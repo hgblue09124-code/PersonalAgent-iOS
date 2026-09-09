@@ -31,6 +31,11 @@ public enum ExecutionEventKind: String, Sendable, Codable {
     case providerCompleted
     case providerFailed
     case providerCancelled
+    // M3 module runtime
+    case moduleInvoked
+    case moduleCompleted
+    case moduleFailed
+    case moduleCancelled
 }
 
 public struct ExecutionEvent: Sendable, Codable, Equatable {
