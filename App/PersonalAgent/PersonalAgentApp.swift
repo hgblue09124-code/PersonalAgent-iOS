@@ -1,14 +1,26 @@
 import SwiftUI
 import PAComposition
+import PAKernel
 
 @main
 struct PersonalAgentApp: App {
-    private let composition = M0CompositionRoot()
+    @State private var session: KernelSession?
 
     var body: some Scene {
         WindowGroup {
-            RootView(composition: composition)
-                .dynamicTypeSize(.xSmall ... .accessibility3)
+            Group {
+                if let session {
+                    RootView(session: session)
+                } else {
+                    ProgressView("Starting kernel")
+                        .task {
+                            let root = await M1CompositionRoot()
+                            let state = await root.runtime.currentState()
+                            session = KernelSession(composition: root, state: state)
+                        }
+                }
+            }
+            .dynamicTypeSize(.xSmall ... .accessibility3)
         }
     }
 }

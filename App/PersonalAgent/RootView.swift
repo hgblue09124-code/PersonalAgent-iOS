@@ -1,16 +1,14 @@
 import SwiftUI
-import PAComposition
 import PAArchitecture
-import PAFoundation
 
 struct RootView: View {
-    let composition: M0CompositionRoot
+    @ObservedObject var session: KernelSession
 
     var body: some View {
         TabView {
-            ChatScreen()
+            ChatScreen(session: session)
                 .tabItem { Label("Chat", systemImage: "bubble.left.and.bubble.right") }
-            AgentScreen(gate: composition.milestone)
+            AgentScreen(session: session)
                 .tabItem { Label("Agent", systemImage: "cpu") }
             TasksScreen()
                 .tabItem { Label("Tasks", systemImage: "checklist") }
@@ -23,7 +21,8 @@ struct RootView: View {
             SettingsScreen()
                 .tabItem { Label("Settings", systemImage: "gear") }
         }
-        .environment(\.milestoneGate, composition.milestone)
+        .environment(\.milestoneGate, session.milestone)
+        .task { await session.refresh() }
     }
 }
 

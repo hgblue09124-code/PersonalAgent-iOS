@@ -6,10 +6,17 @@ import PAAgency
 
 @Suite("M0 architecture manifest")
 struct ArchitectureManifestTests {
-    @Test func milestoneIsM0() {
-        #expect(ArchitectureManifest.milestone == "M0")
+    @Test func contractFoundationRemainsM0() {
+        #expect(ArchitectureManifest.contractFoundation == "M0")
         #expect(MilestoneGate.m0.kernelRuntime == false)
         #expect(MilestoneGate.m0.providers == false)
+    }
+
+    @Test func currentMilestoneIsM1KernelRuntime() {
+        #expect(ArchitectureManifest.milestone == "M1")
+        #expect(MilestoneGate.m1.kernelRuntime == true)
+        #expect(MilestoneGate.m1.providers == false)
+        #expect(MilestoneGate.m1.cognitionLoop == false)
     }
 
     @Test func axisStartsAtUIAndEndsAtFoundation() {
