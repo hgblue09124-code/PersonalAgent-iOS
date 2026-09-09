@@ -2,9 +2,12 @@ import Foundation
 import PAFoundation
 import PAEvents
 import PAObservability
+import PAModules
 
-/// Authoritative M1 kernel. Owns identity, lifecycle, goals, and coordination ports.
-/// Does not call a provider, planner, or tool.
+/// Authoritative kernel. Owns identity, lifecycle, goals, and coordination ports.
+/// M2 may attach a provider contract. M3 may attach a module port.
+/// The kernel requests module execution through `ModuleExecuting`.
+/// It does not contain concrete module implementations.
 public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, GoalManaging {
     public let sessionTrace: TraceID
     public let coordination: KernelCoordinationBoundary
@@ -174,6 +177,21 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         if activeGoalID == goalID {
             activeGoalID = nil
         }
+    }
+
+    /// Minimum coordination port: kernel requests execution, runtime owns it.
+    public func invokeModule(_ invocation: ModuleInvocation) async throws -> ModuleResult {
+        guard LifecycleMachine.canExecute(in: lifecycle) else {
+            let error = KernelError.runtimeNotExecutable(lifecycle)
+            await emitRejection(command: "invokeModule", error: error)
+            throw error
+        }
+        guard let modules = coordination.modules else {
+            let error = KernelError.modulePortUnavailable
+            await emitRejection(command: "invokeModule", error: error)
+            throw error
+        }
+        return try await modules.execute(invocation)
     }
 
     private func applyRuntime(_ command: RuntimeCommand) async throws {
