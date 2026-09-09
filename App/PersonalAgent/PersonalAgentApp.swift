@@ -14,7 +14,7 @@ struct PersonalAgentApp: App {
                 } else {
                     ProgressView("Starting kernel")
                         .task {
-                            let root = await M2CompositionRoot()
+                            let root = await M3CompositionRoot()
                             let state = await root.runtime.currentState()
                             session = KernelSession(composition: root, state: state)
                         }

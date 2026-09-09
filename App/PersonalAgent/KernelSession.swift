@@ -6,20 +6,22 @@ import PAArchitecture
 
 @MainActor
 final class KernelSession: ObservableObject {
-    let composition: M2CompositionRoot
+    let composition: M3CompositionRoot
     @Published var state: AgentState
     @Published var goals: [Goal]
     @Published var lastError: String?
     @Published var providerID: String
     @Published var providerLifecycle: String
+    @Published var moduleIDs: [String]
 
-    init(composition: M2CompositionRoot, state: AgentState) {
+    init(composition: M3CompositionRoot, state: AgentState) {
         self.composition = composition
         self.state = state
         self.goals = []
         self.lastError = nil
         self.providerID = composition.selectedProviderID
         self.providerLifecycle = "unknown"
+        self.moduleIDs = []
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -29,6 +31,7 @@ final class KernelSession: ObservableObject {
         goals = await composition.runtime.goals()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
+        moduleIDs = await composition.registeredModuleIDs()
     }
 
     func start() async { await run { try await composition.runtime.start() } }

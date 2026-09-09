@@ -64,6 +64,9 @@ struct MilestoneBanner: View {
 }
 
 private func bannerCopy(_ gate: MilestoneGate) -> String {
+    if gate.skillRuntime || gate.toolRuntime {
+        return "Kernel, provider, and module runtime are wired. This screen does not own execution."
+    }
     if gate.providers {
         return "Kernel and provider runtime are wired. This screen does not own execution."
     }
