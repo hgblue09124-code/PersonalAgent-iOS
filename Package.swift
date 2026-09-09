@@ -140,6 +140,7 @@ let package = Package(
                 "PAArchitecture",
                 "PAKernel",
                 "PAObservability",
+                "PAEvents",
             ],
             path: "Sources/Composition"
         ),
