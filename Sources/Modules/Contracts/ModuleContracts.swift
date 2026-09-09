@@ -6,6 +6,7 @@ public enum ModuleKind: String, Sendable, Codable {
     case meso
 }
 
+/// Catalog / availability lifecycle. Isolated from a single invocation.
 public enum ModuleLifecycle: String, Sendable, Codable {
     case registered
     case loaded
@@ -13,6 +14,16 @@ public enum ModuleLifecycle: String, Sendable, Codable {
     case degraded
     case unloaded
     case failed
+}
+
+/// Per-invocation execution state. Isolated from AgentLifecycle and ProviderLifecycle.
+public enum ModuleExecutionState: String, Sendable, Codable, Equatable {
+    case idle
+    case validating
+    case executing
+    case completed
+    case failed
+    case cancelled
 }
 
 public struct ModuleContract: Hashable, Sendable, Codable {
@@ -25,6 +36,7 @@ public struct ModuleContract: Hashable, Sendable, Codable {
     public let inputSchema: SchemaDocument
     public let outputSchema: SchemaDocument
     public let lifecycle: ModuleLifecycle
+    public let requiredFields: [String]
 
     public init(
         id: ModuleID,
@@ -35,7 +47,8 @@ public struct ModuleContract: Hashable, Sendable, Codable {
         dependencies: [ModuleID] = [],
         inputSchema: SchemaDocument,
         outputSchema: SchemaDocument,
-        lifecycle: ModuleLifecycle = .registered
+        lifecycle: ModuleLifecycle = .registered,
+        requiredFields: [String] = []
     ) {
         self.id = id
         self.name = name
@@ -46,13 +59,94 @@ public struct ModuleContract: Hashable, Sendable, Codable {
         self.inputSchema = inputSchema
         self.outputSchema = outputSchema
         self.lifecycle = lifecycle
+        self.requiredFields = requiredFields
     }
 }
 
+/// Typed payload. Fields are strings; this is not an untyped bag for Kernel state.
+public struct ModulePayload: Sendable, Equatable, Codable {
+    public let schema: SchemaDocument
+    public let fields: [String: String]
+
+    public init(schema: SchemaDocument, fields: [String: String] = [:]) {
+        self.schema = schema
+        self.fields = fields
+    }
+
+    public func value(for key: String) -> String? {
+        fields[key]
+    }
+}
+
+public struct ModuleInvocation: Sendable, Equatable {
+    public let moduleID: ModuleID
+    public let input: ModulePayload
+    public let timeoutNanoseconds: UInt64?
+
+    public init(moduleID: ModuleID, input: ModulePayload, timeoutNanoseconds: UInt64? = nil) {
+        self.moduleID = moduleID
+        self.input = input
+        self.timeoutNanoseconds = timeoutNanoseconds
+    }
+}
+
+public struct ModuleResult: Sendable, Equatable {
+    public let moduleID: ModuleID
+    public let output: ModulePayload
+    public let state: ModuleExecutionState
+
+    public init(moduleID: ModuleID, output: ModulePayload, state: ModuleExecutionState = .completed) {
+        self.moduleID = moduleID
+        self.output = output
+        self.state = state
+    }
+}
+
+public enum ModuleRuntimeError: Error, Sendable, Equatable, CustomStringConvertible {
+    case unknownModule(ModuleID)
+    case duplicateRegistration(ModuleID)
+    case invalidInput(String)
+    case capabilityDenied(CapabilityLevel)
+    case unavailable(ModuleID)
+    case timeout
+    case cancelled
+    case invalidState(ModuleExecutionState)
+    case executionFailed(String)
+    case compositionFailed(String)
+
+    public var description: String {
+        switch self {
+        case .unknownModule(let id): return "unknownModule:\(id.rawValue)"
+        case .duplicateRegistration(let id): return "duplicateRegistration:\(id.rawValue)"
+        case .invalidInput(let reason): return "invalidInput:\(reason)"
+        case .capabilityDenied: return "capabilityDenied"
+        case .unavailable(let id): return "unavailable:\(id.rawValue)"
+        case .timeout: return "timeout"
+        case .cancelled: return "cancelled"
+        case .invalidState(let state): return "invalidState:\(state.rawValue)"
+        case .executionFailed(let reason): return "executionFailed:\(reason)"
+        case .compositionFailed(let reason): return "compositionFailed:\(reason)"
+        }
+    }
+}
+
+/// A module is an explicit capability boundary with typed I/O.
 public protocol Module: Sendable {
     var contract: ModuleContract { get }
+    func execute(_ input: ModulePayload) async throws -> ModulePayload
 }
 
 public protocol ModuleHealthReporting: Sendable {
     func status() async -> ModuleLifecycle
+}
+
+/// Kernel and skills invoke modules through this port. Not a service locator.
+public protocol ModuleExecuting: Sendable {
+    func execute(_ invocation: ModuleInvocation) async throws -> ModuleResult
+}
+
+public protocol ModuleCataloging: Sendable {
+    func register(_ module: any Module) async throws
+    func resolve(_ id: ModuleID) async -> (any Module)?
+    func contracts() async -> [ModuleContract]
 }
