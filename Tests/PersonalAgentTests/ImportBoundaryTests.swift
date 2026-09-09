@@ -29,7 +29,7 @@ struct ImportBoundaryTests {
                 }
             }
         }
-        #expect(violations.isEmpty, "\(violations.joined(separator: "\n"))")
+        #expect(violations.isEmpty, "\(violations.joined(separator: \"\\n\"))")
     }
 
     @Test func packageDoesNotDependOnCompanionRepos() throws {
@@ -59,7 +59,15 @@ struct ImportBoundaryTests {
 }
 
 func repositoryRoot() -> URL {
-    URL(fileURLWithPath: #filePath)
+    var url = URL(fileURLWithPath: #filePath)
+    let fm = FileManager.default
+    for _ in 0..<8 {
+        url.deleteLastPathComponent()
+        if fm.fileExists(atPath: url.appendingPathComponent("Package.swift").path) {
+            return url
+        }
+    }
+    return URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()
         .deletingLastPathComponent()
         .deletingLastPathComponent()
@@ -67,12 +75,31 @@ func repositoryRoot() -> URL {
 
 func files(under root: URL, suffix: String) throws -> [URL] {
     let fm = FileManager.default
-    guard let enumerator = fm.enumerator(at: root, includingPropertiesForKeys: nil) else {
-        return []
-    }
     var result: [URL] = []
-    for case let url as URL in enumerator {
-        if url.path.hasSuffix(suffix) {
+    if let enumerator = fm.enumerator(at: root, includingPropertiesForKeys: [.isRegularFileKey]) {
+        for case let url as URL in enumerator where url.path.hasSuffix(suffix) {
+            result.append(url)
+        }
+    }
+    if result.isEmpty {
+        result = try walk(root, suffix: suffix)
+    }
+    return result
+}
+
+private func walk(_ root: URL, suffix: String) throws -> [URL] {
+    let fm = FileManager.default
+    let contents = (try? fm.contentsOfDirectory(
+        at: root,
+        includingPropertiesForKeys: [.isDirectoryKey],
+        options: []
+    )) ?? []
+    var result: [URL] = []
+    for url in contents {
+        let isDirectory = (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+        if isDirectory {
+            result.append(contentsOf: try walk(url, suffix: suffix))
+        } else if url.path.hasSuffix(suffix) {
             result.append(url)
         }
     }
