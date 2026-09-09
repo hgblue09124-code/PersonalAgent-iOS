@@ -3,7 +3,7 @@ import PAFoundation
 /// Architecture encoded as data so tests can lock the skeleton without a runtime.
 public enum ArchitectureManifest: Sendable {
     public static let contractFoundation = "M0"
-    public static let milestone = "M2"
+    public static let milestone = "M3"
     public static let product = "PersonalAgent"
     public static let foundationVersion = SemanticVersion(major: 0, minor: 1, patch: 0)
 
@@ -58,7 +58,7 @@ public enum ArchitectureManifest: Sendable {
         "PAProvidersLocal": ["PAProviders", "PAFoundation"],
         "PAPolicy": ["PAFoundation"],
         "PATools": ["PAFoundation", "PAPolicy", "PAObservability"],
-        "PAModules": ["PAFoundation", "PAPolicy"],
+        "PAModules": ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
         "PASkills": ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
         "PACognition": ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
         "PAAgency": ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
@@ -70,6 +70,7 @@ public enum ArchitectureManifest: Sendable {
             "PAObservability",
             "PAEvents",
             "PAProviders",
+            "PAModules",
         ],
         "PAArchitecture": ["PAFoundation"],
         "PAComposition": [
@@ -80,6 +81,9 @@ public enum ArchitectureManifest: Sendable {
             "PAEvents",
             "PAProviders",
             "PASecurity",
+            "PAModules",
+            "PASkills",
+            "PATools",
         ],
     ]
 
@@ -163,6 +167,18 @@ public struct MilestoneGate: Sendable, Equatable {
         memoryEngine: false,
         skillRuntime: false,
         toolRuntime: false,
+        cognitionLoop: false,
+        eventReplay: false
+    )
+
+    public static let m3 = MilestoneGate(
+        milestone: "M3",
+        kernelRuntime: true,
+        providers: true,
+        storageEngine: false,
+        memoryEngine: false,
+        skillRuntime: true,
+        toolRuntime: true,
         cognitionLoop: false,
         eventReplay: false
     )
