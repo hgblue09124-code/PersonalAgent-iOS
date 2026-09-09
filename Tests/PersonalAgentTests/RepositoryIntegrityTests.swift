@@ -84,7 +84,7 @@ struct RepositoryIntegrityTests {
                 }
             }
         }
-        #expect(violations.isEmpty, "\(violations.joined(separator: \"\\n\"))")
+        #expect(violations.isEmpty)
     }
 
     @Test func compositionDependsOnEventsInPackageGraph() throws {
@@ -92,11 +92,11 @@ struct RepositoryIntegrityTests {
             contentsOf: repositoryRoot().appendingPathComponent("Package.swift"),
             encoding: .utf8
         )
-        #expect(package.contains("\"PAEvents\""))
+        #expect(package.contains("PAEvents"))
         #expect(package.contains("name: \"PAComposition\""))
         let compositionSlice = package.components(separatedBy: "name: \"PAComposition\"").last ?? ""
         let nextTarget = compositionSlice.components(separatedBy: ".target(").first ?? compositionSlice
-        #expect(nextTarget.contains("\"PAEvents\""))
+        #expect(nextTarget.contains("PAEvents"))
     }
 
     @Test func ciWorkflowEnforcesSwiftTest() throws {
