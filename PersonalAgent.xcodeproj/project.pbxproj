@@ -18,15 +18,17 @@
 		A10000000000000000000009 /* ProvidersScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* ProvidersScreen.swift */; };
 		A1000000000000000000000A /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* SettingsScreen.swift */; };
 		A1000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* Assets.xcassets */; };
+		A1000000000000000000000C /* KernelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* KernelSession.swift */; };
 		A10000000000000000000011 /* PAComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000001 /* PAComposition */; };
 		A10000000000000000000012 /* PAArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000002 /* PAArchitecture */; };
 		A10000000000000000000013 /* PAFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000003 /* PAFoundation */; };
-		A10000000000000000000014 /* PAMemory in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000004 /* PAMemory */; };
+		A10000000000000000000015 /* PAKernel in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000005 /* PAKernel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* PersonalAgentApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalAgentApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A2000000000000000000000C /* KernelSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KernelSession.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 		A20000000000000000000004 /* ChatScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatScreen.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* AgentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentScreen.swift; sourceTree = "<group>"; };
@@ -47,7 +49,7 @@
 				A10000000000000000000011 /* PAComposition in Frameworks */,
 				A10000000000000000000012 /* PAArchitecture in Frameworks */,
 				A10000000000000000000013 /* PAFoundation in Frameworks */,
-				A10000000000000000000014 /* PAMemory in Frameworks */,
+				A10000000000000000000015 /* PAKernel in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +77,7 @@
 			children = (
 				A20000000000000000000001 /* PersonalAgentApp.swift */,
 				A20000000000000000000002 /* RootView.swift */,
+				A2000000000000000000000C /* KernelSession.swift */,
 				A50000000000000000000004 /* Screens */,
 				A2000000000000000000000B /* Assets.xcassets */,
 			);
@@ -124,7 +127,7 @@
 				A30000000000000000000001 /* PAComposition */,
 				A30000000000000000000002 /* PAArchitecture */,
 				A30000000000000000000003 /* PAFoundation */,
-				A30000000000000000000004 /* PAMemory */,
+				A30000000000000000000005 /* PAKernel */,
 			);
 			productName = PersonalAgent;
 			productReference = A200000000000000000000FF /* PersonalAgent.app */;
@@ -184,6 +187,7 @@
 			files = (
 				A10000000000000000000001 /* PersonalAgentApp.swift in Sources */,
 				A10000000000000000000002 /* RootView.swift in Sources */,
+				A1000000000000000000000C /* KernelSession.swift in Sources */,
 				A10000000000000000000003 /* Shared.swift in Sources */,
 				A10000000000000000000004 /* ChatScreen.swift in Sources */,
 				A10000000000000000000005 /* AgentScreen.swift in Sources */,
@@ -342,10 +346,10 @@
 			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
 			productName = PAFoundation;
 		};
-		A30000000000000000000004 /* PAMemory */ = {
+		A30000000000000000000005 /* PAKernel */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
-			productName = PAMemory;
+			productName = PAKernel;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
