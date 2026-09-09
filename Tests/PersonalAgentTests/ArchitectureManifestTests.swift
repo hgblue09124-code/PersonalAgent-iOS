@@ -12,11 +12,15 @@ struct ArchitectureManifestTests {
         #expect(MilestoneGate.m0.providers == false)
     }
 
-    @Test func currentMilestoneIsM1KernelRuntime() {
-        #expect(ArchitectureManifest.milestone == "M1")
+    @Test func currentMilestoneIsM2ProviderRuntime() {
+        #expect(ArchitectureManifest.milestone == "M2")
+        #expect(ArchitectureManifest.contractFoundation == "M0")
         #expect(MilestoneGate.m1.kernelRuntime == true)
         #expect(MilestoneGate.m1.providers == false)
-        #expect(MilestoneGate.m1.cognitionLoop == false)
+        #expect(MilestoneGate.m2.kernelRuntime == true)
+        #expect(MilestoneGate.m2.providers == true)
+        #expect(MilestoneGate.m2.cognitionLoop == false)
+        #expect(MilestoneGate.m2.storageEngine == false)
     }
 
     @Test func axisStartsAtUIAndEndsAtFoundation() {
