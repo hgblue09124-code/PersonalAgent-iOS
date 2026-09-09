@@ -29,7 +29,7 @@ struct ImportBoundaryTests {
                 }
             }
         }
-        #expect(violations.isEmpty, "\(violations.joined(separator: \"\\n\"))")
+        #expect(violations.isEmpty)
     }
 
     @Test func packageDoesNotDependOnCompanionRepos() throws {
