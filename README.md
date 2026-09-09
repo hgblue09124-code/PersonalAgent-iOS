@@ -4,7 +4,7 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M2 — provider runtime.** M0 contracts and M1 kernel remain in place.
+**Milestone: M3 — module / skill / tool runtime.** M0–M2 remain in place.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 
@@ -18,6 +18,7 @@ Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first
 | Kernel runtime | Present (lifecycle, goals, events) |
 | Provider contract + runtime | Present |
 | Concrete provider adapters | Present (fixture-tested; live network pending) |
+| Module / skill / tool runtime | Present (deterministic modules; no privileged device tools) |
 | Storage / memory / skills / tools engines | Contracts only |
 | Device verification on iPhone 12 Pro Max | Not signed off |
 
