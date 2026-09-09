@@ -4,6 +4,29 @@ import PAArchitecture
 
 @Suite("Repository integrity")
 struct RepositoryIntegrityTests {
+    @Test func requiredM2ProviderSourcesExist() {
+        let root = repositoryRoot().appendingPathComponent("Sources")
+        for path in [
+            "Providers/Contracts/LLMProvider.swift",
+            "Providers/Contracts/ProviderRuntime.swift",
+            "Providers/Contracts/ProviderRuntimeError.swift",
+            "Providers/Contracts/ProviderTransport.swift",
+            "Providers/Contracts/ChatCompletionsCodec.swift",
+            "Providers/Contracts/HTTPChatProvider.swift",
+            "Providers/Contracts/DeterministicFakeProvider.swift",
+            "Providers/Grok/GrokBoundary.swift",
+            "Providers/OpenAI/OpenAIBoundary.swift",
+            "Providers/OpenAICompatible/OpenAICompatibleBoundary.swift",
+            "Providers/Local/LocalBoundary.swift",
+            "Composition/M2CompositionRoot.swift",
+        ] {
+            #expect(
+                FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),
+                "missing \(path)"
+            )
+        }
+    }
+
     @Test func requiredM1KernelSourcesExist() {
         let root = repositoryRoot()
         let kernel = root
@@ -37,6 +60,14 @@ struct RepositoryIntegrityTests {
             "M1EventDeterminismTests.swift",
             "M1ConcurrencyTests.swift",
             "M1CompositionTests.swift",
+            "M2ContractTests.swift",
+            "M2LifecycleTests.swift",
+            "M2FakeProviderTests.swift",
+            "M2AdapterFixtureTests.swift",
+            "M2SecurityTests.swift",
+            "M2ConcurrencyTests.swift",
+            "M2IsolationTests.swift",
+            "M2CompositionTests.swift",
             "ImportBoundaryTests.swift",
             "ArchitectureManifestTests.swift",
         ] {
@@ -92,11 +123,11 @@ struct RepositoryIntegrityTests {
             contentsOf: repositoryRoot().appendingPathComponent("Package.swift"),
             encoding: .utf8
         )
-        #expect(package.contains("PAEvents"))
+        #expect(package.contains("\"PAEvents\""))
         #expect(package.contains("name: \"PAComposition\""))
         let compositionSlice = package.components(separatedBy: "name: \"PAComposition\"").last ?? ""
         let nextTarget = compositionSlice.components(separatedBy: ".target(").first ?? compositionSlice
-        #expect(nextTarget.contains("PAEvents"))
+        #expect(nextTarget.contains("\"PAEvents\""))
     }
 
     @Test func ciWorkflowEnforcesSwiftTest() throws {

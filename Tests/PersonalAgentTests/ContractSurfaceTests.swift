@@ -58,11 +58,15 @@ struct ContractSurfaceTests {
         #expect(MemoryLifecycleStage.allCases.map(\.rawValue).last == "forget")
     }
 
-    @Test func reservedProvidersAreNotRuntimes() {
+    @Test func reservedProvidersLandInM2WithoutLiveVerification() {
         #expect(GrokProviderBoundary.availableInMilestone == "M2")
         #expect(OpenAIProviderBoundary.availableInMilestone == "M2")
         #expect(OpenAICompatibleProviderBoundary.availableInMilestone == "M2")
         #expect(LocalProviderBoundary.availableInMilestone == "M2")
+        #expect(GrokProviderBoundary.liveNetworkVerified == false)
+        #expect(OpenAIProviderBoundary.liveNetworkVerified == false)
+        #expect(OpenAICompatibleProviderBoundary.liveNetworkVerified == false)
+        #expect(LocalProviderBoundary.liveNetworkVerified == false)
         #expect(LocalProviderBoundary.intendedCompatibleServers.contains("ollama"))
     }
 

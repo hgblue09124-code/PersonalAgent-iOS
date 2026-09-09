@@ -3,7 +3,7 @@ import PAFoundation
 /// Architecture encoded as data so tests can lock the skeleton without a runtime.
 public enum ArchitectureManifest: Sendable {
     public static let contractFoundation = "M0"
-    public static let milestone = "M1"
+    public static let milestone = "M2"
     public static let product = "PersonalAgent"
     public static let foundationVersion = SemanticVersion(major: 0, minor: 1, patch: 0)
 
@@ -51,7 +51,7 @@ public enum ArchitectureManifest: Sendable {
         "PASecurity": ["PAFoundation"],
         "PAStorage": ["PAFoundation", "PAEvents", "PAObservability"],
         "PAMemory": ["PAFoundation", "PAStorage", "PAEvents"],
-        "PAProviders": ["PAFoundation", "PAObservability", "PASecurity"],
+        "PAProviders": ["PAFoundation", "PAObservability", "PASecurity", "PAEvents"],
         "PAProvidersGrok": ["PAProviders", "PAFoundation"],
         "PAProvidersOpenAI": ["PAProviders", "PAFoundation"],
         "PAProvidersOpenAICompatible": ["PAProviders", "PAFoundation"],
@@ -69,9 +69,18 @@ public enum ArchitectureManifest: Sendable {
             "PACognition",
             "PAObservability",
             "PAEvents",
+            "PAProviders",
         ],
         "PAArchitecture": ["PAFoundation"],
-        "PAComposition": ["PAFoundation", "PAArchitecture", "PAKernel", "PAObservability", "PAEvents"],
+        "PAComposition": [
+            "PAFoundation",
+            "PAArchitecture",
+            "PAKernel",
+            "PAObservability",
+            "PAEvents",
+            "PAProviders",
+            "PASecurity",
+        ],
     ]
 
     public static let kernelMustNotImport: Set<String> = [
@@ -82,6 +91,7 @@ public enum ArchitectureManifest: Sendable {
         "SwiftUI",
         "UIKit",
         "AppKit",
+        "URLSession",
     ]
 }
 
@@ -137,6 +147,18 @@ public struct MilestoneGate: Sendable, Equatable {
         milestone: "M1",
         kernelRuntime: true,
         providers: false,
+        storageEngine: false,
+        memoryEngine: false,
+        skillRuntime: false,
+        toolRuntime: false,
+        cognitionLoop: false,
+        eventReplay: false
+    )
+
+    public static let m2 = MilestoneGate(
+        milestone: "M2",
+        kernelRuntime: true,
+        providers: true,
         storageEngine: false,
         memoryEngine: false,
         skillRuntime: false,

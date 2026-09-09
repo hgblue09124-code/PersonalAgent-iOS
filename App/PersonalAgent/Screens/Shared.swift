@@ -47,9 +47,7 @@ struct MilestoneBanner: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Milestone \(gate.milestone)")
                 .font(.headline)
-            Text(gate.kernelRuntime
-                ? "Kernel runtime is live. This screen does not own agent state."
-                : "Kernel runtime is not wired. This screen is a shell, not an agent.")
+            Text(bannerCopy(gate))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             HStack {
@@ -63,6 +61,16 @@ struct MilestoneBanner: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
+}
+
+private func bannerCopy(_ gate: MilestoneGate) -> String {
+    if gate.providers {
+        return "Kernel and provider runtime are wired. This screen does not own execution."
+    }
+    if gate.kernelRuntime {
+        return "Kernel runtime is live. This screen does not own agent state."
+    }
+    return "Kernel runtime is not wired. This screen is a shell, not an agent."
 }
 
 struct PhaseChip: View {
