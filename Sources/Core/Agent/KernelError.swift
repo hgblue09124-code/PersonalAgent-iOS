@@ -24,6 +24,7 @@ public enum KernelError: Error, Sendable, Equatable {
     case runtimeNotExecutable(AgentLifecycle)
     case activeGoalConflict(existing: GoalID)
     case identityMutationRejected
+    case modulePortUnavailable
 }
 
 extension KernelError: CustomStringConvertible {
@@ -43,6 +44,8 @@ extension KernelError: CustomStringConvertible {
             return "activeGoalConflict:\(existing.rawValue)"
         case .identityMutationRejected:
             return "identityMutationRejected"
+        case .modulePortUnavailable:
+            return "modulePortUnavailable"
         }
     }
 }
