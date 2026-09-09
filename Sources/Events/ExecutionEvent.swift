@@ -14,6 +14,17 @@ public enum ExecutionEventKind: String, Sendable, Codable {
     case approvalRequested
     case approvalResolved
     case failed
+    // M1 kernel runtime
+    case runtimeInitialized
+    case runtimeStarted
+    case runtimePaused
+    case runtimeResumed
+    case runtimeStopped
+    case goalActivated
+    case goalBlocked
+    case goalCompleted
+    case goalAborted
+    case commandRejected
 }
 
 public struct ExecutionEvent: Sendable, Codable, Equatable {
