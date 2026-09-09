@@ -1,0 +1,51 @@
+# Personal Agent — Architecture (M0)
+
+Status: M0 architecture skeleton. No agent runtime, no LLM call, no persistence engine.
+
+This iOS client is the long-lived Personal Agent / Agent OS *client*.
+It is not a chat wrapper. Kernel is not an LLM.
+
+Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`)
+are external material. They must not appear as runtime dependencies.
+
+## Axis
+
+```
+UI
+  ↓
+Composition
+  ↓
+Agent Kernel
+  ↓
+Cognition / Memory / Agency / Policy
+  ↓
+Module / Skill / Tool / Provider contracts
+  ↓
+Storage / Sync
+  ↓
+Events / Observability / Security
+  ↓
+Foundation
+```
+
+## Layer responsibilities
+
+| Layer | Owns | Must not own |
+| --- | --- | --- |
+| UI | rendering, input, safe-area layout | goals, plans, storage, provider calls |
+| Composition | wiring contracts for a process | business logic |
+| Kernel | identity, state, goals, lifecycle, coordination | SwiftUI, concrete LLM, concrete store |
+| Cognition | perception → reflection pipeline contracts | execution side effects |
+| Agency | goal → adapt loop contracts | bypassing policy |
+| Policy | capability + approval gate | tool implementations |
+| Skills / Tools / Modules / Providers | contracts + reserved implementation packages | agent state |
+| Storage / Memory | contracts for local-first + sync | cloud vendor lock-in |
+| Events | trace / replay contracts | UI |
+| Security | secret + network boundaries | agent state |
+
+## Milestone freeze
+
+M0 freezes boundaries and contracts.
+M1 implements Kernel runtime.
+M2 implements providers.
+Later milestones fill storage, memory, skills, tools, cognition, events, then the iOS vertical slice.
