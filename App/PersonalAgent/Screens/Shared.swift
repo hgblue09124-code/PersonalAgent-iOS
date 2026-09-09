@@ -47,7 +47,9 @@ struct MilestoneBanner: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Milestone \(gate.milestone)")
                 .font(.headline)
-            Text("Kernel runtime is not wired. This screen is a shell, not an agent.")
+            Text(gate.kernelRuntime
+                ? "Kernel runtime is live. This screen does not own agent state."
+                : "Kernel runtime is not wired. This screen is a shell, not an agent.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             HStack {
