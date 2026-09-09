@@ -1,7 +1,7 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
-/// M0–M2 package graph.
+/// M0–M3 package graph.
 ///
 /// Dependency direction is downward only:
 ///   App -> Composition -> Kernel -> Cognition/Agency/Policy
@@ -103,7 +103,7 @@ let package = Package(
         ),
         .target(
             name: "PAModules",
-            dependencies: ["PAFoundation", "PAPolicy"],
+            dependencies: ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
             path: "Sources/Modules/Contracts"
         ),
         .target(
@@ -131,6 +131,7 @@ let package = Package(
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
+                "PAModules",
             ],
             path: "Sources/Core/Agent"
         ),
@@ -144,6 +145,9 @@ let package = Package(
                 "PAEvents",
                 "PAProviders",
                 "PASecurity",
+                "PAModules",
+                "PASkills",
+                "PATools",
             ],
             path: "Sources/Composition"
         ),
