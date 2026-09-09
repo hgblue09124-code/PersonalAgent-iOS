@@ -1,4 +1,4 @@
-name: M1
+name: M2
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       image: swift:6.3.2
     steps:
       - uses: actions/checkout@v4
-      - name: Run contract and kernel tests
+      - name: Run contract, kernel, and provider tests
         run: swift test --disable-sandbox
 
   repository-integrity:
@@ -30,16 +30,48 @@ jobs:
             echo "PAMemory must not be an app product dependency"
             exit 1
           fi
-      - name: M1 test sources are present
+      - name: App target does not link concrete providers
+        run: |
+          for name in PAProvidersGrok PAProvidersOpenAI PAProvidersOpenAICompatible PAProvidersLocal; do
+            if grep -q "productName = ${name}" PersonalAgent.xcodeproj/project.pbxproj; then
+              echo "App must not link ${name}"
+              exit 1
+            fi
+          done
+      - name: M1 and M2 test sources are present
         run: |
           test -f Tests/PersonalAgentTests/M1LifecycleTests.swift
           test -f Tests/PersonalAgentTests/M1GoalTests.swift
           test -f Tests/PersonalAgentTests/M1EventDeterminismTests.swift
           test -f Tests/PersonalAgentTests/M1ConcurrencyTests.swift
           test -f Tests/PersonalAgentTests/M1CompositionTests.swift
-      - name: App does not import PAMemory
+          test -f Tests/PersonalAgentTests/M2ContractTests.swift
+          test -f Tests/PersonalAgentTests/M2LifecycleTests.swift
+          test -f Tests/PersonalAgentTests/M2FakeProviderTests.swift
+          test -f Tests/PersonalAgentTests/M2AdapterFixtureTests.swift
+          test -f Tests/PersonalAgentTests/M2SecurityTests.swift
+          test -f Tests/PersonalAgentTests/M2ConcurrencyTests.swift
+          test -f Tests/PersonalAgentTests/M2IsolationTests.swift
+          test -f Tests/PersonalAgentTests/M2CompositionTests.swift
+      - name: App does not import reserved engines
         run: |
           if grep -R "^import PAMemory" App; then
             echo "App must not import PAMemory"
+            exit 1
+          fi
+          if grep -R "^import PAProvidersGrok\|^import PAProvidersOpenAI\|^import PAProvidersLocal" App; then
+            echo "App must not import concrete providers"
+            exit 1
+          fi
+      - name: Kernel does not import concrete providers
+        run: |
+          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Sources/Core/Agent; then
+            echo "Kernel isolation violated"
+            exit 1
+          fi
+      - name: No committed secrets
+        run: |
+          if grep -R -E "sk-[A-Za-z0-9]{10,}|xai-[A-Za-z0-9]{10,}" --include='*.swift' --include='*.md' --include='*.yml' . | grep -v "sk-live-secret-DO-NOT-EMIT" | grep -v "sk-secret"; then
+            echo "Possible secret committed"
             exit 1
           fi

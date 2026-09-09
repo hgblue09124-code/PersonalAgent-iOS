@@ -4,7 +4,7 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M1 — kernel runtime.** M0 contracts remain the foundation.
+**Milestone: M2 — provider runtime.** M0 contracts and M1 kernel remain in place.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 
@@ -12,11 +12,12 @@ Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first
 
 | Layer | Status |
 | --- | --- |
-| Module boundaries + contracts | Present (M0) |
+| Module boundaries + contracts | Present |
 | Dependency direction tests | Present |
-| SwiftUI shell (7 screens) | Present, forwards kernel commands only |
+| SwiftUI shell (7 screens) | Present, no business logic |
 | Kernel runtime | Present (lifecycle, goals, events) |
-| Provider implementations | Reserved packages only (M2) |
+| Provider contract + runtime | Present |
+| Concrete provider adapters | Present (fixture-tested; live network pending) |
 | Storage / memory / skills / tools engines | Contracts only |
 | Device verification on iPhone 12 Pro Max | Not signed off |
 
@@ -41,8 +42,6 @@ Package contracts (macOS or Linux with Swift 6):
 swift test
 ```
 
-Linux Swift 6.3.3: 59 tests / 10 suites passed.
-
 iOS app: open `PersonalAgent.xcodeproj` in Xcode 16+, destination iPhone 12 Pro Max.
 
 ## Review notes
@@ -50,5 +49,6 @@ iOS app: open `PersonalAgent.xcodeproj` in Xcode 16+, destination iPhone 12 Pro 
 - Kernel must not import SwiftUI or a concrete provider module.
 - Tools must go through Policy.
 - Provider credentials stay outside AgentState.
+- Default app composition uses `DeterministicFakeProvider`. No production credentials. No launch-time network.
 - No overwrite-without-conflict sync strategy.
 - Production code must not use `print()`.
