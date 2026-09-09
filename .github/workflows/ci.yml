@@ -1,0 +1,45 @@
+name: M1
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  package-tests:
+    name: Swift package tests
+    runs-on: ubuntu-24.04
+    container:
+      image: swift:6.3.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run contract and kernel tests
+        run: swift test --disable-sandbox
+
+  repository-integrity:
+    name: Repository integrity greps
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: KernelSession is in the Xcode sources phase
+        run: |
+          grep -q "KernelSession.swift in Sources" PersonalAgent.xcodeproj/project.pbxproj
+      - name: App target does not link PAMemory
+        run: |
+          if grep -q "productName = PAMemory" PersonalAgent.xcodeproj/project.pbxproj; then
+            echo "PAMemory must not be an app product dependency"
+            exit 1
+          fi
+      - name: M1 test sources are present
+        run: |
+          test -f Tests/PersonalAgentTests/M1LifecycleTests.swift
+          test -f Tests/PersonalAgentTests/M1GoalTests.swift
+          test -f Tests/PersonalAgentTests/M1EventDeterminismTests.swift
+          test -f Tests/PersonalAgentTests/M1ConcurrencyTests.swift
+          test -f Tests/PersonalAgentTests/M1CompositionTests.swift
+      - name: App does not import PAMemory
+        run: |
+          if grep -R "^import PAMemory" App; then
+            echo "App must not import PAMemory"
+            exit 1
+          fi
