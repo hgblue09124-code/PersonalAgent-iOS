@@ -25,6 +25,12 @@ public enum ExecutionEventKind: String, Sendable, Codable {
     case goalCompleted
     case goalAborted
     case commandRejected
+    // M2 provider runtime
+    case providerConfigured
+    case providerReady
+    case providerCompleted
+    case providerFailed
+    case providerCancelled
 }
 
 public struct ExecutionEvent: Sendable, Codable, Equatable {
