@@ -18,6 +18,14 @@ public struct M2CompositionRoot: CompositionRoot, Sendable {
         catalog.identities.first?.id.rawValue ?? "none"
     }
 
+    public func currentProviderIdentityID() async -> String {
+        await providerRuntime.identity.id.rawValue
+    }
+
+    public func currentProviderLifecycle() async -> String {
+        await providerRuntime.lifecycle.rawValue
+    }
+
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
         logger: any AgentLogger = NullLogger(),
