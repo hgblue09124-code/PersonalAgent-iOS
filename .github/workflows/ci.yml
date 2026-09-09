@@ -1,4 +1,4 @@
-name: M2
+name: M3
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
       image: swift:6.3.2
     steps:
       - uses: actions/checkout@v4
-      - name: Run contract, kernel, and provider tests
+      - name: Run contract, kernel, provider, and module tests
         run: swift test --disable-sandbox
 
   repository-integrity:
@@ -53,6 +53,16 @@ jobs:
           test -f Tests/PersonalAgentTests/M2ConcurrencyTests.swift
           test -f Tests/PersonalAgentTests/M2IsolationTests.swift
           test -f Tests/PersonalAgentTests/M2CompositionTests.swift
+          test -f Tests/PersonalAgentTests/M3ContractTests.swift
+          test -f Tests/PersonalAgentTests/M3RuntimeTests.swift
+          test -f Tests/PersonalAgentTests/M3CatalogTests.swift
+          test -f Tests/PersonalAgentTests/M3CompositionIsolationTests.swift
+          test -f Sources/Modules/Contracts/ModuleRuntime.swift
+          test -f Sources/Modules/Contracts/ModuleCatalog.swift
+          test -f Sources/Modules/Contracts/DeterministicModules.swift
+          test -f Sources/Skills/Contracts/ToolModule.swift
+          test -f Sources/Composition/M3CompositionRoot.swift
+          test -f Documentation/M3.md
       - name: App does not import reserved engines
         run: |
           if grep -R "^import PAMemory" App; then

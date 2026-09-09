@@ -6,8 +6,8 @@ Arrows mean "may import".
 App
   -> PAComposition
     -> PAKernel
-      -> PAAgency / PACognition / PAPolicy / PAEvents / PAObservability / PAProviders
-        -> PASkills / PATools / PAModules / PAMemory
+      -> PAAgency / PACognition / PAPolicy / PAEvents / PAObservability / PAProviders / PAModules
+        -> PASkills / PATools / PAMemory
           -> PAStorage / PASecurity
             -> PAFoundation
 
