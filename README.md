@@ -4,18 +4,18 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M0 — architecture skeleton.**
+**Milestone: M1 — kernel runtime.** M0 contracts remain the foundation.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 
 ## Status
 
-| Layer | M0 |
+| Layer | Status |
 | --- | --- |
-| Module boundaries + contracts | Present |
+| Module boundaries + contracts | Present (M0) |
 | Dependency direction tests | Present |
-| SwiftUI shell (7 screens) | Present, no business logic |
-| Kernel runtime | Absent (M1) |
+| SwiftUI shell (7 screens) | Present, forwards kernel commands only |
+| Kernel runtime | Present (lifecycle, goals, events) |
 | Provider implementations | Reserved packages only (M2) |
 | Storage / memory / skills / tools engines | Contracts only |
 | Device verification on iPhone 12 Pro Max | Not signed off |
@@ -40,6 +40,8 @@ Package contracts (macOS or Linux with Swift 6):
 ```
 swift test
 ```
+
+Linux Swift 6.3.3: 59 tests / 10 suites passed.
 
 iOS app: open `PersonalAgent.xcodeproj` in Xcode 16+, destination iPhone 12 Pro Max.
 

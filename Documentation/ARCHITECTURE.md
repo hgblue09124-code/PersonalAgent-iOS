@@ -1,6 +1,7 @@
-# Personal Agent — Architecture (M0)
+# Personal Agent — Architecture
 
-Status: M0 architecture skeleton. No agent runtime, no LLM call, no persistence engine.
+Status: M0 contracts frozen. M1 kernel runtime implemented.
+No LLM call. No persistence engine.
 
 This iOS client is the long-lived Personal Agent / Agent OS *client*.
 It is not a chat wrapper. Kernel is not an LLM.
@@ -46,6 +47,9 @@ Foundation
 ## Milestone freeze
 
 M0 freezes boundaries and contracts.
-M1 implements Kernel runtime.
+M1 implements Kernel runtime (`Documentation/M1.md`).
 M2 implements providers.
 Later milestones fill storage, memory, skills, tools, cognition, events, then the iOS vertical slice.
+
+M1 does not collapse Cognition / Policy / Skills into the Kernel.
+Coordination ports on `AgentRuntime` are seams, not implementations.
