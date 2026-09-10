@@ -8,8 +8,8 @@ import PAEvents
 
 @Suite("M3 composition and isolation")
 struct M3CompositionIsolationTests {
-    @Test func rootWiresModuleRuntimeWithoutPrivilegedGrant() async {
-        let root = await M3CompositionRoot(
+    @Test func rootWiresModuleRuntimeWithoutPrivilegedGrant() async throws {
+        let root = try await M3CompositionRoot(
             identity: AgentIdentity(id: AgentID(rawValue: "m3"), displayName: "Personal")
         )
         #expect(root.milestone == .m3)
@@ -101,7 +101,7 @@ struct M3CompositionIsolationTests {
     }
 
     @Test func kernelInvokeRequiresRunningLifecycleAndPreservesInvariants() async throws {
-        let root = await M3CompositionRoot(
+        let root = try await M3CompositionRoot(
             identity: AgentIdentity(id: AgentID(rawValue: "m3-invoke"), displayName: "Personal")
         )
         await #expect(throws: KernelError.runtimeNotExecutable(.created)) {
@@ -142,6 +142,15 @@ struct M3CompositionIsolationTests {
             )
         }
         #expect(await root.runtime.invariantsHold())
+    }
+
+    @Test func compositionRootRegistrationFailureFailsClosed() async {
+        await #expect(throws: ModuleRuntimeError.duplicateRegistration(DeterministicModuleIDs.echo)) {
+            _ = try await M3CompositionRoot(additionalModules: [EchoModule()])
+        }
+        await #expect(throws: ModuleRuntimeError.missingDependency(module: DeterministicModuleIDs.needsMissing, missing: ModuleID(rawValue: "mod.does-not-exist"))) {
+            _ = try await M3CompositionRoot(additionalModules: [MissingDependencyModule()])
+        }
     }
 
     @Test func unwiredKernelRejectsModulePort() async throws {

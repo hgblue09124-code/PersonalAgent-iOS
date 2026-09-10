@@ -38,8 +38,9 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
         logger: any AgentLogger = NullLogger(),
-        provider: any LLMProvider = DeterministicFakeProvider()
-    ) async {
+        provider: any LLMProvider = DeterministicFakeProvider(),
+        additionalModules: [any Module] = []
+    ) async throws {
         let log = InMemoryEventLog()
         self.milestone = .m3
         self.logger = logger
@@ -56,24 +57,27 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
             endpointURL: nil,
             defaultModel: provider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
         )
-        try? await providerRuntime.configure(configuration)
-        try? await providerRuntime.ready()
+        try await providerRuntime.configure(configuration)
+        try await providerRuntime.ready()
         self.providerRuntime = providerRuntime
 
         let moduleCatalog = ModuleCatalog()
-        try? await moduleCatalog.register(EchoModule())
-        try? await moduleCatalog.register(ValidationRejectModule())
-        try? await moduleCatalog.register(PrivilegedModule())
-        try? await moduleCatalog.register(HangModule())
-        try? await moduleCatalog.register(FailingModule())
-        try? await moduleCatalog.register(ToolModule(tool: EchoTool()))
+        try await moduleCatalog.register(EchoModule())
+        try await moduleCatalog.register(ValidationRejectModule())
+        try await moduleCatalog.register(PrivilegedModule())
+        try await moduleCatalog.register(HangModule())
+        try await moduleCatalog.register(FailingModule())
+        try await moduleCatalog.register(ToolModule(tool: EchoTool()))
+        for module in additionalModules {
+            try await moduleCatalog.register(module)
+        }
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
             eventLog: log,
             logger: logger
         )
-        try? await moduleCatalog.register(EchoSkillModule(runtime: moduleRuntime))
+        try await moduleCatalog.register(EchoSkillModule(runtime: moduleRuntime))
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 
