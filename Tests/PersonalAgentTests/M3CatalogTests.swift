@@ -20,6 +20,16 @@ struct M3CatalogTests {
         #expect(await catalog.resolve(ModuleID(rawValue: "nope")) == nil)
     }
 
+    @Test func incrementalRegisterRejectsMissingDependency() async {
+        let catalog = ModuleCatalog()
+        await #expect(throws: ModuleRuntimeError.missingDependency(
+            module: DeterministicModuleIDs.needsMissing,
+            missing: ModuleID(rawValue: "mod.does-not-exist")
+        )) {
+            try await catalog.register(MissingDependencyModule())
+        }
+    }
+
     @Test func initRejectsDuplicateBatch() {
         #expect(throws: ModuleRuntimeError.duplicateRegistration(DeterministicModuleIDs.echo)) {
             _ = try ModuleCatalog(modules: [EchoModule(), EchoModule()])
