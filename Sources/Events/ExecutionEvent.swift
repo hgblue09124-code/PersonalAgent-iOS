@@ -36,11 +36,6 @@ public enum ExecutionEventKind: String, Sendable, Codable {
     case moduleCompleted
     case moduleFailed
     case moduleCancelled
-    // M4 memory runtime
-    case memoryCaptured
-    case memoryUpdated
-    case memoryForgotten
-    case memoryQueried
 }
 
 public struct ExecutionEvent: Sendable, Codable, Equatable {

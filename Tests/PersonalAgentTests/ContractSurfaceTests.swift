@@ -53,7 +53,7 @@ struct ContractSurfaceTests {
     }
 
     @Test func memoryKindsAndLifecycleAreComplete() {
-        #expect(MemoryKind.allCases.count == 10)
+        #expect(MemoryKind.allCases.count == 5)
         #expect(MemoryLifecycleStage.allCases.map(\.rawValue).first == "capture")
         #expect(MemoryLifecycleStage.allCases.map(\.rawValue).last == "forget")
     }

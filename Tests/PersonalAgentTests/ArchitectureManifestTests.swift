@@ -12,8 +12,8 @@ struct ArchitectureManifestTests {
         #expect(MilestoneGate.m0.providers == false)
     }
 
-    @Test func currentMilestoneIsM4MemoryOS() {
-        #expect(ArchitectureManifest.milestone == "M4")
+    @Test func currentMilestoneIsM3ModuleRuntime() {
+        #expect(ArchitectureManifest.milestone == "M3")
         #expect(ArchitectureManifest.contractFoundation == "M0")
         #expect(MilestoneGate.m2.providers == true)
         #expect(MilestoneGate.m2.skillRuntime == false)
@@ -21,9 +21,8 @@ struct ArchitectureManifestTests {
         #expect(MilestoneGate.m3.providers == true)
         #expect(MilestoneGate.m3.skillRuntime == true)
         #expect(MilestoneGate.m3.toolRuntime == true)
-        #expect(MilestoneGate.m4.memoryEngine == true)
-        #expect(MilestoneGate.m4.storageEngine == true)
-        #expect(MilestoneGate.m4.cognitionLoop == false)
+        #expect(MilestoneGate.m3.memoryEngine == false)
+        #expect(MilestoneGate.m3.cognitionLoop == false)
     }
 
     @Test func axisStartsAtUIAndEndsAtFoundation() {
