@@ -45,9 +45,9 @@ struct M3CompositionIsolationTests {
     }
 
     @Test func skillFailurePropagates() async throws {
-        let catalog = try ModuleCatalog(modules: [FailingModule()])
+        let catalog = try ModuleCatalog(modules: [FailingEchoModule()])
         let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
-        try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.fail))
+        try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.failEcho))
         do {
             _ = try await runtime.execute(
                 ModuleInvocation(
@@ -57,10 +57,11 @@ struct M3CompositionIsolationTests {
             )
             Issue.record("expected composition failure")
         } catch let error as ModuleRuntimeError {
-            guard case .compositionFailed = error else {
+            guard case .compositionFailed(let reason) = error else {
                 Issue.record("wrong \(error)")
                 return
             }
+            #expect(reason.contains("executionFailed:skill-child"))
         }
     }
 
