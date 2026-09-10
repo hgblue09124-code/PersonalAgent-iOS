@@ -41,6 +41,16 @@ public enum MemoryLifecycle: String, Sendable, Codable, CaseIterable, Hashable {
     case deleted
 }
 
+public enum MemorySource: String, Sendable, Codable, CaseIterable, Hashable {
+    case user
+    case agent
+    case conversation
+    case tool
+    case module
+    case system
+    case importSource
+}
+
 public struct MemoryMetadata: Sendable, Codable, Equatable, ExpressibleByDictionaryLiteral {
     public var storage: [String: String]
 
