@@ -146,8 +146,17 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             await emitRejection(command: GoalCommand.activate.rawValue, error: error)
             throw error
         }
-        try await applyGoal(goalID, command: .activate)
+        // Reserve before the emit suspension point so a reentrant activate cannot both pass.
+        let previousActive = activeGoalID
         activeGoalID = goalID
+        do {
+            try await applyGoal(goalID, command: .activate)
+        } catch {
+            if activeGoalID == goalID {
+                activeGoalID = previousActive
+            }
+            throw error
+        }
     }
 
     public func suspend(goalID: GoalID) async throws {
@@ -168,8 +177,16 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             await emitRejection(command: GoalCommand.resume.rawValue, error: error)
             throw error
         }
-        try await applyGoal(goalID, command: .resume)
+        let previousActive = activeGoalID
         activeGoalID = goalID
+        do {
+            try await applyGoal(goalID, command: .resume)
+        } catch {
+            if activeGoalID == goalID {
+                activeGoalID = previousActive
+            }
+            throw error
+        }
     }
 
     public func complete(goalID: GoalID) async throws {
