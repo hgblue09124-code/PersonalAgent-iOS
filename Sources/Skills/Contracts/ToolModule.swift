@@ -24,8 +24,10 @@ public struct ToolModule: Module {
     }
 
     public func execute(_ input: ModulePayload) async throws -> ModulePayload {
+        try Task.checkCancellation()
         let arguments = input.value(for: "arguments") ?? ""
         let output = try await tool.run(argumentsJSON: arguments)
+        try Task.checkCancellation()
         return ModulePayload(schema: contract.outputSchema, fields: ["output": output])
     }
 }

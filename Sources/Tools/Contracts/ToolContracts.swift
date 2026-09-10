@@ -1,3 +1,4 @@
+import Foundation
 import PAFoundation
 import PAPolicy
 import PAObservability
@@ -53,7 +54,8 @@ public struct ToolResult: Sendable, Equatable {
     }
 }
 
-/// Tools never bypass Policy.
+/// Future policy-gated tool port. M3 tool runtime is `Tool` → `ToolModule` → `ModuleRuntime`.
+/// Do not treat this protocol as a second execution engine.
 public protocol ToolExecuting: Sendable {
     func execute(_ invocation: ToolInvocation, policy: any PolicyEvaluating) async throws -> ToolResult
 }
@@ -83,5 +85,46 @@ public struct EchoTool: Tool {
 
     public func run(argumentsJSON: String) async throws -> String {
         argumentsJSON
+    }
+}
+
+public struct PrivilegedTool: Tool {
+    public let manifest: ToolManifest
+
+    public init() {
+        self.manifest = ToolManifest(
+            id: ToolID(rawValue: "privileged"),
+            name: "Privileged",
+            version: SemanticVersion(major: 0, minor: 1, patch: 0),
+            requiredCapabilities: [.destructive],
+            inputSchema: SchemaDocument(identifier: "tool.privileged.in"),
+            outputSchema: SchemaDocument(identifier: "tool.privileged.out")
+        )
+    }
+
+    public func run(argumentsJSON: String) async throws -> String {
+        "destroyed"
+    }
+}
+
+/// Cooperative hang used to prove Tool → ToolModule → ModuleRuntime timeout/cancel.
+public struct HangTool: Tool {
+    public let manifest: ToolManifest
+
+    public init() {
+        self.manifest = ToolManifest(
+            id: ToolID(rawValue: "hang"),
+            name: "Hang",
+            version: SemanticVersion(major: 0, minor: 1, patch: 0),
+            requiredCapabilities: [.read, .execute],
+            inputSchema: SchemaDocument(identifier: "tool.hang.in"),
+            outputSchema: SchemaDocument(identifier: "tool.hang.out")
+        )
+    }
+
+    public func run(argumentsJSON: String) async throws -> String {
+        try await Task.sleep(nanoseconds: 60_000_000_000)
+        try Task.checkCancellation()
+        return argumentsJSON
     }
 }
