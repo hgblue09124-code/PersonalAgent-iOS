@@ -6,13 +6,14 @@ import PASkills
 
 @Suite("M3 module contract")
 struct M3ContractTests {
-    @Test func payloadIsTypedNotAnyDictionary() {
+    @Test func payloadIsSchemaTaggedStringMap() {
         let payload = ModulePayload(
             schema: SchemaDocument(identifier: "mod.echo.in"),
             fields: ["text": "hi"]
         )
         #expect(payload.value(for: "text") == "hi")
         #expect(payload.fields["text"] == "hi")
+        #expect(payload.schema.identifier == "mod.echo.in")
     }
 
     @Test func toolAndSkillRemainDistinct() {

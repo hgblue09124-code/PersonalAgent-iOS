@@ -57,6 +57,7 @@ jobs:
           test -f Tests/PersonalAgentTests/M3RuntimeTests.swift
           test -f Tests/PersonalAgentTests/M3CatalogTests.swift
           test -f Tests/PersonalAgentTests/M3CompositionIsolationTests.swift
+          test -f Tests/PersonalAgentTests/M3SemanticsTests.swift
           test -f Sources/Modules/Contracts/ModuleRuntime.swift
           test -f Sources/Modules/Contracts/ModuleCatalog.swift
           test -f Sources/Modules/Contracts/DeterministicModules.swift

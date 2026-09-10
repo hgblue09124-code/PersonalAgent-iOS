@@ -3,6 +3,14 @@ import PAModules
 import PATools
 import PAPolicy
 
+/// A Skill is a higher-level compositional capability.
+/// It may compose Modules/Tools through their contracts. It must not bypass them.
+/// A Skill is not a Tool.
+///
+/// M3 execution path is Skill-as-Module (`EchoSkillModule`) → `ModuleRuntime`.
+/// `SkillStore` / `SkillSelecting` / `SkillExecuting` / `SkillVerifying` are
+/// future seams. They are not a second runtime.
+
 public struct SkillManifest: Hashable, Sendable, Codable {
     public let id: SkillID
     public let name: String
