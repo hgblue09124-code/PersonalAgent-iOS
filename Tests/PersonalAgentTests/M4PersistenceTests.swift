@@ -1,5 +1,10 @@
 import Testing
 import Foundation
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Darwin)
+import Darwin
+#endif
 import PAFoundation
 import PAStorage
 import PAMemory
@@ -193,7 +198,16 @@ struct M4PersistenceTests {
     @Test func persistenceFailureRollsBackInMemoryAndOnDiskState() async throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M4Rollback_\(UUID().uuidString)")
-        defer { try? FileManager.default.removeItem(at: tempDir) }
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer {
+            #if canImport(Glibc)
+            seteuid(0)
+            #elseif canImport(Darwin)
+            seteuid(0)
+            #endif
+            chmod(tempDir.path, 0o755)
+            try? FileManager.default.removeItem(at: tempDir)
+        }
 
         let store = try FileBackedMemoryStore(directoryURL: tempDir)
 
@@ -205,14 +219,16 @@ struct M4PersistenceTests {
         )
         try await store.capture(rec1)
 
-        // Verify initial state on disk and in store
-        let countBefore = try await store.count()
-        #expect(countBefore == 1)
-
-        // Make write fail deterministically: replace store.json with a directory named store.json
         let storeFileURL = tempDir.appendingPathComponent("store.json")
-        try FileManager.default.removeItem(at: storeFileURL)
-        try FileManager.default.createDirectory(at: storeFileURL, withIntermediateDirectories: true)
+        let previousCommittedBytes = try Data(contentsOf: storeFileURL)
+
+        // Make write fail deterministically by making directory read-only (chmod 0555) and dropping euid
+        chmod(tempDir.path, 0o555)
+        #if canImport(Glibc)
+        seteuid(1000)
+        #elseif canImport(Darwin)
+        seteuid(1000)
+        #endif
 
         let rec2 = MemoryRecord(
             id: MemoryRecordID(rawValue: "rec-fail-2"),
@@ -221,10 +237,27 @@ struct M4PersistenceTests {
             provenance: Provenance(source: "user")
         )
 
-        // Attempting to capture rec2 must fail and throw persistenceFailed
-        await #expect(throws: MemoryError.self) {
+        // Attempting to capture rec2 must fail and throw MemoryError.persistenceFailed specifically
+        do {
             try await store.capture(rec2)
+            Issue.record("Expected capture to throw MemoryError.persistenceFailed")
+        } catch let err as MemoryError {
+            if case .persistenceFailed = err {
+                // Expected error case
+            } else {
+                Issue.record("Expected MemoryError.persistenceFailed, got \(err)")
+            }
+        } catch {
+            Issue.record("Expected MemoryError, got \(error)")
         }
+
+        // Restore euid and write permissions so we can inspect disk and clean up
+        #if canImport(Glibc)
+        seteuid(0)
+        #elseif canImport(Darwin)
+        seteuid(0)
+        #endif
+        chmod(tempDir.path, 0o755)
 
         // Prove BOTH:
         // 1. In-memory state == previous committed state (count == 1, rec2 not present)
@@ -236,6 +269,10 @@ struct M4PersistenceTests {
 
         let inMemoryRec1 = try await store.retrieve(id: rec1.id)
         #expect(inMemoryRec1?.content == "Committed Fact 1")
+
+        // 2. On-disk store.json bytes == previousCommittedBytes
+        let currentDiskBytes = try Data(contentsOf: storeFileURL)
+        #expect(currentDiskBytes == previousCommittedBytes)
     }
 
     @Test func bulkInsertRejectsDuplicateIDsInBatchAndStoreAtomically() async throws {
