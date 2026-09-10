@@ -4,7 +4,7 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M4 — local-first Memory OS runtime & persistence.** M0–M3 remain in place.
+**Milestone: M3 — module / skill / tool runtime.** M0–M2 remain in place.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 
@@ -19,8 +19,7 @@ Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first
 | Provider contract + runtime | Present |
 | Concrete provider adapters | Present (fixture-tested; live network pending) |
 | Module / skill / tool runtime | Present (deterministic modules; no privileged device tools) |
-| Memory OS runtime & persistence | Present (FileBackedMemoryStore, MemoryIndex, MemoryRuntime) |
-| Storage / sync engines | Local-first file engine present; sync pending |
+| Storage / memory / skills / tools engines | Contracts only |
 | Device verification on iPhone 12 Pro Max | Not signed off |
 
 Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`) are external material. They are not runtime dependencies.
@@ -49,7 +48,6 @@ iOS app: open `PersonalAgent.xcodeproj` in Xcode 16+, destination iPhone 12 Pro 
 ## Review notes
 
 - Kernel must not import SwiftUI or a concrete provider module.
-- Memory subsystem is contract-driven, local-first, actor-isolated, and uses multi-field indexing ($O(1)$ ID/Scope/Kind lookups).
 - Tools must go through Policy.
 - Provider credentials stay outside AgentState.
 - Default app composition uses `DeterministicFakeProvider`. No production credentials. No launch-time network.

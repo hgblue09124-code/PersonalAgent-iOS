@@ -63,7 +63,7 @@ struct M3SemanticsTests {
 
     @Test func cancellationResistantModuleStillTimesOutWithoutCompleted() async throws {
         let log = InMemoryEventLog()
-        let catalog = try ModuleCatalog(modules: [CancellationResistantModule(spinNanoseconds: 500_000_000)])
+        let catalog = try ModuleCatalog(modules: [CancellationResistantModule(spinNanoseconds: 80_000_000)])
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
