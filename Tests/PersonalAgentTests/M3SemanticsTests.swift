@@ -63,7 +63,7 @@ struct M3SemanticsTests {
 
     @Test func cancellationResistantModuleStillTimesOutWithoutCompleted() async throws {
         let log = InMemoryEventLog()
-        let catalog = try ModuleCatalog(modules: [CancellationResistantModule(spinNanoseconds: 80_000_000)])
+        let catalog = try ModuleCatalog(modules: [CancellationResistantModule(spinNanoseconds: 300_000_000)])
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
@@ -74,7 +74,7 @@ struct M3SemanticsTests {
                 ModuleInvocation(
                     moduleID: DeterministicModuleIDs.resistant,
                     input: ModulePayload(schema: SchemaDocument(identifier: "mod.resistant.in")),
-                    timeoutNanoseconds: 5_000_000
+                    timeoutNanoseconds: 10_000_000
                 )
             )
         }

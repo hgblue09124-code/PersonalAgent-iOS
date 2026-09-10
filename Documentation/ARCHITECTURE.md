@@ -1,7 +1,7 @@
 # Personal Agent — Architecture
 
-Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented.
-No live LLM call in default composition. No persistence engine.
+Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented. M4 Memory OS implemented (`Documentation/M4.md`).
+No live LLM call in default composition.
 
 This iOS client is the long-lived Personal Agent / Agent OS *client*.
 It is not a chat wrapper. Kernel is not an LLM.
@@ -50,9 +50,11 @@ M0 freezes boundaries and contracts.
 M1 implements Kernel runtime (`Documentation/M1.md`).
 M2 implements the provider contract and runtime (`Documentation/M2.md`).
 M3 implements the module / skill / tool runtime (`Documentation/M3.md`).
-Later milestones fill storage, memory, skills, tools, cognition, events, then the iOS vertical slice.
+M4 implements the local-first Memory OS runtime & persistence (`Documentation/M4.md`).
+Later milestones fill cognition, events replay, then the iOS vertical slice.
 
 M2 does not collapse Cognition into the Kernel.
 Kernel may hold `any LLMProvider`. It does not import `PAProvidersGrok` / OpenAI / Local.
 Default composition wires `DeterministicFakeProvider`. Live vendor calls are a separate verification gate.
 Kernel may hold `any ModuleExecuting` and request execution. It does not contain concrete modules.
+Kernel may hold `any MemoryExecuting` and request memory operations. It does not contain concrete memory stores.
