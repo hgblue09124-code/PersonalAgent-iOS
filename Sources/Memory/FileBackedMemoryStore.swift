@@ -56,7 +56,7 @@ public actor FileBackedMemoryStore: MemoryStore {
         decoder.dateDecodingStrategy = .iso8601
         self.jsonDecoder = decoder
 
-        Self.ensureDirectoryExists(at: directoryURL, fileManager: fileManager)
+        try Self.ensureDirectoryExists(at: directoryURL, fileManager: fileManager)
 
         let loaded = try Self.loadFromDisk(
             directoryURL: directoryURL,
@@ -68,6 +68,7 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     public func capture(_ record: MemoryRecord) async throws {
+        try MemoryRecordValidator.validate(record)
         if index.record(for: record.id) != nil {
             throw MemoryError.duplicateID(record.id)
         }
@@ -93,6 +94,7 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     public func update(_ record: MemoryRecord) async throws {
+        try MemoryRecordValidator.validate(record)
         guard let existing = index.record(for: record.id) else {
             throw MemoryError.notFound(record.id)
         }
@@ -165,14 +167,18 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
-        if let limit = query.limit, limit <= 0 {
-            throw MemoryError.invalidQuery("Limit must be greater than zero")
-        }
+        try MemoryQueryValidator.validate(query)
         return index.query(query)
     }
 
     public func bulkInsert(_ records: [MemoryRecord]) async throws {
+        var seenIDs = Set<MemoryRecordID>()
         for record in records {
+            try MemoryRecordValidator.validate(record)
+            if seenIDs.contains(record.id) {
+                throw MemoryError.duplicateID(record.id)
+            }
+            seenIDs.insert(record.id)
             if index.record(for: record.id) != nil {
                 throw MemoryError.duplicateID(record.id)
             }
@@ -228,9 +234,13 @@ public actor FileBackedMemoryStore: MemoryStore {
         self.index = loaded.index
     }
 
-    private static func ensureDirectoryExists(at directoryURL: URL, fileManager: FileManager) {
+    private static func ensureDirectoryExists(at directoryURL: URL, fileManager: FileManager) throws {
         if !fileManager.fileExists(atPath: directoryURL.path) {
-            try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+            do {
+                try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                throw MemoryError.persistenceFailed("Failed to create store directory at \(directoryURL.path): \(error.localizedDescription)")
+            }
         }
     }
 
@@ -248,7 +258,7 @@ public actor FileBackedMemoryStore: MemoryStore {
             do {
                 let data = try Data(contentsOf: storeURL)
                 let snapshot = try decoder.decode(MemoryStoreSnapshot.self, from: data)
-                if snapshot.metadata.version > 1 {
+                if snapshot.metadata.version != 1 {
                     throw MemoryError.unsupportedVersion(snapshot.metadata.version)
                 }
                 loadedMeta = snapshot.metadata

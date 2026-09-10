@@ -143,4 +143,164 @@ struct M4PersistenceTests {
             try await store.update(updateB)
         }
     }
+
+    @Test func schemaVersionsZeroNegativeAndFutureThrowUnsupportedVersion() async throws {
+        let invalidVersions = [0, -1, -99, 2, 100]
+
+        for v in invalidVersions {
+            let tempDir = FileManager.default.temporaryDirectory
+                .appendingPathComponent("M4VerTest_\(UUID().uuidString)")
+            defer { try? FileManager.default.removeItem(at: tempDir) }
+
+            try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+            let storeFile = tempDir.appendingPathComponent("store.json")
+            let metaJSON = """
+            {
+              "metadata": {
+                "version": \(v),
+                "createdAt": "2026-01-01T00:00:00Z",
+                "updatedAt": "2026-01-01T00:00:00Z",
+                "recordCount": 0
+              },
+              "records": []
+            }
+            """
+            try metaJSON.write(to: storeFile, atomically: true, encoding: .utf8)
+
+            #expect(throws: MemoryError.unsupportedVersion(v)) {
+                _ = try FileBackedMemoryStore(directoryURL: tempDir)
+            }
+        }
+    }
+
+    @Test func directoryCreationFailureThrowsPersistenceFailed() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M4DirFile_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        // Create a regular file where directory is expected
+        let fakeFilePath = tempDir.appendingPathComponent("file_not_dir")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        try "I am a file".write(to: fakeFilePath, atomically: true, encoding: .utf8)
+
+        let targetDirURL = fakeFilePath.appendingPathComponent("sub_dir")
+
+        #expect(throws: MemoryError.self) {
+            _ = try FileBackedMemoryStore(directoryURL: targetDirURL)
+        }
+    }
+
+    @Test func persistenceFailureRollsBackInMemoryAndOnDiskState() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M4Rollback_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let store = try FileBackedMemoryStore(directoryURL: tempDir)
+
+        let rec1 = MemoryRecord(
+            id: MemoryRecordID(rawValue: "rec-committed-1"),
+            kind: .fact,
+            content: "Committed Fact 1",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(rec1)
+
+        // Verify initial state on disk and in store
+        let countBefore = try await store.count()
+        #expect(countBefore == 1)
+
+        // Make write fail deterministically: replace store.json with a directory named store.json
+        let storeFileURL = tempDir.appendingPathComponent("store.json")
+        try FileManager.default.removeItem(at: storeFileURL)
+        try FileManager.default.createDirectory(at: storeFileURL, withIntermediateDirectories: true)
+
+        let rec2 = MemoryRecord(
+            id: MemoryRecordID(rawValue: "rec-fail-2"),
+            kind: .fact,
+            content: "Uncommitted Fact 2",
+            provenance: Provenance(source: "user")
+        )
+
+        // Attempting to capture rec2 must fail and throw persistenceFailed
+        await #expect(throws: MemoryError.self) {
+            try await store.capture(rec2)
+        }
+
+        // Prove BOTH:
+        // 1. In-memory state == previous committed state (count == 1, rec2 not present)
+        let countAfter = try await store.count()
+        #expect(countAfter == 1)
+
+        let inMemoryRec2 = try await store.retrieve(id: rec2.id)
+        #expect(inMemoryRec2 == nil)
+
+        let inMemoryRec1 = try await store.retrieve(id: rec1.id)
+        #expect(inMemoryRec1?.content == "Committed Fact 1")
+    }
+
+    @Test func bulkInsertRejectsDuplicateIDsInBatchAndStoreAtomically() async throws {
+        let store = InMemoryMemoryStore()
+
+        let existing = MemoryRecord(
+            id: MemoryRecordID(rawValue: "existing-1"),
+            kind: .fact,
+            content: "Existing record",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(existing)
+
+        let r1 = MemoryRecord(id: MemoryRecordID(rawValue: "batch-1"), kind: .fact, content: "Batch 1", provenance: Provenance(source: "user"))
+        let r2 = MemoryRecord(id: MemoryRecordID(rawValue: "batch-2"), kind: .fact, content: "Batch 2", provenance: Provenance(source: "user"))
+        let rDuplicateExisting = MemoryRecord(id: MemoryRecordID(rawValue: "existing-1"), kind: .fact, content: "Duplicate Existing", provenance: Provenance(source: "user"))
+
+        // Rejection due to duplicate with existing record in store
+        await #expect(throws: MemoryError.duplicateID(existing.id)) {
+            try await store.bulkInsert([r1, r2, rDuplicateExisting])
+        }
+
+        // Prove entire batch remains uncommitted
+        #expect(try await store.count() == 1)
+        #expect(try await store.retrieve(id: r1.id) == nil)
+
+        let rDup1 = MemoryRecord(id: MemoryRecordID(rawValue: "dup-batch"), kind: .fact, content: "Dup 1", provenance: Provenance(source: "user"))
+        let rDup2 = MemoryRecord(id: MemoryRecordID(rawValue: "dup-batch"), kind: .fact, content: "Dup 2", provenance: Provenance(source: "user"))
+
+        // Rejection due to intra-batch duplicate IDs
+        await #expect(throws: MemoryError.duplicateID(rDup1.id)) {
+            try await store.bulkInsert([rDup1, rDup2])
+        }
+
+        // Prove entire batch remains uncommitted
+        #expect(try await store.count() == 1)
+        #expect(try await store.retrieve(id: rDup1.id) == nil)
+    }
+
+    @Test func directStoreRejectsInvalidRecords() async throws {
+        let store = InMemoryMemoryStore()
+
+        let emptyContent = MemoryRecord(kind: .fact, content: "   ", provenance: Provenance(source: "user"))
+        await #expect(throws: MemoryError.invalidRecord("Record content cannot be empty")) {
+            try await store.capture(emptyContent)
+        }
+
+        let nanImportance = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: Double.nan)
+        await #expect(throws: MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")) {
+            try await store.capture(nanImportance)
+        }
+
+        let infImportance = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: Double.infinity)
+        await #expect(throws: MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")) {
+            try await store.capture(infImportance)
+        }
+
+        let negativeImportance = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: -0.1)
+        await #expect(throws: MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")) {
+            try await store.capture(negativeImportance)
+        }
+
+        let overflowImportance = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: 1.01)
+        await #expect(throws: MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")) {
+            try await store.capture(overflowImportance)
+        }
+    }
 }

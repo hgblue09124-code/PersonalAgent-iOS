@@ -18,12 +18,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
     }
 
     public func validate(_ record: MemoryRecord) throws {
-        if record.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            throw MemoryError.invalidRecord("Record content cannot be empty")
-        }
-        if record.importance.isNaN || record.importance.isInfinite || record.importance < 0.0 || record.importance > 1.0 {
-            throw MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")
-        }
+        try MemoryRecordValidator.validate(record)
     }
 
     public func capture(_ record: MemoryRecord) async throws {
@@ -76,9 +71,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
     }
 
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
-        if let limit = query.limit, limit <= 0 {
-            throw MemoryError.invalidQuery("Limit must be greater than zero")
-        }
+        try MemoryQueryValidator.validate(query)
         let res = try await store.query(query)
         await logEvent(
             kind: .memoryQueried,

@@ -13,7 +13,7 @@ struct M4ConcurrencyTests {
         let taskCount = 50
         let itemsPerTask = 20
 
-        await withTaskGroup(of: Void.self) { group in
+        try await withThrowingTaskGroup(of: Void.self) { group in
             for t in 0..<taskCount {
                 group.addTask {
                     for i in 0..<itemsPerTask {
@@ -24,10 +24,11 @@ struct M4ConcurrencyTests {
                             provenance: Provenance(source: "task-\(t)"),
                             scope: .agent
                         )
-                        try? await runtime.capture(rec)
+                        try await runtime.capture(rec)
                     }
                 }
             }
+            try await group.waitForAll()
         }
 
         let totalCount = try await runtime.count()
@@ -50,7 +51,7 @@ struct M4ConcurrencyTests {
             try await runtime.capture(rec)
         }
 
-        await withTaskGroup(of: Void.self) { group in
+        try await withThrowingTaskGroup(of: Void.self) { group in
             // Writer tasks
             for t in 0..<10 {
                 group.addTask {
@@ -61,7 +62,7 @@ struct M4ConcurrencyTests {
                             content: "Preference \(t)-\(i)",
                             provenance: Provenance(source: "writer")
                         )
-                        try? await runtime.capture(rec)
+                        try await runtime.capture(rec)
                     }
                 }
             }
@@ -71,11 +72,12 @@ struct M4ConcurrencyTests {
                 group.addTask {
                     for _ in 0..<10 {
                         let query = MemoryQuery(kinds: [.observation, .preference])
-                        let res = try? await runtime.query(query)
-                        #expect((res?.records.count ?? 0) >= 100)
+                        let res = try await runtime.query(query)
+                        #expect(res.records.count >= 100)
                     }
                 }
             }
+            try await group.waitForAll()
         }
 
         let finalCount = try await runtime.count()

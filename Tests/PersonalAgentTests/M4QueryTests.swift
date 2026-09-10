@@ -137,4 +137,32 @@ struct M4QueryTests {
         #expect(result.records.count == 2)
         #expect(result.records.first?.content == "Swift concurrency in Swift 6")
     }
+
+    @Test func invalidQueryNumericBoundariesRejected() async throws {
+        let store = InMemoryMemoryStore()
+
+        await #expect(throws: MemoryError.invalidQuery("Limit must be greater than zero")) {
+            _ = try await store.query(MemoryQuery(limit: 0))
+        }
+
+        await #expect(throws: MemoryError.invalidQuery("Limit must be greater than zero")) {
+            _ = try await store.query(MemoryQuery(limit: -5))
+        }
+
+        await #expect(throws: MemoryError.invalidQuery("Query minImportance must be finite and within [0.0, 1.0]")) {
+            _ = try await store.query(MemoryQuery(minImportance: Double.nan))
+        }
+
+        await #expect(throws: MemoryError.invalidQuery("Query minImportance must be finite and within [0.0, 1.0]")) {
+            _ = try await store.query(MemoryQuery(minImportance: Double.infinity))
+        }
+
+        await #expect(throws: MemoryError.invalidQuery("Query minImportance must be finite and within [0.0, 1.0]")) {
+            _ = try await store.query(MemoryQuery(minImportance: -0.1))
+        }
+
+        await #expect(throws: MemoryError.invalidQuery("Query minImportance must be finite and within [0.0, 1.0]")) {
+            _ = try await store.query(MemoryQuery(minImportance: 1.05))
+        }
+    }
 }

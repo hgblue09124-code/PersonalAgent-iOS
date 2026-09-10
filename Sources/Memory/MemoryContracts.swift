@@ -194,6 +194,30 @@ public struct MemoryQueryResult: Sendable, Codable, Equatable {
     }
 }
 
+public enum MemoryRecordValidator {
+    public static func validate(_ record: MemoryRecord) throws {
+        if record.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            throw MemoryError.invalidRecord("Record content cannot be empty")
+        }
+        if record.importance.isNaN || record.importance.isInfinite || record.importance < 0.0 || record.importance > 1.0 {
+            throw MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")
+        }
+    }
+}
+
+public enum MemoryQueryValidator {
+    public static func validate(_ query: MemoryQuery) throws {
+        if let limit = query.limit, limit <= 0 {
+            throw MemoryError.invalidQuery("Limit must be greater than zero")
+        }
+        if let minImp = query.minImportance {
+            if minImp.isNaN || minImp.isInfinite || minImp < 0.0 || minImp > 1.0 {
+                throw MemoryError.invalidQuery("Query minImportance must be finite and within [0.0, 1.0]")
+            }
+        }
+    }
+}
+
 public enum MemoryError: Error, Sendable, Codable, Equatable, CustomStringConvertible {
     case invalidRecord(String)
     case notFound(MemoryRecordID)

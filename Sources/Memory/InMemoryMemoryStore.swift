@@ -9,6 +9,7 @@ public actor InMemoryMemoryStore: MemoryStore {
     }
 
     public func capture(_ record: MemoryRecord) async throws {
+        try MemoryRecordValidator.validate(record)
         if index.record(for: record.id) != nil {
             throw MemoryError.duplicateID(record.id)
         }
@@ -20,6 +21,7 @@ public actor InMemoryMemoryStore: MemoryStore {
     }
 
     public func update(_ record: MemoryRecord) async throws {
+        try MemoryRecordValidator.validate(record)
         guard let existing = index.record(for: record.id) else {
             throw MemoryError.notFound(record.id)
         }
@@ -63,14 +65,18 @@ public actor InMemoryMemoryStore: MemoryStore {
     }
 
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
-        if let limit = query.limit, limit <= 0 {
-            throw MemoryError.invalidQuery("Limit must be greater than zero")
-        }
+        try MemoryQueryValidator.validate(query)
         return index.query(query)
     }
 
     public func bulkInsert(_ records: [MemoryRecord]) async throws {
+        var seenIDs = Set<MemoryRecordID>()
         for record in records {
+            try MemoryRecordValidator.validate(record)
+            if seenIDs.contains(record.id) {
+                throw MemoryError.duplicateID(record.id)
+            }
+            seenIDs.insert(record.id)
             if index.record(for: record.id) != nil {
                 throw MemoryError.duplicateID(record.id)
             }
