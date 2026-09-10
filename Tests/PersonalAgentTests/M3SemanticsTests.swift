@@ -154,9 +154,14 @@ struct M3SemanticsTests {
     }
 
     @Test func skillFailurePropagatesThroughRuntime() async throws {
-        let catalog = try ModuleCatalog(modules: [FailingModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
-        try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.fail))
+        let log = InMemoryEventLog()
+        let catalog = try ModuleCatalog(modules: [FailingEchoModule()])
+        let runtime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            eventLog: log
+        )
+        try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.failEcho))
         do {
             _ = try await runtime.execute(
                 ModuleInvocation(
@@ -166,11 +171,17 @@ struct M3SemanticsTests {
             )
             Issue.record("expected composition failure")
         } catch let error as ModuleRuntimeError {
-            guard case .compositionFailed = error else {
+            guard case .compositionFailed(let reason) = error else {
                 Issue.record("wrong \(error)")
                 return
             }
+            #expect(reason.contains("executionFailed:skill-child"))
         }
+        let events = await log.allEvents()
+        let invoked = events.filter { $0.kind == .moduleInvoked }.compactMap { $0.payload["moduleID"] }
+        #expect(invoked.contains("skill.echo"))
+        #expect(invoked.contains("mod.fail-echo"))
+        #expect(!events.map(\.kind).contains(.moduleCompleted))
     }
 
     @Test func toolExecutesThroughModuleRuntime() async throws {
@@ -205,6 +216,46 @@ struct M3SemanticsTests {
         }
     }
 
+    @Test func incrementalMissingDependencyRejected() async {
+        let catalog = ModuleCatalog()
+        await #expect(throws: ModuleRuntimeError.missingDependency(
+            module: DeterministicModuleIDs.needsMissing,
+            missing: ModuleID(rawValue: "mod.does-not-exist")
+        )) {
+            try await catalog.register(MissingDependencyModule())
+        }
+    }
+
+    @Test func cancellationResistantModuleCallerCancelDoesNotComplete() async throws {
+        let log = InMemoryEventLog()
+        let catalog = try ModuleCatalog(modules: [CancellationResistantModule(spinNanoseconds: 80_000_000)])
+        let runtime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            eventLog: log
+        )
+        let task = Task {
+            try await runtime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.resistant,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.resistant.in")),
+                    timeoutNanoseconds: 60_000_000_000
+                )
+            )
+        }
+        try await Task.sleep(nanoseconds: 5_000_000)
+        task.cancel()
+        do {
+            _ = try await task.value
+            Issue.record("expected cancel")
+        } catch is CancellationError {
+        } catch let error as ModuleRuntimeError {
+            #expect(error == .cancelled || error == .timeout)
+        }
+        let kinds = await log.kinds()
+        #expect(!kinds.contains(.moduleCompleted))
+    }
+
     @Test func toolTimeoutDoesNotComplete() async throws {
         let log = InMemoryEventLog()
         let catalog = try ModuleCatalog(modules: [ToolModule(tool: HangTool())])
@@ -224,6 +275,39 @@ struct M3SemanticsTests {
                     timeoutNanoseconds: 20_000_000
                 )
             )
+        }
+        let kinds = await log.kinds()
+        #expect(!kinds.contains(.moduleCompleted))
+    }
+
+    @Test func toolCancellationDoesNotComplete() async throws {
+        let log = InMemoryEventLog()
+        let catalog = try ModuleCatalog(modules: [ToolModule(tool: HangTool())])
+        let runtime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            eventLog: log
+        )
+        let task = Task {
+            try await runtime.execute(
+                ModuleInvocation(
+                    moduleID: ModuleID(rawValue: "tool.hang"),
+                    input: ModulePayload(
+                        schema: SchemaDocument(identifier: "tool.hang.in"),
+                        fields: ["arguments": "x"]
+                    ),
+                    timeoutNanoseconds: 60_000_000_000
+                )
+            )
+        }
+        try await Task.sleep(nanoseconds: 15_000_000)
+        task.cancel()
+        do {
+            _ = try await task.value
+            Issue.record("expected cancel")
+        } catch is CancellationError {
+        } catch let error as ModuleRuntimeError {
+            #expect(error == .cancelled || error == .timeout)
         }
         let kinds = await log.kinds()
         #expect(!kinds.contains(.moduleCompleted))
