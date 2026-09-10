@@ -36,6 +36,7 @@ public actor FileBackedMemoryStore: MemoryStore {
     private let fileManager: FileManager
     private let jsonEncoder: JSONEncoder
     private let jsonDecoder: JSONDecoder
+    private let fileWriter: @Sendable (Data, URL) throws -> Void
     private var index: MemoryIndex
     private var metadata: MemoryStoreMetadata
 
@@ -43,9 +44,16 @@ public actor FileBackedMemoryStore: MemoryStore {
         directoryURL.appendingPathComponent("store.json")
     }
 
-    public init(directoryURL: URL, fileManager: FileManager = .default) throws {
+    public init(
+        directoryURL: URL,
+        fileManager: FileManager = .default,
+        fileWriter: @escaping @Sendable (Data, URL) throws -> Void = { data, url in
+            try data.write(to: url, options: .atomic)
+        }
+    ) throws {
         self.directoryURL = directoryURL
         self.fileManager = fileManager
+        self.fileWriter = fileWriter
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -279,7 +287,9 @@ public actor FileBackedMemoryStore: MemoryStore {
         let snapshot = MemoryStoreSnapshot(metadata: metadata, records: index.allRecords())
         do {
             let data = try jsonEncoder.encode(snapshot)
-            try data.write(to: storeFileURL, options: .atomic)
+            try fileWriter(data, storeFileURL)
+        } catch let error as MemoryError {
+            throw error
         } catch {
             throw MemoryError.persistenceFailed("Atomic snapshot write failed: \(error.localizedDescription)")
         }

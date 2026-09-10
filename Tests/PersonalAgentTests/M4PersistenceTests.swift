@@ -1,13 +1,18 @@
 import Testing
 import Foundation
-#if canImport(Glibc)
-import Glibc
-#elseif canImport(Darwin)
-import Darwin
-#endif
 import PAFoundation
 import PAStorage
 import PAMemory
+
+private final class AtomicBool: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _value: Bool
+    init(_ value: Bool) { self._value = value }
+    var value: Bool {
+        get { lock.withLock { _value } }
+        set { lock.withLock { _value = newValue } }
+    }
+}
 
 @Suite("M4 Persistence Tests")
 struct M4PersistenceTests {
@@ -198,18 +203,19 @@ struct M4PersistenceTests {
     @Test func persistenceFailureRollsBackInMemoryAndOnDiskState() async throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M4Rollback_\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        defer {
-            #if canImport(Glibc)
-            seteuid(0)
-            #elseif canImport(Darwin)
-            seteuid(0)
-            #endif
-            chmod(tempDir.path, 0o755)
-            try? FileManager.default.removeItem(at: tempDir)
-        }
+        defer { try? FileManager.default.removeItem(at: tempDir) }
 
-        let store = try FileBackedMemoryStore(directoryURL: tempDir)
+        let shouldFail = AtomicBool(false)
+
+        let store = try FileBackedMemoryStore(
+            directoryURL: tempDir,
+            fileWriter: { data, url in
+                if shouldFail.value {
+                    throw MemoryError.persistenceFailed("Simulated atomic write failure")
+                }
+                try data.write(to: url, options: .atomic)
+            }
+        )
 
         let rec1 = MemoryRecord(
             id: MemoryRecordID(rawValue: "rec-committed-1"),
@@ -222,13 +228,8 @@ struct M4PersistenceTests {
         let storeFileURL = tempDir.appendingPathComponent("store.json")
         let previousCommittedBytes = try Data(contentsOf: storeFileURL)
 
-        // Make write fail deterministically by making directory read-only (chmod 0555) and dropping euid
-        chmod(tempDir.path, 0o555)
-        #if canImport(Glibc)
-        seteuid(1000)
-        #elseif canImport(Darwin)
-        seteuid(1000)
-        #endif
+        // Inject deterministic persistence failure ONLY for subsequent writes
+        shouldFail.value = true
 
         let rec2 = MemoryRecord(
             id: MemoryRecordID(rawValue: "rec-fail-2"),
@@ -250,14 +251,6 @@ struct M4PersistenceTests {
         } catch {
             Issue.record("Expected MemoryError, got \(error)")
         }
-
-        // Restore euid and write permissions so we can inspect disk and clean up
-        #if canImport(Glibc)
-        seteuid(0)
-        #elseif canImport(Darwin)
-        seteuid(0)
-        #endif
-        chmod(tempDir.path, 0o755)
 
         // Prove BOTH:
         // 1. In-memory state == previous committed state (count == 1, rec2 not present)
