@@ -14,6 +14,7 @@ public enum DeterministicModuleIDs {
     public static let cycleA = ModuleID(rawValue: "mod.cycle.a")
     public static let cycleB = ModuleID(rawValue: "mod.cycle.b")
     public static let needsMissing = ModuleID(rawValue: "mod.needs-missing")
+    public static let failEcho = ModuleID(rawValue: "mod.fail-echo")
 }
 
 public struct EchoModule: Module {
@@ -124,11 +125,12 @@ public struct CancellationResistantModule: Module {
     }
 
     public func execute(_ input: ModulePayload) async throws -> ModulePayload {
+        // No await: Swift will not preempt this body. The runtime still
+        // returns .timeout / .cancelled from the sibling timeout/cancel path.
         let start = DispatchTime.now().uptimeNanoseconds
         var ticks = 0
         while DispatchTime.now().uptimeNanoseconds &- start < spinNanoseconds {
             ticks &+= 1
-            try? await Task.sleep(nanoseconds: 2_000_000)
         }
         return ModulePayload(
             schema: contract.outputSchema,
@@ -155,6 +157,29 @@ public struct UnloadedModule: Module {
 
     public func execute(_ input: ModulePayload) async throws -> ModulePayload {
         throw ModuleRuntimeError.invalidState(.idle)
+    }
+}
+
+/// Same schemas as `EchoModule`, so a skill can invoke it through ModuleRuntime
+/// and observe a real child `execute` failure rather than an input-schema miss.
+public struct FailingEchoModule: Module {
+    public let contract: ModuleContract
+
+    public init() {
+        self.contract = ModuleContract(
+            id: DeterministicModuleIDs.failEcho,
+            name: "Fail Echo",
+            version: SemanticVersion(major: 0, minor: 1, patch: 0),
+            kind: .atomic,
+            capabilities: [.read, .execute],
+            inputSchema: SchemaDocument(identifier: "mod.echo.in"),
+            outputSchema: SchemaDocument(identifier: "mod.echo.out"),
+            requiredFields: ["text"]
+        )
+    }
+
+    public func execute(_ input: ModulePayload) async throws -> ModulePayload {
+        throw ModuleRuntimeError.executionFailed("skill-child")
     }
 }
 
