@@ -21,6 +21,16 @@ public struct MemoryStoreMetadata: Sendable, Codable, Equatable {
     }
 }
 
+public struct MemoryStoreSnapshot: Sendable, Codable, Equatable {
+    public var metadata: MemoryStoreMetadata
+    public var records: [MemoryRecord]
+
+    public init(metadata: MemoryStoreMetadata, records: [MemoryRecord]) {
+        self.metadata = metadata
+        self.records = records
+    }
+}
+
 public actor FileBackedMemoryStore: MemoryStore {
     private let directoryURL: URL
     private let fileManager: FileManager
@@ -29,12 +39,8 @@ public actor FileBackedMemoryStore: MemoryStore {
     private var index: MemoryIndex
     private var metadata: MemoryStoreMetadata
 
-    private var metadataFileURL: URL {
-        directoryURL.appendingPathComponent("metadata.json")
-    }
-
-    private var recordsFileURL: URL {
-        directoryURL.appendingPathComponent("records.json")
+    private var storeFileURL: URL {
+        directoryURL.appendingPathComponent("store.json")
     }
 
     public init(directoryURL: URL, fileManager: FileManager = .default) throws {
@@ -66,11 +72,20 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.duplicateID(record.id)
         }
 
+        let previousIndex = index
+        let previousMetadata = metadata
+
         index.index(record)
         metadata.updatedAt = Date()
         metadata.recordCount = index.count
 
-        try persistToDisk()
+        do {
+            try persistToDisk()
+        } catch {
+            index = previousIndex
+            metadata = previousMetadata
+            throw error
+        }
     }
 
     public func retrieve(id: MemoryRecordID) async throws -> MemoryRecord? {
@@ -78,14 +93,41 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     public func update(_ record: MemoryRecord) async throws {
-        guard index.record(for: record.id) != nil else {
+        guard let existing = index.record(for: record.id) else {
             throw MemoryError.notFound(record.id)
         }
 
-        index.index(record)
+        if existing.version != record.version {
+            throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
+        }
+
+        let committedRecord = MemoryRecord(
+            id: record.id,
+            kind: record.kind,
+            content: record.content,
+            provenance: record.provenance,
+            createdAt: record.createdAt,
+            updatedAt: Date(),
+            scope: record.scope,
+            lifecycle: record.lifecycle,
+            importance: record.importance,
+            metadata: record.metadata,
+            version: existing.version + 1
+        )
+
+        let previousIndex = index
+        let previousMetadata = metadata
+
+        index.index(committedRecord)
         metadata.updatedAt = Date()
 
-        try persistToDisk()
+        do {
+            try persistToDisk()
+        } catch {
+            index = previousIndex
+            metadata = previousMetadata
+            throw error
+        }
     }
 
     public func forget(id: MemoryRecordID, reason: String) async throws {
@@ -93,15 +135,40 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.notFound(id)
         }
 
-        let updated = existing.updating(lifecycle: .deleted)
+        let updated = MemoryRecord(
+            id: existing.id,
+            kind: existing.kind,
+            content: existing.content,
+            provenance: existing.provenance,
+            createdAt: existing.createdAt,
+            updatedAt: Date(),
+            scope: existing.scope,
+            lifecycle: .deleted,
+            importance: existing.importance,
+            metadata: existing.metadata,
+            version: existing.version + 1
+        )
+
+        let previousIndex = index
+        let previousMetadata = metadata
+
         index.index(updated)
         metadata.updatedAt = Date()
 
-        try persistToDisk()
+        do {
+            try persistToDisk()
+        } catch {
+            index = previousIndex
+            metadata = previousMetadata
+            throw error
+        }
     }
 
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
-        index.query(query)
+        if let limit = query.limit, limit <= 0 {
+            throw MemoryError.invalidQuery("Limit must be greater than zero")
+        }
+        return index.query(query)
     }
 
     public func bulkInsert(_ records: [MemoryRecord]) async throws {
@@ -109,12 +176,24 @@ public actor FileBackedMemoryStore: MemoryStore {
             if index.record(for: record.id) != nil {
                 throw MemoryError.duplicateID(record.id)
             }
+        }
+
+        let previousIndex = index
+        let previousMetadata = metadata
+
+        for record in records {
             index.index(record)
         }
         metadata.updatedAt = Date()
         metadata.recordCount = index.count
 
-        try persistToDisk()
+        do {
+            try persistToDisk()
+        } catch {
+            index = previousIndex
+            metadata = previousMetadata
+            throw error
+        }
     }
 
     public func count(scope: MemoryScope?) async throws -> Int {
@@ -122,11 +201,20 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     public func clear() async throws {
+        let previousIndex = index
+        let previousMetadata = metadata
+
         index.clear()
         metadata.recordCount = 0
         metadata.updatedAt = Date()
 
-        try persistToDisk()
+        do {
+            try persistToDisk()
+        } catch {
+            index = previousIndex
+            metadata = previousMetadata
+            throw error
+        }
     }
 
     public func reload() throws {
@@ -151,35 +239,26 @@ public actor FileBackedMemoryStore: MemoryStore {
         fileManager: FileManager,
         decoder: JSONDecoder
     ) throws -> (metadata: MemoryStoreMetadata, index: MemoryIndex) {
-        let metaURL = directoryURL.appendingPathComponent("metadata.json")
-        let recsURL = directoryURL.appendingPathComponent("records.json")
+        let storeURL = directoryURL.appendingPathComponent("store.json")
 
         var loadedMeta = MemoryStoreMetadata(version: 1)
         var loadedIndex = MemoryIndex()
 
-        if fileManager.fileExists(atPath: metaURL.path) {
+        if fileManager.fileExists(atPath: storeURL.path) {
             do {
-                let metaData = try Data(contentsOf: metaURL)
-                loadedMeta = try decoder.decode(MemoryStoreMetadata.self, from: metaData)
-                if loadedMeta.version > 1 {
-                    throw MemoryError.unsupportedVersion(loadedMeta.version)
+                let data = try Data(contentsOf: storeURL)
+                let snapshot = try decoder.decode(MemoryStoreSnapshot.self, from: data)
+                if snapshot.metadata.version > 1 {
+                    throw MemoryError.unsupportedVersion(snapshot.metadata.version)
+                }
+                loadedMeta = snapshot.metadata
+                for record in snapshot.records {
+                    loadedIndex.index(record)
                 }
             } catch let err as MemoryError {
                 throw err
             } catch {
-                throw MemoryError.corruptRecord("Corrupt metadata.json: \(error.localizedDescription)")
-            }
-        }
-
-        if fileManager.fileExists(atPath: recsURL.path) {
-            do {
-                let recordsData = try Data(contentsOf: recsURL)
-                let records = try decoder.decode([MemoryRecord].self, from: recordsData)
-                for record in records {
-                    loadedIndex.index(record)
-                }
-            } catch {
-                throw MemoryError.corruptRecord("Corrupt records.json: \(error.localizedDescription)")
+                throw MemoryError.corruptRecord("Corrupt store.json: \(error.localizedDescription)")
             }
         }
 
@@ -187,15 +266,12 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     private func persistToDisk() throws {
+        let snapshot = MemoryStoreSnapshot(metadata: metadata, records: index.allRecords())
         do {
-            let metaData = try jsonEncoder.encode(metadata)
-            try metaData.write(to: metadataFileURL, options: .atomic)
-
-            let allRecords = index.allRecords()
-            let recordsData = try jsonEncoder.encode(allRecords)
-            try recordsData.write(to: recordsFileURL, options: .atomic)
+            let data = try jsonEncoder.encode(snapshot)
+            try data.write(to: storeFileURL, options: .atomic)
         } catch {
-            throw MemoryError.persistenceFailed("Atomic write failed: \(error.localizedDescription)")
+            throw MemoryError.persistenceFailed("Atomic snapshot write failed: \(error.localizedDescription)")
         }
     }
 }

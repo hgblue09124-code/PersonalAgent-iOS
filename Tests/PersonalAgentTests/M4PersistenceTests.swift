@@ -73,7 +73,7 @@ struct M4PersistenceTests {
         #expect(fetched?.content == "Keynote presentation")
     }
 
-    @Test func corruptRecordsFileThrowsCorruptRecordErrorAndFailsClosed() async throws {
+    @Test func corruptSnapshotFileThrowsCorruptRecordErrorAndFailsClosed() async throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M4Corrupt_\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -82,9 +82,9 @@ struct M4PersistenceTests {
         let rec = MemoryRecord(kind: .observation, content: "Test", provenance: Provenance(source: "sensor"))
         try await store.capture(rec)
 
-        // Intentionally corrupt records.json on disk
-        let recordsFile = tempDir.appendingPathComponent("records.json")
-        try "CORRUPT INVALID JSON {{{".write(to: recordsFile, atomically: true, encoding: .utf8)
+        // Intentionally corrupt store.json on disk
+        let storeFile = tempDir.appendingPathComponent("store.json")
+        try "CORRUPT INVALID JSON {{{".write(to: storeFile, atomically: true, encoding: .utf8)
 
         #expect(throws: MemoryError.self) {
             _ = try FileBackedMemoryStore(directoryURL: tempDir)
@@ -100,40 +100,47 @@ struct M4PersistenceTests {
         let rec = MemoryRecord(kind: .fact, content: "Version test", provenance: Provenance(source: "test"))
         try await store.capture(rec)
 
-        // Write metadata with unsupported schema version (e.g. version 99)
-        let metadataFile = tempDir.appendingPathComponent("metadata.json")
+        // Write store.json with unsupported schema version (e.g. version 99)
+        let storeFile = tempDir.appendingPathComponent("store.json")
         let invalidMetaJSON = """
         {
-          "version": 99,
-          "createdAt": "2026-01-01T00:00:00Z",
-          "updatedAt": "2026-01-01T00:00:00Z",
-          "recordCount": 1
+          "metadata": {
+            "version": 99,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "updatedAt": "2026-01-01T00:00:00Z",
+            "recordCount": 1
+          },
+          "records": []
         }
         """
-        try invalidMetaJSON.write(to: metadataFile, atomically: true, encoding: .utf8)
+        try invalidMetaJSON.write(to: storeFile, atomically: true, encoding: .utf8)
 
         #expect(throws: MemoryError.self) {
             _ = try FileBackedMemoryStore(directoryURL: tempDir)
         }
     }
 
-    @Test func updatePersistsToDiskAtomically() async throws {
+    @Test func staleVersionUpdateThrowsConcurrentConflict() async throws {
         let tempDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("M4Update_\(UUID().uuidString)")
+            .appendingPathComponent("M4Conflict_\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
 
-        let rec = MemoryRecord(kind: .instruction, content: "Original instruction", provenance: Provenance(source: "user"))
+        let store = try FileBackedMemoryStore(directoryURL: tempDir)
+        let original = MemoryRecord(kind: .fact, content: "Initial content", provenance: Provenance(source: "user"))
+        try await store.capture(original)
 
-        do {
-            let store1 = try FileBackedMemoryStore(directoryURL: tempDir)
-            try await store1.capture(rec)
-            let updatedRec = rec.updating(content: "Modified instruction")
-            try await store1.update(updatedRec)
+        // Produce two copies with version = 1
+        let copyA = original
+        let copyB = original
+
+        // Update A -> version becomes 2 in store
+        let updateA = copyA.updating(content: "Content from A")
+        try await store.update(updateA)
+
+        // Attempting to update stale copy B (which still has version = 1) must throw concurrentConflict
+        let updateB = copyB.updating(content: "Content from B")
+        await #expect(throws: MemoryError.self) {
+            try await store.update(updateB)
         }
-
-        let store2 = try FileBackedMemoryStore(directoryURL: tempDir)
-        let fetched = try await store2.retrieve(id: rec.id)
-        #expect(fetched?.content == "Modified instruction")
-        #expect(fetched?.version == 2)
     }
 }

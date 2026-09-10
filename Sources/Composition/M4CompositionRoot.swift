@@ -48,6 +48,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         logger: any AgentLogger = NullLogger(),
         provider: any LLMProvider = DeterministicFakeProvider(),
         memoryStore: (any MemoryStore)? = nil,
+        storeDirectoryURL: URL? = nil,
         additionalModules: [any Module] = []
     ) async throws {
         let log = InMemoryEventLog()
@@ -94,9 +95,15 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         if let memoryStore {
             store = memoryStore
         } else {
-            let tempDir = FileManager.default.temporaryDirectory
-                .appendingPathComponent("PAMemory_\(UUID().uuidString)")
-            store = try FileBackedMemoryStore(directoryURL: tempDir)
+            let defaultDirectory: URL
+            if let storeDirectoryURL {
+                defaultDirectory = storeDirectoryURL
+            } else if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                defaultDirectory = appSupport.appendingPathComponent("PersonalAgent/PAMemory")
+            } else {
+                defaultDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("PersonalAgent/PAMemory")
+            }
+            store = try FileBackedMemoryStore(directoryURL: defaultDirectory)
         }
         self.memoryStore = store
 

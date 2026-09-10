@@ -102,7 +102,7 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         self.updatedAt = updatedAt
         self.scope = scope
         self.lifecycle = lifecycle
-        self.importance = max(0.0, min(1.0, importance))
+        self.importance = importance
         self.metadata = metadata
         self.version = version
     }
@@ -126,7 +126,7 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
             lifecycle: lifecycle ?? self.lifecycle,
             importance: importance ?? self.importance,
             metadata: metadata ?? self.metadata,
-            version: version + 1
+            version: version
         )
     }
 }
@@ -247,6 +247,9 @@ public extension MemoryStore {
     }
 
     func retrieve(kind: MemoryKind, limit: Int) async throws -> [MemoryRecord] {
+        if limit <= 0 {
+            throw MemoryError.invalidQuery("Limit must be greater than zero")
+        }
         let q = MemoryQuery(kinds: [kind], limit: limit)
         let res = try await query(q)
         return res.records

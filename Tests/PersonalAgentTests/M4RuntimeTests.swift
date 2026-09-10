@@ -109,6 +109,46 @@ struct M4RuntimeTests {
         }
     }
 
+    @Test func runtimeRejectsInvalidImportance() async throws {
+        let store = InMemoryMemoryStore()
+        let runtime = MemoryRuntime(store: store)
+
+        let lowImp = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: -0.1)
+        let highImp = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: 1.1)
+        let nanImp = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), importance: Double.nan)
+
+        await #expect(throws: MemoryError.self) {
+            try await runtime.capture(lowImp)
+        }
+        await #expect(throws: MemoryError.self) {
+            try await runtime.capture(highImp)
+        }
+        await #expect(throws: MemoryError.self) {
+            try await runtime.capture(nanImp)
+        }
+    }
+
+    @Test func runtimeRejectsInvalidQueryLimits() async throws {
+        let store = InMemoryMemoryStore()
+        let runtime = MemoryRuntime(store: store)
+
+        let qZero = MemoryQuery(limit: 0)
+        let qNeg = MemoryQuery(limit: -1)
+
+        await #expect(throws: MemoryError.self) {
+            _ = try await runtime.query(qZero)
+        }
+        await #expect(throws: MemoryError.self) {
+            _ = try await runtime.query(qNeg)
+        }
+        await #expect(throws: MemoryError.self) {
+            _ = try await runtime.retrieve(kind: .fact, limit: 0)
+        }
+        await #expect(throws: MemoryError.self) {
+            _ = try await runtime.retrieve(kind: .fact, limit: -1)
+        }
+    }
+
     @Test func runtimeBulkInsertAndCountAndTeardown() async throws {
         let store = InMemoryMemoryStore()
         let runtime = MemoryRuntime(store: store)
