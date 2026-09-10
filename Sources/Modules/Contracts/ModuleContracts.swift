@@ -63,7 +63,16 @@ public struct ModuleContract: Hashable, Sendable, Codable {
     }
 }
 
-/// Typed payload. Fields are strings; this is not an untyped bag for Kernel state.
+/// Schema-tagged string map. This is not a Swift generic payload and not a JSON Schema engine.
+///
+/// Guarantees enforced by ModuleRuntime:
+/// - `schema.identifier` must equal the contract input/output schema identifier
+/// - each `requiredFields` key must be present and non-blank on input
+///
+/// Deliberately not guaranteed:
+/// - structural typing of field values
+/// - unknown-key rejection
+/// - JSON Schema / Codable model validation
 public struct ModulePayload: Sendable, Equatable, Codable {
     public let schema: SchemaDocument
     public let fields: [String: String]
@@ -106,6 +115,7 @@ public enum ModuleRuntimeError: Error, Sendable, Equatable, CustomStringConverti
     case unknownModule(ModuleID)
     case duplicateRegistration(ModuleID)
     case invalidInput(String)
+    case invalidOutput(String)
     case capabilityDenied(CapabilityLevel)
     case unavailable(ModuleID)
     case timeout
@@ -113,12 +123,15 @@ public enum ModuleRuntimeError: Error, Sendable, Equatable, CustomStringConverti
     case invalidState(ModuleExecutionState)
     case executionFailed(String)
     case compositionFailed(String)
+    case missingDependency(module: ModuleID, missing: ModuleID)
+    case dependencyCycle([ModuleID])
 
     public var description: String {
         switch self {
         case .unknownModule(let id): return "unknownModule:\(id.rawValue)"
         case .duplicateRegistration(let id): return "duplicateRegistration:\(id.rawValue)"
         case .invalidInput(let reason): return "invalidInput:\(reason)"
+        case .invalidOutput(let reason): return "invalidOutput:\(reason)"
         case .capabilityDenied: return "capabilityDenied"
         case .unavailable(let id): return "unavailable:\(id.rawValue)"
         case .timeout: return "timeout"
@@ -126,11 +139,18 @@ public enum ModuleRuntimeError: Error, Sendable, Equatable, CustomStringConverti
         case .invalidState(let state): return "invalidState:\(state.rawValue)"
         case .executionFailed(let reason): return "executionFailed:\(reason)"
         case .compositionFailed(let reason): return "compositionFailed:\(reason)"
+        case .missingDependency(let module, let missing):
+            return "missingDependency:\(module.rawValue)->\(missing.rawValue)"
+        case .dependencyCycle(let ids):
+            return "dependencyCycle:\(ids.map(\.rawValue).joined(separator: ","))"
         }
     }
 }
 
-/// A module is an explicit capability boundary with typed I/O.
+/// A module is an explicit capability boundary.
+/// Implementations must check `Task.checkCancellation()` at await points.
+/// Timeout and cancellation are cooperative; the runtime does not hard-preempt a
+/// module body that never suspends.
 public protocol Module: Sendable {
     var contract: ModuleContract { get }
     func execute(_ input: ModulePayload) async throws -> ModulePayload
