@@ -3,7 +3,7 @@ import PAFoundation
 /// Architecture encoded as data so tests can lock the skeleton without a runtime.
 public enum ArchitectureManifest: Sendable {
     public static let contractFoundation = "M0"
-    public static let milestone = "M3"
+    public static let milestone = "M4"
     public static let product = "PersonalAgent"
     public static let foundationVersion = SemanticVersion(major: 0, minor: 1, patch: 0)
 
@@ -71,6 +71,7 @@ public enum ArchitectureManifest: Sendable {
             "PAEvents",
             "PAProviders",
             "PAModules",
+            "PAMemory",
         ],
         "PAArchitecture": ["PAFoundation"],
         "PAComposition": [
@@ -84,6 +85,7 @@ public enum ArchitectureManifest: Sendable {
             "PAModules",
             "PASkills",
             "PATools",
+            "PAMemory",
         ],
     ]
 
@@ -177,6 +179,18 @@ public struct MilestoneGate: Sendable, Equatable {
         providers: true,
         storageEngine: false,
         memoryEngine: false,
+        skillRuntime: true,
+        toolRuntime: true,
+        cognitionLoop: false,
+        eventReplay: false
+    )
+
+    public static let m4 = MilestoneGate(
+        milestone: "M4",
+        kernelRuntime: true,
+        providers: true,
+        storageEngine: true,
+        memoryEngine: true,
         skillRuntime: true,
         toolRuntime: true,
         cognitionLoop: false,
