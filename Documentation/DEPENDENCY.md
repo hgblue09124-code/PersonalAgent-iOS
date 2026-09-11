@@ -21,6 +21,7 @@ PAProvidersGrok / OpenAI / OpenAICompatible / Local
 ## Forbidden
 
 - Kernel importing a concrete provider module (`PAProvidersGrok`, `PAProvidersOpenAI`, ...)
+- Kernel or Memory importing cloud vendors or cloud storage SDKs directly
 - Kernel importing SwiftUI / UIKit / URLSession
 - Any Core module importing App screens
 - Living Data Ocean, Firebase, Supabase as required runtime packages
@@ -29,6 +30,7 @@ PAProvidersGrok / OpenAI / OpenAICompatible / Local
 - Tool bypassing Policy
 - Global singleton service locators
 - Secrets in Kernel state, events, logs, or source control
+- Memory subsystem depending on cloud storage or sync engine implementations
 
 ## Provider packages
 

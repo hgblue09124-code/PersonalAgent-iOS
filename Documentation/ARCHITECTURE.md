@@ -1,6 +1,6 @@
 # Personal Agent — Architecture
 
-Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented. M4 Memory OS implemented (`Documentation/M4.md`).
+Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented. M4 Memory OS implemented (`Documentation/M4.md`). M5 Local + Cloud Storage / Sync architectural specification defined (`Documentation/M5.md`).
 No live LLM call in default composition.
 
 This iOS client is the long-lived Personal Agent / Agent OS *client*.
@@ -51,6 +51,7 @@ M1 implements Kernel runtime (`Documentation/M1.md`).
 M2 implements the provider contract and runtime (`Documentation/M2.md`).
 M3 implements the module / skill / tool runtime (`Documentation/M3.md`).
 M4 implements the local-first Memory OS runtime & persistence (`Documentation/M4.md`).
+M5 defines the Local + Cloud Storage / Sync architectural specification (`Documentation/M5.md`).
 Later milestones fill cognition, events replay, then the iOS vertical slice.
 
 M2 does not collapse Cognition into the Kernel.
