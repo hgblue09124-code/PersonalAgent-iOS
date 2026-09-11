@@ -226,5 +226,11 @@ struct M4RuntimeTests {
         await #expect(throws: FailingEventLog.SimulatedAppendError.self) {
             try await runtime.capture(record)
         }
+
+        // Store state assertion: record IS in store (log-after-write,
+        // best-effort telemetry consistency)
+        let fetched = try await store.retrieve(id: record.id)
+        #expect(fetched != nil)
+        #expect(fetched?.id == record.id)
     }
 }
