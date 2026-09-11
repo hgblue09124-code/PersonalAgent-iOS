@@ -92,6 +92,43 @@ struct M5LocalStoreContractTests {
         try await exerciseUpdateAndVersionIncrement(store: store)
     }
 
+    @Test func testLocalStoreRejectsStaleVersionUpsert() async throws {
+        let store = InMemoryMemoryStore()
+
+        let initialMem = MemoryRecord(
+            id: MemoryRecordID(rawValue: "m5-stale-1"),
+            kind: .fact,
+            content: "Initial content",
+            provenance: Provenance(source: "user"),
+            version: 1
+        )
+        try await store.upsert(MemoryStorageRecord(initialMem))
+
+        // Update once -> version in store becomes 2
+        let update1 = initialMem.updating(content: "First valid update")
+        try await store.upsert(MemoryStorageRecord(update1))
+
+        // Attempting to upsert with initialMem (which still has version = 1) must be rejected with concurrentConflict
+        let staleUpdate = initialMem.updating(content: "Stale update attempting overwrite")
+        do {
+            try await store.upsert(MemoryStorageRecord(staleUpdate))
+            Issue.record("Expected stale upsert to throw concurrentConflict error")
+        } catch let err as MemoryError {
+            if case .concurrentConflict = err {
+                // Expected
+            } else {
+                Issue.record("Expected concurrentConflict, got \(err)")
+            }
+        } catch {
+            Issue.record("Expected MemoryError, got \(error)")
+        }
+
+        // Verify stored state remains at version 2 with First valid update
+        let fetched = try await store.fetch(id: "m5-stale-1")
+        #expect(fetched?.version == 2)
+        #expect(fetched?.record.content == "First valid update")
+    }
+
     @Test func testLocalStoreDeleteMarksRecordDeletedAndIncrementsVersion() async throws {
         let store = InMemoryMemoryStore()
         try await exerciseDelete(store: store)
