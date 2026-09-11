@@ -240,4 +240,27 @@ struct M4QueryTests {
         #expect(result.records.count == 1)
         #expect(result.records.first?.content == "Persistent memory index test")
     }
+
+    @Test func partialTokenQueryReturnsZeroMatchesInExactTokenSearch() async throws {
+        let store = InMemoryMemoryStore()
+
+        let record = MemoryRecord(
+            id: MemoryRecordID(rawValue: "rec-exact-only"),
+            kind: .fact,
+            content: "Quantum computing algorithms",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(record)
+
+        // Querying partial token "comput" must return 0 matches against "computing"
+        let partialQuery = MemoryQuery(textSearch: "comput")
+        let partialResult = try await store.query(partialQuery)
+        #expect(partialResult.records.isEmpty)
+
+        // Querying full exact token "computing" must return 1 match
+        let exactQuery = MemoryQuery(textSearch: "computing")
+        let exactResult = try await store.query(exactQuery)
+        #expect(exactResult.records.count == 1)
+        #expect(exactResult.records.first?.id.rawValue == "rec-exact-only")
+    }
 }
