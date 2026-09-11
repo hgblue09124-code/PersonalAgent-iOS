@@ -202,6 +202,9 @@ public enum MemoryRecordValidator {
         if record.importance.isNaN || record.importance.isInfinite || record.importance < 0.0 || record.importance > 1.0 {
             throw MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")
         }
+        if record.version < 1 {
+            throw MemoryError.invalidRecord("Record version must be greater than or equal to 1")
+        }
     }
 }
 

@@ -232,7 +232,6 @@ public actor FileBackedMemoryStore: MemoryStore {
     }
 
     public func reload() throws {
-        index.clear()
         let loaded = try Self.loadFromDisk(
             directoryURL: directoryURL,
             fileManager: fileManager,
@@ -269,10 +268,21 @@ public actor FileBackedMemoryStore: MemoryStore {
                 if snapshot.metadata.version != 1 {
                     throw MemoryError.unsupportedVersion(snapshot.metadata.version)
                 }
-                loadedMeta = snapshot.metadata
+                if snapshot.metadata.recordCount != snapshot.records.count {
+                    throw MemoryError.corruptRecord("Snapshot recordCount mismatch: metadata count \(snapshot.metadata.recordCount) != actual records count \(snapshot.records.count)")
+                }
+
+                var seenIDs = Set<MemoryRecordID>()
                 for record in snapshot.records {
+                    try MemoryRecordValidator.validate(record)
+                    if seenIDs.contains(record.id) {
+                        throw MemoryError.corruptRecord("Duplicate record ID in snapshot: \(record.id.rawValue)")
+                    }
+                    seenIDs.insert(record.id)
                     loadedIndex.index(record)
                 }
+
+                loadedMeta = snapshot.metadata
             } catch let err as MemoryError {
                 throw err
             } catch {

@@ -332,5 +332,165 @@ struct M4PersistenceTests {
         await #expect(throws: MemoryError.invalidRecord("Record importance must be finite and within [0.0, 1.0]")) {
             try await store.capture(overflowImportance)
         }
+
+        let zeroVersion = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), version: 0)
+        await #expect(throws: MemoryError.invalidRecord("Record version must be greater than or equal to 1")) {
+            try await store.capture(zeroVersion)
+        }
+
+        let negativeVersion = MemoryRecord(kind: .fact, content: "Test", provenance: Provenance(source: "user"), version: -5)
+        await #expect(throws: MemoryError.invalidRecord("Record version must be greater than or equal to 1")) {
+            try await store.capture(negativeVersion)
+        }
+    }
+
+    @Test func reloadFailureWithCorruptOrMalformedJSONPreservesExistingInMemoryState() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M4ReloadFail_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let store = try FileBackedMemoryStore(directoryURL: tempDir)
+        let validRec = MemoryRecord(
+            id: MemoryRecordID(rawValue: "valid-1"),
+            kind: .fact,
+            content: "Original valid in-memory record",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(validRec)
+
+        // Corrupt store.json on disk
+        let storeFile = tempDir.appendingPathComponent("store.json")
+        try "{{ INVALID MALFORMED JSON }}".write(to: storeFile, atomically: true, encoding: .utf8)
+
+        // reload() must fail closed
+        await #expect(throws: MemoryError.self) {
+            try await store.reload()
+        }
+
+        // Verify existing in-memory state remains untouched
+        #expect(try await store.count() == 1)
+        let fetched = try await store.retrieve(id: validRec.id)
+        #expect(fetched?.content == "Original valid in-memory record")
+    }
+
+    @Test func reloadFailureWithInvalidRecordOrDuplicateIDsOrRecordCountMismatchPreservesExistingInMemoryState() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M4ReloadCorrupt_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let store = try FileBackedMemoryStore(directoryURL: tempDir)
+        let originalRec = MemoryRecord(
+            id: MemoryRecordID(rawValue: "original-rec"),
+            kind: .fact,
+            content: "Original record before corrupt reload",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(originalRec)
+
+        let storeFile = tempDir.appendingPathComponent("store.json")
+
+        // 1. Record count mismatch
+        let countMismatchJSON = """
+        {
+          "metadata": {
+            "version": 1,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "updatedAt": "2026-01-01T00:00:00Z",
+            "recordCount": 10
+          },
+          "records": []
+        }
+        """
+        try countMismatchJSON.write(to: storeFile, atomically: true, encoding: .utf8)
+
+        await #expect(throws: MemoryError.corruptRecord("Snapshot recordCount mismatch: metadata count 10 != actual records count 0")) {
+            try await store.reload()
+        }
+
+        #expect(try await store.count() == 1)
+        #expect(try await store.retrieve(id: originalRec.id)?.content == "Original record before corrupt reload")
+
+        // 2. Duplicate record IDs in snapshot
+        let duplicateIDsJSON = """
+        {
+          "metadata": {
+            "version": 1,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "updatedAt": "2026-01-01T00:00:00Z",
+            "recordCount": 2
+          },
+          "records": [
+            {
+              "id": "dup-id",
+              "kind": "fact",
+              "content": "First rec",
+              "provenance": { "source": "user", "recordedAt": "2026-01-01T00:00:00Z" },
+              "createdAt": "2026-01-01T00:00:00Z",
+              "updatedAt": "2026-01-01T00:00:00Z",
+              "scope": "agent",
+              "lifecycle": "active",
+              "importance": 0.5,
+              "metadata": { "storage": {} },
+              "version": 1
+            },
+            {
+              "id": "dup-id",
+              "kind": "fact",
+              "content": "Second rec",
+              "provenance": { "source": "user", "recordedAt": "2026-01-01T00:00:00Z" },
+              "createdAt": "2026-01-01T00:00:00Z",
+              "updatedAt": "2026-01-01T00:00:00Z",
+              "scope": "agent",
+              "lifecycle": "active",
+              "importance": 0.5,
+              "metadata": { "storage": {} },
+              "version": 1
+            }
+          ]
+        }
+        """
+        try duplicateIDsJSON.write(to: storeFile, atomically: true, encoding: .utf8)
+
+        await #expect(throws: MemoryError.corruptRecord("Duplicate record ID in snapshot: dup-id")) {
+            try await store.reload()
+        }
+
+        #expect(try await store.count() == 1)
+        #expect(try await store.retrieve(id: originalRec.id)?.content == "Original record before corrupt reload")
+
+        // 3. Invalid record content/importance in snapshot
+        let invalidRecordJSON = """
+        {
+          "metadata": {
+            "version": 1,
+            "createdAt": "2026-01-01T00:00:00Z",
+            "updatedAt": "2026-01-01T00:00:00Z",
+            "recordCount": 1
+          },
+          "records": [
+            {
+              "id": "invalid-rec",
+              "kind": "fact",
+              "content": "    ",
+              "provenance": { "source": "user", "recordedAt": "2026-01-01T00:00:00Z" },
+              "createdAt": "2026-01-01T00:00:00Z",
+              "updatedAt": "2026-01-01T00:00:00Z",
+              "scope": "agent",
+              "lifecycle": "active",
+              "importance": 0.5,
+              "metadata": { "storage": {} },
+              "version": 1
+            }
+          ]
+        }
+        """
+        try invalidRecordJSON.write(to: storeFile, atomically: true, encoding: .utf8)
+
+        await #expect(throws: MemoryError.invalidRecord("Record content cannot be empty")) {
+            try await store.reload()
+        }
+
+        #expect(try await store.count() == 1)
+        #expect(try await store.retrieve(id: originalRec.id)?.content == "Original record before corrupt reload")
     }
 }
