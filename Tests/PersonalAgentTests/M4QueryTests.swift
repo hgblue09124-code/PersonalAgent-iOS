@@ -165,4 +165,79 @@ struct M4QueryTests {
             _ = try await store.query(MemoryQuery(minImportance: 1.05))
         }
     }
+
+    @Test func exactTokenLookupAndNonexistentToken() async throws {
+        let store = InMemoryMemoryStore()
+
+        let r1 = MemoryRecord(id: MemoryRecordID(rawValue: "rec-1"), kind: .fact, content: "Quantum computing algorithms", provenance: Provenance(source: "user"))
+        let r2 = MemoryRecord(id: MemoryRecordID(rawValue: "rec-2"), kind: .fact, content: "Classical mechanics physics", provenance: Provenance(source: "user"))
+
+        try await store.bulkInsert([r1, r2])
+
+        // Exact token match
+        let queryExact = MemoryQuery(textSearch: "quantum")
+        let resultExact = try await store.query(queryExact)
+        #expect(resultExact.records.count == 1)
+        #expect(resultExact.records.first?.id.rawValue == "rec-1")
+
+        // Nonexistent token returns no match
+        let queryNone = MemoryQuery(textSearch: "thermodynamics")
+        let resultNone = try await store.query(queryNone)
+        #expect(resultNone.records.isEmpty)
+    }
+
+    @Test func multiTokenQueryMatchesAndRanksCandidates() async throws {
+        let store = InMemoryMemoryStore()
+
+        let r1 = MemoryRecord(id: MemoryRecordID(rawValue: "multi-1"), kind: .fact, content: "Swift language overview", provenance: Provenance(source: "a"), importance: 0.5)
+        let r2 = MemoryRecord(id: MemoryRecordID(rawValue: "multi-2"), kind: .fact, content: "Swift concurrency language features", provenance: Provenance(source: "a"), importance: 0.5)
+
+        try await store.bulkInsert([r1, r2])
+
+        let query = MemoryQuery(textSearch: "swift concurrency", sortOrder: .relevance)
+        let result = try await store.query(query)
+
+        #expect(result.records.count == 2)
+        #expect(result.records[0].id.rawValue == "multi-2")
+    }
+
+    @Test func recordUpdateRemovesOldTokenAndAddsNewTokenInIndex() async throws {
+        let store = InMemoryMemoryStore()
+
+        let original = MemoryRecord(id: MemoryRecordID(rawValue: "upd-1"), kind: .fact, content: "Original alpha content", provenance: Provenance(source: "user"), version: 1)
+        try await store.capture(original)
+
+        // Verify initial token matches
+        #expect((try await store.query(MemoryQuery(textSearch: "alpha"))).records.count == 1)
+        #expect((try await store.query(MemoryQuery(textSearch: "beta"))).records.isEmpty)
+
+        // Update content to replace "alpha" with "beta"
+        let updated = original.updating(content: "Updated beta content")
+        try await store.update(updated)
+
+        // Old token "alpha" must no longer match, new token "beta" must match
+        #expect((try await store.query(MemoryQuery(textSearch: "alpha"))).records.isEmpty)
+        let newMatch = try await store.query(MemoryQuery(textSearch: "beta"))
+        #expect(newMatch.records.count == 1)
+        #expect(newMatch.records.first?.content == "Updated beta content")
+    }
+
+    @Test func fileBackedStoreReloadRebuildsTextIndexCorrectly() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M4TextReload_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let store = try FileBackedMemoryStore(directoryURL: tempDir)
+        let rec = MemoryRecord(kind: .fact, content: "Persistent memory index test", provenance: Provenance(source: "user"))
+        try await store.capture(rec)
+
+        // Re-read/reload store from disk
+        try await store.reload()
+
+        let query = MemoryQuery(textSearch: "persistent")
+        let result = try await store.query(query)
+
+        #expect(result.records.count == 1)
+        #expect(result.records.first?.content == "Persistent memory index test")
+    }
 }

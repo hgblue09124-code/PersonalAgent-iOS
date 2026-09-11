@@ -142,16 +142,14 @@ public struct MemoryIndex: Sendable {
             }
         }
 
-        // Text search candidate set (OR union across tokens so multi-token queries rank candidates)
+        // Text search candidate set (OR union across tokens using direct O(1) posting set lookup)
         if let textSearch = query.textSearch, !textSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let tokens = tokenize(textSearch)
             if !tokens.isEmpty {
                 var textMatchedIDs = Set<MemoryRecordID>()
                 for token in tokens {
-                    for (word, ids) in invertedWordIndex {
-                        if word.contains(token) {
-                            textMatchedIDs.formUnion(ids)
-                        }
+                    if let ids = invertedWordIndex[token] {
+                        textMatchedIDs.formUnion(ids)
                     }
                 }
                 if let current = candidateIDs {
