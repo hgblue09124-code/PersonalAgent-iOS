@@ -4,7 +4,7 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M4 — local-first Memory OS runtime & persistence.** M0–M3 remain in place.
+**Milestone: M5 — Local + Cloud Storage / Sync Architecture.** M0–M4 remain in place.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 
@@ -20,7 +20,7 @@ Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first
 | Concrete provider adapters | Present (fixture-tested; live network pending) |
 | Module / skill / tool runtime | Present (deterministic modules; no privileged device tools) |
 | Memory OS runtime & persistence | Present (FileBackedMemoryStore, MemoryIndex, MemoryRuntime) |
-| Storage / sync engines | Local-first file engine present; sync pending |
+| Storage / sync engines | Local-first file engine present; M5 architecture defined |
 | Device verification on iPhone 12 Pro Max | Not signed off |
 
 Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`) are external material. They are not runtime dependencies.
