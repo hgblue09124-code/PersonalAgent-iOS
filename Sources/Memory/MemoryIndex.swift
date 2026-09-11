@@ -219,11 +219,11 @@ public struct MemoryIndex: Sendable {
             }
         }
         if let textSearch = query.textSearch, !textSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            let lowerContent = record.content.lowercased()
+            let recordTokens = Set(tokenize(record.content))
             let searchTokens = tokenize(textSearch)
             var hasMatch = false
             for st in searchTokens {
-                if lowerContent.contains(st) {
+                if recordTokens.contains(st) {
                     hasMatch = true
                     break
                 }
@@ -277,10 +277,10 @@ public struct MemoryIndex: Sendable {
     }
 
     private func computeRelevance(_ record: MemoryRecord, tokens: [String]) -> Double {
-        let contentLower = record.content.lowercased()
+        let recordTokens = Set(tokenize(record.content))
         var matchCount = 0.0
         for token in tokens {
-            if contentLower.contains(token) {
+            if recordTokens.contains(token) {
                 matchCount += 1.0
             }
         }

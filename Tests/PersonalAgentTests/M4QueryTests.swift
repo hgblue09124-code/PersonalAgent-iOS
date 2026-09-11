@@ -263,4 +263,32 @@ struct M4QueryTests {
         #expect(exactResult.records.count == 1)
         #expect(exactResult.records.first?.id.rawValue == "rec-exact-only")
     }
+
+    @Test func candidateSelectionAndMatchesFiltersAgreeOnExactTokenSemantics() async throws {
+        let store = InMemoryMemoryStore()
+
+        let rec = MemoryRecord(
+            id: MemoryRecordID(rawValue: "rec-foobar"),
+            kind: .fact,
+            content: "foobar baz",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(rec)
+
+        // Path 1: Text query candidate index lookup for "foo"
+        let indexQuery = MemoryQuery(textSearch: "foo")
+        let indexResult = try await store.query(indexQuery)
+        #expect(indexResult.records.isEmpty)
+
+        // Path 2: Direct ID query with textSearch filter for "foo" (bypasses candidateIDs index, tests matchesFilters directly)
+        let directFilterQuery = MemoryQuery(ids: [rec.id], textSearch: "foo")
+        let directFilterResult = try await store.query(directFilterQuery)
+        #expect(directFilterResult.records.isEmpty)
+
+        // Path 3: Direct ID query with exact token textSearch "foobar"
+        let exactFilterQuery = MemoryQuery(ids: [rec.id], textSearch: "foobar")
+        let exactFilterResult = try await store.query(exactFilterQuery)
+        #expect(exactFilterResult.records.count == 1)
+        #expect(exactFilterResult.records.first?.id.rawValue == "rec-foobar")
+    }
 }
