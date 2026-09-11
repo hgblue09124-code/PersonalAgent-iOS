@@ -4,6 +4,22 @@ import PAFoundation
 import PAEvents
 import PAMemory
 
+private struct FailingEventLog: EventLog {
+    struct SimulatedAppendError: Error, Equatable {}
+
+    func append(_ event: ExecutionEvent) async throws {
+        throw SimulatedAppendError()
+    }
+
+    func events(for traceID: TraceID) async throws -> [ExecutionEvent] {
+        []
+    }
+
+    func allEvents() async throws -> [ExecutionEvent] {
+        []
+    }
+}
+
 @Suite("M4 Memory Runtime")
 struct M4RuntimeTests {
     @Test func runtimeCaptureAndRetrieveRecord() async throws {
@@ -175,5 +191,40 @@ struct M4RuntimeTests {
         try await runtime.clear()
         let countAfterClear = try await runtime.count()
         #expect(countAfterClear == 0)
+    }
+
+    @Test func eventLoggingSuccessAppendsEventToEventLog() async throws {
+        let store = InMemoryMemoryStore()
+        let eventLog = InMemoryEventLog()
+        let runtime = MemoryRuntime(store: store, eventLog: eventLog)
+
+        let record = MemoryRecord(
+            kind: .fact,
+            content: "Testing event logging success",
+            provenance: Provenance(source: "user")
+        )
+
+        try await runtime.capture(record)
+
+        let events = try await eventLog.events(for: runtime.traceID)
+        #expect(events.count == 1)
+        #expect(events.first?.kind == .memoryCaptured)
+    }
+
+    @Test func eventLoggingFailurePropagatesErrorToCaller() async throws {
+        let store = InMemoryMemoryStore()
+        let failingLog = FailingEventLog()
+        let runtime = MemoryRuntime(store: store, eventLog: failingLog)
+
+        let record = MemoryRecord(
+            kind: .fact,
+            content: "Testing event logging failure propagation",
+            provenance: Provenance(source: "user")
+        )
+
+        // Capture must throw the event log error rather than silently swallowing it
+        await #expect(throws: FailingEventLog.SimulatedAppendError.self) {
+            try await runtime.capture(record)
+        }
     }
 }

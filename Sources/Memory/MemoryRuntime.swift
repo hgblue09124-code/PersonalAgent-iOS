@@ -24,7 +24,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
     public func capture(_ record: MemoryRecord) async throws {
         try validate(record)
         try await store.capture(record)
-        await logEvent(
+        try await logEvent(
             kind: .memoryCaptured,
             payload: [
                 "id": record.id.rawValue,
@@ -50,7 +50,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
     public func update(_ record: MemoryRecord) async throws {
         try validate(record)
         try await store.update(record)
-        await logEvent(
+        try await logEvent(
             kind: .memoryUpdated,
             payload: [
                 "id": record.id.rawValue,
@@ -61,7 +61,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
 
     public func forget(id: MemoryRecordID, reason: String) async throws {
         try await store.forget(id: id, reason: reason)
-        await logEvent(
+        try await logEvent(
             kind: .memoryForgotten,
             payload: [
                 "id": id.rawValue,
@@ -73,7 +73,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
         try MemoryQueryValidator.validate(query)
         let res = try await store.query(query)
-        await logEvent(
+        try await logEvent(
             kind: .memoryQueried,
             payload: [
                 "resultCount": String(res.records.count),
@@ -88,7 +88,7 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
             try validate(record)
         }
         try await store.bulkInsert(records)
-        await logEvent(
+        try await logEvent(
             kind: .memoryCaptured,
             payload: [
                 "bulk": "true",
@@ -105,9 +105,9 @@ public actor MemoryRuntime: MemoryExecuting, Sendable {
         try await store.clear()
     }
 
-    private func logEvent(kind: ExecutionEventKind, payload: [String: String]) async {
+    private func logEvent(kind: ExecutionEventKind, payload: [String: String]) async throws {
         guard let eventLog else { return }
         let event = ExecutionEvent(traceID: traceID, kind: kind, payload: payload)
-        try? await eventLog.append(event)
+        try await eventLog.append(event)
     }
 }
