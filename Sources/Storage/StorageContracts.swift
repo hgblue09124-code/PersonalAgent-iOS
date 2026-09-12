@@ -42,10 +42,10 @@ extension StorageRecord {
         guard self.id == ancestor.id else { return false }
         guard self.version > ancestor.version else { return false }
 
-        // Must have non-empty revision token and non-empty ancestor revision token
+        // Must have non-empty revision tokens
         guard !self.revisionToken.isEmpty, !ancestor.revisionToken.isEmpty else { return false }
 
-        // Must have an explicit parentVersion pointer matching self.version - 1 (sequential lineage)
+        // Must have an explicit parentVersion matching self.version - 1 (sequential lineage step)
         guard let pVer = self.parentVersion, pVer == self.version - 1 else {
             return false
         }
@@ -55,14 +55,31 @@ extension StorageRecord {
             return false
         }
 
+        // Cyclic check: revisionToken cannot equal parentRevisionToken
+        guard self.revisionToken != pToken else {
+            return false
+        }
+
         // Direct parent-child relationship (self.version == ancestor.version + 1)
         if self.version == ancestor.version + 1 {
             return pToken == ancestor.revisionToken
         }
 
         // Multi-generation relationship (self.version > ancestor.version + 1)
+        // Parent at self.version - 1 is distinct from ancestor at ancestor.version (< self.version - 1).
+        // Therefore, pToken cannot equal ancestor.revisionToken.
+        guard pToken != ancestor.revisionToken else {
+            return false
+        }
+
+        // Multi-generation ancestor count check: ancestorRevisionTokens must contain
+        // at least (self.version - 1) tokens to cover all intermediate parent steps.
+        guard self.ancestorRevisionTokens.count >= self.version - 1 else {
+            return false
+        }
+
         // Ancestry requires self's ancestorRevisionTokens to contain BOTH its immediate parentRevisionToken
-        // AND the claimed ancestor's revisionToken.
+        // AND the claimed ancestor's revisionToken, ensuring an unbroken parent chain exists.
         return self.ancestorRevisionTokens.contains(pToken) &&
                self.ancestorRevisionTokens.contains(ancestor.revisionToken)
     }
