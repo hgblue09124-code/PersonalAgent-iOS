@@ -83,10 +83,7 @@ struct M5CloudStoreContractTests {
 
     // 2. provider abstraction
     @Test func testProviderAbstractionAndAvailabilityCheck() async throws {
-        let state = DynamicAvailabilityState(false)
-        let provider = AbstractCloudStorageProvider(identifier: "dynamic-provider") {
-            state.available
-        }
+        let provider = AbstractCloudStorageProvider(identifier: "dynamic-provider", isAvailable: false)
         let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
 
         #expect(await cloudStore.provider.identifier == "dynamic-provider")
@@ -130,7 +127,7 @@ struct M5CloudStoreContractTests {
         }
 
         // Make provider available
-        state.available = true
+        provider.setAvailable(true)
 
         // Push and pull should now succeed
         try await cloudStore.push(record)

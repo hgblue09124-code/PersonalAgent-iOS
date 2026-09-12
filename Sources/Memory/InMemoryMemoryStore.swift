@@ -29,6 +29,10 @@ public actor InMemoryMemoryStore: MemoryStore {
         if existing.version != record.version {
             throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
         }
+        var updatedAncestors = existing.ancestorRevisionTokens
+        updatedAncestors.insert(existing.revisionToken)
+        updatedAncestors.formUnion(record.ancestorRevisionTokens)
+
         let committedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -40,7 +44,11 @@ public actor InMemoryMemoryStore: MemoryStore {
             lifecycle: record.lifecycle,
             importance: record.importance,
             metadata: record.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version,
+            revisionToken: "\(record.id.rawValue)-v\(existing.version + 1)",
+            parentRevisionToken: existing.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
         index.index(committedRecord)
     }
@@ -49,6 +57,9 @@ public actor InMemoryMemoryStore: MemoryStore {
         guard let existing = index.record(for: id) else {
             throw MemoryError.notFound(id)
         }
+        var updatedAncestors = existing.ancestorRevisionTokens
+        updatedAncestors.insert(existing.revisionToken)
+
         let updated = MemoryRecord(
             id: existing.id,
             kind: existing.kind,
@@ -60,7 +71,11 @@ public actor InMemoryMemoryStore: MemoryStore {
             lifecycle: .deleted,
             importance: existing.importance,
             metadata: existing.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version,
+            revisionToken: "\(existing.id.rawValue)-v\(existing.version + 1)",
+            parentRevisionToken: existing.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
         index.index(updated)
     }
@@ -102,7 +117,24 @@ extension InMemoryMemoryStore: LocalStore {
     public func upsert(_ record: MemoryStorageRecord) async throws {
         let memRecord = record.record
         if index.record(for: memRecord.id) != nil {
-            try await update(memRecord)
+            let preparedRecord = MemoryRecord(
+                id: memRecord.id,
+                kind: memRecord.kind,
+                content: memRecord.content,
+                provenance: memRecord.provenance,
+                createdAt: memRecord.createdAt,
+                updatedAt: memRecord.updatedAt,
+                scope: memRecord.scope,
+                lifecycle: memRecord.lifecycle,
+                importance: memRecord.importance,
+                metadata: memRecord.metadata,
+                version: memRecord.version,
+                parentVersion: memRecord.parentVersion,
+                revisionToken: memRecord.revisionToken,
+                parentRevisionToken: memRecord.parentRevisionToken,
+                ancestorRevisionTokens: memRecord.ancestorRevisionTokens
+            )
+            try await update(preparedRecord)
         } else {
             try await capture(memRecord)
         }
@@ -115,7 +147,7 @@ extension InMemoryMemoryStore: LocalStore {
         return nil
     }
 
-    public func delete(id: String) async throws {
-        try await forget(id: MemoryRecordID(rawValue: id), reason: "Deleted via LocalStore interface")
+    public func forget(id: String) async throws {
+        try await forget(id: MemoryRecordID(rawValue: id), reason: "Forgotten via LocalStore interface")
     }
 }

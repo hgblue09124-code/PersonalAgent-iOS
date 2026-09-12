@@ -74,9 +74,58 @@ public struct MemoryStorageRecord: StorageRecord, Codable, Sendable, Equatable {
     public var id: String { record.id.rawValue }
     public var updatedAt: Date { record.updatedAt }
     public var version: Int { record.version }
+    public var parentVersion: Int? { record.parentVersion }
+    public var revisionToken: String { record.revisionToken }
+    public var parentRevisionToken: String? { record.parentRevisionToken }
+    public var ancestorRevisionTokens: Set<String> { record.ancestorRevisionTokens }
 
     public init(_ record: MemoryRecord) {
         self.record = record
+    }
+
+    public func updatingVersion(_ newVersion: Int, parentVersion: Int?, revisionToken: String, parentRevisionToken: String?, ancestorRevisionTokens: Set<String>) -> MemoryStorageRecord {
+        let updatedRecord = MemoryRecord(
+            id: record.id,
+            kind: record.kind,
+            content: record.content,
+            provenance: record.provenance,
+            createdAt: record.createdAt,
+            updatedAt: Date(),
+            scope: record.scope,
+            lifecycle: record.lifecycle,
+            importance: record.importance,
+            metadata: record.metadata,
+            version: newVersion,
+            parentVersion: parentVersion,
+            revisionToken: revisionToken,
+            parentRevisionToken: parentRevisionToken,
+            ancestorRevisionTokens: ancestorRevisionTokens
+        )
+        return MemoryStorageRecord(updatedRecord)
+    }
+
+    public func updatingVersion(_ newVersion: Int, parentVersion: Int?) -> MemoryStorageRecord {
+        let newToken = "\(id)-v\(newVersion)"
+        var updatedAncestors = record.ancestorRevisionTokens
+        updatedAncestors.insert(record.revisionToken)
+        let updatedRecord = MemoryRecord(
+            id: record.id,
+            kind: record.kind,
+            content: record.content,
+            provenance: record.provenance,
+            createdAt: record.createdAt,
+            updatedAt: Date(),
+            scope: record.scope,
+            lifecycle: record.lifecycle,
+            importance: record.importance,
+            metadata: record.metadata,
+            version: newVersion,
+            parentVersion: parentVersion,
+            revisionToken: newToken,
+            parentRevisionToken: record.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
+        )
+        return MemoryStorageRecord(updatedRecord)
     }
 }
 
@@ -92,6 +141,10 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
     public let importance: Double
     public let metadata: MemoryMetadata
     public let version: Int
+    public let parentVersion: Int?
+    public let revisionToken: String
+    public let parentRevisionToken: String?
+    public let ancestorRevisionTokens: Set<String>
 
     public init(
         id: MemoryRecordID = MemoryRecordID(),
@@ -104,7 +157,11 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         lifecycle: MemoryLifecycle = .active,
         importance: Double = 0.5,
         metadata: MemoryMetadata = MemoryMetadata(),
-        version: Int = 1
+        version: Int = 1,
+        parentVersion: Int? = nil,
+        revisionToken: String? = nil,
+        parentRevisionToken: String? = nil,
+        ancestorRevisionTokens: Set<String> = []
     ) {
         self.id = id
         self.kind = kind
@@ -117,6 +174,33 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         self.importance = importance
         self.metadata = metadata
         self.version = version
+        self.parentVersion = parentVersion
+        self.revisionToken = revisionToken ?? "\(id.rawValue)-v\(version)"
+        self.parentRevisionToken = parentRevisionToken
+        self.ancestorRevisionTokens = ancestorRevisionTokens
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, kind, content, provenance, createdAt, updatedAt, scope, lifecycle, importance, metadata, version, parentVersion, revisionToken, parentRevisionToken, ancestorRevisionTokens
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(MemoryRecordID.self, forKey: .id)
+        self.kind = try container.decode(MemoryKind.self, forKey: .kind)
+        self.content = try container.decode(String.self, forKey: .content)
+        self.provenance = try container.decode(Provenance.self, forKey: .provenance)
+        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
+        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+        self.scope = try container.decode(MemoryScope.self, forKey: .scope)
+        self.lifecycle = try container.decode(MemoryLifecycle.self, forKey: .lifecycle)
+        self.importance = try container.decode(Double.self, forKey: .importance)
+        self.metadata = try container.decode(MemoryMetadata.self, forKey: .metadata)
+        self.version = try container.decode(Int.self, forKey: .version)
+        self.parentVersion = try container.decodeIfPresent(Int.self, forKey: .parentVersion)
+        self.revisionToken = try container.decodeIfPresent(String.self, forKey: .revisionToken) ?? "\(id.rawValue)-v\(version)"
+        self.parentRevisionToken = try container.decodeIfPresent(String.self, forKey: .parentRevisionToken)
+        self.ancestorRevisionTokens = try container.decodeIfPresent(Set<String>.self, forKey: .ancestorRevisionTokens) ?? []
     }
 
     public func updating(
@@ -125,7 +209,11 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         lifecycle: MemoryLifecycle? = nil,
         importance: Double? = nil,
         metadata: MemoryMetadata? = nil,
-        updatedAt: Date = Date()
+        updatedAt: Date = Date(),
+        parentVersion: Int?? = nil,
+        revisionToken: String? = nil,
+        parentRevisionToken: String?? = nil,
+        ancestorRevisionTokens: Set<String>? = nil
     ) -> MemoryRecord {
         MemoryRecord(
             id: id,
@@ -138,7 +226,11 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
             lifecycle: lifecycle ?? self.lifecycle,
             importance: importance ?? self.importance,
             metadata: metadata ?? self.metadata,
-            version: version
+            version: version,
+            parentVersion: parentVersion ?? self.parentVersion,
+            revisionToken: revisionToken ?? self.revisionToken,
+            parentRevisionToken: parentRevisionToken ?? self.parentRevisionToken,
+            ancestorRevisionTokens: ancestorRevisionTokens ?? self.ancestorRevisionTokens
         )
     }
 }
