@@ -3,23 +3,31 @@ import Foundation
 public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine where Local.Record == Cloud.Record {
     public typealias Record = Local.Record
     public typealias ConflictResolver = @Sendable (Record, Record, ConflictResolution) throws -> Record
+    public typealias VersionAdapter = @Sendable (Record, Int) -> Record
+    public typealias LineageChecker = @Sendable (Record, Record) -> Bool
 
     private let localStore: Local
     private let cloudStore: Cloud
     private let queue: PASyncQueue
     private let conflictResolver: ConflictResolver?
+    private let versionAdapter: VersionAdapter?
+    private let lineageChecker: LineageChecker?
     private var pendingConflictsMap: [String: SyncConflict<Record>] = [:]
 
     public init(
         localStore: Local,
         cloudStore: Cloud,
         queue: PASyncQueue = PASyncQueue(),
-        conflictResolver: ConflictResolver? = nil
+        conflictResolver: ConflictResolver? = nil,
+        versionAdapter: VersionAdapter? = nil,
+        lineageChecker: LineageChecker? = nil
     ) {
         self.localStore = localStore
         self.cloudStore = cloudStore
         self.queue = queue
         self.conflictResolver = conflictResolver
+        self.versionAdapter = versionAdapter
+        self.lineageChecker = lineageChecker
     }
 
     public func enqueueLocalChange(id: String) async throws {
@@ -59,16 +67,19 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
             case (.some(let loc), .some(let rem)):
                 if loc == rem {
                     try await queue.remove(id: id)
-                } else if loc.version == rem.version {
-                    // Divergent revisions with same version -> conflict! MUST NOT silently overwrite.
-                    let conflict = SyncConflict(local: loc, remote: rem)
-                    pendingConflictsMap[id] = conflict
-                } else if loc.version > rem.version {
+                } else if hasDeterministicLineage(child: rem, parent: loc) {
+                    // Remote is proven descendant of local -> update local safely
+                    try await updateLocalWithRemote(loc: loc, rem: rem)
+                    try await queue.remove(id: id)
+                } else if hasDeterministicLineage(child: loc, parent: rem) {
+                    // Local is proven descendant of remote -> push local to cloud
                     try await cloudStore.push(loc)
                     try await queue.remove(id: id)
                 } else {
-                    try await localStore.upsert(rem)
-                    try await queue.remove(id: id)
+                    // Divergence without provable lineage -> produce SyncConflict.
+                    // MUST NOT silently overwrite either side!
+                    let conflict = SyncConflict(local: loc, remote: rem)
+                    pendingConflictsMap[id] = conflict
                 }
             }
         }
@@ -83,16 +94,57 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
         }
 
         guard let resolver = conflictResolver else {
-            throw CloudStorageError.storeFailed("No conflictResolver provided to resolve conflict for record \(id)")
+            throw CloudStorageError.storeFailed("Unable to resolve conflict for \(id) without conflictResolver")
         }
 
-        let resolvedRecord = try resolver(conflict.local, conflict.remote, policy)
+        let resolvedBaseRecord = try resolver(conflict.local, conflict.remote, policy)
 
-        // Write new authoritative revision to local and cloud store
-        try await localStore.upsert(resolvedRecord)
-        try await cloudStore.push(resolvedRecord)
+        let currentLocalVersion = conflict.local.version
+        let targetVersion = max(conflict.local.version, conflict.remote.version) + 1
+
+        // Step-wise update local store from currentLocalVersion up to targetVersion
+        // preserving M5.1 stale-version protection at each step.
+        for v in currentLocalVersion..<targetVersion {
+            let stepRecord = modifyVersion(resolvedBaseRecord, version: v)
+            try await localStore.upsert(stepRecord)
+        }
+
+        guard let newlyCommittedLocal = try await localStore.fetch(id: id) else {
+            throw CloudStorageError.storeFailed("Failed to fetch newly committed local record \(id)")
+        }
+
+        // Push new authoritative revision to cloud store
+        try await cloudStore.push(newlyCommittedLocal)
 
         pendingConflictsMap.removeValue(forKey: id)
         try await queue.remove(id: id)
+    }
+
+    private func hasDeterministicLineage(child: Record, parent: Record) -> Bool {
+        if let checker = lineageChecker {
+            return checker(child, parent)
+        }
+        return false
+    }
+
+    private func updateLocalWithRemote(loc: Record, rem: Record) async throws {
+        let locVersion = loc.version
+        let remVersion = rem.version
+
+        if remVersion > locVersion {
+            for v in locVersion..<remVersion {
+                let stepRecord = modifyVersion(rem, version: v)
+                try await localStore.upsert(stepRecord)
+            }
+        } else {
+            try await localStore.upsert(rem)
+        }
+    }
+
+    private func modifyVersion(_ record: Record, version: Int) -> Record {
+        if let adapter = versionAdapter {
+            return adapter(record, version)
+        }
+        return record
     }
 }

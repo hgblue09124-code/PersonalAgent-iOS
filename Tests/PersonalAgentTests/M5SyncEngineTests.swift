@@ -48,7 +48,6 @@ private actor TestDoubleCloudStore<Record: StorageRecord>: CloudStore {
 }
 
 private func defaultMemoryResolver(local: MemoryStorageRecord, remote: MemoryStorageRecord, policy: ConflictResolution) throws -> MemoryStorageRecord {
-    let newVersion = max(local.version, remote.version) + 1
     let newContent: String
     switch policy {
     case .keepLocal:
@@ -71,6 +70,8 @@ private func defaultMemoryResolver(local: MemoryStorageRecord, remote: MemorySto
             mergedMeta[k] = v
         }
     }
+    mergedMeta["parentVersion"] = String(local.version)
+    mergedMeta["remoteParentVersion"] = String(remote.version)
 
     let newMem = MemoryRecord(
         id: local.record.id,
@@ -83,9 +84,34 @@ private func defaultMemoryResolver(local: MemoryStorageRecord, remote: MemorySto
         lifecycle: local.record.lifecycle,
         importance: max(local.record.importance, remote.record.importance),
         metadata: mergedMeta,
-        version: newVersion
+        version: local.version
     )
     return MemoryStorageRecord(newMem)
+}
+
+private func defaultVersionAdapter(record: MemoryStorageRecord, version: Int) -> MemoryStorageRecord {
+    let updatedMem = MemoryRecord(
+        id: record.record.id,
+        kind: record.record.kind,
+        content: record.record.content,
+        provenance: record.record.provenance,
+        createdAt: record.record.createdAt,
+        updatedAt: record.record.updatedAt,
+        scope: record.record.scope,
+        lifecycle: record.record.lifecycle,
+        importance: record.record.importance,
+        metadata: record.record.metadata,
+        version: version
+    )
+    return MemoryStorageRecord(updatedMem)
+}
+
+private func defaultLineageChecker(child: MemoryStorageRecord, parent: MemoryStorageRecord) -> Bool {
+    if let parentVer = child.record.metadata["parentVersion"],
+       parentVer == String(parent.version) {
+        return true
+    }
+    return false
 }
 
 @Suite("M5.3 SyncEngine Tests")
@@ -228,30 +254,35 @@ struct M5SyncEngineTests {
         #expect(conflicts.first?.remote.record.content == "Remote divergent version of content")
     }
 
-    // 5. no silent overwrite
-    @Test func testNoSilentOverwrite() async throws {
+    // 5. no silent overwrite (without provable lineage, higher version MUST NOT overwrite lower version)
+    @Test func testNoSilentOverwriteWithoutLineage() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
         let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
         let queue = PASyncQueue()
-        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+        let engine = PASyncEngine(
+            localStore: localStore,
+            cloudStore: cloudStore,
+            queue: queue,
+            lineageChecker: defaultLineageChecker
+        )
 
         let localRecord = MemoryStorageRecord(
             MemoryRecord(
                 id: MemoryRecordID(rawValue: "no-overwrite-1"),
                 kind: .fact,
-                content: "Local content stay intact",
+                content: "Local content version 2 without parent lineage",
                 provenance: Provenance(source: "user"),
-                version: 1
+                version: 2
             )
         )
         let remoteRecord = MemoryStorageRecord(
             MemoryRecord(
                 id: MemoryRecordID(rawValue: "no-overwrite-1"),
                 kind: .fact,
-                content: "Remote content stay intact",
+                content: "Remote content version 3 without parent lineage",
                 provenance: Provenance(source: "agent"),
-                version: 1
+                version: 3
             )
         )
 
@@ -265,8 +296,8 @@ struct M5SyncEngineTests {
         let localFetched = try await localStore.fetch(id: "no-overwrite-1")
         let cloudFetched = try await cloudStore.pull(id: "no-overwrite-1")
 
-        #expect(localFetched?.record.content == "Local content stay intact")
-        #expect(cloudFetched?.record.content == "Remote content stay intact")
+        #expect(localFetched?.record.content == "Local content version 2 without parent lineage")
+        #expect(cloudFetched?.record.content == "Remote content version 3 without parent lineage")
 
         // Conflict is exposed
         let conflict = await engine.conflict(for: "no-overwrite-1")
@@ -286,7 +317,9 @@ struct M5SyncEngineTests {
                 localStore: localStore,
                 cloudStore: cloudStore,
                 queue: queue,
-                conflictResolver: defaultMemoryResolver
+                conflictResolver: defaultMemoryResolver,
+                versionAdapter: defaultVersionAdapter,
+                lineageChecker: defaultLineageChecker
             )
 
             let localRecord = MemoryStorageRecord(
@@ -339,7 +372,7 @@ struct M5SyncEngineTests {
         }
     }
 
-    // 7. successful resolution creates a new revision
+    // 7. successful resolution creates a new revision passing M5.1 version semantics
     @Test func testSuccessfulResolutionCreatesNewRevision() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -349,7 +382,9 @@ struct M5SyncEngineTests {
             localStore: localStore,
             cloudStore: cloudStore,
             queue: queue,
-            conflictResolver: defaultMemoryResolver
+            conflictResolver: defaultMemoryResolver,
+            versionAdapter: defaultVersionAdapter,
+            lineageChecker: defaultLineageChecker
         )
 
         let localRecord = MemoryStorageRecord(
@@ -370,6 +405,8 @@ struct M5SyncEngineTests {
                 version: 4
             )
         )
+
+        try await localStore.upsert(localRecord)
 
         let conflict = SyncConflict(local: localRecord, remote: remoteRecord)
         try await engine.resolve(conflict, policy: .keepLocal)
@@ -467,7 +504,37 @@ struct M5SyncEngineTests {
         #expect(await queue.contains(id: "fail-preserve-1"))
     }
 
-    // 10. M0-M5.2 regression & contract boundaries
+    // 10. Durable queue recovery tests (PR Feedback Audit Point 3)
+    @Test func testDurableQueueSurvivesPersistenceAndReload() async throws {
+        let tempQueueDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5QueuePersistence_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempQueueDir) }
+
+        let queueFileURL = tempQueueDir.appendingPathComponent("queue.json")
+
+        // Step 1: Instantiate PASyncQueue with storageURL and enqueue items
+        let queue1 = PASyncQueue(storageURL: queueFileURL)
+        try await queue1.enqueue(id: "durable-1")
+        try await queue1.enqueue(id: "durable-2")
+
+        #expect(await queue1.count() == 2)
+
+        // Step 2: Instantiate new PASyncQueue from same storageURL
+        let queue2 = PASyncQueue(storageURL: queueFileURL)
+        #expect(await queue2.count() == 2)
+        #expect(await queue2.contains(id: "durable-1"))
+        #expect(await queue2.contains(id: "durable-2"))
+
+        // Dequeue one item and verify queue update persists across reload
+        let dequeued = try await queue2.dequeue()
+        #expect(dequeued == "durable-1")
+
+        let queue3 = PASyncQueue(storageURL: queueFileURL)
+        #expect(await queue3.count() == 1)
+        #expect(await queue3.contains(id: "durable-2"))
+    }
+
+    // 11. M0-M5.2 regression & contract boundaries
     @Test func testM0ToM52RegressionAndSyncEngineBoundaries() throws {
         // PAStorage MUST NOT import PAMemory or PAKernel or PAProviders
         guard let storageImports = ArchitectureManifest.allowedImports["PAStorage"] else {
