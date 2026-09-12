@@ -72,40 +72,6 @@ public struct AbstractCloudStorageProvider: CloudStorageProvider, Sendable {
     }
 }
 
-public actor InMemoryCloudStore<Record: StorageRecord>: CloudStore {
-    public let provider: any CloudStorageProvider
-    private var records: [String: Record] = [:]
-    private var shouldFail: Bool = false
-
-    public init(provider: any CloudStorageProvider) {
-        self.provider = provider
-    }
-
-    public func setFailureSimulation(_ fail: Bool) {
-        self.shouldFail = fail
-    }
-
-    public func push(_ record: Record) async throws {
-        guard await provider.isAvailable else {
-            throw CloudStorageError.unavailable("Provider \(provider.identifier) is currently offline/unavailable")
-        }
-        if shouldFail {
-            throw CloudStorageError.storeFailed("Simulated cloud failure on push")
-        }
-        records[record.id] = record
-    }
-
-    public func pull(id: String) async throws -> Record? {
-        guard await provider.isAvailable else {
-            throw CloudStorageError.unavailable("Provider \(provider.identifier) is currently offline/unavailable")
-        }
-        if shouldFail {
-            throw CloudStorageError.storeFailed("Simulated cloud failure on pull")
-        }
-        return records[id]
-    }
-}
-
 public enum ConflictResolution: String, Sendable, Codable {
     case keepLocal
     case keepRemote

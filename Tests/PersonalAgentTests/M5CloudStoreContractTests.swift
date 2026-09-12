@@ -15,13 +15,49 @@ private final class DynamicAvailabilityState: @unchecked Sendable {
     }
 }
 
+/// Private test double strictly isolated as test support in M5CloudStoreContractTests.
+/// Does not exist in production PAStorage runtime.
+private actor TestDoubleCloudStore<Record: StorageRecord>: CloudStore {
+    let provider: any CloudStorageProvider
+    private var records: [String: Record] = [:]
+    private var shouldFail: Bool = false
+
+    init(provider: any CloudStorageProvider) {
+        self.provider = provider
+    }
+
+    func setFailureSimulation(_ fail: Bool) {
+        self.shouldFail = fail
+    }
+
+    func push(_ record: Record) async throws {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider \(provider.identifier) is currently offline/unavailable")
+        }
+        if shouldFail {
+            throw CloudStorageError.storeFailed("Simulated cloud failure on push")
+        }
+        records[record.id] = record
+    }
+
+    func pull(id: String) async throws -> Record? {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider \(provider.identifier) is currently offline/unavailable")
+        }
+        if shouldFail {
+            throw CloudStorageError.storeFailed("Simulated cloud failure on pull")
+        }
+        return records[id]
+    }
+}
+
 @Suite("M5.2 CloudStore Contract Tests")
 struct M5CloudStoreContractTests {
 
     // 1. push/pull identity + version preservation
     @Test func testPushAndPullIdentityAndVersionPreservation() async throws {
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud-provider", isAvailable: true)
-        let cloudStore = InMemoryCloudStore<MemoryStorageRecord>(provider: provider)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
 
         let record = MemoryRecord(
             id: MemoryRecordID(rawValue: "cloud-rec-1"),
@@ -51,7 +87,7 @@ struct M5CloudStoreContractTests {
         let provider = AbstractCloudStorageProvider(identifier: "dynamic-provider") {
             state.available
         }
-        let cloudStore = InMemoryCloudStore<MemoryStorageRecord>(provider: provider)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
 
         #expect(await cloudStore.provider.identifier == "dynamic-provider")
 
@@ -107,7 +143,7 @@ struct M5CloudStoreContractTests {
     @Test func testCloudFailureDoesNotAlterLocalState() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "failing-cloud-provider", isAvailable: true)
-        let cloudStore = InMemoryCloudStore<MemoryStorageRecord>(provider: provider)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
 
         let initialMem = MemoryRecord(
             id: MemoryRecordID(rawValue: "local-rec-1"),
