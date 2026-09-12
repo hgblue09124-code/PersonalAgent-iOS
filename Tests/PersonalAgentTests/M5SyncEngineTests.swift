@@ -278,7 +278,56 @@ struct M5SyncEngineTests {
         #expect(v3.isDescendant(of: v1) == true, "v3 MUST be proven descendant of v1 across multi-generation lineage")
     }
 
-    // 6. Version-gap conflict resolution parent chain test (local v4, remote v6 -> resolve v7)
+    // 6. Forged ancestorVersions with gaps fails closed
+    @Test func testForgedAncestorVersionsWithGapsFailsClosed() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let v1 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "forged-ancestor-1"),
+                kind: .fact,
+                content: "Local v1 content",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+
+        // Forged record claiming version 10 with parentVersion = 9, and ancestorVersions = [1, 9] (missing intermediate 2...8!)
+        let forgedV10 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "forged-ancestor-1"),
+                kind: .fact,
+                content: "Forged v10 content with fabricated gap-filled ancestor set",
+                provenance: Provenance(source: "agent"),
+                version: 10,
+                parentVersion: 9,
+                ancestorVersions: [1, 9] // missing 2,3,4,5,6,7,8!
+            )
+        )
+
+        try await localStore.upsert(v1)
+        await cloudStore.setRecordDirectly(forgedV10)
+
+        // isDescendant must fail closed because parent chain (1...9) is incomplete
+        #expect(!forgedV10.isDescendant(of: v1))
+
+        try await engine.enqueueLocalChange(id: "forged-ancestor-1")
+        try await engine.synchronize()
+
+        let conflicts = await engine.pendingConflicts()
+        #expect(conflicts.count == 1)
+        #expect(conflicts.first?.local.id == "forged-ancestor-1")
+
+        let localFetched = try await localStore.fetch(id: "forged-ancestor-1")
+        #expect(localFetched?.version == 1)
+        #expect(localFetched?.record.content == "Local v1 content")
+    }
+
+    // 7. Version-gap conflict resolution parent chain test (local v4, remote v6 -> resolve v7)
     @Test func testVersionGapConflictResolutionParentChain() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -340,7 +389,7 @@ struct M5SyncEngineTests {
         #expect(cloudFinal?.record.content == "Local v4 content")
     }
 
-    // 7. Forged or inconsistent lineage fails closed as conflict
+    // 8. Forged or inconsistent lineage fails closed as conflict
     @Test func testForgedOrInconsistentLineageFailsClosedAsConflict() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -391,7 +440,7 @@ struct M5SyncEngineTests {
         #expect(localFetched?.record.content == "Local v2")
     }
 
-    // 8. Same version with different parent lineage is divergent
+    // 9. Same version with different parent lineage is divergent
     @Test func testSameVersionDifferentParentLineageIsDivergent() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -435,7 +484,7 @@ struct M5SyncEngineTests {
         #expect(conflicts.first?.local.id == "same-ver-rec-1")
     }
 
-    // 9. Higher version with no valid parent lineage fails closed as conflict
+    // 10. Higher version with no valid parent lineage fails closed as conflict
     @Test func testHigherVersionNoValidAncestryFailsClosedAsConflict() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -483,7 +532,7 @@ struct M5SyncEngineTests {
         #expect(localFetched?.record.content == "Local v2")
     }
 
-    // 10. each conflict policy behaves explicitly
+    // 11. each conflict policy behaves explicitly
     @Test func testEachConflictPolicyBehavesExplicitly() async throws {
         let policies: [ConflictResolution] = [.keepLocal, .keepRemote, .merge, .requireUser]
 
@@ -551,7 +600,7 @@ struct M5SyncEngineTests {
         }
     }
 
-    // 11. successful resolution creates a new revision
+    // 12. successful resolution creates a new revision
     @Test func testSuccessfulResolutionCreatesNewRevision() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -598,7 +647,7 @@ struct M5SyncEngineTests {
         #expect(resolvedLocal?.record.content == "Base local content")
     }
 
-    // 12. repeated/resumed sync is idempotent
+    // 13. repeated/resumed sync is idempotent
     @Test func testRepeatedResumedSyncIsIdempotent() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -634,7 +683,7 @@ struct M5SyncEngineTests {
         #expect(cloudRun2 == record)
     }
 
-    // 13. cloud failure preserves local state and queued work
+    // 14. cloud failure preserves local state and queued work
     @Test func testCloudFailurePreservesLocalStateAndQueuedWork() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "failing-cloud", isAvailable: true)
@@ -682,7 +731,7 @@ struct M5SyncEngineTests {
         #expect(await queue.contains(id: "fail-preserve-1"))
     }
 
-    // 14. Durable queue recovery tests
+    // 15. Durable queue recovery tests
     @Test func testDurableQueueSurvivesPersistenceAndReload() async throws {
         let tempQueueDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M5QueuePersistence_\(UUID().uuidString)")
@@ -712,7 +761,7 @@ struct M5SyncEngineTests {
         #expect(await queue3.contains(id: "durable-2"))
     }
 
-    // 15. M0-M5.2 regression & contract boundaries
+    // 16. M0-M5.2 regression & contract boundaries
     @Test func testM0ToM52RegressionAndSyncEngineBoundaries() throws {
         // PAStorage MUST NOT import PAMemory or PAKernel or PAProviders
         guard let storageImports = ArchitectureManifest.allowedImports["PAStorage"] else {

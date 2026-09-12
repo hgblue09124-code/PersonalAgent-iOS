@@ -23,20 +23,32 @@ public extension StorageRecord {
 
     /// Determines whether this record is a valid deterministic descendant of the given ancestor record.
     ///
-    /// Ancestry MUST be proven by direct parent matching (`parentVersion == ancestor.version` with `version == ancestor.version + 1`)
-    /// or explicit ancestor set membership (`ancestorVersions.contains(ancestor.version)`).
-    /// Version number alone NEVER proves ancestry.
-    /// Missing, invalid, cyclic, or inconsistent parent lineage returns `false`.
+    /// Ancestry MUST be proven by traversing the continuous, unbroken parent chain (`parentVersion`).
+    /// `ancestorVersions` is only a supporting cache/optimization and CANNOT by itself prove ancestry
+    /// if intermediate parent steps are missing or inconsistent.
+    ///
+    /// Version numbers alone NEVER prove ancestry.
+    /// Missing, invalid, cyclic, gapped, or inconsistent parent lineage returns `false`.
     func isDescendant(of ancestor: Self) -> Bool {
         guard id == ancestor.id else { return false }
         guard ancestor.version >= 1 else { return false }
         guard version > ancestor.version else { return false }
-        if let parent = parentVersion {
-            if parent == ancestor.version && version == ancestor.version + 1 {
-                return true
-            }
+        guard let parent = parentVersion else { return false }
+        guard parent >= 1 && parent < version else { return false }
+
+        // Parent MUST be at or above ancestor's version
+        guard parent >= ancestor.version else { return false }
+
+        // Case 1: Direct parent link (version == ancestor.version + 1)
+        if version == ancestor.version + 1 {
+            return parent == ancestor.version
         }
-        return ancestorVersions.contains(ancestor.version)
+
+        // Case 2: Multi-generation descendant (version > ancestor.version + 1)
+        // Parent chain MUST be unbroken and continuous: every version in (ancestor.version...parent)
+        // MUST be present in ancestorVersions set.
+        let requiredChain = Set(ancestor.version...parent)
+        return requiredChain.isSubset(of: ancestorVersions)
     }
 }
 
