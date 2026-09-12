@@ -112,12 +112,9 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
         }
 
-        var updatedAncestors = existing.ancestorVersions
-        updatedAncestors.insert(existing.version)
-        if let incomingParent = record.parentVersion {
-            updatedAncestors.insert(incomingParent)
-        }
-        updatedAncestors.formUnion(record.ancestorVersions)
+        var updatedAncestors = existing.ancestorRevisionTokens
+        updatedAncestors.insert(existing.revisionToken)
+        updatedAncestors.formUnion(record.ancestorRevisionTokens)
 
         let committedRecord = MemoryRecord(
             id: record.id,
@@ -132,7 +129,9 @@ public actor FileBackedMemoryStore: MemoryStore {
             metadata: record.metadata,
             version: existing.version + 1,
             parentVersion: existing.version,
-            ancestorVersions: updatedAncestors
+            revisionToken: "\(record.id.rawValue)-v\(existing.version + 1)",
+            parentRevisionToken: existing.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
 
         let previousIndex = index
@@ -155,8 +154,8 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.notFound(id)
         }
 
-        var updatedAncestors = existing.ancestorVersions
-        updatedAncestors.insert(existing.version)
+        var updatedAncestors = existing.ancestorRevisionTokens
+        updatedAncestors.insert(existing.revisionToken)
 
         let updated = MemoryRecord(
             id: existing.id,
@@ -171,7 +170,9 @@ public actor FileBackedMemoryStore: MemoryStore {
             metadata: existing.metadata,
             version: existing.version + 1,
             parentVersion: existing.version,
-            ancestorVersions: updatedAncestors
+            revisionToken: "\(existing.id.rawValue)-v\(existing.version + 1)",
+            parentRevisionToken: existing.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
 
         let previousIndex = index
@@ -340,7 +341,9 @@ extension FileBackedMemoryStore: LocalStore {
                 metadata: memRecord.metadata,
                 version: memRecord.version,
                 parentVersion: memRecord.parentVersion,
-                ancestorVersions: memRecord.ancestorVersions
+                revisionToken: memRecord.revisionToken,
+                parentRevisionToken: memRecord.parentRevisionToken,
+                ancestorRevisionTokens: memRecord.ancestorRevisionTokens
             )
             try await update(preparedRecord)
         } else {
@@ -355,7 +358,7 @@ extension FileBackedMemoryStore: LocalStore {
         return nil
     }
 
-    public func delete(id: String) async throws {
-        try await forget(id: MemoryRecordID(rawValue: id), reason: "Deleted via LocalStore interface")
+    public func forget(id: String) async throws {
+        try await forget(id: MemoryRecordID(rawValue: id), reason: "Forgotten via LocalStore interface")
     }
 }

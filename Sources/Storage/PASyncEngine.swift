@@ -94,17 +94,27 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
         let startVersion = conflict.local.version
         let targetVersion = max(conflict.local.version, conflict.remote.version) + 1
 
+        var mergedAncestors = conflict.local.ancestorRevisionTokens
+        mergedAncestors.formUnion(conflict.remote.ancestorRevisionTokens)
+        mergedAncestors.insert(conflict.local.revisionToken)
+        mergedAncestors.insert(conflict.remote.revisionToken)
+
         // Step-wise advance local store from conflict.local.version up to targetVersion.
         // For each step v from (startVersion + 1) to targetVersion:
-        // derive the next parentVersion from the actual committed local revision (committedLocal.version),
-        // guaranteeing that v5.parentVersion == 4, v6.parentVersion == 5, v7.parentVersion == 6.
+        // derive the next parentVersion, revisionToken, parentRevisionToken from the actual committed local revision
         for _ in (startVersion + 1)...targetVersion {
             guard let currentCommittedLocal = try await localStore.fetch(id: id) else {
                 throw CloudStorageError.storeFailed("Failed to fetch current local revision during conflict resolution for \(id)")
             }
+            let newToken = "\(id)-v\(currentCommittedLocal.version + 1)"
+            var stepAncestors = mergedAncestors
+            stepAncestors.insert(currentCommittedLocal.revisionToken)
             let stepPrepared = resolvedBaseRecord.updatingVersion(
                 currentCommittedLocal.version,
-                parentVersion: currentCommittedLocal.version
+                parentVersion: currentCommittedLocal.version,
+                revisionToken: newToken,
+                parentRevisionToken: currentCommittedLocal.revisionToken,
+                ancestorRevisionTokens: stepAncestors
             )
             try await localStore.upsert(stepPrepared)
         }
@@ -129,9 +139,14 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
             guard let currentCommitted = try await localStore.fetch(id: loc.id) else {
                 throw CloudStorageError.storeFailed("Failed to fetch local record \(loc.id) during remote update")
             }
+            var stepAncestors = rem.ancestorRevisionTokens
+            stepAncestors.insert(currentCommitted.revisionToken)
             let stepPrepared = rem.updatingVersion(
                 currentCommitted.version,
-                parentVersion: currentCommitted.version
+                parentVersion: currentCommitted.version,
+                revisionToken: rem.revisionToken,
+                parentRevisionToken: currentCommitted.revisionToken,
+                ancestorRevisionTokens: stepAncestors
             )
             try await localStore.upsert(stepPrepared)
             currentLocalVersion += 1

@@ -75,13 +75,15 @@ public struct MemoryStorageRecord: StorageRecord, Codable, Sendable, Equatable {
     public var updatedAt: Date { record.updatedAt }
     public var version: Int { record.version }
     public var parentVersion: Int? { record.parentVersion }
-    public var ancestorVersions: Set<Int> { record.ancestorVersions }
+    public var revisionToken: String { record.revisionToken }
+    public var parentRevisionToken: String? { record.parentRevisionToken }
+    public var ancestorRevisionTokens: Set<String> { record.ancestorRevisionTokens }
 
     public init(_ record: MemoryRecord) {
         self.record = record
     }
 
-    public func updatingVersion(_ newVersion: Int, parentVersion: Int?, ancestorVersions: Set<Int>) -> MemoryStorageRecord {
+    public func updatingVersion(_ newVersion: Int, parentVersion: Int?, revisionToken: String, parentRevisionToken: String?, ancestorRevisionTokens: Set<String>) -> MemoryStorageRecord {
         let updatedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -95,7 +97,33 @@ public struct MemoryStorageRecord: StorageRecord, Codable, Sendable, Equatable {
             metadata: record.metadata,
             version: newVersion,
             parentVersion: parentVersion,
-            ancestorVersions: ancestorVersions
+            revisionToken: revisionToken,
+            parentRevisionToken: parentRevisionToken,
+            ancestorRevisionTokens: ancestorRevisionTokens
+        )
+        return MemoryStorageRecord(updatedRecord)
+    }
+
+    public func updatingVersion(_ newVersion: Int, parentVersion: Int?) -> MemoryStorageRecord {
+        let newToken = "\(id)-v\(newVersion)"
+        var updatedAncestors = record.ancestorRevisionTokens
+        updatedAncestors.insert(record.revisionToken)
+        let updatedRecord = MemoryRecord(
+            id: record.id,
+            kind: record.kind,
+            content: record.content,
+            provenance: record.provenance,
+            createdAt: record.createdAt,
+            updatedAt: Date(),
+            scope: record.scope,
+            lifecycle: record.lifecycle,
+            importance: record.importance,
+            metadata: record.metadata,
+            version: newVersion,
+            parentVersion: parentVersion,
+            revisionToken: newToken,
+            parentRevisionToken: record.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
         return MemoryStorageRecord(updatedRecord)
     }
@@ -114,7 +142,9 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
     public let metadata: MemoryMetadata
     public let version: Int
     public let parentVersion: Int?
-    public let ancestorVersions: Set<Int>
+    public let revisionToken: String
+    public let parentRevisionToken: String?
+    public let ancestorRevisionTokens: Set<String>
 
     public init(
         id: MemoryRecordID = MemoryRecordID(),
@@ -129,7 +159,9 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         metadata: MemoryMetadata = MemoryMetadata(),
         version: Int = 1,
         parentVersion: Int? = nil,
-        ancestorVersions: Set<Int> = []
+        revisionToken: String? = nil,
+        parentRevisionToken: String? = nil,
+        ancestorRevisionTokens: Set<String> = []
     ) {
         self.id = id
         self.kind = kind
@@ -143,11 +175,13 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         self.metadata = metadata
         self.version = version
         self.parentVersion = parentVersion
-        self.ancestorVersions = ancestorVersions
+        self.revisionToken = revisionToken ?? "\(id.rawValue)-v\(version)"
+        self.parentRevisionToken = parentRevisionToken
+        self.ancestorRevisionTokens = ancestorRevisionTokens
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, kind, content, provenance, createdAt, updatedAt, scope, lifecycle, importance, metadata, version, parentVersion, ancestorVersions
+        case id, kind, content, provenance, createdAt, updatedAt, scope, lifecycle, importance, metadata, version, parentVersion, revisionToken, parentRevisionToken, ancestorRevisionTokens
     }
 
     public init(from decoder: Decoder) throws {
@@ -164,7 +198,9 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         self.metadata = try container.decode(MemoryMetadata.self, forKey: .metadata)
         self.version = try container.decode(Int.self, forKey: .version)
         self.parentVersion = try container.decodeIfPresent(Int.self, forKey: .parentVersion)
-        self.ancestorVersions = try container.decodeIfPresent(Set<Int>.self, forKey: .ancestorVersions) ?? []
+        self.revisionToken = try container.decodeIfPresent(String.self, forKey: .revisionToken) ?? "\(id.rawValue)-v\(version)"
+        self.parentRevisionToken = try container.decodeIfPresent(String.self, forKey: .parentRevisionToken)
+        self.ancestorRevisionTokens = try container.decodeIfPresent(Set<String>.self, forKey: .ancestorRevisionTokens) ?? []
     }
 
     public func updating(
@@ -175,7 +211,9 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         metadata: MemoryMetadata? = nil,
         updatedAt: Date = Date(),
         parentVersion: Int?? = nil,
-        ancestorVersions: Set<Int>? = nil
+        revisionToken: String? = nil,
+        parentRevisionToken: String?? = nil,
+        ancestorRevisionTokens: Set<String>? = nil
     ) -> MemoryRecord {
         MemoryRecord(
             id: id,
@@ -190,7 +228,9 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
             metadata: metadata ?? self.metadata,
             version: version,
             parentVersion: parentVersion ?? self.parentVersion,
-            ancestorVersions: ancestorVersions ?? self.ancestorVersions
+            revisionToken: revisionToken ?? self.revisionToken,
+            parentRevisionToken: parentRevisionToken ?? self.parentRevisionToken,
+            ancestorRevisionTokens: ancestorRevisionTokens ?? self.ancestorRevisionTokens
         )
     }
 }

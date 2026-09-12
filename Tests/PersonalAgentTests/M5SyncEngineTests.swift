@@ -84,7 +84,9 @@ private func defaultMemoryResolver(local: MemoryStorageRecord, remote: MemorySto
         metadata: mergedMeta,
         version: local.version,
         parentVersion: local.parentVersion,
-        ancestorVersions: local.ancestorVersions.union(remote.ancestorVersions)
+        revisionToken: local.revisionToken,
+        parentRevisionToken: local.parentRevisionToken,
+        ancestorRevisionTokens: local.ancestorRevisionTokens.union(remote.ancestorRevisionTokens)
     )
     return MemoryStorageRecord(newMem)
 }
@@ -159,6 +161,17 @@ struct M5SyncEngineTests {
         let queue = PASyncQueue()
         let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
 
+        let remoteRecord = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "ancestry-rec-1"),
+                kind: .fact,
+                content: "Remote version 1",
+                provenance: Provenance(source: "agent"),
+                version: 1,
+                revisionToken: "token-v1"
+            )
+        )
+
         let localRecord = MemoryStorageRecord(
             MemoryRecord(
                 id: MemoryRecordID(rawValue: "ancestry-rec-1"),
@@ -166,16 +179,10 @@ struct M5SyncEngineTests {
                 content: "Local version 2 (parent was 1)",
                 provenance: Provenance(source: "user"),
                 version: 2,
-                parentVersion: 1
-            )
-        )
-        let remoteRecord = MemoryStorageRecord(
-            MemoryRecord(
-                id: MemoryRecordID(rawValue: "ancestry-rec-1"),
-                kind: .fact,
-                content: "Remote version 1",
-                provenance: Provenance(source: "agent"),
-                version: 1
+                parentVersion: 1,
+                revisionToken: "token-v2",
+                parentRevisionToken: "token-v1",
+                ancestorRevisionTokens: ["token-v1"]
             )
         )
 
@@ -208,7 +215,8 @@ struct M5SyncEngineTests {
                 kind: .fact,
                 content: "Local version 1",
                 provenance: Provenance(source: "user"),
-                version: 1
+                version: 1,
+                revisionToken: "token-local-v1"
             )
         )
         let remoteRecord = MemoryStorageRecord(
@@ -218,7 +226,10 @@ struct M5SyncEngineTests {
                 content: "Remote version 2 (parent was 1)",
                 provenance: Provenance(source: "agent"),
                 version: 2,
-                parentVersion: 1
+                parentVersion: 1,
+                revisionToken: "token-remote-v2",
+                parentRevisionToken: "token-local-v1",
+                ancestorRevisionTokens: ["token-local-v1"]
             )
         )
 
@@ -245,7 +256,8 @@ struct M5SyncEngineTests {
                 kind: .fact,
                 content: "V1 content",
                 provenance: Provenance(source: "user"),
-                version: 1
+                version: 1,
+                revisionToken: "token-1"
             )
         )
 
@@ -257,7 +269,9 @@ struct M5SyncEngineTests {
                 provenance: Provenance(source: "user"),
                 version: 2,
                 parentVersion: 1,
-                ancestorVersions: [1]
+                revisionToken: "token-2",
+                parentRevisionToken: "token-1",
+                ancestorRevisionTokens: ["token-1"]
             )
         )
 
@@ -269,7 +283,9 @@ struct M5SyncEngineTests {
                 provenance: Provenance(source: "user"),
                 version: 3,
                 parentVersion: 2,
-                ancestorVersions: [1, 2]
+                revisionToken: "token-3",
+                parentRevisionToken: "token-2",
+                ancestorRevisionTokens: ["token-1", "token-2"]
             )
         )
 
@@ -278,51 +294,54 @@ struct M5SyncEngineTests {
         #expect(v3.isDescendant(of: v1) == true, "v3 MUST be proven descendant of v1 across multi-generation lineage")
     }
 
-    // 6. Forged ancestorVersions with gaps fails closed
-    @Test func testForgedAncestorVersionsWithGapsFailsClosed() async throws {
+    // 6. Record with full ancestorVersions Set<Int> but NO actual revision token lineage proof fails closed
+    @Test func testRecordWithFullAncestorVersionsSetButNoLineageProofFailsClosedAsConflict() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
         let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
         let queue = PASyncQueue()
         let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
 
-        let v1 = MemoryStorageRecord(
+        let localV1 = MemoryStorageRecord(
             MemoryRecord(
-                id: MemoryRecordID(rawValue: "forged-ancestor-1"),
+                id: MemoryRecordID(rawValue: "no-lineage-proof-1"),
                 kind: .fact,
                 content: "Local v1 content",
                 provenance: Provenance(source: "user"),
-                version: 1
+                version: 1,
+                revisionToken: "unique-local-v1-token"
             )
         )
 
-        // Forged record claiming version 10 with parentVersion = 9, and ancestorVersions = [1, 9] (missing intermediate 2...8!)
-        let forgedV10 = MemoryStorageRecord(
+        // Remote v5 claiming version 5, parentVersion 4, but carrying generic/unmatched revision tokens
+        let remoteV5 = MemoryStorageRecord(
             MemoryRecord(
-                id: MemoryRecordID(rawValue: "forged-ancestor-1"),
+                id: MemoryRecordID(rawValue: "no-lineage-proof-1"),
                 kind: .fact,
-                content: "Forged v10 content with fabricated gap-filled ancestor set",
+                content: "Remote v5 content without local v1 revision token",
                 provenance: Provenance(source: "agent"),
-                version: 10,
-                parentVersion: 9,
-                ancestorVersions: [1, 9] // missing 2,3,4,5,6,7,8!
+                version: 5,
+                parentVersion: 4,
+                revisionToken: "remote-v5-token",
+                parentRevisionToken: "remote-v4-token",
+                ancestorRevisionTokens: ["remote-v1-token", "remote-v2-token", "remote-v3-token", "remote-v4-token"]
             )
         )
 
-        try await localStore.upsert(v1)
-        await cloudStore.setRecordDirectly(forgedV10)
+        try await localStore.upsert(localV1)
+        await cloudStore.setRecordDirectly(remoteV5)
 
-        // isDescendant must fail closed because parent chain (1...9) is incomplete
-        #expect(!forgedV10.isDescendant(of: v1))
+        // isDescendant MUST return false because remoteV5 ancestorRevisionTokens does not contain "unique-local-v1-token"
+        #expect(!remoteV5.isDescendant(of: localV1))
 
-        try await engine.enqueueLocalChange(id: "forged-ancestor-1")
+        try await engine.enqueueLocalChange(id: "no-lineage-proof-1")
         try await engine.synchronize()
 
         let conflicts = await engine.pendingConflicts()
         #expect(conflicts.count == 1)
-        #expect(conflicts.first?.local.id == "forged-ancestor-1")
+        #expect(conflicts.first?.local.id == "no-lineage-proof-1")
 
-        let localFetched = try await localStore.fetch(id: "forged-ancestor-1")
+        let localFetched = try await localStore.fetch(id: "no-lineage-proof-1")
         #expect(localFetched?.version == 1)
         #expect(localFetched?.record.content == "Local v1 content")
     }
@@ -404,7 +423,8 @@ struct M5SyncEngineTests {
                 content: "Local v2",
                 provenance: Provenance(source: "user"),
                 version: 2,
-                parentVersion: 1
+                parentVersion: 1,
+                revisionToken: "local-v2-token"
             )
         )
 
@@ -416,14 +436,15 @@ struct M5SyncEngineTests {
                 content: "Forged remote v5 claiming parent 1",
                 provenance: Provenance(source: "agent"),
                 version: 5,
-                parentVersion: 1
+                parentVersion: 1,
+                revisionToken: "forged-v5-token",
+                parentRevisionToken: "unrelated-v1-token"
             )
         )
 
         try await localStore.upsert(localRecord)
         await cloudStore.setRecordDirectly(forgedRemote)
 
-        // isDescendant must return false because forgedRemote.parentVersion (1) != version - 1 (4)
         #expect(!forgedRemote.isDescendant(of: localRecord))
 
         try await engine.enqueueLocalChange(id: "forged-rec-1")
@@ -455,7 +476,8 @@ struct M5SyncEngineTests {
                 content: "Local v2 from parent 1",
                 provenance: Provenance(source: "user"),
                 version: 2,
-                parentVersion: 1
+                parentVersion: 1,
+                revisionToken: "local-v2-token"
             )
         )
 
@@ -466,7 +488,8 @@ struct M5SyncEngineTests {
                 content: "Remote v2 from parent 1 (divergent content)",
                 provenance: Provenance(source: "agent"),
                 version: 2,
-                parentVersion: 1
+                parentVersion: 1,
+                revisionToken: "remote-v2-token"
             )
         )
 
@@ -499,7 +522,8 @@ struct M5SyncEngineTests {
                 content: "Local v2",
                 provenance: Provenance(source: "user"),
                 version: 2,
-                parentVersion: 1
+                parentVersion: 1,
+                revisionToken: "local-v2-token"
             )
         )
 
@@ -510,7 +534,8 @@ struct M5SyncEngineTests {
                 content: "Remote v4 with nil parentVersion",
                 provenance: Provenance(source: "agent"),
                 version: 4,
-                parentVersion: nil
+                parentVersion: nil,
+                revisionToken: "remote-v4-token"
             )
         )
 
