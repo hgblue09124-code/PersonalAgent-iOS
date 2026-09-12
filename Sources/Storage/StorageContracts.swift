@@ -16,10 +16,94 @@ public protocol LocalStore: Sendable {
     func delete(id: String) async throws
 }
 
+public enum CloudStorageError: Error, Sendable, Codable, Equatable, CustomStringConvertible {
+    case unavailable(String)
+    case notFound(String)
+    case storeFailed(String)
+    case networkError(String)
+    case invalidRecord(String)
+
+    public var description: String {
+        switch self {
+        case .unavailable(let reason):
+            return "Cloud storage unavailable: \(reason)"
+        case .notFound(let id):
+            return "Cloud storage record not found: \(id)"
+        case .storeFailed(let reason):
+            return "Cloud storage operation failed: \(reason)"
+        case .networkError(let details):
+            return "Cloud storage network error: \(details)"
+        case .invalidRecord(let reason):
+            return "Cloud storage invalid record: \(reason)"
+        }
+    }
+}
+
+public protocol CloudStorageProvider: Sendable {
+    var identifier: String { get }
+    var isAvailable: Bool { get async }
+}
+
 public protocol CloudStore: Sendable {
     associatedtype Record: StorageRecord
+    var provider: any CloudStorageProvider { get }
     func push(_ record: Record) async throws
     func pull(id: String) async throws -> Record?
+}
+
+public struct AbstractCloudStorageProvider: CloudStorageProvider, Sendable {
+    public let identifier: String
+    private let availabilityHandler: @Sendable () async -> Bool
+
+    public init(identifier: String, isAvailable: Bool = true) {
+        self.identifier = identifier
+        self.availabilityHandler = { isAvailable }
+    }
+
+    public init(identifier: String, availabilityHandler: @Sendable @escaping () async -> Bool) {
+        self.identifier = identifier
+        self.availabilityHandler = availabilityHandler
+    }
+
+    public var isAvailable: Bool {
+        get async {
+            await availabilityHandler()
+        }
+    }
+}
+
+public actor InMemoryCloudStore<Record: StorageRecord>: CloudStore {
+    public let provider: any CloudStorageProvider
+    private var records: [String: Record] = [:]
+    private var shouldFail: Bool = false
+
+    public init(provider: any CloudStorageProvider) {
+        self.provider = provider
+    }
+
+    public func setFailureSimulation(_ fail: Bool) {
+        self.shouldFail = fail
+    }
+
+    public func push(_ record: Record) async throws {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider \(provider.identifier) is currently offline/unavailable")
+        }
+        if shouldFail {
+            throw CloudStorageError.storeFailed("Simulated cloud failure on push")
+        }
+        records[record.id] = record
+    }
+
+    public func pull(id: String) async throws -> Record? {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider \(provider.identifier) is currently offline/unavailable")
+        }
+        if shouldFail {
+            throw CloudStorageError.storeFailed("Simulated cloud failure on pull")
+        }
+        return records[id]
+    }
 }
 
 public enum ConflictResolution: String, Sendable, Codable {
@@ -44,11 +128,6 @@ public protocol SyncEngine: Sendable {
     func enqueueLocalChange(id: String) async throws
     func synchronize() async throws
     func resolve(_ conflict: SyncConflict<Record>, policy: ConflictResolution) async throws
-}
-
-public protocol CloudStorageProvider: Sendable {
-    var identifier: String { get }
-    var isAvailable: Bool { get async }
 }
 
 public enum StorageBoundary {
