@@ -42,16 +42,29 @@ extension StorageRecord {
         guard self.id == ancestor.id else { return false }
         guard self.version > ancestor.version else { return false }
 
-        // Case 1: Direct parent-child relationship
-        if let pVer = self.parentVersion, pVer == ancestor.version {
-            if let pToken = self.parentRevisionToken {
-                return pToken == ancestor.revisionToken
-            }
-            return true
+        // Must have non-empty revision token and non-empty ancestor revision token
+        guard !self.revisionToken.isEmpty, !ancestor.revisionToken.isEmpty else { return false }
+
+        // Must have an explicit parentVersion pointer matching self.version - 1 (sequential lineage)
+        guard let pVer = self.parentVersion, pVer == self.version - 1 else {
+            return false
         }
 
-        // Case 2: Multi-generation ancestry verified via ancestor revision tokens
-        return self.ancestorRevisionTokens.contains(ancestor.revisionToken)
+        // Must have an explicit parentRevisionToken
+        guard let pToken = self.parentRevisionToken, !pToken.isEmpty else {
+            return false
+        }
+
+        // Direct parent-child relationship (self.version == ancestor.version + 1)
+        if self.version == ancestor.version + 1 {
+            return pToken == ancestor.revisionToken
+        }
+
+        // Multi-generation relationship (self.version > ancestor.version + 1)
+        // Ancestry requires self's ancestorRevisionTokens to contain BOTH its immediate parentRevisionToken
+        // AND the claimed ancestor's revisionToken.
+        return self.ancestorRevisionTokens.contains(pToken) &&
+               self.ancestorRevisionTokens.contains(ancestor.revisionToken)
     }
 }
 
