@@ -7,6 +7,49 @@ public protocol StorageRecord: Sendable, Codable, Equatable {
     var id: String { get }
     var updatedAt: Date { get }
     var version: Int { get }
+    var parentVersion: Int? { get }
+    var ancestorVersions: Set<Int> { get }
+
+    func isDescendant(of ancestor: Self) -> Bool
+    func updatingVersion(_ newVersion: Int, parentVersion: Int?, ancestorVersions: Set<Int>) -> Self
+}
+
+public extension StorageRecord {
+    var ancestorVersions: Set<Int> { [] }
+
+    func updatingVersion(_ newVersion: Int, parentVersion: Int?) -> Self {
+        updatingVersion(newVersion, parentVersion: parentVersion, ancestorVersions: ancestorVersions)
+    }
+
+    /// Determines whether this record is a valid deterministic descendant of the given ancestor record.
+    ///
+    /// Ancestry MUST be proven by traversing the continuous, unbroken parent chain (`parentVersion`).
+    /// `ancestorVersions` is only a supporting cache/optimization and CANNOT by itself prove ancestry
+    /// if intermediate parent steps are missing or inconsistent.
+    ///
+    /// Version numbers alone NEVER prove ancestry.
+    /// Missing, invalid, cyclic, gapped, or inconsistent parent lineage returns `false`.
+    func isDescendant(of ancestor: Self) -> Bool {
+        guard id == ancestor.id else { return false }
+        guard ancestor.version >= 1 else { return false }
+        guard version > ancestor.version else { return false }
+        guard let parent = parentVersion else { return false }
+        guard parent >= 1 && parent < version else { return false }
+
+        // Parent MUST be at or above ancestor's version
+        guard parent >= ancestor.version else { return false }
+
+        // Case 1: Direct parent link (version == ancestor.version + 1)
+        if version == ancestor.version + 1 {
+            return parent == ancestor.version
+        }
+
+        // Case 2: Multi-generation descendant (version > ancestor.version + 1)
+        // Parent chain MUST be unbroken and continuous: every version in (ancestor.version...parent)
+        // MUST be present in ancestorVersions set.
+        let requiredChain = Set(ancestor.version...parent)
+        return requiredChain.isSubset(of: ancestorVersions)
+    }
 }
 
 public protocol LocalStore: Sendable {

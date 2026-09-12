@@ -112,6 +112,13 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
         }
 
+        var updatedAncestors = existing.ancestorVersions
+        updatedAncestors.insert(existing.version)
+        if let incomingParent = record.parentVersion {
+            updatedAncestors.insert(incomingParent)
+        }
+        updatedAncestors.formUnion(record.ancestorVersions)
+
         let committedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -123,7 +130,9 @@ public actor FileBackedMemoryStore: MemoryStore {
             lifecycle: record.lifecycle,
             importance: record.importance,
             metadata: record.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version,
+            ancestorVersions: updatedAncestors
         )
 
         let previousIndex = index
@@ -146,6 +155,9 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.notFound(id)
         }
 
+        var updatedAncestors = existing.ancestorVersions
+        updatedAncestors.insert(existing.version)
+
         let updated = MemoryRecord(
             id: existing.id,
             kind: existing.kind,
@@ -157,7 +169,9 @@ public actor FileBackedMemoryStore: MemoryStore {
             lifecycle: .deleted,
             importance: existing.importance,
             metadata: existing.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version,
+            ancestorVersions: updatedAncestors
         )
 
         let previousIndex = index
@@ -313,7 +327,22 @@ extension FileBackedMemoryStore: LocalStore {
     public func upsert(_ record: MemoryStorageRecord) async throws {
         let memRecord = record.record
         if index.record(for: memRecord.id) != nil {
-            try await update(memRecord)
+            let preparedRecord = MemoryRecord(
+                id: memRecord.id,
+                kind: memRecord.kind,
+                content: memRecord.content,
+                provenance: memRecord.provenance,
+                createdAt: memRecord.createdAt,
+                updatedAt: memRecord.updatedAt,
+                scope: memRecord.scope,
+                lifecycle: memRecord.lifecycle,
+                importance: memRecord.importance,
+                metadata: memRecord.metadata,
+                version: memRecord.version,
+                parentVersion: memRecord.parentVersion,
+                ancestorVersions: memRecord.ancestorVersions
+            )
+            try await update(preparedRecord)
         } else {
             try await capture(memRecord)
         }
