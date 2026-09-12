@@ -74,30 +74,9 @@ public struct MemoryStorageRecord: StorageRecord, Codable, Sendable, Equatable {
     public var id: String { record.id.rawValue }
     public var updatedAt: Date { record.updatedAt }
     public var version: Int { record.version }
-    public var parentVersion: Int? { record.parentVersion }
-    public var ancestorVersions: Set<Int> { record.ancestorVersions }
 
     public init(_ record: MemoryRecord) {
         self.record = record
-    }
-
-    public func updatingVersion(_ newVersion: Int, parentVersion: Int?, ancestorVersions: Set<Int>) -> MemoryStorageRecord {
-        let updatedRecord = MemoryRecord(
-            id: record.id,
-            kind: record.kind,
-            content: record.content,
-            provenance: record.provenance,
-            createdAt: record.createdAt,
-            updatedAt: Date(),
-            scope: record.scope,
-            lifecycle: record.lifecycle,
-            importance: record.importance,
-            metadata: record.metadata,
-            version: newVersion,
-            parentVersion: parentVersion,
-            ancestorVersions: ancestorVersions
-        )
-        return MemoryStorageRecord(updatedRecord)
     }
 }
 
@@ -113,8 +92,6 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
     public let importance: Double
     public let metadata: MemoryMetadata
     public let version: Int
-    public let parentVersion: Int?
-    public let ancestorVersions: Set<Int>
 
     public init(
         id: MemoryRecordID = MemoryRecordID(),
@@ -127,9 +104,7 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         lifecycle: MemoryLifecycle = .active,
         importance: Double = 0.5,
         metadata: MemoryMetadata = MemoryMetadata(),
-        version: Int = 1,
-        parentVersion: Int? = nil,
-        ancestorVersions: Set<Int> = []
+        version: Int = 1
     ) {
         self.id = id
         self.kind = kind
@@ -142,29 +117,6 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         self.importance = importance
         self.metadata = metadata
         self.version = version
-        self.parentVersion = parentVersion
-        self.ancestorVersions = ancestorVersions
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case id, kind, content, provenance, createdAt, updatedAt, scope, lifecycle, importance, metadata, version, parentVersion, ancestorVersions
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(MemoryRecordID.self, forKey: .id)
-        self.kind = try container.decode(MemoryKind.self, forKey: .kind)
-        self.content = try container.decode(String.self, forKey: .content)
-        self.provenance = try container.decode(Provenance.self, forKey: .provenance)
-        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
-        self.updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        self.scope = try container.decode(MemoryScope.self, forKey: .scope)
-        self.lifecycle = try container.decode(MemoryLifecycle.self, forKey: .lifecycle)
-        self.importance = try container.decode(Double.self, forKey: .importance)
-        self.metadata = try container.decode(MemoryMetadata.self, forKey: .metadata)
-        self.version = try container.decode(Int.self, forKey: .version)
-        self.parentVersion = try container.decodeIfPresent(Int.self, forKey: .parentVersion)
-        self.ancestorVersions = try container.decodeIfPresent(Set<Int>.self, forKey: .ancestorVersions) ?? []
     }
 
     public func updating(
@@ -173,9 +125,7 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
         lifecycle: MemoryLifecycle? = nil,
         importance: Double? = nil,
         metadata: MemoryMetadata? = nil,
-        updatedAt: Date = Date(),
-        parentVersion: Int?? = nil,
-        ancestorVersions: Set<Int>? = nil
+        updatedAt: Date = Date()
     ) -> MemoryRecord {
         MemoryRecord(
             id: id,
@@ -188,9 +138,7 @@ public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
             lifecycle: lifecycle ?? self.lifecycle,
             importance: importance ?? self.importance,
             metadata: metadata ?? self.metadata,
-            version: version,
-            parentVersion: parentVersion ?? self.parentVersion,
-            ancestorVersions: ancestorVersions ?? self.ancestorVersions
+            version: version
         )
     }
 }
