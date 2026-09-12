@@ -29,6 +29,13 @@ public actor InMemoryMemoryStore: MemoryStore {
         if existing.version != record.version {
             throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
         }
+        var updatedAncestors = existing.ancestorVersions
+        updatedAncestors.insert(existing.version)
+        if let incomingParent = record.parentVersion {
+            updatedAncestors.insert(incomingParent)
+        }
+        updatedAncestors.formUnion(record.ancestorVersions)
+
         let committedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -41,7 +48,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             importance: record.importance,
             metadata: record.metadata,
             version: existing.version + 1,
-            parentVersion: existing.version
+            parentVersion: existing.version,
+            ancestorVersions: updatedAncestors
         )
         index.index(committedRecord)
     }
@@ -50,6 +58,9 @@ public actor InMemoryMemoryStore: MemoryStore {
         guard let existing = index.record(for: id) else {
             throw MemoryError.notFound(id)
         }
+        var updatedAncestors = existing.ancestorVersions
+        updatedAncestors.insert(existing.version)
+
         let updated = MemoryRecord(
             id: existing.id,
             kind: existing.kind,
@@ -62,7 +73,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             importance: existing.importance,
             metadata: existing.metadata,
             version: existing.version + 1,
-            parentVersion: existing.version
+            parentVersion: existing.version,
+            ancestorVersions: updatedAncestors
         )
         index.index(updated)
     }

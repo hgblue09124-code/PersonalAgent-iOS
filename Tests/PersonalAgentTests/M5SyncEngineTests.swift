@@ -83,7 +83,8 @@ private func defaultMemoryResolver(local: MemoryStorageRecord, remote: MemorySto
         importance: max(local.record.importance, remote.record.importance),
         metadata: mergedMeta,
         version: local.version,
-        parentVersion: local.parentVersion
+        parentVersion: local.parentVersion,
+        ancestorVersions: local.ancestorVersions.union(remote.ancestorVersions)
     )
     return MemoryStorageRecord(newMem)
 }
@@ -236,7 +237,48 @@ struct M5SyncEngineTests {
         #expect(await queue.count() == 0)
     }
 
-    // 5. Version-gap conflict resolution parent chain test (local v4, remote v6 -> resolve v7)
+    // 5. Valid multi-generation ancestry (v1 -> v2 -> v3)
+    @Test func testValidMultiGenerationAncestryV1ToV2ToV3() async throws {
+        let v1 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "multi-gen-1"),
+                kind: .fact,
+                content: "V1 content",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+
+        let v2 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "multi-gen-1"),
+                kind: .fact,
+                content: "V2 content",
+                provenance: Provenance(source: "user"),
+                version: 2,
+                parentVersion: 1,
+                ancestorVersions: [1]
+            )
+        )
+
+        let v3 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "multi-gen-1"),
+                kind: .fact,
+                content: "V3 content",
+                provenance: Provenance(source: "user"),
+                version: 3,
+                parentVersion: 2,
+                ancestorVersions: [1, 2]
+            )
+        )
+
+        #expect(v2.isDescendant(of: v1) == true)
+        #expect(v3.isDescendant(of: v2) == true)
+        #expect(v3.isDescendant(of: v1) == true, "v3 MUST be proven descendant of v1 across multi-generation lineage")
+    }
+
+    // 6. Version-gap conflict resolution parent chain test (local v4, remote v6 -> resolve v7)
     @Test func testVersionGapConflictResolutionParentChain() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -298,7 +340,7 @@ struct M5SyncEngineTests {
         #expect(cloudFinal?.record.content == "Local v4 content")
     }
 
-    // 6. Forged or inconsistent lineage fails closed as conflict
+    // 7. Forged or inconsistent lineage fails closed as conflict
     @Test func testForgedOrInconsistentLineageFailsClosedAsConflict() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -332,7 +374,7 @@ struct M5SyncEngineTests {
         try await localStore.upsert(localRecord)
         await cloudStore.setRecordDirectly(forgedRemote)
 
-        // isDescendant must return false because forgedRemote.parentVersion (1) != localRecord.version (2)
+        // isDescendant must return false because forgedRemote.parentVersion (1) != version - 1 (4)
         #expect(!forgedRemote.isDescendant(of: localRecord))
 
         try await engine.enqueueLocalChange(id: "forged-rec-1")
@@ -349,7 +391,99 @@ struct M5SyncEngineTests {
         #expect(localFetched?.record.content == "Local v2")
     }
 
-    // 7. each conflict policy behaves explicitly
+    // 8. Same version with different parent lineage is divergent
+    @Test func testSameVersionDifferentParentLineageIsDivergent() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let localV2 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "same-ver-rec-1"),
+                kind: .fact,
+                content: "Local v2 from parent 1",
+                provenance: Provenance(source: "user"),
+                version: 2,
+                parentVersion: 1
+            )
+        )
+
+        let remoteV2 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "same-ver-rec-1"),
+                kind: .fact,
+                content: "Remote v2 from parent 1 (divergent content)",
+                provenance: Provenance(source: "agent"),
+                version: 2,
+                parentVersion: 1
+            )
+        )
+
+        try await localStore.upsert(localV2)
+        await cloudStore.setRecordDirectly(remoteV2)
+
+        #expect(!remoteV2.isDescendant(of: localV2))
+        #expect(!localV2.isDescendant(of: remoteV2))
+
+        try await engine.enqueueLocalChange(id: "same-ver-rec-1")
+        try await engine.synchronize()
+
+        let conflicts = await engine.pendingConflicts()
+        #expect(conflicts.count == 1)
+        #expect(conflicts.first?.local.id == "same-ver-rec-1")
+    }
+
+    // 9. Higher version with no valid parent lineage fails closed as conflict
+    @Test func testHigherVersionNoValidAncestryFailsClosedAsConflict() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let localV2 = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "higher-ver-no-ancestry-1"),
+                kind: .fact,
+                content: "Local v2",
+                provenance: Provenance(source: "user"),
+                version: 2,
+                parentVersion: 1
+            )
+        )
+
+        let remoteV4NoParent = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "higher-ver-no-ancestry-1"),
+                kind: .fact,
+                content: "Remote v4 with nil parentVersion",
+                provenance: Provenance(source: "agent"),
+                version: 4,
+                parentVersion: nil
+            )
+        )
+
+        try await localStore.upsert(localV2)
+        await cloudStore.setRecordDirectly(remoteV4NoParent)
+
+        #expect(!remoteV4NoParent.isDescendant(of: localV2))
+        #expect(!localV2.isDescendant(of: remoteV4NoParent))
+
+        try await engine.enqueueLocalChange(id: "higher-ver-no-ancestry-1")
+        try await engine.synchronize()
+
+        let conflicts = await engine.pendingConflicts()
+        #expect(conflicts.count == 1)
+        #expect(conflicts.first?.local.id == "higher-ver-no-ancestry-1")
+
+        let localFetched = try await localStore.fetch(id: "higher-ver-no-ancestry-1")
+        #expect(localFetched?.version == 2)
+        #expect(localFetched?.record.content == "Local v2")
+    }
+
+    // 10. each conflict policy behaves explicitly
     @Test func testEachConflictPolicyBehavesExplicitly() async throws {
         let policies: [ConflictResolution] = [.keepLocal, .keepRemote, .merge, .requireUser]
 
@@ -417,7 +551,7 @@ struct M5SyncEngineTests {
         }
     }
 
-    // 8. successful resolution creates a new revision
+    // 11. successful resolution creates a new revision
     @Test func testSuccessfulResolutionCreatesNewRevision() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -464,7 +598,7 @@ struct M5SyncEngineTests {
         #expect(resolvedLocal?.record.content == "Base local content")
     }
 
-    // 9. repeated/resumed sync is idempotent
+    // 12. repeated/resumed sync is idempotent
     @Test func testRepeatedResumedSyncIsIdempotent() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "test-cloud", isAvailable: true)
@@ -500,7 +634,7 @@ struct M5SyncEngineTests {
         #expect(cloudRun2 == record)
     }
 
-    // 10. cloud failure preserves local state and queued work
+    // 13. cloud failure preserves local state and queued work
     @Test func testCloudFailurePreservesLocalStateAndQueuedWork() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "failing-cloud", isAvailable: true)
@@ -548,7 +682,7 @@ struct M5SyncEngineTests {
         #expect(await queue.contains(id: "fail-preserve-1"))
     }
 
-    // 11. Durable queue recovery tests
+    // 14. Durable queue recovery tests
     @Test func testDurableQueueSurvivesPersistenceAndReload() async throws {
         let tempQueueDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M5QueuePersistence_\(UUID().uuidString)")
@@ -578,7 +712,7 @@ struct M5SyncEngineTests {
         #expect(await queue3.contains(id: "durable-2"))
     }
 
-    // 12. M0-M5.2 regression & contract boundaries
+    // 15. M0-M5.2 regression & contract boundaries
     @Test func testM0ToM52RegressionAndSyncEngineBoundaries() throws {
         // PAStorage MUST NOT import PAMemory or PAKernel or PAProviders
         guard let storageImports = ArchitectureManifest.allowedImports["PAStorage"] else {

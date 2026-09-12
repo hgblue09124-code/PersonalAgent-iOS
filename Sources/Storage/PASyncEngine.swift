@@ -94,6 +94,11 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
         let startVersion = conflict.local.version
         let targetVersion = max(conflict.local.version, conflict.remote.version) + 1
 
+        var mergedAncestors = conflict.local.ancestorVersions
+        mergedAncestors.formUnion(conflict.remote.ancestorVersions)
+        mergedAncestors.insert(conflict.local.version)
+        mergedAncestors.insert(conflict.remote.version)
+
         // Step-wise advance local store from conflict.local.version up to targetVersion.
         // For each step v from (startVersion + 1) to targetVersion:
         // derive the next parentVersion from the actual committed local revision (committedLocal.version),
@@ -102,9 +107,12 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
             guard let currentCommittedLocal = try await localStore.fetch(id: id) else {
                 throw CloudStorageError.storeFailed("Failed to fetch current local revision during conflict resolution for \(id)")
             }
+            var stepAncestors = mergedAncestors
+            stepAncestors.insert(currentCommittedLocal.version)
             let stepPrepared = resolvedBaseRecord.updatingVersion(
                 currentCommittedLocal.version,
-                parentVersion: currentCommittedLocal.version
+                parentVersion: currentCommittedLocal.version,
+                ancestorVersions: stepAncestors
             )
             try await localStore.upsert(stepPrepared)
         }
@@ -129,9 +137,12 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
             guard let currentCommitted = try await localStore.fetch(id: loc.id) else {
                 throw CloudStorageError.storeFailed("Failed to fetch local record \(loc.id) during remote update")
             }
+            var stepAncestors = rem.ancestorVersions
+            stepAncestors.insert(currentCommitted.version)
             let stepPrepared = rem.updatingVersion(
                 currentCommitted.version,
-                parentVersion: currentCommitted.version
+                parentVersion: currentCommitted.version,
+                ancestorVersions: stepAncestors
             )
             try await localStore.upsert(stepPrepared)
             currentLocalVersion += 1

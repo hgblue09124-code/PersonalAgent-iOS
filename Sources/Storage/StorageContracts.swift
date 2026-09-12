@@ -8,18 +8,35 @@ public protocol StorageRecord: Sendable, Codable, Equatable {
     var updatedAt: Date { get }
     var version: Int { get }
     var parentVersion: Int? { get }
+    var ancestorVersions: Set<Int> { get }
 
     func isDescendant(of ancestor: Self) -> Bool
-    func updatingVersion(_ newVersion: Int, parentVersion: Int?) -> Self
+    func updatingVersion(_ newVersion: Int, parentVersion: Int?, ancestorVersions: Set<Int>) -> Self
 }
 
 public extension StorageRecord {
+    var ancestorVersions: Set<Int> { [] }
+
+    func updatingVersion(_ newVersion: Int, parentVersion: Int?) -> Self {
+        updatingVersion(newVersion, parentVersion: parentVersion, ancestorVersions: ancestorVersions)
+    }
+
+    /// Determines whether this record is a valid deterministic descendant of the given ancestor record.
+    ///
+    /// Ancestry MUST be proven by direct parent matching (`parentVersion == ancestor.version` with `version == ancestor.version + 1`)
+    /// or explicit ancestor set membership (`ancestorVersions.contains(ancestor.version)`).
+    /// Version number alone NEVER proves ancestry.
+    /// Missing, invalid, cyclic, or inconsistent parent lineage returns `false`.
     func isDescendant(of ancestor: Self) -> Bool {
         guard id == ancestor.id else { return false }
-        if version <= ancestor.version { return false }
-        guard let parent = parentVersion else { return false }
-        if parent == ancestor.version { return true }
-        return false
+        guard ancestor.version >= 1 else { return false }
+        guard version > ancestor.version else { return false }
+        if let parent = parentVersion {
+            if parent == ancestor.version && version == ancestor.version + 1 {
+                return true
+            }
+        }
+        return ancestorVersions.contains(ancestor.version)
     }
 }
 
