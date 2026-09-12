@@ -91,49 +91,30 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
 
         let resolvedBaseRecord = try resolver(conflict.local, conflict.remote, policy)
 
+        let startVersion = conflict.local.version
         let targetVersion = max(conflict.local.version, conflict.remote.version) + 1
-        var mergedAncestors = conflict.local.ancestorVersions
-        mergedAncestors.formUnion(conflict.remote.ancestorVersions)
-        mergedAncestors.insert(conflict.local.version)
-        mergedAncestors.insert(conflict.remote.version)
 
-        let resolvedRecord = resolvedBaseRecord.updatingVersion(
-            targetVersion,
-            parentVersion: conflict.local.version,
-            ancestorVersions: mergedAncestors
-        )
-
-        // Local store currently holds conflict.local (version conflict.local.version).
-        // To reach targetVersion in LocalStore (which increments version by +1 on each update),
-        // step-wise advance local store from conflict.local.version up to targetVersion - 1,
-        // then perform final upsert with targetVersion - 1 so local store arrives at targetVersion.
-        var currentLocalVersion = conflict.local.version
-        while currentLocalVersion < targetVersion - 1 {
-            let nextLocalVersion = currentLocalVersion + 1
-            var stepAncestors = mergedAncestors.filter { $0 < currentLocalVersion }
-            stepAncestors.insert(currentLocalVersion)
-            let stepRecord = resolvedRecord.updatingVersion(
-                currentLocalVersion,
-                parentVersion: currentLocalVersion - 1 >= 1 ? currentLocalVersion - 1 : nil,
-                ancestorVersions: stepAncestors
+        // Step-wise advance local store from conflict.local.version up to targetVersion.
+        // For each step v from (startVersion + 1) to targetVersion:
+        // derive the next parentVersion from the actual committed local revision (committedLocal.version),
+        // guaranteeing that v5.parentVersion == 4, v6.parentVersion == 5, v7.parentVersion == 6.
+        for _ in (startVersion + 1)...targetVersion {
+            guard let currentCommittedLocal = try await localStore.fetch(id: id) else {
+                throw CloudStorageError.storeFailed("Failed to fetch current local revision during conflict resolution for \(id)")
+            }
+            let stepPrepared = resolvedBaseRecord.updatingVersion(
+                currentCommittedLocal.version,
+                parentVersion: currentCommittedLocal.version
             )
-            try await localStore.upsert(stepRecord)
-            currentLocalVersion = nextLocalVersion
+            try await localStore.upsert(stepPrepared)
         }
 
-        let finalPreparedRecord = resolvedRecord.updatingVersion(
-            targetVersion - 1,
-            parentVersion: conflict.local.version,
-            ancestorVersions: mergedAncestors
-        )
-        try await localStore.upsert(finalPreparedRecord)
-
-        guard let newlyCommittedLocal = try await localStore.fetch(id: id) else {
+        guard let finalCommittedLocal = try await localStore.fetch(id: id) else {
             throw CloudStorageError.storeFailed("Failed to fetch newly committed local record \(id)")
         }
 
-        // Push new authoritative revision to cloud store
-        try await cloudStore.push(newlyCommittedLocal)
+        // Push final authoritative revision to cloud store
+        try await cloudStore.push(finalCommittedLocal)
 
         pendingConflictsMap.removeValue(forKey: id)
         try await queue.remove(id: id)
@@ -141,29 +122,19 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
 
     private func updateLocalWithRemote(loc: Record, rem: Record) async throws {
         // Local store currently holds loc (version loc.version).
-        // To update local store through LocalStore.update() (which requires matching version v and increments to v+1),
-        // we step-wise advance local store from loc.version up to rem.version - 1,
-        // then perform final upsert with rem's version = rem.version - 1 so local store reaches rem.version.
+        // Step-wise advance local store deriving each step's parentVersion from the actual committed local revision,
+        // so intermediate versions increment sequentially until local store reaches rem.version.
         var currentLocalVersion = loc.version
-        while currentLocalVersion < rem.version - 1 {
-            let nextLocalVersion = currentLocalVersion + 1
-            var stepAncestors = rem.ancestorVersions.filter { $0 < currentLocalVersion }
-            stepAncestors.insert(currentLocalVersion)
-            let stepRecord = rem.updatingVersion(
-                currentLocalVersion,
-                parentVersion: currentLocalVersion - 1 >= 1 ? currentLocalVersion - 1 : nil,
-                ancestorVersions: stepAncestors
+        while currentLocalVersion < rem.version {
+            guard let currentCommitted = try await localStore.fetch(id: loc.id) else {
+                throw CloudStorageError.storeFailed("Failed to fetch local record \(loc.id) during remote update")
+            }
+            let stepPrepared = rem.updatingVersion(
+                currentCommitted.version,
+                parentVersion: currentCommitted.version
             )
-            try await localStore.upsert(stepRecord)
-            currentLocalVersion = nextLocalVersion
+            try await localStore.upsert(stepPrepared)
+            currentLocalVersion += 1
         }
-
-        // Final step: upsert with version = rem.version - 1 so local store arrives at rem.version with rem's full content and lineage.
-        let finalPreparedRemote = rem.updatingVersion(
-            rem.version - 1,
-            parentVersion: rem.parentVersion,
-            ancestorVersions: rem.ancestorVersions
-        )
-        try await localStore.upsert(finalPreparedRemote)
     }
 }

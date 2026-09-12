@@ -112,9 +112,6 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
         }
 
-        var newAncestors = existing.ancestorVersions
-        newAncestors.insert(existing.version)
-
         let committedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -127,8 +124,7 @@ public actor FileBackedMemoryStore: MemoryStore {
             importance: record.importance,
             metadata: record.metadata,
             version: existing.version + 1,
-            parentVersion: existing.version,
-            ancestorVersions: newAncestors
+            parentVersion: existing.version
         )
 
         let previousIndex = index
@@ -151,9 +147,6 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.notFound(id)
         }
 
-        var newAncestors = existing.ancestorVersions
-        newAncestors.insert(existing.version)
-
         let updated = MemoryRecord(
             id: existing.id,
             kind: existing.kind,
@@ -166,8 +159,7 @@ public actor FileBackedMemoryStore: MemoryStore {
             importance: existing.importance,
             metadata: existing.metadata,
             version: existing.version + 1,
-            parentVersion: existing.version,
-            ancestorVersions: newAncestors
+            parentVersion: existing.version
         )
 
         let previousIndex = index
