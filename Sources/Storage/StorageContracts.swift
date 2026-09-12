@@ -8,19 +8,20 @@ public protocol StorageRecord: Sendable, Codable, Equatable {
     var updatedAt: Date { get }
     var version: Int { get }
     var parentVersion: Int? { get }
+    var ancestorVersions: Set<Int> { get }
 
     func isDescendant(of ancestor: Self) -> Bool
-    func updatingVersion(_ newVersion: Int, parentVersion: Int?) -> Self
+    func updatingVersion(_ newVersion: Int, parentVersion: Int?, ancestorVersions: Set<Int>) -> Self
 }
 
 public extension StorageRecord {
     func isDescendant(of ancestor: Self) -> Bool {
         guard id == ancestor.id else { return false }
         if version <= ancestor.version { return false }
-        if let parent = parentVersion {
-            return parent == ancestor.version
+        if let parent = parentVersion, parent == ancestor.version {
+            return true
         }
-        return false
+        return ancestorVersions.contains(ancestor.version)
     }
 }
 
