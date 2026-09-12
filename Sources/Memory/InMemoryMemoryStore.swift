@@ -40,7 +40,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             lifecycle: record.lifecycle,
             importance: record.importance,
             metadata: record.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version
         )
         index.index(committedRecord)
     }
@@ -60,7 +61,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             lifecycle: .deleted,
             importance: existing.importance,
             metadata: existing.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version
         )
         index.index(updated)
     }
