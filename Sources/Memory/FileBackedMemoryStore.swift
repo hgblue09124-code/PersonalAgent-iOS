@@ -1,6 +1,7 @@
 import Foundation
 import PAFoundation
 import PAEvents
+import PAStorage
 
 public struct MemoryStoreMetadata: Sendable, Codable, Equatable {
     public let version: Int
@@ -303,5 +304,29 @@ public actor FileBackedMemoryStore: MemoryStore {
         } catch {
             throw MemoryError.persistenceFailed("Atomic snapshot write failed: \(error.localizedDescription)")
         }
+    }
+}
+
+extension FileBackedMemoryStore: LocalStore {
+    public typealias Record = MemoryStorageRecord
+
+    public func upsert(_ record: MemoryStorageRecord) async throws {
+        let memRecord = record.record
+        if index.record(for: memRecord.id) != nil {
+            try await update(memRecord)
+        } else {
+            try await capture(memRecord)
+        }
+    }
+
+    public func fetch(id: String) async throws -> MemoryStorageRecord? {
+        if let memRecord = try await retrieve(id: MemoryRecordID(rawValue: id)) {
+            return MemoryStorageRecord(memRecord)
+        }
+        return nil
+    }
+
+    public func delete(id: String) async throws {
+        try await forget(id: MemoryRecordID(rawValue: id), reason: "Deleted via LocalStore interface")
     }
 }

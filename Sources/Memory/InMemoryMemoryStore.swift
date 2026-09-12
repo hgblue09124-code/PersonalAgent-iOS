@@ -1,5 +1,6 @@
 import Foundation
 import PAFoundation
+import PAStorage
 
 public actor InMemoryMemoryStore: MemoryStore {
     private var index: MemoryIndex
@@ -92,5 +93,29 @@ public actor InMemoryMemoryStore: MemoryStore {
 
     public func clear() async throws {
         index.clear()
+    }
+}
+
+extension InMemoryMemoryStore: LocalStore {
+    public typealias Record = MemoryStorageRecord
+
+    public func upsert(_ record: MemoryStorageRecord) async throws {
+        let memRecord = record.record
+        if index.record(for: memRecord.id) != nil {
+            try await update(memRecord)
+        } else {
+            try await capture(memRecord)
+        }
+    }
+
+    public func fetch(id: String) async throws -> MemoryStorageRecord? {
+        if let memRecord = try await retrieve(id: MemoryRecordID(rawValue: id)) {
+            return MemoryStorageRecord(memRecord)
+        }
+        return nil
+    }
+
+    public func delete(id: String) async throws {
+        try await forget(id: MemoryRecordID(rawValue: id), reason: "Deleted via LocalStore interface")
     }
 }

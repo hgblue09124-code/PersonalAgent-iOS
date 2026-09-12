@@ -68,6 +68,18 @@ public struct MemoryMetadata: Sendable, Codable, Equatable, ExpressibleByDiction
     }
 }
 
+public struct MemoryStorageRecord: StorageRecord, Codable, Sendable, Equatable {
+    public let record: MemoryRecord
+
+    public var id: String { record.id.rawValue }
+    public var updatedAt: Date { record.updatedAt }
+    public var version: Int { record.version }
+
+    public init(_ record: MemoryRecord) {
+        self.record = record
+    }
+}
+
 public struct MemoryRecord: Sendable, Codable, Equatable, Identifiable {
     public let id: MemoryRecordID
     public let kind: MemoryKind
