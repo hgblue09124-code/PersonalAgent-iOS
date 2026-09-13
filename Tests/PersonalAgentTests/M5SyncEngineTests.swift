@@ -147,17 +147,17 @@ struct M5SyncEngineTests {
 
         try await localStore.upsert(v1)
 
-        // Perform sequential updates via store to advance history properly
+        // Perform sequential updates via store to advance history properly with fresh tokens
         let v1Fetched = try await localStore.fetch(id: "rec-multi-1")
         #expect(v1Fetched != nil)
 
-        let v2Record = v1Fetched!.record.updating(content: "V2 content")
+        let v2Record = v1Fetched!.record.updating(content: "V2 content", revisionToken: "token-v2")
         try await localStore.upsert(MemoryStorageRecord(v2Record))
 
         let v2Fetched = try await localStore.fetch(id: "rec-multi-1")
         #expect(v2Fetched != nil)
 
-        let v3Record = v2Fetched!.record.updating(content: "V3 content")
+        let v3Record = v2Fetched!.record.updating(content: "V3 content", revisionToken: "token-v3")
         try await localStore.upsert(MemoryStorageRecord(v3Record))
 
         let v3Fetched = try await localStore.fetch(id: "rec-multi-1")
@@ -289,11 +289,11 @@ struct M5SyncEngineTests {
 
         try await localStore.upsert(v1)
 
-        // Update v1 -> v2 via store
+        // Update v1 -> v2 via store with fresh token "token-v2-real"
         let v1Fetched = try await localStore.fetch(id: "rec-broken-1")
         #expect(v1Fetched != nil)
 
-        let v2Record = v1Fetched!.record.updating(content: "V2 content")
+        let v2Record = v1Fetched!.record.updating(content: "V2 content", revisionToken: "token-v2-real")
         try await localStore.upsert(MemoryStorageRecord(v2Record))
 
         let v3Broken = MemoryStorageRecord(
@@ -405,23 +405,30 @@ struct M5SyncEngineTests {
                 content: "V1 content",
                 provenance: Provenance(source: "user"),
                 version: 1,
-                revisionToken: "shared-token-X"
+                revisionToken: "token-v1"
             )
         )
 
         try await localStore.upsert(v1Shared)
 
-        // Fetch v1 from store and attempt update v1 -> v2 reusing v1's revisionToken "shared-token-X"
-        let fetched = try await localStore.fetch(id: "rec-shared-1")
-        #expect(fetched != nil)
+        // Advance v1 -> v2 with fresh token
+        let fetched1 = try await localStore.fetch(id: "rec-shared-1")
+        #expect(fetched1 != nil)
 
-        let v2Shared = fetched!.record.updating(
-            content: "V2 content reusing v1 token",
-            revisionToken: "shared-token-X"
+        let v2Record = fetched1!.record.updating(content: "V2 content", revisionToken: "token-v2")
+        try await localStore.upsert(MemoryStorageRecord(v2Record))
+
+        // Attempting update v2 -> v3 explicitly reusing v1's token "token-v1"
+        let fetched2 = try await localStore.fetch(id: "rec-shared-1")
+        #expect(fetched2 != nil)
+
+        let v3ReusedToken = fetched2!.record.updating(
+            content: "V3 reusing v1 token",
+            revisionToken: "token-v1"
         )
 
         do {
-            try await localStore.upsert(MemoryStorageRecord(v2Shared))
+            try await localStore.upsert(MemoryStorageRecord(v3ReusedToken))
             Issue.record("Expected upsert with duplicate revisionToken to fail")
         } catch let err as MemoryError {
             if case .corruptRecord = err {
