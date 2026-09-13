@@ -397,7 +397,6 @@ struct M5SyncEngineTests {
     // 9. Shared Revision Tokens
     @Test func test9_SharedRevisionTokens() async throws {
         let localStore = InMemoryMemoryStore()
-        let verifier = DefaultLineageVerifier(historyStore: localStore)
 
         let v1Shared = MemoryStorageRecord(
             MemoryRecord(
@@ -412,24 +411,21 @@ struct M5SyncEngineTests {
 
         try await localStore.upsert(v1Shared)
 
-        // Attempting to record second revision with same token throws corruptRecord
-        let v2Shared = MemoryStorageRecord(
-            MemoryRecord(
-                id: MemoryRecordID(rawValue: "rec-shared-1"),
-                kind: .fact,
-                content: "V2 sharing token with V1",
-                provenance: Provenance(source: "agent"),
-                version: 1,
-                revisionToken: "shared-token-X"
-            )
+        // Fetch v1 from store and attempt update v1 -> v2 reusing v1's revisionToken "shared-token-X"
+        let fetched = try await localStore.fetch(id: "rec-shared-1")
+        #expect(fetched != nil)
+
+        let v2Shared = fetched!.record.updating(
+            content: "V2 content reusing v1 token",
+            revisionToken: "shared-token-X"
         )
 
         do {
-            try await localStore.upsert(v2Shared)
+            try await localStore.upsert(MemoryStorageRecord(v2Shared))
             Issue.record("Expected upsert with duplicate revisionToken to fail")
         } catch let err as MemoryError {
             if case .corruptRecord = err {
-                // Expected
+                // Expected fail closed as corruption
             } else {
                 Issue.record("Expected corruptRecord, got \(err)")
             }

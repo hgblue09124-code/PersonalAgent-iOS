@@ -37,6 +37,8 @@ public actor InMemoryMemoryStore: MemoryStore {
         updatedAncestors.insert(existing.revisionToken)
         updatedAncestors.formUnion(record.ancestorRevisionTokens)
 
+        let committedToken = record.revisionToken.isEmpty || record.revisionToken == "\(record.id.rawValue)-v\(existing.version)" ? "\(record.id.rawValue)-v\(existing.version + 1)" : record.revisionToken
+
         let committedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -50,7 +52,7 @@ public actor InMemoryMemoryStore: MemoryStore {
             metadata: record.metadata,
             version: existing.version + 1,
             parentVersion: existing.version,
-            revisionToken: "\(record.id.rawValue)-v\(existing.version + 1)",
+            revisionToken: committedToken,
             parentRevisionToken: existing.revisionToken,
             ancestorRevisionTokens: updatedAncestors
         )
