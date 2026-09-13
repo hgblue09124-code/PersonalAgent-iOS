@@ -61,7 +61,7 @@ struct M5LocalStoreContractTests {
         #expect(fetched?.record.content == "Updated preference")
     }
 
-    private func exerciseDelete<S: LocalStore>(store: S) async throws where S.Record == MemoryStorageRecord {
+    private func exerciseForget<S: LocalStore>(store: S) async throws where S.Record == MemoryStorageRecord {
         let memRecord = MemoryRecord(
             id: MemoryRecordID(rawValue: "m5-rec-3"),
             kind: .episodic,
@@ -71,8 +71,8 @@ struct M5LocalStoreContractTests {
         )
         try await store.upsert(MemoryStorageRecord(memRecord))
 
-        // Exercise delete via LocalStore interface
-        try await store.delete(id: "m5-rec-3")
+        // Exercise forget via LocalStore interface
+        try await store.forget(id: "m5-rec-3")
 
         let fetched = try await store.fetch(id: "m5-rec-3")
 
@@ -131,7 +131,7 @@ struct M5LocalStoreContractTests {
 
     @Test func testLocalStoreDeleteMarksRecordDeletedAndIncrementsVersion() async throws {
         let store = InMemoryMemoryStore()
-        try await exerciseDelete(store: store)
+        try await exerciseForget(store: store)
     }
 
     @Test func testLocalStorePersistenceAndReload() async throws {

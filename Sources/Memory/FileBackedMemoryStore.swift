@@ -25,10 +25,12 @@ public struct MemoryStoreMetadata: Sendable, Codable, Equatable {
 public struct MemoryStoreSnapshot: Sendable, Codable, Equatable {
     public var metadata: MemoryStoreMetadata
     public var records: [MemoryRecord]
+    public var historyRecords: [MemoryRecord]?
 
-    public init(metadata: MemoryStoreMetadata, records: [MemoryRecord]) {
+    public init(metadata: MemoryStoreMetadata, records: [MemoryRecord], historyRecords: [MemoryRecord]? = nil) {
         self.metadata = metadata
         self.records = records
+        self.historyRecords = historyRecords
     }
 }
 
@@ -40,6 +42,8 @@ public actor FileBackedMemoryStore: MemoryStore {
     private let fileWriter: @Sendable (Data, URL) throws -> Void
     private var index: MemoryIndex
     private var metadata: MemoryStoreMetadata
+    private var historyMap: [String: [Int: MemoryStorageRecord]] = [:]
+    private var knownRevisionTokens: [String: Set<String>] = [:]
 
     private var storeFileURL: URL {
         directoryURL.appendingPathComponent("store.json")
@@ -74,6 +78,8 @@ public actor FileBackedMemoryStore: MemoryStore {
         )
         self.metadata = loaded.metadata
         self.index = loaded.index
+        self.historyMap = loaded.historyMap
+        self.knownRevisionTokens = loaded.knownTokens
     }
 
     public func capture(_ record: MemoryRecord) async throws {
@@ -84,16 +90,21 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
+        let previousTokens = knownRevisionTokens
 
         index.index(record)
         metadata.updatedAt = Date()
         metadata.recordCount = index.count
+        try recordHistory(MemoryStorageRecord(record))
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
+            knownRevisionTokens = previousTokens
             throw error
         }
     }
@@ -112,6 +123,16 @@ public actor FileBackedMemoryStore: MemoryStore {
             throw MemoryError.concurrentConflict("Stale update for ID \(record.id.rawValue): existing version \(existing.version), incoming version \(record.version)")
         }
 
+        var updatedAncestors = existing.ancestorRevisionTokens
+        updatedAncestors.insert(existing.revisionToken)
+        updatedAncestors.formUnion(record.ancestorRevisionTokens)
+
+        if record.revisionToken != existing.revisionToken,
+           knownRevisionTokens[record.id.rawValue]?.contains(record.revisionToken) == true {
+            throw MemoryError.corruptRecord("Duplicate revision token \(record.revisionToken) detected for record \(record.id.rawValue)")
+        }
+        let freshToken = makeFreshRevisionToken(for: record.id.rawValue)
+
         let committedRecord = MemoryRecord(
             id: record.id,
             kind: record.kind,
@@ -123,20 +144,29 @@ public actor FileBackedMemoryStore: MemoryStore {
             lifecycle: record.lifecycle,
             importance: record.importance,
             metadata: record.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version,
+            revisionToken: freshToken,
+            parentRevisionToken: existing.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
+        let previousTokens = knownRevisionTokens
 
         index.index(committedRecord)
         metadata.updatedAt = Date()
+        try recordHistory(MemoryStorageRecord(committedRecord))
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
+            knownRevisionTokens = previousTokens
             throw error
         }
     }
@@ -145,6 +175,9 @@ public actor FileBackedMemoryStore: MemoryStore {
         guard let existing = index.record(for: id) else {
             throw MemoryError.notFound(id)
         }
+
+        var updatedAncestors = existing.ancestorRevisionTokens
+        updatedAncestors.insert(existing.revisionToken)
 
         let updated = MemoryRecord(
             id: existing.id,
@@ -157,20 +190,29 @@ public actor FileBackedMemoryStore: MemoryStore {
             lifecycle: .deleted,
             importance: existing.importance,
             metadata: existing.metadata,
-            version: existing.version + 1
+            version: existing.version + 1,
+            parentVersion: existing.version,
+            revisionToken: makeFreshRevisionToken(for: existing.id.rawValue),
+            parentRevisionToken: existing.revisionToken,
+            ancestorRevisionTokens: updatedAncestors
         )
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
+        let previousTokens = knownRevisionTokens
 
         index.index(updated)
         metadata.updatedAt = Date()
+        try recordHistory(MemoryStorageRecord(updated))
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
+            knownRevisionTokens = previousTokens
             throw error
         }
     }
@@ -195,9 +237,12 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
+        let previousTokens = knownRevisionTokens
 
         for record in records {
             index.index(record)
+            try recordHistory(MemoryStorageRecord(record))
         }
         metadata.updatedAt = Date()
         metadata.recordCount = index.count
@@ -207,6 +252,8 @@ public actor FileBackedMemoryStore: MemoryStore {
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
+            knownRevisionTokens = previousTokens
             throw error
         }
     }
@@ -218,16 +265,22 @@ public actor FileBackedMemoryStore: MemoryStore {
     public func clear() async throws {
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
+        let previousTokens = knownRevisionTokens
 
         index.clear()
         metadata.recordCount = 0
         metadata.updatedAt = Date()
+        historyMap.removeAll()
+        knownRevisionTokens.removeAll()
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
+            knownRevisionTokens = previousTokens
             throw error
         }
     }
@@ -240,6 +293,45 @@ public actor FileBackedMemoryStore: MemoryStore {
         )
         self.metadata = loaded.metadata
         self.index = loaded.index
+        self.historyMap = loaded.historyMap
+        self.knownRevisionTokens = loaded.knownTokens
+    }
+
+    private func recordHistory(_ storageRecord: MemoryStorageRecord) throws {
+        let id = storageRecord.id
+        let ver = storageRecord.version
+        let token = storageRecord.revisionToken
+
+        guard !token.isEmpty else {
+            throw MemoryError.corruptRecord("Revision token cannot be empty")
+        }
+
+        if knownRevisionTokens[id] == nil {
+            knownRevisionTokens[id] = []
+        }
+
+        if knownRevisionTokens[id]?.contains(token) == true {
+            throw MemoryError.corruptRecord("Duplicate revision token \(token) detected for record \(id)")
+        }
+
+        if historyMap[id] == nil {
+            historyMap[id] = [:]
+        }
+
+        if historyMap[id]?[ver] != nil {
+            throw MemoryError.corruptRecord("Duplicate revision history entry detected for \(id) at version \(ver)")
+        }
+
+        historyMap[id]?[ver] = storageRecord
+        knownRevisionTokens[id]?.insert(token)
+    }
+
+    private func makeFreshRevisionToken(for id: String) -> String {
+        var token: String
+        repeat {
+            token = UUID().uuidString
+        } while knownRevisionTokens[id]?.contains(token) == true
+        return token
     }
 
     private static func ensureDirectoryExists(at directoryURL: URL, fileManager: FileManager) throws {
@@ -256,11 +348,13 @@ public actor FileBackedMemoryStore: MemoryStore {
         directoryURL: URL,
         fileManager: FileManager,
         decoder: JSONDecoder
-    ) throws -> (metadata: MemoryStoreMetadata, index: MemoryIndex) {
+    ) throws -> (metadata: MemoryStoreMetadata, index: MemoryIndex, historyMap: [String: [Int: MemoryStorageRecord]], knownTokens: [String: Set<String>]) {
         let storeURL = directoryURL.appendingPathComponent("store.json")
 
         var loadedMeta = MemoryStoreMetadata(version: 1)
         var loadedIndex = MemoryIndex()
+        var loadedHistory: [String: [Int: MemoryStorageRecord]] = [:]
+        var loadedTokens: [String: Set<String>] = [:]
 
         if fileManager.fileExists(atPath: storeURL.path) {
             do {
@@ -281,8 +375,48 @@ public actor FileBackedMemoryStore: MemoryStore {
                     }
                     seenIDs.insert(record.id)
                     loadedIndex.index(record)
+                    let storageRec = MemoryStorageRecord(record)
+                    let id = storageRec.id
+                    let ver = storageRec.version
+                    let token = storageRec.revisionToken
+
+                    if loadedTokens[id] == nil { loadedTokens[id] = [] }
+                    if loadedTokens[id]?.contains(token) == true {
+                        throw MemoryError.corruptRecord("Duplicate revision token \(token) in snapshot for \(id)")
+                    }
+                    if loadedHistory[id] == nil { loadedHistory[id] = [:] }
+                    if loadedHistory[id]?[ver] != nil {
+                        throw MemoryError.corruptRecord("Duplicate revision entry for \(id) at version \(ver) in snapshot")
+                    }
+
+                    loadedHistory[id]?[ver] = storageRec
+                    loadedTokens[id]?.insert(token)
                 }
 
+                if let histList = snapshot.historyRecords {
+                    for hRec in histList {
+                        let storageRec = MemoryStorageRecord(hRec)
+                        let id = storageRec.id
+                        let ver = storageRec.version
+                        let token = storageRec.revisionToken
+
+                        if loadedTokens[id] == nil { loadedTokens[id] = [] }
+                        if loadedHistory[id] == nil { loadedHistory[id] = [:] }
+
+                        // If already recorded from active records, verify identity match or throw corruption
+                        if let existingVer = loadedHistory[id]?[ver] {
+                            if existingVer != storageRec {
+                                throw MemoryError.corruptRecord("Conflicting duplicate revision for \(id) at version \(ver) in snapshot")
+                            }
+                        } else {
+                            if loadedTokens[id]?.contains(token) == true {
+                                throw MemoryError.corruptRecord("Duplicate revision token \(token) in snapshot for \(id)")
+                            }
+                            loadedHistory[id]?[ver] = storageRec
+                            loadedTokens[id]?.insert(token)
+                        }
+                    }
+                }
                 loadedMeta = snapshot.metadata
             } catch let err as MemoryError {
                 throw err
@@ -291,11 +425,17 @@ public actor FileBackedMemoryStore: MemoryStore {
             }
         }
 
-        return (loadedMeta, loadedIndex)
+        return (loadedMeta, loadedIndex, loadedHistory, loadedTokens)
     }
 
     private func persistToDisk() throws {
-        let snapshot = MemoryStoreSnapshot(metadata: metadata, records: index.allRecords())
+        var allHistoryRecords: [MemoryRecord] = []
+        for (_, verMap) in historyMap {
+            for (_, storageRec) in verMap {
+                allHistoryRecords.append(storageRec.record)
+            }
+        }
+        let snapshot = MemoryStoreSnapshot(metadata: metadata, records: index.allRecords(), historyRecords: allHistoryRecords)
         do {
             let data = try jsonEncoder.encode(snapshot)
             try fileWriter(data, storeFileURL)
@@ -313,7 +453,24 @@ extension FileBackedMemoryStore: LocalStore {
     public func upsert(_ record: MemoryStorageRecord) async throws {
         let memRecord = record.record
         if index.record(for: memRecord.id) != nil {
-            try await update(memRecord)
+            let preparedRecord = MemoryRecord(
+                id: memRecord.id,
+                kind: memRecord.kind,
+                content: memRecord.content,
+                provenance: memRecord.provenance,
+                createdAt: memRecord.createdAt,
+                updatedAt: memRecord.updatedAt,
+                scope: memRecord.scope,
+                lifecycle: memRecord.lifecycle,
+                importance: memRecord.importance,
+                metadata: memRecord.metadata,
+                version: memRecord.version,
+                parentVersion: memRecord.parentVersion,
+                revisionToken: memRecord.revisionToken,
+                parentRevisionToken: memRecord.parentRevisionToken,
+                ancestorRevisionTokens: memRecord.ancestorRevisionTokens
+            )
+            try await update(preparedRecord)
         } else {
             try await capture(memRecord)
         }
@@ -326,7 +483,16 @@ extension FileBackedMemoryStore: LocalStore {
         return nil
     }
 
-    public func delete(id: String) async throws {
-        try await forget(id: MemoryRecordID(rawValue: id), reason: "Deleted via LocalStore interface")
+    public func forget(id: String) async throws {
+        try await forget(id: MemoryRecordID(rawValue: id), reason: "Forgotten via LocalStore interface")
+    }
+}
+
+extension FileBackedMemoryStore: RevisionHistoryStore {
+    public func fetchRevision(id: String, version: Int) async throws -> MemoryStorageRecord? {
+        guard let versionMap = historyMap[id] else {
+            return nil
+        }
+        return versionMap[version]
     }
 }
