@@ -43,6 +43,7 @@ public actor PASyncQueue: Sendable {
     private let storageURL: URL?
     public let maxRetries: Int
     public private(set) var corruptionBackupURL: URL?
+    public private(set) var isCorrupted: Bool = false
 
     public var hasCorruptedStorageBackup: Bool {
         corruptionBackupURL != nil
@@ -91,23 +92,25 @@ public actor PASyncQueue: Sendable {
             }
 
             if !loadedSuccessfully {
-                // Truthful corruption handling: set backupURL ONLY if backup file exists or copyItem succeeds
+                // Fail-closed corruption handling: mark queue as corrupted and attempt truthful sidecar backup
+                self.isCorrupted = true
                 let backupURL = url.appendingPathExtension("corrupt")
-                if FileManager.default.fileExists(atPath: backupURL.path) {
+                do {
+                    try FileManager.default.copyItem(at: url, to: backupURL)
                     self.corruptionBackupURL = backupURL
-                } else {
-                    do {
-                        try FileManager.default.copyItem(at: url, to: backupURL)
-                        self.corruptionBackupURL = backupURL
-                    } catch {
-                        self.corruptionBackupURL = nil
-                    }
+                } catch {
+                    self.corruptionBackupURL = nil
                 }
             }
         }
     }
 
+    public func recoverCorruptedStorage() {
+        self.isCorrupted = false
+    }
+
     public func enqueue(id: String) async throws {
+        try checkNotCorrupted()
         if entriesMap[id] == nil {
             pendingIDs.append(id)
             entriesMap[id] = PASyncQueueEntry(id: id)
@@ -117,6 +120,7 @@ public actor PASyncQueue: Sendable {
     }
 
     public func dequeue() async throws -> String? {
+        try checkNotCorrupted()
         guard !pendingIDs.isEmpty else { return nil }
         let id = pendingIDs.removeFirst()
         entriesMap.removeValue(forKey: id)
@@ -125,6 +129,7 @@ public actor PASyncQueue: Sendable {
     }
 
     public func remove(id: String) async throws {
+        try checkNotCorrupted()
         if entriesMap[id] != nil {
             pendingIDs.removeAll { $0 == id }
             entriesMap.removeValue(forKey: id)
@@ -133,6 +138,7 @@ public actor PASyncQueue: Sendable {
     }
 
     public func recordFailure(id: String, error: String? = nil) async throws {
+        try checkNotCorrupted()
         if var entry = entriesMap[id] {
             entry.retryCount += 1
             entry.lastAttemptAt = Date()
@@ -143,6 +149,7 @@ public actor PASyncQueue: Sendable {
     }
 
     public func resetRetryCount(id: String) async throws {
+        try checkNotCorrupted()
         if var entry = entriesMap[id] {
             entry.retryCount = 0
             entry.lastError = nil
@@ -152,6 +159,7 @@ public actor PASyncQueue: Sendable {
     }
 
     public func resetAllRetries() async throws {
+        try checkNotCorrupted()
         for (id, var entry) in entriesMap {
             entry.retryCount = 0
             entry.lastError = nil
@@ -206,9 +214,17 @@ public actor PASyncQueue: Sendable {
     }
 
     public func clear() async throws {
+        self.isCorrupted = false
         pendingIDs.removeAll()
         entriesMap.removeAll()
         try persist()
+    }
+
+    private func checkNotCorrupted() throws {
+        if isCorrupted {
+            let path = storageURL?.path ?? "in-memory"
+            throw CloudStorageError.storeFailed("PASyncQueue storage at \(path) is corrupt and unrecovered. Call recoverCorruptedStorage() or clear() before performing queue operations.")
+        }
     }
 
     private func persist() throws {

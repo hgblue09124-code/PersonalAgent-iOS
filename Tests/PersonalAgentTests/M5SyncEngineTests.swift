@@ -790,15 +790,33 @@ struct M5SyncEngineTests {
         let garbageData = "NOT_VALID_JSON_GARBAGE_###".data(using: .utf8)!
         try garbageData.write(to: queueFileURL)
 
-        // Instantiating queue must create sidecar corrupt backup to preserve raw work on disk
+        // Instantiating queue must set isCorrupted == true and create sidecar corrupt backup to preserve raw work on disk
         let queue = PASyncQueue(storageURL: queueFileURL)
+        #expect(await queue.isCorrupted == true)
         #expect(await queue.hasCorruptedStorageBackup == true)
+
         let backupURL = await queue.corruptionBackupURL
         #expect(backupURL != nil)
         #expect(FileManager.default.fileExists(atPath: backupURL!.path) == true)
 
         let savedGarbage = try Data(contentsOf: backupURL!)
         #expect(String(data: savedGarbage, encoding: .utf8) == "NOT_VALID_JSON_GARBAGE_###")
+
+        // Invariant: Fail-closed queue refuses enqueue while corrupted until explicitly recovered or cleared
+        do {
+            try await queue.enqueue(id: "atomic-rec-1")
+            Issue.record("Expected enqueue to fail closed when queue is corrupt")
+        } catch let err as CloudStorageError {
+            if case .storeFailed = err {
+                // Expected fail-closed behavior
+            } else {
+                Issue.record("Expected storeFailed, got \(err)")
+            }
+        }
+
+        // Call recoverCorruptedStorage to unblock clean queue operations
+        await queue.recoverCorruptedStorage()
+        #expect(await queue.isCorrupted == false)
 
         // Enqueueing persists new valid payload atomically alongside the backup file
         try await queue.enqueue(id: "atomic-rec-1")
@@ -872,7 +890,8 @@ struct M5SyncEngineTests {
 
         let queue = PASyncQueue(storageURL: queueFileURL)
 
-        // Invariant: corrupt storage MUST preserve sidecar backup so pending work semantics are never silently lost
+        // Invariant: corrupt storage MUST fail closed and preserve sidecar backup so pending work semantics are never silently lost
+        #expect(await queue.isCorrupted == true)
         #expect(await queue.hasCorruptedStorageBackup == true)
         guard let backupURL = await queue.corruptionBackupURL else {
             Issue.record("Expected corruptionBackupURL to be set")
@@ -987,12 +1006,24 @@ struct M5SyncEngineTests {
 
     // 26. Corrupt Queue Failed Backup Truthfulness
     @Test func test26_CorruptQueueFailedBackupTruthfulness() async throws {
-        // Construct uncopyable URL in /proc/sys/fs where sidecar copyItem fails
-        let uncopyableURL = URL(fileURLWithPath: "/proc/sys/fs/corrupt_queue_\(UUID().uuidString).json")
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5CorruptQueueNoBackup_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
 
-        let queue = PASyncQueue(storageURL: uncopyableURL)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
-        // Invariant: If sidecar backup creation fails, queue MUST NOT claim a backup that failed to be created
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+        let corruptContent = "GARBAGE_JSON_DATA"
+        try corruptContent.data(using: .utf8)!.write(to: queueFileURL)
+
+        let backupURL = queueFileURL.appendingPathExtension("corrupt")
+        // Create an existing file at backupURL destination beforehand so copyItem fails with NSCocoaErrorDomain Code 516 ("File exists")
+        try "PRE_EXISTING_FILE".data(using: .utf8)!.write(to: backupURL)
+
+        let queue = PASyncQueue(storageURL: queueFileURL)
+
+        // Invariant: If sidecar copyItem fails, queue MUST set isCorrupted == true, but MUST NOT claim a backup that failed to be created
+        #expect(await queue.isCorrupted == true)
         #expect(await queue.corruptionBackupURL == nil)
         #expect(await queue.hasCorruptedStorageBackup == false)
     }
