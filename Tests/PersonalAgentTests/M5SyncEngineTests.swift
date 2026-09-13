@@ -604,4 +604,454 @@ struct M5SyncEngineTests {
         #expect(ArchitectureManifest.forbiddenCompanionDependencies.contains("Firebase"))
         #expect(ArchitectureManifest.forbiddenCompanionDependencies.contains("Supabase"))
     }
+
+    // 15. Restart and Interruption Recovery
+    @Test func test15_RestartAndInterruptionRecovery() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5RestartRecovery_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "restart-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+
+        let queue1 = PASyncQueue(storageURL: queueFileURL)
+        let engine1 = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue1)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "restart-rec-1"),
+                kind: .fact,
+                content: "Record surviving process restart",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+        try await localStore.upsert(record)
+        try await engine1.enqueueLocalChange(id: "restart-rec-1")
+
+        // Simulate crash / restart by dropping engine1 & queue1 and reloading queue2 from disk
+        let queue2 = PASyncQueue(storageURL: queueFileURL)
+        let engine2 = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue2)
+
+        #expect(await engine2.queue.contains(id: "restart-rec-1"))
+        #expect(await engine2.queue.count() == 1)
+
+        try await engine2.synchronize()
+
+        #expect(await engine2.queue.count() == 0)
+        let cloudRecord = try await cloudStore.pull(id: "restart-rec-1")
+        #expect(cloudRecord?.record.content == "Record surviving process restart")
+    }
+
+    // 16. Failed Push/Pull Retry Tracking
+    @Test func test16_FailedPushPullRetryTracking() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "retry-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "retry-rec-1"),
+                kind: .fact,
+                content: "Retry tracking record",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+        try await localStore.upsert(record)
+        try await engine.enqueueLocalChange(id: "retry-rec-1")
+
+        await cloudStore.setFailureSimulation(true)
+
+        do {
+            try await engine.synchronize()
+            Issue.record("Expected failure during cloud push")
+        } catch {
+            // Expected
+        }
+
+        #expect(await queue.retryCount(for: "retry-rec-1") == 1)
+        let entry = await queue.entry(for: "retry-rec-1")
+        #expect(entry?.lastError != nil)
+
+        // Clear failure simulation and retry sync
+        await cloudStore.setFailureSimulation(false)
+        try await engine.synchronize()
+
+        #expect(await queue.count() == 0)
+        let pushed = try await cloudStore.pull(id: "retry-rec-1")
+        #expect(pushed != nil)
+    }
+
+    // 17. Bounded Retry Behavior and Reset
+    @Test func test17_BoundedRetryBehaviorAndReset() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "bounded-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue(maxRetries: 2)
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "bounded-rec-1"),
+                kind: .fact,
+                content: "Bounded retry record",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+        try await localStore.upsert(record)
+        try await engine.enqueueLocalChange(id: "bounded-rec-1")
+
+        await cloudStore.setFailureSimulation(true)
+
+        // Attempt 1 -> fails, retryCount = 1
+        try? await engine.synchronize()
+        #expect(await queue.retryCount(for: "bounded-rec-1") == 1)
+
+        // Attempt 2 -> fails, retryCount = 2
+        try? await engine.synchronize()
+        #expect(await queue.retryCount(for: "bounded-rec-1") == 2)
+        #expect(await queue.isMaxRetriesExceeded(id: "bounded-rec-1") == true)
+        #expect(await queue.failedIDs() == ["bounded-rec-1"])
+
+        // Attempt 3 -> skipped because max retries reached, no error thrown
+        try await engine.synchronize()
+        #expect(await queue.count() == 1)
+
+        // Reset retries and allow sync to succeed
+        try await queue.resetAllRetries()
+        #expect(await queue.retryCount(for: "bounded-rec-1") == 0)
+        await cloudStore.setFailureSimulation(false)
+
+        try await engine.synchronize()
+        #expect(await queue.count() == 0)
+    }
+
+    // 18. Offline Recovery
+    @Test func test18_OfflineRecovery() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "offline-cloud", isAvailable: false)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "offline-rec-1"),
+                kind: .fact,
+                content: "Offline recovery content",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+        try await localStore.upsert(record)
+        try await engine.enqueueLocalChange(id: "offline-rec-1")
+
+        do {
+            try await engine.synchronize()
+            Issue.record("Expected failure when provider is offline")
+        } catch let err as CloudStorageError {
+            if case .unavailable = err {
+                // Expected
+            } else {
+                Issue.record("Expected unavailable, got \(err)")
+            }
+        }
+
+        // Local state and queue item remain preserved
+        #expect(await queue.count() == 1)
+        #expect(try await localStore.fetch(id: "offline-rec-1") != nil)
+
+        // Provider comes back online
+        provider.setAvailable(true)
+        try await engine.synchronize()
+
+        #expect(await queue.count() == 0)
+        let remoteRecord = try await cloudStore.pull(id: "offline-rec-1")
+        #expect(remoteRecord?.record.content == "Offline recovery content")
+    }
+
+    // 19. Corrupt Queue File Handling and Atomicity
+    @Test func test19_CorruptQueueFileHandlingAndAtomicity() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5CorruptQueue_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+
+        // Write corrupt garbage data
+        let garbageData = "NOT_VALID_JSON_GARBAGE_###".data(using: .utf8)!
+        try garbageData.write(to: queueFileURL)
+
+        // Instantiating queue must set isCorrupted == true and create sidecar corrupt backup to preserve raw work on disk
+        let queue = PASyncQueue(storageURL: queueFileURL)
+        #expect(await queue.isCorrupted == true)
+        #expect(await queue.hasCorruptedStorageBackup == true)
+
+        let backupURL = await queue.corruptionBackupURL
+        #expect(backupURL != nil)
+        #expect(FileManager.default.fileExists(atPath: backupURL!.path) == true)
+
+        let savedGarbage = try Data(contentsOf: backupURL!)
+        #expect(String(data: savedGarbage, encoding: .utf8) == "NOT_VALID_JSON_GARBAGE_###")
+
+        // Invariant: Fail-closed queue refuses enqueue while corrupted until explicitly recovered or cleared
+        do {
+            try await queue.enqueue(id: "atomic-rec-1")
+            Issue.record("Expected enqueue to fail closed when queue is corrupt")
+        } catch let err as CloudStorageError {
+            if case .storeFailed = err {
+                // Expected fail-closed behavior
+            } else {
+                Issue.record("Expected storeFailed, got \(err)")
+            }
+        }
+
+        // Call recoverCorruptedStorage to unblock clean queue operations
+        try await queue.recoverCorruptedStorage()
+        #expect(await queue.isCorrupted == false)
+
+        // Enqueueing persists new valid payload atomically alongside the backup file
+        try await queue.enqueue(id: "atomic-rec-1")
+        #expect(await queue.count() == 1)
+
+        let reloadedQueue = PASyncQueue(storageURL: queueFileURL)
+        #expect(await reloadedQueue.count() == 1)
+        #expect(await reloadedQueue.contains(id: "atomic-rec-1"))
+    }
+
+    // 20. Idempotent Sync Retry (No duplicate records or artificial version increments)
+    @Test func test20_IdempotentSyncRetryNoArtificialVersionIncrements() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "idempotent-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "idempotent-rec-1"),
+                kind: .fact,
+                content: "Idempotent sync content",
+                provenance: Provenance(source: "user"),
+                version: 2,
+                parentVersion: 1,
+                revisionToken: "token-v2",
+                parentRevisionToken: "token-v1"
+            )
+        )
+
+        try await localStore.upsert(record)
+        await cloudStore.setRecordDirectly(record)
+
+        try await engine.enqueueLocalChange(id: "idempotent-rec-1")
+        #expect(await queue.count() == 1)
+
+        // First sync pass: detects loc == rem, removes from queue without mutating version
+        try await engine.synchronize()
+        #expect(await queue.count() == 0)
+
+        let local1 = try await localStore.fetch(id: "idempotent-rec-1")
+        let cloud1 = try await cloudStore.pull(id: "idempotent-rec-1")
+        #expect(local1?.version == 2)
+        #expect(cloud1?.version == 2)
+
+        // Enqueue again and run second sync pass
+        try await engine.enqueueLocalChange(id: "idempotent-rec-1")
+        try await engine.synchronize()
+
+        let local2 = try await localStore.fetch(id: "idempotent-rec-1")
+        let cloud2 = try await cloudStore.pull(id: "idempotent-rec-1")
+
+        // Invariant: version strictly stays 2 (no artificial version increment)
+        #expect(local2?.version == 2)
+        #expect(cloud2?.version == 2)
+        #expect(local2?.revisionToken == "token-v2")
+    }
+
+    // 21. Corrupt Queue Preserves Backup and Recoverable Data
+    @Test func test21_CorruptQueuePreservesBackupAndRecoverableData() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5CorruptQueueBackup_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+
+        let corruptContent = "{\"pendingIDs\": [\"rec-1\", \"rec-2\"], DAMAGED_JSON_END_STUB"
+        try corruptContent.data(using: .utf8)!.write(to: queueFileURL)
+
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "recover-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+
+        let r1 = MemoryStorageRecord(MemoryRecord(id: MemoryRecordID(rawValue: "rec-1"), kind: .fact, content: "Rec 1 content", provenance: Provenance(source: "user"), version: 1))
+        let r2 = MemoryStorageRecord(MemoryRecord(id: MemoryRecordID(rawValue: "rec-2"), kind: .fact, content: "Rec 2 content", provenance: Provenance(source: "user"), version: 1))
+        try await localStore.upsert(r1)
+        try await localStore.upsert(r2)
+
+        let queue = PASyncQueue(storageURL: queueFileURL)
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        // Invariant: corrupt queue causes engine.synchronize() to fail closed
+        #expect(await queue.isCorrupted == true)
+        #expect(await queue.hasCorruptedStorageBackup == true)
+
+        do {
+            try await engine.synchronize()
+            Issue.record("Expected synchronize to fail closed when queue is corrupt")
+        } catch let err as CloudStorageError {
+            if case .storeFailed = err {
+                // Expected
+            } else {
+                Issue.record("Expected storeFailed, got \(err)")
+            }
+        }
+
+        // Perform real recovery
+        try await queue.recoverCorruptedStorage()
+        #expect(await queue.isCorrupted == false)
+        #expect(await queue.contains(id: "rec-1") == true)
+        #expect(await queue.contains(id: "rec-2") == true)
+
+        // Sync now resumes and pushes recovered records cleanly
+        try await engine.synchronize()
+        #expect(await queue.count() == 0)
+
+        let cloud1 = try await cloudStore.pull(id: "rec-1")
+        let cloud2 = try await cloudStore.pull(id: "rec-2")
+        #expect(cloud1?.record.content == "Rec 1 content")
+        #expect(cloud2?.record.content == "Rec 2 content")
+    }
+
+    // 22. Duplicate Enqueue Preserves Retry State
+    @Test func test22_DuplicateEnqueuePreservesRetryState() async throws {
+        let queue = PASyncQueue()
+        try await queue.enqueue(id: "dup-retry-1")
+        try await queue.recordFailure(id: "dup-retry-1", error: "Failure attempt 1")
+
+        #expect(await queue.retryCount(for: "dup-retry-1") == 1)
+        #expect(await queue.entry(for: "dup-retry-1")?.lastError == "Failure attempt 1")
+
+        // Duplicate enqueue must NOT reset retry state or metadata
+        try await queue.enqueue(id: "dup-retry-1")
+
+        #expect(await queue.retryCount(for: "dup-retry-1") == 1)
+        #expect(await queue.entry(for: "dup-retry-1")?.lastError == "Failure attempt 1")
+    }
+
+    // 23. Retry Metadata Survives Restart
+    @Test func test23_RetryMetadataSurvivesRestart() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5RetryRestart_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+        let queue1 = PASyncQueue(storageURL: queueFileURL)
+
+        try await queue1.enqueue(id: "survive-1")
+        try await queue1.recordFailure(id: "survive-1", error: "Error 1")
+        try await queue1.recordFailure(id: "survive-1", error: "Error 2")
+
+        let queue2 = PASyncQueue(storageURL: queueFileURL)
+        #expect(await queue2.retryCount(for: "survive-1") == 2)
+        #expect(await queue2.entry(for: "survive-1")?.lastError == "Error 2")
+    }
+
+    // 24. Exact Max Retry Boundary and Lifecycle
+    @Test func test24_ExactMaxRetryBoundaryAndLifecycle() async throws {
+        let queue = PASyncQueue(maxRetries: 3)
+        try await queue.enqueue(id: "lifecycle-1")
+
+        #expect(await queue.status(for: "lifecycle-1") == .pending)
+
+        try await queue.recordFailure(id: "lifecycle-1", error: "Error 1")
+        #expect(await queue.status(for: "lifecycle-1") == .retrying)
+        #expect(await queue.retryCount(for: "lifecycle-1") == 1)
+
+        try await queue.recordFailure(id: "lifecycle-1", error: "Error 2")
+        #expect(await queue.status(for: "lifecycle-1") == .retrying)
+        #expect(await queue.retryCount(for: "lifecycle-1") == 2)
+
+        try await queue.recordFailure(id: "lifecycle-1", error: "Error 3")
+        #expect(await queue.status(for: "lifecycle-1") == .failed)
+        #expect(await queue.retryCount(for: "lifecycle-1") == 3)
+        #expect(await queue.isFailed(id: "lifecycle-1") == true)
+    }
+
+    // 25. Exhausted Item Lifecycle and Reset
+    @Test func test25_ExhaustedItemLifecycleAndReset() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "exhausted-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue(maxRetries: 2)
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "exhausted-1"),
+                kind: .fact,
+                content: "Exhausted content",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+        try await localStore.upsert(record)
+        try await engine.enqueueLocalChange(id: "exhausted-1")
+
+        await cloudStore.setFailureSimulation(true)
+
+        // Run until exhausted (2 retries)
+        try? await engine.synchronize()
+        try? await engine.synchronize()
+
+        #expect(await queue.status(for: "exhausted-1") == .failed)
+        #expect(await queue.activePendingIDs().isEmpty)
+
+        // Engine synchronize skips exhausted item automatically
+        try await engine.synchronize()
+        #expect(await queue.count() == 1)
+
+        // Explicit reset restores item to .pending
+        try await queue.resetRetryCount(id: "exhausted-1")
+        #expect(await queue.status(for: "exhausted-1") == .pending)
+
+        await cloudStore.setFailureSimulation(false)
+        try await engine.synchronize()
+
+        #expect(await queue.count() == 0)
+        let synced = try await cloudStore.pull(id: "exhausted-1")
+        #expect(synced?.record.content == "Exhausted content")
+    }
+
+    // 26. Corrupt Queue Failed Backup Truthfulness
+    @Test func test26_CorruptQueueFailedBackupTruthfulness() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5CorruptQueueNoBackup_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+        let corruptContent = "GARBAGE_JSON_DATA"
+        try corruptContent.data(using: .utf8)!.write(to: queueFileURL)
+
+        let backupURL = queueFileURL.appendingPathExtension("corrupt")
+        // Create an existing file at backupURL destination beforehand so copyItem fails with NSCocoaErrorDomain Code 516 ("File exists")
+        try "PRE_EXISTING_FILE".data(using: .utf8)!.write(to: backupURL)
+
+        let queue = PASyncQueue(storageURL: queueFileURL)
+
+        // Invariant: If backupURL already exists, queue sets corruptionBackupURL to existing backup file
+        #expect(await queue.isCorrupted == true)
+        #expect(await queue.corruptionBackupURL == backupURL)
+        #expect(await queue.hasCorruptedStorageBackup == true)
+    }
 }
