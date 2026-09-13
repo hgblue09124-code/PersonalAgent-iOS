@@ -6,7 +6,7 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
 
     private let localStore: Local
     private let cloudStore: Cloud
-    public let queue: PASyncQueue
+    private let queue: PASyncQueue
     private let conflictResolver: ConflictResolver?
     private let lineageVerifier: (any LineageVerifying<Record>)?
     private var pendingConflictsMap: [String: SyncConflict<Record>] = [:]
@@ -43,70 +43,53 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
         }
 
         let pendingIDs = await queue.allPendingIDs()
-        var firstError: Error?
-
         for id in pendingIDs {
-            if await queue.isMaxRetriesExceeded(id: id) {
-                continue
-            }
+            let local = try await localStore.fetch(id: id)
+            let remote = try await cloudStore.pull(id: id)
 
-            do {
-                let local = try await localStore.fetch(id: id)
-                let remote = try await cloudStore.pull(id: id)
+            switch (local, remote) {
+            case (.none, .none):
+                try await queue.remove(id: id)
 
-                switch (local, remote) {
-                case (.none, .none):
+            case (.some(let loc), .none):
+                try await cloudStore.push(loc)
+                try await queue.remove(id: id)
+
+            case (.none, .some(let rem)):
+                try await localStore.upsert(rem)
+                try await queue.remove(id: id)
+
+            case (.some(let loc), .some(let rem)):
+                if loc == rem {
                     try await queue.remove(id: id)
+                } else if let verifier = lineageVerifier {
+                    let remoteToLocalProof = await verifier.verifyLineage(candidate: rem, ancestor: loc)
+                    let localToRemoteProof = await verifier.verifyLineage(candidate: loc, ancestor: rem)
 
-                case (.some(let loc), .none):
-                    try await cloudStore.push(loc)
-                    try await queue.remove(id: id)
-
-                case (.none, .some(let rem)):
-                    try await localStore.upsert(rem)
-                    try await queue.remove(id: id)
-
-                case (.some(let loc), .some(let rem)):
-                    if loc == rem {
+                    if remoteToLocalProof == .provenDescendant {
+                        try await updateLocalWithRemote(loc: loc, rem: rem)
                         try await queue.remove(id: id)
-                    } else if let verifier = lineageVerifier {
-                        let remoteToLocalProof = await verifier.verifyLineage(candidate: rem, ancestor: loc)
-                        let localToRemoteProof = await verifier.verifyLineage(candidate: loc, ancestor: rem)
-
-                        if remoteToLocalProof == .provenDescendant {
-                            try await updateLocalWithRemote(loc: loc, rem: rem)
-                            try await queue.remove(id: id)
-                        } else if localToRemoteProof == .provenDescendant {
-                            try await cloudStore.push(loc)
-                            try await queue.remove(id: id)
-                        } else {
-                            let conflict = SyncConflict(local: loc, remote: rem)
-                            pendingConflictsMap[id] = conflict
-                        }
+                    } else if localToRemoteProof == .provenDescendant {
+                        try await cloudStore.push(loc)
+                        try await queue.remove(id: id)
                     } else {
-                        // Fallback to direct pair check
-                        if rem.isDescendant(of: loc) {
-                            try await updateLocalWithRemote(loc: loc, rem: rem)
-                            try await queue.remove(id: id)
-                        } else if loc.isDescendant(of: rem) {
-                            try await cloudStore.push(loc)
-                            try await queue.remove(id: id)
-                        } else {
-                            let conflict = SyncConflict(local: loc, remote: rem)
-                            pendingConflictsMap[id] = conflict
-                        }
+                        let conflict = SyncConflict(local: loc, remote: rem)
+                        pendingConflictsMap[id] = conflict
+                    }
+                } else {
+                    // Fallback to direct pair check
+                    if rem.isDescendant(of: loc) {
+                        try await updateLocalWithRemote(loc: loc, rem: rem)
+                        try await queue.remove(id: id)
+                    } else if loc.isDescendant(of: rem) {
+                        try await cloudStore.push(loc)
+                        try await queue.remove(id: id)
+                    } else {
+                        let conflict = SyncConflict(local: loc, remote: rem)
+                        pendingConflictsMap[id] = conflict
                     }
                 }
-            } catch {
-                try await queue.recordFailure(id: id, error: error.localizedDescription)
-                if firstError == nil {
-                    firstError = error
-                }
             }
-        }
-
-        if let error = firstError {
-            throw error
         }
     }
 
