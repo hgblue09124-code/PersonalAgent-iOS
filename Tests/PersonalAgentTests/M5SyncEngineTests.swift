@@ -884,4 +884,116 @@ struct M5SyncEngineTests {
         #expect(backedUpContent.contains("rec-1"))
         #expect(backedUpContent.contains("rec-2"))
     }
+
+    // 22. Duplicate Enqueue Preserves Retry State
+    @Test func test22_DuplicateEnqueuePreservesRetryState() async throws {
+        let queue = PASyncQueue()
+        try await queue.enqueue(id: "dup-retry-1")
+        try await queue.recordFailure(id: "dup-retry-1", error: "Failure attempt 1")
+
+        #expect(await queue.retryCount(for: "dup-retry-1") == 1)
+        #expect(await queue.entry(for: "dup-retry-1")?.lastError == "Failure attempt 1")
+
+        // Duplicate enqueue must NOT reset retry state or metadata
+        try await queue.enqueue(id: "dup-retry-1")
+
+        #expect(await queue.retryCount(for: "dup-retry-1") == 1)
+        #expect(await queue.entry(for: "dup-retry-1")?.lastError == "Failure attempt 1")
+    }
+
+    // 23. Retry Metadata Survives Restart
+    @Test func test23_RetryMetadataSurvivesRestart() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5RetryRestart_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+        let queue1 = PASyncQueue(storageURL: queueFileURL)
+
+        try await queue1.enqueue(id: "survive-1")
+        try await queue1.recordFailure(id: "survive-1", error: "Error 1")
+        try await queue1.recordFailure(id: "survive-1", error: "Error 2")
+
+        let queue2 = PASyncQueue(storageURL: queueFileURL)
+        #expect(await queue2.retryCount(for: "survive-1") == 2)
+        #expect(await queue2.entry(for: "survive-1")?.lastError == "Error 2")
+    }
+
+    // 24. Exact Max Retry Boundary and Lifecycle
+    @Test func test24_ExactMaxRetryBoundaryAndLifecycle() async throws {
+        let queue = PASyncQueue(maxRetries: 3)
+        try await queue.enqueue(id: "lifecycle-1")
+
+        #expect(await queue.status(for: "lifecycle-1") == .pending)
+
+        try await queue.recordFailure(id: "lifecycle-1", error: "Error 1")
+        #expect(await queue.status(for: "lifecycle-1") == .retrying)
+        #expect(await queue.retryCount(for: "lifecycle-1") == 1)
+
+        try await queue.recordFailure(id: "lifecycle-1", error: "Error 2")
+        #expect(await queue.status(for: "lifecycle-1") == .retrying)
+        #expect(await queue.retryCount(for: "lifecycle-1") == 2)
+
+        try await queue.recordFailure(id: "lifecycle-1", error: "Error 3")
+        #expect(await queue.status(for: "lifecycle-1") == .failed)
+        #expect(await queue.retryCount(for: "lifecycle-1") == 3)
+        #expect(await queue.isFailed(id: "lifecycle-1") == true)
+    }
+
+    // 25. Exhausted Item Lifecycle and Reset
+    @Test func test25_ExhaustedItemLifecycleAndReset() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "exhausted-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue(maxRetries: 2)
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let record = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "exhausted-1"),
+                kind: .fact,
+                content: "Exhausted content",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+        )
+        try await localStore.upsert(record)
+        try await engine.enqueueLocalChange(id: "exhausted-1")
+
+        await cloudStore.setFailureSimulation(true)
+
+        // Run until exhausted (2 retries)
+        try? await engine.synchronize()
+        try? await engine.synchronize()
+
+        #expect(await queue.status(for: "exhausted-1") == .failed)
+        #expect(await queue.activePendingIDs().isEmpty)
+
+        // Engine synchronize skips exhausted item automatically
+        try await engine.synchronize()
+        #expect(await queue.count() == 1)
+
+        // Explicit reset restores item to .pending
+        try await queue.resetRetryCount(id: "exhausted-1")
+        #expect(await queue.status(for: "exhausted-1") == .pending)
+
+        await cloudStore.setFailureSimulation(false)
+        try await engine.synchronize()
+
+        #expect(await queue.count() == 0)
+        let synced = try await cloudStore.pull(id: "exhausted-1")
+        #expect(synced?.record.content == "Exhausted content")
+    }
+
+    // 26. Corrupt Queue Failed Backup Truthfulness
+    @Test func test26_CorruptQueueFailedBackupTruthfulness() async throws {
+        // Construct uncopyable URL in /proc/sys/fs where sidecar copyItem fails
+        let uncopyableURL = URL(fileURLWithPath: "/proc/sys/fs/corrupt_queue_\(UUID().uuidString).json")
+
+        let queue = PASyncQueue(storageURL: uncopyableURL)
+
+        // Invariant: If sidecar backup creation fails, queue MUST NOT claim a backup that failed to be created
+        #expect(await queue.corruptionBackupURL == nil)
+        #expect(await queue.hasCorruptedStorageBackup == false)
+    }
 }

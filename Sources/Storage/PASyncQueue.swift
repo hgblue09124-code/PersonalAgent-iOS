@@ -1,5 +1,12 @@
 import Foundation
 
+/// State of an item in the sync queue based on retry metadata and queue limits.
+public enum PASyncQueueStatus: String, Codable, Sendable, Equatable {
+    case pending
+    case retrying
+    case failed
+}
+
 /// Value object representing an entry in the sync queue with retry metadata.
 public struct PASyncQueueEntry: Codable, Sendable, Equatable {
     public let id: String
@@ -17,6 +24,16 @@ public struct PASyncQueueEntry: Codable, Sendable, Equatable {
         self.retryCount = retryCount
         self.lastAttemptAt = lastAttemptAt
         self.lastError = lastError
+    }
+
+    public func status(maxRetries: Int) -> PASyncQueueStatus {
+        if retryCount >= maxRetries {
+            return .failed
+        } else if retryCount > 0 {
+            return .retrying
+        } else {
+            return .pending
+        }
     }
 }
 
@@ -74,12 +91,18 @@ public actor PASyncQueue: Sendable {
             }
 
             if !loadedSuccessfully {
-                // Fail-closed corruption handling: back up unreadable file to preserve raw queue work on disk
+                // Truthful corruption handling: set backupURL ONLY if backup file exists or copyItem succeeds
                 let backupURL = url.appendingPathExtension("corrupt")
-                if !FileManager.default.fileExists(atPath: backupURL.path) {
-                    try? FileManager.default.copyItem(at: url, to: backupURL)
+                if FileManager.default.fileExists(atPath: backupURL.path) {
+                    self.corruptionBackupURL = backupURL
+                } else {
+                    do {
+                        try FileManager.default.copyItem(at: url, to: backupURL)
+                        self.corruptionBackupURL = backupURL
+                    } catch {
+                        self.corruptionBackupURL = nil
+                    }
                 }
-                self.corruptionBackupURL = backupURL
             }
         }
     }
@@ -87,9 +110,10 @@ public actor PASyncQueue: Sendable {
     public func enqueue(id: String) async throws {
         if entriesMap[id] == nil {
             pendingIDs.append(id)
+            entriesMap[id] = PASyncQueueEntry(id: id)
+            try persist()
         }
-        entriesMap[id] = PASyncQueueEntry(id: id)
-        try persist()
+        // Invariant: If item is already enqueued, do NOT reset its retryCount/metadata
     }
 
     public func dequeue() async throws -> String? {
@@ -136,6 +160,14 @@ public actor PASyncQueue: Sendable {
         try persist()
     }
 
+    public func status(for id: String) async -> PASyncQueueStatus? {
+        entriesMap[id]?.status(maxRetries: maxRetries)
+    }
+
+    public func isFailed(id: String) async -> Bool {
+        await status(for: id) == .failed
+    }
+
     public func contains(id: String) async -> Bool {
         entriesMap[id] != nil
     }
@@ -146,6 +178,10 @@ public actor PASyncQueue: Sendable {
 
     public func allPendingIDs() async -> [String] {
         pendingIDs
+    }
+
+    public func activePendingIDs() async -> [String] {
+        pendingIDs.filter { (entriesMap[$0]?.retryCount ?? 0) < maxRetries }
     }
 
     public func pendingEntries() async -> [PASyncQueueEntry] {
