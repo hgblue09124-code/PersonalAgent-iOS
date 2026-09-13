@@ -5,16 +5,6 @@ import PAStorage
 import PAMemory
 import PAArchitecture
 
-private final class DynamicAvailabilityState: @unchecked Sendable {
-    private let lock = NSLock()
-    private var _available: Bool
-    init(_ available: Bool) { self._available = available }
-    var available: Bool {
-        get { lock.withLock { _available } }
-        set { lock.withLock { _available = newValue } }
-    }
-}
-
 /// Private test double strictly isolated as test support in M5CloudStoreContractTests.
 /// Does not exist in production PAStorage runtime.
 private actor TestDoubleCloudStore<Record: StorageRecord>: CloudStore {
@@ -83,13 +73,10 @@ struct M5CloudStoreContractTests {
 
     // 2. provider abstraction
     @Test func testProviderAbstractionAndAvailabilityCheck() async throws {
-        let state = DynamicAvailabilityState(false)
-        let provider = AbstractCloudStorageProvider(identifier: "dynamic-provider") {
-            state.available
-        }
+        let provider = AbstractCloudStorageProvider(identifier: "dynamic-provider", isAvailable: false)
         let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
 
-        #expect(await cloudStore.provider.identifier == "dynamic-provider")
+        #expect(cloudStore.provider.identifier == "dynamic-provider")
 
         let record = MemoryStorageRecord(
             MemoryRecord(
@@ -130,7 +117,7 @@ struct M5CloudStoreContractTests {
         }
 
         // Make provider available
-        state.available = true
+        provider.setAvailable(true)
 
         // Push and pull should now succeed
         try await cloudStore.push(record)
