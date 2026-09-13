@@ -5,6 +5,7 @@ import PAStorage
 public actor InMemoryMemoryStore: MemoryStore {
     private var index: MemoryIndex
     private var historyMap: [String: [Int: MemoryStorageRecord]] = [:]
+    private var knownRevisionTokens: [String: Set<String>] = [:]
 
     public init() {
         self.index = MemoryIndex()
@@ -15,9 +16,9 @@ public actor InMemoryMemoryStore: MemoryStore {
         if index.record(for: record.id) != nil {
             throw MemoryError.duplicateID(record.id)
         }
-        index.index(record)
         let storageRec = MemoryStorageRecord(record)
-        recordHistory(storageRec)
+        try recordHistory(storageRec)
+        index.index(record)
     }
 
     public func retrieve(id: MemoryRecordID) async throws -> MemoryRecord? {
@@ -53,9 +54,9 @@ public actor InMemoryMemoryStore: MemoryStore {
             parentRevisionToken: existing.revisionToken,
             ancestorRevisionTokens: updatedAncestors
         )
-        index.index(committedRecord)
         let storageRec = MemoryStorageRecord(committedRecord)
-        recordHistory(storageRec)
+        try recordHistory(storageRec)
+        index.index(committedRecord)
     }
 
     public func forget(id: MemoryRecordID, reason: String) async throws {
@@ -82,9 +83,9 @@ public actor InMemoryMemoryStore: MemoryStore {
             parentRevisionToken: existing.revisionToken,
             ancestorRevisionTokens: updatedAncestors
         )
-        index.index(updated)
         let storageRec = MemoryStorageRecord(updated)
-        recordHistory(storageRec)
+        try recordHistory(storageRec)
+        index.index(updated)
     }
 
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
@@ -105,8 +106,9 @@ public actor InMemoryMemoryStore: MemoryStore {
             }
         }
         for record in records {
+            let storageRec = MemoryStorageRecord(record)
+            try recordHistory(storageRec)
             index.index(record)
-            recordHistory(MemoryStorageRecord(record))
         }
     }
 
@@ -117,15 +119,36 @@ public actor InMemoryMemoryStore: MemoryStore {
     public func clear() async throws {
         index.clear()
         historyMap.removeAll()
+        knownRevisionTokens.removeAll()
     }
 
-    private func recordHistory(_ storageRecord: MemoryStorageRecord) {
+    private func recordHistory(_ storageRecord: MemoryStorageRecord) throws {
         let id = storageRecord.id
         let ver = storageRecord.version
+        let token = storageRecord.revisionToken
+
+        guard !token.isEmpty else {
+            throw MemoryError.corruptRecord("Revision token cannot be empty")
+        }
+
+        if knownRevisionTokens[id] == nil {
+            knownRevisionTokens[id] = []
+        }
+
+        if knownRevisionTokens[id]?.contains(token) == true {
+            throw MemoryError.corruptRecord("Duplicate revision token \(token) detected for record \(id)")
+        }
+
         if historyMap[id] == nil {
             historyMap[id] = [:]
         }
+
+        if historyMap[id]?[ver] != nil {
+            throw MemoryError.corruptRecord("Duplicate revision history entry detected for \(id) at version \(ver)")
+        }
+
         historyMap[id]?[ver] = storageRecord
+        knownRevisionTokens[id]?.insert(token)
     }
 }
 
@@ -173,18 +196,8 @@ extension InMemoryMemoryStore: LocalStore {
 extension InMemoryMemoryStore: RevisionHistoryStore {
     public func fetchRevision(id: String, version: Int) async throws -> MemoryStorageRecord? {
         guard let versionMap = historyMap[id] else {
-            // Fallback to active index if version matches active head
-            if let active = index.record(for: MemoryRecordID(rawValue: id)), active.version == version {
-                return MemoryStorageRecord(active)
-            }
             return nil
         }
-        if let record = versionMap[version] {
-            return record
-        }
-        if let active = index.record(for: MemoryRecordID(rawValue: id)), active.version == version {
-            return MemoryStorageRecord(active)
-        }
-        return nil
+        return versionMap[version]
     }
 }

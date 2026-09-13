@@ -144,35 +144,26 @@ struct M5SyncEngineTests {
                 revisionToken: "token-v1"
             )
         )
-        let v2 = MemoryStorageRecord(
-            MemoryRecord(
-                id: MemoryRecordID(rawValue: "rec-multi-1"),
-                kind: .fact,
-                content: "V2 content",
-                provenance: Provenance(source: "user"),
-                version: 2,
-                parentVersion: 1,
-                revisionToken: "token-v2",
-                parentRevisionToken: "token-v1"
-            )
-        )
-        let v3 = MemoryStorageRecord(
-            MemoryRecord(
-                id: MemoryRecordID(rawValue: "rec-multi-1"),
-                kind: .fact,
-                content: "V3 content",
-                provenance: Provenance(source: "user"),
-                version: 3,
-                parentVersion: 2,
-                revisionToken: "token-v3",
-                parentRevisionToken: "token-v2"
-            )
-        )
 
         try await localStore.upsert(v1)
-        try await localStore.upsert(v2)
 
-        let result = await verifier.verifyLineage(candidate: v3, ancestor: v1)
+        // Perform sequential updates via store to advance history properly
+        let v1Fetched = try await localStore.fetch(id: "rec-multi-1")
+        #expect(v1Fetched != nil)
+
+        let v2Record = v1Fetched!.record.updating(content: "V2 content")
+        try await localStore.upsert(MemoryStorageRecord(v2Record))
+
+        let v2Fetched = try await localStore.fetch(id: "rec-multi-1")
+        #expect(v2Fetched != nil)
+
+        let v3Record = v2Fetched!.record.updating(content: "V3 content")
+        try await localStore.upsert(MemoryStorageRecord(v3Record))
+
+        let v3Fetched = try await localStore.fetch(id: "rec-multi-1")
+        #expect(v3Fetched != nil)
+
+        let result = await verifier.verifyLineage(candidate: v3Fetched!, ancestor: v1)
         #expect(result == .provenDescendant)
     }
 
@@ -295,18 +286,16 @@ struct M5SyncEngineTests {
                 revisionToken: "token-v1"
             )
         )
-        let v2 = MemoryStorageRecord(
-            MemoryRecord(
-                id: MemoryRecordID(rawValue: "rec-broken-1"),
-                kind: .fact,
-                content: "V2 content",
-                provenance: Provenance(source: "user"),
-                version: 2,
-                parentVersion: 1,
-                revisionToken: "token-v2-real",
-                parentRevisionToken: "token-v1"
-            )
-        )
+
+        try await localStore.upsert(v1)
+
+        // Update v1 -> v2 via store
+        let v1Fetched = try await localStore.fetch(id: "rec-broken-1")
+        #expect(v1Fetched != nil)
+
+        let v2Record = v1Fetched!.record.updating(content: "V2 content")
+        try await localStore.upsert(MemoryStorageRecord(v2Record))
+
         let v3Broken = MemoryStorageRecord(
             MemoryRecord(
                 id: MemoryRecordID(rawValue: "rec-broken-1"),
@@ -319,9 +308,6 @@ struct M5SyncEngineTests {
                 parentRevisionToken: "token-v2-wrong"
             )
         )
-
-        try await localStore.upsert(v1)
-        try await localStore.upsert(v2)
 
         let result = await verifier.verifyLineage(candidate: v3Broken, ancestor: v1)
         #expect(result == .notDescendant)
@@ -423,26 +409,32 @@ struct M5SyncEngineTests {
                 revisionToken: "shared-token-X"
             )
         )
+
+        try await localStore.upsert(v1Shared)
+
+        // Attempting to record second revision with same token throws corruptRecord
         let v2Shared = MemoryStorageRecord(
             MemoryRecord(
                 id: MemoryRecordID(rawValue: "rec-shared-1"),
                 kind: .fact,
                 content: "V2 sharing token with V1",
                 provenance: Provenance(source: "agent"),
-                version: 2,
-                parentVersion: 1,
-                revisionToken: "shared-token-X",
-                parentRevisionToken: "shared-token-X"
+                version: 1,
+                revisionToken: "shared-token-X"
             )
         )
 
-        try await localStore.upsert(v1Shared)
-
-        let result = await verifier.verifyLineage(candidate: v2Shared, ancestor: v1Shared)
-        if case .corruptHistory = result {
-            // Expected
-        } else {
-            Issue.record("Expected corruptHistory on shared revision token, got \(result)")
+        do {
+            try await localStore.upsert(v2Shared)
+            Issue.record("Expected upsert with duplicate revisionToken to fail")
+        } catch let err as MemoryError {
+            if case .corruptRecord = err {
+                // Expected
+            } else {
+                Issue.record("Expected corruptRecord, got \(err)")
+            }
+        } catch {
+            Issue.record("Expected MemoryError, got \(error)")
         }
     }
 
