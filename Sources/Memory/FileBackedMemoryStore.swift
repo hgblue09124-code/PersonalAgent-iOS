@@ -127,12 +127,11 @@ public actor FileBackedMemoryStore: MemoryStore {
         updatedAncestors.insert(existing.revisionToken)
         updatedAncestors.formUnion(record.ancestorRevisionTokens)
 
-        let freshToken: String
-        if record.revisionToken.isEmpty || record.revisionToken == existing.revisionToken || record.revisionToken == "\(record.id.rawValue)-v\(existing.version)" {
-            freshToken = "\(record.id.rawValue)-v\(existing.version + 1)"
-        } else {
-            freshToken = record.revisionToken
+        if record.revisionToken != existing.revisionToken,
+           knownRevisionTokens[record.id.rawValue]?.contains(record.revisionToken) == true {
+            throw MemoryError.corruptRecord("Duplicate revision token \(record.revisionToken) detected for record \(record.id.rawValue)")
         }
+        let freshToken = makeFreshRevisionToken(for: record.id.rawValue)
 
         let committedRecord = MemoryRecord(
             id: record.id,
@@ -193,7 +192,7 @@ public actor FileBackedMemoryStore: MemoryStore {
             metadata: existing.metadata,
             version: existing.version + 1,
             parentVersion: existing.version,
-            revisionToken: "\(existing.id.rawValue)-v\(existing.version + 1)",
+            revisionToken: makeFreshRevisionToken(for: existing.id.rawValue),
             parentRevisionToken: existing.revisionToken,
             ancestorRevisionTokens: updatedAncestors
         )
@@ -325,6 +324,14 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         historyMap[id]?[ver] = storageRecord
         knownRevisionTokens[id]?.insert(token)
+    }
+
+    private func makeFreshRevisionToken(for id: String) -> String {
+        var token: String
+        repeat {
+            token = UUID().uuidString
+        } while knownRevisionTokens[id]?.contains(token) == true
+        return token
     }
 
     private static func ensureDirectoryExists(at directoryURL: URL, fileManager: FileManager) throws {
