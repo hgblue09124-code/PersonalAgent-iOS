@@ -118,11 +118,14 @@ public final class DefaultLineageVerifier<History: RevisionHistoryStore>: Lineag
         // Direct parent step evaluation
         if candidate.version == ancestor.version + 1 {
             guard candidate.parentVersion == ancestor.version else { return .notDescendant }
-            guard let pToken = candidate.parentRevisionToken, !pToken.isEmpty, pToken == ancestor.revisionToken else {
+            guard let pToken = candidate.parentRevisionToken, !pToken.isEmpty else {
                 return .notDescendant
             }
             guard candidate.revisionToken != pToken else {
                 return .corruptHistory("Cyclic revision token: \(candidate.revisionToken)")
+            }
+            guard pToken == ancestor.revisionToken else {
+                return .notDescendant
             }
             return .provenDescendant
         }
