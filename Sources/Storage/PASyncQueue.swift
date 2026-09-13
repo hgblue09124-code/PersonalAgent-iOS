@@ -1,51 +1,126 @@
 import Foundation
 
+/// Value object representing an entry in the sync queue with retry metadata.
+public struct PASyncQueueEntry: Codable, Sendable, Equatable {
+    public let id: String
+    public var retryCount: Int
+    public var lastAttemptAt: Date?
+    public var lastError: String?
+
+    public init(
+        id: String,
+        retryCount: Int = 0,
+        lastAttemptAt: Date? = nil,
+        lastError: String? = nil
+    ) {
+        self.id = id
+        self.retryCount = retryCount
+        self.lastAttemptAt = lastAttemptAt
+        self.lastError = lastError
+    }
+}
+
 public actor PASyncQueue: Sendable {
     private var pendingIDs: [String] = []
-    private var pendingSet: Set<String> = []
+    private var entriesMap: [String: PASyncQueueEntry] = [:]
     private let storageURL: URL?
+    public let maxRetries: Int
 
     private struct PersistedQueue: Codable {
-        let pendingIDs: [String]
+        let pendingIDs: [String]?
+        let entries: [PASyncQueueEntry]?
     }
 
-    public init(storageURL: URL? = nil) {
+    public init(storageURL: URL? = nil, maxRetries: Int = 3) {
         self.storageURL = storageURL
+        self.maxRetries = maxRetries
+
         if let url = storageURL, FileManager.default.fileExists(atPath: url.path) {
-            if let data = try? Data(contentsOf: url),
-               let decoded = try? JSONDecoder().decode(PersistedQueue.self, from: data) {
-                self.pendingIDs = decoded.pendingIDs
-                self.pendingSet = Set(decoded.pendingIDs)
+            if let data = try? Data(contentsOf: url) {
+                let decoder = JSONDecoder()
+                if let decoded = try? decoder.decode(PersistedQueue.self, from: data) {
+                    if let loadedEntries = decoded.entries, !loadedEntries.isEmpty {
+                        var ids: [String] = []
+                        var map: [String: PASyncQueueEntry] = [:]
+                        for entry in loadedEntries {
+                            if map[entry.id] == nil {
+                                ids.append(entry.id)
+                            }
+                            map[entry.id] = entry
+                        }
+                        self.pendingIDs = ids
+                        self.entriesMap = map
+                    } else if let loadedIDs = decoded.pendingIDs {
+                        var ids: [String] = []
+                        var map: [String: PASyncQueueEntry] = [:]
+                        for id in loadedIDs {
+                            if map[id] == nil {
+                                ids.append(id)
+                                map[id] = PASyncQueueEntry(id: id)
+                            }
+                        }
+                        self.pendingIDs = ids
+                        self.entriesMap = map
+                    }
+                }
             }
         }
     }
 
     public func enqueue(id: String) async throws {
-        if !pendingSet.contains(id) {
+        if entriesMap[id] == nil {
             pendingIDs.append(id)
-            pendingSet.insert(id)
-            try persist()
         }
+        entriesMap[id] = PASyncQueueEntry(id: id)
+        try persist()
     }
 
     public func dequeue() async throws -> String? {
         guard !pendingIDs.isEmpty else { return nil }
         let id = pendingIDs.removeFirst()
-        pendingSet.remove(id)
+        entriesMap.removeValue(forKey: id)
         try persist()
         return id
     }
 
     public func remove(id: String) async throws {
-        if pendingSet.contains(id) {
+        if entriesMap[id] != nil {
             pendingIDs.removeAll { $0 == id }
-            pendingSet.remove(id)
+            entriesMap.removeValue(forKey: id)
             try persist()
         }
     }
 
+    public func recordFailure(id: String, error: String? = nil) async throws {
+        if var entry = entriesMap[id] {
+            entry.retryCount += 1
+            entry.lastAttemptAt = Date()
+            entry.lastError = error
+            entriesMap[id] = entry
+            try persist()
+        }
+    }
+
+    public func resetRetryCount(id: String) async throws {
+        if var entry = entriesMap[id] {
+            entry.retryCount = 0
+            entry.lastError = nil
+            entriesMap[id] = entry
+            try persist()
+        }
+    }
+
+    public func resetAllRetries() async throws {
+        for (id, var entry) in entriesMap {
+            entry.retryCount = 0
+            entry.lastError = nil
+            entriesMap[id] = entry
+        }
+        try persist()
+    }
+
     public func contains(id: String) async -> Bool {
-        pendingSet.contains(id)
+        entriesMap[id] != nil
     }
 
     public func count() async -> Int {
@@ -56,15 +131,39 @@ public actor PASyncQueue: Sendable {
         pendingIDs
     }
 
+    public func pendingEntries() async -> [PASyncQueueEntry] {
+        pendingIDs.compactMap { entriesMap[$0] }
+    }
+
+    public func entry(for id: String) async -> PASyncQueueEntry? {
+        entriesMap[id]
+    }
+
+    public func retryCount(for id: String) async -> Int {
+        entriesMap[id]?.retryCount ?? 0
+    }
+
+    public func isMaxRetriesExceeded(id: String) async -> Bool {
+        guard let entry = entriesMap[id] else { return false }
+        return entry.retryCount >= maxRetries
+    }
+
+    public func failedIDs() async -> [String] {
+        pendingIDs.filter { (entriesMap[$0]?.retryCount ?? 0) >= maxRetries }
+    }
+
     public func clear() async throws {
         pendingIDs.removeAll()
-        pendingSet.removeAll()
+        entriesMap.removeAll()
         try persist()
     }
 
     private func persist() throws {
         guard let url = storageURL else { return }
-        let payload = PersistedQueue(pendingIDs: pendingIDs)
+        let payload = PersistedQueue(
+            pendingIDs: pendingIDs,
+            entries: pendingIDs.compactMap { entriesMap[$0] }
+        )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(payload)
