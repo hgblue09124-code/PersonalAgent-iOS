@@ -790,11 +790,17 @@ struct M5SyncEngineTests {
         let garbageData = "NOT_VALID_JSON_GARBAGE_###".data(using: .utf8)!
         try garbageData.write(to: queueFileURL)
 
-        // Instantiating queue must gracefully fall back to empty state without throwing or crashing
+        // Instantiating queue must create sidecar corrupt backup to preserve raw work on disk
         let queue = PASyncQueue(storageURL: queueFileURL)
-        #expect(await queue.count() == 0)
+        #expect(await queue.hasCorruptedStorageBackup == true)
+        let backupURL = await queue.corruptionBackupURL
+        #expect(backupURL != nil)
+        #expect(FileManager.default.fileExists(atPath: backupURL!.path) == true)
 
-        // Enqueueing persists new valid payload atomically
+        let savedGarbage = try Data(contentsOf: backupURL!)
+        #expect(String(data: savedGarbage, encoding: .utf8) == "NOT_VALID_JSON_GARBAGE_###")
+
+        // Enqueueing persists new valid payload atomically alongside the backup file
         try await queue.enqueue(id: "atomic-rec-1")
         #expect(await queue.count() == 1)
 
@@ -850,5 +856,32 @@ struct M5SyncEngineTests {
         #expect(local2?.version == 2)
         #expect(cloud2?.version == 2)
         #expect(local2?.revisionToken == "token-v2")
+    }
+
+    // 21. Corrupt Queue Preserves Backup and Recoverable Data
+    @Test func test21_CorruptQueuePreservesBackupAndRecoverableData() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M5CorruptQueueBackup_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        let queueFileURL = tempDir.appendingPathComponent("queue.json")
+
+        let corruptContent = "{\"pendingIDs\": [\"rec-1\", \"rec-2\"], DAMAGED_JSON_END_STUB"
+        try corruptContent.data(using: .utf8)!.write(to: queueFileURL)
+
+        let queue = PASyncQueue(storageURL: queueFileURL)
+
+        // Invariant: corrupt storage MUST preserve sidecar backup so pending work semantics are never silently lost
+        #expect(await queue.hasCorruptedStorageBackup == true)
+        guard let backupURL = await queue.corruptionBackupURL else {
+            Issue.record("Expected corruptionBackupURL to be set")
+            return
+        }
+
+        let backedUpContent = try String(contentsOf: backupURL, encoding: .utf8)
+        #expect(backedUpContent == corruptContent)
+        #expect(backedUpContent.contains("rec-1"))
+        #expect(backedUpContent.contains("rec-2"))
     }
 }

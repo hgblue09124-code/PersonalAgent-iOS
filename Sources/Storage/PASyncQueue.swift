@@ -25,6 +25,11 @@ public actor PASyncQueue: Sendable {
     private var entriesMap: [String: PASyncQueueEntry] = [:]
     private let storageURL: URL?
     public let maxRetries: Int
+    public private(set) var corruptionBackupURL: URL?
+
+    public var hasCorruptedStorageBackup: Bool {
+        corruptionBackupURL != nil
+    }
 
     private struct PersistedQueue: Codable {
         let pendingIDs: [String]?
@@ -36,6 +41,7 @@ public actor PASyncQueue: Sendable {
         self.maxRetries = maxRetries
 
         if let url = storageURL, FileManager.default.fileExists(atPath: url.path) {
+            var loadedSuccessfully = false
             if let data = try? Data(contentsOf: url) {
                 let decoder = JSONDecoder()
                 if let decoded = try? decoder.decode(PersistedQueue.self, from: data) {
@@ -50,6 +56,7 @@ public actor PASyncQueue: Sendable {
                         }
                         self.pendingIDs = ids
                         self.entriesMap = map
+                        loadedSuccessfully = true
                     } else if let loadedIDs = decoded.pendingIDs {
                         var ids: [String] = []
                         var map: [String: PASyncQueueEntry] = [:]
@@ -61,8 +68,18 @@ public actor PASyncQueue: Sendable {
                         }
                         self.pendingIDs = ids
                         self.entriesMap = map
+                        loadedSuccessfully = true
                     }
                 }
+            }
+
+            if !loadedSuccessfully {
+                // Fail-closed corruption handling: back up unreadable file to preserve raw queue work on disk
+                let backupURL = url.appendingPathExtension("corrupt")
+                if !FileManager.default.fileExists(atPath: backupURL.path) {
+                    try? FileManager.default.copyItem(at: url, to: backupURL)
+                }
+                self.corruptionBackupURL = backupURL
             }
         }
     }
