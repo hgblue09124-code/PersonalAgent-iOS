@@ -5,13 +5,17 @@ public actor PASyncQueue: Sendable {
     private var pendingSet: Set<String> = []
     private let storageURL: URL?
 
+    private struct PersistedQueue: Codable {
+        let pendingIDs: [String]
+    }
+
     public init(storageURL: URL? = nil) {
         self.storageURL = storageURL
-        if let storageURL = storageURL, FileManager.default.fileExists(atPath: storageURL.path) {
-            if let data = try? Data(contentsOf: storageURL),
-               let decoded = try? JSONDecoder().decode([String].self, from: data) {
-                self.pendingIDs = decoded
-                self.pendingSet = Set(decoded)
+        if let url = storageURL, FileManager.default.fileExists(atPath: url.path) {
+            if let data = try? Data(contentsOf: url),
+               let decoded = try? JSONDecoder().decode(PersistedQueue.self, from: data) {
+                self.pendingIDs = decoded.pendingIDs
+                self.pendingSet = Set(decoded.pendingIDs)
             }
         }
     }
@@ -34,31 +38,40 @@ public actor PASyncQueue: Sendable {
 
     public func remove(id: String) async throws {
         if pendingSet.contains(id) {
-            pendingSet.remove(id)
             pendingIDs.removeAll { $0 == id }
+            pendingSet.remove(id)
             try persist()
         }
     }
 
-    public func allPendingIDs() async -> [String] {
-        return pendingIDs
-    }
-
     public func contains(id: String) async -> Bool {
-        return pendingSet.contains(id)
+        pendingSet.contains(id)
     }
 
     public func count() async -> Int {
-        return pendingIDs.count
+        pendingIDs.count
+    }
+
+    public func allPendingIDs() async -> [String] {
+        pendingIDs
+    }
+
+    public func clear() async throws {
+        pendingIDs.removeAll()
+        pendingSet.removeAll()
+        try persist()
     }
 
     private func persist() throws {
-        guard let storageURL = storageURL else { return }
-        let parentDir = storageURL.deletingLastPathComponent()
+        guard let url = storageURL else { return }
+        let payload = PersistedQueue(pendingIDs: pendingIDs)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(payload)
+        let parentDir = url.deletingLastPathComponent()
         if !FileManager.default.fileExists(atPath: parentDir.path) {
-            try FileManager.default.createDirectory(at: parentDir, withIntermediateDirectories: true)
+            try FileManager.default.createDirectory(at: parentDir, withIntermediateDirectories: true, attributes: nil)
         }
-        let data = try JSONEncoder().encode(pendingIDs)
-        try data.write(to: storageURL, options: .atomic)
+        try data.write(to: url, options: .atomic)
     }
 }

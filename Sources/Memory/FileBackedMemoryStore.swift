@@ -25,10 +25,12 @@ public struct MemoryStoreMetadata: Sendable, Codable, Equatable {
 public struct MemoryStoreSnapshot: Sendable, Codable, Equatable {
     public var metadata: MemoryStoreMetadata
     public var records: [MemoryRecord]
+    public var historyRecords: [MemoryRecord]?
 
-    public init(metadata: MemoryStoreMetadata, records: [MemoryRecord]) {
+    public init(metadata: MemoryStoreMetadata, records: [MemoryRecord], historyRecords: [MemoryRecord]? = nil) {
         self.metadata = metadata
         self.records = records
+        self.historyRecords = historyRecords
     }
 }
 
@@ -40,6 +42,7 @@ public actor FileBackedMemoryStore: MemoryStore {
     private let fileWriter: @Sendable (Data, URL) throws -> Void
     private var index: MemoryIndex
     private var metadata: MemoryStoreMetadata
+    private var historyMap: [String: [Int: MemoryStorageRecord]] = [:]
 
     private var storeFileURL: URL {
         directoryURL.appendingPathComponent("store.json")
@@ -74,6 +77,7 @@ public actor FileBackedMemoryStore: MemoryStore {
         )
         self.metadata = loaded.metadata
         self.index = loaded.index
+        self.historyMap = loaded.historyMap
     }
 
     public func capture(_ record: MemoryRecord) async throws {
@@ -84,16 +88,19 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
 
         index.index(record)
         metadata.updatedAt = Date()
         metadata.recordCount = index.count
+        recordHistory(MemoryStorageRecord(record))
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
             throw error
         }
     }
@@ -136,15 +143,18 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
 
         index.index(committedRecord)
         metadata.updatedAt = Date()
+        recordHistory(MemoryStorageRecord(committedRecord))
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
             throw error
         }
     }
@@ -177,15 +187,18 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
 
         index.index(updated)
         metadata.updatedAt = Date()
+        recordHistory(MemoryStorageRecord(updated))
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
             throw error
         }
     }
@@ -210,9 +223,11 @@ public actor FileBackedMemoryStore: MemoryStore {
 
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
 
         for record in records {
             index.index(record)
+            recordHistory(MemoryStorageRecord(record))
         }
         metadata.updatedAt = Date()
         metadata.recordCount = index.count
@@ -222,6 +237,7 @@ public actor FileBackedMemoryStore: MemoryStore {
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
             throw error
         }
     }
@@ -233,16 +249,19 @@ public actor FileBackedMemoryStore: MemoryStore {
     public func clear() async throws {
         let previousIndex = index
         let previousMetadata = metadata
+        let previousHistory = historyMap
 
         index.clear()
         metadata.recordCount = 0
         metadata.updatedAt = Date()
+        historyMap.removeAll()
 
         do {
             try persistToDisk()
         } catch {
             index = previousIndex
             metadata = previousMetadata
+            historyMap = previousHistory
             throw error
         }
     }
@@ -255,6 +274,16 @@ public actor FileBackedMemoryStore: MemoryStore {
         )
         self.metadata = loaded.metadata
         self.index = loaded.index
+        self.historyMap = loaded.historyMap
+    }
+
+    private func recordHistory(_ storageRecord: MemoryStorageRecord) {
+        let id = storageRecord.id
+        let ver = storageRecord.version
+        if historyMap[id] == nil {
+            historyMap[id] = [:]
+        }
+        historyMap[id]?[ver] = storageRecord
     }
 
     private static func ensureDirectoryExists(at directoryURL: URL, fileManager: FileManager) throws {
@@ -271,11 +300,12 @@ public actor FileBackedMemoryStore: MemoryStore {
         directoryURL: URL,
         fileManager: FileManager,
         decoder: JSONDecoder
-    ) throws -> (metadata: MemoryStoreMetadata, index: MemoryIndex) {
+    ) throws -> (metadata: MemoryStoreMetadata, index: MemoryIndex, historyMap: [String: [Int: MemoryStorageRecord]]) {
         let storeURL = directoryURL.appendingPathComponent("store.json")
 
         var loadedMeta = MemoryStoreMetadata(version: 1)
         var loadedIndex = MemoryIndex()
+        var loadedHistory: [String: [Int: MemoryStorageRecord]] = [:]
 
         if fileManager.fileExists(atPath: storeURL.path) {
             do {
@@ -296,8 +326,18 @@ public actor FileBackedMemoryStore: MemoryStore {
                     }
                     seenIDs.insert(record.id)
                     loadedIndex.index(record)
+                    let storageRec = MemoryStorageRecord(record)
+                    if loadedHistory[storageRec.id] == nil { loadedHistory[storageRec.id] = [:] }
+                    loadedHistory[storageRec.id]?[storageRec.version] = storageRec
                 }
 
+                if let histList = snapshot.historyRecords {
+                    for hRec in histList {
+                        let storageRec = MemoryStorageRecord(hRec)
+                        if loadedHistory[storageRec.id] == nil { loadedHistory[storageRec.id] = [:] }
+                        loadedHistory[storageRec.id]?[storageRec.version] = storageRec
+                    }
+                }
                 loadedMeta = snapshot.metadata
             } catch let err as MemoryError {
                 throw err
@@ -306,11 +346,17 @@ public actor FileBackedMemoryStore: MemoryStore {
             }
         }
 
-        return (loadedMeta, loadedIndex)
+        return (loadedMeta, loadedIndex, loadedHistory)
     }
 
     private func persistToDisk() throws {
-        let snapshot = MemoryStoreSnapshot(metadata: metadata, records: index.allRecords())
+        var allHistoryRecords: [MemoryRecord] = []
+        for (_, verMap) in historyMap {
+            for (_, storageRec) in verMap {
+                allHistoryRecords.append(storageRec.record)
+            }
+        }
+        let snapshot = MemoryStoreSnapshot(metadata: metadata, records: index.allRecords(), historyRecords: allHistoryRecords)
         do {
             let data = try jsonEncoder.encode(snapshot)
             try fileWriter(data, storeFileURL)
@@ -360,5 +406,23 @@ extension FileBackedMemoryStore: LocalStore {
 
     public func forget(id: String) async throws {
         try await forget(id: MemoryRecordID(rawValue: id), reason: "Forgotten via LocalStore interface")
+    }
+}
+
+extension FileBackedMemoryStore: RevisionHistoryStore {
+    public func fetchRevision(id: String, version: Int) async throws -> MemoryStorageRecord? {
+        guard let versionMap = historyMap[id] else {
+            if let active = index.record(for: MemoryRecordID(rawValue: id)), active.version == version {
+                return MemoryStorageRecord(active)
+            }
+            return nil
+        }
+        if let record = versionMap[version] {
+            return record
+        }
+        if let active = index.record(for: MemoryRecordID(rawValue: id)), active.version == version {
+            return MemoryStorageRecord(active)
+        }
+        return nil
     }
 }

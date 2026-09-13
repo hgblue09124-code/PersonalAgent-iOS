@@ -33,7 +33,7 @@ public protocol StorageRecord: Equatable, Sendable, Codable {
     ) -> Self
 
     /// Determines if this record is a proven descendant of an ancestor record.
-    /// Ancestry requires explicit parentVersion and parentRevisionToken matching or ancestorRevisionTokens membership.
+    /// Direct check strictly verifies candidate.version == ancestor.version + 1.
     func isDescendant(of ancestor: Self) -> Bool
 }
 
@@ -45,43 +45,127 @@ extension StorageRecord {
         // Must have non-empty revision tokens
         guard !self.revisionToken.isEmpty, !ancestor.revisionToken.isEmpty else { return false }
 
-        // Must have an explicit parentVersion matching self.version - 1 (sequential lineage step)
-        guard let pVer = self.parentVersion, pVer == self.version - 1 else {
+        // Revision token identity uniqueness invariant: revision tokens must not match across revisions
+        guard self.revisionToken != ancestor.revisionToken else { return false }
+
+        // Direct parent-child relationship strictly required for standalone pair evaluation
+        guard self.version == ancestor.version + 1 else {
             return false
         }
 
-        // Must have an explicit parentRevisionToken
-        guard let pToken = self.parentRevisionToken, !pToken.isEmpty else {
+        // Must have matching parentVersion
+        guard let pVer = self.parentVersion, pVer == ancestor.version else {
             return false
         }
 
-        // Cyclic check: revisionToken cannot equal parentRevisionToken
+        // Must have matching parentRevisionToken
+        guard let pToken = self.parentRevisionToken, !pToken.isEmpty, pToken == ancestor.revisionToken else {
+            return false
+        }
+
+        // Cyclic token check: revisionToken cannot equal parentRevisionToken
         guard self.revisionToken != pToken else {
             return false
         }
 
-        // Direct parent-child relationship (self.version == ancestor.version + 1)
-        if self.version == ancestor.version + 1 {
-            return pToken == ancestor.revisionToken
+        return true
+    }
+}
+
+/// Explicit representation of lineage verification results.
+public enum LineageProofResult: Sendable, Equatable {
+    case provenDescendant
+    case notDescendant
+    case unprovenGap(requiredVersionRange: ClosedRange<Int>)
+    case corruptHistory(String)
+}
+
+/// Vendor-agnostic protocol for retrieving authoritative historical revisions of a record.
+public protocol RevisionHistoryStore<Record>: Sendable {
+    associatedtype Record: StorageRecord
+
+    /// Fetches a specific historical revision of record `id` at `version`.
+    /// Throws an error if duplicate or conflicting records exist for `(id, version)`.
+    /// Returns `nil` if no committed historical revision exists at `version`.
+    func fetchRevision(id: String, version: Int) async throws -> Record?
+}
+
+/// Protocol for explicit lineage verification across single or multi-generation version steps.
+public protocol LineageVerifying<Record>: Sendable {
+    associatedtype Record: StorageRecord
+
+    /// Verifies whether `candidate` is a proven descendant of `ancestor`.
+    func verifyLineage(candidate: Record, ancestor: Record) async -> LineageProofResult
+}
+
+/// Reference implementation performing store-backed intermediate lineage verification.
+public final class DefaultLineageVerifier<History: RevisionHistoryStore>: LineageVerifying, Sendable {
+    public typealias Record = History.Record
+    private let historyStore: History
+
+    public init(historyStore: History) {
+        self.historyStore = historyStore
+    }
+
+    public func verifyLineage(candidate: Record, ancestor: Record) async -> LineageProofResult {
+        guard candidate.id == ancestor.id else { return .notDescendant }
+        guard candidate.version > ancestor.version else { return .notDescendant }
+        guard !candidate.revisionToken.isEmpty, !ancestor.revisionToken.isEmpty else { return .notDescendant }
+        guard candidate.revisionToken != ancestor.revisionToken else {
+            return .corruptHistory("Shared revision token between candidate and ancestor: \(candidate.revisionToken)")
         }
 
-        // Multi-generation relationship (self.version > ancestor.version + 1)
-        // Parent at self.version - 1 is distinct from ancestor at ancestor.version (< self.version - 1).
-        // Therefore, pToken cannot equal ancestor.revisionToken.
-        guard pToken != ancestor.revisionToken else {
-            return false
+        // Direct parent step evaluation
+        if candidate.version == ancestor.version + 1 {
+            guard candidate.parentVersion == ancestor.version else { return .notDescendant }
+            guard let pToken = candidate.parentRevisionToken, !pToken.isEmpty, pToken == ancestor.revisionToken else {
+                return .notDescendant
+            }
+            guard candidate.revisionToken != pToken else {
+                return .corruptHistory("Cyclic revision token: \(candidate.revisionToken)")
+            }
+            return .provenDescendant
         }
 
-        // Multi-generation ancestor count check: ancestorRevisionTokens must contain
-        // at least (self.version - 1) tokens to cover all intermediate parent steps.
-        guard self.ancestorRevisionTokens.count >= self.version - 1 else {
-            return false
+        // Multi-generation version gap evaluation (candidate.version > ancestor.version + 1)
+        var currentTarget = candidate
+
+        for v in stride(from: candidate.version - 1, through: ancestor.version, by: -1) {
+            let fetched: Record?
+            do {
+                fetched = try await historyStore.fetchRevision(id: candidate.id, version: v)
+            } catch {
+                return .corruptHistory("Duplicate or conflicting revisions at version \(v): \(error.localizedDescription)")
+            }
+
+            guard let fetchedRecord = fetched else {
+                return .unprovenGap(requiredVersionRange: (ancestor.version + 1)...(candidate.version - 1))
+            }
+
+            // Token identity check
+            guard fetchedRecord.revisionToken != currentTarget.revisionToken else {
+                return .corruptHistory("Shared revision token across versions: \(fetchedRecord.revisionToken)")
+            }
+
+            // Step-wise linkage check
+            guard currentTarget.parentVersion == fetchedRecord.version else {
+                return .notDescendant
+            }
+            guard let pToken = currentTarget.parentRevisionToken, !pToken.isEmpty, pToken == fetchedRecord.revisionToken else {
+                return .notDescendant
+            }
+            guard currentTarget.revisionToken != pToken else {
+                return .corruptHistory("Cyclic revision token: \(currentTarget.revisionToken)")
+            }
+
+            currentTarget = fetchedRecord
         }
 
-        // Ancestry requires self's ancestorRevisionTokens to contain BOTH its immediate parentRevisionToken
-        // AND the claimed ancestor's revisionToken, ensuring an unbroken parent chain exists.
-        return self.ancestorRevisionTokens.contains(pToken) &&
-               self.ancestorRevisionTokens.contains(ancestor.revisionToken)
+        if currentTarget.version == ancestor.version && currentTarget.revisionToken == ancestor.revisionToken {
+            return .provenDescendant
+        } else {
+            return .notDescendant
+        }
     }
 }
 

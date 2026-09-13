@@ -4,6 +4,7 @@ import PAStorage
 
 public actor InMemoryMemoryStore: MemoryStore {
     private var index: MemoryIndex
+    private var historyMap: [String: [Int: MemoryStorageRecord]] = [:]
 
     public init() {
         self.index = MemoryIndex()
@@ -15,6 +16,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             throw MemoryError.duplicateID(record.id)
         }
         index.index(record)
+        let storageRec = MemoryStorageRecord(record)
+        recordHistory(storageRec)
     }
 
     public func retrieve(id: MemoryRecordID) async throws -> MemoryRecord? {
@@ -51,6 +54,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             ancestorRevisionTokens: updatedAncestors
         )
         index.index(committedRecord)
+        let storageRec = MemoryStorageRecord(committedRecord)
+        recordHistory(storageRec)
     }
 
     public func forget(id: MemoryRecordID, reason: String) async throws {
@@ -78,6 +83,8 @@ public actor InMemoryMemoryStore: MemoryStore {
             ancestorRevisionTokens: updatedAncestors
         )
         index.index(updated)
+        let storageRec = MemoryStorageRecord(updated)
+        recordHistory(storageRec)
     }
 
     public func query(_ query: MemoryQuery) async throws -> MemoryQueryResult {
@@ -99,6 +106,7 @@ public actor InMemoryMemoryStore: MemoryStore {
         }
         for record in records {
             index.index(record)
+            recordHistory(MemoryStorageRecord(record))
         }
     }
 
@@ -108,6 +116,16 @@ public actor InMemoryMemoryStore: MemoryStore {
 
     public func clear() async throws {
         index.clear()
+        historyMap.removeAll()
+    }
+
+    private func recordHistory(_ storageRecord: MemoryStorageRecord) {
+        let id = storageRecord.id
+        let ver = storageRecord.version
+        if historyMap[id] == nil {
+            historyMap[id] = [:]
+        }
+        historyMap[id]?[ver] = storageRecord
     }
 }
 
@@ -149,5 +167,24 @@ extension InMemoryMemoryStore: LocalStore {
 
     public func forget(id: String) async throws {
         try await forget(id: MemoryRecordID(rawValue: id), reason: "Forgotten via LocalStore interface")
+    }
+}
+
+extension InMemoryMemoryStore: RevisionHistoryStore {
+    public func fetchRevision(id: String, version: Int) async throws -> MemoryStorageRecord? {
+        guard let versionMap = historyMap[id] else {
+            // Fallback to active index if version matches active head
+            if let active = index.record(for: MemoryRecordID(rawValue: id)), active.version == version {
+                return MemoryStorageRecord(active)
+            }
+            return nil
+        }
+        if let record = versionMap[version] {
+            return record
+        }
+        if let active = index.record(for: MemoryRecordID(rawValue: id)), active.version == version {
+            return MemoryStorageRecord(active)
+        }
+        return nil
     }
 }

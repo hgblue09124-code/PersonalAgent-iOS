@@ -8,18 +8,21 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
     private let cloudStore: Cloud
     private let queue: PASyncQueue
     private let conflictResolver: ConflictResolver?
+    private let lineageVerifier: (any LineageVerifying<Record>)?
     private var pendingConflictsMap: [String: SyncConflict<Record>] = [:]
 
     public init(
         localStore: Local,
         cloudStore: Cloud,
         queue: PASyncQueue = PASyncQueue(),
-        conflictResolver: ConflictResolver? = nil
+        conflictResolver: ConflictResolver? = nil,
+        lineageVerifier: (any LineageVerifying<Record>)? = nil
     ) {
         self.localStore = localStore
         self.cloudStore = cloudStore
         self.queue = queue
         self.conflictResolver = conflictResolver
+        self.lineageVerifier = lineageVerifier
     }
 
     public func enqueueLocalChange(id: String) async throws {
@@ -59,19 +62,32 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
             case (.some(let loc), .some(let rem)):
                 if loc == rem {
                     try await queue.remove(id: id)
-                } else if rem.isDescendant(of: loc) {
-                    // Remote is proven descendant of local -> update local safely
-                    try await updateLocalWithRemote(loc: loc, rem: rem)
-                    try await queue.remove(id: id)
-                } else if loc.isDescendant(of: rem) {
-                    // Local is proven descendant of remote -> push local to cloud
-                    try await cloudStore.push(loc)
-                    try await queue.remove(id: id)
+                } else if let verifier = lineageVerifier {
+                    let remoteToLocalProof = await verifier.verifyLineage(candidate: rem, ancestor: loc)
+                    let localToRemoteProof = await verifier.verifyLineage(candidate: loc, ancestor: rem)
+
+                    if remoteToLocalProof == .provenDescendant {
+                        try await updateLocalWithRemote(loc: loc, rem: rem)
+                        try await queue.remove(id: id)
+                    } else if localToRemoteProof == .provenDescendant {
+                        try await cloudStore.push(loc)
+                        try await queue.remove(id: id)
+                    } else {
+                        let conflict = SyncConflict(local: loc, remote: rem)
+                        pendingConflictsMap[id] = conflict
+                    }
                 } else {
-                    // Divergence without provable lineage -> produce SyncConflict.
-                    // MUST NOT silently overwrite either side!
-                    let conflict = SyncConflict(local: loc, remote: rem)
-                    pendingConflictsMap[id] = conflict
+                    // Fallback to direct pair check
+                    if rem.isDescendant(of: loc) {
+                        try await updateLocalWithRemote(loc: loc, rem: rem)
+                        try await queue.remove(id: id)
+                    } else if loc.isDescendant(of: rem) {
+                        try await cloudStore.push(loc)
+                        try await queue.remove(id: id)
+                    } else {
+                        let conflict = SyncConflict(local: loc, remote: rem)
+                        pendingConflictsMap[id] = conflict
+                    }
                 }
             }
         }
@@ -99,9 +115,6 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
         mergedAncestors.insert(conflict.local.revisionToken)
         mergedAncestors.insert(conflict.remote.revisionToken)
 
-        // Step-wise advance local store from conflict.local.version up to targetVersion.
-        // For each step v from (startVersion + 1) to targetVersion:
-        // derive the next parentVersion, revisionToken, parentRevisionToken from the actual committed local revision
         for _ in (startVersion + 1)...targetVersion {
             guard let currentCommittedLocal = try await localStore.fetch(id: id) else {
                 throw CloudStorageError.storeFailed("Failed to fetch current local revision during conflict resolution for \(id)")
@@ -123,7 +136,6 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
             throw CloudStorageError.storeFailed("Failed to fetch newly committed local record \(id)")
         }
 
-        // Push final authoritative revision to cloud store
         try await cloudStore.push(finalCommittedLocal)
 
         pendingConflictsMap.removeValue(forKey: id)
@@ -131,20 +143,18 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
     }
 
     private func updateLocalWithRemote(loc: Record, rem: Record) async throws {
-        // Local store currently holds loc (version loc.version).
-        // Step-wise advance local store deriving each step's parentVersion from the actual committed local revision,
-        // so intermediate versions increment sequentially until local store reaches rem.version.
         var currentLocalVersion = loc.version
         while currentLocalVersion < rem.version {
             guard let currentCommitted = try await localStore.fetch(id: loc.id) else {
                 throw CloudStorageError.storeFailed("Failed to fetch local record \(loc.id) during remote update")
             }
+            let stepToken = "\(loc.id)-v\(currentCommitted.version + 1)"
             var stepAncestors = rem.ancestorRevisionTokens
             stepAncestors.insert(currentCommitted.revisionToken)
             let stepPrepared = rem.updatingVersion(
                 currentCommitted.version,
                 parentVersion: currentCommitted.version,
-                revisionToken: rem.revisionToken,
+                revisionToken: stepToken,
                 parentRevisionToken: currentCommitted.revisionToken,
                 ancestorRevisionTokens: stepAncestors
             )
