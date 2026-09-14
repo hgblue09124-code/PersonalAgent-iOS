@@ -120,6 +120,8 @@ public actor SimulatedLatencyCloudStore<Record: StorageRecord>: CloudStore {
     private let yieldsPerOperation: Int
     private var activeRequests: Int = 0
     private var completedRequests: Int = 0
+    private var pushCount: Int = 0
+    private var pullCount: Int = 0
 
     public init(provider: any CloudStorageProvider, yieldsPerOperation: Int = 5) {
         self.provider = provider
@@ -131,6 +133,7 @@ public actor SimulatedLatencyCloudStore<Record: StorageRecord>: CloudStore {
             throw CloudStorageError.unavailable("Provider offline")
         }
         activeRequests += 1
+        pushCount += 1
         defer {
             activeRequests -= 1
             completedRequests += 1
@@ -148,6 +151,7 @@ public actor SimulatedLatencyCloudStore<Record: StorageRecord>: CloudStore {
             throw CloudStorageError.unavailable("Provider offline")
         }
         activeRequests += 1
+        pullCount += 1
         defer {
             activeRequests -= 1
             completedRequests += 1
@@ -160,8 +164,8 @@ public actor SimulatedLatencyCloudStore<Record: StorageRecord>: CloudStore {
         return records[id]
     }
 
-    public func requestMetrics() -> (active: Int, completed: Int) {
-        (activeRequests, completedRequests)
+    public func requestMetrics() -> (active: Int, completed: Int, pushes: Int, pulls: Int) {
+        (activeRequests, completedRequests, pushCount, pullCount)
     }
 }
 
@@ -305,7 +309,10 @@ struct M5HarnessAndPerformanceTests {
 
         #expect(await queue.count() == 0)
         let metrics = await latencyCloud.requestMetrics()
-        #expect(metrics.completed >= recordCount * 2) // push + pull checks
+        #expect(metrics.active == 0)
+        #expect(metrics.pushes == recordCount)
+        #expect(metrics.pulls == recordCount)
+        #expect(metrics.completed == recordCount * 2)
     }
 
     // 3. Fault Injection Resilience
