@@ -113,6 +113,76 @@ public actor FaultInjectingCloudStore<Record: StorageRecord>: CloudStore {
     }
 }
 
+/// Actor-isolated cloud store wrapper enabling deterministic barrier blocking and signaling for concurrency tests.
+public actor BlockingCloudStore<Record: StorageRecord>: CloudStore {
+    public let provider: any CloudStorageProvider
+    private var records: [String: Record] = [:]
+
+    private var enterContinuation: CheckedContinuation<Void, Never>?
+    private var releaseContinuation: CheckedContinuation<Void, Never>?
+    private var isBlocked: Bool = false
+    private var isEntered: Bool = false
+
+    public init(provider: any CloudStorageProvider) {
+        self.provider = provider
+    }
+
+    public func push(_ record: Record) async throws {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider offline")
+        }
+        await checkBarrier()
+        records[record.id] = record
+    }
+
+    public func pull(id: String) async throws -> Record? {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider offline")
+        }
+        await checkBarrier()
+        return records[id]
+    }
+
+    public func blockNextOperation() {
+        isBlocked = true
+        isEntered = false
+    }
+
+    public func waitForOperationEntry() async {
+        if isEntered { return }
+        await withCheckedContinuation { continuation in
+            enterContinuation = continuation
+        }
+    }
+
+    public func releaseBarrier() {
+        isBlocked = false
+        releaseContinuation?.resume()
+        releaseContinuation = nil
+    }
+
+    private func checkBarrier() async {
+        if isBlocked {
+            isEntered = true
+            let c = enterContinuation
+            enterContinuation = nil
+            c?.resume()
+
+            await withCheckedContinuation { continuation in
+                releaseContinuation = continuation
+            }
+        }
+    }
+
+    public func getRecordDirectly(id: String) -> Record? {
+        records[id]
+    }
+
+    public func recordCount() -> Int {
+        records.count
+    }
+}
+
 /// Actor-isolated cloud store simulating network latency via deterministic yield loops.
 public actor SimulatedLatencyCloudStore<Record: StorageRecord>: CloudStore {
     public let provider: any CloudStorageProvider
@@ -214,14 +284,14 @@ struct M5HarnessAndPerformanceTests {
     @Test func testConcurrentSyncOperationAndEnqueueing() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "concurrent-cloud", isAvailable: true)
-        let cloudStore = InMemoryCloudStore<MemoryStorageRecord>(provider: provider)
+        let cloudStore = BlockingCloudStore<MemoryStorageRecord>(provider: provider)
         let queue = PASyncQueue()
         let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
 
         let totalItems = 50
         let concurrentTasks = 10
 
-        // Perform concurrent enqueuing and store writes
+        // Perform initial concurrent enqueuing and store writes for 50 records
         await withTaskGroup(of: Void.self) { group in
             for t in 0..<concurrentTasks {
                 group.addTask {
@@ -245,10 +315,18 @@ struct M5HarnessAndPerformanceTests {
 
         #expect(await queue.count() == totalItems)
 
-        // Execute synchronize concurrently with additional local changes
-        async let syncTask: Void = engine.synchronize()
+        // Step 2: Deterministically block the test-only/instrumented cloud operation
+        await cloudStore.blockNextOperation()
 
-        // Additional concurrent enqueue during active sync
+        // Step 1: Start synchronize()
+        let syncTask = Task {
+            try await engine.synchronize()
+        }
+
+        // Step 3: Wait for an explicit signal that the cloud operation has been entered
+        await cloudStore.waitForOperationEntry()
+
+        // Step 4: Enqueue late record #51
         let lateID = "late-rec-999"
         let lateRec = MemoryStorageRecord(
             MemoryRecord(
@@ -262,21 +340,31 @@ struct M5HarnessAndPerformanceTests {
         try await localStore.upsert(lateRec)
         try await engine.enqueueLocalChange(id: lateID)
 
-        try await syncTask
+        // Step 5: Release the barrier
+        await cloudStore.releaseBarrier()
 
-        // Run second synchronize pass to drain remaining items if any
+        // Step 6: Await the first synchronization
+        try await syncTask.value
+
+        // Verify that late record #51 remains in the queue after the first pass
+        #expect(await queue.count() == 1)
+
+        // Step 7: Run the second synchronization
         try await engine.synchronize()
 
+        // Step 8: Assert #51 is drained and final local/queue/cloud invariants are correct
         #expect(await queue.count() == 0)
 
-        // Verify cloud store holds all 51 records
+        // Verify cloud store holds all 51 records (50 initial + 1 late)
         for i in 0..<totalItems {
-            let pulled = try await cloudStore.pull(id: "conc-rec-\(i)")
+            let pulled = await cloudStore.getRecordDirectly(id: "conc-rec-\(i)")
             #expect(pulled != nil)
             #expect(pulled?.id == "conc-rec-\(i)")
         }
-        let latePulled = try await cloudStore.pull(id: lateID)
+        let latePulled = await cloudStore.getRecordDirectly(id: lateID)
         #expect(latePulled != nil)
+        #expect(latePulled?.id == lateID)
+        #expect(await cloudStore.recordCount() == 51)
     }
 
     // 2. High-Latency Cloud Simulation
