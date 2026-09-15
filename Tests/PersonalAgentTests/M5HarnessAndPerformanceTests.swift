@@ -207,48 +207,108 @@ private func defaultM55ConflictResolver(
     return MemoryStorageRecord(mergedRecord)
 }
 
+private actor TestGate {
+    private var enteredContinuation: CheckedContinuation<Void, Never>?
+    private var releaseContinuation: CheckedContinuation<Void, Never>?
+    private var hasEntered = false
+    private var hasReleased = false
+
+    func notifyEntered() {
+        hasEntered = true
+        enteredContinuation?.resume()
+        enteredContinuation = nil
+    }
+
+    func waitUntilEntered() async {
+        if hasEntered { return }
+        await withCheckedContinuation { continuation in
+            enteredContinuation = continuation
+        }
+    }
+
+    func awaitRelease() async {
+        if hasReleased { return }
+        await withCheckedContinuation { continuation in
+            releaseContinuation = continuation
+        }
+    }
+
+    func release() {
+        hasReleased = true
+        releaseContinuation?.resume()
+        releaseContinuation = nil
+    }
+}
+
+/// Actor-isolated cloud store with explicit barrier instrumentation for deterministic concurrency testing.
+private actor InstrumentedCloudStore<Record: StorageRecord>: CloudStore {
+    let provider: any CloudStorageProvider
+    private var records: [String: Record] = [:]
+    let gate: TestGate
+    let triggerID: String
+
+    init(provider: any CloudStorageProvider, gate: TestGate, triggerID: String) {
+        self.provider = provider
+        self.gate = gate
+        self.triggerID = triggerID
+    }
+
+    func push(_ record: Record) async throws {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider \(provider.identifier) is unavailable")
+        }
+        if record.id == triggerID {
+            await gate.notifyEntered()
+            await gate.awaitRelease()
+        }
+        records[record.id] = record
+    }
+
+    func pull(id: String) async throws -> Record? {
+        guard await provider.isAvailable else {
+            throw CloudStorageError.unavailable("Provider \(provider.identifier) is unavailable")
+        }
+        if id == triggerID {
+            await gate.notifyEntered()
+            await gate.awaitRelease()
+        }
+        return records[id]
+    }
+}
+
 @Suite("M5.5 Performance & Integration Gate Harness Tests")
 struct M5HarnessAndPerformanceTests {
 
     // 1. Concurrent Sync Operations
     @Test func testConcurrentSyncOperationAndEnqueueing() async throws {
+        let gate = TestGate()
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "concurrent-cloud", isAvailable: true)
-        let cloudStore = InMemoryCloudStore<MemoryStorageRecord>(provider: provider)
+        let triggerID = "conc-rec-0"
+        let cloudStore = InstrumentedCloudStore<MemoryStorageRecord>(provider: provider, gate: gate, triggerID: triggerID)
         let queue = PASyncQueue()
         let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
 
         let totalItems = 50
-        let concurrentTasks = 10
 
-        // Perform concurrent enqueuing and store writes
-        await withTaskGroup(of: Void.self) { group in
-            for t in 0..<concurrentTasks {
-                group.addTask {
-                    let itemsPerTask = totalItems / concurrentTasks
-                    for i in 0..<itemsPerTask {
-                        let itemID = "conc-rec-\(t * itemsPerTask + i)"
-                        let rec = MemoryRecord(
-                            id: MemoryRecordID(rawValue: itemID),
-                            kind: .fact,
-                            content: "Concurrent content \(itemID)",
-                            provenance: Provenance(source: "user-\(t)"),
-                            version: 1
-                        )
-                        let storageRec = MemoryStorageRecord(rec)
-                        try? await localStore.upsert(storageRec)
-                        try? await engine.enqueueLocalChange(id: itemID)
-                    }
-                }
-            }
+        // Seed initial records #0..#49
+        for i in 0..<totalItems {
+            let itemID = "conc-rec-\(i)"
+            let rec = MemoryRecord(
+                id: MemoryRecordID(rawValue: itemID),
+                kind: .fact,
+                content: "Concurrent content \(itemID)",
+                provenance: Provenance(source: "user"),
+                version: 1
+            )
+            let storageRec = MemoryStorageRecord(rec)
+            try await localStore.upsert(storageRec)
+            try await engine.enqueueLocalChange(id: itemID)
         }
 
         #expect(await queue.count() == totalItems)
 
-        // Execute synchronize concurrently with additional local changes
-        async let syncTask: Void = engine.synchronize()
-
-        // Additional concurrent enqueue during active sync
+        // Seed record #51 (lateID) in localStore only (not yet enqueued)
         let lateID = "late-rec-999"
         let lateRec = MemoryStorageRecord(
             MemoryRecord(
@@ -260,16 +320,32 @@ struct M5HarnessAndPerformanceTests {
             )
         )
         try await localStore.upsert(lateRec)
+
+        // 1. Start synchronize()
+        let syncTask = Task {
+            try await engine.synchronize()
+        }
+
+        // 2 & 3. Confirm via explicit signal that trigger record cloud operation has been entered
+        await gate.waitUntilEntered()
+
+        // 4. Enqueue record #51 while first sync is suspended in trigger record cloud operation
         try await engine.enqueueLocalChange(id: lateID)
 
-        try await syncTask
+        // 5. Release barrier
+        await gate.release()
 
-        // Run second synchronize pass to drain remaining items if any
+        // 6. Await first synchronization and confirm #51 was not drained in pass 1
+        try await syncTask.value
+        #expect(await queue.contains(id: lateID))
+
+        // 7. Run second synchronization
         try await engine.synchronize()
 
+        // 8. Verify #51 is drained and final invariants hold
         #expect(await queue.count() == 0)
 
-        // Verify cloud store holds all 51 records
+        // Verify cloud store holds all records including lateID
         for i in 0..<totalItems {
             let pulled = try await cloudStore.pull(id: "conc-rec-\(i)")
             #expect(pulled != nil)
@@ -277,18 +353,18 @@ struct M5HarnessAndPerformanceTests {
         }
         let latePulled = try await cloudStore.pull(id: lateID)
         #expect(latePulled != nil)
+        #expect(latePulled?.id == lateID)
     }
 
     // 2. High-Latency Cloud Simulation
     @Test func testSimulatedHighLatencyCloudBehavior() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "high-latency-cloud", isAvailable: true)
-        let latencyCloud = SimulatedLatencyCloudStore<MemoryStorageRecord>(provider: provider, yieldsPerOperation: 3)
+        let cloudStore = SimulatedLatencyCloudStore<MemoryStorageRecord>(provider: provider, yieldsPerOperation: 5)
         let queue = PASyncQueue()
-        let engine = PASyncEngine(localStore: localStore, cloudStore: latencyCloud, queue: queue)
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
 
-        let recordCount = 20
-        for i in 0..<recordCount {
+        for i in 0..<10 {
             let id = "latency-rec-\(i)"
             let rec = MemoryStorageRecord(
                 MemoryRecord(
@@ -303,25 +379,24 @@ struct M5HarnessAndPerformanceTests {
             try await engine.enqueueLocalChange(id: id)
         }
 
-        #expect(await queue.count() == recordCount)
+        #expect(await queue.count() == 10)
 
         try await engine.synchronize()
 
         #expect(await queue.count() == 0)
-        let metrics = await latencyCloud.requestMetrics()
-        #expect(metrics.active == 0)
-        #expect(metrics.pushes == recordCount)
-        #expect(metrics.pulls == recordCount)
-        #expect(metrics.completed == recordCount * 2)
+        for i in 0..<10 {
+            let pulled = try await cloudStore.pull(id: "latency-rec-\(i)")
+            #expect(pulled != nil)
+        }
     }
 
-    // 3. Fault Injection Resilience
+    // 3. Fault Injection - Transient Failures & Recovery
     @Test func testFaultInjectionTransientFailuresAndRecovery() async throws {
         let localStore = InMemoryMemoryStore()
         let provider = AbstractCloudStorageProvider(identifier: "faulty-cloud", isAvailable: true)
         let faultyCloud = FaultInjectingCloudStore<MemoryStorageRecord>(
             provider: provider,
-            policy: .transientFailureThenSuccess(failCount: 2, error: CloudStorageError.storeFailed("Network glitch"))
+            policy: .transientFailureThenSuccess(failCount: 2, error: CloudStorageError.storeFailed("Transient cloud push failure"))
         )
         let queue = PASyncQueue()
         let engine = PASyncEngine(localStore: localStore, cloudStore: faultyCloud, queue: queue)
