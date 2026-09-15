@@ -47,7 +47,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         provider: any LLMProvider = DeterministicFakeProvider(),
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
-        additionalModules: [any Module] = []
+        modules: [any Module] = [ToolModule(tool: EchoTool())]
     ) async throws {
         let log = InMemoryEventLog()
         self.milestone = .m6
@@ -72,13 +72,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         self.providerRuntime = providerRuntime
 
         let moduleCatalog = ModuleCatalog()
-        try await moduleCatalog.register(EchoModule())
-        try await moduleCatalog.register(ValidationRejectModule())
-        try await moduleCatalog.register(PrivilegedModule())
-        try await moduleCatalog.register(HangModule())
-        try await moduleCatalog.register(FailingModule())
-        try await moduleCatalog.register(ToolModule(tool: EchoTool()))
-        for module in additionalModules {
+        for module in modules {
             try await moduleCatalog.register(module)
         }
         let moduleRuntime = ModuleRuntime(
@@ -87,7 +81,6 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
             eventLog: log,
             logger: logger
         )
-        try await moduleCatalog.register(EchoSkillModule(runtime: moduleRuntime))
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 

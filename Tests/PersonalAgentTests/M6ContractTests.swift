@@ -1,3 +1,4 @@
+import PASkills
 import Testing
 import Foundation
 import PAFoundation
@@ -11,11 +12,11 @@ import PAMemory
 import PAProviders
 import PAComposition
 import PAEvents
+import PATools
 
 @Suite("M6 Architectural Contract & Verification Gate Tests")
 struct M6ContractTests {
 
-    // Helper fake PolicyEvaluator & ApprovalGate
     struct RejectingApprovalGate: ApprovalGate {
         func requestApproval(for intent: ActionIntent) async throws -> Bool {
             return false
@@ -34,7 +35,6 @@ struct M6ContractTests {
         }
     }
 
-    // Custom Cognition pipeline mock for boundary verification
     struct MockCognitionPipeline: CognitionPipelining {
         let outputToReturn: CognitionOutput
         let reflectionToReturn: Reflection
@@ -48,7 +48,6 @@ struct M6ContractTests {
         }
     }
 
-    // Custom Agency looping mock
     struct MockAgencyLoop: AgencyLooping {
         let feedbackToReturn: CognitionFeedback
 
@@ -69,7 +68,10 @@ struct M6ContractTests {
     // 1 & 2. Plan and ActionProposal cross Cognition -> Agency explicitly
     @Test("Plan and ActionProposal cross Cognition -> Agency boundary explicitly")
     func planAndProposalsCrossBoundary() async throws {
-        let root = try await M6CompositionRoot(storeDirectoryURL: createTempDir())
+        let root = try await M6CompositionRoot(
+            storeDirectoryURL: createTempDir(),
+            modules: [ToolModule(tool: EchoTool())]
+        )
         try await root.runtime.start()
 
         let goal = Goal(statement: "Cross Boundary Goal")
@@ -100,7 +102,7 @@ struct M6ContractTests {
         try await root.runtime.activate(goalID: goal.id)
 
         let plan = Plan(goalID: goal.id, steps: [])
-        let proposal = ActionProposal(planID: plan.id, description: "forbidden", capabilities: .read)
+        let proposal = ActionProposal(planID: plan.id, toolID: ToolID(rawValue: "echo"), description: "forbidden", capabilities: .read)
         let rejectedOutput = CognitionOutput(
             plan: plan,
             proposals: [proposal],
@@ -115,7 +117,11 @@ struct M6ContractTests {
     // 4. Policy denial prevents execution
     @Test("Policy denial prevents execution")
     func policyDenialPreventsExecution() async throws {
-        let root = try await M6CompositionRoot(policy: DenyingPolicyEvaluator(), storeDirectoryURL: createTempDir())
+        let root = try await M6CompositionRoot(
+            policy: DenyingPolicyEvaluator(),
+            storeDirectoryURL: createTempDir(),
+            modules: [ToolModule(tool: EchoTool())]
+        )
         try await root.runtime.start()
 
         let goal = Goal(statement: "Denied Policy Goal")
@@ -135,7 +141,12 @@ struct M6ContractTests {
     @Test("Approval failure prevents execution")
     func approvalFailurePreventsExecution() async throws {
         let authorizer = DefaultActionAuthorizer()
-        let proposal = ActionProposal(planID: PlanID(), description: "sensitive action", capabilities: .write)
+        let proposal = ActionProposal(
+            planID: PlanID(),
+            toolID: ToolID(rawValue: "sensitive"),
+            description: "sensitive action",
+            capabilities: .write
+        )
 
         let deniedIntent = try await authorizer.authorize(
             proposal: proposal,
@@ -152,31 +163,46 @@ struct M6ContractTests {
         #expect(allowedIntent != nil)
     }
 
-    // 6 & 7. Authorized actions execute and produce Observations
-    @Test("Authorized actions execute and produce Observations")
-    func authorizedActionsExecuteAndProduceObservations() async throws {
-        let root = try await M6CompositionRoot(policy: PermissivePolicyEvaluator(), storeDirectoryURL: createTempDir())
+    // 6 & 7. Authorized actions execute and produce Observations; throws produce failed Observation
+    @Test("Authorized actions execute and produce Observations fail closed on error")
+    func authorizedActionsExecuteAndFailClosedOnError() async throws {
+        let root = try await M6CompositionRoot(
+            policy: PermissivePolicyEvaluator(),
+            storeDirectoryURL: createTempDir(),
+            modules: [ToolModule(tool: EchoTool()), FailingModule(), EchoModule()]
+        )
         try await root.runtime.start()
 
         let goal = Goal(statement: "Execute Goal")
         try await root.runtime.submit(goal: goal)
         try await root.runtime.activate(goalID: goal.id)
 
+        // Succeeded tool execution
         let plan = Plan(goalID: goal.id, steps: [PlanStep(index: 0, description: "echo", skillID: nil)])
-        let proposal = ActionProposal(planID: plan.id, description: "echo", capabilities: .read)
+        let proposal = ActionProposal(planID: plan.id, toolID: ToolID(rawValue: "tool.echo"), description: "echo", capabilities: .read)
         let output = CognitionOutput(plan: plan, proposals: [proposal], verification: VerificationResult(accepted: true, notes: "OK"))
 
         let feedback = try await root.orchestrator.executeAgency(output: output)
-
         #expect(feedback.observations.count == 1)
         #expect(feedback.observations[0].succeeded == true)
-        #expect(feedback.evaluation.disposition == .complete)
+        #expect(feedback.evaluation.disposition == AgencyDisposition.complete)
+
+        // Failed module execution fail-closed
+        let failProposal = ActionProposal(planID: plan.id, toolID: ToolID(rawValue: "mod.fail"), description: "failing", capabilities: .read)
+        let failOutput = CognitionOutput(plan: plan, proposals: [failProposal], verification: VerificationResult(accepted: true, notes: "OK"))
+        let failFeedback = try await root.orchestrator.executeAgency(output: failOutput)
+        #expect(failFeedback.observations.count == 1)
+        #expect(failFeedback.observations[0].succeeded == false)
+        #expect(failFeedback.evaluation.disposition == AgencyDisposition.continue)
     }
 
     // 8, 9, 10. Agency produces Evaluation; Observation + Evaluation re-enter Cognition; Reflection is post-execution
     @Test("Full M6 normative loop with post-execution Reflection feedback loop")
     func fullNormativeLoopWithReflection() async throws {
-        let root = try await M6CompositionRoot(storeDirectoryURL: createTempDir())
+        let root = try await M6CompositionRoot(
+            storeDirectoryURL: createTempDir(),
+            modules: [ToolModule(tool: EchoTool())]
+        )
         try await root.runtime.start()
 
         let goal = Goal(statement: "Complete Loop Goal")
@@ -184,7 +210,7 @@ struct M6ContractTests {
         try await root.runtime.activate(goalID: goal.id)
 
         let plan = Plan(goalID: goal.id, steps: [PlanStep(index: 0, description: "step", skillID: nil)])
-        let proposal = ActionProposal(planID: plan.id, description: "echo", capabilities: .read)
+        let proposal = ActionProposal(planID: plan.id, toolID: ToolID(rawValue: "tool.echo"), description: "echo", capabilities: .read)
         let output = CognitionOutput(plan: plan, proposals: [proposal], verification: VerificationResult(accepted: true, notes: "OK"))
         let mockCognition = MockCognitionPipeline(
             outputToReturn: output,
@@ -204,7 +230,7 @@ struct M6ContractTests {
             customAgency: mockAgency
         )
 
-        #expect(disposition == .complete)
+        #expect(disposition == AgencyDisposition.complete)
         let currentState = await root.runtime.currentState()
         #expect(currentState.activeGoalID == nil) // Goal completed deterministically
     }
@@ -257,7 +283,7 @@ struct M6ContractTests {
 
         let rejectedOutput = CognitionOutput(
             plan: Plan(goalID: goal1.id, steps: []),
-            proposals: [ActionProposal(planID: PlanID(), description: "x", capabilities: .read)],
+            proposals: [ActionProposal(planID: PlanID(), toolID: nil, description: "x", capabilities: .read)],
             verification: VerificationResult(accepted: false, notes: "Reject")
         )
         let mockRejectedCognition = MockCognitionPipeline(
@@ -278,19 +304,22 @@ struct M6ContractTests {
     // 16, 17, 18. Audit evidence, Concurrency & Import boundary verification
     @Test("M6 event auditability and imports manifest")
     func auditabilityAndManifest() async throws {
-        let root = try await M6CompositionRoot(storeDirectoryURL: createTempDir())
+        let root = try await M6CompositionRoot(
+            storeDirectoryURL: createTempDir(),
+            modules: [ToolModule(tool: EchoTool())]
+        )
         try await root.runtime.start()
 
         let goal = Goal(statement: "Audit Goal")
         try await root.runtime.submit(goal: goal)
         try await root.runtime.activate(goalID: goal.id)
 
-        let perception = Perception(rawInput: "audit task", source: "test")
+        let perception = Perception(rawInput: "echo", source: "test")
         _ = try await root.orchestrator.runCycle(perception: perception, goalID: goal.id)
 
         let events = await root.eventLog.allEvents()
         #expect(!events.isEmpty)
-        #expect(events.contains(where: { $0.kind == .stateUpdated }))
+        #expect(events.contains(where: { $0.kind == ExecutionEventKind.stateUpdated }))
 
         #expect(ArchitectureManifest.milestone == "M6")
         #expect(MilestoneGate.m6.cognitionLoop == true)

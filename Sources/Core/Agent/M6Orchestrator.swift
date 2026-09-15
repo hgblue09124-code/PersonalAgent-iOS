@@ -45,6 +45,7 @@ public actor M6Orchestrator: Sendable {
         let proposal = ActionProposal(
             actionID: ActionID(),
             planID: plan.id,
+            toolID: ToolID(rawValue: perception.rawInput),
             description: perception.rawInput,
             capabilities: .read
         )
@@ -85,20 +86,54 @@ public actor M6Orchestrator: Sendable {
             let moduleExecutor = runtime.coordination.modules
             let succeeded: Bool
             let summary: String
-            if let executor = moduleExecutor, let toolID = intent.toolID {
-                let schema = SchemaDocument(identifier: "m6-input")
-                let invocation = ModuleInvocation(
-                    moduleID: ModuleID(rawValue: toolID.rawValue),
-                    input: ModulePayload(schema: schema, fields: ["input": proposal.description, "message": proposal.description])
-                )
-                do {
-                    let result = try await executor.execute(invocation)
-                    succeeded = (result.state == ModuleExecutionState.completed)
-                    summary = result.output.fields["message"] ?? result.output.fields["output"] ?? "Executed module"
-                } catch {
-                    // Fall back to direct intent execution summary if module ID was not registered in ModuleCatalog
-                    succeeded = true
-                    summary = "Executed intent: \(intent.summary)"
+            if let toolID = intent.toolID {
+                if let executor = moduleExecutor {
+                    let candidates = [
+                        ModuleID(rawValue: toolID.rawValue),
+                        ModuleID(rawValue: "tool." + toolID.rawValue)
+                    ]
+
+                    var executionResult: ModuleResult?
+                    var lastError: Error?
+
+                    for candidate in candidates {
+                        let schema = SchemaDocument(identifier: candidate.rawValue.hasPrefix("tool.") ? "tool.\(toolID.rawValue).in" : "mod.\(toolID.rawValue).in")
+                        let payload = ModulePayload(
+                            schema: schema,
+                            fields: [
+                                "input": proposal.description,
+                                "message": proposal.description,
+                                "arguments": proposal.description,
+                                "text": proposal.description,
+                                "must": proposal.description
+                            ]
+                        )
+                        do {
+                            let res = try await executor.execute(ModuleInvocation(moduleID: candidate, input: payload))
+                            executionResult = res
+                            break
+                        } catch {
+                            lastError = error
+                            continue
+                        }
+                    }
+
+                    if let result = executionResult {
+                        succeeded = (result.state == ModuleExecutionState.completed)
+                        summary = result.output.fields["message"] ?? result.output.fields["output"] ?? result.output.fields["text"] ?? "Executed module \(toolID.rawValue)"
+                    } else {
+                        // Fail closed: execution error or missing module
+                        succeeded = false
+                        if let err = lastError {
+                            summary = "Execution error: \(err)"
+                        } else {
+                            summary = "Missing module executor for target \(toolID.rawValue)"
+                        }
+                    }
+                } else {
+                    // Fail closed: missing executor produces failed observation
+                    succeeded = false
+                    summary = "Missing module executor for target \(toolID.rawValue)"
                 }
             } else {
                 succeeded = true
@@ -123,58 +158,74 @@ public actor M6Orchestrator: Sendable {
         perception: Perception,
         goalID: GoalID,
         customCognition: (any CognitionPipelining)? = nil,
-        customAgency: (any AgencyLooping)? = nil
+        customAgency: (any AgencyLooping)? = nil,
+        maxCycles: Int = 5
     ) async throws -> AgencyDisposition {
-        // 1. Cognition: Perception → Context → Reasoning → Planning → ActionProposal → Verification
-        let output: CognitionOutput
-        if let customCognition {
-            output = try await customCognition.process(perception: perception, goalID: goalID)
-        } else {
-            output = try await processCognition(perception: perception, goalID: goalID)
-        }
+        var currentPerception = perception
+        var cycleCount = 0
 
-        // 2. Agency: Policy Authorization → Execution → Observation → Evaluation
-        let feedback: CognitionFeedback
-        if let customAgency {
-            feedback = try await customAgency.executePlan(
-                output: output,
-                policy: policy,
-                gate: approvalGate,
-                moduleExecutor: runtime.coordination.modules
+        while cycleCount < maxCycles {
+            cycleCount += 1
+
+            // 1. Cognition: Perception → Context → Reasoning → Planning → ActionProposal → Verification
+            let output: CognitionOutput
+            if let customCognition {
+                output = try await customCognition.process(perception: currentPerception, goalID: goalID)
+            } else {
+                output = try await processCognition(perception: currentPerception, goalID: goalID)
+            }
+
+            // 2. Agency: Policy Authorization → Execution → Observation → Evaluation
+            let feedback: CognitionFeedback
+            if let customAgency {
+                feedback = try await customAgency.executePlan(
+                    output: output,
+                    policy: policy,
+                    gate: approvalGate,
+                    moduleExecutor: runtime.coordination.modules
+                )
+            } else {
+                feedback = try await executeAgency(output: output)
+            }
+
+            // 3. Post-execution Reflection
+            let reflection: Reflection
+            if let customCognition {
+                reflection = try await customCognition.reflect(feedback: feedback)
+            } else {
+                reflection = Reflection(
+                    notes: "Executed \(feedback.observations.count) actions for goal \(goalID.rawValue)",
+                    shouldAdapt: feedback.evaluation.disposition == AgencyDisposition.continue
+                )
+            }
+
+            // 4. StateUpdate request -> Authoritative AgentRuntime / PAMemory
+            let stateUpdate = StateUpdate(
+                goalID: goalID,
+                memoryRecordsToCapture: [],
+                reflection: reflection
             )
-        } else {
-            feedback = try await executeAgency(output: output)
+            try await runtime.applyStateUpdate(stateUpdate)
+
+            // 5. Terminal / Cycle Decision via AgentRuntime
+            switch feedback.evaluation.disposition {
+            case .complete:
+                try await runtime.complete(goalID: goalID)
+                return .complete
+            case .abort:
+                try await runtime.abort(goalID: goalID)
+                return .abort
+            case .continue:
+                // Re-enter Cognition loop with feedback as perception input
+                currentPerception = Perception(
+                    rawInput: "Continuation cycle \(cycleCount + 1) based on feedback: \(feedback.evaluation.reason)",
+                    source: "feedback"
+                )
+            }
         }
 
-        // 3. Post-execution Reflection
-        let reflection: Reflection
-        if let customCognition {
-            reflection = try await customCognition.reflect(feedback: feedback)
-        } else {
-            reflection = Reflection(
-                notes: "Executed \(feedback.observations.count) actions for goal \(goalID.rawValue)",
-                shouldAdapt: feedback.evaluation.disposition == .continue
-            )
-        }
-
-        // 4. StateUpdate request -> Authoritative AgentRuntime / PAMemory
-        let stateUpdate = StateUpdate(
-            goalID: goalID,
-            memoryRecordsToCapture: [],
-            reflection: reflection
-        )
-        try await runtime.applyStateUpdate(stateUpdate)
-
-        // 5. Terminal / Cycle Decision via AgentRuntime
-        switch feedback.evaluation.disposition {
-        case .complete:
-            try await runtime.complete(goalID: goalID)
-        case .abort:
-            try await runtime.abort(goalID: goalID)
-        case .continue:
-            break
-        }
-
-        return feedback.evaluation.disposition
+        // Bounded retry exceeded: abort fail-closed
+        try await runtime.abort(goalID: goalID)
+        return .abort
     }
 }
