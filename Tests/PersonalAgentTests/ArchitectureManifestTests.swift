@@ -12,8 +12,8 @@ struct ArchitectureManifestTests {
         #expect(MilestoneGate.m0.providers == false)
     }
 
-    @Test func currentMilestoneIsM4MemoryOS() {
-        #expect(ArchitectureManifest.milestone == "M4")
+    @Test func currentMilestoneIsM6() {
+        #expect(ArchitectureManifest.milestone == "M6")
         #expect(ArchitectureManifest.contractFoundation == "M0")
         #expect(MilestoneGate.m2.providers == true)
         #expect(MilestoneGate.m2.skillRuntime == false)
