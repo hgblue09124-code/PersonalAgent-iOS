@@ -101,6 +101,23 @@ public struct VerificationResult: Sendable, Equatable {
     }
 }
 
+/// M6 artifact exposed across Cognition -> Agency boundary.
+public struct CognitionOutput: Sendable, Equatable {
+    public let plan: Plan
+    public let proposals: [ActionProposal]
+    public let verification: VerificationResult
+
+    public init(
+        plan: Plan,
+        proposals: [ActionProposal],
+        verification: VerificationResult
+    ) {
+        self.plan = plan
+        self.proposals = proposals
+        self.verification = verification
+    }
+}
+
 public struct Reflection: Sendable, Equatable {
     public let notes: String
     public let shouldAdapt: Bool
@@ -111,14 +128,26 @@ public struct Reflection: Sendable, Equatable {
     }
 }
 
+public struct StateUpdate: Sendable, Equatable {
+    public let goalID: GoalID
+    public let memoryRecordsToCapture: [MemoryRecord]
+    public let reflection: Reflection
+
+    public init(
+        goalID: GoalID,
+        memoryRecordsToCapture: [MemoryRecord] = [],
+        reflection: Reflection
+    ) {
+        self.goalID = goalID
+        self.memoryRecordsToCapture = memoryRecordsToCapture
+        self.reflection = reflection
+    }
+}
+
 public protocol Planning: Sendable {
     func plan(goalID: GoalID, context: ContextBundle, reasoning: ReasoningResult) async throws -> Plan
 }
 
 public protocol Executing: Sendable {
     func propose(plan: Plan) async throws -> [ActionProposal]
-}
-
-public protocol CognitionPipelining: Sendable {
-    func run(perception: Perception) async throws -> Reflection
 }
