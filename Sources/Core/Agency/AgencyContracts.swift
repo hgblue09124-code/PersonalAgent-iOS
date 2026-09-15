@@ -65,7 +65,7 @@ public struct DefaultActionAuthorizer: ActionAuthorizing {
     public func authorize(proposal: ActionProposal, policy: any PolicyEvaluating, gate: (any ApprovalGate)?) async throws -> ActionIntent? {
         let intent = ActionIntent(
             actionID: proposal.actionID,
-            toolID: ToolID(rawValue: proposal.description),
+            toolID: proposal.toolID,
             capabilities: proposal.capabilities,
             summary: proposal.description
         )

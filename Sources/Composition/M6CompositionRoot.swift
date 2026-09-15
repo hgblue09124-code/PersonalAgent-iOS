@@ -25,7 +25,8 @@ public struct DenyingPolicyEvaluator: PolicyEvaluating {
     }
 }
 
-/// M6 Composition Root wiring M6 responsibilities explicitly.
+/// M6 Production Composition Root wiring M6 responsibilities explicitly.
+/// Does NOT hard-wire fake or test modules.
 public struct M6CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
@@ -33,7 +34,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
     public let orchestrator: M6Orchestrator
     public let policy: any PolicyEvaluating
     public let eventLog: InMemoryEventLog
-    public let providerRuntime: ProviderRuntime
+    public let providerRuntime: ProviderRuntime?
     public let catalog: ProviderCatalog
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
@@ -44,10 +45,10 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         identity: AgentIdentity = AgentIdentity(displayName: "M6Agent"),
         logger: any AgentLogger = NullLogger(),
         policy: (any PolicyEvaluating)? = nil,
-        provider: any LLMProvider = DeterministicFakeProvider(),
+        provider: (any LLMProvider)? = nil,
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
-        additionalModules: [any Module] = []
+        modules: [any Module] = []
     ) async throws {
         let log = InMemoryEventLog()
         self.milestone = .m6
@@ -55,30 +56,29 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = log
         let policyEvaluator = policy ?? PermissivePolicyEvaluator()
         self.policy = policyEvaluator
-        self.catalog = ProviderCatalog(providers: [provider])
 
-        let providerRuntime = ProviderRuntime(
-            provider: provider,
-            eventLog: log,
-            logger: logger
-        )
-        let configuration = ProviderConfiguration(
-            providerID: provider.identity.id,
-            endpointURL: nil,
-            defaultModel: provider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
-        )
-        try await providerRuntime.configure(configuration)
-        try await providerRuntime.ready()
-        self.providerRuntime = providerRuntime
+        if let provider {
+            self.catalog = ProviderCatalog(providers: [provider])
+            let pRuntime = ProviderRuntime(
+                provider: provider,
+                eventLog: log,
+                logger: logger
+            )
+            let configuration = ProviderConfiguration(
+                providerID: provider.identity.id,
+                endpointURL: nil,
+                defaultModel: provider.identity.models.first?.id ?? ModelID(rawValue: "default-text")
+            )
+            try await pRuntime.configure(configuration)
+            try await pRuntime.ready()
+            self.providerRuntime = pRuntime
+        } else {
+            self.catalog = ProviderCatalog(providers: [])
+            self.providerRuntime = nil
+        }
 
         let moduleCatalog = ModuleCatalog()
-        try await moduleCatalog.register(EchoModule())
-        try await moduleCatalog.register(ValidationRejectModule())
-        try await moduleCatalog.register(PrivilegedModule())
-        try await moduleCatalog.register(HangModule())
-        try await moduleCatalog.register(FailingModule())
-        try await moduleCatalog.register(ToolModule(tool: EchoTool()))
-        for module in additionalModules {
+        for module in modules {
             try await moduleCatalog.register(module)
         }
         let moduleRuntime = ModuleRuntime(
@@ -87,7 +87,6 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
             eventLog: log,
             logger: logger
         )
-        try await moduleCatalog.register(EchoSkillModule(runtime: moduleRuntime))
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 

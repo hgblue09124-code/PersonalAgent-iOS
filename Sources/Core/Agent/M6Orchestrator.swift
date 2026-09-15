@@ -141,7 +141,7 @@ public actor M6Orchestrator: Sendable {
             let succeeded: Bool
             let summary: String
 
-            if let executor = moduleExecutor, let toolID = intent.toolID {
+            if let toolID = intent.toolID, let executor = moduleExecutor {
                 await emitEvent(
                     kind: .toolCalled,
                     payload: ["toolID": toolID.rawValue, "actionID": proposal.actionID.rawValue],
@@ -168,19 +168,6 @@ public actor M6Orchestrator: Sendable {
                     } else {
                         summary = "Module execution failed with state \(result.state.rawValue)"
                     }
-                } catch let err as ModuleRuntimeError {
-                    if case .unknownModule = err {
-                        succeeded = true
-                        summary = "Executed intent: \(intent.summary)"
-                    } else {
-                        succeeded = false
-                        summary = "Module execution failed for \(toolID.rawValue): \(err)"
-                        await emitEvent(
-                            kind: .failed,
-                            payload: ["actionID": proposal.actionID.rawValue, "toolID": toolID.rawValue, "reason": err.description],
-                            traceID: traceID
-                        )
-                    }
                 } catch {
                     succeeded = false
                     summary = "Module execution failed for \(toolID.rawValue): \(error)"
@@ -191,8 +178,18 @@ public actor M6Orchestrator: Sendable {
                     )
                 }
             } else {
-                succeeded = true
-                summary = "Executed intent: \(intent.summary)"
+                // Unknown/missing moduleExecutor or missing toolID -> fail closed
+                succeeded = false
+                if intent.toolID == nil {
+                    summary = "Action failed closed: no explicit toolID provided in ActionProposal/ActionIntent"
+                } else {
+                    summary = "Action failed closed: module executor unavailable"
+                }
+                await emitEvent(
+                    kind: .failed,
+                    payload: ["actionID": proposal.actionID.rawValue, "reason": summary],
+                    traceID: traceID
+                )
             }
 
             observations.append(Observation(actionID: proposal.actionID, summary: summary, succeeded: succeeded))
