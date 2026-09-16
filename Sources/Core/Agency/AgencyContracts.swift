@@ -2,7 +2,6 @@ import PAFoundation
 import PAPolicy
 import PATools
 import PACognition
-import PAModules
 
 public enum AgencyStage: String, Sendable, Codable, CaseIterable {
     case goal
@@ -44,78 +43,10 @@ public struct Evaluation: Sendable, Equatable {
     }
 }
 
-/// Execution evidence returned from Agency -> Cognition feedback loop.
-public struct CognitionFeedback: Sendable, Equatable {
-    public let observations: [Observation]
-    public let evaluation: Evaluation
-
-    public init(observations: [Observation], evaluation: Evaluation) {
-        self.observations = observations
-        self.evaluation = evaluation
-    }
+public protocol AgencyLooping: Sendable {
+    func run(goalID: GoalID) async throws -> Evaluation
 }
 
 public protocol ActionAuthorizing: Sendable {
-    func authorize(proposal: ActionProposal, policy: any PolicyEvaluating, gate: (any ApprovalGate)?) async throws -> ActionIntent?
-}
-
-public struct DefaultActionAuthorizer: ActionAuthorizing {
-    public init() {}
-
-    public func authorize(proposal: ActionProposal, policy: any PolicyEvaluating, gate: (any ApprovalGate)?) async throws -> ActionIntent? {
-        let intent = ActionIntent(
-            actionID: proposal.actionID,
-            toolID: proposal.toolID,
-            capabilities: proposal.capabilities,
-            summary: proposal.description
-        )
-
-        let decision = await policy.evaluate(intent)
-        if decision.allowed {
-            return intent
-        }
-
-        if decision.requiresApproval {
-            guard let gate = gate else {
-                return nil
-            }
-            let approved = try await gate.requestApproval(for: intent)
-            if approved {
-                return intent
-            }
-            return nil
-        }
-
-        return nil
-    }
-}
-
-public protocol CognitionPipelining: Sendable {
-    func process(perception: Perception, goalID: GoalID) async throws -> CognitionOutput
-    func reflect(feedback: CognitionFeedback) async throws -> Reflection
-    func run(perception: Perception) async throws -> Reflection
-}
-
-/// Extension for default backwards compatibility where needed
-extension CognitionPipelining {
-    public func run(perception: Perception) async throws -> Reflection {
-        let dummyGoalID = GoalID()
-        let output = try await process(perception: perception, goalID: dummyGoalID)
-        let feedback = CognitionFeedback(
-            observations: output.proposals.map { Observation(actionID: $0.actionID, summary: "executed", succeeded: output.verification.accepted) },
-            evaluation: Evaluation(goalID: dummyGoalID, disposition: .complete, reason: output.verification.notes)
-        )
-        return try await reflect(feedback: feedback)
-    }
-}
-
-public protocol AgencyLooping: Sendable {
-    func executePlan(
-        output: CognitionOutput,
-        policy: any PolicyEvaluating,
-        gate: (any ApprovalGate)?,
-        moduleExecutor: (any ModuleExecuting)?
-    ) async throws -> CognitionFeedback
-
-    func run(goalID: GoalID) async throws -> Evaluation
+    func authorize(_ proposal: ActionProposal, policy: any PolicyEvaluating) async throws -> ActionIntent
 }
