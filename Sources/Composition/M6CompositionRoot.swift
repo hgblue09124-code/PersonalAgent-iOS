@@ -9,9 +9,12 @@ import PAModules
 import PASkills
 import PATools
 import PAMemory
+import PAPolicy
+import PACognition
+import PAAgency
 
-/// Wires kernel, provider runtime, module runtime, and memory OS.
-public struct M4CompositionRoot: CompositionRoot, Sendable {
+/// Canonical M6 Composition Root wiring M6Orchestrator, AgentRuntime, Subsystem Runtimes, and Events.
+public struct M6CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
     public let runtime: AgentRuntime
@@ -22,37 +25,19 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
     public let moduleRuntime: ModuleRuntime
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
-
-    public var selectedProviderID: String {
-        catalog.identities.first?.id.rawValue ?? "none"
-    }
-
-    public func currentProviderIdentityID() async -> String {
-        await providerRuntime.identity.id.rawValue
-    }
-
-    public func currentProviderLifecycle() async -> String {
-        await providerRuntime.lifecycle.rawValue
-    }
-
-    public func registeredModuleIDs() async -> [String] {
-        await moduleCatalog.contracts().map(\.id.rawValue)
-    }
-
-    public func currentMemoryCount() async throws -> Int {
-        try await memoryRuntime.count()
-    }
+    public let orchestrator: M6Orchestrator
 
     public init(
-        identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
+        identity: AgentIdentity = AgentIdentity(displayName: "Personal M6"),
         logger: any AgentLogger = NullLogger(),
         provider: any LLMProvider = DeterministicFakeProvider(),
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
+        policy: (any PolicyEvaluating)? = nil,
         additionalModules: [any Module] = []
     ) async throws {
         let log = InMemoryEventLog()
-        self.milestone = .m4
+        self.milestone = .m6
         self.logger = logger
         self.eventLog = log
         self.catalog = ProviderCatalog(providers: [provider])
@@ -102,7 +87,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
                 guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
                     throw MemoryError.persistenceFailed("Unable to resolve Application Support directory for PAMemory")
                 }
-                defaultDirectory = appSupport.appendingPathComponent("PersonalAgent/PAMemory")
+                defaultDirectory = appSupport.appendingPathComponent("PersonalAgent/PAMemoryM6")
             }
             store = try FileBackedMemoryStore(directoryURL: defaultDirectory)
         }
@@ -114,7 +99,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         )
         self.memoryRuntime = memoryRuntime
 
-        self.runtime = try await AgentRuntime(
+        let agentRuntime = try await AgentRuntime(
             identity: identity,
             eventLog: log,
             logger: logger,
@@ -123,6 +108,16 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
                 modules: moduleRuntime,
                 memory: memoryRuntime
             )
+        )
+        try await agentRuntime.start()
+        self.runtime = agentRuntime
+
+        self.orchestrator = M6Orchestrator(
+            runtime: agentRuntime,
+            eventLog: log,
+            logger: logger,
+            policy: policy,
+            moduleRuntime: moduleRuntime
         )
     }
 }
