@@ -1,4 +1,3 @@
-import PACognition
 import Foundation
 import PAFoundation
 import PAEvents
@@ -189,35 +188,6 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             throw error
         }
     }
-
-
-    /// M6: Process a StateUpdate mutation request.
-    /// AgentRuntime remains the sole authority for AgentState and goal lifecycle updates.
-    /// Memory mutations go to memory, audit logs go to eventLog.
-    public func applyStateUpdate(_ update: StateUpdate) async throws {
-        guard LifecycleMachine.canExecute(in: lifecycle) else {
-            let error = KernelError.runtimeNotExecutable(lifecycle)
-            await emitRejection(command: "applyStateUpdate", error: error)
-            throw error
-        }
-
-        // Process memory updates if memory port is available
-        if let memory = coordination.memory {
-            for record in update.memoryRecordsToCapture {
-                try await memory.capture(record)
-            }
-        }
-
-        await emit(
-            kind: .stateUpdated,
-            payload: [
-                "goalID": update.goalID.rawValue,
-                "reflectionNotes": update.reflection.notes,
-                "shouldAdapt": String(update.reflection.shouldAdapt)
-            ]
-        )
-    }
-
 
     public func complete(goalID: GoalID) async throws {
         try await applyGoal(goalID, command: .complete)
