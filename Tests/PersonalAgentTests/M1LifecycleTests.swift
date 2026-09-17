@@ -7,7 +7,7 @@ import PAKernel
 struct M1LifecycleTests {
     @Test func validHappyPath() async throws {
         let log = InMemoryEventLog()
-        let runtime = try await AgentRuntime(
+        let runtime = await AgentRuntime(
             identity: AgentIdentity(id: AgentID(rawValue: "agent.1"), displayName: "A"),
             eventLog: log
         )
@@ -24,7 +24,7 @@ struct M1LifecycleTests {
     }
 
     @Test func stopFromCreatedIsTerminal() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         try await runtime.stop()
         #expect(await runtime.currentState().lifecycle == .stopped)
         await #expect(throws: KernelError.self) { try await runtime.start() }
@@ -32,7 +32,7 @@ struct M1LifecycleTests {
     }
 
     @Test func repeatedStartIsRejected() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         try await runtime.start()
         await #expect(throws: KernelError.invalidLifecycleTransition(from: .running, command: .start)) {
             try await runtime.start()
@@ -41,7 +41,7 @@ struct M1LifecycleTests {
     }
 
     @Test func pauseWhenNotRunningIsRejected() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         await #expect(throws: KernelError.invalidLifecycleTransition(from: .created, command: .pause)) {
             try await runtime.pause()
         }
@@ -49,7 +49,7 @@ struct M1LifecycleTests {
     }
 
     @Test func resumeWhenNotPausedIsRejected() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         try await runtime.start()
         await #expect(throws: KernelError.invalidLifecycleTransition(from: .running, command: .resume)) {
             try await runtime.resume()
@@ -58,7 +58,7 @@ struct M1LifecycleTests {
     }
 
     @Test func startFromPausedMustUseResume() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         try await runtime.start()
         try await runtime.pause()
         await #expect(throws: KernelError.invalidLifecycleTransition(from: .paused, command: .start)) {
@@ -69,7 +69,7 @@ struct M1LifecycleTests {
     }
 
     @Test func stopWhenStoppedIsRejectedAndStateHolds() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         try await runtime.stop()
         await #expect(throws: KernelError.invalidLifecycleTransition(from: .stopped, command: .stop)) {
             try await runtime.stop()
@@ -79,7 +79,7 @@ struct M1LifecycleTests {
 
     @Test func identityIsImmutableAcrossCommands() async throws {
         let identity = AgentIdentity(id: AgentID(rawValue: "fixed"), displayName: "Personal")
-        let runtime = try await AgentRuntime(identity: identity, eventLog: InMemoryEventLog())
+        let runtime = await AgentRuntime(identity: identity, eventLog: InMemoryEventLog())
         try await runtime.start()
         try await runtime.pause()
         try await runtime.resume()
@@ -159,8 +159,8 @@ extension Result {
     }
 }
 
-func makeRuntime() async throws -> AgentRuntime {
-    try await AgentRuntime(
+func makeRuntime() async -> AgentRuntime {
+    await AgentRuntime(
         identity: AgentIdentity(id: AgentID(rawValue: "agent.test"), displayName: "Test"),
         eventLog: InMemoryEventLog()
     )

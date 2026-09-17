@@ -30,7 +30,7 @@ public struct M2CompositionRoot: CompositionRoot, Sendable {
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
         logger: any AgentLogger = NullLogger(),
         provider: any LLMProvider = DeterministicFakeProvider()
-    ) async throws {
+    ) async {
         let log = InMemoryEventLog()
         self.milestone = .m2
         self.logger = logger
@@ -49,7 +49,7 @@ public struct M2CompositionRoot: CompositionRoot, Sendable {
         try? await providerRuntime.configure(configuration)
         try? await providerRuntime.ready()
         self.providerRuntime = providerRuntime
-        self.runtime = try await AgentRuntime(
+        self.runtime = await AgentRuntime(
             identity: identity,
             eventLog: log,
             logger: logger,

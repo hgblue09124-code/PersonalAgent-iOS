@@ -114,7 +114,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         )
         self.memoryRuntime = memoryRuntime
 
-        self.runtime = try await AgentRuntime(
+        self.runtime = await AgentRuntime(
             identity: identity,
             eventLog: log,
             logger: logger,

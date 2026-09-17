@@ -1,3 +1,4 @@
+
 /// Observable agent phase. UI may render this. UI may not set internals.
 public enum AgentPhase: String, Sendable, Codable, CaseIterable {
     case idle
@@ -8,12 +9,4 @@ public enum AgentPhase: String, Sendable, Codable, CaseIterable {
     case syncing
     case failed
     case completed
-}
-
-public enum GoalStatus: String, Sendable, Codable {
-    case proposed
-    case active
-    case blocked
-    case completed
-    case aborted
 }

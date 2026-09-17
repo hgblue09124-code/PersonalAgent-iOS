@@ -16,7 +16,7 @@ struct M4KernelIntegrationTests {
         #expect(coordination.isWiredForMemory)
         #expect(coordination.memory != nil)
 
-        let agentRuntime = try await AgentRuntime(
+        let agentRuntime = await AgentRuntime(
             identity: AgentIdentity(displayName: "TestAgent"),
             eventLog: InMemoryEventLog(),
             coordination: coordination

@@ -25,7 +25,6 @@ public enum KernelError: Error, Sendable, Equatable {
     case activeGoalConflict(existing: GoalID)
     case identityMutationRejected
     case modulePortUnavailable
-    case invalidStateUpdate(String)
 }
 
 extension KernelError: CustomStringConvertible {
@@ -47,8 +46,6 @@ extension KernelError: CustomStringConvertible {
             return "identityMutationRejected"
         case .modulePortUnavailable:
             return "modulePortUnavailable"
-        case .invalidStateUpdate(let reason):
-            return "invalidStateUpdate:\(reason)"
         }
     }
 }

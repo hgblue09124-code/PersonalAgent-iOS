@@ -7,8 +7,8 @@ import PAProviders
 
 @Suite("M2 composition")
 struct M2CompositionTests {
-    @Test func rootWiresKernelAndProviderWithoutNetwork() async throws {
-        let root = try await M2CompositionRoot(
+    @Test func rootWiresKernelAndProviderWithoutNetwork() async {
+        let root = await M2CompositionRoot(
             identity: AgentIdentity(id: AgentID(rawValue: "m2"), displayName: "Personal")
         )
         #expect(root.milestone == .m2)
@@ -21,8 +21,8 @@ struct M2CompositionTests {
         #expect(root.catalog.resolve(ProviderID(rawValue: "fake")) != nil)
     }
 
-    @Test func m1RootRemainsAvailable() async throws {
-        let root = try await M1CompositionRoot()
+    @Test func m1RootRemainsAvailable() async {
+        let root = await M1CompositionRoot()
         #expect(root.milestone == .m1)
         #expect(root.milestone.providers == false)
     }

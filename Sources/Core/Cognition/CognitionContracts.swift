@@ -75,20 +75,17 @@ public struct Plan: Sendable, Equatable {
 public struct ActionProposal: Sendable, Equatable {
     public let actionID: ActionID
     public let planID: PlanID
-    public let toolID: ToolID?
     public let description: String
     public let capabilities: CapabilityLevel
 
     public init(
         actionID: ActionID = ActionID(),
         planID: PlanID,
-        toolID: ToolID? = nil,
         description: String,
         capabilities: CapabilityLevel
     ) {
         self.actionID = actionID
         self.planID = planID
-        self.toolID = toolID
         self.description = description
         self.capabilities = capabilities
     }
@@ -111,22 +108,6 @@ public struct Reflection: Sendable, Equatable {
     public init(notes: String, shouldAdapt: Bool) {
         self.notes = notes
         self.shouldAdapt = shouldAdapt
-    }
-}
-
-public struct StateUpdate: Sendable, Equatable {
-    public let goalID: GoalID
-    public let targetStatus: GoalStatus
-    public let evidence: [String: String]
-
-    public init(
-        goalID: GoalID,
-        targetStatus: GoalStatus,
-        evidence: [String: String] = [:]
-    ) {
-        self.goalID = goalID
-        self.targetStatus = targetStatus
-        self.evidence = evidence
     }
 }
 

@@ -6,8 +6,8 @@ import PAKernel
 
 @Suite("M1 composition")
 struct M1CompositionTests {
-    @Test func m1RootExposesLiveRuntimeNotAStub() async throws {
-        let root = try await M1CompositionRoot(
+    @Test func m1RootExposesLiveRuntimeNotAStub() async {
+        let root = await M1CompositionRoot(
             identity: AgentIdentity(id: AgentID(rawValue: "comp"), displayName: "Personal")
         )
         #expect(root.milestone == .m1)

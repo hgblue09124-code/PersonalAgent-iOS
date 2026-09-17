@@ -6,7 +6,7 @@ import PAKernel
 @Suite("M1 goal management")
 struct M1GoalTests {
     @Test func submitCreatesProposedGoalWithoutActivating() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         let goal = Goal(id: GoalID(rawValue: "g1"), statement: "Remember the weekly review")
         try await runtime.submit(goal: goal)
         #expect(await runtime.currentState().activeGoalID == nil)
@@ -14,7 +14,7 @@ struct M1GoalTests {
     }
 
     @Test func emptyStatementIsRejected() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         await #expect(throws: KernelError.emptyGoalStatement) {
             try await runtime.submit(goal: Goal(statement: "   "))
         }
@@ -22,7 +22,7 @@ struct M1GoalTests {
     }
 
     @Test func activateRequiresRunningRuntime() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         let goal = Goal(id: GoalID(rawValue: "g2"), statement: "Draft architecture note")
         try await runtime.submit(goal: goal)
         await #expect(throws: KernelError.runtimeNotExecutable(.created)) {
@@ -97,7 +97,7 @@ struct M1GoalTests {
     }
 
     @Test func duplicateSubmitIsRejected() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         let goal = Goal(id: GoalID(rawValue: "dup"), statement: "Once")
         try await runtime.submit(goal: goal)
         await #expect(throws: KernelError.self) {
@@ -107,7 +107,7 @@ struct M1GoalTests {
     }
 
     @Test func abortFromProposed() async throws {
-        let runtime = try await makeRuntime()
+        let runtime = await makeRuntime()
         let goal = Goal(id: GoalID(rawValue: "p1"), statement: "Never start")
         try await runtime.submit(goal: goal)
         try await runtime.abort(goalID: goal.id)
@@ -150,7 +150,7 @@ struct M1GoalTests {
 }
 
 func startedRuntime() async throws -> AgentRuntime {
-    let runtime = try await makeRuntime()
+    let runtime = await makeRuntime()
     try await runtime.start()
     return runtime
 }

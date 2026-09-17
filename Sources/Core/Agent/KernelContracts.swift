@@ -18,6 +18,14 @@ public struct AgentIdentity: Hashable, Sendable, Codable {
     }
 }
 
+public enum GoalStatus: String, Sendable, Codable {
+    case proposed
+    case active
+    case blocked
+    case completed
+    case aborted
+}
+
 public struct Goal: Hashable, Sendable, Codable {
     public let id: GoalID
     public let statement: String
