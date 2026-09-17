@@ -1,45 +1,47 @@
 import Foundation
 import PAFoundation
-import PAEvents
 import PAObservability
+import PAEvents
+import PAProviders
 import PAModules
+import PAMemory
+import PACognition
 
-/// Authoritative kernel. Owns identity, lifecycle, goals, and coordination ports.
-/// M2 may attach a provider contract. M3 may attach a module port.
-/// The kernel requests module execution through `ModuleExecuting`.
-/// It does not contain concrete module implementations.
+/// M1 Kernel Runtime.
+///
+/// AgentRuntime is the central actor driving the agent state, goal lifecycles,
+/// and subsystem coordination.
 public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, GoalManaging {
-    public let sessionTrace: TraceID
-    public let coordination: KernelCoordinationBoundary
-
     private let identity: AgentIdentity
     private var lifecycle: AgentLifecycle
     private var phase: AgentPhase
     private var activeGoalID: GoalID?
-    private var goalStore: [GoalID: Goal]
+    private var goalStore: [GoalID: Goal] = [:]
+
     private let eventLog: any EventLog
-    private let clock: any KernelClock
     private let logger: any AgentLogger
+    private let clock: any KernelClock
+    private let sessionTrace: TraceID
+    public let coordination: KernelCoordinationBoundary
 
     public init(
-        identity: AgentIdentity,
+        identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
         eventLog: any EventLog,
-        clock: any KernelClock = SystemKernelClock(),
         logger: any AgentLogger = NullLoggerBridge(),
+        clock: any KernelClock = SystemKernelClock(),
         coordination: KernelCoordinationBoundary = KernelCoordinationBoundary(),
         sessionTrace: TraceID = TraceID()
-    ) async {
+    ) async throws {
         self.identity = identity
         self.lifecycle = .created
         self.phase = .idle
-        self.activeGoalID = nil
-        self.goalStore = [:]
         self.eventLog = eventLog
-        self.clock = clock
         self.logger = logger
-        self.coordination = coordination
+        self.clock = clock
         self.sessionTrace = sessionTrace
-        await emit(
+        self.coordination = coordination
+
+        try await emit(
             kind: .runtimeInitialized,
             payload: [
                 "agentID": identity.id.rawValue,
@@ -88,14 +90,14 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     public func submit(goal: Goal) async throws {
         if LifecycleMachine.terminal.contains(lifecycle) {
             let error = KernelError.runtimeNotExecutable(lifecycle)
-            await emitRejection(command: GoalCommand.submit.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.submit.rawValue, error: error)
             throw error
         }
 
         let statement = goal.statement.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !statement.isEmpty else {
             let error = KernelError.emptyGoalStatement
-            await emitRejection(command: GoalCommand.submit.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.submit.rawValue, error: error)
             throw error
         }
 
@@ -107,17 +109,22 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                 from: goalStore[stored.id]!.status,
                 command: .submit
             )
-            await emitRejection(command: GoalCommand.submit.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.submit.rawValue, error: error)
             throw error
         }
         goalStore[stored.id] = stored
-        await emit(
-            kind: .goalSubmitted,
-            payload: [
-                "goalID": stored.id.rawValue,
-                "status": stored.status.rawValue,
-            ]
-        )
+        do {
+            try await emit(
+                kind: .goalSubmitted,
+                payload: [
+                    "goalID": stored.id.rawValue,
+                    "status": stored.status.rawValue,
+                ]
+            )
+        } catch {
+            goalStore.removeValue(forKey: stored.id)
+            throw error
+        }
     }
 
     public func abort(goalID: GoalID) async throws {
@@ -138,15 +145,14 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     public func activate(goalID: GoalID) async throws {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
-            await emitRejection(command: GoalCommand.activate.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.activate.rawValue, error: error)
             throw error
         }
         if let current = activeGoalID, current != goalID {
             let error = KernelError.activeGoalConflict(existing: current)
-            await emitRejection(command: GoalCommand.activate.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.activate.rawValue, error: error)
             throw error
         }
-        // Reserve before the emit suspension point so a reentrant activate cannot both pass.
         let previousActive = activeGoalID
         activeGoalID = goalID
         do {
@@ -169,12 +175,12 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     public func resumeGoal(goalID: GoalID) async throws {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
-            await emitRejection(command: GoalCommand.resume.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.resume.rawValue, error: error)
             throw error
         }
         if let current = activeGoalID, current != goalID {
             let error = KernelError.activeGoalConflict(existing: current)
-            await emitRejection(command: GoalCommand.resume.rawValue, error: error)
+            try await emitRejection(command: GoalCommand.resume.rawValue, error: error)
             throw error
         }
         let previousActive = activeGoalID
@@ -196,16 +202,75 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
     }
 
+    /// Authoritative StateUpdate entry point.
+    public func applyStateUpdate(_ update: StateUpdate) async throws {
+        guard LifecycleMachine.canExecute(in: lifecycle) else {
+            let error = KernelError.runtimeNotExecutable(lifecycle)
+            try await emitRejection(command: "applyStateUpdate", error: error)
+            throw error
+        }
+        guard let goal = goalStore[update.goalID] else {
+            let error = KernelError.goalNotFound(update.goalID)
+            try await emitRejection(command: "applyStateUpdate", error: error)
+            throw error
+        }
+        guard !update.evidence.isEmpty else {
+            let error = KernelError.invalidStateUpdate("Missing required evidence for StateUpdate")
+            try await emitRejection(command: "applyStateUpdate", error: error)
+            throw error
+        }
+
+        let previousGoal = goal
+        let previousActiveGoalID = activeGoalID
+
+        do {
+            let targetStatus = update.targetStatus
+            if targetStatus == .completed {
+                try await complete(goalID: update.goalID)
+            } else if targetStatus == .aborted || targetStatus == .blocked {
+                try await abort(goalID: update.goalID)
+            } else if targetStatus == .active {
+                if goal.status == .blocked {
+                    try await resumeGoal(goalID: update.goalID)
+                } else if goal.status != .active {
+                    try await activate(goalID: update.goalID)
+                }
+            } else {
+                guard let next = GoalMachine.nextStatus(goal.status, command: .suspend) else {
+                    let error = KernelError.invalidGoalTransition(
+                        goalID: update.goalID,
+                        from: goal.status,
+                        command: .suspend
+                    )
+                    try await emitRejection(command: "applyStateUpdate", error: error)
+                    throw error
+                }
+                var updatedGoal = goal
+                updatedGoal.status = next
+                goalStore[update.goalID] = updatedGoal
+            }
+
+            var payload = update.evidence
+            payload["goalID"] = update.goalID.rawValue
+            payload["targetStatus"] = update.targetStatus.rawValue
+            try await emit(kind: .stateUpdated, payload: payload)
+        } catch {
+            goalStore[update.goalID] = previousGoal
+            activeGoalID = previousActiveGoalID
+            throw error
+        }
+    }
+
     /// Minimum coordination port: kernel requests execution, runtime owns it.
     public func invokeModule(_ invocation: ModuleInvocation) async throws -> ModuleResult {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
-            await emitRejection(command: "invokeModule", error: error)
+            try await emitRejection(command: "invokeModule", error: error)
             throw error
         }
         guard let modules = coordination.modules else {
             let error = KernelError.modulePortUnavailable
-            await emitRejection(command: "invokeModule", error: error)
+            try await emitRejection(command: "invokeModule", error: error)
             throw error
         }
         return try await modules.execute(invocation)
@@ -214,16 +279,16 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     private func applyRuntime(_ command: RuntimeCommand) async throws {
         switch LifecycleMachine.apply(lifecycle, command: command) {
         case .failure(let error):
-            await emitRejection(command: command.rawValue, error: error)
+            try await emitRejection(command: command.rawValue, error: error)
             throw error
         case .success(let next):
             if LifecycleMachine.terminal.contains(next) {
-                await parkActiveGoalForTerminalLifecycle()
+                try await parkActiveGoalForTerminalLifecycle()
             }
             let previous = lifecycle
             lifecycle = next
             phase = LifecycleMachine.phase(for: next)
-            await emit(
+            try await emit(
                 kind: LifecycleMachine.eventKind(for: command),
                 payload: [
                     "from": previous.rawValue,
@@ -236,7 +301,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
 
     /// Stop is terminal. An active goal cannot remain executable.
     /// Pause keeps the pointer: execution is frozen, the goal is still current.
-    private func parkActiveGoalForTerminalLifecycle() async {
+    private func parkActiveGoalForTerminalLifecycle() async throws {
         guard let id = activeGoalID, var existing = goalStore[id] else {
             activeGoalID = nil
             return
@@ -244,7 +309,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         if existing.status == .active {
             existing.status = .blocked
             goalStore[id] = existing
-            await emit(
+            try await emit(
                 kind: .goalBlocked,
                 payload: [
                     "goalID": id.rawValue,
@@ -261,7 +326,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     private func applyGoal(_ id: GoalID, command: GoalCommand) async throws {
         guard var existing = goalStore[id] else {
             let error = KernelError.goalNotFound(id)
-            await emitRejection(command: command.rawValue, error: error)
+            try await emitRejection(command: command.rawValue, error: error)
             throw error
         }
         guard let next = GoalMachine.nextStatus(existing.status, command: command) else {
@@ -270,13 +335,13 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                 from: existing.status,
                 command: command
             )
-            await emitRejection(command: command.rawValue, error: error)
+            try await emitRejection(command: command.rawValue, error: error)
             throw error
         }
         let previous = existing.status
         existing.status = next
         goalStore[id] = existing
-        await emit(
+        try await emit(
             kind: GoalMachine.eventKind(for: command),
             payload: [
                 "goalID": id.rawValue,
@@ -287,8 +352,8 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         )
     }
 
-    private func emitRejection(command: String, error: KernelError) async {
-        await emit(
+    private func emitRejection(command: String, error: KernelError) async throws {
+        try await emit(
             kind: .commandRejected,
             payload: [
                 "command": command,
@@ -297,7 +362,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         )
     }
 
-    private func emit(kind: ExecutionEventKind, payload: [String: String]) async {
+    private func emit(kind: ExecutionEventKind, payload: [String: String]) async throws {
         let timestamp = await clock.now()
         let event = ExecutionEvent(
             traceID: sessionTrace,
@@ -324,6 +389,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                     metadata: ["kind": kind.rawValue]
                 )
             )
+            throw error
         }
     }
 }

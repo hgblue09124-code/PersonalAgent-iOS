@@ -32,6 +32,31 @@ struct ImportBoundaryTests {
         #expect(violations.isEmpty)
     }
 
+    @Test func kernelAndCoreDoNotImportConcreteStorageCloudOrUI() throws {
+        let coreDir = repositoryRoot().appendingPathComponent("Sources").appendingPathComponent("Core")
+        let forbiddenImports: Set<String> = [
+            "PAProvidersGrok",
+            "PAProvidersOpenAI",
+            "PAProvidersOpenAICompatible",
+            "PAProvidersLocal",
+            "PAStorage",
+            "SwiftUI",
+            "UIKit",
+            "AppKit",
+            "URLSession",
+            "Supabase",
+            "Firebase"
+        ]
+
+        let swiftFiles = try files(under: coreDir, suffix: ".swift")
+        for file in swiftFiles {
+            let contents = try String(contentsOf: file, encoding: .utf8)
+            let imports = Set(importedModules(in: contents))
+            let intersection = imports.intersection(forbiddenImports)
+            #expect(intersection.isEmpty, "Core file \(file.lastPathComponent) contains forbidden imports: \(intersection)")
+        }
+    }
+
     @Test func packageDoesNotDependOnCompanionRepos() throws {
         let package = try String(
             contentsOf: repositoryRoot().appendingPathComponent("Package.swift"),

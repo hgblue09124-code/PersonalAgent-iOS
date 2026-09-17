@@ -6,7 +6,7 @@ import PAKernel
 @Suite("M1 concurrency")
 struct M1ConcurrencyTests {
     @Test func concurrentCommandsLeaveAValidStableState() async throws {
-        let runtime = await makeRuntime()
+        let runtime = try await makeRuntime()
         try await runtime.start()
         await withTaskGroup(of: Void.self) { group in
             group.addTask { try? await runtime.pause() }
