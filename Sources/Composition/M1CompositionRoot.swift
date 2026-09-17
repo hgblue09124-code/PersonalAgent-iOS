@@ -14,12 +14,12 @@ public struct M1CompositionRoot: CompositionRoot, Sendable {
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
         logger: any AgentLogger = NullLogger()
-    ) async {
+    ) async throws {
         let log = InMemoryEventLog()
         self.milestone = .m1
         self.logger = logger
         self.eventLog = log
-        self.runtime = await AgentRuntime(
+        self.runtime = try await AgentRuntime(
             identity: identity,
             eventLog: log,
             logger: logger

@@ -3,14 +3,21 @@ import PAFoundation
 import PAObservability
 
 public enum ExecutionEventKind: String, Sendable, Codable {
+    case perceptionReceived
     case goalSubmitted
     case contextBuilt
     case planProduced
     case actionProposed
+    case actionAuthorized
+    case actionDenied
+    case actionExecuted
+    case observationProduced
+    case evaluationCompleted
+    case reflectionCompleted
+    case stateUpdated
     case toolCalled
     case providerInvoked
     case verificationCompleted
-    case stateUpdated
     case approvalRequested
     case approvalResolved
     case failed

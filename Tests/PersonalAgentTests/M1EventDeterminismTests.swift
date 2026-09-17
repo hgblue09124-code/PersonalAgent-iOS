@@ -7,7 +7,7 @@ import PAKernel
 struct M1EventDeterminismTests {
     @Test func startEmitsInitializedThenStarted() async throws {
         let log = InMemoryEventLog()
-        let runtime = await AgentRuntime(
+        let runtime = try await AgentRuntime(
             identity: AgentIdentity(id: AgentID(rawValue: "e1"), displayName: "E"),
             eventLog: log,
             sessionTrace: TraceID(rawValue: "trace.1")
@@ -19,7 +19,7 @@ struct M1EventDeterminismTests {
 
     @Test func rejectedCommandEmitsWithoutMutatingLifecycle() async throws {
         let log = InMemoryEventLog()
-        let runtime = await AgentRuntime(
+        let runtime = try await AgentRuntime(
             identity: AgentIdentity(displayName: "E"),
             eventLog: log
         )
@@ -48,7 +48,7 @@ struct M1EventDeterminismTests {
 
     @Test func rejectionPayloadIsStructured() async throws {
         let log = InMemoryEventLog()
-        let runtime = await AgentRuntime(
+        let runtime = try await AgentRuntime(
             identity: AgentIdentity(displayName: "E"),
             eventLog: log
         )
@@ -62,7 +62,7 @@ struct M1EventDeterminismTests {
     @Test func coordinationPortsRemainUninvoked() async throws {
         let ports = KernelCoordinationBoundary()
         #expect(ports.isWiredForCognition == false)
-        let runtime = await AgentRuntime(
+        let runtime = try await AgentRuntime(
             identity: AgentIdentity(displayName: "E"),
             eventLog: InMemoryEventLog(),
             coordination: ports
@@ -75,7 +75,7 @@ struct M1EventDeterminismTests {
 
 private func playStandardSequence() async throws -> [ExecutionEventKind] {
     let log = InMemoryEventLog()
-    let runtime = await AgentRuntime(
+    let runtime = try await AgentRuntime(
         identity: AgentIdentity(id: AgentID(rawValue: "same"), displayName: "Same"),
         eventLog: log,
         sessionTrace: TraceID(rawValue: "same.trace")
