@@ -1,7 +1,7 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
-/// M0–M4 package graph.
+/// M0–M6 package graph.
 ///
 /// Dependency direction is downward only:
 ///   App -> Composition -> Kernel -> Cognition/Agency/Policy

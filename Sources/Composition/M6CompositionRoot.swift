@@ -9,88 +9,79 @@ import PAModules
 import PASkills
 import PATools
 import PAMemory
+import PAPolicy
+import PACognition
+import PAAgency
 
-/// Wires kernel, provider runtime, module runtime, and memory OS.
-public struct M4CompositionRoot: CompositionRoot, Sendable {
+/// Canonical M6 Composition Root wiring M6Orchestrator, AgentRuntime, Subsystem Runtimes, and Events.
+/// Production composition uses clean explicit dependency injection without test-fixture pollution.
+public struct M6CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
     public let runtime: AgentRuntime
-    public let eventLog: InMemoryEventLog
-    public let providerRuntime: ProviderRuntime
+    public let eventLog: any EventLog
+    public let providerRuntime: ProviderRuntime?
     public let catalog: ProviderCatalog
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
-
-    public var selectedProviderID: String {
-        catalog.identities.first?.id.rawValue ?? "none"
-    }
-
-    public func currentProviderIdentityID() async -> String {
-        await providerRuntime.identity.id.rawValue
-    }
-
-    public func currentProviderLifecycle() async -> String {
-        await providerRuntime.lifecycle.rawValue
-    }
-
-    public func registeredModuleIDs() async -> [String] {
-        await moduleCatalog.contracts().map(\.id.rawValue)
-    }
-
-    public func currentMemoryCount() async throws -> Int {
-        try await memoryRuntime.count()
-    }
+    public let orchestrator: M6Orchestrator
 
     public init(
-        identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
+        identity: AgentIdentity = AgentIdentity(displayName: "Personal M6"),
         logger: any AgentLogger = NullLogger(),
-        provider: any LLMProvider = DeterministicFakeProvider(),
+        eventLog: (any EventLog)? = nil,
+        provider: (any LLMProvider)? = nil,
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
-        additionalModules: [any Module] = []
+        policy: (any PolicyEvaluating)? = nil,
+        approvalGate: (any ApprovalGate)? = nil,
+        modules: [any Module] = [],
+        tools: [any Tool] = []
     ) async throws {
-        let log = InMemoryEventLog()
-        self.milestone = .m4
+        let log = eventLog ?? InMemoryEventLog()
+        self.milestone = .m6
         self.logger = logger
         self.eventLog = log
-        self.catalog = ProviderCatalog(providers: [provider])
+
+        // 1. Provider setup
+        let activeProvider = provider ?? DeterministicFakeProvider()
+        self.catalog = ProviderCatalog(providers: [activeProvider])
 
         let providerRuntime = ProviderRuntime(
-            provider: provider,
+            provider: activeProvider,
             eventLog: log,
             logger: logger
         )
         let configuration = ProviderConfiguration(
-            providerID: provider.identity.id,
+            providerID: activeProvider.identity.id,
             endpointURL: nil,
-            defaultModel: provider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
+            defaultModel: activeProvider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
         )
         try await providerRuntime.configure(configuration)
         try await providerRuntime.ready()
         self.providerRuntime = providerRuntime
 
+        // 2. Module setup (clean production registration, no test fixtures)
         let moduleCatalog = ModuleCatalog()
-        try await moduleCatalog.register(EchoModule())
-        try await moduleCatalog.register(ValidationRejectModule())
-        try await moduleCatalog.register(PrivilegedModule())
-        try await moduleCatalog.register(HangModule())
-        try await moduleCatalog.register(FailingModule())
-        try await moduleCatalog.register(ToolModule(tool: EchoTool()))
-        for module in additionalModules {
-            try await moduleCatalog.register(module)
+        for mod in modules {
+            try await moduleCatalog.register(mod)
         }
+        for tool in tools {
+            try await moduleCatalog.register(ToolModule(tool: tool))
+        }
+
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
             eventLog: log,
             logger: logger
         )
-        try await moduleCatalog.register(EchoSkillModule(runtime: moduleRuntime))
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 
+        // 3. Memory setup
         let store: any MemoryStore
         if let memoryStore {
             store = memoryStore
@@ -102,7 +93,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
                 guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
                     throw MemoryError.persistenceFailed("Unable to resolve Application Support directory for PAMemory")
                 }
-                defaultDirectory = appSupport.appendingPathComponent("PersonalAgent/PAMemory")
+                defaultDirectory = appSupport.appendingPathComponent("PersonalAgent/PAMemoryM6")
             }
             store = try FileBackedMemoryStore(directoryURL: defaultDirectory)
         }
@@ -114,15 +105,31 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         )
         self.memoryRuntime = memoryRuntime
 
-        self.runtime = try await AgentRuntime(
+        // 4. Kernel Coordination & Runtime
+        let coordination = KernelCoordinationBoundary(
+            policy: policy,
+            provider: activeProvider,
+            modules: moduleRuntime,
+            memory: memoryRuntime
+        )
+
+        let agentRuntime = try await AgentRuntime(
             identity: identity,
             eventLog: log,
             logger: logger,
-            coordination: KernelCoordinationBoundary(
-                provider: provider,
-                modules: moduleRuntime,
-                memory: memoryRuntime
-            )
+            coordination: coordination
+        )
+        try await agentRuntime.start()
+        self.runtime = agentRuntime
+
+        // 5. M6 Orchestrator
+        self.orchestrator = M6Orchestrator(
+            runtime: agentRuntime,
+            eventLog: log,
+            logger: logger,
+            policy: policy,
+            approvalGate: approvalGate,
+            moduleRuntime: moduleRuntime
         )
     }
 }

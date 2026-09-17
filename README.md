@@ -4,7 +4,7 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M5 — Local + Cloud Storage / Sync Architecture.** M0–M4 remain in place.
+**Milestone: M6 — Cognitive Agent Loop & Multi-Cycle Orchestration.** M0–M5 remain in place.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 

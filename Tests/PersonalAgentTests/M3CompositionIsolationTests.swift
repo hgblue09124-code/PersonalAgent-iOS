@@ -154,7 +154,7 @@ struct M3CompositionIsolationTests {
     }
 
     @Test func unwiredKernelRejectsModulePort() async throws {
-        let runtime = await AgentRuntime(
+        let runtime = try await AgentRuntime(
             identity: AgentIdentity(displayName: "bare"),
             eventLog: InMemoryEventLog()
         )
