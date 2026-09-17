@@ -81,7 +81,7 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 
-        self.runtime = await AgentRuntime(
+        self.runtime = try await AgentRuntime(
             identity: identity,
             eventLog: log,
             logger: logger,

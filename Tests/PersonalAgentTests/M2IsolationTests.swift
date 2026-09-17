@@ -38,9 +38,9 @@ struct M2IsolationTests {
         #expect(hits.isEmpty)
     }
 
-    @Test func kernelCanHoldProviderContractWithoutExecuting() async {
+    @Test func kernelCanHoldProviderContractWithoutExecuting() async throws {
         let provider = DeterministicFakeProvider()
-        let runtime = await AgentRuntime(
+        let runtime = try await AgentRuntime(
             identity: AgentIdentity(displayName: "Personal"),
             eventLog: InMemoryEventLog(),
             coordination: KernelCoordinationBoundary(provider: provider)
@@ -53,7 +53,7 @@ struct M2IsolationTests {
 
     @Test func providerRuntimeDoesNotMutateAgentLifecycle() async throws {
         let log = InMemoryEventLog()
-        let agent = await AgentRuntime(
+        let agent = try await AgentRuntime(
             identity: AgentIdentity(displayName: "Personal"),
             eventLog: log
         )
