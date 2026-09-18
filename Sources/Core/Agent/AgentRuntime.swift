@@ -12,7 +12,7 @@ import PACognition
 /// AgentRuntime is the central actor driving the agent state, goal lifecycles,
 /// and subsystem coordination.
 public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, GoalManaging {
-    private let identity: AgentIdentity
+    public let identity: AgentIdentity
     private var lifecycle: AgentLifecycle
     private var phase: AgentPhase
     private var activeGoalID: GoalID?
