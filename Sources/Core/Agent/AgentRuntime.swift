@@ -16,6 +16,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     private var lifecycle: AgentLifecycle
     private var phase: AgentPhase
     private var activeGoalID: GoalID?
+    private var appliedMutationTokens: Set<UUID> = []
     private var goalStore: [GoalID: Goal] = [:]
 
     private let eventLog: any EventLog
@@ -203,6 +204,10 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     }
 
     /// Authoritative StateUpdate entry point.
+    public func hasAppliedMutation(token: UUID) async -> Bool {
+        appliedMutationTokens.contains(token)
+    }
+
     public func applyStateUpdate(_ update: StateUpdate) async throws {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
@@ -254,6 +259,9 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             payload["goalID"] = update.goalID.rawValue
             payload["targetStatus"] = update.targetStatus.rawValue
             try await emit(kind: .stateUpdated, payload: payload)
+            if let token = update.mutationToken {
+                appliedMutationTokens.insert(token)
+            }
         } catch {
             goalStore[update.goalID] = previousGoal
             activeGoalID = previousActiveGoalID

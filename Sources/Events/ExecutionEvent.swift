@@ -75,13 +75,19 @@ public struct ExecutionEvent: Sendable, Codable, Equatable {
 public protocol EventLog: Sendable {
     func append(_ event: ExecutionEvent) async throws
     func events(for traceID: TraceID) async throws -> [ExecutionEvent]
+    func allEvents() async throws -> [ExecutionEvent]
+}
+
+extension EventLog {
+    public func allEvents() async throws -> [ExecutionEvent] {
+        try await events(for: TraceID(rawValue: "all"))
+    }
 }
 
 public protocol ExecutionTrace: Sendable {
     var traceID: TraceID { get }
 }
 
-/// Replay is designed in M0. Implementation may stay minimal until M8.
 public protocol ExecutionReplaying: Sendable {
     func replay(traceID: TraceID) async throws
 }

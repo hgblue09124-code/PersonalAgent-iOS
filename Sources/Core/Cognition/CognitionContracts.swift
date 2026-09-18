@@ -1,3 +1,4 @@
+import Foundation
 import PAFoundation
 import PAProviders
 import PAMemory
@@ -72,7 +73,7 @@ public struct Plan: Sendable, Equatable {
     }
 }
 
-public struct ActionProposal: Sendable, Equatable {
+public struct ActionProposal: Sendable, Codable, Equatable {
     public let actionID: ActionID
     public let planID: PlanID
     public let toolID: ToolID?
@@ -104,7 +105,7 @@ public struct VerificationResult: Sendable, Equatable {
     }
 }
 
-public struct Reflection: Sendable, Equatable {
+public struct Reflection: Sendable, Codable, Equatable {
     public let notes: String
     public let shouldAdapt: Bool
 
@@ -114,19 +115,22 @@ public struct Reflection: Sendable, Equatable {
     }
 }
 
-public struct StateUpdate: Sendable, Equatable {
+public struct StateUpdate: Sendable, Codable, Equatable {
     public let goalID: GoalID
     public let targetStatus: GoalStatus
     public let evidence: [String: String]
+    public let mutationToken: UUID?
 
     public init(
         goalID: GoalID,
         targetStatus: GoalStatus,
-        evidence: [String: String] = [:]
+        evidence: [String: String] = [:],
+        mutationToken: UUID? = nil
     ) {
         self.goalID = goalID
         self.targetStatus = targetStatus
         self.evidence = evidence
+        self.mutationToken = mutationToken
     }
 }
 
