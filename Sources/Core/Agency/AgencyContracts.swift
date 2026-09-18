@@ -19,7 +19,7 @@ public enum AgencyDisposition: String, Sendable, Codable {
     case abort
 }
 
-public struct Observation: Sendable, Equatable {
+public struct Observation: Sendable, Codable, Equatable {
     public let actionID: ActionID
     public let summary: String
     public let succeeded: Bool
@@ -31,7 +31,7 @@ public struct Observation: Sendable, Equatable {
     }
 }
 
-public struct Evaluation: Sendable, Equatable {
+public struct Evaluation: Sendable, Codable, Equatable {
     public let goalID: GoalID
     public let disposition: AgencyDisposition
     public let reason: String
