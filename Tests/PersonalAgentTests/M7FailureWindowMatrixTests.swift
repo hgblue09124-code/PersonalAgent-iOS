@@ -672,4 +672,240 @@ struct M7FailureWindowMatrixTests {
         #expect(attempt.status == .startedUnknown)
         #expect(attempt.receiptRef != nil)
     }
+
+    // Test A: Executor non-completed + NOT_STARTED -> attempt.status == .notStarted (never .failed)
+    @Test("Executor non-completed + notStarted evidence resolves as notStarted, never failed")
+    func testExecutorNonCompletedNotStartedEvidence() async throws {
+        struct FailingTool: Tool {
+            let manifest = ToolManifest(
+                id: ToolID(rawValue: "failingToolA"),
+                name: "FailingA",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                requiredCapabilities: [.read],
+                inputSchema: SchemaDocument(identifier: "tool.faila.in"),
+                outputSchema: SchemaDocument(identifier: "tool.faila.out")
+            )
+            func run(argumentsJSON: String) async throws -> String {
+                struct FailError: Error {}
+                throw FailError()
+            }
+        }
+
+        struct NotStartedResolver: ExecutionEvidenceResolver {
+            func resolve(attemptID: ExecutionAttemptID, idempotencyKey: String) async throws -> EvidenceResolution {
+                .notStarted
+            }
+        }
+
+        let tool = FailingTool()
+        let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
+        let composition = try await M7CompositionRoot(
+            evidenceResolver: NotStartedResolver(),
+            targetCapabilities: [cap],
+            tools: [tool]
+        )
+
+        let goal = Goal(statement: "Test A Goal")
+        try await composition.runtime.submit(goal: goal)
+        let record = try await composition.lifecycleManager.createRun(goalID: goal.id)
+        let lease = CapabilityLease(runID: record.runID)
+
+        let proposal = ActionProposal(
+            actionID: ActionID(),
+            planID: PlanID(),
+            toolID: tool.manifest.id,
+            description: "test",
+            capabilities: [.read]
+        )
+
+        let (obs, attempt) = try await composition.executionBoundary.executeProposal(
+            proposal: proposal,
+            runID: record.runID,
+            goalID: goal.id,
+            traceID: record.traceID,
+            cycleIndex: 1,
+            lease: lease
+        )
+
+        #expect(!obs.succeeded)
+        #expect(attempt.status == .notStarted)
+        #expect(attempt.status != .failed)
+    }
+
+    // Test B: Executor non-completed + UNKNOWN (idempotent target) -> attempt.status == .startedUnknown (never .failed)
+    @Test("Executor non-completed + unknown evidence (idempotent target) resolves as startedUnknown, never failed")
+    func testExecutorNonCompletedUnknownEvidenceIdempotent() async throws {
+        struct FailingTool: Tool {
+            let manifest = ToolManifest(
+                id: ToolID(rawValue: "failingToolB"),
+                name: "FailingB",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                requiredCapabilities: [.read],
+                inputSchema: SchemaDocument(identifier: "tool.failb.in"),
+                outputSchema: SchemaDocument(identifier: "tool.failb.out")
+            )
+            func run(argumentsJSON: String) async throws -> String {
+                struct FailError: Error {}
+                throw FailError()
+            }
+        }
+
+        struct UnknownResolver: ExecutionEvidenceResolver {
+            func resolve(attemptID: ExecutionAttemptID, idempotencyKey: String) async throws -> EvidenceResolution {
+                .unknown
+            }
+        }
+
+        let tool = FailingTool()
+        let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
+        let composition = try await M7CompositionRoot(
+            evidenceResolver: UnknownResolver(),
+            targetCapabilities: [cap],
+            tools: [tool]
+        )
+
+        let goal = Goal(statement: "Test B Goal")
+        try await composition.runtime.submit(goal: goal)
+        let record = try await composition.lifecycleManager.createRun(goalID: goal.id)
+        let lease = CapabilityLease(runID: record.runID)
+
+        let proposal = ActionProposal(
+            actionID: ActionID(),
+            planID: PlanID(),
+            toolID: tool.manifest.id,
+            description: "test",
+            capabilities: [.read]
+        )
+
+        let (obs, attempt) = try await composition.executionBoundary.executeProposal(
+            proposal: proposal,
+            runID: record.runID,
+            goalID: goal.id,
+            traceID: record.traceID,
+            cycleIndex: 1,
+            lease: lease
+        )
+
+        #expect(!obs.succeeded)
+        #expect(attempt.status == .startedUnknown)
+        #expect(attempt.status != .failed)
+    }
+
+    // Test C: Executor non-completed + UNAVAILABLE (idempotent target) -> attempt.status == .startedUnknown (never .failed)
+    @Test("Executor non-completed + unavailable evidence (idempotent target) resolves as startedUnknown, never failed")
+    func testExecutorNonCompletedUnavailableEvidenceIdempotent() async throws {
+        struct FailingTool: Tool {
+            let manifest = ToolManifest(
+                id: ToolID(rawValue: "failingToolC"),
+                name: "FailingC",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                requiredCapabilities: [.read],
+                inputSchema: SchemaDocument(identifier: "tool.failc.in"),
+                outputSchema: SchemaDocument(identifier: "tool.failc.out")
+            )
+            func run(argumentsJSON: String) async throws -> String {
+                struct FailError: Error {}
+                throw FailError()
+            }
+        }
+
+        struct UnavailableResolver: ExecutionEvidenceResolver {
+            func resolve(attemptID: ExecutionAttemptID, idempotencyKey: String) async throws -> EvidenceResolution {
+                .unavailable
+            }
+        }
+
+        let tool = FailingTool()
+        let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
+        let composition = try await M7CompositionRoot(
+            evidenceResolver: UnavailableResolver(),
+            targetCapabilities: [cap],
+            tools: [tool]
+        )
+
+        let goal = Goal(statement: "Test C Goal")
+        try await composition.runtime.submit(goal: goal)
+        let record = try await composition.lifecycleManager.createRun(goalID: goal.id)
+        let lease = CapabilityLease(runID: record.runID)
+
+        let proposal = ActionProposal(
+            actionID: ActionID(),
+            planID: PlanID(),
+            toolID: tool.manifest.id,
+            description: "test",
+            capabilities: [.read]
+        )
+
+        let (obs, attempt) = try await composition.executionBoundary.executeProposal(
+            proposal: proposal,
+            runID: record.runID,
+            goalID: goal.id,
+            traceID: record.traceID,
+            cycleIndex: 1,
+            lease: lease
+        )
+
+        #expect(!obs.succeeded)
+        #expect(attempt.status == .startedUnknown)
+        #expect(attempt.status != .failed)
+    }
+
+    // Test D: Executor non-completed + UNKNOWN (non-idempotent target) -> attempt.status == .unresolved (never .failed)
+    @Test("Executor non-completed + unknown evidence (non-idempotent target) resolves as unresolved, never failed")
+    func testExecutorNonCompletedUnknownEvidenceNonIdempotent() async throws {
+        struct FailingTool: Tool {
+            let manifest = ToolManifest(
+                id: ToolID(rawValue: "failingToolD"),
+                name: "FailingD",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                requiredCapabilities: [.read],
+                inputSchema: SchemaDocument(identifier: "tool.faild.in"),
+                outputSchema: SchemaDocument(identifier: "tool.faild.out")
+            )
+            func run(argumentsJSON: String) async throws -> String {
+                struct FailError: Error {}
+                throw FailError()
+            }
+        }
+
+        struct UnknownResolver: ExecutionEvidenceResolver {
+            func resolve(attemptID: ExecutionAttemptID, idempotencyKey: String) async throws -> EvidenceResolution {
+                .unknown
+            }
+        }
+
+        let tool = FailingTool()
+        let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .nonIdempotent, supportsEvidenceResolution: true)
+        let composition = try await M7CompositionRoot(
+            evidenceResolver: UnknownResolver(),
+            targetCapabilities: [cap],
+            tools: [tool]
+        )
+
+        let goal = Goal(statement: "Test D Goal")
+        try await composition.runtime.submit(goal: goal)
+        let record = try await composition.lifecycleManager.createRun(goalID: goal.id)
+        let lease = CapabilityLease(runID: record.runID)
+
+        let proposal = ActionProposal(
+            actionID: ActionID(),
+            planID: PlanID(),
+            toolID: tool.manifest.id,
+            description: "test",
+            capabilities: [.read]
+        )
+
+        let (obs, attempt) = try await composition.executionBoundary.executeProposal(
+            proposal: proposal,
+            runID: record.runID,
+            goalID: goal.id,
+            traceID: record.traceID,
+            cycleIndex: 1,
+            lease: lease
+        )
+
+        #expect(!obs.succeeded)
+        #expect(attempt.status == .unresolved)
+        #expect(attempt.status != .failed)
+    }
 }

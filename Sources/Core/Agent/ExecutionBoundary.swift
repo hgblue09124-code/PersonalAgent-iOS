@@ -78,7 +78,7 @@ public actor ExecutionBoundary {
             proposal: proposal
         )
 
-        // 0. Target Capability Check (Missing capability -> Fail Closed)
+        // 0. Target Capability Check (Missing capability -> Fail Closed pre-dispatch)
         var targetCap: ExecutionTargetCapability? = nil
         if let toolID = proposal.toolID {
             guard let cap = targetCapability(for: toolID) else {
@@ -280,52 +280,76 @@ public actor ExecutionBoundary {
                         return (obs, attempt)
                     }
                 } else {
-                    // Executor returned failed / non-completed state. Check independent evidence first!
+                    // Executor returned non-completed state. Evaluate authoritative evidence!
                     let verificationResolution = await resolveEvidence(attempt: attempt)
 
-                    if case .completed(let receipt) = verificationResolution {
+                    switch verificationResolution {
+                    case .completed(let receipt):
                         attempt.status = .completed
                         attempt.completedAt = Date()
                         attempt.receiptRef = receipt.receiptID
                         try await attemptStore.saveAttempt(attempt)
                         let obs = Observation(actionID: proposal.actionID, summary: receipt.outputSummary, succeeded: true)
                         return (obs, attempt)
+
+                    case .notStarted:
+                        attempt.status = .notStarted
+                        try await attemptStore.saveAttempt(attempt)
+                        let obs = Observation(actionID: proposal.actionID, summary: "Execution not started: \(obsSummary)", succeeded: false)
+                        return (obs, attempt)
+
+                    case .unknown, .unavailable:
+                        if cap.idempotencyClass == .idempotent {
+                            attempt.status = .startedUnknown
+                        } else {
+                            attempt.status = .unresolved
+                        }
+                        try await attemptStore.saveAttempt(attempt)
+                        let obs = Observation(
+                            actionID: proposal.actionID,
+                            summary: "Execution unverified (\(verificationResolution)): \(obsSummary)",
+                            succeeded: false
+                        )
+                        return (obs, attempt)
                     }
-
-                    attempt.status = .failed
-                    attempt.completedAt = Date()
-                    try await attemptStore.saveAttempt(attempt)
-
-                    let obs = Observation(actionID: proposal.actionID, summary: obsSummary, succeeded: false)
-                    return (obs, attempt)
                 }
             } catch {
-                // Dispatch threw exception or timed out. Check independent evidence!
+                // Dispatch threw exception or timed out. Evaluate authoritative evidence!
                 let verificationResolution = await resolveEvidence(attempt: attempt)
 
-                if case .completed(let receipt) = verificationResolution {
+                switch verificationResolution {
+                case .completed(let receipt):
                     attempt.status = .completed
                     attempt.completedAt = Date()
                     attempt.receiptRef = receipt.receiptID
                     try await attemptStore.saveAttempt(attempt)
                     let obs = Observation(actionID: proposal.actionID, summary: receipt.outputSummary, succeeded: true)
                     return (obs, attempt)
-                }
 
-                // Exception during execution: attempt status MUST REMAIN STARTED_UNKNOWN (if idempotent) or UNRESOLVED (if non-idempotent)!
-                if cap.idempotencyClass == .nonIdempotent {
-                    attempt.status = .unresolved
-                } else {
-                    attempt.status = .startedUnknown
-                }
-                try await attemptStore.saveAttempt(attempt)
+                case .notStarted:
+                    attempt.status = .notStarted
+                    try await attemptStore.saveAttempt(attempt)
+                    let obs = Observation(
+                        actionID: proposal.actionID,
+                        summary: "Execution side effect threw error (not started): \(error)",
+                        succeeded: false
+                    )
+                    return (obs, attempt)
 
-                let obs = Observation(
-                    actionID: proposal.actionID,
-                    summary: "Execution side effect threw error: \(error)",
-                    succeeded: false
-                )
-                return (obs, attempt)
+                case .unknown, .unavailable:
+                    if cap.idempotencyClass == .idempotent {
+                        attempt.status = .startedUnknown
+                    } else {
+                        attempt.status = .unresolved
+                    }
+                    try await attemptStore.saveAttempt(attempt)
+                    let obs = Observation(
+                        actionID: proposal.actionID,
+                        summary: "Execution side effect threw error (\(verificationResolution)): \(error)",
+                        succeeded: false
+                    )
+                    return (obs, attempt)
+                }
             }
         }
 
