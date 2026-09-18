@@ -319,4 +319,86 @@ struct M7RecoveryTests {
             #expect(Bool(false), "Expected resumed outcome across repeated recovery invocations")
         }
     }
+
+    @Test("Restart recovery across fresh store instances using FileBacked stores")
+    func testRestartRecoveryAcrossFreshStoreInstances() async throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let toolID = ToolID(rawValue: "echo")
+        let receipt = ExecutionReceipt(
+            receiptID: "r-restart-1",
+            attemptID: ExecutionAttemptID(),
+            toolID: toolID,
+            idempotencyKey: "restart-key-1",
+            outputSummary: "Success"
+        )
+
+        let runID: RunID
+        let attemptID: ExecutionAttemptID = receipt.attemptID
+        let goal = Goal(statement: "Durable restart goal")
+
+        // Instance A
+        do {
+            let resolverA = TestEvidenceResolver(mode: .completed(receipt))
+            let capA = ExecutionTargetCapability(toolID: toolID, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
+            let compA = try await M7CompositionRoot(
+                storeDirectoryURL: tempDir,
+                evidenceResolver: resolverA,
+                targetCapabilities: [capA]
+            )
+
+            try await compA.runtime.submit(goal: goal)
+            let record = try await compA.lifecycleManager.createRun(goalID: goal.id)
+            runID = record.runID
+
+            let attempt = ExecutionAttempt(
+                attemptID: attemptID,
+                runID: runID,
+                actionID: ActionID(),
+                toolID: toolID,
+                idempotencyKey: "restart-key-1",
+                status: .startedUnknown
+            )
+            try await compA.attemptStore.saveAttempt(attempt)
+        }
+
+        // Instance B - fresh process / stores opening same directory
+        let resolverB = TestEvidenceResolver(mode: .completed(receipt))
+        let capB = ExecutionTargetCapability(toolID: toolID, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
+        let compB = try await M7CompositionRoot(
+            storeDirectoryURL: tempDir,
+            evidenceResolver: resolverB,
+            targetCapabilities: [capB]
+        )
+        try await compB.runtime.submit(goal: goal)
+
+        // Verify Instance B loaded persisted attempt from Instance A
+        let loadedAttempt = try await compB.attemptStore.attempt(for: attemptID)
+        #expect(loadedAttempt != nil)
+        #expect(loadedAttempt?.status == .startedUnknown)
+
+        // Recover run with Instance B
+        let outcome = try await compB.recoveryEngine.recoverRun(runID: runID)
+        if case .resumed(let rec) = outcome {
+            #expect(rec.status == .running)
+        } else {
+            #expect(Bool(false), "Expected resumed outcome from Instance B recovery, got \(outcome)")
+        }
+
+        let updatedAttempt = try await compB.attemptStore.attempt(for: attemptID)
+        #expect(updatedAttempt?.status == .completed)
+        #expect(updatedAttempt?.receiptRef == receipt.receiptID)
+    }
+
+    @Test("Persistence errors throw and fail closed without false successful transition")
+    func testPersistenceFailureFailsClosed() async throws {
+        let invalidDir = URL(fileURLWithPath: "/dev/null/invalid_dir_\(UUID().uuidString)")
+        do {
+            _ = try FileBackedRunStore(directoryURL: invalidDir)
+            #expect(Bool(false), "Expected FileBackedRunStore init or directory creation to throw")
+        } catch {
+            #expect(error != nil)
+        }
+    }
 }

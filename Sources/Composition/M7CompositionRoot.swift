@@ -42,6 +42,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         eventLog: (any EventLog)? = nil,
         provider: (any LLMProvider)? = nil,
         memoryStore: (any MemoryStore)? = nil,
+        storeDirectoryURL: URL? = nil,
         policy: (any PolicyEvaluating)? = nil,
         approvalGate: (any ApprovalGate)? = nil,
         evidenceResolver: (any ExecutionEvidenceResolver)? = nil,
@@ -51,9 +52,31 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         runStore: (any RunStore)? = nil,
         attemptStore: (any ExecutionAttemptStore)? = nil,
         checkpointStore: (any RunCheckpointStore)? = nil,
-        journalStore: (any StateJournalStore)? = nil
+        journalStore: (any StateJournalStore)? = nil,
+        mutationEvidenceStore: (any MutationEvidenceStore)? = nil
     ) async throws {
-        let rawLog = eventLog ?? InMemoryEventLog()
+        let resolvedDirectoryURL: URL?
+        if let storeDirectoryURL {
+            resolvedDirectoryURL = storeDirectoryURL
+        } else if runStore == nil || attemptStore == nil || checkpointStore == nil || journalStore == nil {
+            if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                resolvedDirectoryURL = appSupport.appendingPathComponent("PersonalAgent/M7Stores")
+            } else {
+                resolvedDirectoryURL = nil
+            }
+        } else {
+            resolvedDirectoryURL = nil
+        }
+
+        let rawLog: any EventLog
+        if let eventLog {
+            rawLog = eventLog
+        } else if let dir = resolvedDirectoryURL {
+            rawLog = try FileBackedEventLog(directoryURL: dir)
+        } else {
+            rawLog = InMemoryEventLog()
+        }
+
         let idempotentLog = IdempotentEventLog(innerLog: rawLog)
         self.milestone = .m7
         self.logger = logger
@@ -94,7 +117,14 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 
-        let store = memoryStore ?? InMemoryMemoryStore()
+        let store: any MemoryStore
+        if let memoryStore {
+            store = memoryStore
+        } else if let dir = resolvedDirectoryURL {
+            store = try FileBackedMemoryStore(directoryURL: dir)
+        } else {
+            store = InMemoryMemoryStore()
+        }
         self.memoryStore = store
 
         let memoryRuntime = MemoryRuntime(
@@ -102,6 +132,15 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
             eventLog: idempotentLog
         )
         self.memoryRuntime = memoryRuntime
+
+        let mutStore: any MutationEvidenceStore
+        if let mutationEvidenceStore {
+            mutStore = mutationEvidenceStore
+        } else if let dir = resolvedDirectoryURL {
+            mutStore = try FileBackedMutationStore(directoryURL: dir)
+        } else {
+            mutStore = InMemoryMutationEvidenceStore()
+        }
 
         let coordination = KernelCoordinationBoundary(
             policy: policy,
@@ -114,7 +153,8 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
             identity: identity,
             eventLog: idempotentLog,
             logger: logger,
-            coordination: coordination
+            coordination: coordination,
+            mutationEvidenceStore: mutStore
         )
         try await agentRuntime.start()
         self.runtime = agentRuntime
@@ -128,10 +168,41 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
             moduleRuntime: moduleRuntime
         )
 
-        let rStore = runStore ?? InMemoryRunStore()
-        let aStore = attemptStore ?? InMemoryExecutionAttemptStore()
-        let cStore = checkpointStore ?? InMemoryRunCheckpointStore()
-        let jStore = journalStore ?? InMemoryStateJournalStore()
+        let rStore: any RunStore
+        if let runStore {
+            rStore = runStore
+        } else if let dir = resolvedDirectoryURL {
+            rStore = try FileBackedRunStore(directoryURL: dir)
+        } else {
+            rStore = InMemoryRunStore()
+        }
+
+        let aStore: any ExecutionAttemptStore
+        if let attemptStore {
+            aStore = attemptStore
+        } else if let dir = resolvedDirectoryURL {
+            aStore = try FileBackedExecutionAttemptStore(directoryURL: dir)
+        } else {
+            aStore = InMemoryExecutionAttemptStore()
+        }
+
+        let cStore: any RunCheckpointStore
+        if let checkpointStore {
+            cStore = checkpointStore
+        } else if let dir = resolvedDirectoryURL {
+            cStore = try FileBackedRunCheckpointStore(directoryURL: dir)
+        } else {
+            cStore = InMemoryRunCheckpointStore()
+        }
+
+        let jStore: any StateJournalStore
+        if let journalStore {
+            jStore = journalStore
+        } else if let dir = resolvedDirectoryURL {
+            jStore = try FileBackedStateJournalStore(directoryURL: dir)
+        } else {
+            jStore = InMemoryStateJournalStore()
+        }
 
         self.runStore = rStore
         self.attemptStore = aStore

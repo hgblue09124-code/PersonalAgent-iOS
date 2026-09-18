@@ -17,6 +17,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     private var phase: AgentPhase
     private var activeGoalID: GoalID?
     private var appliedMutationTokens: Set<UUID> = []
+    private let mutationEvidenceStore: any MutationEvidenceStore
     private var goalStore: [GoalID: Goal] = [:]
 
     private let eventLog: any EventLog
@@ -31,7 +32,8 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         logger: any AgentLogger = NullLoggerBridge(),
         clock: any KernelClock = SystemKernelClock(),
         coordination: KernelCoordinationBoundary = KernelCoordinationBoundary(),
-        sessionTrace: TraceID = TraceID()
+        sessionTrace: TraceID = TraceID(),
+        mutationEvidenceStore: (any MutationEvidenceStore)? = nil
     ) async throws {
         self.identity = identity
         self.lifecycle = .created
@@ -41,6 +43,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         self.clock = clock
         self.sessionTrace = sessionTrace
         self.coordination = coordination
+        self.mutationEvidenceStore = mutationEvidenceStore ?? InMemoryMutationEvidenceStore()
 
         try await emit(
             kind: .runtimeInitialized,
@@ -205,7 +208,10 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
 
     /// Authoritative StateUpdate entry point.
     public func hasAppliedMutation(token: UUID) async -> Bool {
-        appliedMutationTokens.contains(token)
+        if appliedMutationTokens.contains(token) {
+            return true
+        }
+        return await mutationEvidenceStore.hasAppliedMutation(token: token)
     }
 
     public func applyStateUpdate(_ update: StateUpdate) async throws {
@@ -261,6 +267,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             try await emit(kind: .stateUpdated, payload: payload)
             if let token = update.mutationToken {
                 appliedMutationTokens.insert(token)
+                try await mutationEvidenceStore.recordMutation(token: token)
             }
         } catch {
             goalStore[update.goalID] = previousGoal
