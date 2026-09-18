@@ -6,7 +6,7 @@ import PAArchitecture
 
 @MainActor
 final class KernelSession: ObservableObject {
-    let composition: M3CompositionRoot
+    let composition: M8CompositionRoot
     @Published var state: AgentState
     @Published var goals: [Goal]
     @Published var lastError: String?
@@ -14,7 +14,7 @@ final class KernelSession: ObservableObject {
     @Published var providerLifecycle: String
     @Published var moduleIDs: [String]
 
-    init(composition: M3CompositionRoot, state: AgentState) {
+    init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
         self.state = state
         self.goals = []
@@ -27,21 +27,21 @@ final class KernelSession: ObservableObject {
     var milestone: MilestoneGate { composition.milestone }
 
     func refresh() async {
-        state = await composition.runtime.currentState()
-        goals = await composition.runtime.goals()
+        state = await composition.session.currentState()
+        goals = await composition.session.activeGoals()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
         moduleIDs = await composition.registeredModuleIDs()
     }
 
-    func start() async { await run { try await composition.runtime.start() } }
-    func pause() async { await run { try await composition.runtime.pause() } }
-    func resume() async { await run { try await composition.runtime.resume() } }
-    func stop() async { await run { try await composition.runtime.stop() } }
+    func start() async { await run { try await composition.session.start() } }
+    func pause() async { await run { try await composition.session.pause() } }
+    func resume() async { await run { try await composition.session.resume() } }
+    func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
         await run {
-            try await composition.runtime.submit(goal: Goal(statement: statement))
+            _ = try await composition.session.submitInput(statement)
         }
     }
 

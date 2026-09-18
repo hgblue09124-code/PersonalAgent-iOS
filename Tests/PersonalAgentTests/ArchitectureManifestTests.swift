@@ -12,8 +12,8 @@ struct ArchitectureManifestTests {
         #expect(MilestoneGate.m0.providers == false)
     }
 
-    @Test func currentMilestoneIsM6() {
-        #expect(ArchitectureManifest.milestone == "M6")
+    @Test func currentMilestoneIsM8() {
+        #expect(ArchitectureManifest.milestone == "M8")
         #expect(ArchitectureManifest.contractFoundation == "M0")
         #expect(MilestoneGate.m2.providers == true)
         #expect(MilestoneGate.m2.skillRuntime == false)
@@ -24,6 +24,7 @@ struct ArchitectureManifestTests {
         #expect(MilestoneGate.m4.memoryEngine == true)
         #expect(MilestoneGate.m4.storageEngine == true)
         #expect(MilestoneGate.m6.cognitionLoop == true)
+        #expect(MilestoneGate.m8.cognitionLoop == true)
     }
 
     @Test func axisStartsAtUIAndEndsAtFoundation() {

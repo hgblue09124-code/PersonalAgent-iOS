@@ -37,8 +37,8 @@ struct PersonalAgentApp: App {
     private func initialize() async {
         initializationError = nil
         do {
-            let root = try await M3CompositionRoot()
-            let state = await root.runtime.currentState()
+            let root = try await M8CompositionRoot()
+            let state = await root.session.currentState()
             session = KernelSession(composition: root, state: state)
         } catch {
             initializationError = String(describing: error)

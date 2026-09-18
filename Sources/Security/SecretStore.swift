@@ -8,6 +8,32 @@ public protocol SecretStore: Sendable {
     func delete(account: String) throws
 }
 
+/// Thread-safe in-memory SecretStore implementation for testing and non-persistent environments.
+public final class InMemorySecretStore: SecretStore, @unchecked Sendable {
+    private var secrets: [String: Data] = [:]
+    private let lock = NSLock()
+
+    public init() {}
+
+    public func store(account: String, secret: Data) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        secrets[account] = secret
+    }
+
+    public func load(account: String) throws -> Data? {
+        lock.lock()
+        defer { lock.unlock() }
+        return secrets[account]
+    }
+
+    public func delete(account: String) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        secrets.removeValue(forKey: account)
+    }
+}
+
 /// Provider credentials stay outside AgentState.
 public struct ProviderCredentialRef: Hashable, Sendable, Codable {
     public let providerID: ProviderID

@@ -4,7 +4,7 @@ Contract-driven Personal Agent / Agent OS client for iPhone.
 
 This is not a chat-app wrapper. The LLM is a reasoning engine. The kernel owns identity, state, goals, lifecycle, and coordination.
 
-**Milestone: M6 — Cognitive Agent Loop & Multi-Cycle Orchestration.** M0–M5 remain in place.
+**Milestone: M8 — Personal Agent Product Architecture Foundation.** M0–M7 remain in place.
 
 Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first · provider-agnostic.
 
@@ -16,11 +16,16 @@ Target device: iPhone 12 Pro Max · Swift 6 · SwiftUI · iOS 18+ · local-first
 | Dependency direction tests | Present |
 | SwiftUI shell (7 screens) | Present, no business logic |
 | Kernel runtime | Present (lifecycle, goals, events) |
+| App Session boundary (`AgentSession`) | Present |
 | Provider contract + runtime | Present |
+| Local Model boundary (`LocalModelEngine` & adapter) | Present |
+| Device Capability boundary (`DeviceCapabilityProviding`) | Present |
+| Product Persistence boundary (`ProductPersistenceContainer`) | Present |
 | Concrete provider adapters | Present (fixture-tested; live network pending) |
 | Module / skill / tool runtime | Present (deterministic modules; no privileged device tools) |
 | Memory OS runtime & persistence | Present (FileBackedMemoryStore, MemoryIndex, MemoryRuntime) |
 | Storage / sync engines | Local-first file engine present; M5 architecture defined |
+| Durable Execution Lifecycle & Recovery | Present (M7 RunStore, ExecutionAttemptStore, RecoveryEngine) |
 | Device verification on iPhone 12 Pro Max | Not signed off |
 
 Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`) are external material. They are not runtime dependencies.
@@ -28,11 +33,11 @@ Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-dat
 ## Layout
 
 ```
-UI → Composition → Kernel
+UI → App Session → Composition → Kernel
   → Cognition / Agency / Policy / Memory
-  → Skills / Tools / Modules / Providers
-  → Storage / Sync
-  → Events / Observability / Security
+  → Skills / Tools / Modules / Providers / Local Models
+  → Domain Persistence / Storage / Sync
+  → Device Capabilities / Events / Observability / Security
   → Foundation
 ```
 
