@@ -230,7 +230,7 @@ public actor ExecutionBoundary {
                 let executorSucceeded = (res.state == .completed)
 
                 if executorSucceeded {
-                    // Save receipt as execution evidence
+                    // Save receipt as execution/audit artifact
                     let receipt = ExecutionReceipt(
                         attemptID: attempt.attemptID,
                         toolID: toolID,
@@ -358,20 +358,10 @@ public actor ExecutionBoundary {
                     attemptID: attempt.attemptID,
                     idempotencyKey: attempt.idempotencyKey
                 )
-                if res != .unavailable {
-                    return res
-                }
+                return res
             } catch {
                 return .unavailable
             }
-        }
-
-        do {
-            if let receipt = try await attemptStore.receipt(forAttemptID: attempt.attemptID) {
-                return .completed(receipt)
-            }
-        } catch {
-            return .unavailable
         }
 
         return .unavailable

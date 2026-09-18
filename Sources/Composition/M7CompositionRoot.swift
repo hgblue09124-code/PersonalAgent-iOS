@@ -46,7 +46,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         policy: (any PolicyEvaluating)? = nil,
         approvalGate: (any ApprovalGate)? = nil,
         evidenceResolver: (any ExecutionEvidenceResolver)? = nil,
-        targetCapabilities: [ExecutionTargetCapability]? = nil,
+        targetCapabilities: [ExecutionTargetCapability] = [],
         modules: [any Module] = [],
         tools: [any Tool] = [],
         runStore: (any RunStore)? = nil,
@@ -209,33 +209,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         self.checkpointStore = cStore
         self.journalStore = jStore
 
-        let capabilities: [ExecutionTargetCapability]
-        if let targetCapabilities {
-            capabilities = targetCapabilities
-        } else {
-            var autoCaps: [ExecutionTargetCapability] = [
-                ExecutionTargetCapability(
-                    toolID: ToolID(rawValue: "echo"),
-                    idempotencyClass: .idempotent,
-                    supportsEvidenceResolution: evidenceResolver != nil
-                ),
-                ExecutionTargetCapability(
-                    toolID: ToolID(rawValue: "tool.echo"),
-                    idempotencyClass: .idempotent,
-                    supportsEvidenceResolution: evidenceResolver != nil
-                )
-            ]
-            for tool in tools {
-                autoCaps.append(
-                    ExecutionTargetCapability(
-                        toolID: tool.manifest.id,
-                        idempotencyClass: .idempotent,
-                        supportsEvidenceResolution: evidenceResolver != nil
-                    )
-                )
-            }
-            capabilities = autoCaps
-        }
+
 
         let boundary = ExecutionBoundary(
             attemptStore: aStore,
@@ -244,7 +218,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
             moduleRuntime: moduleRuntime,
             evidenceResolver: evidenceResolver,
             eventLog: idempotentLog,
-            targetCapabilities: capabilities
+            targetCapabilities: targetCapabilities
         )
         self.executionBoundary = boundary
 

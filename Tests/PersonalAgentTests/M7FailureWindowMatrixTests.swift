@@ -16,9 +16,26 @@ struct M7FailureWindowMatrixTests {
     // 1. executor completed, verification completed -> success
     @Test("Failure Window 1: executor completed + verification completed -> success")
     func testExecutorCompletedVerificationCompleted() async throws {
+        struct CompletedResolver: ExecutionEvidenceResolver {
+            let receipt: ExecutionReceipt
+            func resolve(attemptID: ExecutionAttemptID, idempotencyKey: String) async throws -> EvidenceResolution {
+                .completed(receipt)
+            }
+        }
         let tool = EchoTool()
+        let receipt = ExecutionReceipt(
+            receiptID: "r-verified-1",
+            attemptID: ExecutionAttemptID(),
+            toolID: tool.manifest.id,
+            idempotencyKey: "key-verified-1",
+            outputSummary: "Success"
+        )
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(targetCapabilities: [cap], tools: [tool])
+        let composition = try await M7CompositionRoot(
+            evidenceResolver: CompletedResolver(receipt: receipt),
+            targetCapabilities: [cap],
+            tools: [tool]
+        )
 
         let goal = Goal(statement: "Verified execution test")
         try await composition.runtime.submit(goal: goal)
@@ -601,5 +618,58 @@ struct M7FailureWindowMatrixTests {
         } catch is CapabilityLeaseError {
             #expect(Bool(true))
         }
+    }
+
+    // Executor-produced receipt alone does NOT verify execution
+    @Test("Executor-produced receipt alone does NOT verify execution")
+    func testExecutorProducedReceiptDoesNotVerifyExecution() async throws {
+        struct EchoTool: Tool {
+            let manifest = ToolManifest(
+                id: ToolID(rawValue: "receiptOnlyTool"),
+                name: "ReceiptOnly",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                requiredCapabilities: [.read],
+                inputSchema: SchemaDocument(identifier: "tool.receipt.in"),
+                outputSchema: SchemaDocument(identifier: "tool.receipt.out")
+            )
+            func run(argumentsJSON: String) async throws -> String { "hello" }
+        }
+
+        let tool = EchoTool()
+        let cap = ExecutionTargetCapability(
+            toolID: tool.manifest.id,
+            idempotencyClass: .idempotent,
+            supportsEvidenceResolution: false
+        )
+        let composition = try await M7CompositionRoot(
+            targetCapabilities: [cap],
+            tools: [tool]
+        )
+
+        let goal = Goal(statement: "Receipt only test goal")
+        try await composition.runtime.submit(goal: goal)
+        let record = try await composition.lifecycleManager.createRun(goalID: goal.id)
+        let lease = CapabilityLease(runID: record.runID)
+
+        let proposal = ActionProposal(
+            actionID: ActionID(),
+            planID: PlanID(),
+            toolID: tool.manifest.id,
+            description: "test",
+            capabilities: [.read]
+        )
+
+        let (obs, attempt) = try await composition.executionBoundary.executeProposal(
+            proposal: proposal,
+            runID: record.runID,
+            goalID: goal.id,
+            traceID: record.traceID,
+            cycleIndex: 1,
+            lease: lease
+        )
+
+        #expect(!obs.succeeded)
+        #expect(attempt.status == .startedUnknown)
+        #expect(attempt.receiptRef != nil)
     }
 }

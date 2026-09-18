@@ -78,7 +78,8 @@ struct M7RuntimeTests {
             }
         }
 
-        let composition = try await M7CompositionRoot(policy: ApprovalRequiredPolicy(), approvalGate: nil)
+        let cap = ExecutionTargetCapability(toolID: ToolID(rawValue: "echo"), idempotencyClass: .idempotent, supportsEvidenceResolution: false)
+        let composition = try await M7CompositionRoot(policy: ApprovalRequiredPolicy(), approvalGate: nil, targetCapabilities: [cap])
         let goal = Goal(statement: "Action requiring approval")
         try await composition.runtime.submit(goal: goal)
 
@@ -155,10 +156,17 @@ struct M7RuntimeTests {
         #expect(!obs1.succeeded)
         #expect(att1.status == .failed)
 
+        struct CompletedResolver: ExecutionEvidenceResolver {
+            func resolve(attemptID: ExecutionAttemptID, idempotencyKey: String) async throws -> EvidenceResolution {
+                .completed(ExecutionReceipt(attemptID: attemptID, toolID: ToolID(rawValue: "echoTool"), idempotencyKey: idempotencyKey, outputSummary: "hello"))
+            }
+        }
+
         // Test Granted Gate
         let grantedComp = try await M7CompositionRoot(
             policy: ApprovalRequiredPolicy(),
             approvalGate: GrantingApprovalGate(),
+            evidenceResolver: CompletedResolver(),
             targetCapabilities: [cap],
             tools: [tool]
         )
@@ -203,7 +211,8 @@ struct M7RuntimeTests {
         }
 
         let tool = ThrowingTool()
-        let composition = try await M7CompositionRoot(tools: [tool])
+        let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: false)
+        let composition = try await M7CompositionRoot(targetCapabilities: [cap], tools: [tool])
         let goal = Goal(statement: "Throwing target test")
         try await composition.runtime.submit(goal: goal)
 
