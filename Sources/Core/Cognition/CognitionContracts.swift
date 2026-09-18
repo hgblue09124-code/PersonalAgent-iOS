@@ -72,7 +72,7 @@ public struct Plan: Sendable, Equatable {
     }
 }
 
-public struct ActionProposal: Sendable, Codable, Equatable {
+public struct ActionProposal: Sendable, Equatable {
     public let actionID: ActionID
     public let planID: PlanID
     public let toolID: ToolID?
@@ -104,7 +104,7 @@ public struct VerificationResult: Sendable, Equatable {
     }
 }
 
-public struct Reflection: Sendable, Codable, Equatable {
+public struct Reflection: Sendable, Equatable {
     public let notes: String
     public let shouldAdapt: Bool
 
