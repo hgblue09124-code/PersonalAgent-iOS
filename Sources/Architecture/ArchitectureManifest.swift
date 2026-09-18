@@ -200,6 +200,19 @@ public struct MilestoneGate: Sendable, Equatable {
         eventReplay: false
     )
 
+
+    public static let m7 = MilestoneGate(
+        milestone: "M7",
+        kernelRuntime: true,
+        providers: true,
+        storageEngine: true,
+        memoryEngine: true,
+        skillRuntime: true,
+        toolRuntime: true,
+        cognitionLoop: true,
+        eventReplay: false
+    )
+
     public static let m6 = MilestoneGate(
         milestone: "M6",
         kernelRuntime: true,
