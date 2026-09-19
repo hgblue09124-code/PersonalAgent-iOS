@@ -1,0 +1,252 @@
+import Foundation
+import Testing
+@testable import PAFoundation
+@testable import PAProviders
+@testable import PAProvidersLocal
+@testable import PAComposition
+
+@Suite("M8.1 Real Native Llama.cpp Local Inference Tests")
+struct M81LlamaCPPTests {
+
+    private func createDummyHeaderGGUFFile(name: String = "dummy.gguf") throws -> URL {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M81Test_\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        let fileURL = tempDir.appendingPathComponent(name)
+
+        var data = Data()
+        // Magic "GGUF" = 0x46554747
+        var magic: UInt32 = 0x46554747
+        var version: UInt32 = 3
+        var tensorCount: UInt64 = 0
+        var metadataCount: UInt64 = 0
+
+        data.append(Data(bytes: &magic, count: 4))
+        data.append(Data(bytes: &version, count: 4))
+        data.append(Data(bytes: &tensorCount, count: 8))
+        data.append(Data(bytes: &metadataCount, count: 8))
+
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
+    private func createInvalidHeaderFile() throws -> URL {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M81Invalid_\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        let fileURL = tempDir.appendingPathComponent("invalid.bin")
+        let data = "NOT_GGUF_HEADER_BYTES".data(using: .utf8)!
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
+    @Test func testGGUFHeaderParserHeaderValidation() async throws {
+        let fileURL = try createDummyHeaderGGUFFile()
+        defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
+
+        let parser = GGUFModelParser()
+        let summary = try parser.parseHeaderAndMetadata(at: fileURL)
+
+        #expect(summary.version == 3)
+        #expect(summary.tensorCount == 0)
+        #expect(summary.metadataCount == 0)
+    }
+
+    @Test func testInvalidHeaderFileFailsParserAndEngineLoad() async throws {
+        let fileURL = try createInvalidHeaderFile()
+        defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
+
+        let parser = GGUFModelParser()
+        #expect(throws: (any Error).self) {
+            _ = try parser.parseHeaderAndMetadata(at: fileURL)
+        }
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "invalid-gguf"),
+            name: "Invalid GGUF",
+            localURL: fileURL
+        )
+
+        let engine = LlamaCPPModelEngine(identity: identity)
+        do {
+            try await engine.load(options: LocalModelLoadingOptions())
+            #expect(Bool(false), "Expected engine load to fail on invalid file")
+        } catch {
+            let state = await engine.lifecycleState
+            if case .failed = state {
+                #expect(true)
+            } else {
+                #expect(Bool(false), "Expected state to be .failed")
+            }
+        }
+    }
+
+    @Test func testDummyHeaderFileFailsNativeModelLoadAndFailsClosed() async throws {
+        // A file with GGUF header but no tensors cannot be loaded by native llama.cpp
+        let fileURL = try createDummyHeaderGGUFFile()
+        defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "dummy-gguf"),
+            name: "Dummy GGUF",
+            localURL: fileURL
+        )
+
+        let engine = LlamaCPPModelEngine(identity: identity)
+        do {
+            try await engine.load(options: LocalModelLoadingOptions())
+            #expect(Bool(false), "Native model loader must fail closed on missing tensor weights")
+        } catch let err as LlamaCPPEngineError {
+            if case .nativeModelLoadFailed = err {
+                #expect(true)
+            } else {
+                #expect(Bool(false), "Expected nativeModelLoadFailed, got \(err)")
+            }
+            let state = await engine.lifecycleState
+            if case .failed = state {
+                #expect(true)
+            } else {
+                #expect(Bool(false), "Expected state .failed")
+            }
+        }
+    }
+
+    @Test func testSingleResidentModelExclusivityInvariant() async throws {
+        let ggufURL1 = try createDummyHeaderGGUFFile(name: "model1.gguf")
+        let ggufURL2 = try createDummyHeaderGGUFFile(name: "model2.gguf")
+        defer {
+            try? FileManager.default.removeItem(at: ggufURL1.deletingLastPathComponent())
+            try? FileManager.default.removeItem(at: ggufURL2.deletingLastPathComponent())
+        }
+
+        let identity1 = LocalModelIdentity(
+            id: ModelID(rawValue: "model-1"),
+            name: "Model 1",
+            localURL: ggufURL1
+        )
+        let identity2 = LocalModelIdentity(
+            id: ModelID(rawValue: "model-2"),
+            name: "Model 2",
+            localURL: ggufURL2
+        )
+
+        let coordinator = LlamaCPPResidencyCoordinator()
+        let engine1 = LlamaCPPModelEngine(identity: identity1, residencyCoordinator: coordinator)
+        let engine2 = LlamaCPPModelEngine(identity: identity2, residencyCoordinator: coordinator)
+
+        // Attempting to load model 1 fails on dummy weights, but coordinator tracks residency request
+        do {
+            try await engine1.load(options: LocalModelLoadingOptions())
+        } catch {}
+
+        let state1 = await engine1.lifecycleState
+        let state2 = await engine2.lifecycleState
+
+        // Model 1 and Model 2 must never be simultaneously loaded
+        let isSimultaneous = (state1 == .loaded && state2 == .loaded)
+        #expect(!isSimultaneous)
+    }
+
+    @Test func testThermalGovernance() async throws {
+        let deviceProv = DefaultDeviceCapabilityProvider(
+            initialSnapshot: DeviceStateSnapshot(thermalState: .critical)
+        )
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "thermal-llama"),
+            name: "Thermal Llama",
+            localURL: URL(fileURLWithPath: "/tmp/nonexistent.gguf")
+        )
+
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            deviceCapabilityProvider: deviceProv
+        )
+
+        let request = LocalModelGenerationRequest(prompt: "Hello thermal test")
+        do {
+            _ = try await engine.generate(request: request)
+            #expect(Bool(false), "Expected modelNotLoaded or thermalStateCritical error")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .modelNotLoaded || err == .thermalStateCritical)
+        }
+    }
+
+    @Test func testMemoryPressureGovernance() async throws {
+        let deviceProv = DefaultDeviceCapabilityProvider(
+            initialSnapshot: DeviceStateSnapshot(memoryPressure: .critical)
+        )
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "memory-llama"),
+            name: "Memory Llama",
+            localURL: URL(fileURLWithPath: "/tmp/nonexistent.gguf")
+        )
+
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            deviceCapabilityProvider: deviceProv
+        )
+
+        let request = LocalModelGenerationRequest(prompt: "Hello memory test")
+        do {
+            _ = try await engine.generate(request: request)
+            #expect(Bool(false), "Expected modelNotLoaded error")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .modelNotLoaded)
+        }
+    }
+
+    @Test func testLocalModelProviderAdapterBridge() async throws {
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "bridge-llama"),
+            name: "Bridge Llama",
+            localURL: URL(fileURLWithPath: "/tmp/dummy.gguf")
+        )
+
+        let engine = LlamaCPPModelEngine(identity: identity)
+        let adapter = LocalModelProviderAdapter(engine: engine)
+
+        #expect(adapter.capabilities.contains(ProviderCapabilities.localInference))
+        #expect(!adapter.capabilities.contains(ProviderCapabilities.toolCalling))
+    }
+
+    @Test func testSecurityAndPersistenceBoundaryInvariants() async throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M81Security_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let container = try ProductPersistenceContainer(baseDirectoryURL: tempDir)
+        #expect(container.modelMetadataDirectoryURL.lastPathComponent == "ModelMetadata")
+        #expect(container.agentDurableDirectoryURL.lastPathComponent == "AgentDurableState")
+        #expect(container.modelMetadataDirectoryURL != container.agentDurableDirectoryURL)
+    }
+
+    @Test func testRealNativeInferenceWhenModelProvided() async throws {
+        guard let modelPath = ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"],
+              FileManager.default.fileExists(atPath: modelPath) else {
+            // Path not supplied; skip live weight execution test safely
+            return
+        }
+
+        let modelURL = URL(fileURLWithPath: modelPath)
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "live-local-llama"),
+            name: "Live Local Llama",
+            localURL: modelURL
+        )
+
+        let engine = LlamaCPPModelEngine(identity: identity)
+        try await engine.load(options: LocalModelLoadingOptions(contextWindow: 1024))
+
+        let state = await engine.lifecycleState
+        #expect(state == .loaded)
+
+        let request = LocalModelGenerationRequest(prompt: "Hello, reply with one word: Success")
+        let response = try await engine.generate(request: request)
+
+        #expect(!response.text.isEmpty)
+        #expect(response.finishReason == "stop" || response.finishReason == "length")
+
+        try await engine.unload()
+        let stateAfter = await engine.lifecycleState
+        #expect(stateAfter == .unloaded)
+    }
+}

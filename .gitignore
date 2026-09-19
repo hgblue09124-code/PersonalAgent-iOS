@@ -9,3 +9,6 @@ DerivedData/
 .netrc
 *.xcuserstate
 .idea/
+
+*.log
+*.out

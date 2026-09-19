@@ -1,0 +1,46 @@
+name: Apple Native Build & Unsigned IPA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  apple-build:
+    name: macOS Xcode iOS arm64 Build & Unsigned IPA
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build PersonalAgent iOS app target (arm64)
+        run: |
+          xcodebuild build \
+            -project PersonalAgent.xcodeproj \
+            -scheme PersonalAgent \
+            -sdk iphoneos \
+            -configuration Release \
+            -arch arm64 \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            DERIVED_DATA_PATH=DerivedData
+
+      - name: Package Unsigned Development IPA Artifact
+        run: |
+          mkdir -p Payload
+          APP_PATH=$(find DerivedData -name "PersonalAgent.app" -type d | head -n 1)
+          test -n "$APP_PATH" || (echo "Error: PersonalAgent.app not found in DerivedData" && false)
+          cp -R "$APP_PATH" Payload/
+          zip -r PersonalAgent-unsigned.ipa Payload
+          echo "Created PersonalAgent-unsigned.ipa successfully"
+
+      - name: Upload Unsigned Development IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PersonalAgent-iOS-unsigned-IPA
+          path: PersonalAgent-unsigned.ipa
+          retention-days: 14
