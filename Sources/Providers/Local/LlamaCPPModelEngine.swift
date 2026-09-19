@@ -16,10 +16,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private var activeGenerationTask: Task<Void, Never>?
     private var parsedMetadata: GGUFMetadataSummary?
 
-    // Native llama.cpp handles
-    private var nativeModel: UnsafeMutablePointer<llama_model>?
-    private var nativeContext: UnsafeMutablePointer<llama_context>?
-    private var nativeSampler: UnsafeMutablePointer<llama_sampler>?
+    // Native llama.cpp handles using OpaquePointer
+    private var nativeModel: OpaquePointer?
+    private var nativeContext: OpaquePointer?
+    private var nativeSampler: OpaquePointer?
 
     public init(
         identity: LocalModelIdentity,
@@ -103,10 +103,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
 
         let path = url.path
-        guard let modelPtr = llama_model_load_from_file(path, modelParams) else {
+        guard let rawModelPtr = llama_model_load_from_file(path, modelParams) else {
             setLifecycleState(.failed(reason: "llama_model_load_from_file failed for \(path)"))
             throw LlamaCPPEngineError.nativeModelLoadFailed(path)
         }
+        let modelPtr = OpaquePointer(rawModelPtr)
 
         var ctxParams = llama_context_default_params()
         ctxParams.n_ctx = UInt32(options.contextWindow)
@@ -115,15 +116,22 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         ctxParams.n_threads = Int32(nThreads)
         ctxParams.n_threads_batch = Int32(nThreads)
 
-        guard let contextPtr = llama_init_from_model(modelPtr, ctxParams) else {
+        guard let rawCtxPtr = llama_init_from_model(modelPtr, ctxParams) else {
             llama_model_free(modelPtr)
             setLifecycleState(.failed(reason: "llama_init_from_model failed"))
             throw LlamaCPPEngineError.nativeContextCreationFailed
         }
+        let contextPtr = OpaquePointer(rawCtxPtr)
 
         // Initialize sampler chain
         let chainParams = llama_sampler_chain_default_params()
-        let samplerPtr = llama_sampler_chain_init(chainParams)
+        guard let rawSamplerPtr = llama_sampler_chain_init(chainParams) else {
+            llama_free(contextPtr)
+            llama_model_free(modelPtr)
+            setLifecycleState(.failed(reason: "llama_sampler_chain_init failed"))
+            throw LlamaCPPEngineError.nativeContextCreationFailed
+        }
+        let samplerPtr = OpaquePointer(rawSamplerPtr)
 
         setLifecycleState(.loading(progress: 0.95))
 
@@ -187,9 +195,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     promptText = request.prompt
                 }
 
-                guard let vocabPtr = llama_model_get_vocab(modelPtr) else {
+                guard let rawVocabPtr = llama_model_get_vocab(modelPtr) else {
                     throw LlamaCPPEngineError.tokenizationFailed
                 }
+                let vocabPtr = OpaquePointer(rawVocabPtr)
 
                 let promptTokens = try self.tokenize(vocab: vocabPtr, text: promptText, addSpecial: true)
                 guard !promptTokens.isEmpty else {
@@ -356,7 +365,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
     }
 
-    private func getNativeHandles() -> (UnsafeMutablePointer<llama_model>, UnsafeMutablePointer<llama_context>, UnsafeMutablePointer<llama_sampler>)? {
+    private func getNativeHandles() -> (OpaquePointer, OpaquePointer, OpaquePointer)? {
         stateLock.withLock {
             guard let m = nativeModel, let c = nativeContext, let s = nativeSampler else {
                 return nil
