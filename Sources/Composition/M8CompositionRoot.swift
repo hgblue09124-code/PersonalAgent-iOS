@@ -40,6 +40,24 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let lifecycleManager: RunLifecycleManager
     public let recoveryEngine: RunRecoveryEngine
 
+
+    public var selectedProviderID: String {
+        catalog.registeredProviders.first?.identity.id.rawValue ?? "none"
+    }
+
+    public func currentProviderIdentityID() async -> String {
+        selectedProviderID
+    }
+
+    public func currentProviderLifecycle() async -> String {
+        guard let runtime = providerRuntime else { return "none" }
+        return String(describing: await runtime.lifecycleState)
+    }
+
+    public func registeredModuleIDs() async -> [String] {
+        await moduleCatalog.registeredModules.map(\.id.rawValue)
+    }
+
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal M8 Agent"),
         logger: any AgentLogger = NullLoggerBridge(),
