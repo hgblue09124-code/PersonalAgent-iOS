@@ -16,10 +16,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private var activeGenerationTask: Task<Void, Never>?
     private var parsedMetadata: GGUFMetadataSummary?
 
-    // Native llama.cpp handles using OpaquePointer
+    // Native llama.cpp handles
     private var nativeModel: OpaquePointer?
     private var nativeContext: OpaquePointer?
-    private var nativeSampler: OpaquePointer?
+    private var nativeSampler: UnsafeMutablePointer<llama_sampler>?
 
     public init(
         identity: LocalModelIdentity,
@@ -239,7 +239,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     }
 
                     // Sample next token
-                    let nextToken = llama_sampler_sample(UnsafeMutablePointer(samplerPtr), contextPtr, batch.n_tokens - 1)
+                    let nextToken = llama_sampler_sample(samplerPtr, contextPtr, batch.n_tokens - 1)
 
                     // Check EOS / EOG
                     if llama_vocab_is_eog(vocabPtr, nextToken) {
@@ -253,11 +253,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     invalidBytes.append(contentsOf: pieceBytes)
 
                     let deltaText: String
-                    if let str = String(validatingUTF8: invalidBytes + [0]) {
+                    if let str = String(validatingCString: invalidBytes + [0]) {
                         invalidBytes.removeAll()
                         deltaText = str
-                    } else if (0 ..< invalidBytes.count).contains(where: { $0 != 0 && String(validatingUTF8: Array(invalidBytes.suffix($0)) + [0]) != nil }) {
-                        deltaText = String(cString: invalidBytes + [0])
+                    } else if (0 ..< invalidBytes.count).contains(where: { $0 != 0 && String(validatingCString: Array(invalidBytes.suffix($0)) + [0]) != nil }) {
+                        deltaText = String(validatingCString: invalidBytes + [0]) ?? ""
                         invalidBytes.removeAll()
                     } else {
                         deltaText = ""
@@ -361,7 +361,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
     }
 
-    private func getNativeHandles() -> (OpaquePointer, OpaquePointer, OpaquePointer)? {
+    private func getNativeHandles() -> (OpaquePointer, OpaquePointer, UnsafeMutablePointer<llama_sampler>)? {
         stateLock.withLock {
             guard let m = nativeModel, let c = nativeContext, let s = nativeSampler else {
                 return nil
@@ -373,7 +373,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private func releaseNativeHandles() {
         stateLock.withLock {
             if let s = nativeSampler {
-                llama_sampler_free(UnsafeMutablePointer(s))
+                llama_sampler_free(s)
                 nativeSampler = nil
             }
             if let c = nativeContext {
