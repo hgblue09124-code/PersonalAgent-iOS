@@ -128,7 +128,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             throw LlamaCPPEngineError.nativeContextCreationFailed
         }
 
-        // Initialize sampler chain
+        // Initialize sampler chain and configure real samplers
         let chainParams = llama_sampler_chain_default_params()
         guard let samplerPtr = llama_sampler_chain_init(chainParams) else {
             llama_free(contextPtr)
@@ -136,6 +136,9 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             setLifecycleState(.failed(reason: "llama_sampler_chain_init failed"))
             throw LlamaCPPEngineError.nativeContextCreationFailed
         }
+
+        // Configure greedy sampler by default in the chain
+        llama_sampler_chain_add(samplerPtr, llama_sampler_init_greedy())
 
         setLifecycleState(.loading(progress: 0.95))
 

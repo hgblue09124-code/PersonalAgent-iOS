@@ -221,8 +221,14 @@ struct M81LlamaCPPTests {
 
     @Test func testRealNativeInferenceWhenModelProvided() async throws {
         guard let modelPath = ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"],
-              FileManager.default.fileExists(atPath: modelPath) else {
-            // Path not supplied; skip live weight execution test safely
+              !modelPath.isEmpty else {
+            print("STATUS_REPORT: LOCAL_GGUF_MODEL_PATH not provided. REAL DEVICE INFERENCE: UNVERIFIED")
+            #expect(Bool(true), "MODEL MISSING: REAL DEVICE INFERENCE UNVERIFIED (LOCAL_GGUF_MODEL_PATH not set)")
+            return
+        }
+
+        guard FileManager.default.fileExists(atPath: modelPath) else {
+            #expect(Bool(false), "MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
             return
         }
 
