@@ -1,3 +1,4 @@
+import PAProvidersLocal
 import Foundation
 import PAFoundation
 import PAArchitecture
@@ -39,12 +40,32 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let executionBoundary: ExecutionBoundary
     public let lifecycleManager: RunLifecycleManager
     public let recoveryEngine: RunRecoveryEngine
+    public let localModelEngine: (any LocalModelEngine)?
+
+
+    public var selectedProviderID: String {
+        catalog.identities.first?.id.rawValue ?? "none"
+    }
+
+    public func currentProviderIdentityID() async -> String {
+        await providerRuntime?.identity.id.rawValue ?? "none"
+    }
+
+    public func currentProviderLifecycle() async -> String {
+        guard let runtime = providerRuntime else { return "none" }
+        return await runtime.lifecycle.rawValue
+    }
+
+    public func registeredModuleIDs() async -> [String] {
+        await moduleCatalog.contracts().map(\.id.rawValue)
+    }
 
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal M8 Agent"),
         logger: any AgentLogger = NullLoggerBridge(),
         eventLog: (any EventLog)? = nil,
         provider: (any LLMProvider)? = nil,
+        localModelEngine: (any LocalModelEngine)? = nil,
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
         deviceCapabilityProvider: (any DeviceCapabilityProviding)? = nil,
@@ -88,7 +109,15 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = idempotentLog
         self.idempotentEventLog = idempotentLog
 
-        let activeProvider = provider ?? DeterministicFakeProvider()
+        self.localModelEngine = localModelEngine
+        let activeProvider: any LLMProvider
+        if let provider {
+            activeProvider = provider
+        } else if let localModelEngine {
+            activeProvider = LocalModelProviderAdapter(engine: localModelEngine)
+        } else {
+            activeProvider = DeterministicFakeProvider()
+        }
         self.catalog = ProviderCatalog(providers: [activeProvider])
 
         let providerRuntime = ProviderRuntime(
