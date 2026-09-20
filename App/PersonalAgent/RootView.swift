@@ -14,7 +14,7 @@ struct RootView: View {
                 .tabItem { Label("Tasks", systemImage: "checklist") }
             MemoryScreen()
                 .tabItem { Label("Memory", systemImage: "brain") }
-            SkillsScreen(session: session)
+            SkillsScreen()
                 .tabItem { Label("Skills", systemImage: "puzzlepiece") }
             ProvidersScreen(session: session)
                 .tabItem { Label("Providers", systemImage: "server.rack") }

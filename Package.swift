@@ -1,6 +1,16 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
+/// M0–M6 package graph.
+///
+/// Dependency direction is downward only:
+///   App -> Composition -> Kernel -> Cognition/Agency/Policy
+///        -> Skills/Tools/Modules/Providers/Memory
+///        -> Storage/Events/Observability/Security
+///        -> Foundation
+///
+/// Concrete provider modules exist as reserved boundaries for M2.
+/// They must not be imported by Kernel.
 let package = Package(
     name: "PersonalAgent",
     platforms: [
@@ -30,31 +40,6 @@ let package = Package(
         .library(name: "PAProvidersLocal", targets: ["PAProvidersLocal"]),
     ],
     targets: [
-        .target(
-            name: "cllama",
-            path: "Sources/cllama",
-            publicHeadersPath: "include",
-            cSettings: [
-                .headerSearchPath("include"),
-                .headerSearchPath("ggml/include"),
-                .headerSearchPath("ggml/src"),
-                .headerSearchPath("ggml/src/ggml-cpu"),
-                .headerSearchPath("src"),
-                .headerSearchPath("src/models"),
-                .define("GGML_USE_CPU"),
-                .define("_GNU_SOURCE")
-            ],
-            cxxSettings: [
-                .headerSearchPath("include"),
-                .headerSearchPath("ggml/include"),
-                .headerSearchPath("ggml/src"),
-                .headerSearchPath("ggml/src/ggml-cpu"),
-                .headerSearchPath("src"),
-                .headerSearchPath("src/models"),
-                .define("GGML_USE_CPU"),
-                .define("_GNU_SOURCE")
-            ]
-        ),
         .target(name: "PAFoundation", path: "Sources/Foundation"),
         .target(
             name: "PAObservability",
@@ -103,7 +88,7 @@ let package = Package(
         ),
         .target(
             name: "PAProvidersLocal",
-            dependencies: ["PAProviders", "PAFoundation", .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))],
+            dependencies: ["PAProviders", "PAFoundation"],
             path: "Sources/Providers/Local"
         ),
         .target(
@@ -199,6 +184,5 @@ let package = Package(
             ],
             path: "Tests/PersonalAgentTests"
         ),
-    ],
-    cxxLanguageStandard: .cxx17
+    ]
 )
