@@ -9,3 +9,8 @@ DerivedData/
 .netrc
 *.xcuserstate
 .idea/
+
+*.log
+*.out
+Sources/cllama/
+Sources/cllama/
