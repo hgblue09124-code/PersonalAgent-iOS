@@ -214,3 +214,24 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         )
     }
 }
+
+extension M8CompositionRoot {
+    public var selectedProviderID: String {
+        catalog.identities.first?.id.rawValue ?? "none"
+    }
+
+    public func currentProviderIdentityID() async -> String {
+        catalog.identities.first?.id.rawValue ?? "none"
+    }
+
+    public func currentProviderLifecycle() async -> String {
+        if let providerRuntime {
+            return await providerRuntime.lifecycle.rawValue
+        }
+        return "unconfigured"
+    }
+
+    public func registeredModuleIDs() async -> [String] {
+        await moduleCatalog.contracts().map(\.id.rawValue)
+    }
+}

@@ -219,15 +219,19 @@ struct M81LlamaCPPTests {
         #expect(container.modelMetadataDirectoryURL != container.agentDurableDirectoryURL)
     }
 
-    @Test func testRealNativeInferenceWhenModelProvided() async throws {
-        guard let modelPath = ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"],
-              !modelPath.isEmpty else {
-            print("STATUS_REPORT: LOCAL_GGUF_MODEL_PATH not provided. REAL DEVICE INFERENCE: UNVERIFIED")
-            return
+    private static var isLocalGGUFModelPathProvided: Bool {
+        guard let path = ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"],
+              !path.isEmpty else {
+            return false
         }
+        return true
+    }
 
+    @Test(.enabled(if: isLocalGGUFModelPathProvided))
+    func testRealNativeInferenceWhenModelProvided() async throws {
+        let modelPath = try #require(ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"])
         guard FileManager.default.fileExists(atPath: modelPath) else {
-            #expect(Bool(false), "MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
+            Issue.record("MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
             return
         }
 
