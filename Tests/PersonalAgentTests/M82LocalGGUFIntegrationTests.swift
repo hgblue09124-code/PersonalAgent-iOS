@@ -65,6 +65,41 @@ import PAComposition
         }
     }
 
+    @Test func testModelSwitchingUpdatesEngineIdentity() async throws {
+        let tempDir = try createTempDir()
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let source1 = tempDir.appendingPathComponent("model1.gguf")
+        let source2 = tempDir.appendingPathComponent("model2.gguf")
+        try createValidGGUFFile(at: source1)
+        try createValidGGUFFile(at: source2)
+
+        let storeDir = tempDir.appendingPathComponent("Storage")
+        let storage = try FileBackedLocalModelStorage(baseDirectoryURL: storeDir)
+
+        let desc1 = try await storage.importModel(from: source1, name: "Model One")
+        let desc2 = try await storage.importModel(from: source2, name: "Model Two")
+
+        // Set desc1 as active initially
+        try await storage.selectActiveModel(id: desc1.id)
+
+        let root = try await M8CompositionRoot(
+            localModelStorage: storage,
+            storeDirectoryURL: storeDir
+        )
+
+        let initialEngine = try await root.activeLocalModelEngine()
+        #expect(initialEngine?.identity.id == desc1.id)
+
+        // Switch active model in storage to desc2
+        try await storage.selectActiveModel(id: desc2.id)
+
+        // activeLocalModelEngine MUST return an engine bound to desc2
+        let switchedEngine = try await root.activeLocalModelEngine()
+        #expect(switchedEngine?.identity.id == desc2.id)
+        #expect(switchedEngine?.identity.name == "Model Two")
+    }
+
     @Test func testEngineFailsClosedWhenUnloadedOrMissingFile() async throws {
         let tempDir = try createTempDir()
         defer { try? FileManager.default.removeItem(at: tempDir) }

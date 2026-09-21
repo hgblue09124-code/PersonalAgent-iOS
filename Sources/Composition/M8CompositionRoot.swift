@@ -246,11 +246,11 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     }
 
     public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
-        if let initialLocalModelEngine {
+        guard let activeDescriptor = try await modelStorage.getActiveModelDescriptor() else {
             return initialLocalModelEngine
         }
-        guard let activeDescriptor = try await modelStorage.getActiveModelDescriptor() else {
-            return nil
+        if let initialEngine = initialLocalModelEngine, initialEngine.identity.id == activeDescriptor.id {
+            return initialEngine
         }
         let modelIdent = activeDescriptor.toModelIdentity(baseDirectoryURL: modelStorage.baseDirectoryURL)
         return LlamaCPPModelEngine(
