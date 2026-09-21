@@ -162,5 +162,6 @@ func moduleName(for file: URL, sourcesRoot: URL) -> String {
     if relative.hasPrefix("Core/Agent/") { return "PAKernel" }
     if relative.hasPrefix("Architecture/") { return "PAArchitecture" }
     if relative.hasPrefix("Composition/") { return "PAComposition" }
+    if relative.hasPrefix("cllama/") { return "cllama" }
     return "UNKNOWN"
 }
