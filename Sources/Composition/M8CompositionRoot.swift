@@ -5,6 +5,7 @@ import PAKernel
 import PAObservability
 import PAEvents
 import PAProviders
+import PAProvidersLocal
 import PAModules
 import PASkills
 import PATools
@@ -23,6 +24,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let session: any AgentSession
     public let deviceCapabilityProvider: any DeviceCapabilityProviding
     public let persistenceContainer: ProductPersistenceContainer
+    public let modelStorage: any LocalModelStorageStore
+    public let initialLocalModelEngine: (any LocalModelEngine)?
     public let eventLog: any EventLog
     public let idempotentEventLog: IdempotentEventLog
     public let providerRuntime: ProviderRuntime?
@@ -45,6 +48,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         logger: any AgentLogger = NullLoggerBridge(),
         eventLog: (any EventLog)? = nil,
         provider: (any LLMProvider)? = nil,
+        localModelStorage: (any LocalModelStorageStore)? = nil,
+        localModelEngine: (any LocalModelEngine)? = nil,
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
         deviceCapabilityProvider: (any DeviceCapabilityProviding)? = nil,
@@ -75,6 +80,24 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let resolvedDeviceCapability = deviceCapabilityProvider ?? DefaultDeviceCapabilityProvider()
         self.deviceCapabilityProvider = resolvedDeviceCapability
 
+        let mStorage: any LocalModelStorageStore
+        if let localModelStorage {
+            mStorage = localModelStorage
+        } else {
+            mStorage = try FileBackedLocalModelStorage(baseDirectoryURL: persistenceContainer.modelMetadataDirectoryURL)
+        }
+        self.modelStorage = mStorage
+
+        var resolvedEngine: (any LocalModelEngine)? = localModelEngine
+        if resolvedEngine == nil, let activeDescriptor = try await mStorage.getActiveModelDescriptor() {
+            let modelIdent = activeDescriptor.toModelIdentity(baseDirectoryURL: mStorage.baseDirectoryURL)
+            resolvedEngine = LlamaCPPModelEngine(
+                identity: modelIdent,
+                deviceCapabilityProvider: resolvedDeviceCapability
+            )
+        }
+        self.initialLocalModelEngine = resolvedEngine
+
         let rawLog: any EventLog
         if let eventLog {
             rawLog = eventLog
@@ -88,7 +111,15 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = idempotentLog
         self.idempotentEventLog = idempotentLog
 
-        let activeProvider = provider ?? DeterministicFakeProvider()
+        let activeProvider: any LLMProvider
+        if let provider {
+            activeProvider = provider
+        } else if let resolvedEngine {
+            activeProvider = LocalModelProviderAdapter(engine: resolvedEngine)
+        } else {
+            activeProvider = DeterministicFakeProvider()
+        }
+
         self.catalog = ProviderCatalog(providers: [activeProvider])
 
         let providerRuntime = ProviderRuntime(
@@ -211,6 +242,20 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             executionBoundary: boundary,
             eventLog: idempotentLog,
             logger: logger
+        )
+    }
+
+    public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
+        if let initialLocalModelEngine {
+            return initialLocalModelEngine
+        }
+        guard let activeDescriptor = try await modelStorage.getActiveModelDescriptor() else {
+            return nil
+        }
+        let modelIdent = activeDescriptor.toModelIdentity(baseDirectoryURL: modelStorage.baseDirectoryURL)
+        return LlamaCPPModelEngine(
+            identity: modelIdent,
+            deviceCapabilityProvider: deviceCapabilityProvider
         )
     }
 }
