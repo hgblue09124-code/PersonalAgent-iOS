@@ -40,6 +40,18 @@ let package = Package(
         .library(name: "PAProvidersLocal", targets: ["PAProvidersLocal"]),
     ],
     targets: [
+        .binaryTarget(
+            name: "llama",
+            path: "Frameworks/llama.xcframework"
+        ),
+        .target(
+            name: "cllama",
+            dependencies: [
+                .target(name: "llama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
+            ],
+            path: "Sources/cllama",
+            exclude: ["README.md"]
+        ),
         .target(name: "PAFoundation", path: "Sources/Foundation"),
         .target(
             name: "PAObservability",
@@ -88,7 +100,11 @@ let package = Package(
         ),
         .target(
             name: "PAProvidersLocal",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: [
+                "PAProviders",
+                "PAFoundation",
+                .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
+            ],
             path: "Sources/Providers/Local"
         ),
         .target(
