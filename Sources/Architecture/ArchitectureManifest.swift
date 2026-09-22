@@ -82,7 +82,6 @@ public enum ArchitectureManifest: Sendable {
             "PAObservability",
             "PAEvents",
             "PAProviders",
-            "PAProvidersLocal",
             "PASecurity",
             "PAModules",
             "PASkills",
