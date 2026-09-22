@@ -1,0 +1,262 @@
+import Foundation
+import Testing
+import PAFoundation
+import PAProviders
+import PAProvidersLocal
+import PAComposition
+
+@Suite("Local Model Storage & Selection Tests")
+struct LocalModelStorageTests {
+
+    private func createTestDirectory() throws -> URL {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("LocalModelStorageTests-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        return tempDir
+    }
+
+    private func createValidGGUFFile(at directory: URL, filename: String = "test-model.gguf") throws -> URL {
+        let fileURL = directory.appendingPathComponent(filename)
+        var data = Data()
+
+        // 1. Magic bytes 0x46554747 ("GGUF" in LE)
+        let magic: UInt32 = 0x46554747
+        var magicLE = magic.littleEndian
+        data.append(Data(bytes: &magicLE, count: 4))
+
+        // 2. Version UInt32 = 3
+        let version: UInt32 = 3
+        var versionLE = version.littleEndian
+        data.append(Data(bytes: &versionLE, count: 4))
+
+        // 3. Tensor count UInt64 = 10
+        let tensorCount: UInt64 = 10
+        var tensorCountLE = tensorCount.littleEndian
+        data.append(Data(bytes: &tensorCountLE, count: 8))
+
+        // 4. Metadata count UInt64 = 0
+        let metadataCount: UInt64 = 0
+        var metadataCountLE = metadataCount.littleEndian
+        data.append(Data(bytes: &metadataCountLE, count: 8))
+
+        // Dummy payload to make file non-empty
+        data.append(Data(repeating: 0x00, count: 1024))
+
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
+    private func createInvalidGGUFFile(at directory: URL, filename: String = "bad-model.gguf") throws -> URL {
+        let fileURL = directory.appendingPathComponent(filename)
+        let badData = Data("NOT_GGUF_HEADER_DATA_1234567890".utf8)
+        try badData.write(to: fileURL)
+        return fileURL
+    }
+
+    private func createUnsupportedVersionGGUFFile(at directory: URL, filename: String = "v1-model.gguf") throws -> URL {
+        let fileURL = directory.appendingPathComponent(filename)
+        var data = Data()
+
+        // Magic bytes 0x46554747
+        let magic: UInt32 = 0x46554747
+        var magicLE = magic.littleEndian
+        data.append(Data(bytes: &magicLE, count: 4))
+
+        // Unsupported Version UInt32 = 1
+        let version: UInt32 = 1
+        var versionLE = version.littleEndian
+        data.append(Data(bytes: &versionLE, count: 4))
+
+        // Tensor count UInt64 = 1
+        let tensorCount: UInt64 = 1
+        var tensorCountLE = tensorCount.littleEndian
+        data.append(Data(bytes: &tensorCountLE, count: 8))
+
+        // Metadata count UInt64 = 0
+        let metadataCount: UInt64 = 0
+        var metadataCountLE = metadataCount.littleEndian
+        data.append(Data(bytes: &metadataCountLE, count: 8))
+
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
+    @Test func testImportValidGGUFModelCopiesFileAndPersistsMetadata() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let sourceURL = try createValidGGUFFile(at: root, filename: "source-llama.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let descriptor = try await storage.importModel(from: sourceURL, name: "Test Llama Model")
+
+        #expect(descriptor.name == "Test Llama Model")
+        #expect(descriptor.version == 3)
+        #expect(descriptor.tensorCount == 10)
+        #expect(descriptor.fileSizeBytes > 0)
+
+        // Verify model file copied into app storage
+        let models = try await storage.listModels()
+        #expect(models.count == 1)
+        #expect(models.first?.id == descriptor.id)
+
+        let fileURL = try await storage.modelFileURL(for: descriptor.id)
+        #expect(fileURL != nil)
+        #expect(fileURL != sourceURL) // Ensures copied into app storage
+        #expect(FileManager.default.fileExists(atPath: fileURL!.path))
+    }
+
+    @Test func testImportInvalidGGUFMagicBytesFailsAndLeavesNoOrphanFile() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let badSource = try createInvalidGGUFFile(at: root, filename: "corrupt.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        await #expect(throws: LocalModelStorageError.self) {
+            try await storage.importModel(from: badSource, name: "Corrupt Model")
+        }
+
+        let models = try await storage.listModels()
+        #expect(models.isEmpty)
+
+        // Verify no orphan files created in storageDir
+        let contents = try FileManager.default.contentsOfDirectory(atPath: storageDir.path)
+            .filter { $0 != "models_index.json" }
+        #expect(contents.isEmpty)
+    }
+
+    @Test func testImportUnsupportedGGUFVersionFailsAndLeavesNoOrphanFile() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let v1Source = try createUnsupportedVersionGGUFFile(at: root, filename: "v1.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        await #expect(throws: LocalModelStorageError.self) {
+            try await storage.importModel(from: v1Source, name: "V1 Model")
+        }
+
+        let models = try await storage.listModels()
+        #expect(models.isEmpty)
+
+        let contents = try FileManager.default.contentsOfDirectory(atPath: storageDir.path)
+            .filter { $0 != "models_index.json" }
+        #expect(contents.isEmpty)
+    }
+
+    @Test func testActiveModelSelectionAndDescriptorResolution() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "active-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        #expect(try await storage.activeModelID() == nil)
+        #expect(try await storage.activeModelDescriptor() == nil)
+
+        let model1 = try await storage.importModel(from: source, name: "Model 1")
+
+        try await storage.setActiveModel(id: model1.id)
+
+        let activeID = try await storage.activeModelID()
+        let activeDescriptor = try await storage.activeModelDescriptor()
+
+        #expect(activeID == model1.id)
+        #expect(activeDescriptor?.id == model1.id)
+        #expect(activeDescriptor?.name == "Model 1")
+
+        // Clearing active model
+        try await storage.setActiveModel(id: nil)
+        #expect(try await storage.activeModelID() == nil)
+        #expect(try await storage.activeModelDescriptor() == nil)
+    }
+
+    @Test func testSetActiveModelToNonExistentIDThrowsModelNotFound() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let bogusID = ModelID(rawValue: "non-existent-model-id")
+
+        await #expect(throws: LocalModelStorageError.self) {
+            try await storage.setActiveModel(id: bogusID)
+        }
+    }
+
+    @Test func testDeleteModelRemovesFileClearsActiveSelectionAndIndex() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "delete-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let model = try await storage.importModel(from: source, name: "To Delete")
+        try await storage.setActiveModel(id: model.id)
+
+        #expect(try await storage.activeModelID() == model.id)
+
+        let fileURL = try await storage.modelFileURL(for: model.id)
+        #expect(fileURL != nil)
+        #expect(FileManager.default.fileExists(atPath: fileURL!.path))
+
+        try await storage.deleteModel(id: model.id)
+
+        // Verify index cleared
+        let models = try await storage.listModels()
+        #expect(models.isEmpty)
+
+        // Verify active selection cleared safely
+        #expect(try await storage.activeModelID() == nil)
+        #expect(try await storage.activeModelDescriptor() == nil)
+
+        // Verify file deleted from disk
+        #expect(!FileManager.default.fileExists(atPath: fileURL!.path))
+    }
+
+    @Test func testIndexPersistenceAcrossStorageInstances() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "persist-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+
+        var importedID: ModelID?
+        do {
+            let storage1 = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+            let m = try await storage1.importModel(from: source, name: "Persisted Model")
+            try await storage1.setActiveModel(id: m.id)
+            importedID = m.id
+        }
+
+        // Create fresh storage instance pointing to same directory
+        let storage2 = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+        let models = try await storage2.listModels()
+
+        #expect(models.count == 1)
+        #expect(models.first?.id == importedID)
+        #expect(try await storage2.activeModelID() == importedID)
+        #expect(try await storage2.activeModelDescriptor()?.name == "Persisted Model")
+    }
+
+    @Test func testM8CompositionRootWiresLocalModelStorage() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let composition = try await M8CompositionRoot(storeDirectoryURL: root)
+
+        let models = try await composition.localModelStorage.listModels()
+        #expect(models.isEmpty)
+        #expect(try await composition.localModelStorage.activeModelID() == nil)
+    }
+}

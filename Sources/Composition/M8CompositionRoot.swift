@@ -5,6 +5,7 @@ import PAKernel
 import PAObservability
 import PAEvents
 import PAProviders
+import PAProvidersLocal
 import PAModules
 import PASkills
 import PATools
@@ -23,6 +24,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let session: any AgentSession
     public let deviceCapabilityProvider: any DeviceCapabilityProviding
     public let persistenceContainer: ProductPersistenceContainer
+    public let localModelStorage: any LocalModelStorage
     public let eventLog: any EventLog
     public let idempotentEventLog: IdempotentEventLog
     public let providerRuntime: ProviderRuntime?
@@ -47,6 +49,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         provider: (any LLMProvider)? = nil,
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
+        localModelStorage: (any LocalModelStorage)? = nil,
         deviceCapabilityProvider: (any DeviceCapabilityProviding)? = nil,
         policy: (any PolicyEvaluating)? = nil,
         approvalGate: (any ApprovalGate)? = nil,
@@ -71,6 +74,13 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
         let persistenceContainer = try ProductPersistenceContainer(baseDirectoryURL: rootDirectoryURL)
         self.persistenceContainer = persistenceContainer
+
+        if let localModelStorage {
+            self.localModelStorage = localModelStorage
+        } else {
+            let modelsDir = persistenceContainer.modelMetadataDirectoryURL.appendingPathComponent("Models")
+            self.localModelStorage = try FileBackedLocalModelStorage(modelsDirectoryURL: modelsDir)
+        }
 
         let resolvedDeviceCapability = deviceCapabilityProvider ?? DefaultDeviceCapabilityProvider()
         self.deviceCapabilityProvider = resolvedDeviceCapability
