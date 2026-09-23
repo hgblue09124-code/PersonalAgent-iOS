@@ -12,4 +12,5 @@ public enum LlamaCPPEngineError: Error, Sendable, Equatable {
     case thermalStateCritical
     case memoryPressureCritical
     case cancelled
+    case emptyOutput
 }

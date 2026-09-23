@@ -258,4 +258,131 @@ struct M81LlamaCPPTests {
         let stateAfter = await engine.lifecycleState
         #expect(stateAfter == .unloaded)
     }
+
+    struct ZeroTokenEngineNoValidator: LocalModelEngine {
+        let identity: LocalModelIdentity
+        var availability: LocalModelAvailability { get async { .ready } }
+        var lifecycleState: LocalModelLifecycleState { get async { .loaded } }
+
+        init() {
+            self.identity = LocalModelIdentity(
+                id: ModelID(rawValue: "empty-llama"),
+                name: "Empty Llama",
+                contextTokenLimit: 2048
+            )
+        }
+
+        func load(options: LocalModelLoadingOptions) async throws {}
+
+        func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
+            return LocalModelResponse(text: "", finishReason: "stop")
+        }
+
+        func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
+            AsyncThrowingStream { continuation in
+                continuation.finish()
+            }
+        }
+
+        func cancel() async {}
+        func unload() async throws {}
+    }
+
+    @Test func testEmptyOutputThrowsExplicitError() async throws {
+        // Direct production validator unit test
+        #expect(throws: LlamaCPPEngineError.emptyOutput) {
+            try LocalModelOutputValidator.validate(text: "", generatedCount: 0)
+        }
+
+        // LlamaCPPModelEngine production zero-token boundary test.
+        // Instantiates actual production LlamaCPPModelEngine with a stream runner that yields 0 tokens (generatedCount == 0) without throwing.
+        // If LlamaCPPModelEngine removes LocalModelOutputValidator.validate(text:generatedCount:), THIS TEST FAILS.
+        let llamaIdentity = LocalModelIdentity(
+            id: ModelID(rawValue: "zero-token-llama"),
+            name: "Zero Token Llama",
+            contextTokenLimit: 2048
+        )
+        let zeroTokenLlamaEngine = LlamaCPPModelEngine(
+            identity: llamaIdentity,
+            streamRunner: { _, _ in
+                // Yield 0 tokens and return generatedCount = 0
+                return 0
+            }
+        )
+
+        let llamaGenRequest = LocalModelGenerationRequest(prompt: "Hello zero token test")
+
+        // 1. Verify LlamaCPPModelEngine.generateStream throws LlamaCPPEngineError.emptyOutput
+        let llamaStream = zeroTokenLlamaEngine.generateStream(request: llamaGenRequest)
+        do {
+            for try await _ in llamaStream {}
+            #expect(Bool(false), "Expected LlamaCPPModelEngine.generateStream to throw LlamaCPPEngineError.emptyOutput on generatedCount == 0")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .emptyOutput)
+        }
+
+        // 2. Verify LlamaCPPModelEngine.generate throws LlamaCPPEngineError.emptyOutput
+        do {
+            _ = try await zeroTokenLlamaEngine.generate(request: llamaGenRequest)
+            #expect(Bool(false), "Expected LlamaCPPModelEngine.generate to throw LlamaCPPEngineError.emptyOutput")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .emptyOutput)
+        }
+
+        // 3. Verify LocalModelProviderAdapter stream validation catches zero-token stream from raw engine
+        let rawEngine = ZeroTokenEngineNoValidator()
+        let adapter = LocalModelProviderAdapter(engine: rawEngine)
+        let request = LLMRequest(model: ModelID(rawValue: "empty-llama"), prompt: "Hello empty test")
+
+        let adapterStream = adapter.stream(request)
+        do {
+            for try await _ in adapterStream {}
+            #expect(Bool(false), "Expected adapter.stream to catch zero-token stream and throw LlamaCPPEngineError.emptyOutput")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .emptyOutput)
+        }
+    }
+
+    @Test func testCancellationPropagation() async throws {
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "cancel-llama"),
+            name: "Cancel Llama",
+            localURL: URL(fileURLWithPath: "/tmp/nonexistent.gguf")
+        )
+        let engine = LlamaCPPModelEngine(identity: identity)
+        await engine.cancel()
+
+        let state = await engine.lifecycleState
+        #expect(state == .unloaded)
+    }
+
+    @Test func testActiveModelIdentityMatchesEngineModelIdentity() async throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M8P3IdentityTest_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let compositionRoot = try await M8CompositionRoot(storeDirectoryURL: tempDir)
+
+        // When no active model is selected, activeLocalModelEngine returns nil
+        let nilEngine = try await compositionRoot.activeLocalModelEngine()
+        #expect(nilEngine == nil)
+
+        // Register a model in localModelStorage and mark active
+        let dummyModelURL = try createDummyHeaderGGUFFile(name: "active_test.gguf")
+
+        _ = try await compositionRoot.localModelStorage.importModel(
+            from: dummyModelURL,
+            name: "Active Test Model"
+        )
+
+        let importedModels = try await compositionRoot.localModelStorage.listModels()
+        let imported = try #require(importedModels.first)
+
+        try await compositionRoot.localModelStorage.setActiveModel(id: imported.id)
+
+        let activeEngine = try await compositionRoot.activeLocalModelEngine()
+        let resolvedEngine = try #require(activeEngine)
+
+        #expect(resolvedEngine.identity.id == imported.id)
+        #expect(resolvedEngine.identity.name == "Active Test Model")
+    }
 }

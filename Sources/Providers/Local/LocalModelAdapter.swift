@@ -64,6 +64,7 @@ public final class LocalModelProviderAdapter: LLMProvider, @unchecked Sendable {
                         accumulated += chunk.textDelta
                         continuation.yield(.delta(chunk.textDelta))
                     }
+                    try LocalModelOutputValidator.validate(text: accumulated)
                     let finalResponse = LLMResponse(
                         text: accumulated,
                         finishReason: "stop",
