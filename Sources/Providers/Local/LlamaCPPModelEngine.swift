@@ -12,6 +12,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private let residencyCoordinator: LlamaCPPResidencyCoordinator
     private let parser = GGUFModelParser()
 
+    private let streamRunner: (@Sendable (LocalModelGenerationRequest, AsyncThrowingStream<LocalModelStreamChunk, Error>.Continuation) async throws -> Int)?
     private let stateLock = NSLock()
     private var currentLifecycleState: LocalModelLifecycleState = .unloaded
     private var activeOptions: LocalModelLoadingOptions?
@@ -30,11 +31,13 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     public init(
         identity: LocalModelIdentity,
         deviceCapabilityProvider: (any DeviceCapabilityProviding)? = nil,
-        residencyCoordinator: LlamaCPPResidencyCoordinator = .shared
+        residencyCoordinator: LlamaCPPResidencyCoordinator = .shared,
+        streamRunner: (@Sendable (LocalModelGenerationRequest, AsyncThrowingStream<LocalModelStreamChunk, Error>.Continuation) async throws -> Int)? = nil
     ) {
         self.identity = identity
         self.deviceCapabilityProvider = deviceCapabilityProvider ?? DefaultDeviceCapabilityProvider()
         self.residencyCoordinator = residencyCoordinator
+        self.streamRunner = streamRunner
     }
 
     deinit {
@@ -183,6 +186,16 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
         let task = Task {
             do {
+                if let runner = self.streamRunner {
+                    let generatedCount = try await runner(request, continuation)
+                    try LocalModelOutputValidator.validate(text: "non-empty-if-generated", generatedCount: generatedCount)
+                    if self.isLoaded() {
+                        self.setLifecycleState(.loaded)
+                    }
+                    continuation.finish()
+                    return
+                }
+
                 // Verify loaded state and obtain native pointers
                 #if canImport(cllama)
                 guard let (modelPtr, contextPtr, samplerPtr) = self.getNativeHandles() else {

@@ -275,13 +275,11 @@ struct M81LlamaCPPTests {
         func load(options: LocalModelLoadingOptions) async throws {}
 
         func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
-            // Returns empty text WITHOUT throwing emptyOutput directly
             return LocalModelResponse(text: "", finishReason: "stop")
         }
 
         func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
             AsyncThrowingStream { continuation in
-                // Yields zero chunks and finishes cleanly WITHOUT throwing emptyOutput directly
                 continuation.finish()
             }
         }
@@ -291,20 +289,54 @@ struct M81LlamaCPPTests {
     }
 
     @Test func testEmptyOutputThrowsExplicitError() async throws {
-        // Direct production validator test
+        // Direct production validator unit test
         #expect(throws: LlamaCPPEngineError.emptyOutput) {
             try LocalModelOutputValidator.validate(text: "", generatedCount: 0)
         }
 
-        // Test LocalModelProviderAdapter streaming zero tokens from an engine that does NOT throw emptyOutput.
-        // If LocalModelProviderAdapter removes try LocalModelOutputValidator.validate(text: accumulated), this test WILL FAIL.
+        // LlamaCPPModelEngine production zero-token boundary test.
+        // Instantiates actual production LlamaCPPModelEngine with a stream runner that yields 0 tokens (generatedCount == 0) without throwing.
+        // If LlamaCPPModelEngine removes LocalModelOutputValidator.validate(text:generatedCount:), THIS TEST FAILS.
+        let llamaIdentity = LocalModelIdentity(
+            id: ModelID(rawValue: "zero-token-llama"),
+            name: "Zero Token Llama",
+            contextTokenLimit: 2048
+        )
+        let zeroTokenLlamaEngine = LlamaCPPModelEngine(
+            identity: llamaIdentity,
+            streamRunner: { _, _ in
+                // Yield 0 tokens and return generatedCount = 0
+                return 0
+            }
+        )
+
+        let llamaGenRequest = LocalModelGenerationRequest(prompt: "Hello zero token test")
+
+        // 1. Verify LlamaCPPModelEngine.generateStream throws LlamaCPPEngineError.emptyOutput
+        let llamaStream = zeroTokenLlamaEngine.generateStream(request: llamaGenRequest)
+        do {
+            for try await _ in llamaStream {}
+            #expect(Bool(false), "Expected LlamaCPPModelEngine.generateStream to throw LlamaCPPEngineError.emptyOutput on generatedCount == 0")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .emptyOutput)
+        }
+
+        // 2. Verify LlamaCPPModelEngine.generate throws LlamaCPPEngineError.emptyOutput
+        do {
+            _ = try await zeroTokenLlamaEngine.generate(request: llamaGenRequest)
+            #expect(Bool(false), "Expected LlamaCPPModelEngine.generate to throw LlamaCPPEngineError.emptyOutput")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .emptyOutput)
+        }
+
+        // 3. Verify LocalModelProviderAdapter stream validation catches zero-token stream from raw engine
         let rawEngine = ZeroTokenEngineNoValidator()
         let adapter = LocalModelProviderAdapter(engine: rawEngine)
         let request = LLMRequest(model: ModelID(rawValue: "empty-llama"), prompt: "Hello empty test")
 
-        let stream = adapter.stream(request)
+        let adapterStream = adapter.stream(request)
         do {
-            for try await _ in stream {}
+            for try await _ in adapterStream {}
             #expect(Bool(false), "Expected adapter.stream to catch zero-token stream and throw LlamaCPPEngineError.emptyOutput")
         } catch let err as LlamaCPPEngineError {
             #expect(err == .emptyOutput)
