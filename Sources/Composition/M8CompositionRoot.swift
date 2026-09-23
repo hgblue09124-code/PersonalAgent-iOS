@@ -244,4 +244,38 @@ extension M8CompositionRoot {
     public func registeredModuleIDs() async -> [String] {
         await moduleCatalog.contracts().map(\.id.rawValue)
     }
+
+    /// Dynamically resolves and binds the currently active local model from `localModelStorage` to a lazy `LlamaCPPModelEngine`.
+    /// Returns `nil` if no active model is selected (`activeModelID() == nil`).
+    /// Throws `LocalModelStorageError` if an active model is selected but its descriptor or model file is missing, stale, or unreadable (fail closed).
+    public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
+        guard let activeID = try await localModelStorage.activeModelID() else {
+            return nil
+        }
+
+        guard let descriptor = try await localModelStorage.activeModelDescriptor(),
+              descriptor.id == activeID,
+              let fileURL = try await localModelStorage.modelFileURL(for: activeID) else {
+            throw LocalModelStorageError.modelNotFound(activeID)
+        }
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            throw LocalModelStorageError.fileNotFound(fileURL)
+        }
+
+        let identity = LocalModelIdentity(
+            id: descriptor.id,
+            name: descriptor.name,
+            parameterCount: descriptor.parameterCount,
+            quantization: descriptor.quantization,
+            contextTokenLimit: descriptor.contextWindow ?? 8192,
+            fileSizeBytes: descriptor.fileSizeBytes,
+            localURL: fileURL
+        )
+
+        return LlamaCPPModelEngine(
+            identity: identity,
+            deviceCapabilityProvider: deviceCapabilityProvider
+        )
+    }
 }

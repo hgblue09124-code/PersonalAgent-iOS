@@ -323,3 +323,287 @@ struct LocalModelStorageTests {
         #expect(activeID == nil)
     }
 }
+
+
+@Suite("M8.2 Active Local Model Binding Tests")
+struct M82ActiveModelBindingTests {
+
+    private func createTestDirectory() throws -> URL {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M82BindingTests-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        return tempDir
+    }
+
+    private func createValidGGUFFile(at directory: URL, filename: String = "valid-model.gguf") throws -> URL {
+        let fileURL = directory.appendingPathComponent(filename)
+        var data = Data()
+
+        // 1. Magic bytes 0x46554747 ("GGUF" in LE)
+        let magic: UInt32 = 0x46554747
+        var magicLE = magic.littleEndian
+        data.append(Data(bytes: &magicLE, count: 4))
+
+        // 2. Version UInt32 = 3
+        let version: UInt32 = 3
+        var versionLE = version.littleEndian
+        data.append(Data(bytes: &versionLE, count: 4))
+
+        // 3. Tensor count UInt64 = 10
+        let tensorCount: UInt64 = 10
+        var tensorCountLE = tensorCount.littleEndian
+        data.append(Data(bytes: &tensorCountLE, count: 8))
+
+        // 4. Metadata count UInt64 = 0
+        let metadataCount: UInt64 = 0
+        var metadataCountLE = metadataCount.littleEndian
+        data.append(Data(bytes: &metadataCountLE, count: 8))
+
+        data.append(Data(repeating: 0x00, count: 1024))
+        try data.write(to: fileURL)
+        return fileURL
+    }
+
+    @Test func testActiveModelBindingGuaranteesIdentityMatch() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "identity-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let descriptor = try await storage.importModel(from: source, name: "Identity Test Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let resolvedEngine = try await compositionRoot.activeLocalModelEngine()
+        let engine = try #require(resolvedEngine)
+
+        #expect(engine.identity.id == descriptor.id)
+        #expect(engine.identity.name == descriptor.name)
+        #expect(engine.identity.localURL != nil)
+    }
+
+    @Test func testNoActiveModelReturnsNilNoRuntimeCreated() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        try await storage.setActiveModel(id: nil)
+
+        let resolvedEngine = try await compositionRoot.activeLocalModelEngine()
+        #expect(resolvedEngine == nil)
+    }
+
+    @Test func testLazyRuntimeInitialization() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "lazy-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let descriptor = try await storage.importModel(from: source, name: "Lazy Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let resolvedEngine = try await compositionRoot.activeLocalModelEngine()
+        let engine = try #require(resolvedEngine)
+
+        let state = await engine.lifecycleState
+        #expect(state == .unloaded)
+    }
+
+    private struct StaleModelStorageMock: LocalModelStorage {
+        let staleID: ModelID
+        let returnDescriptor: Bool
+        let fileURL: URL?
+
+        func importModel(from sourceURL: URL, name: String?) async throws -> LocalModelDescriptor {
+            fatalError("Not implemented")
+        }
+        func listModels() async throws -> [LocalModelDescriptor] { [] }
+        func getModel(id: ModelID) async throws -> LocalModelDescriptor? { nil }
+        func deleteModel(id: ModelID) async throws {}
+        func setActiveModel(id: ModelID?) async throws {}
+        func activeModelID() async throws -> ModelID? { staleID }
+        func activeModelDescriptor() async throws -> LocalModelDescriptor? {
+            guard returnDescriptor else { return nil }
+            return LocalModelDescriptor(
+                id: staleID,
+                name: "Stale Model",
+                filename: "stale.gguf",
+                fileSizeBytes: 1024
+            )
+        }
+        func modelFileURL(for id: ModelID) async throws -> URL? { fileURL }
+    }
+
+    @Test func testMissingOrStaleOrInvalidModelFailsClosed() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let rootDir = root.appendingPathComponent("M8Product")
+
+        // Case A: activeModelID is set, but activeModelDescriptor returns nil (stale/missing descriptor)
+        let staleID = ModelID(rawValue: "stale-missing-descriptor")
+        let mockA = StaleModelStorageMock(staleID: staleID, returnDescriptor: false, fileURL: nil)
+        let compositionRootA = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: mockA
+        )
+
+        do {
+            _ = try await compositionRootA.activeLocalModelEngine()
+            #expect(Bool(false), "Expected activeLocalModelEngine to fail closed when active descriptor is missing")
+        } catch let err as LocalModelStorageError {
+            #expect(err == .modelNotFound(staleID))
+        }
+
+        // Case B: activeModelDescriptor exists, but model file is missing on disk
+        let missingFileURL = root.appendingPathComponent("nonexistent.gguf")
+        let mockB = StaleModelStorageMock(staleID: staleID, returnDescriptor: true, fileURL: missingFileURL)
+        let compositionRootB = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: mockB
+        )
+
+        do {
+            _ = try await compositionRootB.activeLocalModelEngine()
+            #expect(Bool(false), "Expected activeLocalModelEngine to fail closed when model file is missing on disk")
+        } catch let err as LocalModelStorageError {
+            #expect(err == .fileNotFound(missingFileURL))
+        }
+    }
+
+    @Test func testNativeLoadFailurePropagatesWithoutFakeFallback() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        // Create a GGUF file with valid header but dummy payload (no tensors)
+        let source = try createValidGGUFFile(at: root, filename: "no-tensors.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let descriptor = try await storage.importModel(from: source, name: "No Tensors Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let resolvedEngine = try await compositionRoot.activeLocalModelEngine()
+        let engine = try #require(resolvedEngine)
+
+        do {
+            try await engine.load(options: LocalModelLoadingOptions())
+            #expect(Bool(false), "Native model load must fail closed when tensor weights are missing")
+        } catch {
+            let state = await engine.lifecycleState
+            if case .failed = state {
+                #expect(Bool(true))
+            } else {
+                #expect(Bool(false), "Expected state to be .failed")
+            }
+        }
+    }
+
+
+    private struct IdentityMismatchModelStorageMock: LocalModelStorage {
+        let activeID: ModelID
+        let mismatchedDescriptorID: ModelID
+        let validFileURL: URL
+
+        func importModel(from sourceURL: URL, name: String?) async throws -> LocalModelDescriptor {
+            fatalError("Not implemented")
+        }
+        func listModels() async throws -> [LocalModelDescriptor] { [] }
+        func getModel(id: ModelID) async throws -> LocalModelDescriptor? { nil }
+        func deleteModel(id: ModelID) async throws {}
+        func setActiveModel(id: ModelID?) async throws {}
+        func activeModelID() async throws -> ModelID? { activeID }
+        func activeModelDescriptor() async throws -> LocalModelDescriptor? {
+            LocalModelDescriptor(
+                id: mismatchedDescriptorID,
+                name: "Mismatched Model",
+                filename: "mismatched.gguf",
+                fileSizeBytes: 1024
+            )
+        }
+        func modelFileURL(for id: ModelID) async throws -> URL? { validFileURL }
+    }
+
+    @Test func testIdentityMismatchFailsClosed() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let validFile = try createValidGGUFFile(at: root, filename: "mismatched.gguf")
+        let rootDir = root.appendingPathComponent("M8Product")
+
+        let activeID = ModelID(rawValue: "active-model-A")
+        let mismatchedDescriptorID = ModelID(rawValue: "descriptor-model-B")
+
+        let mock = IdentityMismatchModelStorageMock(
+            activeID: activeID,
+            mismatchedDescriptorID: mismatchedDescriptorID,
+            validFileURL: validFile
+        )
+
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: mock
+        )
+
+        do {
+            _ = try await compositionRoot.activeLocalModelEngine()
+            #expect(Bool(false), "Expected activeLocalModelEngine to fail closed on identity mismatch")
+        } catch let err as LocalModelStorageError {
+            #expect(err == .modelNotFound(activeID))
+        }
+    }
+
+    @Test func testDeterministicRuntimeCleanup() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "cleanup-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let descriptor = try await storage.importModel(from: source, name: "Cleanup Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let resolvedEngine = try await compositionRoot.activeLocalModelEngine()
+        let engine = try #require(resolvedEngine)
+
+        try await engine.unload()
+        let state = await engine.lifecycleState
+        #expect(state == .unloaded)
+    }
+}
