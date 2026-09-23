@@ -259,20 +259,50 @@ struct M81LlamaCPPTests {
         #expect(stateAfter == .unloaded)
     }
 
+    struct EmptyStreamLocalEngine: LocalModelEngine {
+        let identity: LocalModelIdentity
+        var availability: LocalModelAvailability { get async { .ready } }
+        var lifecycleState: LocalModelLifecycleState { get async { .loaded } }
+
+        init() {
+            self.identity = LocalModelIdentity(
+                id: ModelID(rawValue: "empty-llama"),
+                name: "Empty Llama",
+                contextTokenLimit: 2048
+            )
+        }
+
+        func load(options: LocalModelLoadingOptions) async throws {}
+        func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
+            throw LlamaCPPEngineError.emptyOutput
+        }
+        func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
+            AsyncThrowingStream { continuation in
+                continuation.finish()
+            }
+        }
+        func cancel() async {}
+        func unload() async throws {}
+    }
+
     @Test func testEmptyOutputThrowsExplicitError() async throws {
-        let identity = LocalModelIdentity(
-            id: ModelID(rawValue: "empty-llama"),
-            name: "Empty Llama",
-            localURL: URL(fileURLWithPath: "/tmp/nonexistent.gguf")
-        )
-        let engine = LlamaCPPModelEngine(identity: identity)
-        let request = LocalModelGenerationRequest(prompt: "Hello empty test")
+        let engine = EmptyStreamLocalEngine()
+        let adapter = LocalModelProviderAdapter(engine: engine)
+        let request = LLMRequest(model: ModelID(rawValue: "empty-llama"), prompt: "Hello empty test")
 
         do {
-            _ = try await engine.generate(request: request)
-            #expect(Bool(false), "Expected engine.generate to throw modelNotLoaded or emptyOutput")
+            _ = try await adapter.complete(request)
+            #expect(Bool(false), "Expected adapter.complete to throw LlamaCPPEngineError.emptyOutput")
         } catch let err as LlamaCPPEngineError {
-            #expect(err == .modelNotLoaded || err == .emptyOutput)
+            #expect(err == .emptyOutput)
+        }
+
+        let stream = adapter.stream(request)
+        do {
+            for try await _ in stream {}
+            #expect(Bool(false), "Expected adapter.stream to throw LlamaCPPEngineError.emptyOutput")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .emptyOutput)
         }
     }
 
