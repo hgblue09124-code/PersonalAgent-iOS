@@ -599,7 +599,7 @@ struct M82ActiveModelBindingTests {
         #expect(unloadCalls == 1)
     }
 
-    @Test func testAcceptanceG_ModelSwitchingLifecycle() async throws {
+    @Test func testAcceptanceG1_SuccessfulModelSwitch() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -628,10 +628,66 @@ struct M82ActiveModelBindingTests {
         let resolvedA = try #require(try await coordinator.activeLocalModelEngine())
         #expect(resolvedA.identity.id == mA.id)
 
-        // Switch to B
         try await coordinator.setActiveModel(id: mB.id)
         let resolvedB = try #require(try await coordinator.activeLocalModelEngine())
         #expect(resolvedB.identity.id == mB.id)
         #expect(try await storage.activeModelID() == mB.id)
+        #expect(mockEngineA.unloadCallCount == 1)
+    }
+
+    @Test func testAcceptanceG2_FailedModelSwitchPreservesActiveModel() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let sourceA = try createValidGGUFFile(at: root, filename: "modelA.gguf")
+        let sourceB = try createValidGGUFFile(at: root, filename: "modelB.gguf")
+
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let mA = try await storage.importModel(from: sourceA, name: "Model A")
+        let mB = try await storage.importModel(from: sourceB, name: "Model B")
+
+        let mockEngineA = ObservableMockEngine(
+            identity: LocalModelIdentity(id: mA.id, name: mA.name),
+            state: .loaded,
+            shouldFailUnload: true
+        )
+        let mockEngineB = ObservableMockEngine(
+            identity: LocalModelIdentity(id: mB.id, name: mB.name),
+            state: .loaded
+        )
+
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: storage,
+            deviceCapabilityProvider: DefaultDeviceCapabilityProvider(),
+            engineFactory: { identity, _ in
+                if identity.id == mA.id { return mockEngineA }
+                return mockEngineB
+            }
+        )
+
+        try await coordinator.setActiveModel(id: mA.id)
+        let resolvedA = try #require(try await coordinator.activeLocalModelEngine())
+        #expect(resolvedA.identity.id == mA.id)
+
+        // Attempting switch to B fails because A unload fails
+        do {
+            try await coordinator.setActiveModel(id: mB.id)
+            #expect(Bool(false), "Expected switch to fail when unloading model A fails")
+        } catch let err as LocalModelStorageError {
+            if case .storageCorrupt = err {
+                #expect(Bool(true))
+            } else {
+                #expect(Bool(false), "Unexpected error: \(err)")
+            }
+        }
+
+        // Active model in storage remains A, and cached engine remains A
+        #expect(try await storage.activeModelID() == mA.id)
+        let currentEngine = try #require(try await coordinator.activeLocalModelEngine())
+        #expect(currentEngine.identity.id == mA.id)
+        #expect(mockEngineA.unloadCallCount == 1)
+        #expect(mockEngineB.completeCallCount == 0)
     }
 }
