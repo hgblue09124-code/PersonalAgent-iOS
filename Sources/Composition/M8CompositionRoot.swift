@@ -1,32 +1,202 @@
 import Foundation
 import PAFoundation
-import PAArchitecture
-import PAKernel
-import PAObservability
-import PAEvents
 import PAProviders
 import PAProvidersLocal
-import PAModules
-import PASkills
-import PATools
 import PAMemory
-import PAPolicy
+import PAModules
+import PAKernel
 import PACognition
+import PAPolicy
 import PAAgency
-import PASecurity
+import PAEvents
+import PAArchitecture
+import PAObservability
+import PATools
+import PASkills
 
-/// Canonical M8 Composition Root assembling the Agent OS runtime into a Personal Agent product architecture.
-/// Wires M7 Durable Execution Lifecycle, M8 AgentSession, Local Model Contracts, Device Capabilities, and Domain Persistence.
+/// Manages active local model engine instance lifetime and residency in product composition.
+public actor LocalModelRuntimeCoordinator: Sendable {
+    private let storage: any LocalModelStorage
+    private let deviceCapabilityProvider: any DeviceCapabilityProviding
+    private var cachedEngine: (any LocalModelEngine)?
+
+    public init(
+        storage: any LocalModelStorage,
+        deviceCapabilityProvider: any DeviceCapabilityProviding
+    ) {
+        self.storage = storage
+        self.deviceCapabilityProvider = deviceCapabilityProvider
+    }
+
+    public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
+        guard let activeID = try await storage.activeModelID() else {
+            if let existing = cachedEngine {
+                try? await existing.unload()
+                cachedEngine = nil
+            }
+            return nil
+        }
+
+        guard let descriptor = try await storage.activeModelDescriptor(),
+              descriptor.id == activeID,
+              let fileURL = try await storage.modelFileURL(for: activeID) else {
+            if let existing = cachedEngine {
+                try? await existing.unload()
+                cachedEngine = nil
+            }
+            throw LocalModelStorageError.modelNotFound(activeID)
+        }
+
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            if let existing = cachedEngine {
+                try? await existing.unload()
+                cachedEngine = nil
+            }
+            throw LocalModelStorageError.fileNotFound(fileURL)
+        }
+
+        if let existing = cachedEngine, existing.identity.id == activeID {
+            return existing
+        }
+
+        if let existing = cachedEngine {
+            try? await existing.unload()
+            cachedEngine = nil
+        }
+
+        let identity = LocalModelIdentity(
+            id: descriptor.id,
+            name: descriptor.name,
+            parameterCount: descriptor.parameterCount,
+            quantization: descriptor.quantization,
+            contextTokenLimit: descriptor.contextWindow ?? 8192,
+            fileSizeBytes: descriptor.fileSizeBytes,
+            localURL: fileURL
+        )
+
+        let newEngine = LlamaCPPModelEngine(
+            identity: identity,
+            deviceCapabilityProvider: deviceCapabilityProvider
+        )
+        cachedEngine = newEngine
+        return newEngine
+    }
+
+    public func loadActiveModel(options: LocalModelLoadingOptions? = nil) async throws -> any LocalModelEngine {
+        guard let engine = try await activeLocalModelEngine() else {
+            throw LlamaCPPEngineError.modelNotLoaded
+        }
+        let opts = options ?? LocalModelLoadingOptions()
+        try await engine.load(options: opts)
+        return engine
+    }
+
+    public func unloadActiveModel() async throws {
+        if let engine = cachedEngine {
+            try await engine.unload()
+            cachedEngine = nil
+        }
+    }
+
+    public func setActiveModel(id: ModelID?) async throws {
+        let currentActiveID = try await storage.activeModelID()
+        if currentActiveID != id {
+            try await unloadActiveModel()
+        }
+        try await storage.setActiveModel(id: id)
+    }
+
+    public func deleteModel(id: ModelID) async throws {
+        if let engine = cachedEngine, engine.identity.id == id {
+            try await unloadActiveModel()
+        }
+        try await storage.deleteModel(id: id)
+    }
+}
+
+/// Dynamic provider wrapper routing completion/streaming requests to the active local model engine when loaded,
+/// falling back to the configured default provider when no local model engine is loaded.
+public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
+    private let fallbackProvider: any LLMProvider
+    private let coordinator: LocalModelRuntimeCoordinator
+
+    public init(
+        fallbackProvider: any LLMProvider,
+        coordinator: LocalModelRuntimeCoordinator
+    ) {
+        self.fallbackProvider = fallbackProvider
+        self.coordinator = coordinator
+    }
+
+    private func activeLocalProvider() async -> (any LLMProvider)? {
+        guard let engine = try? await coordinator.activeLocalModelEngine() else {
+            return nil
+        }
+        let state = await engine.lifecycleState
+        if case .loaded = state {
+            return LocalModelProviderAdapter(engine: engine)
+        }
+        return nil
+    }
+
+    public var identity: ProviderIdentity {
+        fallbackProvider.identity
+    }
+
+    public var capabilities: ProviderCapabilities {
+        [.textGeneration, .streaming, .localInference]
+    }
+
+    public var health: ProviderHealth {
+        get async {
+            if let active = await activeLocalProvider() {
+                return await active.health
+            }
+            return await fallbackProvider.health
+        }
+    }
+
+    public func complete(_ request: LLMRequest) async throws -> LLMResponse {
+        if let active = await activeLocalProvider() {
+            return try await active.complete(request)
+        }
+        return try await fallbackProvider.complete(request)
+    }
+
+    public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        let fallback = fallbackProvider
+        let coord = coordinator
+        return AsyncThrowingStream { continuation in
+            Task {
+                if let engine = try? await coord.activeLocalModelEngine(),
+                   case .loaded = await engine.lifecycleState {
+                    let adapter = LocalModelProviderAdapter(engine: engine)
+                    for try await event in adapter.stream(request) {
+                        continuation.yield(event)
+                    }
+                    continuation.finish()
+                } else {
+                    for try await event in fallback.stream(request) {
+                        continuation.yield(event)
+                    }
+                    continuation.finish()
+                }
+            }
+        }
+    }
+}
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
-    public let runtime: AgentRuntime
-    public let session: any AgentSession
-    public let deviceCapabilityProvider: any DeviceCapabilityProviding
-    public let persistenceContainer: ProductPersistenceContainer
-    public let localModelStorage: any LocalModelStorage
     public let eventLog: any EventLog
     public let idempotentEventLog: IdempotentEventLog
+    public let runtime: AgentRuntime
+    public let session: AgentSession
+    public let persistenceContainer: ProductPersistenceContainer
+    public let localModelStorage: any LocalModelStorage
+    public let deviceCapabilityProvider: any DeviceCapabilityProviding
+    public let localModelRuntimeCoordinator: LocalModelRuntimeCoordinator
     public let providerRuntime: ProviderRuntime?
     public let catalog: ProviderCatalog
     public let moduleCatalog: ModuleCatalog
@@ -75,15 +245,23 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let persistenceContainer = try ProductPersistenceContainer(baseDirectoryURL: rootDirectoryURL)
         self.persistenceContainer = persistenceContainer
 
+        let resolvedStorage: any LocalModelStorage
         if let localModelStorage {
-            self.localModelStorage = localModelStorage
+            resolvedStorage = localModelStorage
         } else {
             let modelsDir = persistenceContainer.modelMetadataDirectoryURL.appendingPathComponent("Models")
-            self.localModelStorage = try FileBackedLocalModelStorage(modelsDirectoryURL: modelsDir)
+            resolvedStorage = try FileBackedLocalModelStorage(modelsDirectoryURL: modelsDir)
         }
+        self.localModelStorage = resolvedStorage
 
         let resolvedDeviceCapability = deviceCapabilityProvider ?? DefaultDeviceCapabilityProvider()
         self.deviceCapabilityProvider = resolvedDeviceCapability
+
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: resolvedStorage,
+            deviceCapabilityProvider: resolvedDeviceCapability
+        )
+        self.localModelRuntimeCoordinator = coordinator
 
         let rawLog: any EventLog
         if let eventLog {
@@ -98,18 +276,22 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = idempotentLog
         self.idempotentEventLog = idempotentLog
 
-        let activeProvider = provider ?? DeterministicFakeProvider()
-        self.catalog = ProviderCatalog(providers: [activeProvider])
+        let fallbackProvider = provider ?? DeterministicFakeProvider()
+        let dynamicProvider = DynamicActiveProvider(
+            fallbackProvider: fallbackProvider,
+            coordinator: coordinator
+        )
+        self.catalog = ProviderCatalog(providers: [dynamicProvider])
 
         let providerRuntime = ProviderRuntime(
-            provider: activeProvider,
+            provider: dynamicProvider,
             eventLog: idempotentLog,
             logger: logger
         )
         let configuration = ProviderConfiguration(
-            providerID: activeProvider.identity.id,
+            providerID: dynamicProvider.identity.id,
             endpointURL: nil,
-            defaultModel: activeProvider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
+            defaultModel: dynamicProvider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
         )
         try await providerRuntime.configure(configuration)
         try await providerRuntime.ready()
@@ -155,7 +337,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
         let coordination = KernelCoordinationBoundary(
             policy: policy,
-            provider: activeProvider,
+            provider: dynamicProvider,
             modules: moduleRuntime,
             memory: memoryRuntime
         )
@@ -231,10 +413,26 @@ extension M8CompositionRoot {
     }
 
     public func currentProviderIdentityID() async -> String {
-        catalog.identities.first?.id.rawValue ?? "none"
+        if let engine = try? await localModelRuntimeCoordinator.activeLocalModelEngine() {
+            let state = await engine.lifecycleState
+            if case .loaded = state {
+                return "local-\(engine.identity.id.rawValue)"
+            }
+        }
+        return catalog.identities.first?.id.rawValue ?? "none"
     }
 
     public func currentProviderLifecycle() async -> String {
+        if let engine = try? await localModelRuntimeCoordinator.activeLocalModelEngine() {
+            let state = await engine.lifecycleState
+            switch state {
+            case .unloaded: return "unloaded"
+            case .loading(let p): return "loading(\(Int(p * 100))%)"
+            case .loaded: return "loaded"
+            case .unloading: return "unloading"
+            case .failed(let r): return "failed(\(r))"
+            }
+        }
         if let providerRuntime {
             return await providerRuntime.lifecycle.rawValue
         }
@@ -245,37 +443,23 @@ extension M8CompositionRoot {
         await moduleCatalog.contracts().map(\.id.rawValue)
     }
 
-    /// Dynamically resolves and binds the currently active local model from `localModelStorage` to a lazy `LlamaCPPModelEngine`.
-    /// Returns `nil` if no active model is selected (`activeModelID() == nil`).
-    /// Throws `LocalModelStorageError` if an active model is selected but its descriptor or model file is missing, stale, or unreadable (fail closed).
     public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
-        guard let activeID = try await localModelStorage.activeModelID() else {
-            return nil
-        }
+        try await localModelRuntimeCoordinator.activeLocalModelEngine()
+    }
 
-        guard let descriptor = try await localModelStorage.activeModelDescriptor(),
-              descriptor.id == activeID,
-              let fileURL = try await localModelStorage.modelFileURL(for: activeID) else {
-            throw LocalModelStorageError.modelNotFound(activeID)
-        }
+    public func loadActiveLocalModel(options: LocalModelLoadingOptions? = nil) async throws -> any LocalModelEngine {
+        try await localModelRuntimeCoordinator.loadActiveModel(options: options)
+    }
 
-        guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            throw LocalModelStorageError.fileNotFound(fileURL)
-        }
+    public func unloadActiveLocalModel() async throws {
+        try await localModelRuntimeCoordinator.unloadActiveModel()
+    }
 
-        let identity = LocalModelIdentity(
-            id: descriptor.id,
-            name: descriptor.name,
-            parameterCount: descriptor.parameterCount,
-            quantization: descriptor.quantization,
-            contextTokenLimit: descriptor.contextWindow ?? 8192,
-            fileSizeBytes: descriptor.fileSizeBytes,
-            localURL: fileURL
-        )
+    public func setActiveLocalModel(id: ModelID?) async throws {
+        try await localModelRuntimeCoordinator.setActiveModel(id: id)
+    }
 
-        return LlamaCPPModelEngine(
-            identity: identity,
-            deviceCapabilityProvider: deviceCapabilityProvider
-        )
+    public func deleteLocalModel(id: ModelID) async throws {
+        try await localModelRuntimeCoordinator.deleteModel(id: id)
     }
 }

@@ -606,4 +606,106 @@ struct M82ActiveModelBindingTests {
         let state = await engine.lifecycleState
         #expect(state == .unloaded)
     }
+
+    @Test func testPersistentRuntimeInstanceAcrossActiveLocalModelEngineCalls() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "persistent-instance-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let descriptor = try await storage.importModel(from: source, name: "Persistent Model")
+        try await compositionRoot.setActiveLocalModel(id: descriptor.id)
+
+        let engine1 = try await compositionRoot.activeLocalModelEngine()
+        let engine2 = try await compositionRoot.activeLocalModelEngine()
+
+        let e1 = try #require(engine1)
+        let e2 = try #require(engine2)
+
+        #expect(e1.identity.id == e2.identity.id)
+        #expect(e1.identity.name == e2.identity.name)
+    }
+
+    @Test func testSwitchingActiveModelUnloadsAndResetsRuntime() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source1 = try createValidGGUFFile(at: root, filename: "model1.gguf")
+        let source2 = try createValidGGUFFile(at: root, filename: "model2.gguf")
+
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let d1 = try await storage.importModel(from: source1, name: "Model 1")
+        let d2 = try await storage.importModel(from: source2, name: "Model 2")
+
+        try await compositionRoot.setActiveLocalModel(id: d1.id)
+        let e1 = try #require(try await compositionRoot.activeLocalModelEngine())
+        #expect(e1.identity.id == d1.id)
+
+        try await compositionRoot.setActiveLocalModel(id: d2.id)
+        let e2 = try #require(try await compositionRoot.activeLocalModelEngine())
+        #expect(e2.identity.id == d2.id)
+
+        let activeID = try await storage.activeModelID()
+        #expect(activeID == d2.id)
+    }
+
+    @Test func testDeleteActiveModelUnloadsAndClearsSelection() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "delete-test.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: storage
+        )
+
+        let descriptor = try await storage.importModel(from: source, name: "Delete Test Model")
+        try await compositionRoot.setActiveLocalModel(id: descriptor.id)
+
+        #expect(try await storage.activeModelID() == descriptor.id)
+
+        try await compositionRoot.deleteLocalModel(id: descriptor.id)
+
+        #expect(try await storage.activeModelID() == nil)
+        #expect(try await compositionRoot.activeLocalModelEngine() == nil)
+    }
+
+    @Test func testProviderAndChatPathWithDynamicActiveProvider() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir
+        )
+
+        let providerIDBefore = await compositionRoot.currentProviderIdentityID()
+        #expect(providerIDBefore == "fake")
+
+        let stateBefore = await compositionRoot.session.currentState()
+        #expect(stateBefore.lifecycle == .running)
+
+        let result = try await compositionRoot.session.submitInput("Hello world")
+        #expect(result.rawValue != "")
+    }
 }
