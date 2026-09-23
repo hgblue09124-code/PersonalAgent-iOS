@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import PAFoundation
 import PAKernel
 import PAComposition
 import PAArchitecture
