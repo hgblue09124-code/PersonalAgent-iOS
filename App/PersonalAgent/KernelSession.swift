@@ -3,7 +3,6 @@ import SwiftUI
 import PAKernel
 import PAComposition
 import PAArchitecture
-import PAProviders
 
 @MainActor
 final class KernelSession: ObservableObject {
@@ -15,11 +14,6 @@ final class KernelSession: ObservableObject {
     @Published var providerLifecycle: String
     @Published var moduleIDs: [String]
 
-    @Published var installedModels: [LocalModelDescriptor]
-    @Published var activeModelID: ModelID?
-    @Published var activeModelDescriptor: LocalModelDescriptor?
-    @Published var activeEngineState: LocalModelLifecycleState
-
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
         self.state = state
@@ -28,10 +22,6 @@ final class KernelSession: ObservableObject {
         self.providerID = composition.selectedProviderID
         self.providerLifecycle = "unknown"
         self.moduleIDs = []
-        self.installedModels = []
-        self.activeModelID = nil
-        self.activeModelDescriptor = nil
-        self.activeEngineState = .unloaded
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -42,29 +32,6 @@ final class KernelSession: ObservableObject {
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
         moduleIDs = await composition.registeredModuleIDs()
-
-        let storage = composition.localModelStorage
-        do {
-            installedModels = try await storage.listModels()
-            activeModelID = try await storage.activeModelID()
-            activeModelDescriptor = try await storage.activeModelDescriptor()
-        } catch {
-            installedModels = []
-            activeModelID = nil
-            activeModelDescriptor = nil
-            lastError = String(describing: error)
-        }
-
-        do {
-            if let engine = try await composition.activeLocalModelEngine() {
-                activeEngineState = await engine.lifecycleState
-            } else {
-                activeEngineState = .unloaded
-            }
-        } catch {
-            activeEngineState = .failed(reason: error.localizedDescription)
-            lastError = String(describing: error)
-        }
     }
 
     func start() async { await run { try await composition.session.start() } }
@@ -75,36 +42,6 @@ final class KernelSession: ObservableObject {
     func submitGoal(_ statement: String) async {
         await run {
             _ = try await composition.session.submitInput(statement)
-        }
-    }
-
-    func importModel(from url: URL, name: String? = nil) async {
-        await run {
-            _ = try await composition.localModelStorage.importModel(from: url, name: name)
-        }
-    }
-
-    func selectActiveModel(id: ModelID?) async {
-        await run {
-            try await composition.setActiveLocalModel(id: id)
-        }
-    }
-
-    func loadActiveModel(options: LocalModelLoadingOptions? = nil) async {
-        await run {
-            _ = try await composition.loadActiveLocalModel(options: options)
-        }
-    }
-
-    func unloadActiveModel() async {
-        await run {
-            try await composition.unloadActiveLocalModel()
-        }
-    }
-
-    func deleteModel(id: ModelID) async {
-        await run {
-            try await composition.deleteLocalModel(id: id)
         }
     }
 

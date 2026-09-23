@@ -18,7 +18,7 @@ struct RootView: View {
                 .tabItem { Label("Skills", systemImage: "puzzlepiece") }
             ProvidersScreen(session: session)
                 .tabItem { Label("Providers", systemImage: "server.rack") }
-            SettingsScreen(session: session)
+            SettingsScreen()
                 .tabItem { Label("Settings", systemImage: "gear") }
         }
         .environment(\.milestoneGate, session.milestone)
