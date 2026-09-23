@@ -528,6 +528,60 @@ struct M82ActiveModelBindingTests {
         }
     }
 
+
+    private struct IdentityMismatchModelStorageMock: LocalModelStorage {
+        let activeID: ModelID
+        let mismatchedDescriptorID: ModelID
+        let validFileURL: URL
+
+        func importModel(from sourceURL: URL, name: String?) async throws -> LocalModelDescriptor {
+            fatalError("Not implemented")
+        }
+        func listModels() async throws -> [LocalModelDescriptor] { [] }
+        func getModel(id: ModelID) async throws -> LocalModelDescriptor? { nil }
+        func deleteModel(id: ModelID) async throws {}
+        func setActiveModel(id: ModelID?) async throws {}
+        func activeModelID() async throws -> ModelID? { activeID }
+        func activeModelDescriptor() async throws -> LocalModelDescriptor? {
+            LocalModelDescriptor(
+                id: mismatchedDescriptorID,
+                name: "Mismatched Model",
+                filename: "mismatched.gguf",
+                fileSizeBytes: 1024
+            )
+        }
+        func modelFileURL(for id: ModelID) async throws -> URL? { validFileURL }
+    }
+
+    @Test func testIdentityMismatchFailsClosed() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let validFile = try createValidGGUFFile(at: root, filename: "mismatched.gguf")
+        let rootDir = root.appendingPathComponent("M8Product")
+
+        let activeID = ModelID(rawValue: "active-model-A")
+        let mismatchedDescriptorID = ModelID(rawValue: "descriptor-model-B")
+
+        let mock = IdentityMismatchModelStorageMock(
+            activeID: activeID,
+            mismatchedDescriptorID: mismatchedDescriptorID,
+            validFileURL: validFile
+        )
+
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: mock
+        )
+
+        do {
+            _ = try await compositionRoot.activeLocalModelEngine()
+            #expect(Bool(false), "Expected activeLocalModelEngine to fail closed on identity mismatch")
+        } catch let err as LocalModelStorageError {
+            #expect(err == .modelNotFound(activeID))
+        }
+    }
+
     @Test func testDeterministicRuntimeCleanup() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }

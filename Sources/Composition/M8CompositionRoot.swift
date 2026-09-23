@@ -254,6 +254,7 @@ extension M8CompositionRoot {
         }
 
         guard let descriptor = try await localModelStorage.activeModelDescriptor(),
+              descriptor.id == activeID,
               let fileURL = try await localModelStorage.modelFileURL(for: activeID) else {
             throw LocalModelStorageError.modelNotFound(activeID)
         }
