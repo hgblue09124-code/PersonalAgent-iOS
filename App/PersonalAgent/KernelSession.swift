@@ -44,14 +44,26 @@ final class KernelSession: ObservableObject {
         moduleIDs = await composition.registeredModuleIDs()
 
         let storage = composition.localModelStorage
-        installedModels = (try? await storage.listModels()) ?? []
-        activeModelID = try? await storage.activeModelID()
-        activeModelDescriptor = try? await storage.activeModelDescriptor()
+        do {
+            installedModels = try await storage.listModels()
+            activeModelID = try await storage.activeModelID()
+            activeModelDescriptor = try await storage.activeModelDescriptor()
+        } catch {
+            installedModels = []
+            activeModelID = nil
+            activeModelDescriptor = nil
+            lastError = String(describing: error)
+        }
 
-        if let engine = try? await composition.activeLocalModelEngine() {
-            activeEngineState = await engine.lifecycleState
-        } else {
-            activeEngineState = .unloaded
+        do {
+            if let engine = try await composition.activeLocalModelEngine() {
+                activeEngineState = await engine.lifecycleState
+            } else {
+                activeEngineState = .unloaded
+            }
+        } catch {
+            activeEngineState = .failed(reason: error.localizedDescription)
+            lastError = String(describing: error)
         }
     }
 

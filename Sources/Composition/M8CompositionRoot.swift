@@ -28,30 +28,27 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         self.deviceCapabilityProvider = deviceCapabilityProvider
     }
 
+    private func ensureCachedEngineUnloaded() async throws {
+        guard let existing = cachedEngine else { return }
+        try await existing.unload()
+        cachedEngine = nil
+    }
+
     public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
         guard let activeID = try await storage.activeModelID() else {
-            if let existing = cachedEngine {
-                try? await existing.unload()
-                cachedEngine = nil
-            }
+            try await ensureCachedEngineUnloaded()
             return nil
         }
 
         guard let descriptor = try await storage.activeModelDescriptor(),
               descriptor.id == activeID,
               let fileURL = try await storage.modelFileURL(for: activeID) else {
-            if let existing = cachedEngine {
-                try? await existing.unload()
-                cachedEngine = nil
-            }
+            try await ensureCachedEngineUnloaded()
             throw LocalModelStorageError.modelNotFound(activeID)
         }
 
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            if let existing = cachedEngine {
-                try? await existing.unload()
-                cachedEngine = nil
-            }
+            try await ensureCachedEngineUnloaded()
             throw LocalModelStorageError.fileNotFound(fileURL)
         }
 
@@ -59,10 +56,7 @@ public actor LocalModelRuntimeCoordinator: Sendable {
             return existing
         }
 
-        if let existing = cachedEngine {
-            try? await existing.unload()
-            cachedEngine = nil
-        }
+        try await ensureCachedEngineUnloaded()
 
         let identity = LocalModelIdentity(
             id: descriptor.id,
@@ -92,30 +86,28 @@ public actor LocalModelRuntimeCoordinator: Sendable {
     }
 
     public func unloadActiveModel() async throws {
-        if let engine = cachedEngine {
-            try await engine.unload()
-            cachedEngine = nil
-        }
+        try await ensureCachedEngineUnloaded()
     }
 
     public func setActiveModel(id: ModelID?) async throws {
         let currentActiveID = try await storage.activeModelID()
         if currentActiveID != id {
-            try await unloadActiveModel()
+            try await ensureCachedEngineUnloaded()
         }
         try await storage.setActiveModel(id: id)
     }
 
     public func deleteModel(id: ModelID) async throws {
         if let engine = cachedEngine, engine.identity.id == id {
-            try await unloadActiveModel()
+            try await ensureCachedEngineUnloaded()
         }
         try await storage.deleteModel(id: id)
     }
 }
 
-/// Dynamic provider wrapper routing completion/streaming requests to the active local model engine when loaded,
-/// falling back to the configured default provider when no local model engine is loaded.
+/// Dynamic provider wrapper routing completion/streaming requests to the active local model engine when configured,
+/// propagating local resolution/execution errors fail-closed, and falling back to the configured default provider
+/// strictly when no local model is configured.
 public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     private let fallbackProvider: any LLMProvider
     private let coordinator: LocalModelRuntimeCoordinator
@@ -128,15 +120,16 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         self.coordinator = coordinator
     }
 
-    private func activeLocalProvider() async -> (any LLMProvider)? {
-        guard let engine = try? await coordinator.activeLocalModelEngine() else {
-            return nil
+    private enum ActiveResolution {
+        case noActiveModel
+        case activeModel(any LLMProvider)
+    }
+
+    private func resolveActiveProvider() async throws -> ActiveResolution {
+        guard let engine = try await coordinator.activeLocalModelEngine() else {
+            return .noActiveModel
         }
-        let state = await engine.lifecycleState
-        if case .loaded = state {
-            return LocalModelProviderAdapter(engine: engine)
-        }
-        return nil
+        return .activeModel(LocalModelProviderAdapter(engine: engine))
     }
 
     public var identity: ProviderIdentity {
@@ -149,18 +142,26 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
 
     public var health: ProviderHealth {
         get async {
-            if let active = await activeLocalProvider() {
-                return await active.health
+            do {
+                switch try await resolveActiveProvider() {
+                case .noActiveModel:
+                    return await fallbackProvider.health
+                case .activeModel(let adapter):
+                    return await adapter.health
+                }
+            } catch {
+                return .unavailable
             }
-            return await fallbackProvider.health
         }
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
-        if let active = await activeLocalProvider() {
-            return try await active.complete(request)
+        switch try await resolveActiveProvider() {
+        case .noActiveModel:
+            return try await fallbackProvider.complete(request)
+        case .activeModel(let adapter):
+            return try await adapter.complete(request)
         }
-        return try await fallbackProvider.complete(request)
     }
 
     public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
@@ -168,18 +169,21 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         let coord = coordinator
         return AsyncThrowingStream { continuation in
             Task {
-                if let engine = try? await coord.activeLocalModelEngine(),
-                   case .loaded = await engine.lifecycleState {
+                do {
+                    guard let engine = try await coord.activeLocalModelEngine() else {
+                        for try await event in fallback.stream(request) {
+                            continuation.yield(event)
+                        }
+                        continuation.finish()
+                        return
+                    }
                     let adapter = LocalModelProviderAdapter(engine: engine)
                     for try await event in adapter.stream(request) {
                         continuation.yield(event)
                     }
                     continuation.finish()
-                } else {
-                    for try await event in fallback.stream(request) {
-                        continuation.yield(event)
-                    }
-                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
                 }
             }
         }
@@ -413,25 +417,30 @@ extension M8CompositionRoot {
     }
 
     public func currentProviderIdentityID() async -> String {
-        if let engine = try? await localModelRuntimeCoordinator.activeLocalModelEngine() {
-            let state = await engine.lifecycleState
-            if case .loaded = state {
+        do {
+            if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
                 return "local-\(engine.identity.id.rawValue)"
             }
+        } catch {
+            return "local-error"
         }
         return catalog.identities.first?.id.rawValue ?? "none"
     }
 
     public func currentProviderLifecycle() async -> String {
-        if let engine = try? await localModelRuntimeCoordinator.activeLocalModelEngine() {
-            let state = await engine.lifecycleState
-            switch state {
-            case .unloaded: return "unloaded"
-            case .loading(let p): return "loading(\(Int(p * 100))%)"
-            case .loaded: return "loaded"
-            case .unloading: return "unloading"
-            case .failed(let r): return "failed(\(r))"
+        do {
+            if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
+                let state = await engine.lifecycleState
+                switch state {
+                case .unloaded: return "unloaded"
+                case .loading(let p): return "loading(\(Int(p * 100))%)"
+                case .loaded: return "loaded"
+                case .unloading: return "unloading"
+                case .failed(let r): return "failed(\(r))"
+                }
             }
+        } catch {
+            return "error(\(error.localizedDescription))"
         }
         if let providerRuntime {
             return await providerRuntime.lifecycle.rawValue

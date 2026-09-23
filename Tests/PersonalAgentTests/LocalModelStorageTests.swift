@@ -708,4 +708,121 @@ struct M82ActiveModelBindingTests {
         let result = try await compositionRoot.session.submitInput("Hello world")
         #expect(result.rawValue != "")
     }
+
+    private struct UnloadFailingStorageMock: LocalModelStorage {
+        let activeID: ModelID
+        let validFileURL: URL
+
+        func importModel(from sourceURL: URL, name: String?) async throws -> LocalModelDescriptor {
+            fatalError("Not implemented")
+        }
+        func listModels() async throws -> [LocalModelDescriptor] { [] }
+        func getModel(id: ModelID) async throws -> LocalModelDescriptor? { nil }
+        func deleteModel(id: ModelID) async throws {}
+        func setActiveModel(id: ModelID?) async throws {}
+        func activeModelID() async throws -> ModelID? { activeID }
+        func activeModelDescriptor() async throws -> LocalModelDescriptor? {
+            LocalModelDescriptor(
+                id: activeID,
+                name: "Unload Test Model",
+                filename: "unload.gguf",
+                fileSizeBytes: 1024
+            )
+        }
+        func modelFileURL(for id: ModelID) async throws -> URL? { validFileURL }
+    }
+
+    @Test func testNoActiveModelUsesFallbackProvider() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: root.appendingPathComponent("M8Product")
+        )
+
+        let provider = compositionRoot.catalog.resolve(ProviderID(rawValue: "fake"))
+        let active = try #require(provider)
+
+        let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Test prompt")])
+        let res = try await active.complete(req)
+        #expect(!res.text.isEmpty)
+    }
+
+    @Test func testActiveLocalModelFailureThrowsFailClosedWithoutFallback() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let missingFileURL = root.appendingPathComponent("missing.gguf")
+        let nonExistentID = ModelID(rawValue: "active-but-missing-descriptor")
+        let mock = UnloadFailingStorageMock(activeID: nonExistentID, validFileURL: missingFileURL)
+
+        let compositionRootWithMock = try await M8CompositionRoot(
+            storeDirectoryURL: root.appendingPathComponent("M8Product"),
+            localModelStorage: mock
+        )
+
+        let provider = compositionRootWithMock.catalog.identities.first
+        let activeProvider = try #require(compositionRootWithMock.catalog.resolve(provider!.id))
+
+        let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Test prompt")])
+
+        do {
+            _ = try await activeProvider.complete(req)
+            #expect(Bool(false), "DynamicActiveProvider MUST NOT fall back silently when an active local model is missing")
+        } catch let err as LocalModelStorageError {
+            #expect(err == .fileNotFound(missingFileURL))
+        }
+    }
+
+    @Test func testActiveLocalModelStreamPathAndFailurePropagation() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let missingFileURL = root.appendingPathComponent("missing-stream.gguf")
+        let activeID = ModelID(rawValue: "active-missing-stream")
+        let mock = UnloadFailingStorageMock(activeID: activeID, validFileURL: missingFileURL)
+
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: root.appendingPathComponent("M8Product"),
+            localModelStorage: mock
+        )
+
+        let providerID = compositionRoot.catalog.identities.first!.id
+        let provider = compositionRoot.catalog.resolve(providerID)!
+
+        let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Stream prompt")])
+
+        var receivedError: Error?
+        do {
+            for try await _ in provider.stream(req) {
+                #expect(Bool(false), "Stream MUST NOT yield items when active local model resolution fails")
+            }
+        } catch {
+            receivedError = error
+        }
+
+        let err = try #require(receivedError as? LocalModelStorageError)
+        #expect(err == .fileNotFound(missingFileURL))
+    }
+
+    @Test func testMissingFileThrowsFailClosedNoSilentFallback() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let missingFile = root.appendingPathComponent("missing-backing.gguf")
+        let activeID = ModelID(rawValue: "missing-backing-id")
+        let mock = UnloadFailingStorageMock(activeID: activeID, validFileURL: missingFile)
+
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: root.appendingPathComponent("M8Product"),
+            localModelStorage: mock
+        )
+
+        do {
+            _ = try await compositionRoot.activeLocalModelEngine()
+            #expect(Bool(false), "activeLocalModelEngine must fail closed when backing file is missing")
+        } catch let err as LocalModelStorageError {
+            #expect(err == .fileNotFound(missingFile))
+        }
+    }
 }
