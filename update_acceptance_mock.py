@@ -1,4 +1,4 @@
-import Foundation
+content = """import Foundation
 import Testing
 import PAFoundation
 import PAProviders
@@ -10,7 +10,7 @@ import PAArchitecture
 struct LocalModelStorageTests {
     private func createTestDirectory() throws -> URL {
         let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("LocalModelStorageTests-\(UUID().uuidString)")
+            .appendingPathComponent("LocalModelStorageTests-\\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
@@ -79,7 +79,7 @@ struct LocalModelStorageTests {
             if case .invalidGGUFHeader = err {
                 #expect(Bool(true))
             } else {
-                #expect(Bool(false), "Unexpected error: \(err)")
+                #expect(Bool(false), "Unexpected error: \\(err)")
             }
         }
 
@@ -99,10 +99,6 @@ struct LocalModelStorageTests {
         var data = Data([0x47, 0x47, 0x55, 0x46]) // "GGUF"
         var version: UInt32 = 1 // unsupported version 1
         data.append(Data(bytes: &version, count: MemoryLayout<UInt32>.size))
-        var tensorCount: UInt64 = 0
-        data.append(Data(bytes: &tensorCount, count: MemoryLayout<UInt64>.size))
-        var metadataCount: UInt64 = 0
-        data.append(Data(bytes: &metadataCount, count: MemoryLayout<UInt64>.size))
         try data.write(to: fileURL)
 
         let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
@@ -115,7 +111,7 @@ struct LocalModelStorageTests {
             if case .unsupportedGGUFVersion(let v) = err {
                 #expect(v == 1)
             } else {
-                #expect(Bool(false), "Unexpected error: \(err)")
+                #expect(Bool(false), "Unexpected error: \\(err)")
             }
         }
 
@@ -261,7 +257,7 @@ struct LocalModelStorageTests {
 struct M82ActiveModelBindingTests {
     private func createTestDirectory() throws -> URL {
         let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("M82ActiveModelBindingTests-\(UUID().uuidString)")
+            .appendingPathComponent("M82ActiveModelBindingTests-\\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }
@@ -281,18 +277,16 @@ struct M82ActiveModelBindingTests {
         return fileURL
     }
 
-    private final class ObservableMockEngine: LocalModelEngine, @unchecked Sendable {
+    private actor ObservableMockEngine: LocalModelEngine {
         let identity: LocalModelIdentity
-        private var _state: LocalModelLifecycleState
-        let shouldFailUnload: Bool
-        let shouldFailGenerate: Bool
+        var state: LocalModelLifecycleState
+        var shouldFailUnload: Bool
+        var shouldFailGenerate: Bool
 
         private(set) var completeCallCount = 0
         private(set) var streamCallCount = 0
         private(set) var unloadCallCount = 0
         private(set) var lastGenerationRequest: LocalModelGenerationRequest?
-
-        private let lock = NSLock()
 
         init(
             identity: LocalModelIdentity,
@@ -301,40 +295,31 @@ struct M82ActiveModelBindingTests {
             shouldFailGenerate: Bool = false
         ) {
             self.identity = identity
-            self._state = state
+            self.state = state
             self.shouldFailUnload = shouldFailUnload
             self.shouldFailGenerate = shouldFailGenerate
         }
 
         var availability: LocalModelAvailability { .ready }
-
-        var lifecycleState: LocalModelLifecycleState {
-            get async {
-                lock.withLock { _state }
-            }
-        }
+        var lifecycleState: LocalModelLifecycleState { state }
 
         func load(options: LocalModelLoadingOptions) async throws {
-            lock.withLock { _state = .loaded }
+            state = .loaded
         }
 
         func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
-            lock.withLock {
-                completeCallCount += 1
-                lastGenerationRequest = request
-            }
-            if shouldFailGenerate || lock.withLock({ _state }) != .loaded {
+            completeCallCount += 1
+            lastGenerationRequest = request
+            if shouldFailGenerate || state != .loaded {
                 throw LlamaCPPEngineError.modelNotLoaded
             }
-            return LocalModelResponse(text: "Observable mock output for: \(request.prompt)")
+            return LocalModelResponse(text: "Observable mock output for: \\(request.prompt)")
         }
 
         func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
-            lock.withLock {
-                streamCallCount += 1
-                lastGenerationRequest = request
-            }
-            let isLoaded = lock.withLock { _state } == .loaded
+            streamCallCount += 1
+            lastGenerationRequest = request
+            let isLoaded = (state == .loaded)
             let failGen = shouldFailGenerate
             return AsyncThrowingStream { continuation in
                 if failGen || !isLoaded {
@@ -349,11 +334,11 @@ struct M82ActiveModelBindingTests {
         func cancel() async {}
 
         func unload() async throws {
-            lock.withLock { unloadCallCount += 1 }
+            unloadCallCount += 1
             if shouldFailUnload {
                 throw LocalModelStorageError.storageCorrupt("Engine unload failed")
             }
-            lock.withLock { _state = .unloaded }
+            state = .unloaded
         }
     }
 
@@ -457,9 +442,9 @@ struct M82ActiveModelBindingTests {
         let res = try await activeProvider.complete(req)
 
         #expect(res.text == "Observable mock output for: Route to local engine")
-        let callCount = mockEngine.completeCallCount
+        let callCount = await mockEngine.completeCallCount
         #expect(callCount == 1)
-        let lastReq = mockEngine.lastGenerationRequest
+        let lastReq = await mockEngine.lastGenerationRequest
         #expect(lastReq?.prompt == "Route to local engine")
         #expect(fallback.completeCallCount == 0) // Proves fallback was NOT called!
     }
@@ -499,7 +484,7 @@ struct M82ActiveModelBindingTests {
         }
 
         #expect(receivedDeltas == ["Observable stream chunk"])
-        let streamCount = mockEngine.streamCallCount
+        let streamCount = await mockEngine.streamCallCount
         #expect(streamCount == 1)
     }
 
@@ -588,14 +573,14 @@ struct M82ActiveModelBindingTests {
             if case .storageCorrupt = err {
                 #expect(Bool(true))
             } else {
-                #expect(Bool(false), "Unexpected error: \(err)")
+                #expect(Bool(false), "Unexpected error: \\(err)")
             }
         }
 
         // Cached engine MUST NOT be discarded on unload failure!
         let engine2 = try await coordinator.activeLocalModelEngine()
         #expect(engine2 != nil)
-        let unloadCalls = mockEngine.unloadCallCount
+        let unloadCalls = await mockEngine.unloadCallCount
         #expect(unloadCalls == 1)
     }
 
@@ -635,3 +620,9 @@ struct M82ActiveModelBindingTests {
         #expect(try await storage.activeModelID() == mB.id)
     }
 }
+"""
+
+with open("Tests/PersonalAgentTests/LocalModelStorageTests.swift", "w") as f:
+    f.write(content)
+
+print("Updated LocalModelStorageTests.swift with Acceptance Tests A-G and Mock Engine Seam")

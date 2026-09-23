@@ -20,12 +20,16 @@ public actor LocalModelRuntimeCoordinator: Sendable {
     private let deviceCapabilityProvider: any DeviceCapabilityProviding
     private var cachedEngine: (any LocalModelEngine)?
 
+    private let engineFactory: (@Sendable (LocalModelIdentity, any DeviceCapabilityProviding) -> any LocalModelEngine)?
+
     public init(
         storage: any LocalModelStorage,
-        deviceCapabilityProvider: any DeviceCapabilityProviding
+        deviceCapabilityProvider: any DeviceCapabilityProviding,
+        engineFactory: (@Sendable (LocalModelIdentity, any DeviceCapabilityProviding) -> any LocalModelEngine)? = nil
     ) {
         self.storage = storage
         self.deviceCapabilityProvider = deviceCapabilityProvider
+        self.engineFactory = engineFactory
     }
 
     private func ensureCachedEngineUnloaded() async throws {
@@ -68,10 +72,15 @@ public actor LocalModelRuntimeCoordinator: Sendable {
             localURL: fileURL
         )
 
-        let newEngine = LlamaCPPModelEngine(
-            identity: identity,
-            deviceCapabilityProvider: deviceCapabilityProvider
-        )
+        let newEngine: any LocalModelEngine
+        if let factory = engineFactory {
+            newEngine = factory(identity, deviceCapabilityProvider)
+        } else {
+            newEngine = LlamaCPPModelEngine(
+                identity: identity,
+                deviceCapabilityProvider: deviceCapabilityProvider
+            )
+        }
         cachedEngine = newEngine
         return newEngine
     }
@@ -225,6 +234,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         storeDirectoryURL: URL? = nil,
         localModelStorage: (any LocalModelStorage)? = nil,
         deviceCapabilityProvider: (any DeviceCapabilityProviding)? = nil,
+        localModelEngineFactory: (@Sendable (LocalModelIdentity, any DeviceCapabilityProviding) -> any LocalModelEngine)? = nil,
         policy: (any PolicyEvaluating)? = nil,
         approvalGate: (any ApprovalGate)? = nil,
         evidenceResolver: (any ExecutionEvidenceResolver)? = nil,
@@ -263,7 +273,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
         let coordinator = LocalModelRuntimeCoordinator(
             storage: resolvedStorage,
-            deviceCapabilityProvider: resolvedDeviceCapability
+            deviceCapabilityProvider: resolvedDeviceCapability,
+            engineFactory: localModelEngineFactory
         )
         self.localModelRuntimeCoordinator = coordinator
 
