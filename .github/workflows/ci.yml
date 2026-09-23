@@ -12,7 +12,7 @@ jobs:
     container:
       image: swift:6.3.2
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run contract, kernel, provider, and module tests
         run: swift test --disable-sandbox
 
@@ -20,7 +20,7 @@ jobs:
     name: Repository integrity greps
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: KernelSession is in the Xcode sources phase
         run: |
           grep -q "KernelSession.swift in Sources" PersonalAgent.xcodeproj/project.pbxproj
