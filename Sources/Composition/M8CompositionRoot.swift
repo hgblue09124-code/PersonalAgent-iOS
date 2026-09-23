@@ -100,10 +100,15 @@ public actor LocalModelRuntimeCoordinator: Sendable {
 
     public func setActiveModel(id: ModelID?) async throws {
         let currentActiveID = try await storage.activeModelID()
-        if currentActiveID != id {
-            try await ensureCachedEngineUnloaded()
-        }
+        guard currentActiveID != id else { return }
+
         try await storage.setActiveModel(id: id)
+        do {
+            try await ensureCachedEngineUnloaded()
+        } catch {
+            try? await storage.setActiveModel(id: currentActiveID)
+            throw error
+        }
     }
 
     public func deleteModel(id: ModelID) async throws {

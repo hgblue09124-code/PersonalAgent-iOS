@@ -693,39 +693,92 @@ struct M82ActiveModelBindingTests {
         #expect(mockEngineB.completeCallCount == 0)
     }
 
+    private struct FailingStorageWrapper: LocalModelStorage {
+        let inner: any LocalModelStorage
+        let failOnModelID: ModelID
+
+        func importModel(from sourceURL: URL, name: String?) async throws -> LocalModelDescriptor {
+            try await inner.importModel(from: sourceURL, name: name)
+        }
+        func listModels() async throws -> [LocalModelDescriptor] {
+            try await inner.listModels()
+        }
+        func getModel(id: ModelID) async throws -> LocalModelDescriptor? {
+            try await inner.getModel(id: id)
+        }
+        func deleteModel(id: ModelID) async throws {
+            try await inner.deleteModel(id: id)
+        }
+        func setActiveModel(id: ModelID?) async throws {
+            if id == failOnModelID {
+                throw LocalModelStorageError.storageCorrupt("Deliberate storage failure for model B")
+            }
+            try await inner.setActiveModel(id: id)
+        }
+        func activeModelID() async throws -> ModelID? {
+            try await inner.activeModelID()
+        }
+        func activeModelDescriptor() async throws -> LocalModelDescriptor? {
+            try await inner.activeModelDescriptor()
+        }
+        func modelFileURL(for id: ModelID) async throws -> URL? {
+            try await inner.modelFileURL(for: id)
+        }
+    }
+
     @Test func testAcceptanceG3_FailedStorageMutationInSwitchPreservesActiveModel() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
         let sourceA = try createValidGGUFFile(at: root, filename: "modelA.gguf")
+        let sourceB = try createValidGGUFFile(at: root, filename: "modelB.gguf")
+
         let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
         let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
 
         let mA = try await storage.importModel(from: sourceA, name: "Model A")
+        let mB = try await storage.importModel(from: sourceB, name: "Model B")
+
         try await storage.setActiveModel(id: mA.id)
 
         let mockEngineA = ObservableMockEngine(identity: LocalModelIdentity(id: mA.id, name: mA.name), state: .loaded)
+        let mockEngineB = ObservableMockEngine(identity: LocalModelIdentity(id: mB.id, name: mB.name), state: .loaded)
+
+        let failingStorage = FailingStorageWrapper(inner: storage, failOnModelID: mB.id)
 
         let coordinator = LocalModelRuntimeCoordinator(
-            storage: storage,
+            storage: failingStorage,
             deviceCapabilityProvider: DefaultDeviceCapabilityProvider(),
-            engineFactory: { _, _ in mockEngineA }
+            engineFactory: { identity, _ in
+                if identity.id == mA.id { return mockEngineA }
+                return mockEngineB
+            }
         )
 
-        let activeBefore = try await storage.activeModelID()
-        #expect(activeBefore == mA.id)
+        let engineA = try #require(try await coordinator.activeLocalModelEngine())
+        #expect(engineA.identity.id == mA.id)
 
-        // Attempting to set an invalid/bogus model ID fails storage validation
-        let bogusID = ModelID(rawValue: "bogus-model-b")
         do {
-            try await coordinator.setActiveModel(id: bogusID)
-            #expect(Bool(false), "Expected setting bogus model ID to throw modelNotFound")
+            try await coordinator.setActiveModel(id: mB.id)
+            #expect(Bool(false), "Expected setActiveModel(mB.id) to throw storage failure")
         } catch let err as LocalModelStorageError {
-            #expect(err == .modelNotFound(bogusID))
+            if case .storageCorrupt = err {
+                #expect(Bool(true))
+            } else {
+                #expect(Bool(false), "Unexpected error: \(err)")
+            }
         }
 
-        // Active model in storage remains A
         #expect(try await storage.activeModelID() == mA.id)
+        let engineAfter = try #require(try await coordinator.activeLocalModelEngine())
+        let mockAfter = try #require(engineAfter as? ObservableMockEngine)
+        let mockBefore = try #require(engineA as? ObservableMockEngine)
+        #expect(mockAfter === mockBefore)
+
+        let req = LocalModelGenerationRequest(prompt: "Usable test")
+        let res = try await mockAfter.generate(request: req)
+        #expect(res.text == "Observable mock output for: Usable test")
+        #expect(try await storage.activeModelID() != mB.id)
     }
 
     @Test func testApplicationChatProviderPathRoutesToActiveLocalEngine() async throws {
