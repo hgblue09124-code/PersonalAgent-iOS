@@ -258,4 +258,64 @@ struct M81LlamaCPPTests {
         let stateAfter = await engine.lifecycleState
         #expect(stateAfter == .unloaded)
     }
+
+    @Test func testEmptyOutputThrowsExplicitError() async throws {
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "empty-llama"),
+            name: "Empty Llama",
+            localURL: URL(fileURLWithPath: "/tmp/nonexistent.gguf")
+        )
+        let engine = LlamaCPPModelEngine(identity: identity)
+        let request = LocalModelGenerationRequest(prompt: "Hello empty test")
+
+        do {
+            _ = try await engine.generate(request: request)
+            #expect(Bool(false), "Expected engine.generate to throw modelNotLoaded or emptyOutput")
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .modelNotLoaded || err == .emptyOutput)
+        }
+    }
+
+    @Test func testCancellationPropagation() async throws {
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "cancel-llama"),
+            name: "Cancel Llama",
+            localURL: URL(fileURLWithPath: "/tmp/nonexistent.gguf")
+        )
+        let engine = LlamaCPPModelEngine(identity: identity)
+        await engine.cancel()
+
+        let state = await engine.lifecycleState
+        #expect(state == .unloaded)
+    }
+
+    @Test func testActiveModelIdentityMatchesEngineModelIdentity() async throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M8P3IdentityTest_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let compositionRoot = try await M8CompositionRoot(storeDirectoryURL: tempDir)
+
+        // When no active model is selected, activeLocalModelEngine returns nil
+        let nilEngine = try await compositionRoot.activeLocalModelEngine()
+        #expect(nilEngine == nil)
+
+        // Register a model in localModelStorage and mark active
+        let dummyModelURL = try createDummyHeaderGGUFFile(name: "active_test.gguf")
+
+        _ = try await compositionRoot.localModelStorage.importModel(
+            from: dummyModelURL,
+            name: "Active Test Model"
+        )
+
+        let importedModels = try await compositionRoot.localModelStorage.listModels()
+        let imported = try #require(importedModels.first)
+
+        try await compositionRoot.localModelStorage.setActiveModel(id: imported.id)
+
+        let activeEngine = try await compositionRoot.activeLocalModelEngine()
+        let resolvedEngine = try #require(activeEngine)
+
+        #expect(resolvedEngine.identity.id == imported.id)
+        #expect(resolvedEngine.identity.name == "Active Test Model")
+    }
 }

@@ -168,6 +168,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             }
         }
 
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw LlamaCPPEngineError.emptyOutput
+        }
+
         return LocalModelResponse(
             text: text,
             finishReason: finishReason,
@@ -303,6 +307,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     if currentThermal == .serious {
                         try await Task.sleep(nanoseconds: 20_000_000)
                     }
+                }
+
+                if generatedCount == 0 {
+                    throw LlamaCPPEngineError.emptyOutput
                 }
 
                 if self.isLoaded() {
