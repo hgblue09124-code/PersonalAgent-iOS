@@ -168,9 +168,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             }
         }
 
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw LlamaCPPEngineError.emptyOutput
-        }
+        try LocalModelOutputValidator.validate(text: text)
 
         return LocalModelResponse(
             text: text,
@@ -309,9 +307,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     }
                 }
 
-                if generatedCount == 0 {
-                    throw LlamaCPPEngineError.emptyOutput
-                }
+                try LocalModelOutputValidator.validate(text: "non-empty-if-generated", generatedCount: generatedCount)
 
                 if self.isLoaded() {
                     self.setLifecycleState(.loaded)

@@ -259,7 +259,7 @@ struct M81LlamaCPPTests {
         #expect(stateAfter == .unloaded)
     }
 
-    struct EmptyStreamLocalEngine: LocalModelEngine {
+    struct ZeroTokenLocalEngine: LocalModelEngine {
         let identity: LocalModelIdentity
         var availability: LocalModelAvailability { get async { .ready } }
         var lifecycleState: LocalModelLifecycleState { get async { .loaded } }
@@ -273,20 +273,42 @@ struct M81LlamaCPPTests {
         }
 
         func load(options: LocalModelLoadingOptions) async throws {}
+
         func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
-            throw LlamaCPPEngineError.emptyOutput
+            let res = LocalModelResponse(text: "", finishReason: "stop")
+            try LocalModelOutputValidator.validate(text: res.text, generatedCount: 0)
+            return res
         }
+
         func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
             AsyncThrowingStream { continuation in
-                continuation.finish()
+                do {
+                    try LocalModelOutputValidator.validate(text: "", generatedCount: 0)
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
             }
         }
+
         func cancel() async {}
         func unload() async throws {}
     }
 
     @Test func testEmptyOutputThrowsExplicitError() async throws {
-        let engine = EmptyStreamLocalEngine()
+        // Direct production validator test
+        #expect(throws: LlamaCPPEngineError.emptyOutput) {
+            try LocalModelOutputValidator.validate(text: "", generatedCount: 0)
+        }
+        #expect(throws: LlamaCPPEngineError.emptyOutput) {
+            try LocalModelOutputValidator.validate(text: "   ", generatedCount: 0)
+        }
+        #expect(throws: LlamaCPPEngineError.emptyOutput) {
+            try LocalModelOutputValidator.validate(text: "", generatedCount: 5)
+        }
+
+        // Engine and adapter integration test using ZeroTokenLocalEngine
+        let engine = ZeroTokenLocalEngine()
         let adapter = LocalModelProviderAdapter(engine: engine)
         let request = LLMRequest(model: ModelID(rawValue: "empty-llama"), prompt: "Hello empty test")
 
