@@ -102,11 +102,15 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         let currentActiveID = try await storage.activeModelID()
         guard currentActiveID != id else { return }
 
-        try await storage.setActiveModel(id: id)
+        let previousEngine = cachedEngine
+
+        try await ensureCachedEngineUnloaded()
+
         do {
-            try await ensureCachedEngineUnloaded()
+            try await storage.setActiveModel(id: id)
         } catch {
             try? await storage.setActiveModel(id: currentActiveID)
+            self.cachedEngine = previousEngine
             throw error
         }
     }

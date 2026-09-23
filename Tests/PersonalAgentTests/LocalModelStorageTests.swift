@@ -775,6 +775,15 @@ struct M82ActiveModelBindingTests {
         let mockBefore = try #require(engineA as? ObservableMockEngine)
         #expect(mockAfter === mockBefore)
 
+        // Verify that unload A SUCCESS actually executed before storage B failed
+        let unloadCallsA = mockEngineA.unloadCallCount
+        #expect(unloadCallsA == 1)
+
+        // Re-load restored active engine A
+        _ = try await coordinator.loadActiveModel()
+        let stateAfterReload = await mockAfter.lifecycleState
+        #expect(stateAfterReload == .loaded)
+
         let req = LocalModelGenerationRequest(prompt: "Usable test")
         let res = try await mockAfter.generate(request: req)
         #expect(res.text == "Observable mock output for: Usable test")
