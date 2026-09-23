@@ -278,4 +278,28 @@ extension M8CompositionRoot {
             deviceCapabilityProvider: deviceCapabilityProvider
         )
     }
+
+    /// Switches the active local model in storage to `newModelID` atomically.
+    /// If an active model engine (e.g. model A) is loaded, it is unloaded first.
+    /// If updating active model in storage fails, active model is restored to previous active model (model A),
+    /// preserving system consistency.
+    public func switchActiveModel(to newModelID: ModelID) async throws {
+        let previousActiveID = try await localModelStorage.activeModelID()
+        if previousActiveID == newModelID {
+            return
+        }
+
+        if let currentEngine = try await activeLocalModelEngine() {
+            try await currentEngine.unload()
+        }
+
+        do {
+            try await localModelStorage.setActiveModel(id: newModelID)
+        } catch {
+            if let previousActiveID {
+                try? await localModelStorage.setActiveModel(id: previousActiveID)
+            }
+            throw error
+        }
+    }
 }

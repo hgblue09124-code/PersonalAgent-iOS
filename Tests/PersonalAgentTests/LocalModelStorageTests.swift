@@ -606,4 +606,113 @@ struct M82ActiveModelBindingTests {
         let state = await engine.lifecycleState
         #expect(state == .unloaded)
     }
+
+
+    @Test func testSwitchActiveModelAtomicRollbackOnStorageFailure() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let fileA = try createValidGGUFFile(at: root, filename: "modelA.gguf")
+        let fileB = try createValidGGUFFile(at: root, filename: "modelB.gguf")
+
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let innerStorage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let descA = try await innerStorage.importModel(from: fileA, name: "Model A")
+        let descB = try await innerStorage.importModel(from: fileB, name: "Model B")
+
+        let modelA = descA.id
+        let modelB = descB.id
+
+        try await innerStorage.setActiveModel(id: modelA)
+
+        let failingStorage = FailingSetActiveModelStorageMock(inner: innerStorage, failingTargetID: modelB)
+
+        let rootDir = root.appendingPathComponent("M8Product")
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: rootDir,
+            localModelStorage: failingStorage
+        )
+
+        // 1. Model A is active
+        #expect(try await compositionRoot.localModelStorage.activeModelID() == modelA)
+
+        // 2. Engine A is resolved and available
+        let engineA = try #require(try await compositionRoot.activeLocalModelEngine())
+        #expect(engineA.identity.id == modelA)
+
+        // 3. Request switch to B -> A unloads -> storage.setActiveModel(B) throws failure
+        do {
+            try await compositionRoot.switchActiveModel(to: modelB)
+            #expect(Bool(false), "Expected switchActiveModel to throw on storage failure for B")
+        } catch let err as LocalModelStorageError {
+            if case .storageCorrupt = err {
+                // Expected simulated failure
+            } else {
+                #expect(Bool(false), "Unexpected error type: \(err)")
+            }
+        }
+
+        // 4. Prove system invariants after failure:
+        // - Active model remains A
+        let activeAfterFailure = try await compositionRoot.localModelStorage.activeModelID()
+        #expect(activeAfterFailure == modelA)
+
+        // - B is not active
+        #expect(activeAfterFailure != modelB)
+
+        // - Runtime cache/engine resolution returns engine for A
+        let engineAAfterFailure = try #require(try await compositionRoot.activeLocalModelEngine())
+        #expect(engineAAfterFailure.identity.id == modelA)
+
+        // - Model A engine can still be retrieved and used
+        let stateAAfter = await engineAAfterFailure.lifecycleState
+        #expect(stateAAfter == .unloaded)
+    }
+}
+
+
+private actor FailingSetActiveModelStorageMock: LocalModelStorage {
+    let inner: FileBackedLocalModelStorage
+    let failingTargetID: ModelID
+
+    init(inner: FileBackedLocalModelStorage, failingTargetID: ModelID) {
+        self.inner = inner
+        self.failingTargetID = failingTargetID
+    }
+
+    func importModel(from sourceURL: URL, name: String?) async throws -> LocalModelDescriptor {
+        try await inner.importModel(from: sourceURL, name: name)
+    }
+
+    func listModels() async throws -> [LocalModelDescriptor] {
+        try await inner.listModels()
+    }
+
+    func getModel(id: ModelID) async throws -> LocalModelDescriptor? {
+        try await inner.getModel(id: id)
+    }
+
+    func deleteModel(id: ModelID) async throws {
+        try await inner.deleteModel(id: id)
+    }
+
+    func setActiveModel(id: ModelID?) async throws {
+        if id == failingTargetID {
+            throw LocalModelStorageError.storageCorrupt("Simulated storage write failure for model B")
+        }
+        try await inner.setActiveModel(id: id)
+    }
+
+    func activeModelID() async throws -> ModelID? {
+        try await inner.activeModelID()
+    }
+
+    func activeModelDescriptor() async throws -> LocalModelDescriptor? {
+        try await inner.activeModelDescriptor()
+    }
+
+    func modelFileURL(for id: ModelID) async throws -> URL? {
+        try await inner.modelFileURL(for: id)
+    }
 }
