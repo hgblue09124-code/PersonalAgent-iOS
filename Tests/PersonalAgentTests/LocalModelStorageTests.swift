@@ -259,4 +259,67 @@ struct LocalModelStorageTests {
         #expect(models.isEmpty)
         #expect(try await composition.localModelStorage.activeModelID() == nil)
     }
+
+    private final class UnremovableFileManager: FileManager, @unchecked Sendable {
+        override func removeItem(at URL: URL) throws {
+            throw NSError(domain: NSCocoaErrorDomain, code: NSFileWriteNoPermissionError, userInfo: [NSURLErrorKey: URL])
+        }
+    }
+
+    @Test func testDeleteModelFailsClosedWhenFileRemovalFails() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "fail-delete.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir, fileManager: UnremovableFileManager())
+
+        let model = try await storage.importModel(from: source, name: "Fail Delete Model")
+        try await storage.setActiveModel(id: model.id)
+
+        let fileURL = try await storage.modelFileURL(for: model.id)
+        #expect(fileURL != nil)
+
+        do {
+            try await storage.deleteModel(id: model.id)
+            #expect(Bool(false), "Expected deleteModel to throw when file manager removeItem fails")
+        } catch {
+            // Expected failure
+        }
+
+        // Verify descriptor and activeModelID stay intact (fail closed)
+        let models = try await storage.listModels()
+        #expect(models.count == 1)
+        #expect(models.first?.id == model.id)
+        let activeID = try await storage.activeModelID()
+        #expect(activeID == model.id)
+    }
+
+    @Test func testActiveModelDescriptorReconcilesSafelyWhenBackingFileIsMissing() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "missing-backing.gguf")
+        let storageDir = root.appendingPathComponent("ModelsStorage")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let model = try await storage.importModel(from: source, name: "Disappearing File Model")
+        try await storage.setActiveModel(id: model.id)
+
+        let currentActiveID = try await storage.activeModelID()
+        #expect(currentActiveID == model.id)
+
+        let fileURL = try await storage.modelFileURL(for: model.id)
+        #expect(fileURL != nil)
+
+        // Remove file out-of-band behind storage's back
+        try FileManager.default.removeItem(at: fileURL!)
+
+        // activeModelDescriptor() must detect missing file, clear activeModelID, and return nil
+        let activeDesc = try await storage.activeModelDescriptor()
+        #expect(activeDesc == nil)
+
+        let activeID = try await storage.activeModelID()
+        #expect(activeID == nil)
+    }
 }

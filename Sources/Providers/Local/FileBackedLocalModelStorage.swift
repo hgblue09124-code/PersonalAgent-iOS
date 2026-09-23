@@ -35,19 +35,20 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     private let modelsDirectoryURL: URL
     private let indexFileURL: URL
     private let parser: GGUFModelParser
+    private let fileManager: FileManager
     private var index: LocalModelIndex
 
-    public init(modelsDirectoryURL: URL) throws {
+    public init(modelsDirectoryURL: URL, fileManager: FileManager = .default) throws {
         self.modelsDirectoryURL = modelsDirectoryURL
         self.indexFileURL = modelsDirectoryURL.appendingPathComponent("models_index.json")
         self.parser = GGUFModelParser()
+        self.fileManager = fileManager
 
-        let fm = FileManager.default
-        if !fm.fileExists(atPath: modelsDirectoryURL.path) {
-            try fm.createDirectory(at: modelsDirectoryURL, withIntermediateDirectories: true)
+        if !fileManager.fileExists(atPath: modelsDirectoryURL.path) {
+            try fileManager.createDirectory(at: modelsDirectoryURL, withIntermediateDirectories: true)
         }
 
-        if fm.fileExists(atPath: indexFileURL.path) {
+        if fileManager.fileExists(atPath: indexFileURL.path) {
             do {
                 let data = try Data(contentsOf: indexFileURL)
                 let decoder = JSONDecoder()
@@ -68,8 +69,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             }
         }
 
-        let fm = FileManager.default
-        guard fm.fileExists(atPath: sourceURL.path) else {
+        guard fileManager.fileExists(atPath: sourceURL.path) else {
             throw LocalModelStorageError.fileNotFound(sourceURL)
         }
 
@@ -99,19 +99,19 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         let destinationURL = modelsDirectoryURL.appendingPathComponent(destinationFilename)
 
         var fileSizeBytes: Int64 = 0
-        if let attrs = try? fm.attributesOfItem(atPath: sourceURL.path),
+        if let attrs = try? fileManager.attributesOfItem(atPath: sourceURL.path),
            let size = attrs[.size] as? Int64 {
             fileSizeBytes = size
         }
 
         do {
-            if fm.fileExists(atPath: destinationURL.path) {
-                try fm.removeItem(at: destinationURL)
+            if fileManager.fileExists(atPath: destinationURL.path) {
+                try fileManager.removeItem(at: destinationURL)
             }
-            try fm.copyItem(at: sourceURL, to: destinationURL)
+            try fileManager.copyItem(at: sourceURL, to: destinationURL)
         } catch {
-            if fm.fileExists(atPath: destinationURL.path) {
-                try? fm.removeItem(at: destinationURL)
+            if fileManager.fileExists(atPath: destinationURL.path) {
+                try? fileManager.removeItem(at: destinationURL)
             }
             throw LocalModelStorageError.copyFailed("Failed to copy GGUF model file to app storage: \(error.localizedDescription)")
         }
@@ -136,7 +136,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         do {
             try persistIndex()
         } catch {
-            try? fm.removeItem(at: destinationURL)
+            try? fileManager.removeItem(at: destinationURL)
             index.descriptors.removeValue(forKey: modelID.rawValue)
             throw error
         }
@@ -158,9 +158,8 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         }
 
         let fileURL = modelsDirectoryURL.appendingPathComponent(descriptor.filename)
-        let fm = FileManager.default
-        if fm.fileExists(atPath: fileURL.path) {
-            try? fm.removeItem(at: fileURL)
+        if fileManager.fileExists(atPath: fileURL.path) {
+            try fileManager.removeItem(at: fileURL)
         }
 
         index.descriptors.removeValue(forKey: id.rawValue)
@@ -185,19 +184,34 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     }
 
     public func activeModelID() async throws -> ModelID? {
-        guard let raw = index.activeModelID else { return nil }
-        return ModelID(rawValue: raw)
+        if let descriptor = try await activeModelDescriptor() {
+            return descriptor.id
+        }
+        return nil
     }
 
     public func activeModelDescriptor() async throws -> LocalModelDescriptor? {
         guard let raw = index.activeModelID else { return nil }
-        return index.descriptors[raw]
+        guard let descriptor = index.descriptors[raw] else {
+            index.activeModelID = nil
+            try? persistIndex()
+            return nil
+        }
+
+        let fileURL = modelsDirectoryURL.appendingPathComponent(descriptor.filename)
+        guard fileManager.fileExists(atPath: fileURL.path) else {
+            index.activeModelID = nil
+            try? persistIndex()
+            return nil
+        }
+
+        return descriptor
     }
 
     public func modelFileURL(for id: ModelID) async throws -> URL? {
         guard let descriptor = index.descriptors[id.rawValue] else { return nil }
         let url = modelsDirectoryURL.appendingPathComponent(descriptor.filename)
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        guard fileManager.fileExists(atPath: url.path) else { return nil }
         return url
     }
 
