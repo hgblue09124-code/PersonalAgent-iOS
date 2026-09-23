@@ -65,6 +65,7 @@ public protocol LocalModelStorage: Sendable {
     func setActiveModel(id: ModelID?) async throws
     func activeModelID() async throws -> ModelID?
     func activeModelDescriptor() async throws -> LocalModelDescriptor?
+    func modelFileURL(for id: ModelID) async throws -> URL?
 }
 
 /// Local model identity representation.
