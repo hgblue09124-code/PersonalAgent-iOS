@@ -4,9 +4,21 @@ import Foundation
 /// The selected model is runtime state, not a credential and never enters AgentState.
 public actor ProviderModelSelectionStore {
     private var selected: ModelID?
+    private let defaults: UserDefaults?
+    private let persistenceKey: String
 
-    public init(initialModel: ModelID? = nil) {
-        self.selected = initialModel
+    public init(
+        initialModel: ModelID? = nil,
+        defaults: UserDefaults? = .standard,
+        persistenceKey: String = "personalagent.provider.selected-model"
+    ) {
+        self.defaults = defaults
+        self.persistenceKey = persistenceKey
+        if let raw = defaults?.string(forKey: persistenceKey), !raw.isEmpty {
+            self.selected = ModelID(rawValue: raw)
+        } else {
+            self.selected = initialModel
+        }
     }
 
     public func selectedModel() -> ModelID? {
@@ -15,6 +27,11 @@ public actor ProviderModelSelectionStore {
 
     public func select(_ model: ModelID?) {
         selected = model
+        if let model {
+            defaults?.set(model.rawValue, forKey: persistenceKey)
+        } else {
+            defaults?.removeObject(forKey: persistenceKey)
+        }
     }
 }
 
