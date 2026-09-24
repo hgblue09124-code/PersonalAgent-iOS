@@ -169,7 +169,13 @@ struct SettingsScreen: View {
             switch result {
             case .success(let urls):
                 guard let selectedURL = urls.first else { return }
+                let isAccessing = selectedURL.startAccessingSecurityScopedResource()
                 Task {
+                    defer {
+                        if isAccessing {
+                            selectedURL.stopAccessingSecurityScopedResource()
+                        }
+                    }
                     lastImportError = nil
                     await session.importModel(from: selectedURL)
                 }

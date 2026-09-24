@@ -4,49 +4,71 @@ import PAKernel
 
 @main
 struct PersonalAgentApp: App {
-    @State private var session: KernelSession?
-    @State private var initializationError: String?
+    @StateObject private var sessionHolder = SessionHolder()
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if let session {
+                if let session = sessionHolder.session {
                     RootView(session: session)
                         .onOpenURL { url in
+                            let isAccessing = url.startAccessingSecurityScopedResource()
                             Task {
+                                defer {
+                                    if isAccessing {
+                                        url.stopAccessingSecurityScopedResource()
+                                    }
+                                }
                                 await session.importModel(from: url)
                             }
                         }
-                } else if let initializationError {
+                } else if let initializationError = sessionHolder.initializationError {
                     VStack(spacing: 12) {
                         Text("Initialization failed: \(initializationError)")
-                            .multilineTextAlignment(.center)
+                            .font(.callout)
+                            .foregroundStyle(.red)
                         Button("Retry") {
-                            Task {
-                                await initialize()
-                            }
+                            sessionHolder.reload()
                         }
+                        .buttonStyle(.borderedProminent)
                     }
                     .padding()
                 } else {
-                    ProgressView("Starting kernel")
-                        .task {
-                            await initialize()
-                        }
+                    ProgressView("Initializing Agent...")
                 }
             }
-            .dynamicTypeSize(.xSmall ... .accessibility3)
+            .task {
+                await sessionHolder.load()
+            }
+        }
+    }
+}
+
+@MainActor
+private final class SessionHolder: ObservableObject {
+    @Published var session: KernelSession?
+    @Published var initializationError: String?
+
+    func load() async {
+        guard session == nil else { return }
+        do {
+            let composition = try await M8CompositionRoot()
+            let agentSession = composition.session
+            let state = await agentSession.currentState()
+            let newSession = KernelSession(composition: composition, state: state)
+            await newSession.refresh()
+            self.session = newSession
+            self.initializationError = nil
+        } catch {
+            self.initializationError = error.localizedDescription
         }
     }
 
-    private func initialize() async {
-        initializationError = nil
-        do {
-            let root = try await M8CompositionRoot()
-            let state = await root.session.currentState()
-            session = KernelSession(composition: root, state: state)
-        } catch {
-            initializationError = String(describing: error)
+    func reload() {
+        self.session = nil
+        self.initializationError = nil
+        Task {
+            await load()
         }
     }
 }
