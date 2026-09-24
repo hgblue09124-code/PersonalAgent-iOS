@@ -66,6 +66,26 @@ struct AgentUITests {
         #expect(pipeline.userSafeFailureReason == nil)
     }
 
+    @Test func testCompleteEvaluationWithoutVerificationFailsClosed() async throws {
+        let root = try await M8CompositionRoot(modules: [EchoModule()])
+
+        var pipeline = AgentTaskExecutionPipeline.startPipeline(task: "Echo without verification evidence")
+        let goalID = try await root.session.submitInput(pipeline.currentTask)
+
+        let eval = try await root.orchestrator.run(goalID: goalID)
+        let events = try await root.eventLog.allEvents()
+        let eventsWithoutVerification = events.filter { $0.kind != .verificationCompleted }
+
+        pipeline.updateFromEvents(eventsWithoutVerification, goalID: goalID, eval: eval)
+
+        #expect(eval.disposition == .complete)
+        #expect(pipeline.state == .failed)
+        #expect(pipeline.verificationStatus == .failed)
+        #expect(pipeline.verificationSummary == "Verification evidence missing")
+        #expect(pipeline.resultSummary == nil)
+        #expect(pipeline.userSafeFailureReason == "Verification evidence missing")
+    }
+
     @Test func testFailedTaskExecutionHandling() async throws {
         let root = try await M8CompositionRoot() // No modules registered
         let rejectingVerifier = RejectingVerifier()
