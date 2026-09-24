@@ -346,10 +346,15 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         )
         self.providerModelCatalog = modelCatalog
 
-        let selectableProvider = ModelSelectingProvider(
-            base: baseProvider,
-            selection: modelSelection
-        )
+        let selectableProvider: any LLMProvider
+        if provider == nil {
+            selectableProvider = ModelSelectingProvider(
+                base: baseProvider,
+                selection: modelSelection
+            )
+        } else {
+            selectableProvider = baseProvider
+        }
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: selectableProvider,
             fallbackProvider: fallbackProvider,
