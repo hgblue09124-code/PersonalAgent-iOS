@@ -8,6 +8,52 @@ import PACognition
 import PAModules
 import PAProviders
 
+public enum AgentExecutionProgress: Sendable, Equatable {
+    case perception
+    case reasoning
+    case reasoningCompleted(String)
+    case planning
+    case actionProposed(String)
+    case verification
+    case executing
+    case observation(String)
+    case evaluating
+    case completed(String)
+    case failed(String)
+
+    public var title: String {
+        switch self {
+        case .perception: return "Receiving task"
+        case .reasoning: return "Thinking"
+        case .reasoningCompleted: return "Reasoning ready"
+        case .planning: return "Planning"
+        case .actionProposed: return "Action proposed"
+        case .verification: return "Verifying"
+        case .executing: return "Executing"
+        case .observation: return "Observing"
+        case .evaluating: return "Evaluating"
+        case .completed: return "Completed"
+        case .failed: return "Failed"
+        }
+    }
+
+    public var detail: String {
+        switch self {
+        case .perception: return "Reading your task…"
+        case .reasoning: return "Local model is generating a decision…"
+        case .reasoningCompleted(let text): return text
+        case .planning: return "Building the next action…"
+        case .actionProposed(let text): return text
+        case .verification: return "Checking the proposed action…"
+        case .executing: return "Running the selected action…"
+        case .observation(let text): return text
+        case .evaluating: return "Evaluating the execution result…"
+        case .completed(let text): return text
+        case .failed(let text): return text
+        }
+    }
+}
+
 public protocol ContextAssembling: Sendable {
     func assembleContext(
         perception: Perception,
@@ -194,7 +240,7 @@ public actor M6Orchestrator {
         self.maxCycles = maxCycles
     }
 
-    public func run(goalID: GoalID, rawInput: String? = nil) async throws -> Evaluation {
+    public func run(goalID: GoalID, rawInput: String? = nil, progress: (@Sendable (AgentExecutionProgress) -> Void)? = nil) async throws -> Evaluation {
         let traceID = TraceID()
         if await runtime.currentState().lifecycle == .created {
             try await runtime.start()
@@ -219,7 +265,7 @@ public actor M6Orchestrator {
             cycleCount += 1
             let perception = Perception(rawInput: input, source: "user")
 
-            // 1. Perception
+            progress?(.perception)\n\n            // 1. Perception
             try await emit(
                 traceID: traceID,
                 kind: .perceptionReceived,
