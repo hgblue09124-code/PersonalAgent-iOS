@@ -265,7 +265,9 @@ public actor M6Orchestrator {
             cycleCount += 1
             let perception = Perception(rawInput: input, source: "user")
 
-            progress?(.perception)\n\n            // 1. Perception
+            progress?(.perception)
+
+            // 1. Perception
             try await emit(
                 traceID: traceID,
                 kind: .perceptionReceived,
