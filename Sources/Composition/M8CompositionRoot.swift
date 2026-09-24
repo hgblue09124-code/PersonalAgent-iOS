@@ -233,6 +233,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let localModelRuntimeCoordinator: LocalModelRuntimeCoordinator
     public let providerRuntime: ProviderRuntime?
     public let secretStore: any SecretStore
+    public let providerModelSelection: ProviderModelSelectionStore
+    public let providerModelCatalog: HTTPProviderModelCatalog
     public let catalog: ProviderCatalog
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
@@ -333,8 +335,23 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             capabilities: [.textGeneration, .streaming],
             authorizationScheme: .bearer
         )
-        let fallbackProvider = provider ?? liveProvider
+        let baseProvider = provider ?? liveProvider
+        let modelSelection = ProviderModelSelectionStore(initialModel: DefaultLiveProvider.defaultModel)
+        self.providerModelSelection = modelSelection
+        let modelCatalog = HTTPProviderModelCatalog(
+            modelsEndpoint: "https://api.openai.com/v1/models",
+            credentialRef: credentialRef,
+            credentials: SecretStoreCredentials(store: resolvedSecretStore),
+            network: URLSessionNetworkAccess()
+        )
+        self.providerModelCatalog = modelCatalog
+
+        let selectableProvider = ModelSelectingProvider(
+            base: baseProvider,
+            selection: modelSelection
+        )
         let dynamicProvider = DynamicActiveProvider(
+            fallbackProvider: selectableProvider,
             fallbackProvider: fallbackProvider,
             coordinator: coordinator
         )
@@ -473,6 +490,24 @@ extension M8CompositionRoot {
 
     public var selectedProviderID: String {
         catalog.identities.first?.id.rawValue ?? "none"
+    }
+
+    public func availableProviderModels() async -> [ModelIdentity] {
+        let discovered: [ModelIdentity]
+        do {
+            discovered = try await providerModelCatalog.discover()
+        } catch {
+            return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
+        }
+        return discovered.isEmpty ? (catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]) : discovered
+    }
+
+    public func selectedProviderModelID() async -> ModelID? {
+        await providerModelSelection.selectedModel()
+    }
+
+    public func selectProviderModel(id: ModelID?) async {
+        await providerModelSelection.select(id)
     }
 
     public func currentProviderIdentityID() async -> String {
