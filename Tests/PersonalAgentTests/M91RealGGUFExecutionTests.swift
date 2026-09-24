@@ -85,7 +85,7 @@ struct M91RealGGUFExecutionTests {
         defer { try? FileManager.default.removeItem(at: dir) }
 
         let truncatedFile = dir.appendingPathComponent("truncated.gguf")
-        // Truncated data: valid magic 0x46554747 but no version or metadata
+        // Truncated data: valid magic 0x47475546 but no version or metadata
         try Data([0x47, 0x47, 0x55, 0x46]).write(to: truncatedFile)
 
         let parser = GGUFModelParser()
@@ -396,7 +396,7 @@ struct M91RealGGUFExecutionTests {
 
     @Test(.enabled(if: isLocalGGUFModelPathProvided))
     func testRealNativeInferenceWhenModelProvided() async throws {
-        // [REAL NATIVE INFERENCE GATE]
+        // [REAL NATIVE INFERENCE GATE — FULL PRODUCTION PATH]
         let modelPath = try #require(ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"])
         guard FileManager.default.fileExists(atPath: modelPath) else {
             Issue.record("MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
@@ -404,26 +404,50 @@ struct M91RealGGUFExecutionTests {
         }
 
         let modelURL = URL(fileURLWithPath: modelPath)
-        let identity = LocalModelIdentity(
-            id: ModelID(rawValue: "live-local-llama"),
-            name: "Live Local Llama",
-            localURL: modelURL
+        let testDir = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: testDir) }
+
+        // 1. Storage Import & Active Model Selection
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: testDir)
+        let descriptor = try await storage.importModel(from: modelURL, name: "Live Production Llama")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        #expect(try await storage.activeModelID() == descriptor.id)
+
+        // 2. Runtime Coordinator & Dynamic Provider Setup
+        let deviceProv = DefaultDeviceCapabilityProvider()
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: storage,
+            deviceCapabilityProvider: deviceProv
         )
 
-        let engine = LlamaCPPModelEngine(identity: identity)
-        try await engine.load(options: LocalModelLoadingOptions(contextWindow: 1024))
+        let dynamicProvider = DynamicActiveProvider(
+            fallbackProvider: DeterministicFakeProvider(),
+            coordinator: coordinator
+        )
 
-        let state = await engine.lifecycleState
+        // 3. Verify Active Model Identity Invariant
+        let activeEngine = try #require(try await coordinator.activeLocalModelEngine())
+        #expect(try await storage.activeModelID() == activeEngine.identity.id)
+        #expect(activeEngine.identity.id == descriptor.id)
+
+        // 4. Load Active Local Model via Coordinator
+        _ = try await coordinator.loadActiveModel(options: LocalModelLoadingOptions(contextWindow: 1024))
+        let state = await activeEngine.lifecycleState
         #expect(state == .loaded)
 
-        let request = LocalModelGenerationRequest(prompt: "Hello, reply with one word: Success")
-        let response = try await engine.generate(request: request)
+        // 5. Execute Real Inference Through Dynamic Provider & Provider Adapter Boundary
+        let req = LLMRequest(model: descriptor.id, prompt: "Hello, reply with one word: Success")
+        let response = try await dynamicProvider.complete(req)
 
+        // 6. Verify Real Inference Output
         #expect(!response.text.isEmpty)
         #expect(response.finishReason == "stop" || response.finishReason == "length")
+        #expect(response.model?.rawValue == descriptor.id.rawValue)
 
-        try await engine.unload()
-        let stateAfter = await engine.lifecycleState
+        // 7. Unload Active Local Model via Coordinator
+        try await coordinator.unloadActiveModel()
+        let stateAfter = await activeEngine.lifecycleState
         #expect(stateAfter == .unloaded)
     }
 }
