@@ -431,7 +431,32 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     }
 }
 
+
+/// Authoritative application-layer result for one agent task execution.
+/// UI consumers receive execution-scoped evidence; orchestration remains owned by Composition.
+public struct AgentTaskExecutionResult: Sendable {
+    public let goalID: GoalID
+    public let evaluation: Evaluation
+    public let events: [ExecutionEvent]
+
+    public init(goalID: GoalID, evaluation: Evaluation, events: [ExecutionEvent]) {
+        self.goalID = goalID
+        self.evaluation = evaluation
+        self.events = events
+    }
+}
+
 extension M8CompositionRoot {
+    /// Executes one task through the authoritative Agent Runtime/Orchestrator path.
+    /// UI must consume this boundary instead of orchestrating runtime components directly.
+    public func executeAgentTask(_ statement: String) async throws -> AgentTaskExecutionResult {
+        let goalID = try await session.submitInput(statement)
+        let evaluation = try await orchestrator.run(goalID: goalID)
+        let allEvents = try await eventLog.allEvents()
+        let goalEvents = allEvents.filter { $0.payload["goalID"] == goalID.rawValue }
+        return AgentTaskExecutionResult(goalID: goalID, evaluation: evaluation, events: goalEvents)
+    }
+
     public var selectedProviderID: String {
         catalog.identities.first?.id.rawValue ?? "none"
     }
