@@ -165,8 +165,10 @@ struct M91RealGGUFExecutionTests {
         let descriptor = try await storage.importModel(from: dummyURL, name: "Missing Backing File Model")
         try await storage.setActiveModel(id: descriptor.id)
 
-        // Delete the backing file on disk while keeping descriptor active in index
-        try FileManager.default.removeItem(at: dummyURL)
+        // Delete the actual app-owned backing file while keeping descriptor active in index
+        let backingFileURL = try #require(await storage.modelFileURL(for: descriptor.id))
+        try? FileManager.default.removeItem(at: dummyURL)
+        try FileManager.default.removeItem(at: backingFileURL)
 
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: DeterministicFakeProvider(),
