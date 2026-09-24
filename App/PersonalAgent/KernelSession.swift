@@ -110,15 +110,12 @@ final class KernelSession: ObservableObject {
         pipeline = AgentTaskExecutionPipeline.startPipeline(task: statement)
 
         do {
-            let goalID = try await composition.session.submitInput(pipeline.currentTask)
-
-            // Execute via Orchestrator
-            let eval = try await composition.orchestrator.run(goalID: goalID)
-
-            // Inspect events recorded for this execution
-            let events = try await composition.eventLog.allEvents()
-
-            pipeline.updateFromEvents(events, goalID: goalID, eval: eval)
+            let execution = try await composition.executeAgentTask(pipeline.currentTask)
+            pipeline.updateFromEvents(
+                execution.events,
+                goalID: execution.goalID,
+                eval: execution.evaluation
+            )
         } catch {
             if pipeline.reasoningStatus == .inProgress { pipeline.reasoningStatus = .failed }
             else if pipeline.actionStatus == .inProgress { pipeline.actionStatus = .failed }
