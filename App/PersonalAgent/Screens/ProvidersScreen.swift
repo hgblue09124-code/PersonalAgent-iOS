@@ -6,7 +6,6 @@ struct ProvidersScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Providers", systemImage: "server.rack") {
-            MilestoneBanner()
             StatusRow(title: "selected", value: session.providerID)
             StatusRow(title: "lifecycle", value: session.providerLifecycle)
             ForEach(ArchitectureManifest.reservedProviderIDs, id: \.id) { item in
