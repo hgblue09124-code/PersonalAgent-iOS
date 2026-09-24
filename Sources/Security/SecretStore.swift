@@ -87,7 +87,7 @@ public final class KeychainSecretStore: SecretStore, @unchecked Sendable {
 
 public enum SecretStoreError: Error, Sendable, Equatable {
     case unavailable
-    case keychainStatus(OSStatus)
+    case keychainStatus(Int32)
 }
 
 /// Thread-safe in-memory SecretStore implementation for testing and non-persistent environments.
