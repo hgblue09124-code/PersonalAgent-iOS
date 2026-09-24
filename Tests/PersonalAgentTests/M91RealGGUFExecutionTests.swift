@@ -29,7 +29,7 @@ struct M91RealGGUFExecutionTests {
         return fileURL
     }
 
-    // MARK: - F1: Invalid GGUF Handling
+    // MARK: - F1: Invalid GGUF Handling (Synthetic Fixture)
 
     @Test func testF1_InvalidGGUFHeaderFailsImportAndLoad() async throws {
         let dir = try createTestDirectory()
@@ -48,7 +48,7 @@ struct M91RealGGUFExecutionTests {
             if case .invalidGGUFHeader = err {
                 #expect(Bool(true))
             } else {
-                #expect(Bool(false), "Unexpected error type: \(err)")
+                #expect(Bool(false), "Unexpected LocalModelStorageError type: \(err)")
             }
         }
 
@@ -78,13 +78,12 @@ struct M91RealGGUFExecutionTests {
         }
     }
 
-    // MARK: - F2: Native Model Load Failure Propagation
+    // MARK: - F2: Native Model Load Failure Propagation (Synthetic Fixture)
 
-    @Test func testF2_NativeModelLoadFailurePropagates() async throws {
+    @Test func testF2_NativeModelLoadFailurePropagatesWithExactErrorType() async throws {
         let dir = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
 
-        // Dummy GGUF has valid header but is truncated/fake binary, so llama_model_load_from_file will fail or throw
         let dummyURL = try createDummyGGUFFile(at: dir, filename: "dummy_load_fail.gguf")
 
         let identity = LocalModelIdentity(
@@ -96,12 +95,15 @@ struct M91RealGGUFExecutionTests {
 
         do {
             try await engine.load(options: LocalModelLoadingOptions())
-            #expect(Bool(false), "Expected native model load to throw")
+            #expect(Bool(false), "Expected native model load to throw nativeModelLoadFailed")
         } catch let err as LlamaCPPEngineError {
-            #expect(err == .nativeModelLoadFailed(dummyURL.path))
-        } catch {
-            // Native cllama load failure or file parse error
-            #expect(Bool(true))
+            if case .nativeModelLoadFailed(let path) = err {
+                #expect(path == dummyURL.path)
+            } else {
+                #expect(Bool(false), "Unexpected LlamaCPPEngineError: \(err)")
+            }
+        } catch let err as GGUFParseError {
+            #expect(Bool(true), "GGUFParseError is acceptable if header validation fails: \(err)")
         }
 
         let state = await engine.lifecycleState
@@ -112,9 +114,9 @@ struct M91RealGGUFExecutionTests {
         }
     }
 
-    // MARK: - F3: Active Model Resolution Failure
+    // MARK: - F3: Active Model Resolution Failure Propagation Through Runtime & Provider
 
-    @Test func testF3_ActiveModelResolutionFailureNoFakeSuccess() async throws {
+    @Test func testF3_ActiveModelResolutionFailureFailsClosedWithoutFakeSuccess() async throws {
         let dir = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
 
@@ -124,7 +126,7 @@ struct M91RealGGUFExecutionTests {
             deviceCapabilityProvider: DefaultDeviceCapabilityProvider()
         )
 
-        // Setting active model to missing ID fails closed at storage level
+        // 1. Setting active model to missing ID fails closed at storage level
         do {
             try await storage.setActiveModel(id: ModelID(rawValue: "ghost-id"))
             #expect(Bool(false), "Expected setActiveModel with non-existent ID to throw modelNotFound")
@@ -132,18 +134,49 @@ struct M91RealGGUFExecutionTests {
             if case .modelNotFound = err {
                 #expect(Bool(true))
             } else {
-                #expect(Bool(false), "Unexpected error: \(err)")
+                #expect(Bool(false), "Unexpected LocalModelStorageError: \(err)")
             }
         }
 
-        // Active model resolution returns nil when no active model is set
+        // 2. Active model resolution returns nil when no valid active model is set
         let activeEngine = try await coordinator.activeLocalModelEngine()
         #expect(activeEngine == nil, "Expected nil active engine when no active model is set")
+
+        // 3. DynamicActiveProvider propagation: When storage index has an active model ID whose backing file is deleted,
+        // activeLocalModelEngine throws fileNotFound or engine completion throws modelNotLoaded. DynamicActiveProvider MUST propagate error and NEVER return fake success.
+        let dummyURL = try createDummyGGUFFile(at: dir, filename: "missing_file.gguf")
+        let descriptor = try await storage.importModel(from: dummyURL, name: "Missing Backing File Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        // Delete the backing file on disk while keeping descriptor active in index
+        try FileManager.default.removeItem(at: dummyURL)
+
+        let dynamicProvider = DynamicActiveProvider(
+            fallbackProvider: DeterministicFakeProvider(),
+            coordinator: coordinator
+        )
+
+        let req = LLMRequest(model: ModelID(rawValue: "test"), prompt: "Test missing backing file")
+        do {
+            _ = try await dynamicProvider.complete(req)
+            #expect(Bool(false), "Expected complete to throw error when backing file is missing")
+        } catch let err as LocalModelStorageError {
+            if case .fileNotFound = err {
+                #expect(Bool(true))
+            } else if case .modelNotFound = err {
+                #expect(Bool(true))
+            } else {
+                #expect(Bool(false), "Unexpected LocalModelStorageError: \(err)")
+            }
+        } catch let err as LlamaCPPEngineError {
+            #expect(err == .modelNotLoaded || err == .invalidModelURL)
+        }
     }
 
-    // MARK: - F4: Native Inference Failure Propagation
+    // MARK: - F4: Native Inference Failure Propagation (Injected Test Double)
 
-    @Test func testF4_NativeInferenceFailurePropagatesWithoutFakeFallback() async throws {
+    @Test func testF4_InjectedNativeInferenceFailurePropagatesWithoutFakeFallback() async throws {
+        // [INJECTED TEST DOUBLE] Verifies error propagation using streamRunner injection (not real native llama.cpp execution)
         let identity = LocalModelIdentity(
             id: ModelID(rawValue: "failing-engine"),
             name: "Failing Engine"
@@ -177,7 +210,7 @@ struct M91RealGGUFExecutionTests {
         }
     }
 
-    // MARK: - F5: Empty/Invalid Output Rejection
+    // MARK: - F5: Empty/Invalid Output Rejection (Injected Test Double & Pure Validator)
 
     @Test func testF5_EmptyOrZeroTokenOutputRejectedByValidator() async throws {
         // Direct validator unit verification
@@ -191,7 +224,7 @@ struct M91RealGGUFExecutionTests {
             try LocalModelOutputValidator.validate(text: "Non-empty string", generatedCount: 0)
         }
 
-        // Engine stream runner producing empty output throws emptyOutput
+        // [INJECTED TEST DOUBLE] Engine stream runner producing empty output throws emptyOutput
         let identity = LocalModelIdentity(
             id: ModelID(rawValue: "empty-output-engine"),
             name: "Empty Output Engine"
@@ -199,7 +232,6 @@ struct M91RealGGUFExecutionTests {
         let engine = LlamaCPPModelEngine(
             identity: identity,
             streamRunner: { _, continuation in
-                // Yield empty chunk
                 continuation.yield(LocalModelStreamChunk(textDelta: ""))
                 return 0
             }
@@ -214,24 +246,55 @@ struct M91RealGGUFExecutionTests {
         }
     }
 
-    // MARK: - F6: No Active Model Boundary (Fallback vs Real Inference)
+    // MARK: - F6: Fallback Provider Output vs Local Model Inference Distinguishability
 
     @Test func testF6_NoActiveModelDistinguishesFallbackFromRealInference() async throws {
         let dir = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
 
-        let compositionRoot = try await M8CompositionRoot(storeDirectoryURL: dir)
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: dir)
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: storage,
+            deviceCapabilityProvider: DefaultDeviceCapabilityProvider()
+        )
+        let fallbackProvider = DeterministicFakeProvider()
+        let dynamicProvider = DynamicActiveProvider(
+            fallbackProvider: fallbackProvider,
+            coordinator: coordinator
+        )
 
-        // When no local model is active:
-        let nilEngine = try await compositionRoot.activeLocalModelEngine()
+        // 1. When NO active model is set:
+        let nilEngine = try await coordinator.activeLocalModelEngine()
         #expect(nilEngine == nil)
 
-        let provider = compositionRoot.catalog.identities.first!
-        #expect(provider.id.rawValue == "fake")
+        let req = LLMRequest(model: ModelID(rawValue: "prompt-model"), prompt: "Hello fallback query")
+        let fallbackResponse = try await dynamicProvider.complete(req)
 
-        // Provider completion uses fallback provider, NOT local model engine
-        let res = await compositionRoot.session.currentState()
-        #expect(res.lifecycle == .running || res.lifecycle == .created)
+        // Output comes strictly from DeterministicFakeProvider
+        #expect(fallbackResponse.model?.rawValue == "fake-text")
+        #expect(fallbackResponse.text == "ok")
+        #expect(dynamicProvider.identity.id.rawValue == "fake")
+
+        // 2. When an active local model engine IS configured (using test double for provider identity check):
+        let localIdentity = LocalModelIdentity(
+            id: ModelID(rawValue: "real-gguf-01"),
+            name: "Test Local Model"
+        )
+        let mockEngine = LlamaCPPModelEngine(
+            identity: localIdentity,
+            streamRunner: { req, continuation in
+                continuation.yield(LocalModelStreamChunk(textDelta: "Real local response text"))
+                return 4
+            }
+        )
+        let localAdapter = LocalModelProviderAdapter(engine: mockEngine)
+        let localResponse = try await localAdapter.complete(req)
+
+        // Contrast: Local provider identity and model ID are explicitly distinct from fake fallback
+        #expect(localResponse.model?.rawValue == "prompt-model")
+        #expect(localResponse.text == "Real local response text")
+        #expect(localAdapter.identity.id.rawValue == "local-real-gguf-01")
+        #expect(localAdapter.identity.id.rawValue != fallbackProvider.identity.id.rawValue)
     }
 
     // MARK: - F7: Thermal and Memory Protection Governance
@@ -301,5 +364,47 @@ struct M91RealGGUFExecutionTests {
         #expect(try await storage.activeModelID() == activeEngine.identity.id)
         #expect(activeEngine.identity.id == descriptor.id)
         #expect(activeEngine.identity.name == "Consistency Test Model")
+    }
+
+    // MARK: - Real GGUF Model Execution Gate (Requires LOCAL_GGUF_MODEL_PATH)
+
+    private static var isLocalGGUFModelPathProvided: Bool {
+        guard let path = ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"],
+              !path.isEmpty else {
+            return false
+        }
+        return true
+    }
+
+    @Test(.enabled(if: isLocalGGUFModelPathProvided))
+    func testRealNativeInferenceWhenModelProvided() async throws {
+        let modelPath = try #require(ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"])
+        guard FileManager.default.fileExists(atPath: modelPath) else {
+            Issue.record("MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
+            return
+        }
+
+        let modelURL = URL(fileURLWithPath: modelPath)
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "live-local-llama"),
+            name: "Live Local Llama",
+            localURL: modelURL
+        )
+
+        let engine = LlamaCPPModelEngine(identity: identity)
+        try await engine.load(options: LocalModelLoadingOptions(contextWindow: 1024))
+
+        let state = await engine.lifecycleState
+        #expect(state == .loaded)
+
+        let request = LocalModelGenerationRequest(prompt: "Hello, reply with one word: Success")
+        let response = try await engine.generate(request: request)
+
+        #expect(!response.text.isEmpty)
+        #expect(response.finishReason == "stop" || response.finishReason == "length")
+
+        try await engine.unload()
+        let stateAfter = await engine.lifecycleState
+        #expect(stateAfter == .unloaded)
     }
 }
