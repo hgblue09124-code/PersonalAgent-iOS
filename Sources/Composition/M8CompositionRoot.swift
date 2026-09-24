@@ -453,6 +453,10 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 }
 
 extension M8CompositionRoot {
+    private var dynamicProviderRequiresAPIKey: Bool {
+        catalog.identities.first?.id == OpenAIProviderBoundary.providerID
+    }
+
     public var selectedProviderID: String {
         catalog.identities.first?.id.rawValue ?? "none"
     }
@@ -484,7 +488,11 @@ extension M8CompositionRoot {
             return "error(\(error.localizedDescription))"
         }
         if let providerRuntime {
-            return await providerRuntime.lifecycle.rawValue
+            let lifecycle = await providerRuntime.lifecycle.rawValue
+            if dynamicProviderRequiresAPIKey && !(try? secretStore.load(account: "openai-api-key")).map({ !$0.isEmpty }) ?? true {
+                return "missing-api-key"
+            }
+            return lifecycle
         }
         return "unconfigured"
     }
