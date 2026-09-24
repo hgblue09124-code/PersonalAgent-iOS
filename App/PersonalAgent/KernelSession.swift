@@ -23,6 +23,8 @@ final class KernelSession: ObservableObject {
     @Published var activeEngineState: LocalModelLifecycleState
     @Published var isDownloadingDevModel = false
     @Published var devModelDownloadProgress: Double = 0
+    @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionResult: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -77,8 +79,19 @@ final class KernelSession: ObservableObject {
     func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
+        executionProgress = nil
+        executionResult = nil
         await run {
-            _ = try await composition.session.submitInput(statement)
+            let goalID = try await composition.session.submitInput(statement)
+            await refresh()
+            _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
+                Task { @MainActor in
+                    self?.executionProgress = progress
+                    if case .completed(let result) = progress {
+                        self?.executionResult = result
+                    }
+                }
+            }
         }
     }
 
