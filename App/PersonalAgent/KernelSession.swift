@@ -15,6 +15,8 @@ final class KernelSession: ObservableObject {
     @Published var lastError: String?
     @Published var providerID: String
     @Published var providerLifecycle: String
+    @Published var providerModels: [ModelIdentity]
+    @Published var selectedProviderModelID: ModelID?
     @Published var moduleIDs: [String]
 
     @Published var installedModels: [LocalModelDescriptor]
@@ -35,6 +37,8 @@ final class KernelSession: ObservableObject {
         self.lastError = nil
         self.providerID = composition.selectedProviderID
         self.providerLifecycle = "unknown"
+        self.providerModels = []
+        self.selectedProviderModelID = nil
         self.moduleIDs = []
         self.installedModels = []
         self.activeModelID = nil
@@ -49,6 +53,8 @@ final class KernelSession: ObservableObject {
         goals = await composition.session.activeGoals()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
+        providerModels = await composition.availableProviderModels()
+        selectedProviderModelID = await composition.selectedProviderModelID()
         moduleIDs = await composition.registeredModuleIDs()
 
         let storage = composition.localModelStorage
@@ -73,6 +79,16 @@ final class KernelSession: ObservableObject {
             activeEngineState = .failed(reason: error.localizedDescription)
             lastError = String(describing: error)
         }
+    }
+
+    func refreshProviderModels() async {
+        providerModels = await composition.availableProviderModels()
+        selectedProviderModelID = await composition.selectedProviderModelID()
+    }
+
+    func selectProviderModel(id: ModelID?) async {
+        await composition.selectProviderModel(id: id)
+        selectedProviderModelID = id
     }
 
     func configureProviderAPIKey(_ apiKey: String) async {
