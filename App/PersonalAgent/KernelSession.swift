@@ -77,9 +77,19 @@ final class KernelSession: ObservableObject {
     func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
+        executionProgress = nil
+        executionResult = nil
         await run {
             let goalID = try await composition.session.submitInput(statement)
-            _ = try await composition.orchestrator.run(goalID: goalID)
+            await refresh()
+            _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
+                Task { @MainActor in
+                    self?.executionProgress = progress
+                    if case .completed(let result) = progress {
+                        self?.executionResult = result
+                    }
+                }
+            }
         }
     }
 
