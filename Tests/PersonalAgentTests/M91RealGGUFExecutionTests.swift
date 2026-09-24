@@ -78,9 +78,28 @@ struct M91RealGGUFExecutionTests {
         }
     }
 
-    // MARK: - F2: Native Model Load Failure Propagation (Synthetic Fixture)
+    // MARK: - F2a: Malformed or Truncated GGUF Parser Failure (Synthetic Fixture)
 
-    @Test func testF2_NativeModelLoadFailurePropagatesWithExactErrorType() async throws {
+    @Test func testF2a_MalformedOrTruncatedGGUFParserFailure() async throws {
+        let dir = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let truncatedFile = dir.appendingPathComponent("truncated.gguf")
+        // Truncated data: valid magic 0x46554747 but no version or metadata
+        try Data([0x47, 0x47, 0x55, 0x46]).write(to: truncatedFile)
+
+        let parser = GGUFModelParser()
+        do {
+            _ = try parser.parseHeaderAndMetadata(at: truncatedFile)
+            #expect(Bool(false), "Expected parseHeaderAndMetadata to throw truncatedFile")
+        } catch let err as GGUFParseError {
+            #expect(err == .truncatedFile)
+        }
+    }
+
+    // MARK: - F2b: Valid Header with Truncated Body Native Load Failure (Synthetic Fixture)
+
+    @Test func testF2b_ValidHeaderWithTruncatedBodyNativeLoadFailure() async throws {
         let dir = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
 
@@ -102,8 +121,6 @@ struct M91RealGGUFExecutionTests {
             } else {
                 #expect(Bool(false), "Unexpected LlamaCPPEngineError: \(err)")
             }
-        } catch let err as GGUFParseError {
-            #expect(Bool(true), "GGUFParseError is acceptable if header validation fails: \(err)")
         }
 
         let state = await engine.lifecycleState
@@ -246,9 +263,10 @@ struct M91RealGGUFExecutionTests {
         }
     }
 
-    // MARK: - F6: Fallback Provider Output vs Local Model Inference Distinguishability
+    // MARK: - F6: Fallback Provider Output vs Local Model Inference Distinguishability (Provider Routing Test Double)
 
     @Test func testF6_NoActiveModelDistinguishesFallbackFromRealInference() async throws {
+        // [PROVIDER ROUTING & FALLBACK DISTINCTION TEST]
         let dir = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
 
@@ -378,6 +396,7 @@ struct M91RealGGUFExecutionTests {
 
     @Test(.enabled(if: isLocalGGUFModelPathProvided))
     func testRealNativeInferenceWhenModelProvided() async throws {
+        // [REAL NATIVE INFERENCE GATE]
         let modelPath = try #require(ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"])
         guard FileManager.default.fileExists(atPath: modelPath) else {
             Issue.record("MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
