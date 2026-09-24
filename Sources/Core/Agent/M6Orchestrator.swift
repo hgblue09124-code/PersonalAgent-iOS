@@ -75,7 +75,7 @@ public struct LLMReasoner: Reasoning {
         return ReasoningResult(
             summary: text,
             providerID: provider.identity.id,
-            modelID: response.model
+            modelID: nil
         )
     }
 }
