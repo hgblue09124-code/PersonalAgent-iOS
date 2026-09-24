@@ -23,6 +23,8 @@ final class KernelSession: ObservableObject {
     @Published var activeEngineState: LocalModelLifecycleState
     @Published var isDownloadingDevModel = false
     @Published var devModelDownloadProgress: Double = 0
+    @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionResult: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
