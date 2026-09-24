@@ -17,6 +17,7 @@
 		A10000000000000000000008 /* SkillsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* SkillsScreen.swift */; };
 		A10000000000000000000009 /* ProvidersScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000009 /* ProvidersScreen.swift */; };
 		A1000000000000000000000A /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* SettingsScreen.swift */; };
+		A1000000000000000000000D /* ModelsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* ModelsScreen.swift */; };
 		A1000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* Assets.xcassets */; };
 		A1000000000000000000000C /* KernelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* KernelSession.swift */; };
 		A10000000000000000000011 /* PAComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000001 /* PAComposition */; };
@@ -37,6 +38,7 @@
 		A20000000000000000000008 /* SkillsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsScreen.swift; sourceTree = "<group>"; };
 		A20000000000000000000009 /* ProvidersScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvidersScreen.swift; sourceTree = "<group>"; };
 		A2000000000000000000000A /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		A2000000000000000000000D /* ModelsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsScreen.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A200000000000000000000FF /* PersonalAgent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PersonalAgent.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -95,6 +97,7 @@
 				A20000000000000000000008 /* SkillsScreen.swift */,
 				A20000000000000000000009 /* ProvidersScreen.swift */,
 				A2000000000000000000000A /* SettingsScreen.swift */,
+				A2000000000000000000000D /* ModelsScreen.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -196,6 +199,7 @@
 				A10000000000000000000008 /* SkillsScreen.swift in Sources */,
 				A10000000000000000000009 /* ProvidersScreen.swift in Sources */,
 				A1000000000000000000000A /* SettingsScreen.swift in Sources */,
+				A1000000000000000000000D /* ModelsScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
