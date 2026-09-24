@@ -9,7 +9,7 @@ struct ChatScreen: View {
             VStack(spacing: 0) {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 14) {
-                        ForEach(session.goals, id: .id) { goal in
+                        ForEach(session.goals, id: \.id) { goal in
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(goal.statement)
                                     .padding(12)
