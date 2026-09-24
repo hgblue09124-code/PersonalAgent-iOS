@@ -302,4 +302,47 @@ struct M9RealProviderSliceTests {
         let adapterRes = try await adapter.complete(req)
         #expect(adapterRes.text == "local-engine-output")
     }
+
+    // MARK: - Live Provider Network Execution Gate
+    @Test func testRealLiveProviderExecutionWhenKeyProvided() async throws {
+        let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+            ?? ProcessInfo.processInfo.environment["GROK_API_KEY"]
+
+        guard let key = envKey, !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("LIVE API CONNECTION: UNAVAILABLE (No OPENAI_API_KEY / GROK_API_KEY supplied in environment)")
+            return
+        }
+
+        let isGrok = ProcessInfo.processInfo.environment["GROK_API_KEY"] != nil
+        let providerID = isGrok ? GrokProviderBoundary.providerID : OpenAIProviderBoundary.providerID
+        let endpoint = isGrok ? GrokProviderBoundary.defaultEndpoint : OpenAIProviderBoundary.defaultEndpoint
+        let model = isGrok ? ModelID(rawValue: "grok-3") : ModelID(rawValue: "gpt-4o-mini")
+
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: providerID, account: "live.api")
+        await vault.store(Data(key.utf8), for: ref)
+
+        let config = ProviderConfiguration(
+            providerID: providerID,
+            endpointURL: endpoint,
+            defaultModel: model,
+            credential: ref
+        )
+
+        let transport = SecurityNetworkTransport(network: URLSessionNetworkAccess())
+        let provider: any LLMProvider = isGrok
+            ? GrokProvider(transport: transport, credentials: vault, configuration: config)
+            : OpenAIProvider(transport: transport, credentials: vault, configuration: config)
+
+        let eventLog = InMemoryEventLog()
+        let runtime = ProviderRuntime(provider: provider, eventLog: eventLog, logger: ProviderNullLogger())
+        try await runtime.configure(config)
+        try await runtime.ready()
+
+        let request = LLMRequest(model: model, prompt: "Respond with the single word: LIVE_VERIFIED")
+        let response = try await runtime.complete(request)
+
+        #expect(!response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        print("LIVE API CONNECTION: PASS (Received valid response from \(providerID.rawValue): \(response.text))")
+    }
 }
