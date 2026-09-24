@@ -26,6 +26,54 @@ struct SettingsScreen: View {
                 .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
             }
 
+            // MARK: - Runtime Controls
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Label("Agent Runtime", systemImage: "play.circle")
+                        .font(.headline)
+                    Spacer()
+                    Text(session.state.lifecycle.rawValue.uppercased())
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 8) {
+                    SettingsCommandButton("Start", systemImage: "play.fill") {
+                        Task { await session.start() }
+                    }
+                    .disabled(!runtimeCanStart)
+
+                    SettingsCommandButton("Pause", systemImage: "pause.fill") {
+                        Task { await session.pause() }
+                    }
+                    .disabled(!runtimeCanPause)
+
+                    SettingsCommandButton("Resume", systemImage: "play.fill") {
+                        Task { await session.resume() }
+                    }
+                    .disabled(!runtimeCanResume)
+
+                    SettingsCommandButton("Stop", systemImage: "stop.fill") {
+                        Task { await session.stop() }
+                    }
+                    .disabled(!runtimeCanStop)
+                }
+
+                HStack {
+                    Button {
+                        Task { await session.refresh() }
+                    } label: {
+                        Label("Refresh State", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Spacer()
+                    StatusRow(title: "Phase", value: session.state.phase.rawValue)
+                }
+            }
+            .padding(14)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+
             // MARK: - Capabilities Section: Models / GGUF
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
@@ -294,5 +342,49 @@ private func lifecycleStateTitle(_ state: LocalModelLifecycleState) -> String {
     case .loaded: return "loaded"
     case .unloading: return "unloading"
     case .failed(let r): return "failed (\(r))"
+    }
+}
+
+
+private extension SettingsScreen {
+    var runtimeCanStart: Bool {
+        session.state.lifecycle == .created
+    }
+
+    var runtimeCanPause: Bool {
+        session.state.lifecycle == .running
+    }
+
+    var runtimeCanResume: Bool {
+        session.state.lifecycle == .paused
+    }
+
+    var runtimeCanStop: Bool {
+        switch session.state.lifecycle {
+        case .created, .running, .paused:
+            return true
+        case .starting, .pausing, .stopping, .stopped, .failed:
+            return false
+        }
+    }
+}
+
+private struct SettingsCommandButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    init(_ title: String, systemImage: String, action: @escaping () -> Void) {
+        self.title = title
+        self.systemImage = systemImage
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
     }
 }
