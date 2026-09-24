@@ -6,7 +6,6 @@ struct SkillsScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Skills", systemImage: "puzzlepiece") {
-            MilestoneBanner()
             StatusRow(title: "modules", value: "\(session.moduleIDs.count)")
             ForEach(session.moduleIDs, id: \.self) { id in
                 StatusRow(title: id, value: "registered")
