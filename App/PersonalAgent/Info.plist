@@ -7,6 +7,8 @@
 		<dict>
 			<key>CFBundleTypeName</key>
 			<string>GGUF Model File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
@@ -15,6 +17,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -34,6 +38,7 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>gguf</string>
+					<string>GGUF</string>
 				</array>
 			</dict>
 		</dict>
@@ -57,6 +62,7 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>gguf</string>
+					<string>GGUF</string>
 				</array>
 			</dict>
 		</dict>
