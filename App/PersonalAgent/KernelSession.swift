@@ -5,6 +5,9 @@ import PAKernel
 import PAComposition
 import PAArchitecture
 import PAProviders
+import PAEvents
+import PACognition
+import PAAgency
 
 @MainActor
 final class KernelSession: ObservableObject {
@@ -21,6 +24,9 @@ final class KernelSession: ObservableObject {
     @Published var activeModelDescriptor: LocalModelDescriptor?
     @Published var activeEngineState: LocalModelLifecycleState
 
+    // M10.0 Task & Agent OS Execution State
+    @Published var pipeline: AgentTaskExecutionPipeline = AgentTaskExecutionPipeline()
+
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
         self.state = state
@@ -36,6 +42,21 @@ final class KernelSession: ObservableObject {
     }
 
     var milestone: MilestoneGate { composition.milestone }
+
+    // Convenience computed getters for UI binding
+    var currentTask: String { pipeline.currentTask }
+    var executionState: AgentTaskExecutionState { pipeline.state }
+    var reasoningStatus: ExecutionStepStatus { pipeline.reasoningStatus }
+    var actionStatus: ExecutionStepStatus { pipeline.actionStatus }
+    var observationStatus: ExecutionStepStatus { pipeline.observationStatus }
+    var verificationStatus: ExecutionStepStatus { pipeline.verificationStatus }
+    var reasoningSummary: String? { pipeline.reasoningSummary }
+    var actionSummary: String? { pipeline.actionSummary }
+    var observationSummary: String? { pipeline.observationSummary }
+    var verificationSummary: String? { pipeline.verificationSummary }
+    var resultSummary: String? { pipeline.resultSummary }
+    var userSafeFailureReason: String? { pipeline.userSafeFailureReason }
+    var emptyTaskValidationError: String? { pipeline.validationError }
 
     func refresh() async {
         state = await composition.session.currentState()
@@ -77,6 +98,48 @@ final class KernelSession: ObservableObject {
         await run {
             _ = try await composition.session.submitInput(statement)
         }
+    }
+
+    // M10.0 Task Execution Entry Point
+    func runTask(_ statement: String) async {
+        if let errorMsg = AgentTaskExecutionPipeline.validateTask(statement) {
+            pipeline.validationError = errorMsg
+            return
+        }
+
+        pipeline = AgentTaskExecutionPipeline.startPipeline(task: statement)
+
+        do {
+            let goalID = try await composition.session.submitInput(pipeline.currentTask)
+
+            // Execute via Orchestrator
+            let eval = try await composition.orchestrator.run(goalID: goalID)
+
+            // Inspect events recorded for this execution
+            let events = try await composition.eventLog.allEvents()
+
+            pipeline.updateFromEvents(events, goalID: goalID, eval: eval)
+        } catch {
+            if pipeline.reasoningStatus == .inProgress { pipeline.reasoningStatus = .failed }
+            else if pipeline.actionStatus == .inProgress { pipeline.actionStatus = .failed }
+            else if pipeline.observationStatus == .inProgress { pipeline.observationStatus = .failed }
+            else if pipeline.verificationStatus == .inProgress { pipeline.verificationStatus = .failed }
+
+            pipeline.state = .failed
+            pipeline.userSafeFailureReason = error.localizedDescription
+            lastError = String(describing: error)
+        }
+
+        await refresh()
+    }
+
+    func retryTask() async {
+        guard !pipeline.currentTask.isEmpty else { return }
+        await runTask(pipeline.currentTask)
+    }
+
+    func resetTask() {
+        pipeline = AgentTaskExecutionPipeline()
     }
 
     func importModel(from url: URL, name: String? = nil) async {
