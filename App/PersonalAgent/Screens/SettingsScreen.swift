@@ -182,7 +182,7 @@ struct SettingsScreen: View {
 
 private extension UTType {
     static var gguf: UTType {
-        UTType("org.ggml.gguf") ?? UTType(exportedAs: "org.ggml.gguf", conformingTo: .data)
+        UTType(importedAs: "org.ggml.gguf", conformingTo: .data)
     }
 }
 
