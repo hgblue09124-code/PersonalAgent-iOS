@@ -454,10 +454,10 @@ public actor M6Orchestrator {
 
             try await runtime.applyStateUpdate(stateUpdate)
 
-            finalEvaluation = eval
-            if eval.disposition == .complete {
-                progress?(.completed(eval.reason))
-            }uation
+            finalEvaluation = evaluation
+            if evaluation.disposition == .complete {
+                progress?(.completed(evaluation.reason))
+            }
             previousObservations = observations
             previousEvaluation = evaluation
 
