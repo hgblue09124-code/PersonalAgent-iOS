@@ -184,10 +184,8 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     }
 
     public func activeModelID() async throws -> ModelID? {
-        if let descriptor = try await activeModelDescriptor() {
-            return descriptor.id
-        }
-        return nil
+        guard let raw = index.activeModelID else { return nil }
+        return ModelID(rawValue: raw)
     }
 
     public func activeModelDescriptor() async throws -> LocalModelDescriptor? {

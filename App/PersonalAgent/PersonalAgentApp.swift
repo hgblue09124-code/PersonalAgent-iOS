@@ -12,6 +12,11 @@ struct PersonalAgentApp: App {
             Group {
                 if let session {
                     RootView(session: session)
+                        .onOpenURL { url in
+                            Task {
+                                await session.importModel(from: url)
+                            }
+                        }
                 } else if let initializationError {
                     VStack(spacing: 12) {
                         Text("Initialization failed: \(initializationError)")
