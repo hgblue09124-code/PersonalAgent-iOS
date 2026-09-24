@@ -10,7 +10,7 @@ jobs:
     name: macOS Xcode iOS arm64 Build & Unsigned IPA
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
@@ -35,11 +35,18 @@ jobs:
           APP_PATH=$(find DerivedData ~/Library/Developer/Xcode/DerivedData -name "PersonalAgent.app" -type d 2>/dev/null | head -n 1)
           test -n "$APP_PATH" || (echo "Error: PersonalAgent.app not found" && false)
           cp -R "$APP_PATH" Payload/
-          zip -r PersonalAgent-unsigned.ipa Payload
+          zip -r -y PersonalAgent-unsigned.ipa Payload
           echo "Created PersonalAgent-unsigned.ipa successfully"
 
+      - name: Verify IPA Integrity and Payload Structure
+        run: |
+          file PersonalAgent-unsigned.ipa
+          unzip -t PersonalAgent-unsigned.ipa
+          unzip -l PersonalAgent-unsigned.ipa | grep "Payload/PersonalAgent.app/"
+          echo "IPA archive integrity, Central Directory, and Payload structure verified successfully"
+
       - name: Upload Unsigned Development IPA Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: PersonalAgent-iOS-unsigned-IPA
           path: PersonalAgent-unsigned.ipa
