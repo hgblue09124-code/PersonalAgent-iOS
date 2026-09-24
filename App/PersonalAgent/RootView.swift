@@ -6,20 +6,16 @@ struct RootView: View {
 
     var body: some View {
         TabView {
-            ChatScreen(session: session)
-                .tabItem { Label("Chat", systemImage: "bubble.left.and.bubble.right") }
             AgentScreen(session: session)
                 .tabItem { Label("Agent", systemImage: "cpu") }
-            TasksScreen()
-                .tabItem { Label("Tasks", systemImage: "checklist") }
-            MemoryScreen()
-                .tabItem { Label("Memory", systemImage: "brain") }
             SkillsScreen(session: session)
                 .tabItem { Label("Skills", systemImage: "puzzlepiece") }
             ProvidersScreen(session: session)
                 .tabItem { Label("Providers", systemImage: "server.rack") }
             SettingsScreen(session: session)
                 .tabItem { Label("Settings", systemImage: "gear") }
+            ChatScreen(session: session)
+                .tabItem { Label("Chat", systemImage: "bubble.left.and.bubble.right") }
         }
         .environment(\.milestoneGate, session.milestone)
         .task { await session.refresh() }
