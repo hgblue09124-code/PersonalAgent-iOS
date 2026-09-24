@@ -2,6 +2,7 @@ import Foundation
 import PAFoundation
 import PASecurity
 import PAProviders
+import PAProvidersOpenAI
 import PAProvidersLocal
 import PAMemory
 import PAModules
