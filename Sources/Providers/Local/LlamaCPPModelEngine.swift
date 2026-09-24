@@ -202,6 +202,13 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.modelNotLoaded
                 }
 
+                // Each generate() call is an independent request. Reset llama.cpp
+                // request state before decoding a new prompt; otherwise the second
+                // request can reuse the previous KV cache/sampler state and fail
+                // during prompt evaluation (for example evalFailed(-1)).
+                llama_memory_clear(llama_get_memory(contextPtr), true)
+                llama_sampler_reset(samplerPtr)
+
                 // Verify device thermal & memory state
                 let thermal = await self.deviceCapabilityProvider.thermalState
                 if thermal == .critical {
