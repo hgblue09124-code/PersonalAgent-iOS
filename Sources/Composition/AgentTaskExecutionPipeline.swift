@@ -92,12 +92,16 @@ public struct AgentTaskExecutionPipeline: Sendable, Equatable {
             actionStatus = .inProgress
         }
 
+        let verificationAccepted: Bool
         if let verificationEvent = goalEvents.first(where: { $0.kind == .verificationCompleted }) {
             let accepted = verificationEvent.payload["accepted"] == "true"
+            verificationAccepted = accepted
             verificationStatus = accepted ? .completed : .failed
             verificationSummary = verificationEvent.payload["notes"] ?? (accepted ? "Verified" : "Verification rejected")
         } else {
-            verificationStatus = (eval.disposition == .complete) ? .completed : .failed
+            verificationAccepted = false
+            verificationStatus = .failed
+            verificationSummary = "Verification evidence missing"
         }
 
         if goalEvents.contains(where: { $0.kind == .actionExecuted }) {
@@ -112,7 +116,7 @@ public struct AgentTaskExecutionPipeline: Sendable, Equatable {
             observationSummary = obsEvent.payload["summary"] ?? (succeeded ? "Observation returned" : "Observation failed")
         }
 
-        if eval.disposition == .complete {
+        if eval.disposition == .complete && verificationAccepted {
             state = .completed
             reasoningStatus = .completed
             actionStatus = .completed
@@ -125,7 +129,9 @@ public struct AgentTaskExecutionPipeline: Sendable, Equatable {
             else if actionStatus == .inProgress { actionStatus = .failed }
             else if observationStatus == .inProgress { observationStatus = .failed }
             else if verificationStatus == .inProgress { verificationStatus = .failed }
-            userSafeFailureReason = eval.reason
+            userSafeFailureReason = eval.disposition == .complete && !verificationAccepted
+                ? "Verification evidence missing"
+                : eval.reason
         }
     }
 }
