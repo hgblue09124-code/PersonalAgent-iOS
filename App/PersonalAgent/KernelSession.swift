@@ -24,7 +24,9 @@ final class KernelSession: ObservableObject {
     @Published var isDownloadingDevModel = false
     @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionTrace: [AgentExecutionProgress] = []
     @Published var executionResult: String?
+    private var lastSubmittedTask: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -73,13 +75,52 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    func configureProviderAPIKey(_ apiKey: String) async {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            lastError = "Provider API key cannot be empty."
+            return
+        }
+        do {
+            try composition.secretStore.store(
+                account: "openai-api-key",
+                secret: Data(trimmed.utf8)
+            )
+            lastError = nil
+        } catch {
+            lastError = "Could not save provider API key securely."
+        }
+        await refresh()
+    }
+
+    func removeProviderAPIKey() async {
+        do {
+            try composition.secretStore.delete(account: "openai-api-key")
+            lastError = nil
+        } catch {
+            lastError = "Could not remove provider API key."
+        }
+        await refresh()
+    }
+
+    func hasProviderAPIKey() async -> Bool {
+        do {
+            guard let data = try composition.secretStore.load(account: "openai-api-key") else { return false }
+            return !data.isEmpty
+        } catch {
+            return false
+        }
+    }
+
     func start() async { await run { try await composition.session.start() } }
     func pause() async { await run { try await composition.session.pause() } }
     func resume() async { await run { try await composition.session.resume() } }
     func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
+        lastSubmittedTask = statement
         executionProgress = nil
+        executionTrace = []
         executionResult = nil
         await run {
             let goalID = try await composition.session.submitInput(statement)
@@ -87,12 +128,26 @@ final class KernelSession: ObservableObject {
             _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
                 Task { @MainActor in
                     self?.executionProgress = progress
+                    self?.executionTrace.append(progress)
                     if case .completed(let result) = progress {
                         self?.executionResult = result
                     }
                 }
             }
         }
+    }
+
+    func retryTask() async {
+        guard let statement = lastSubmittedTask else { return }
+        await submitGoal(statement)
+    }
+
+    func resetTask() {
+        lastSubmittedTask = nil
+        executionProgress = nil
+        executionTrace = []
+        executionResult = nil
+        lastError = nil
     }
 
     func downloadDevModel() async {
