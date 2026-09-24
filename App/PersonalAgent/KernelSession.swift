@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import SwiftUI
 import PAFoundation
 import PAKernel
@@ -20,6 +21,8 @@ final class KernelSession: ObservableObject {
     @Published var activeModelID: ModelID?
     @Published var activeModelDescriptor: LocalModelDescriptor?
     @Published var activeEngineState: LocalModelLifecycleState
+    @Published var isDownloadingDevModel = false
+    @Published var devModelDownloadProgress: Double = 0
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -79,6 +82,46 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    func downloadDevModel() async {
+        guard !isDownloadingDevModel else { return }
+        isDownloadingDevModel = true
+        devModelDownloadProgress = 0
+        lastError = nil
+        defer { isDownloadingDevModel = false }
+
+        let urlString = "https://huggingface.co/ggml-org/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M-BF16.gguf?download=true"
+        let expectedSHA256 = "9d00c56fe60a70659db0d905dfec6b95ea52b8d5f3f8c9b1229448b04402e6bf"
+        let maximumBytes: Int64 = 350 * 1024 * 1024
+
+        do {
+            guard let remoteURL = URL(string: urlString) else { throw DevModelDownloadError.invalidURL }
+            let (temporaryURL, response) = try await URLSession.shared.download(from: remoteURL)
+            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+                throw DevModelDownloadError.httpStatus(http.statusCode)
+            }
+
+            let size = try FileManager.default.attributesOfItem(atPath: temporaryURL.path)[.size] as? Int64 ?? 0
+            guard size > 0, size <= maximumBytes else {
+                throw DevModelDownloadError.invalidSize(size)
+            }
+
+            let digest = try Self.sha256(of: temporaryURL)
+            guard digest == expectedSHA256 else {
+                throw DevModelDownloadError.checksumMismatch(expected: expectedSHA256, actual: digest)
+            }
+
+            _ = try await composition.localModelStorage.importModel(
+                from: temporaryURL,
+                name: "SmolLM2-135M (Dev)"
+            )
+            try? FileManager.default.removeItem(at: temporaryURL)
+            devModelDownloadProgress = 1
+            await refresh()
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
     func importModel(from url: URL, name: String? = nil) async {
         await run {
             _ = try await composition.localModelStorage.importModel(from: url, name: name)
@@ -109,6 +152,18 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    private static func sha256(of url: URL) throws -> String {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var hasher = SHA256()
+        while true {
+            let data = try handle.read(upToCount: 1024 * 1024) ?? Data()
+            if data.isEmpty { break }
+            hasher.update(data: data)
+        }
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
     private func run(_ operation: () async throws -> Void) async {
         do {
             try await operation()
@@ -117,5 +172,25 @@ final class KernelSession: ObservableObject {
             lastError = String(describing: error)
         }
         await refresh()
+    }
+}
+
+private enum DevModelDownloadError: LocalizedError {
+    case invalidURL
+    case httpStatus(Int)
+    case invalidSize(Int64)
+    case checksumMismatch(expected: String, actual: String)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Dev model URL is invalid."
+        case .httpStatus(let status):
+            return "Dev model download failed with HTTP (status)."
+        case .invalidSize(let size):
+            return "Dev model size is invalid: (size) bytes."
+        case .checksumMismatch(let expected, let actual):
+            return "Dev model SHA-256 mismatch. Expected (expected), got (actual)."
+        }
     }
 }
