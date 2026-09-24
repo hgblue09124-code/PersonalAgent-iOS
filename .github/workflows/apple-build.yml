@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   apple-build:
     name: macOS Xcode iOS arm64 Build & Unsigned IPA
@@ -35,12 +38,30 @@ jobs:
           APP_PATH=$(find DerivedData ~/Library/Developer/Xcode/DerivedData -name "PersonalAgent.app" -type d 2>/dev/null | head -n 1)
           test -n "$APP_PATH" || (echo "Error: PersonalAgent.app not found" && false)
           cp -R "$APP_PATH" Payload/
-          zip -r PersonalAgent-unsigned.ipa Payload
-          echo "Created PersonalAgent-unsigned.ipa successfully"
+          zip -r -y PersonalAgent-unsigned.ipa Payload
+          test -f PersonalAgent-unsigned.ipa
+          file PersonalAgent-unsigned.ipa
+          unzip -t PersonalAgent-unsigned.ipa
+          unzip -l PersonalAgent-unsigned.ipa | grep -F "Payload/PersonalAgent.app/"
+          test -d Payload/PersonalAgent.app
+          echo "Created and verified PersonalAgent-unsigned.ipa successfully"
 
       - name: Upload Unsigned Development IPA Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: PersonalAgent-iOS-unsigned-IPA
           path: PersonalAgent-unsigned.ipa
           retention-days: 14
+
+      - name: Publish direct IPA release asset
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="dev-pr-${{ github.event.pull_request.number }}-${GITHUB_SHA::12}"
+          gh release create "$TAG" PersonalAgent-unsigned.ipa \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "PersonalAgent Dev IPA · PR #${{ github.event.pull_request.number }}" \
+            --notes "Unsigned development IPA generated from PR #${{ github.event.pull_request.number }} at ${GITHUB_SHA}." \
+            --prerelease
