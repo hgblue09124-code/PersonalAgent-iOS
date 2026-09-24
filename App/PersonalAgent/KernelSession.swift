@@ -75,6 +75,39 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    func configureProviderAPIKey(_ apiKey: String) async {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            lastError = "Provider API key cannot be empty."
+            return
+        }
+        do {
+            try composition.secretStore.store(
+                account: "openai-api-key",
+                secret: Data(trimmed.utf8)
+            )
+            lastError = nil
+        } catch {
+            lastError = "Could not save provider API key securely."
+        }
+        await refresh()
+    }
+
+    func removeProviderAPIKey() async {
+        do {
+            try composition.secretStore.delete(account: "openai-api-key")
+            lastError = nil
+        } catch {
+            lastError = "Could not remove provider API key."
+        }
+        await refresh()
+    }
+
+    func hasProviderAPIKey() async -> Bool {
+        (try? composition.secretStore.load(account: "openai-api-key")) != nil
+            && (try? composition.secretStore.load(account: "openai-api-key"))??.isEmpty == false
+    }
+
     func start() async { await run { try await composition.session.start() } }
     func pause() async { await run { try await composition.session.pause() } }
     func resume() async { await run { try await composition.session.resume() } }
