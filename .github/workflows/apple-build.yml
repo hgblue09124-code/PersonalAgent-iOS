@@ -35,8 +35,13 @@ jobs:
           APP_PATH=$(find DerivedData ~/Library/Developer/Xcode/DerivedData -name "PersonalAgent.app" -type d 2>/dev/null | head -n 1)
           test -n "$APP_PATH" || (echo "Error: PersonalAgent.app not found" && false)
           cp -R "$APP_PATH" Payload/
-          zip -r PersonalAgent-unsigned.ipa Payload
-          echo "Created PersonalAgent-unsigned.ipa successfully"
+          zip -r -y PersonalAgent-unsigned.ipa Payload
+          test -f PersonalAgent-unsigned.ipa
+          file PersonalAgent-unsigned.ipa
+          unzip -t PersonalAgent-unsigned.ipa
+          unzip -l PersonalAgent-unsigned.ipa | grep -F "Payload/PersonalAgent.app/"
+          test -d Payload/PersonalAgent.app
+          echo "Created and verified PersonalAgent-unsigned.ipa successfully"
 
       - name: Upload Unsigned Development IPA Artifact
         uses: actions/upload-artifact@v7
