@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import PAFoundation
 import PAProviders
-import PAArchitecture
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
@@ -9,40 +9,38 @@ struct SettingsScreen: View {
     @State private var lastImportError: String?
 
     var body: some View {
-        ScreenScaffold(title: "Settings", systemImage: "gear") {
+        ScreenScaffold(title: "Settings", systemImage: "gearshape") {
             MilestoneBanner()
 
-            if let error = session.lastError ?? lastImportError {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Error")
-                        .font(.caption.bold())
+            if let error = lastImportError {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.red)
                     Text(error)
-                        .font(.footnote)
+                        .font(.caption)
                         .foregroundStyle(.red)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+                .padding(10)
+                .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
             }
 
-            // MARK: - Capabilities Section: Models / GGUF
+            // MARK: - Local Models Section (M8.2 / M9.1)
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Label("Models / GGUF", systemImage: "cube.box")
+                    Label("Local Models (GGUF)", systemImage: "cpu")
                         .font(.headline)
                     Spacer()
                     Button {
                         isImportingGGUF = true
                     } label: {
-                        Label("Import GGUF", systemImage: "square.and.arrow.down")
-                            .font(.subheadline.bold())
+                        Label("Import .gguf", systemImage: "square.and.arrow.down")
+                            .font(.caption.bold())
                     }
                     .buttonStyle(.borderedProminent)
                 }
 
-                // Active Model Status Banner
-                VStack(alignment: .leading, spacing: 8) {
+                // Active Model Banner
+                VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text("Active Model:")
                             .font(.subheadline)
@@ -165,11 +163,7 @@ struct SettingsScreen: View {
         }
         .fileImporter(
             isPresented: $isImportingGGUF,
-            allowedContentTypes: [
-                UTType(filenameExtension: "gguf") ?? .data,
-                .data,
-                .item
-            ],
+            allowedContentTypes: [.gguf],
             allowsMultipleSelection: false
         ) { result in
             switch result {
@@ -183,6 +177,12 @@ struct SettingsScreen: View {
                 lastImportError = error.localizedDescription
             }
         }
+    }
+}
+
+private extension UTType {
+    static var gguf: UTType {
+        UTType(importedAs: "org.ggml.gguf", conformingTo: .data)
     }
 }
 
