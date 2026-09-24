@@ -24,7 +24,9 @@ final class KernelSession: ObservableObject {
     @Published var isDownloadingDevModel = false
     @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionTrace: [AgentExecutionProgress] = []
     @Published var executionResult: String?
+    private var lastSubmittedTask: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -79,7 +81,9 @@ final class KernelSession: ObservableObject {
     func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
+        lastSubmittedTask = statement
         executionProgress = nil
+        executionTrace = []
         executionResult = nil
         await run {
             let goalID = try await composition.session.submitInput(statement)
@@ -87,12 +91,26 @@ final class KernelSession: ObservableObject {
             _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
                 Task { @MainActor in
                     self?.executionProgress = progress
+                    self?.executionTrace.append(progress)
                     if case .completed(let result) = progress {
                         self?.executionResult = result
                     }
                 }
             }
         }
+    }
+
+    func retryTask() async {
+        guard let statement = lastSubmittedTask else { return }
+        await submitGoal(statement)
+    }
+
+    func resetTask() {
+        lastSubmittedTask = nil
+        executionProgress = nil
+        executionTrace = []
+        executionResult = nil
+        lastError = nil
     }
 
     func downloadDevModel() async {
