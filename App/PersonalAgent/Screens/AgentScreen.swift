@@ -91,15 +91,10 @@ struct AgentScreen: View {
 
     private var executionSession: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if let progress = session.executionProgress {
-                HStack(spacing: 10) {
-                    ProgressView()
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(progress.title)
-                            .font(.headline)
-                        Text(progress.detail)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            if !session.executionTrace.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(session.executionTrace.enumerated()), id: \.offset) { index, step in
+                        executionTraceRow(step, isLast: index == session.executionTrace.count - 1)
                     }
                 }
             }
@@ -107,14 +102,14 @@ struct AgentScreen: View {
             if let result = session.executionResult {
                 Divider()
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Result")
+                    Label("Result", systemImage: "checkmark.circle.fill")
                         .font(.headline)
                     Text(result)
                         .textSelection(.enabled)
                 }
             }
 
-            if session.executionResult != nil {
+            if session.executionResult != nil || session.lastError != nil {
                 HStack {
                     Button("New Task", action: resetTask)
                         .buttonStyle(.bordered)
@@ -126,6 +121,59 @@ struct AgentScreen: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private func executionTraceRow(_ step: AgentExecutionProgress, isLast: Bool) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(spacing: 0) {
+                Image(systemName: stepIcon(step))
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 20, height: 20)
+                if !isLast {
+                    Rectangle()
+                        .fill(.quaternary)
+                        .frame(width: 1)
+                        .frame(minHeight: 24)
+                }
+            }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(step.title)
+                    .font(.subheadline.weight(.semibold))
+                Text(safeDetail(for: step))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if step == session.executionProgress {
+                    ProgressView()
+                        .controlSize(.small)
+                        .padding(.top, 3)
+                }
+            }
+            .padding(.bottom, isLast ? 0 : 12)
+        }
+    }
+
+    private func safeDetail(for step: AgentExecutionProgress) -> String {
+        if case .reasoningCompleted = step {
+            return "Reasoning completed."
+        }
+        return step.detail
+    }
+
+    private func stepIcon(_ step: AgentExecutionProgress) -> String {
+        switch step {
+        case .perception: return "text.magnifyingglass"
+        case .reasoning, .reasoningCompleted: return "brain"
+        case .planning: return "list.bullet.clipboard"
+        case .actionProposed: return "bolt"
+        case .verification: return "checkmark.shield"
+        case .verificationCompleted(let accepted, _): return accepted ? "checkmark.shield.fill" : "xmark.shield.fill"
+        case .executing: return "play.circle"
+        case .observation: return "eye"
+        case .evaluating: return "scope"
+        case .completed: return "checkmark.circle.fill"
+        case .failed: return "xmark.circle.fill"
+        }
     }
 
     private var lifecycleMenu: some View {
