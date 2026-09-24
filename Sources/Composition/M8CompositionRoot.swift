@@ -489,8 +489,9 @@ extension M8CompositionRoot {
         }
         if let providerRuntime {
             let lifecycle = await providerRuntime.lifecycle.rawValue
-            if dynamicProviderRequiresAPIKey && !(try? secretStore.load(account: "openai-api-key")).map({ !$0.isEmpty }) ?? true {
-                return "missing-api-key"
+            if dynamicProviderRequiresAPIKey {
+                let hasKey = (try? secretStore.load(account: "openai-api-key"))?.isEmpty == false
+                if !hasKey { return "missing-api-key" }
             }
             return lifecycle
         }
