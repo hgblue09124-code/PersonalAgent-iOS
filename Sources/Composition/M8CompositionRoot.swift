@@ -2,7 +2,6 @@ import Foundation
 import PAFoundation
 import PASecurity
 import PAProviders
-import PAProvidersOpenAI
 import PAProvidersLocal
 import PAMemory
 import PAModules
@@ -15,6 +14,17 @@ import PAArchitecture
 import PAObservability
 import PATools
 import PASkills
+
+private enum DefaultLiveProvider {
+    static let providerID = ProviderID(rawValue: "openai")
+    static let endpoint = "https://api.openai.com/v1/chat/completions"
+    static let defaultModel = ModelID(rawValue: "gpt-4o-mini")
+    static let identity = ProviderIdentity(
+        id: providerID,
+        displayName: "OpenAI",
+        models: [ModelIdentity(id: defaultModel, displayName: "GPT-4o mini", contextTokenLimit: 128_000)]
+    )
+}
 
 /// Manages active local model engine instance lifetime and residency in product composition.
 public actor LocalModelRuntimeCoordinator: Sendable {
@@ -307,18 +317,21 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let resolvedSecretStore: any SecretStore = secretStore ?? KeychainSecretStore()
         self.secretStore = resolvedSecretStore
         let credentialRef = ProviderCredentialRef(
-            providerID: OpenAIProviderBoundary.providerID,
+            providerID: DefaultLiveProvider.providerID,
             account: "openai-api-key"
         )
-        let liveProvider = OpenAIProvider(
+        let liveProvider = HTTPChatProvider(
+            identity: DefaultLiveProvider.identity,
+            configuration: ProviderConfiguration(
+                providerID: DefaultLiveProvider.providerID,
+                endpointURL: DefaultLiveProvider.endpoint,
+                defaultModel: DefaultLiveProvider.defaultModel,
+                credential: credentialRef
+            ),
             transport: SecurityNetworkTransport(network: URLSessionNetworkAccess()),
             credentials: SecretStoreCredentials(store: resolvedSecretStore),
-            configuration: ProviderConfiguration(
-                providerID: OpenAIProviderBoundary.providerID,
-                endpointURL: OpenAIProviderBoundary.defaultEndpoint,
-                defaultModel: OpenAIProviderBoundary.declaredIdentity.models[0].id,
-                credential: credentialRef
-            )
+            capabilities: [.textGeneration, .streaming],
+            authorizationScheme: .bearer
         )
         let fallbackProvider = provider ?? liveProvider
         let dynamicProvider = DynamicActiveProvider(
@@ -334,9 +347,9 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         )
         let configuration = ProviderConfiguration(
             providerID: dynamicProvider.identity.id,
-            endpointURL: dynamicProvider.identity.id == OpenAIProviderBoundary.providerID ? OpenAIProviderBoundary.defaultEndpoint : nil,
+            endpointURL: dynamicProvider.identity.id == DefaultLiveProvider.providerID ? DefaultLiveProvider.endpoint : nil,
             defaultModel: dynamicProvider.identity.models.first?.id ?? ModelID(rawValue: "fake-text"),
-            credential: dynamicProvider.identity.id == OpenAIProviderBoundary.providerID ? credentialRef : nil
+            credential: dynamicProvider.identity.id == DefaultLiveProvider.providerID ? credentialRef : nil
         )
         try await providerRuntime.configure(configuration)
         try await providerRuntime.ready()
@@ -455,7 +468,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
 extension M8CompositionRoot {
     private var dynamicProviderRequiresAPIKey: Bool {
-        catalog.identities.first?.id == OpenAIProviderBoundary.providerID
+        catalog.identities.first?.id == DefaultLiveProvider.providerID
     }
 
     public var selectedProviderID: String {
