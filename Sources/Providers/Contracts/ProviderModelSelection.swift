@@ -39,16 +39,41 @@ public final class ModelSelectingProvider: LLMProvider, @unchecked Sendable {
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
-        try await base.complete(bindSelectedModel(to: request))
+        try await base.complete(await bindSelectedModel(to: request))
     }
 
     public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
-        base.stream(bindSelectedModel(to: request))
+        let base = self.base
+        let selection = self.selection
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let boundRequest = await Self.bindSelectedModel(to: request, selection: selection)
+                    for try await event in base.stream(boundRequest) {
+                        try Task.checkCancellation()
+                        continuation.yield(event)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
     }
 
-    private func bindSelectedModel(to request: LLMRequest) -> LLMRequest {
-        // Selection is intentionally read synchronously only at request construction time.
-        // The actual actor read happens in complete(); streaming needs an async bridge.
-        request
+    private func bindSelectedModel(
+        to request: LLMRequest,
+        selection: ProviderModelSelectionStore
+    ) async -> LLMRequest {
+        guard let selected = await selection.selectedModel() else { return request }
+        return LLMRequest(
+            model: selected,
+            messages: request.messages,
+            parameters: request.parameters,
+            toolsAllowed: request.toolsAllowed,
+            metadata: request.metadata,
+            timeoutNanoseconds: request.timeoutNanoseconds
+        )
     }
 }
