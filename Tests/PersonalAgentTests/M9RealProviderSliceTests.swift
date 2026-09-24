@@ -305,15 +305,18 @@ struct M9RealProviderSliceTests {
 
     // MARK: - Live Provider Network Execution Gate
     @Test func testRealLiveProviderExecutionWhenKeyProvided() async throws {
-        let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+        let envKey = ProcessInfo.processInfo.environment["LIVE_PROVIDER_API_KEY"]
+            ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
             ?? ProcessInfo.processInfo.environment["GROK_API_KEY"]
 
         guard let key = envKey, !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            print("LIVE API CONNECTION: UNAVAILABLE (No OPENAI_API_KEY / GROK_API_KEY supplied in environment)")
+            print("LIVE API CONNECTION: UNAVAILABLE (No API key found in LIVE_PROVIDER_API_KEY, OPENAI_API_KEY, or GROK_API_KEY environment variables)")
             return
         }
 
-        let isGrok = ProcessInfo.processInfo.environment["GROK_API_KEY"] != nil
+        let targetProviderStr = ProcessInfo.processInfo.environment["LIVE_PROVIDER_ID"]?.lowercased()
+        let isGrok = targetProviderStr == "grok" || (targetProviderStr == nil && ProcessInfo.processInfo.environment["GROK_API_KEY"] != nil)
+
         let providerID = isGrok ? GrokProviderBoundary.providerID : OpenAIProviderBoundary.providerID
         let endpoint = isGrok ? GrokProviderBoundary.defaultEndpoint : OpenAIProviderBoundary.defaultEndpoint
         let model = isGrok ? ModelID(rawValue: "grok-3") : ModelID(rawValue: "gpt-4o-mini")
@@ -343,6 +346,6 @@ struct M9RealProviderSliceTests {
         let response = try await runtime.complete(request)
 
         #expect(!response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-        print("LIVE API CONNECTION: PASS (Received valid response from \(providerID.rawValue): \(response.text))")
+        print("REAL API CONNECTION: PASS (Received valid response from \(providerID.rawValue): \(response.text))")
     }
 }
