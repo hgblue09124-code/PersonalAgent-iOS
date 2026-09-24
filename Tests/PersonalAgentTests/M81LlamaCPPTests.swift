@@ -288,6 +288,36 @@ struct M81LlamaCPPTests {
         func unload() async throws {}
     }
 
+    @Test(.enabled(if: isLocalGGUFModelPathProvided))
+    func testRepeatedNativeInferenceResetsRequestState() async throws {
+        let modelPath = try #require(ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"])
+        guard FileManager.default.fileExists(atPath: modelPath) else {
+            Issue.record("MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
+            return
+        }
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "repeat-local-llama"),
+            name: "Repeat Local Llama",
+            localURL: URL(fileURLWithPath: modelPath)
+        )
+        let engine = LlamaCPPModelEngine(identity: identity)
+        try await engine.load(options: LocalModelLoadingOptions(contextWindow: 1024))
+        defer { Task { try? await engine.unload() } }
+
+        let first = try await engine.generate(
+            request: LocalModelGenerationRequest(prompt: "Reply with one short greeting.")
+        )
+        let second = try await engine.generate(
+            request: LocalModelGenerationRequest(prompt: "Reply with a different short greeting.")
+        )
+
+        #expect(!first.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(!second.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(first.finishReason == "stop" || first.finishReason == "length")
+        #expect(second.finishReason == "stop" || second.finishReason == "length")
+    }
+
     @Test func testEmptyOutputThrowsExplicitError() async throws {
         // Direct production validator unit test
         #expect(throws: LlamaCPPEngineError.emptyOutput) {

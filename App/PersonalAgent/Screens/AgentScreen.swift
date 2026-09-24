@@ -9,16 +9,10 @@ struct AgentScreen: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 20) {
                     hero
                     taskComposer
-                    activity
-                    if let progress = session.executionProgress {
-                        progressView(progress)
-                    }
-                    if let result = session.executionResult {
-                        resultView(result)
-                    }
+                    execution
                     if let error = session.lastError {
                         errorView(error)
                     }
@@ -36,12 +30,11 @@ struct AgentScreen: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(greeting)
                 .font(.largeTitle.bold())
                 .tracking(-0.5)
             Text("Tell me what you want to get done.")
-                .font(.body)
                 .foregroundStyle(.secondary)
         }
     }
@@ -50,18 +43,17 @@ struct AgentScreen: View {
         VStack(alignment: .leading, spacing: 12) {
             TextField("Ask Agent to do something…", text: $task, axis: .vertical)
                 .textFieldStyle(.plain)
-                .font(.body)
                 .lineLimit(3...6)
                 .focused($taskFocused)
                 .submitLabel(.send)
-                .onSubmit { runTask() }
+                .onSubmit(runTask)
 
             HStack {
-                Text("Agent will use the available runtime capabilities.")
+                Text("The Agent will use available capabilities.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Button { runTask() } label: {
+                Button(action: runTask) {
                     Image(systemName: "arrow.up")
                         .font(.headline.bold())
                         .frame(width: 34, height: 34)
@@ -76,53 +68,64 @@ struct AgentScreen: View {
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
     }
 
-    private var activity: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Activity")
-                    .font(.headline)
-                Spacer()
-                Text(session.state.lifecycle.rawValue.capitalized)
-                    .font(.caption.bold())
-                    .foregroundStyle(.secondary)
-            }
-
-            if let goal = session.state.activeGoalID {
-                Label("Working on (goal.rawValue)", systemImage: "circle.dotted")
-                    .font(.subheadline)
-            } else {
-                Label("Ready for a task", systemImage: "checkmark.circle")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+    @ViewBuilder
+    private var execution: some View {
+        if session.executionResult != nil || session.executionProgress != nil {
+            executionSession
+        } else {
+            emptyActivity
         }
-        .padding(16)
-        .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 20))
     }
 
-    private func progressView(_ progress: AgentExecutionProgress) -> some View {
+    private var emptyActivity: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label(progress.title, systemImage: "sparkles")
+            Label("Ready", systemImage: "checkmark.circle")
                 .font(.headline)
-            Text(progress.detail)
-                .font(.subheadline)
+            Text("Give the Agent a task to begin.")
                 .foregroundStyle(.secondary)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
     }
 
-    private func resultView(_ result: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Result", systemImage: "checkmark.circle.fill")
-                .font(.headline)
-            Text(result)
-                .textSelection(.enabled)
+    private var executionSession: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if let progress = session.executionProgress {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(progress.title)
+                            .font(.headline)
+                        Text(progress.detail)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            if let result = session.executionResult {
+                Divider()
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Result")
+                        .font(.headline)
+                    Text(result)
+                        .textSelection(.enabled)
+                }
+            }
+
+            if session.executionResult != nil {
+                HStack {
+                    Button("New Task", action: resetTask)
+                        .buttonStyle(.bordered)
+                    Button("Retry", action: retryTask)
+                        .buttonStyle(.borderedProminent)
+                }
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
     }
 
     private var lifecycleMenu: some View {
@@ -139,8 +142,8 @@ struct AgentScreen: View {
 
     private var greeting: String {
         switch session.state.lifecycle.rawValue.lowercased() {
-        case "running": return "I’m working."
-        case "paused": return "I’m paused."
+        case "running": return "I'm working."
+        case "paused": return "I'm paused."
         case "stopped": return "Ready when you are."
         default: return "What can I do for you?"
         }
@@ -152,6 +155,14 @@ struct AgentScreen: View {
         taskFocused = false
         task = ""
         Task { await session.submitGoal(statement) }
+    }
+
+    private func retryTask() {
+        Task { await session.retryTask() }
+    }
+
+    private func resetTask() {
+        session.resetTask()
     }
 
     private func errorView(_ message: String) -> some View {
