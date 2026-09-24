@@ -77,3 +77,39 @@ public struct NetworkResponse: Sendable, Equatable {
 public protocol NetworkAccess: Sendable {
     func data(for request: NetworkRequest) async throws -> NetworkResponse
 }
+
+public enum NetworkAccessError: Error, Sendable, Equatable {
+    case invalidURL
+    case invalidResponse
+}
+
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
+/// Production NetworkAccess implementation backed by URLSession.
+public struct URLSessionNetworkAccess: NetworkAccess, Sendable {
+    private let session: URLSession
+
+    public init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    public func data(for request: NetworkRequest) async throws -> NetworkResponse {
+        guard let url = URL(string: request.url) else {
+            throw NetworkAccessError.invalidURL
+        }
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = request.method
+        for (key, value) in request.headers {
+            urlRequest.setValue(value, forHTTPHeaderField: key)
+        }
+        urlRequest.httpBody = request.body
+
+        let (data, response) = try await session.data(for: urlRequest)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkAccessError.invalidResponse
+        }
+        return NetworkResponse(statusCode: httpResponse.statusCode, body: data)
+    }
+}
