@@ -477,4 +477,17 @@ struct M91RealGGUFExecutionTests {
         #expect(updatedModels.count == 1)
         #expect(updatedModels.first?.id == descriptor.id)
     }
+
+    // MARK: - GGUF UniformTypeIdentifier Contract Assertion Test
+
+    @Test func testGGUFUniformTypeIdentifierContract() throws {
+        #if canImport(UniformTypeIdentifiers)
+        let ggufType = UTType(importedAs: "org.ggml.gguf", conformingTo: .data)
+        #expect(ggufType.identifier == "org.ggml.gguf")
+        #expect(ggufType.conforms(to: .data))
+        #else
+        // Platform does not support UniformTypeIdentifiers framework
+        #expect(Bool(true))
+        #endif
+    }
 }

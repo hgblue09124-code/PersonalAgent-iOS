@@ -38,12 +38,15 @@ jobs:
           zip -r -y PersonalAgent-unsigned.ipa Payload
           echo "Created PersonalAgent-unsigned.ipa successfully"
 
-      - name: Verify IPA Integrity and Payload Structure
+      - name: Verify IPA Integrity and Compiled Info.plist Structure
         run: |
           file PersonalAgent-unsigned.ipa
           unzip -t PersonalAgent-unsigned.ipa
           unzip -l PersonalAgent-unsigned.ipa | grep "Payload/PersonalAgent.app/"
-          echo "IPA archive integrity, Central Directory, and Payload structure verified successfully"
+          unzip -p PersonalAgent-unsigned.ipa Payload/PersonalAgent.app/Info.plist > compiled-Info.plist
+          plutil -p compiled-Info.plist
+          grep -q "org.ggml.gguf" compiled-Info.plist || (echo "Error: org.ggml.gguf not found in compiled Info.plist" && false)
+          echo "IPA archive integrity, Central Directory, and compiled Info.plist verified successfully"
 
       - name: Upload Unsigned Development IPA Artifact
         uses: actions/upload-artifact@v4
