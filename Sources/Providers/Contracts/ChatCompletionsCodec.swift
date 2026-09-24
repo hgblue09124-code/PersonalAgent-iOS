@@ -64,9 +64,15 @@ public enum ChatCompletionsCodec: Sendable {
         }
         let finish = (first["finish_reason"] as? String) ?? "stop"
         if let message = first["message"] as? [String: Any], let text = message["content"] as? String {
+            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw ProviderRuntimeError.decodingFailure
+            }
             return LLMResponse(text: text, finishReason: finish, model: model)
         }
         if let text = first["text"] as? String {
+            guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                throw ProviderRuntimeError.decodingFailure
+            }
             return LLMResponse(text: text, finishReason: finish, model: model)
         }
         throw ProviderRuntimeError.decodingFailure
@@ -100,8 +106,12 @@ public enum ChatCompletionsCodec: Sendable {
                 deltas.append(content)
             }
         }
+        let fullText = deltas.joined()
+        guard !fullText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ProviderRuntimeError.decodingFailure
+        }
         var events: [LLMStreamEvent] = deltas.map { .delta($0) }
-        events.append(.completed(LLMResponse(text: deltas.joined(), finishReason: finish, model: model)))
+        events.append(.completed(LLMResponse(text: fullText, finishReason: finish, model: model)))
         return events
     }
 }
