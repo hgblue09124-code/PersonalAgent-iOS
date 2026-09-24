@@ -382,6 +382,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             runtime: agentRuntime,
             eventLog: idempotentLog,
             logger: logger,
+            reasoner: LLMReasoner(provider: dynamicProvider),
             policy: policy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime

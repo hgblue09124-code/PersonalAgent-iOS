@@ -10,7 +10,6 @@ struct SettingsScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gear") {
-            MilestoneBanner()
 
             if let error = session.lastError ?? lastImportError {
                 VStack(alignment: .leading, spacing: 4) {
