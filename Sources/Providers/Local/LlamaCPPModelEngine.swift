@@ -108,8 +108,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         llama_backend_init()
 
         var modelParams = llama_model_default_params()
-        if let gL = options.gpuLayers {
-            modelParams.n_gpu_layers = Int32(gL)
+        if options.useMetal {
+            modelParams.n_gpu_layers = Int32(options.gpuLayers ?? 99)
+        } else {
+            modelParams.n_gpu_layers = 0
         }
 
         let path = url.path
@@ -119,7 +121,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
 
         var ctxParams = llama_context_default_params()
-        ctxParams.n_ctx = UInt32(options.contextWindow)
+        let modelContextLimit = summary.contextLength.flatMap { Int(exactly: $0) }
+        let requestedContext = max(256, options.contextWindow)
+        let effectiveContext = min(requestedContext, modelContextLimit ?? requestedContext)
+        ctxParams.n_ctx = UInt32(effectiveContext)
+        ctxParams.n_batch = UInt32(min(effectiveContext, 512))
 
         let nThreads = options.threadCount ?? max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
         ctxParams.n_threads = Int32(nThreads)
@@ -253,7 +259,8 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 }
 
                 // 3. Generation loop
-                let maxTokens = request.maxTokens ?? 512
+                let configuredMaxTokens = self.stateLock.withLock { self.activeOptions?.maxTokens ?? 512 }
+                let maxTokens = min(request.maxTokens ?? configuredMaxTokens, max(1, effectiveGenerationCapacity(contextWindow: self.stateLock.withLock { self.activeOptions?.contextWindow ?? 8192 }, promptTokenCount: promptTokens.count)))
                 var currentPos = Int32(promptTokens.count)
                 var generatedCount = 0
 
@@ -378,6 +385,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    private func effectiveGenerationCapacity(contextWindow: Int, promptTokenCount: Int) -> Int {
+        max(1, contextWindow - max(0, promptTokenCount))
+    }
 
     private func isLoaded() -> Bool {
         stateLock.withLock {
