@@ -119,9 +119,7 @@ struct ModelsScreen: View {
         .fileImporter(
             isPresented: $isImporting,
             allowedContentTypes: [
-                UTType(filenameExtension: "gguf") ?? .data,
-                .data,
-                .item
+                UTType(filenameExtension: "gguf") ?? .data
             ],
             allowsMultipleSelection: false
         ) { result in
@@ -147,14 +145,14 @@ struct ModelsScreen: View {
         case .unloading:
             return "Unloading local model…"
         case .failed(let reason):
-            return "Failed · (reason)"
+            return "Failed · \(reason)"
         }
     }
 
     private var lifecycleTitle: String {
         switch session.activeEngineState {
         case .unloaded: return "UNLOADED"
-        case .loading(let progress): return "LOADING (Int(progress * 100))%"
+        case .loading(let progress): return "LOADING \(Int(progress * 100))%"
         case .loaded: return "LOADED"
         case .unloading: return "UNLOADING"
         case .failed: return "FAILED"
