@@ -84,7 +84,7 @@ struct AgentScreen: View {
             }
 
             if let goal = session.state.activeGoalID {
-                Label("Working on (goal.rawValue)", systemImage: "circle.dotted")
+                Label("Working on \(goal.rawValue)", systemImage: "circle.dotted")
                     .font(.subheadline)
             } else {
                 Label("Ready for a task", systemImage: "checkmark.circle")
