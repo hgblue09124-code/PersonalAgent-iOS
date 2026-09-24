@@ -104,8 +104,12 @@ final class KernelSession: ObservableObject {
     }
 
     func hasProviderAPIKey() async -> Bool {
-        (try? composition.secretStore.load(account: "openai-api-key")) != nil
-            && (try? composition.secretStore.load(account: "openai-api-key"))??.isEmpty == false
+        do {
+            guard let data = try composition.secretStore.load(account: "openai-api-key") else { return false }
+            return !data.isEmpty
+        } catch {
+            return false
+        }
     }
 
     func start() async { await run { try await composition.session.start() } }
