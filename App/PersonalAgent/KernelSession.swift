@@ -78,7 +78,8 @@ final class KernelSession: ObservableObject {
 
     func submitGoal(_ statement: String) async {
         await run {
-            _ = try await composition.session.submitInput(statement)
+            let goalID = try await composition.session.submitInput(statement)
+            _ = try await composition.orchestrator.run(goalID: goalID)
         }
     }
 
