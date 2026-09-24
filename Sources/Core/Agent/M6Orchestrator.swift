@@ -6,6 +6,7 @@ import PAPolicy
 import PAAgency
 import PACognition
 import PAModules
+import PAProviders
 
 public protocol ContextAssembling: Sendable {
     func assembleContext(
@@ -39,6 +40,43 @@ public struct DefaultContextAssembler: ContextAssembling {
         evaluation: Evaluation? = nil
     ) async throws -> ContextBundle {
         ContextBundle(perception: perception, memoryIDs: [], skillIDs: [])
+    }
+}
+
+public struct LLMReasoner: Reasoning {
+    private let provider: any LLMProvider
+
+    public init(provider: any LLMProvider) {
+        self.provider = provider
+    }
+
+    public func reason(context: ContextBundle) async throws -> ReasoningResult {
+        let prompt = """
+        You are the reasoning component of a personal agent.
+        Return a concise plan/decision for the user's task.
+        Do not claim an action was executed.
+        
+        User task:
+        \(context.perception.rawInput)
+        """
+
+        let response = try await provider.complete(
+            LLMRequest(
+                model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
+                prompt: prompt
+            )
+        )
+
+        let text = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            throw KernelError.invalidStateUpdate("LLM reasoning returned empty output")
+        }
+
+        return ReasoningResult(
+            summary: text,
+            providerID: provider.identity.id,
+            modelID: response.model
+        )
     }
 }
 
