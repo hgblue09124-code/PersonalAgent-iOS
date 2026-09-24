@@ -452,4 +452,29 @@ struct M91RealGGUFExecutionTests {
         let stateAfter = await activeEngine.lifecycleState
         #expect(stateAfter == .unloaded)
     }
+
+    // MARK: - iOS Open-In External URL Import Boundary Handoff Test
+
+    @Test func testOpenInDocumentURLHandoffImportsModelToAppStorage() async throws {
+        let dir = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let externalGGUF = try createDummyGGUFFile(at: dir, filename: "external_open_in.gguf")
+
+        let composition = try await M8CompositionRoot(storeDirectoryURL: dir)
+        let storage = composition.localModelStorage
+
+        // Verify initial state
+        let initialModels = try await storage.listModels()
+        #expect(initialModels.isEmpty)
+
+        // Handoff external .gguf URL to localModelStorage.importModel(from: name:)
+        let descriptor = try await storage.importModel(from: externalGGUF, name: "Open-In Model")
+        #expect(descriptor.name == "Open-In Model")
+
+        // Verify model is imported into app storage and registered
+        let updatedModels = try await storage.listModels()
+        #expect(updatedModels.count == 1)
+        #expect(updatedModels.first?.id == descriptor.id)
+    }
 }
