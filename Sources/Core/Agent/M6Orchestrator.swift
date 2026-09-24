@@ -287,9 +287,13 @@ public actor M6Orchestrator {
             )
 
             // 3. Reasoning
+            progress?(.reasoning)
             let reasoningResult = try await reasoner.reason(context: context)
 
+            progress?(.reasoningCompleted(reasoningResult.summary))
+
             // 4. Planning
+            progress?(.planning)
             let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
             try await emit(
                 traceID: traceID,
@@ -313,6 +317,7 @@ public actor M6Orchestrator {
             }
 
             // 6. Verification
+            progress?(.verification)
             let verification = try await verifier.verify(plan: plan, proposals: proposals)
             try await emit(
                 traceID: traceID,
@@ -395,8 +400,10 @@ public actor M6Orchestrator {
                 try await emit(traceID: traceID, kind: .actionAuthorized, payload: authPayload)
 
                 // Execute action
+                progress?(.executing)
                 let obs = try await executeProposal(proposal, traceID: traceID, goalID: goalID)
                 observations.append(obs)
+                progress?(.observation(obs.summary))
             }
 
             // 8. Evaluation
@@ -447,7 +454,10 @@ public actor M6Orchestrator {
 
             try await runtime.applyStateUpdate(stateUpdate)
 
-            finalEvaluation = evaluation
+            finalEvaluation = eval
+            if eval.disposition == .complete {
+                progress?(.completed(eval.reason))
+            }uation
             previousObservations = observations
             previousEvaluation = evaluation
 
