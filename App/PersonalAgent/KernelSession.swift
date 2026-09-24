@@ -24,6 +24,7 @@ final class KernelSession: ObservableObject {
     @Published var isDownloadingDevModel = false
     @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionTrace: [AgentExecutionProgress] = []
     @Published var executionResult: String?
     private var lastSubmittedTask: String?
 
@@ -82,6 +83,7 @@ final class KernelSession: ObservableObject {
     func submitGoal(_ statement: String) async {
         lastSubmittedTask = statement
         executionProgress = nil
+        executionTrace = []
         executionResult = nil
         await run {
             let goalID = try await composition.session.submitInput(statement)
@@ -89,6 +91,7 @@ final class KernelSession: ObservableObject {
             _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
                 Task { @MainActor in
                     self?.executionProgress = progress
+                    self?.executionTrace.append(progress)
                     if case .completed(let result) = progress {
                         self?.executionResult = result
                     }
@@ -105,6 +108,7 @@ final class KernelSession: ObservableObject {
     func resetTask() {
         lastSubmittedTask = nil
         executionProgress = nil
+        executionTrace = []
         executionResult = nil
         lastError = nil
     }
