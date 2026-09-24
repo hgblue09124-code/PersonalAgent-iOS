@@ -140,15 +140,56 @@ private struct RuntimeSettingsView: View {
 
 private struct ProviderSettingsView: View {
     @ObservedObject var session: KernelSession
+    @State private var apiKey = ""
+    @State private var hasAPIKey = false
+    @State private var isSaving = false
 
     var body: some View {
         List {
             Section("Current Provider") {
                 LabeledContent("Provider", value: session.providerID)
                 LabeledContent("Status", value: session.providerLifecycle.capitalized)
+                LabeledContent("API Key", value: hasAPIKey ? "Configured" : "Not configured")
+            }
+
+            Section("OpenAI") {
+                SecureField("API key", text: $apiKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+
+                Button {
+                    Task {
+                        isSaving = true
+                        await session.configureProviderAPIKey(apiKey)
+                        apiKey = ""
+                        hasAPIKey = await session.hasProviderAPIKey()
+                        isSaving = false
+                    }
+                } label: {
+                    Label(isSaving ? "Saving…" : "Save API Key", systemImage: "key.fill")
+                }
+                .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
+
+                if hasAPIKey {
+                    Button(role: .destructive) {
+                        Task {
+                            await session.removeProviderAPIKey()
+                            hasAPIKey = await session.hasProviderAPIKey()
+                        }
+                    } label: {
+                        Label("Remove API Key", systemImage: "trash")
+                    }
+                }
+
+                Text("The key is stored in the iOS Keychain and is never shown in Agent Thinking or logs.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Provider")
+        .task {
+            hasAPIKey = await session.hasProviderAPIKey()
+        }
     }
 }
 
