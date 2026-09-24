@@ -23,7 +23,42 @@ struct ProvidersScreen: View {
                     .padding(.vertical, 6)
                 }
 
-                Section("Available") {
+                Section("Remote Models") {
+                    if session.providerModels.isEmpty {
+                        Text("No remote models discovered. Configure an API key and refresh.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(session.providerModels, id: \.id) { model in
+                            Button {
+                                Task { await session.selectProviderModel(id: model.id) }
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(model.displayName)
+                                            .foregroundStyle(.primary)
+                                        Text(model.id.rawValue)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    if model.id == session.selectedProviderModelID {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(.tint)
+                                    }
+                                }
+                            }
+                        }
+
+                        Button {
+                            Task { await session.refreshProviderModels() }
+                        } label: {
+                            Label("Refresh Models", systemImage: "arrow.clockwise")
+                        }
+                    }
+                }
+
+                Section("Available Providers") {
                     ForEach(ArchitectureManifest.reservedProviderIDs, id: \.id) { item in
                         Label {
                             VStack(alignment: .leading, spacing: 2) {
@@ -47,6 +82,7 @@ struct ProvidersScreen: View {
                 }
             }
             .navigationTitle("Providers")
+        .task { await session.refreshProviderModels() }
         }
     }
 
