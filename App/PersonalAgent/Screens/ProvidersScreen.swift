@@ -24,7 +24,7 @@ struct ProvidersScreen: View {
                 }
 
                 Section("Available") {
-                    ForEach(ArchitectureManifest.reservedProviderIDs, id: .id) { item in
+                    ForEach(ArchitectureManifest.reservedProviderIDs, id: \.id) { item in
                         Label {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.id)
