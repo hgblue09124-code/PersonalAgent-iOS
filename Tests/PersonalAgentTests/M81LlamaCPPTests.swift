@@ -373,6 +373,47 @@ struct M81LlamaCPPTests {
         }
     }
 
+    @Test func testUnloadWaitsForActiveGenerationBeforeReleasingNativeResources() async throws {
+        actor Probe {
+            var finished = false
+            func markFinished() { finished = true }
+            func isFinished() -> Bool { finished }
+        }
+
+        let probe = Probe()
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "unload-race-llama"),
+            name: "Unload Race Llama",
+            contextTokenLimit: 2048
+        )
+
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            streamRunner: { _, _ in
+                do {
+                    while !Task.isCancelled {
+                        try await Task.sleep(nanoseconds: 5_000_000)
+                    }
+                } catch {
+                    // Cancellation is the expected shutdown path.
+                }
+                await probe.markFinished()
+                throw LlamaCPPEngineError.cancelled
+            }
+        )
+
+        _ = engine.generateStream(
+            request: LocalModelGenerationRequest(prompt: "hold generation open")
+        )
+
+        // Give the generation task a chance to enter the runner before unload.
+        try await Task.sleep(nanoseconds: 50_000_000)
+        try await engine.unload()
+
+        #expect(await probe.isFinished())
+        #expect(await engine.lifecycleState == .unloaded)
+    }
+
     @Test func testCancellationPropagation() async throws {
         let identity = LocalModelIdentity(
             id: ModelID(rawValue: "cancel-llama"),
