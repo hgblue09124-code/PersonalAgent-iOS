@@ -21,50 +21,33 @@ struct AgentScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 14) {
-                        if messages.isEmpty {
-                            hero
-                        } else {
-                            ForEach(messages) { message in
-                                messageBubble(message)
-                            }
-                        }
-
-                        if isSending {
-                            HStack(spacing: 10) {
-                                ProgressView()
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Agent")
-                                        .font(.caption.weight(.semibold))
-                                    Text(session.chatPhase ?? "Processing")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .padding(12)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14))
-                        }
-
-                        if session.executionProgress != nil || session.executionResult != nil {
-                            execution
-                        }
-
-                        if let error = session.lastError {
-                            errorView(error)
-                        }
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                }
-                .scrollDismissesKeyboard(.interactively)
-
-                taskComposer
+            ZStack(alignment: .bottom) {
+                conversation
+                composer
             }
-            .navigationTitle("Agent")
+            .background(Color(uiColor: .systemBackground))
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        resetConversation()
+                    } label: {
+                        Image(systemName: "square.and.pencil")
+                    }
+                    .accessibilityLabel("New conversation")
+                }
+
+                ToolbarItem(placement: .principal) {
+                    VStack(spacing: 1) {
+                        Text("Personal Agent")
+                            .font(.subheadline.weight(.semibold))
+                        Text(session.selectedProviderModelID?.rawValue ?? "Local Agent")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     lifecycleMenu
                 }
@@ -72,64 +55,195 @@ struct AgentScreen: View {
         }
     }
 
-    private var hero: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Hi, I'm your Agent.")
-                .font(.largeTitle.bold())
-                .tracking(-0.5)
-            Text("Ask anything or give me a task.")
-                .foregroundStyle(.secondary)
+    private var conversation: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 18) {
+                    if messages.isEmpty {
+                        welcome
+                    }
+
+                    ForEach(messages) { message in
+                        messageRow(message)
+                            .id(message.id)
+                    }
+
+                    if isSending {
+                        thinkingRow
+                            .id("thinking")
+                    }
+
+                    if session.executionProgress != nil || session.executionResult != nil {
+                        execution
+                    }
+
+                    if let error = session.lastError {
+                        errorView(error)
+                    }
+
+                    Color.clear.frame(height: 86)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 18)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .onChange(of: messages.count) { _, _ in
+                scrollToBottom(proxy)
+            }
+            .onChange(of: isSending) { _, _ in
+                scrollToBottom(proxy)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 20)
     }
 
-    private func messageBubble(_ message: ChatMessage) -> some View {
-        HStack {
-            if message.role == .agent { Spacer(minLength: 40) }
+    private var welcome: some View {
+        VStack(spacing: 18) {
+            ZStack {
+                Circle()
+                    .fill(.tint.opacity(0.12))
+                    .frame(width: 64, height: 64)
+                Image(systemName: "sparkles")
+                    .font(.system(size: 28, weight: .semibold))
+                    .foregroundStyle(.tint)
+            }
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(spacing: 6) {
+                Text("What can I help with?")
+                    .font(.title2.weight(.bold))
+                Text("Chat with your Agent. Ask a question or give it a task.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            HStack(spacing: 8) {
+                suggestion("What can you do?")
+                suggestion("2 + 2 = ?")
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 72)
+    }
+
+    private func suggestion(_ text: String) -> some View {
+        Button {
+            task = text
+            taskFocused = true
+        } label: {
+            Text(text)
+                .font(.footnote.weight(.medium))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 9)
+                .background(.thinMaterial, in: Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func messageRow(_ message: ChatMessage) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            if message.role == .agent {
+                agentAvatar
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
                 Text(message.role == .user ? "You" : "Agent")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Text(message.text)
-                    .textSelection(.enabled)
-            }
-            .padding(12)
-            .background(
-                message.role == .user
-                    ? AnyShapeStyle(Color.accentColor.opacity(0.12))
-                    : AnyShapeStyle(.thinMaterial),
-                in: RoundedRectangle(cornerRadius: 16)
-            )
-            .frame(maxWidth: 340, alignment: .leading)
 
-            if message.role == .user { Spacer(minLength: 40) }
+                Text(message.text)
+                    .font(.body)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contextMenu {
+                        Button {
+                            UIPasteboard.general.string = message.text
+                        } label: {
+                            Label("Copy", systemImage: "doc.on.doc")
+                        }
+                    }
+            }
+
+            if message.role == .user {
+                Spacer(minLength: 38)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: message.role == .user ? .trailing : .leading)
+        .padding(.leading, message.role == .user ? 44 : 0)
+        .padding(.trailing, message.role == .agent ? 22 : 0)
+    }
+
+    private var agentAvatar: some View {
+        Image(systemName: "sparkles")
+            .font(.caption.weight(.bold))
+            .frame(width: 30, height: 30)
+            .background(.tint.opacity(0.12), in: Circle())
+            .foregroundStyle(.tint)
+    }
+
+    private var thinkingRow: some View {
+        HStack(alignment: .top, spacing: 10) {
+            agentAvatar
+
+            VStack(alignment: .leading, spacing: 7) {
+                Text("Agent")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 5) {
+                    Circle().frame(width: 6, height: 6)
+                    Circle().frame(width: 6, height: 6)
+                    Circle().frame(width: 6, height: 6)
+                }
+                .foregroundStyle(.secondary)
+                .opacity(0.7)
+
+                if let phase = session.chatPhase {
+                    Text(phase)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
         }
     }
 
-    private var taskComposer: some View {
-        HStack(alignment: .bottom, spacing: 10) {
-            TextField("Message Agent…", text: $task, axis: .vertical)
-                .textFieldStyle(.roundedBorder)
-                .lineLimit(1...6)
+    private var composer: some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            TextField("Message Agent", text: $task, axis: .vertical)
+                .textFieldStyle(.plain)
+                .lineLimit(1...7)
                 .focused($taskFocused)
                 .submitLabel(.send)
                 .onSubmit(sendMessage)
 
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up")
-                    .font(.headline.bold())
+                    .font(.system(size: 15, weight: .bold))
                     .frame(width: 34, height: 34)
+                    .background(
+                        task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
+                            ? AnyShapeStyle(Color.secondary.opacity(0.16))
+                            : AnyShapeStyle(Color.accentColor),
+                        in: Circle()
+                    )
+                    .foregroundStyle(
+                        task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
+                            ? Color.secondary
+                            : Color.white
+                    )
             }
-            .buttonStyle(.borderedProminent)
-            .clipShape(Circle())
             .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending)
             .accessibilityLabel("Send message")
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(.bar)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(.quaternary, lineWidth: 0.7)
+        )
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
     }
 
     @ViewBuilder
@@ -139,7 +253,6 @@ struct AgentScreen: View {
                 ForEach(Array(session.executionTrace.enumerated()), id: \.offset) { index, step in
                     executionTraceRow(step, isLast: index == session.executionTrace.count - 1)
                 }
-
                 if let result = session.executionResult {
                     Divider().padding(.vertical, 8)
                     Text(result)
@@ -158,19 +271,15 @@ struct AgentScreen: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: stepIcon(step))
                 .frame(width: 18, height: 18)
-
             VStack(alignment: .leading, spacing: 2) {
-                Text(step.title)
-                    .font(.footnote.weight(.semibold))
+                Text(step.title).font(.footnote.weight(.semibold))
                 Text(step.detail)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-
             if step == session.executionProgress {
-                ProgressView()
-                    .controlSize(.mini)
+                ProgressView().controlSize(.mini)
             }
         }
         .padding(.vertical, isLast ? 4 : 7)
@@ -219,6 +328,25 @@ struct AgentScreen: View {
                     messages.append(ChatMessage(role: .agent, text: response))
                 }
                 isSending = false
+            }
+        }
+    }
+
+    private func resetConversation() {
+        messages.removeAll()
+        session.resetTask()
+        task = ""
+        isSending = false
+    }
+
+    private func scrollToBottom(_ proxy: ScrollViewProxy) {
+        DispatchQueue.main.async {
+            if let last = messages.last {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    proxy.scrollTo(last.id, anchor: .bottom)
+                }
+            } else if isSending {
+                proxy.scrollTo("thinking", anchor: .bottom)
             }
         }
     }
