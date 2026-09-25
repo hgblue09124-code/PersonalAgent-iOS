@@ -1,3 +1,4 @@
+import PAKernel
 import PAFoundation
 
 public struct PolicyDecision: Sendable, Equatable {
