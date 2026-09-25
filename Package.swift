@@ -142,14 +142,8 @@ let package = Package(
             name: "PAKernel",
             dependencies: [
                 "PAFoundation",
-                "PAPolicy",
-                "PAAgency",
-                "PACognition",
-                "PAObservability",
                 "PAEvents",
-                "PAProviders",
                 "PAModules",
-                "PAMemory",
             ],
             path: "Sources/Core/Agent"
         ),
