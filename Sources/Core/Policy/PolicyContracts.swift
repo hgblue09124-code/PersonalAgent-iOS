@@ -50,3 +50,11 @@ public protocol PolicyEvaluating: Sendable {
 public protocol ApprovalGate: Sendable {
     func requestApproval(for intent: ActionIntent) async throws -> Bool
 }
+
+public struct DefaultPolicyEvaluator: PolicyEvaluating {
+    public init() {}
+
+    public func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+        .allow("Default policy permit")
+    }
+}
