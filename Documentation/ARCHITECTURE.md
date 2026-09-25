@@ -1,86 +1,48 @@
-# Personal Agent — Architecture
+# PersonalAgent-iOS Architecture
 
-## Status
+<!-- TASK-CONTEXT: This is the long-lived architectural source of truth. Future workers MUST read this before changing structure, ownership, or dependency boundaries. Do not infer architecture from historical folder names alone. -->
 
-**Current baseline:** M8 architecture foundation at verified green commit `e3e7182523daf711ba23cbc9ec67bd450ef44e5d`.
+## Purpose
 
-The repository currently uses the M8 package graph. This document separates **CURRENT** from **TARGET**; the target is not presented as implemented.
+PersonalAgent-iOS is organized around explicit boundaries:
+- Kernel — stable contracts, events, errors, and ports.
+- Runtime — agent execution and orchestration.
+- Capabilities — executable skills, tools, and modules.
+- Providers — model/provider adapters.
+- Memory — agent data and retrieval semantics.
+- Storage — persistence and data boundaries.
+- Composition — dependency construction and wiring.
+- App — presentation only.
+- Tests — mirror production ownership.
 
-This iOS client is the long-lived Personal Agent / Agent OS client. It is not a chat wrapper. Kernel is not an LLM.
+## Canonical Structure
 
-Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`) are external material and must not become runtime dependencies.
+See Issue #85 (RE-ARCH — Canonical PersonalAgent-iOS structure) for the migration target.
 
-## CURRENT — verified source graph
+<!-- INVARIANT: One concept -> one place. One boundary -> one folder. One execution path -> one Runtime. One wiring point -> Composition. Vendor-specific implementation stays behind an adapter boundary. -->
 
-The current SwiftPM graph is:
+## Dependency Direction
 
-```text
-App
-  ↓
-Composition
-  ↓
-PARuntime
-  ↓
-PAKernel
-  ├── PACognition → PAProviders / PAMemory / PASkills
-  ├── PAAgency → PACognition / PATools / PAPolicy
-  ├── PAModules
-  ├── PAMemory
-  └── PAProviders / PAEvents / PAObservability / PAPolicy
+`App -> Composition -> Runtime -> Capabilities / Providers / Memory / Storage -> Kernel`
 
-Composition additionally wires Providers / Local / Memory / Modules / Skills / Tools / Storage / Security / Policy / Cognition / Agency.
-```
+<!-- INVARIANT: A lower layer must not depend upward on presentation or orchestration. Kernel must remain vendor- and UI-independent. -->
 
-The runtime slice is now implemented: `AgentRuntime` and `AgentSession` live in `PARuntime`, while Kernel remains the lower stable contract/state boundary. `M8CompositionRoot` explicitly imports `PARuntime` and owns construction/wiring.
+## Migration Rule
 
-The current implementation still has known concentration candidates (for example `KernelCoordinationBoundary` and `LocalModelRuntimeCoordinator`). These are audit targets, not permission for speculative refactoring.
+1. Audit before moving.
+2. Map every current component to exactly one canonical home.
+3. Move before rewriting.
+4. Preserve behavior unless migration requires a minimal compatibility repair.
+5. Verify after each move group.
+6. Audit dependency direction after migration.
+7. Record confirmed findings and deferred decisions.
+8. Stop when one canonical form remains.
 
-## TARGET — responsibility architecture
+<!-- DECISION: Do not introduce generic containers such as Core, Manager, Service, Helper, Utils, or Misc unless a concrete boundary is proven and documented. -->
 
-```text
-App
-  ↓
-Composition
-  ↓
-Runtime ───────── Capabilities
-  ↓                    ↓
-Kernel contracts     Modules / Skills / Tools
-  ↑
-Ports
-  ↑
-Providers / Memory / Storage / Device adapters
-```
+## Change Discipline
 
-The target further separates stable contracts from runtime orchestration and infrastructure responsibilities. Migration must prove each boundary before moving code.
+For every architecture task:
+`inspect -> confirm -> minimal change -> regression test -> full gate -> audit -> record -> handoff`
 
-## Layer responsibilities
-
-| Layer | Owns | Must not own |
-|---|---|---|
-| App | rendering, input, presentation | runtime orchestration, provider SDKs, persistence |
-| Composition | construction and wiring | business logic |
-| Runtime | execution, planning, observation, verification, lifecycle orchestration | persistence implementation, vendor details |
-| Kernel | stable contracts, identity, state, lifecycle contracts, events, ports and invariants | UI, concrete providers, infrastructure implementation |
-| Capabilities | Modules, Skills, Tools | provider internals |
-| Providers | provider contracts and remote/local adapters | UI and unrelated policy |
-| Memory | memory semantics, classification and retrieval | physical persistence mechanics |
-| Storage | durable persistence, sync, model/skill/config/cache storage | reasoning semantics |
-| Device | platform/device adapters and capability signals | agent policy |
-
-## Responsibility gaps to migrate
-
-These are audit candidates, not permission for speculative refactoring:
-
-1. Kernel coordination: identify which concrete coordination knowledge can move behind stable Kernel ports without changing behavior.
-2. Composition concentration: audit whether `LocalModelRuntimeCoordinator` belongs in Composition or a local-provider/runtime boundary.
-3. Provider boundary: verify routing, provider contract and vendor adapter separation.
-4. Memory/Storage: verify semantic memory is not coupled to physical persistence.
-5. ArchitectureManifest: verify declarations match the actual SwiftPM graph.
-
-## Quality bar
-
-A change is complete only when responsibility is singular, dependencies are explicit, vendor knowledge is isolated, contracts are testable, behavior is preserved unless intentionally changed, and relevant verification gates are green.
-
-## Historical milestone documentation
-
-Existing `Documentation/M4.md` through `M8.md` remain historical/contract evidence. This document is the architecture entry point and does not replace those milestone records.
+<!-- HANDOFF: If a task discovers an issue but does not fix it, record CONFIRMED / NOT CONFIRMED / DEFERRED. Never leave future workers to infer status from prose. -->

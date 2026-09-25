@@ -108,10 +108,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
 
         // 4. Kernel Coordination & Runtime
         let coordination = KernelCoordinationBoundary(
-            policy: policy,
-            provider: activeProvider,
-            modules: moduleRuntime,
-            memory: memoryRuntime
+            modules: moduleRuntime
         )
 
         let agentRuntime = try await AgentRuntime(

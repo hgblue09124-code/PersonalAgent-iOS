@@ -239,8 +239,10 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             let targetStatus = update.targetStatus
             if targetStatus == .completed {
                 try await complete(goalID: update.goalID)
-            } else if targetStatus == .aborted || targetStatus == .blocked {
+            } else if targetStatus == .aborted {
                 try await abort(goalID: update.goalID)
+            } else if targetStatus == .blocked {
+                try await suspend(goalID: update.goalID)
             } else if targetStatus == .active {
                 if goal.status == .blocked {
                     try await resumeGoal(goalID: update.goalID)
@@ -248,18 +250,11 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                     try await activate(goalID: update.goalID)
                 }
             } else {
-                guard let next = GoalMachine.nextStatus(goal.status, command: .suspend) else {
-                    let error = KernelError.invalidGoalTransition(
-                        goalID: update.goalID,
-                        from: goal.status,
-                        command: .suspend
-                    )
-                    try await emitRejection(command: "applyStateUpdate", error: error)
-                    throw error
-                }
-                var updatedGoal = goal
-                updatedGoal.status = next
-                goalStore[update.goalID] = updatedGoal
+                let error = KernelError.invalidStateUpdate(
+                    "Unsupported target status: \(targetStatus.rawValue)"
+                )
+                try await emitRejection(command: "applyStateUpdate", error: error)
+                throw error
             }
 
             var payload = update.evidence
@@ -324,7 +319,6 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
         if existing.status == .active {
             existing.status = .blocked
-            goalStore[id] = existing
             try await emit(
                 kind: .goalBlocked,
                 payload: [
@@ -335,6 +329,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                     "reason": "runtimeTerminal",
                 ]
             )
+            goalStore[id] = existing
         }
         activeGoalID = nil
     }
@@ -356,16 +351,22 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
         let previous = existing.status
         existing.status = next
+        do {
+            try await emit(
+                kind: GoalMachine.eventKind(for: command),
+                payload: [
+                    "goalID": id.rawValue,
+                    "from": previous.rawValue,
+                    "to": next.rawValue,
+                    "command": command.rawValue,
+                ]
+            )
+        } catch {
+            // Preserve state/event atomicity: a failed authoritative event append
+            // must not leave the in-memory goal transition committed.
+            throw error
+        }
         goalStore[id] = existing
-        try await emit(
-            kind: GoalMachine.eventKind(for: command),
-            payload: [
-                "goalID": id.rawValue,
-                "from": previous.rawValue,
-                "to": next.rawValue,
-                "command": command.rawValue,
-            ]
-        )
     }
 
     private func emitRejection(command: String, error: KernelError) async throws {

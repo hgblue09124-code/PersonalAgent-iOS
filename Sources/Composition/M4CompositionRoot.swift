@@ -120,9 +120,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
             eventLog: log,
             logger: logger,
             coordination: KernelCoordinationBoundary(
-                provider: provider,
-                modules: moduleRuntime,
-                memory: memoryRuntime
+                modules: moduleRuntime
             )
         )
     }
