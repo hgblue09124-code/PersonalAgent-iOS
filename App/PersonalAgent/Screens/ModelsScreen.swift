@@ -181,8 +181,8 @@ private struct ModelCatalogContent: View {
                 }
                 .disabled(session.isDownloadingModelPack)
 
-                ForEach(0..<session.remoteModels.count, id: \.self) { index in
-                    let model = session.remoteModels[index]
+                ForEach(session.remoteModels.map(\.id), id: \.self) { modelID in
+                    if let model = session.remoteModels.first(where: { $0.id == modelID })
                     Button {
                         Task { await session.downloadModel(model) }
                     } label: {
