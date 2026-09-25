@@ -518,7 +518,7 @@ extension M8CompositionRoot {
                     ),
                     ProviderMessage(role: .user, content: prompt)
                 ],
-                parameters: GenerationParameters(temperature: 0.7, maxOutputTokens: 512)
+                parameters: GenerationParameters(temperature: nil, maxOutputTokens: 512)
             )
         )
         let output = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
