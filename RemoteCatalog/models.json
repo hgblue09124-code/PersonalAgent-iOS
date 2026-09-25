@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "models": [
     {
-      "id": "smollm2-135m-bf16",
+      "id": "smollm2-135m-q4km",
       "name": "SmolLM2 135M",
-      "filename": "SmolLM2-135M-BF16.gguf",
+      "filename": "SmolLM2-135M-Instruct-Q4_K_M.gguf",
       "architecture": "smollm",
       "parameterCount": "135M",
-      "quantization": "BF16",
+      "quantization": "Q4_K_M",
       "contextWindow": 8192,
-      "sizeBytes": 271000000,
-      "sha256": "9d00c56fe60a70659db0d905dfec6b95ea52b8d5f3f8c9b1229448b04402e6bf",
-      "downloadURL": "https://huggingface.co/ggml-org/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M-BF16.gguf?download=true",
+      "sizeBytes": 105000000,
+      "sha256": "ed5fa30c487b282ec156c29062f1222e5c20875a944ac98289dbd242e947f747",
+      "downloadURL": "https://huggingface.co/unsloth/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct-Q4_K_M.gguf?download=true",
       "testPack": true
     },
     {
