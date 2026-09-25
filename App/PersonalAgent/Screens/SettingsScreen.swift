@@ -12,14 +12,7 @@ struct SettingsScreen: View {
         NavigationStack {
             Form {
                 if let error = session.lastError ?? lastImportError {
-                    Section {
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                            Text(error)
-                                .font(.footnote)
-                        }
-                        .foregroundStyle(.red)
-                    }
+                    ErrorSection(message: error)
                 }
 
                 Section("Agent") {
@@ -112,6 +105,22 @@ struct SettingsScreen: View {
             case .failure(let error):
                 lastImportError = error.localizedDescription
             }
+        }
+    }
+}
+
+private struct ErrorSection: View {
+    let message: String
+
+    var body: some View {
+        Section {
+            Label {
+                Text(message)
+                    .font(.footnote)
+            } icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+            }
+            .foregroundStyle(.red)
         }
     }
 }
