@@ -1,4 +1,5 @@
 import Foundation
+import PAKernel
 import PAFoundation
 
 /// Test and composition double. Not a live model. Behavior is scripted and deterministic.
