@@ -2,7 +2,7 @@ name: Auto Repair (Guarded)
 
 on:
   push:
-    branches: [rearch/kernel-migration-2]
+    branches: [rearch/kernel-migration-2, rearch/cognition-policy-runtime]
   workflow_dispatch:
     inputs:
       attempt:
@@ -123,6 +123,21 @@ jobs:
               package_text = re.sub(r'^\s*"PAAgency",\s*\n', "", package_text, flags=re.MULTILINE)
               package.write_text(package_text)
               repairs.append("Package.swift stale PAAgency dependency")
+
+          # R5: stale dependency referencing a removed SwiftPM target.
+          # Only acts when SwiftPM explicitly reports an unknown dependency and
+          # the named target is absent. Removes exact dependency entries only.
+          unknown_deps = sorted(set(re.findall(r"unknown dependency ['‘’\\\"]([^'‘’\\\"]+)['‘’\\\"] in target", log, re.I)))
+          for module in unknown_deps:
+              if not re.fullmatch(r"PA[A-Za-z0-9]+", module):
+                  continue
+              if re.search(rf'name:\s*"{re.escape(module)}"', package_text):
+                  continue
+              pattern = rf'^\\s*"{re.escape(module)}",\\s*$\\n?'
+              package_text, changed = re.subn(pattern, "", package_text, flags=re.MULTILINE)
+              if changed:
+                  package.write_text(package_text)
+                  repairs.append(f"remove stale SwiftPM dependency {module} ({changed} occurrence(s))")
 
           # R4: stale import of a removed module. This never substitutes a module.
           for module in sorted(set(re.findall(r"no such module ['‘’\"](PA[A-Za-z0-9]+)['‘’\"]", log, re.I))):
