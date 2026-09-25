@@ -20,21 +20,10 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
 
-    public var selectedProviderID: String {
-        catalog.identities.first?.id.rawValue ?? "none"
-    }
-
-    public func currentProviderIdentityID() async -> String {
-        await providerRuntime.identity.id.rawValue
-    }
-
-    public func currentProviderLifecycle() async -> String {
-        await providerRuntime.lifecycle.rawValue
-    }
-
-    public func registeredModuleIDs() async -> [String] {
-        await moduleCatalog.contracts().map(\.id.rawValue)
-    }
+    public var selectedProviderID: String { catalog.identities.first?.id.rawValue ?? "none" }
+    public func currentProviderIdentityID() async -> String { await providerRuntime.identity.id.rawValue }
+    public func currentProviderLifecycle() async -> String { await providerRuntime.lifecycle.rawValue }
+    public func registeredModuleIDs() async -> [String] { await moduleCatalog.contracts().map(.id.rawValue) }
 
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
@@ -48,11 +37,7 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = log
         self.catalog = ProviderCatalog(providers: [provider])
 
-        let providerRuntime = ProviderRuntime(
-            provider: provider,
-            eventLog: log,
-            logger: logger
-        )
+        let providerRuntime = ProviderRuntime(provider: provider, eventLog: log, logger: logger)
         let configuration = ProviderConfiguration(
             providerID: provider.identity.id,
             endpointURL: nil,
@@ -69,9 +54,7 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
         try await moduleCatalog.register(HangModule())
         try await moduleCatalog.register(FailingModule())
         try await moduleCatalog.register(ToolModule(tool: EchoTool()))
-        for module in additionalModules {
-            try await moduleCatalog.register(module)
-        }
+        for module in additionalModules { try await moduleCatalog.register(module) }
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
@@ -86,10 +69,7 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
             identity: identity,
             eventLog: log,
             logger: logger,
-            coordination: KernelCoordinationBoundary(
-                provider: provider,
-                modules: moduleRuntime
-            )
+            coordination: KernelCoordinationBoundary(modules: moduleRuntime)
         )
     }
 }
