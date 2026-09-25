@@ -112,7 +112,7 @@ struct ModelsScreen: View {
                     }
                 }
             }
-            .navigationTitle("Models")
+            .scrollContentBackground(.hidden)\n            .background(GlassScreenBackground())\n            .navigationTitle("Models")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
