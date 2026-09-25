@@ -6,9 +6,21 @@ Runtime owns the agent execution lifecycle: receiving work, planning where requi
 
 ## Current implementation
 
-At the green M8 baseline, the main `AgentRuntime` implementation is still part of the `PAKernel` SwiftPM target. The target architecture intends to separate runtime orchestration from the stable Kernel contract/port layer.
+`AgentRuntime` and `AgentSession` are implemented in the `PARuntime` SwiftPM target under `Sources/Runtime`. Composition constructs them and owns dependency wiring; Kernel remains the stable contract/state/port layer.
 
-Do not move `AgentRuntime` merely to satisfy folder aesthetics. First identify which responsibilities are runtime behavior and which are kernel contracts/invariants, then migrate incrementally.
+The runtime boundary is explicit in the package graph:
+
+```text
+App
+  ↓
+Composition
+  ↓
+PARuntime
+  ↓
+PAKernel
+```
+
+`PARuntime` may depend on the contracts it orchestrates, but application code must enter runtime through the session/runtime boundary rather than duplicating lifecycle or execution logic.
 
 ## Lifecycle
 
