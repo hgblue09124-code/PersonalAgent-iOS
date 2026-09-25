@@ -27,6 +27,33 @@ struct M1RegressionTests {
         #expect(await runtime.invariantsHold())
     }
 
+    @Test func terminalLifecycleDoesNotCommitGoalWhenEventAppendFails() async throws {
+        let log = FailingEventLog()
+        let runtime = try await AgentRuntime(
+            identity: AgentIdentity(id: AgentID(rawValue: "terminal.rollback"), displayName: "TerminalRollback"),
+            eventLog: log
+        )
+
+        let goal = Goal(id: GoalID(rawValue: "terminal.goal"), statement: "Stay active") 
+        try await runtime.submit(goal: goal)
+        try await runtime.start()
+        try await runtime.activate(goalID: goal.id)
+
+        await log.failNextAppend()
+        await #expect(throws: TestEventLogError.appendFailed) {
+            try await runtime.stop()
+        }
+
+        #expect(await runtime.goal(id: goal.id)?.status == .active)
+        #expect(await runtime.currentState().activeGoalID == goal.id)
+        #expect(await runtime.currentState().lifecycle == .running)
+        #expect(await runtime.invariantsHold())
+
+        let kinds = await log.kinds()
+        #expect(!kinds.contains(.goalBlocked))
+        #expect(!kinds.contains(.stopped))
+    }
+
     @Test func goalTransitionDoesNotCommitWhenEventAppendFails() async throws {
         let log = FailingEventLog()
         let runtime = try await AgentRuntime(
