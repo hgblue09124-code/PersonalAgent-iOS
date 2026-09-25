@@ -61,7 +61,7 @@ let package = Package(
         ),
         .target(
             name: "PAEvents",
-            dependencies: ["PAFoundation", "PAObservability"],
+            dependencies: ["PAKernel"],
             path: "Sources/Events"
         ),
         .target(
@@ -120,7 +120,7 @@ let package = Package(
         ),
         .target(
             name: "PAModules",
-            dependencies: ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
+            dependencies: ["PAKernel", "PAPolicy", "PAObservability", "PAEvents"],
             path: "Sources/Modules/Contracts"
         ),
         .target(
@@ -140,11 +140,7 @@ let package = Package(
         ),
         .target(
             name: "PAKernel",
-            dependencies: [
-                "PAFoundation",
-                "PAEvents",
-                "PAModules",
-            ],
+            dependencies: [],
             path: "Kernel"
         ),
         .target(
