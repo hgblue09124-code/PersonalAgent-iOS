@@ -36,7 +36,13 @@ struct SettingsScreen: View {
                 }
 
                 Section("Local AI") {
-                    ActiveModelSettingsRow(session: session)
+                    HStack {
+                        Label("Active Model", systemImage: "cube.box")
+                        Spacer()
+                        Text(session.activeModelDescriptor?.name ?? "None", verbatim: session.activeModelDescriptor?.name ?? "None")
+                            .foregroundStyle(Color.secondary)
+                            .lineLimit(1)
+                    }
 
                     Button {
                         isImportingGGUF = true
@@ -99,20 +105,6 @@ struct SettingsScreen: View {
             case .failure(let error):
                 lastImportError = error.localizedDescription
             }
-        }
-    }
-}
-
-private struct ActiveModelSettingsRow: View {
-    @ObservedObject var session: KernelSession
-
-    var body: some View {
-        HStack {
-            Label("Active Model", systemImage: "cube.box")
-            Spacer()
-            Text(verbatim: session.activeModelDescriptor?.name ?? "None")
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
         }
     }
 }
