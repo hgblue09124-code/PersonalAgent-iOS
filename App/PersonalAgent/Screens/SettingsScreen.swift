@@ -94,7 +94,7 @@ struct SettingsScreen: View {
                     }
                 }
             }
-            .navigationTitle("Settings")
+            .scrollContentBackground(.hidden)\n            .background(GlassScreenBackground())\n            .navigationTitle("Settings")
         }
         .fileImporter(
             isPresented: $isImportingGGUF,
