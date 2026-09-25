@@ -78,62 +78,7 @@ struct ModelsScreen: View {
                     }
                 }
 
-                Section("Model Catalog") {
-                    Button {
-                        Task { await session.updateModelCatalog() }
-                    } label: {
-                        Label(
-                            session.isUpdatingModelCatalog ? "Updating…" : "Update Models",
-                            systemImage: "arrow.clockwise"
-                        )
-                    }
-                    .disabled(session.isUpdatingModelCatalog || session.isDownloadingModelPack)
-
-                    if !session.remoteModels.isEmpty {
-                        Button {
-                            Task { await session.downloadTestPack() }
-                        } label: {
-                            Label(
-                                session.isDownloadingModelPack ? "Downloading Test Pack…" : "Download Test Pack",
-                                systemImage: "shippingbox"
-                            )
-                        }
-                        .disabled(session.isDownloadingModelPack)
-
-                        ForEach(session.remoteModels) { model in
-                            Button {
-                                Task { await session.downloadModel(model) }
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(model.name)
-                                        Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    if session.installedModels.contains(where: { $0.filename == model.filename }) {
-                                        Image(systemName: "checkmark.circle")
-                                            .foregroundStyle(.secondary)
-                                    } else {
-                                        Image(systemName: "arrow.down.circle")
-                                            .foregroundStyle(.tint)
-                                    }
-                                }
-                            }
-                            .disabled(session.isDownloadingModelPack)
-                        }
-                    }
-
-                    if let updated = session.modelCatalogUpdatedAt {
-                        Text("Updated \(updated.formatted(date: .omitted, time: .shortened))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    if session.isDownloadingModelPack {
-                        ProgressView(value: session.modelDownloadProgress)
-                    }
-                }
+                ModelCatalogSection(session: session)
 
                 if let errorMessage {
                     Section("Import Error") {
@@ -201,6 +146,65 @@ struct ModelsScreen: View {
         case .loaded: return "LOADED"
         case .unloading: return "UNLOADING"
         case .failed: return "FAILED"
+        }
+    }
+}
+
+
+private struct ModelCatalogSection: View {
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        Section("Model Catalog") {
+            Button {
+                Task { await session.updateModelCatalog() }
+            } label: {
+                Label(
+                    session.isUpdatingModelCatalog ? "Updating…" : "Update Models",
+                    systemImage: "arrow.clockwise"
+                )
+            }
+            .disabled(session.isUpdatingModelCatalog || session.isDownloadingModelPack)
+
+            if !session.remoteModels.isEmpty {
+                Button {
+                    Task { await session.downloadTestPack() }
+                } label: {
+                    Label(
+                        session.isDownloadingModelPack ? "Downloading Test Pack…" : "Download Test Pack",
+                        systemImage: "shippingbox"
+                    )
+                }
+                .disabled(session.isDownloadingModelPack)
+
+                ForEach(session.remoteModels) { model in
+                    Button {
+                        Task { await session.downloadModel(model) }
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(model.name)
+                                Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: session.installedModels.contains(where: { $0.filename == model.filename }) ? "checkmark.circle" : "arrow.down.circle")
+                                .foregroundStyle(session.installedModels.contains(where: { $0.filename == model.filename }) ? .secondary : .tint)
+                        }
+                    }
+                    .disabled(session.isDownloadingModelPack)
+                }
+            }
+
+            if let updated = session.modelCatalogUpdatedAt {
+                Text("Updated \\(updated.formatted(date: .omitted, time: .shortened))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if session.isDownloadingModelPack {
+                ProgressView(value: session.modelDownloadProgress)
+            }
         }
     }
 }
