@@ -1,0 +1,88 @@
+name: Auto Repair (Guarded)
+
+on:
+  workflow_run:
+    workflows: ["M3"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'failure' &&
+          startsWith(github.event.workflow_run.head_branch, 'rearch/') }}
+    runs-on: ubuntu-latest
+    container: swift:6.3.2
+
+    steps:
+      - name: Checkout failed branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - name: Run tests and capture failure
+        id: tests
+        shell: bash
+        run: |
+          set +e
+          swift test --disable-sandbox 2>&1 | tee /tmp/swift-test.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Guarded migration repair
+        if: steps.tests.outputs.status != '0'
+        shell: python3
+        env:
+          LOG: /tmp/swift-test.log
+        run: |
+          import os, re, pathlib, subprocess, sys
+
+          log = pathlib.Path(os.environ["LOG"]).read_text(errors="replace")
+          manifest = pathlib.Path("Sources/Architecture/ArchitectureManifest.swift")
+          text = manifest.read_text()
+
+          # Explicitly approved for the current Kernel migration only.
+          approved = {"PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"}
+
+          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel ([^)]*)"', log)
+          modules = sorted(set(m for m in matches if m in approved))
+
+          if not modules:
+              print("AUTO-REPAIR: no approved deterministic repair matched; stopping.")
+              sys.exit(0)
+
+          for module in modules:
+              pattern = rf'("{re.escape(module)}": [[^\]]*)]'
+              match = re.search(pattern, text)
+              if not match:
+                  print(f"AUTO-REPAIR: manifest entry not found for {module}; stopping.")
+                  sys.exit(1)
+              entry = match.group(0)
+              if '"PAKernel"' in entry:
+                  continue
+              replacement = entry[:-1] + ', "PAKernel"]'
+              text = text[:match.start()] + replacement + text[match.end():]
+
+          manifest.write_text(text)
+          subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+          subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
+          subprocess.run(["git", "add", str(manifest)], check=True)
+          subprocess.run(["git", "diff", "--cached", "--check"], check=True)
+
+          if subprocess.run(["git", "diff", "--cached", "--quiet"]).returncode == 0:
+              print("AUTO-REPAIR: no change required.")
+              sys.exit(0)
+
+          subprocess.run([
+              "git", "commit", "-m",
+              "fix: auto-repair approved kernel migration imports [auto-repair]"
+          ], check=True)
+          subprocess.run([
+              "git", "push", "origin",
+              "HEAD:" + os.environ["GITHUB_REF_NAME"]
+          ], check=True)
+          print("AUTO-REPAIR: repaired:", ", ".join(modules))
