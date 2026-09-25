@@ -545,7 +545,6 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
         return String(cString: resized)
     }
-    #endif
 
     private func getNativeHandles() -> (OpaquePointer, OpaquePointer, UnsafeMutablePointer<llama_sampler>)? {
         stateLock.withLock {
