@@ -45,7 +45,7 @@ struct ModelsScreen: View {
                         ContentUnavailableView(
                             "No Models",
                             systemImage: "cube.box",
-                            description: Text("Import a GGUF model or download the development model.")
+                            description: Text("Import a GGUF model or use Update Models.")
                         )
                     } else {
                         ForEach(session.installedModels, id: \.id) { model in
@@ -56,12 +56,9 @@ struct ModelsScreen: View {
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(model.name)
                                             .foregroundStyle(.primary)
-                                        Text(ByteCountFormatter.string(
-                                            fromByteCount: model.fileSizeBytes,
-                                            countStyle: .file
-                                        ))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                        Text(ByteCountFormatter.string(fromByteCount: model.fileSizeBytes, countStyle: .file))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
                                     }
                                     Spacer()
                                     if model.id == session.activeModelID {
@@ -81,19 +78,60 @@ struct ModelsScreen: View {
                     }
                 }
 
-                Section("Development") {
+                Section("Model Catalog") {
                     Button {
-                        Task { await session.downloadDevModel() }
+                        Task { await session.updateModelCatalog() }
                     } label: {
                         Label(
-                            session.isDownloadingDevModel ? "Downloading…" : "Download Small Dev Model",
-                            systemImage: "arrow.down.circle"
+                            session.isUpdatingModelCatalog ? "Updating…" : "Update Models",
+                            systemImage: "arrow.clockwise"
                         )
                     }
-                    .disabled(session.isDownloadingDevModel)
+                    .disabled(session.isUpdatingModelCatalog || session.isDownloadingModelPack)
 
-                    if session.isDownloadingDevModel {
-                        ProgressView(value: session.devModelDownloadProgress)
+                    if !session.remoteModels.isEmpty {
+                        Button {
+                            Task { await session.downloadTestPack() }
+                        } label: {
+                            Label(
+                                session.isDownloadingModelPack ? "Downloading Test Pack…" : "Download Test Pack",
+                                systemImage: "shippingbox"
+                            )
+                        }
+                        .disabled(session.isDownloadingModelPack)
+
+                        ForEach(session.remoteModels) { model in
+                            Button {
+                                Task { await session.downloadModel(model) }
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(model.name)
+                                        Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    if session.installedModels.contains(where: { $0.filename == model.filename }) {
+                                        Image(systemName: "checkmark.circle")
+                                            .foregroundStyle(.secondary)
+                                    } else {
+                                        Image(systemName: "arrow.down.circle")
+                                            .foregroundStyle(.tint)
+                                    }
+                                }
+                            }
+                            .disabled(session.isDownloadingModelPack)
+                        }
+                    }
+
+                    if let updated = session.modelCatalogUpdatedAt {
+                        Text("Updated \(updated.formatted(date: .omitted, time: .shortened))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if session.isDownloadingModelPack {
+                        ProgressView(value: session.modelDownloadProgress)
                     }
                 }
 
@@ -148,16 +186,11 @@ struct ModelsScreen: View {
 
     private var activeSubtitle: String {
         switch session.activeEngineState {
-        case .unloaded:
-            return "Selected · ready to load"
-        case .loading:
-            return "Loading local model…"
-        case .loaded:
-            return "Loaded · ready for local inference"
-        case .unloading:
-            return "Unloading local model…"
-        case .failed(let reason):
-            return "Failed · \(reason)"
+        case .unloaded: return "Selected · ready to load"
+        case .loading: return "Loading local model…"
+        case .loaded: return "Loaded · ready for local inference"
+        case .unloading: return "Unloading local model…"
+        case .failed(let reason): return "Failed · \(reason)"
         }
     }
 
