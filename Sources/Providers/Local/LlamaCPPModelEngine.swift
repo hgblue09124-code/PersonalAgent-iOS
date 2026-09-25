@@ -372,12 +372,13 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     // Decode the sampled token using llama.cpp's canonical
                     // single-token batch helper. This avoids manually touching
                     // optional seq_id storage on the native batch.
-                    var nextBatch = llama_batch_get_one(
-                        UnsafeMutablePointer<llama_token>(mutating: [nextToken]),
-                        1
-                    )
-                    let stepEval = llama_decode(contextPtr, nextBatch)
-                    llama_batch_free(nextBatch)
+                    var nextTokenBuffer = [nextToken]
+                    let stepEval = nextTokenBuffer.withUnsafeMutableBufferPointer { buffer in
+                        var nextBatch = llama_batch_get_one(buffer.baseAddress, 1)
+                        let result = llama_decode(contextPtr, nextBatch)
+                        llama_batch_free(nextBatch)
+                        return result
+                    }
                     guard stepEval == 0 else {
                         throw LlamaCPPEngineError.evalFailed(stepEval)
                     }
