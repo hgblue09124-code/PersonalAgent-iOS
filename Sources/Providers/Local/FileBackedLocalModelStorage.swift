@@ -69,10 +69,6 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             }
         }
 
-        guard fileManager.fileExists(atPath: sourceURL.path) else {
-            throw LocalModelStorageError.fileNotFound(sourceURL)
-        }
-
         // Files.app / iCloud / other File Provider URLs may require coordinated
         // reads before the bytes are available to the app. Keep the security-scoped
         // access alive for the complete coordinated import operation.
