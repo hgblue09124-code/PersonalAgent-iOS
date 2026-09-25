@@ -82,6 +82,7 @@
 				A20000000000000000000001 /* PersonalAgentApp.swift */,
 				A20000000000000000000002 /* RootView.swift */,
 				A2000000000000000000000C /* KernelSession.swift */,
+				A20000000000000000000010 /* RemoteModelCatalog.swift */,
 				A50000000000000000000004 /* Screens */,
 				A2000000000000000000000B /* Assets.xcassets */,
 			);
