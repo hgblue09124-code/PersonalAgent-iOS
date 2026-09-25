@@ -8,6 +8,8 @@ struct ModelsScreen: View {
     @State private var isImporting = false
     @State private var errorMessage: String?
 
+    private var remoteModels: [RemoteModel] { session.remoteModels }
+
     var body: some View {
         NavigationStack {
             List {
@@ -181,7 +183,7 @@ private struct ModelCatalogContent: View {
                 }
                 .disabled(session.isDownloadingModelPack)
 
-                ForEach(session.remoteModels) { model in
+                ForEach(remoteModels) { model in
                     Button {
                         Task { await session.downloadModel(model) }
                     } label: {
