@@ -181,7 +181,7 @@ private struct ModelCatalogContent: View {
                 }
                 .disabled(session.isDownloadingModelPack)
 
-                ForEach(session.remoteModels) { model in
+                ForEach(session.remoteModels, id: \.id) { model in
                     Button {
                         Task { await session.downloadModel(model) }
                     } label: {
