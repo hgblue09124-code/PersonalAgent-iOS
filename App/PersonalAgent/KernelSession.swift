@@ -1,5 +1,4 @@
 import Foundation
-import CryptoKit
 import SwiftUI
 import PAFoundation
 import PAKernel
@@ -14,17 +13,27 @@ final class KernelSession: ObservableObject {
     @Published var goals: [Goal]
     @Published var lastError: String?
     @Published var providerID: String
+    @Published var providerRoute: ProviderRoute
     @Published var providerLifecycle: String
+    @Published var providerConnectionState: String
+    @Published var providerModels: [ModelIdentity]
+    @Published var selectedProviderModelID: ModelID?
     @Published var moduleIDs: [String]
 
     @Published var installedModels: [LocalModelDescriptor]
     @Published var activeModelID: ModelID?
     @Published var activeModelDescriptor: LocalModelDescriptor?
     @Published var activeEngineState: LocalModelLifecycleState
-    @Published var isDownloadingDevModel = false
-    @Published var devModelDownloadProgress: Double = 0
+    @Published var remoteModels: [RemoteModel] = []
+    @Published var isUpdatingModelCatalog = false
+    @Published var isDownloadingModelPack = false
+    @Published var modelCatalogUpdatedAt: Date?
+    @Published var modelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionTrace: [AgentExecutionProgress] = []
     @Published var executionResult: String?
+    @Published var chatPhase: String?
+    private var lastSubmittedTask: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -32,12 +41,17 @@ final class KernelSession: ObservableObject {
         self.goals = []
         self.lastError = nil
         self.providerID = composition.selectedProviderID
+        self.providerRoute = .remote
         self.providerLifecycle = "unknown"
+        self.providerConnectionState = "Not tested"
+        self.providerModels = []
+        self.selectedProviderModelID = nil
         self.moduleIDs = []
         self.installedModels = []
         self.activeModelID = nil
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
+        self.chatPhase = nil
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -45,8 +59,14 @@ final class KernelSession: ObservableObject {
     func refresh() async {
         state = await composition.session.currentState()
         goals = await composition.session.activeGoals()
+        providerRoute = await composition.selectedProviderRoute()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
+        if providerConnectionState == "Not tested" || providerConnectionState == "Connected" {
+            providerConnectionState = await hasProviderAPIKey() ? providerConnectionState : "Not configured"
+        }
+        providerModels = await composition.availableProviderModels()
+        selectedProviderModelID = await composition.selectedProviderModelID()
         moduleIDs = await composition.registeredModuleIDs()
 
         let storage = composition.localModelStorage
@@ -73,13 +93,155 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    func updateModelCatalog() async {
+        guard !isUpdatingModelCatalog else { return }
+        isUpdatingModelCatalog = true
+        lastError = nil
+        defer { isUpdatingModelCatalog = false }
+
+        do {
+            let catalog = try await RemoteModelCatalogClient.fetch()
+            remoteModels = catalog.models
+            modelCatalogUpdatedAt = Date()
+        } catch {
+            lastError = "Model catalog update failed: \(error.localizedDescription)"
+        }
+    }
+
+    func downloadModel(_ model: RemoteModel) async {
+        guard !isDownloadingModelPack else { return }
+        isDownloadingModelPack = true
+        modelDownloadProgress = 0
+        lastError = nil
+        defer { isDownloadingModelPack = false }
+
+        do {
+            let temporaryURL = try await RemoteModelCatalogClient.download(model)
+            defer { try? FileManager.default.removeItem(at: temporaryURL) }
+            _ = try await composition.localModelStorage.importModel(from: temporaryURL, name: model.name)
+            modelDownloadProgress = 1
+            await refresh()
+        } catch {
+            lastError = "Model download failed: \(error.localizedDescription)"
+        }
+    }
+
+    func downloadTestPack() async {
+        guard !isDownloadingModelPack else { return }
+        let models = remoteModels.filter(\.testPack)
+        guard !models.isEmpty else {
+            lastError = "Update the model catalog first."
+            return
+        }
+
+        isDownloadingModelPack = true
+        modelDownloadProgress = 0
+        lastError = nil
+        defer { isDownloadingModelPack = false }
+
+        do {
+            for (index, model) in models.enumerated() {
+                let temporaryURL = try await RemoteModelCatalogClient.download(model)
+                defer { try? FileManager.default.removeItem(at: temporaryURL) }
+                _ = try await composition.localModelStorage.importModel(from: temporaryURL, name: model.name)
+                modelDownloadProgress = Double(index + 1) / Double(models.count)
+            }
+            await refresh()
+        } catch {
+            lastError = "Test pack failed: \(error.localizedDescription)"
+        }
+    }
+
+    func testProviderConnection() async {
+        providerConnectionState = "Testing…"
+        do {
+            let models = try await composition.testProviderConnection()
+            providerModels = models
+            selectedProviderModelID = await composition.selectedProviderModelID()
+            providerConnectionState = models.isEmpty ? "Failed: no models" : "Connected"
+            lastError = nil
+        } catch {
+            providerConnectionState = "Connection failed"
+            lastError = "Provider connection failed: \(error.localizedDescription)"
+        }
+    }
+
+    func sendChat(_ message: String) async -> String? {
+        chatPhase = "Received"
+        do {
+            chatPhase = "Preparing context"
+            chatPhase = "Generating"
+            let response = try await composition.chat(message)
+            chatPhase = "Response ready"
+            lastError = nil
+            return response
+        } catch {
+            chatPhase = "Generation failed"
+            lastError = "Agent chat failed: \(error.localizedDescription)"
+            return nil
+        }
+    }
+
+    func selectProviderRoute(_ route: ProviderRoute) async {
+        await composition.selectProviderRoute(route)
+        providerRoute = route
+        providerConnectionState = "Not tested"
+        lastError = nil
+        await refresh()
+    }
+
+    func refreshProviderModels() async {
+        providerModels = await composition.availableProviderModels()
+        selectedProviderModelID = await composition.selectedProviderModelID()
+    }
+
+    func selectProviderModel(id: ModelID?) async {
+        await composition.selectProviderModel(id: id)
+        selectedProviderModelID = id
+    }
+
+    func configureProviderAPIKey(_ apiKey: String) async {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            lastError = "Provider API key cannot be empty."
+            return
+        }
+        do {
+            try composition.secretStore.store(account: "openai-api-key", secret: Data(trimmed.utf8))
+            lastError = nil
+        } catch {
+            lastError = "Could not save provider API key securely."
+        }
+        await refresh()
+    }
+
+    func removeProviderAPIKey() async {
+        do {
+            try composition.secretStore.delete(account: "openai-api-key")
+            lastError = nil
+            providerConnectionState = "Not configured"
+        } catch {
+            lastError = "Could not remove provider API key."
+        }
+        await refresh()
+    }
+
+    func hasProviderAPIKey() async -> Bool {
+        do {
+            guard let data = try composition.secretStore.load(account: "openai-api-key") else { return false }
+            return !data.isEmpty
+        } catch { return false }
+    }
+
     func start() async { await run { try await composition.session.start() } }
     func pause() async { await run { try await composition.session.pause() } }
     func resume() async { await run { try await composition.session.resume() } }
     func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
+        lastSubmittedTask = statement
         executionProgress = nil
+        executionTrace = []
         executionResult = nil
         await run {
             let goalID = try await composition.session.submitInput(statement)
@@ -87,94 +249,44 @@ final class KernelSession: ObservableObject {
             _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
                 Task { @MainActor in
                     self?.executionProgress = progress
-                    if case .completed(let result) = progress {
-                        self?.executionResult = result
-                    }
+                    self?.executionTrace.append(progress)
+                    if case .completed(let result) = progress { self?.executionResult = result }
                 }
             }
         }
     }
 
-    func downloadDevModel() async {
-        guard !isDownloadingDevModel else { return }
-        isDownloadingDevModel = true
-        devModelDownloadProgress = 0
+    func retryTask() async {
+        guard let statement = lastSubmittedTask else { return }
+        await submitGoal(statement)
+    }
+
+    func resetTask() {
+        lastSubmittedTask = nil
+        executionProgress = nil
+        executionTrace = []
+        executionResult = nil
         lastError = nil
-        defer { isDownloadingDevModel = false }
-
-        let urlString = "https://huggingface.co/ggml-org/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M-BF16.gguf?download=true"
-        let expectedSHA256 = "9d00c56fe60a70659db0d905dfec6b95ea52b8d5f3f8c9b1229448b04402e6bf"
-        let maximumBytes: Int64 = 350 * 1024 * 1024
-
-        do {
-            guard let remoteURL = URL(string: urlString) else { throw DevModelDownloadError.invalidURL }
-            let (temporaryURL, response) = try await URLSession.shared.download(from: remoteURL)
-            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-                throw DevModelDownloadError.httpStatus(http.statusCode)
-            }
-
-            let size = try FileManager.default.attributesOfItem(atPath: temporaryURL.path)[.size] as? Int64 ?? 0
-            guard size > 0, size <= maximumBytes else {
-                throw DevModelDownloadError.invalidSize(size)
-            }
-
-            let digest = try Self.sha256(of: temporaryURL)
-            guard digest == expectedSHA256 else {
-                throw DevModelDownloadError.checksumMismatch(expected: expectedSHA256, actual: digest)
-            }
-
-            _ = try await composition.localModelStorage.importModel(
-                from: temporaryURL,
-                name: "SmolLM2-135M (Dev)"
-            )
-            try? FileManager.default.removeItem(at: temporaryURL)
-            devModelDownloadProgress = 1
-            await refresh()
-        } catch {
-            lastError = String(describing: error)
-        }
     }
 
     func importModel(from url: URL, name: String? = nil) async {
-        await run {
-            _ = try await composition.localModelStorage.importModel(from: url, name: name)
-        }
+        await run { _ = try await composition.localModelStorage.importModel(from: url, name: name) }
     }
 
     func selectActiveModel(id: ModelID?) async {
-        await run {
-            try await composition.setActiveLocalModel(id: id)
-        }
+        await run { try await composition.setActiveLocalModel(id: id) }
     }
 
     func loadActiveModel(options: LocalModelLoadingOptions? = nil) async {
-        await run {
-            _ = try await composition.loadActiveLocalModel(options: options)
-        }
+        await run { _ = try await composition.loadActiveLocalModel(options: options) }
     }
 
     func unloadActiveModel() async {
-        await run {
-            try await composition.unloadActiveLocalModel()
-        }
+        await run { try await composition.unloadActiveLocalModel() }
     }
 
     func deleteModel(id: ModelID) async {
-        await run {
-            try await composition.deleteLocalModel(id: id)
-        }
-    }
-
-    private static func sha256(of url: URL) throws -> String {
-        let handle = try FileHandle(forReadingFrom: url)
-        defer { try? handle.close() }
-        var hasher = SHA256()
-        while true {
-            let data = try handle.read(upToCount: 1024 * 1024) ?? Data()
-            if data.isEmpty { break }
-            hasher.update(data: data)
-        }
-        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+        await run { try await composition.deleteLocalModel(id: id) }
     }
 
     private func run(_ operation: () async throws -> Void) async {
@@ -185,25 +297,5 @@ final class KernelSession: ObservableObject {
             lastError = String(describing: error)
         }
         await refresh()
-    }
-}
-
-private enum DevModelDownloadError: LocalizedError {
-    case invalidURL
-    case httpStatus(Int)
-    case invalidSize(Int64)
-    case checksumMismatch(expected: String, actual: String)
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidURL:
-            return "Dev model URL is invalid."
-        case .httpStatus(let status):
-            return "Dev model download failed with HTTP (status)."
-        case .invalidSize(let size):
-            return "Dev model size is invalid: (size) bytes."
-        case .checksumMismatch(let expected, let actual):
-            return "Dev model SHA-256 mismatch. Expected (expected), got (actual)."
-        }
     }
 }

@@ -94,7 +94,8 @@ struct M9RealProviderSliceTests {
         #expect(json["model"] as? String == "grok-3")
         #expect((json["messages"] as? [[String: Any]])?.first?["content"] as? String == "Hello Grok")
         #expect(json["temperature"] as? Double == 0.7)
-        #expect(json["max_tokens"] as? Int == 100)
+        #expect(json["max_completion_tokens"] as? Int == 100)
+        #expect(json["max_tokens"] == nil)
     }
 
     // MARK: - P3: Successful provider response crosses application boundary

@@ -45,7 +45,7 @@ struct ModelsScreen: View {
                         ContentUnavailableView(
                             "No Models",
                             systemImage: "cube.box",
-                            description: Text("Import a GGUF model or download the development model.")
+                            description: Text("Import a GGUF model or use Update Models.")
                         )
                     } else {
                         ForEach(session.installedModels, id: \.id) { model in
@@ -56,12 +56,9 @@ struct ModelsScreen: View {
                                     VStack(alignment: .leading, spacing: 3) {
                                         Text(model.name)
                                             .foregroundStyle(.primary)
-                                        Text(ByteCountFormatter.string(
-                                            fromByteCount: model.fileSizeBytes,
-                                            countStyle: .file
-                                        ))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                        Text(ByteCountFormatter.string(fromByteCount: model.fileSizeBytes, countStyle: .file))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
                                     }
                                     Spacer()
                                     if model.id == session.activeModelID {
@@ -81,20 +78,10 @@ struct ModelsScreen: View {
                     }
                 }
 
-                Section("Development") {
-                    Button {
-                        Task { await session.downloadDevModel() }
-                    } label: {
-                        Label(
-                            session.isDownloadingDevModel ? "Downloading…" : "Download Small Dev Model",
-                            systemImage: "arrow.down.circle"
-                        )
-                    }
-                    .disabled(session.isDownloadingDevModel)
-
-                    if session.isDownloadingDevModel {
-                        ProgressView(value: session.devModelDownloadProgress)
-                    }
+                Section {
+                    ModelCatalogContent(session: session)
+                } header: {
+                    Text("Model Catalog")
                 }
 
                 if let errorMessage {
@@ -103,7 +90,17 @@ struct ModelsScreen: View {
                             .foregroundStyle(.red)
                     }
                 }
+
+                if let sessionError = session.lastError {
+                    Section("Model Error") {
+                        Text(sessionError)
+                            .foregroundStyle(.red)
+                            .textSelection(.enabled)
+                    }
+                }
             }
+            .scrollContentBackground(.hidden)
+            .background(GlassScreenBackground())
             .navigationTitle("Models")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -118,14 +115,16 @@ struct ModelsScreen: View {
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [
-                UTType(filenameExtension: "gguf") ?? .data
-            ],
+            allowedContentTypes: [.data],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
                 guard let url = urls.first else { return }
+                guard url.pathExtension.lowercased() == "gguf" else {
+                    errorMessage = "Please select a .gguf model file."
+                    return
+                }
                 errorMessage = nil
                 Task { await session.importModel(from: url) }
             case .failure(let error):
@@ -136,16 +135,11 @@ struct ModelsScreen: View {
 
     private var activeSubtitle: String {
         switch session.activeEngineState {
-        case .unloaded:
-            return "Selected · ready to load"
-        case .loading:
-            return "Loading local model…"
-        case .loaded:
-            return "Loaded · ready for local inference"
-        case .unloading:
-            return "Unloading local model…"
-        case .failed(let reason):
-            return "Failed · \(reason)"
+        case .unloaded: return "Selected · ready to load"
+        case .loading: return "Loading local model…"
+        case .loaded: return "Loaded · ready for local inference"
+        case .unloading: return "Unloading local model…"
+        case .failed(let reason): return "Failed · \(reason)"
         }
     }
 
@@ -156,6 +150,91 @@ struct ModelsScreen: View {
         case .loaded: return "LOADED"
         case .unloading: return "UNLOADING"
         case .failed: return "FAILED"
+        }
+    }
+}
+
+
+private struct RemoteModelRows: View {
+    let models: [RemoteModel]
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        ForEach(models) { model in
+            Button {
+                Task { await session.downloadModel(model) }
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(model.name)
+                        Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: session.installedModels.contains(where: { $0.filename == model.filename }) ? "checkmark.circle" : "arrow.down.circle")
+                        .foregroundStyle(session.installedModels.contains(where: { $0.filename == model.filename }) ? .secondary : .tint)
+                }
+            }
+            .disabled(session.isDownloadingModelPack)
+        }
+    }
+}
+
+private struct ModelCatalogContent: View {
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Button {
+                Task { await session.updateModelCatalog() }
+            } label: {
+                Label(
+                    session.isUpdatingModelCatalog ? "Updating…" : "Update Models",
+                    systemImage: "arrow.clockwise"
+                )
+            }
+            .disabled(session.isUpdatingModelCatalog || session.isDownloadingModelPack)
+
+            if !session.remoteModels.isEmpty {
+                Button {
+                    Task { await session.downloadTestPack() }
+                } label: {
+                    Label(
+                        session.isDownloadingModelPack ? "Downloading Test Pack…" : "Download Test Pack",
+                        systemImage: "shippingbox"
+                    )
+                }
+                .disabled(session.isDownloadingModelPack)
+
+                RemoteModelRows(models: session.remoteModels, session: session)
+                    Button {
+                        Task { await session.downloadModel(model) }
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(model.name)
+                                Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: session.installedModels.contains(where: { $0.filename == model.filename }) ? "checkmark.circle" : "arrow.down.circle")
+                                .foregroundStyle(session.installedModels.contains(where: { $0.filename == model.filename }) ? .secondary : .tint)
+                        }
+                    }
+                    .disabled(session.isDownloadingModelPack)
+                }
+            }
+
+            if let updated = session.modelCatalogUpdatedAt {
+                Text(updated.formatted(date: .omitted, time: .shortened))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if session.isDownloadingModelPack {
+                ProgressView(value: session.modelDownloadProgress)
+            }
         }
     }
 }

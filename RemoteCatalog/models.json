@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "id": "smollm2-135m-q4km",
+      "name": "SmolLM2 135M",
+      "filename": "SmolLM2-135M-Instruct-Q4_K_M.gguf",
+      "architecture": "smollm",
+      "parameterCount": "135M",
+      "quantization": "Q4_K_M",
+      "contextWindow": 8192,
+      "sizeBytes": 105000000,
+      "sha256": "ed5fa30c487b282ec156c29062f1222e5c20875a944ac98289dbd242e947f747",
+      "downloadURL": "https://huggingface.co/unsloth/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct-Q4_K_M.gguf?download=true",
+      "testPack": true
+    },
+    {
+      "id": "qwen2.5-0.5b-instruct-q4km",
+      "name": "Qwen2.5 0.5B Instruct",
+      "filename": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "architecture": "qwen2",
+      "parameterCount": "0.49B",
+      "quantization": "Q4_K_M",
+      "contextWindow": 32768,
+      "sizeBytes": 491400032,
+      "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+      "downloadURL": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf?download=true",
+      "testPack": true
+    }
+  ]
+}
