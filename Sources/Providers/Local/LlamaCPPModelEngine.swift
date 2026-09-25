@@ -146,8 +146,19 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             throw LlamaCPPEngineError.nativeContextCreationFailed
         }
 
-        // Configure greedy sampler by default in the chain
-        llama_sampler_chain_add(samplerPtr, llama_sampler_init_greedy())
+        // Use the request's sampling policy. Greedy-only decoding was causing
+        // deterministic repetition and ignored the provider temperature contract.
+        // Keep a bounded default temperature for normal chat, and add a light
+        // repetition penalty before temperature sampling.
+        let temperature = min(max(options.temperature ?? 0.7, 0.05), 2.0)
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_penalties(64, 1.10, 0.0, 0.0)
+        )
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_temp(Float(temperature))
+        )
 
         setLifecycleState(.loading(progress: 0.95))
 
