@@ -53,6 +53,7 @@ public struct ActionID: Hashable, Sendable, Codable, RawRepresentable {
 public struct PlanID: Hashable, Sendable, Codable, RawRepresentable {
     public let rawValue: String
     public init(rawValue: String) { self.rawValue = rawValue }
+    public init() { self.rawValue = UUID().uuidString }
 }
 public struct RunID: Hashable, Sendable, Codable, RawRepresentable {
     public let rawValue: String
