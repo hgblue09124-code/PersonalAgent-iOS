@@ -15,6 +15,7 @@ final class KernelSession: ObservableObject {
     @Published var lastError: String?
     @Published var providerID: String
     @Published var providerLifecycle: String
+    @Published var providerConnectionState: String
     @Published var providerModels: [ModelIdentity]
     @Published var selectedProviderModelID: ModelID?
     @Published var moduleIDs: [String]
@@ -37,6 +38,7 @@ final class KernelSession: ObservableObject {
         self.lastError = nil
         self.providerID = composition.selectedProviderID
         self.providerLifecycle = "unknown"
+        self.providerConnectionState = "Not tested"
         self.providerModels = []
         self.selectedProviderModelID = nil
         self.moduleIDs = []
@@ -53,6 +55,9 @@ final class KernelSession: ObservableObject {
         goals = await composition.session.activeGoals()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
+        if providerConnectionState == "Not tested" || providerConnectionState == "Connected" {
+            providerConnectionState = await hasProviderAPIKey() ? providerConnectionState : "Not configured"
+        }
         providerModels = await composition.availableProviderModels()
         selectedProviderModelID = await composition.selectedProviderModelID()
         moduleIDs = await composition.registeredModuleIDs()
@@ -78,6 +83,31 @@ final class KernelSession: ObservableObject {
         } catch {
             activeEngineState = .failed(reason: error.localizedDescription)
             lastError = String(describing: error)
+        }
+    }
+
+    func testProviderConnection() async {
+        providerConnectionState = "Testing…"
+        do {
+            let models = try await composition.testProviderConnection()
+            providerModels = models
+            selectedProviderModelID = await composition.selectedProviderModelID()
+            providerConnectionState = models.isEmpty ? "Failed: no models" : "Connected"
+            lastError = nil
+        } catch {
+            providerConnectionState = "Connection failed"
+            lastError = "Provider connection failed: \\(error.localizedDescription)"
+        }
+    }
+
+    func sendChat(_ message: String) async -> String? {
+        do {
+            let response = try await composition.chat(message)
+            lastError = nil
+            return response
+        } catch {
+            lastError = "Agent chat failed: \\(error.localizedDescription)"
+            return nil
         }
     }
 
@@ -113,6 +143,7 @@ final class KernelSession: ObservableObject {
         do {
             try composition.secretStore.delete(account: "openai-api-key")
             lastError = nil
+            providerConnectionState = "Not configured"
         } catch {
             lastError = "Could not remove provider API key."
         }
