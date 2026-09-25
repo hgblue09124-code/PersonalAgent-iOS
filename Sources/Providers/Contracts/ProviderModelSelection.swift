@@ -1,4 +1,5 @@
 import Foundation
+import PAFoundation
 
 /// Actor-isolated model selection for the active remote provider.
 /// The selected model is runtime state, not a credential and never enters AgentState.
