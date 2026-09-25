@@ -46,7 +46,7 @@ public enum ChatCompletionsCodec: Sendable {
             return try decodeSuccess(body: response.body)
         }
         let message = providerErrorMessage(from: response.body)
-        throw ProviderRuntimeError.httpFailure(statusCode: response.statusCode, message: message)
+        throw ProviderRuntimeError.transport("HTTP \(response.statusCode): \(message)")
     }
 
     private static func providerErrorMessage(from body: Data) -> String {
