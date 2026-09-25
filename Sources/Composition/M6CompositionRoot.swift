@@ -12,7 +12,7 @@ import PATools
 import PAMemory
 import PAPolicy
 import PACognition
-import PAAgency
+import PARuntime
 
 /// Canonical M6 Composition Root wiring M6Orchestrator, AgentRuntime, Subsystem Runtimes, and Events.
 /// Production composition uses clean explicit dependency injection without test-fixture pollution.

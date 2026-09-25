@@ -30,7 +30,6 @@ let package = Package(
         .library(name: "PASkills", targets: ["PASkills"]),
         .library(name: "PAPolicy", targets: ["PAPolicy"]),
         .library(name: "PACognition", targets: ["PACognition"]),
-        .library(name: "PAAgency", targets: ["PAAgency"]),
         .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
@@ -134,10 +133,6 @@ let package = Package(
             path: "Sources/Core/Cognition"
         ),
         .target(
-            name: "PAAgency",
-            dependencies: ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
-            path: "Sources/Core/Agency"
-        ),
         .target(
             name: "PAKernel",
             dependencies: [],
@@ -154,10 +149,9 @@ let package = Package(
                 "PAMemory",
                 "PACognition",
                 "PAPolicy",
-                "PAAgency",
                 "PAKernel",
             ],
-            path: "Sources/Runtime"
+            path: "Runtime"
         ),
         .target(
             name: "PAComposition",

@@ -12,7 +12,7 @@ import PATools
 import PAMemory
 import PAPolicy
 import PACognition
-import PAAgency
+import PARuntime
 
 /// Canonical M7 Composition Root wiring Durable Run Lifecycle, ExecutionBoundary,
 /// RunLifecycleManager, RunRecoveryEngine, Stores, and IdempotentEventLog.
