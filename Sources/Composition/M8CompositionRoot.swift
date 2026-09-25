@@ -515,7 +515,7 @@ extension M8CompositionRoot {
             )
         )
         let output = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !output.isEmpty else { throw ProviderRuntimeError.emptyOutput }
+        guard !output.isEmpty else { throw ProviderRuntimeError.providerFailure }
         return output
     }
 
