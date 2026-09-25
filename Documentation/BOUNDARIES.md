@@ -16,7 +16,7 @@
 
 ## Current implementation caveat
 
-The current M8 graph does not yet implement this target as separate SwiftPM layers. `PAKernel` currently contains the AgentRuntime boundary and imports Cognition, Agency, Providers, Memory and Modules. `PAComposition` also owns significant local-model lifecycle and product wiring.
+The current M8 graph now separates `PARuntime` from `PAKernel`, with `AgentRuntime` owned by `PARuntime`. `PAKernel` still imports Cognition, Agency, Providers, Memory and Modules, so it is not yet a minimal contract-only core. `PAComposition` also owns significant local-model lifecycle and product wiring.
 
 These are **architecture gaps to audit**, not confirmed bugs.
 
