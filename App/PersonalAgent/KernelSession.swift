@@ -106,7 +106,7 @@ final class KernelSession: ObservableObject {
             lastError = nil
             return response
         } catch {
-            lastError = "Agent chat failed: \\(error.localizedDescription)"
+            lastError = "Agent chat failed: \(error.localizedDescription)"
             return nil
         }
     }
@@ -301,11 +301,11 @@ private enum DevModelDownloadError: LocalizedError {
         case .invalidURL:
             return "Dev model URL is invalid."
         case .httpStatus(let status):
-            return "Dev model download failed with HTTP (status)."
+            return "Dev model download failed with HTTP \(status)."
         case .invalidSize(let size):
-            return "Dev model size is invalid: (size) bytes."
+            return "Dev model size is invalid: \(size) bytes."
         case .checksumMismatch(let expected, let actual):
-            return "Dev model SHA-256 mismatch. Expected (expected), got (actual)."
+            return "Dev model SHA-256 mismatch. Expected \(expected), got \(actual)."
         }
     }
 }
