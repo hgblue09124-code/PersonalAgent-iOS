@@ -6,8 +6,6 @@ import PAArchitecture
 import PAKernel
 import PAObservability
 import PAEvents
-import PAPolicy
-import PACognition
 import PAModules
 import PASkills
 import PATools
