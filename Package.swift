@@ -28,8 +28,6 @@ let package = Package(
         .library(name: "PATools", targets: ["PATools"]),
         .library(name: "PAModules", targets: ["PAModules"]),
         .library(name: "PASkills", targets: ["PASkills"]),
-        .library(name: "PAPolicy", targets: ["PAPolicy"]),
-        .library(name: "PACognition", targets: ["PACognition"]),
         .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
@@ -108,13 +106,8 @@ let package = Package(
             path: "Sources/Providers/Local"
         ),
         .target(
-            name: "PAPolicy",
-            dependencies: ["PAFoundation", "PAKernel"],
-            path: "Sources/Core/Policy"
-        ),
-        .target(
             name: "PATools",
-            dependencies: ["PAFoundation", "PAPolicy", "PAObservability"],
+            dependencies: ["PAFoundation", "PAObservability"],
             path: "Sources/Tools/Contracts"
         ),
         .target(
@@ -126,11 +119,6 @@ let package = Package(
             name: "PASkills",
             dependencies: ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
             path: "Sources/Skills/Contracts"
-        ),
-        .target(
-            name: "PACognition",
-            dependencies: ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
-            path: "Sources/Core/Cognition"
         ),
         .target(
             name: "PAKernel",
@@ -146,9 +134,7 @@ let package = Package(
                 "PAProviders",
                 "PAModules",
                 "PAMemory",
-                "PACognition",
-                "PAPolicy",
-                "PAKernel",
+                                                "PAKernel",
             ],
             path: "Runtime"
         ),
