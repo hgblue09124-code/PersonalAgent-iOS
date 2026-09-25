@@ -42,7 +42,7 @@ struct SettingsScreen: View {
                     }
                 }
 
-                Section("Local AI") {
+                Section {
                     HStack {
                         Label("Active Model", systemImage: "cube.box")
                         Spacer()
@@ -54,7 +54,10 @@ struct SettingsScreen: View {
                     Button {
                         isImportingGGUF = true
                     } label: {
-                        Label("Import GGUF", systemImage: "square.and.arrow.down")
+                        HStack(spacing: 8) {
+                            Image(systemName: "square.and.arrow.down")
+                            Text("Import GGUF")
+                        }
                     }
 
                     Button {
@@ -67,7 +70,9 @@ struct SettingsScreen: View {
                     }
                     .disabled(session.isDownloadingDevModel)
                 }
-
+ header: {
+                    Text("Local AI")
+                }
                 Section("System") {
                     HStack {
                         Label("Storage", systemImage: "externaldrive")
