@@ -14,6 +14,7 @@ final class KernelSession: ObservableObject {
     @Published var goals: [Goal]
     @Published var lastError: String?
     @Published var providerID: String
+    @Published var providerRoute: ProviderRoute
     @Published var providerLifecycle: String
     @Published var providerConnectionState: String
     @Published var providerModels: [ModelIdentity]
@@ -38,6 +39,7 @@ final class KernelSession: ObservableObject {
         self.goals = []
         self.lastError = nil
         self.providerID = composition.selectedProviderID
+        self.providerRoute = .remote
         self.providerLifecycle = "unknown"
         self.providerConnectionState = "Not tested"
         self.providerModels = []
@@ -55,6 +57,7 @@ final class KernelSession: ObservableObject {
     func refresh() async {
         state = await composition.session.currentState()
         goals = await composition.session.activeGoals()
+        providerRoute = await composition.selectedProviderRoute()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
         if providerConnectionState == "Not tested" || providerConnectionState == "Connected" {
@@ -116,6 +119,14 @@ final class KernelSession: ObservableObject {
             lastError = "Agent chat failed: \(error.localizedDescription)"
             return nil
         }
+    }
+
+    func selectProviderRoute(_ route: ProviderRoute) async {
+        await composition.selectProviderRoute(route)
+        providerRoute = route
+        providerConnectionState = "Not tested"
+        lastError = nil
+        await refresh()
     }
 
     func refreshProviderModels() async {
