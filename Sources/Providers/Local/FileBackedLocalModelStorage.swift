@@ -148,6 +148,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     }
 
     private func coordinatedRead<T>(_ sourceURL: URL, _ operation: (URL) throws -> T) throws -> T {
+        #if os(iOS) || os(macOS) || os(tvOS) || os(watchOS) || os(visionOS)
         let coordinator = NSFileCoordinator(filePresenter: nil)
         var result: Result<T, Error>?
         var coordinationError: Error?
@@ -165,6 +166,11 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             throw LocalModelStorageError.copyFailed("File Provider returned no readable file URL.")
         }
         return try result.get()
+        #else
+        // NSFileCoordinator is Apple-platform API. Package tests run on
+        // non-Apple hosts, where direct file access is the correct equivalent.
+        return try operation(sourceURL)
+        #endif
     }
 
     public func listModels() async throws -> [LocalModelDescriptor] {
