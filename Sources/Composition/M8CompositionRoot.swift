@@ -357,7 +357,6 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         }
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: selectableProvider,
-            fallbackProvider: fallbackProvider,
             coordinator: coordinator
         )
         self.catalog = ProviderCatalog(providers: [dynamicProvider])
