@@ -8,8 +8,6 @@ struct ModelsScreen: View {
     @State private var isImporting = false
     @State private var errorMessage: String?
 
-    private var remoteModels: [RemoteModel] { session.remoteModels }
-
     var body: some View {
         NavigationStack {
             List {
@@ -157,6 +155,32 @@ struct ModelsScreen: View {
 }
 
 
+private struct RemoteModelRows: View {
+    let models: [RemoteModel]
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        ForEach(models) { model in
+            Button {
+                Task { await session.downloadModel(model) }
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(model.name)
+                        Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: session.installedModels.contains(where: { $0.filename == model.filename }) ? "checkmark.circle" : "arrow.down.circle")
+                        .foregroundStyle(session.installedModels.contains(where: { $0.filename == model.filename }) ? .secondary : .tint)
+                }
+            }
+            .disabled(session.isDownloadingModelPack)
+        }
+    }
+}
+
 private struct ModelCatalogContent: View {
     @ObservedObject var session: KernelSession
 
@@ -183,7 +207,7 @@ private struct ModelCatalogContent: View {
                 }
                 .disabled(session.isDownloadingModelPack)
 
-                ForEach(remoteModels) { model in
+                RemoteModelRows(models: session.remoteModels, session: session)
                     Button {
                         Task { await session.downloadModel(model) }
                     } label: {
@@ -204,7 +228,7 @@ private struct ModelCatalogContent: View {
             }
 
             if let updated = session.modelCatalogUpdatedAt {
-                Text("Updated (updated.formatted(date: .omitted, time: .shortened))")
+                Text(updated.formatted(date: .omitted, time: .shortened))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
