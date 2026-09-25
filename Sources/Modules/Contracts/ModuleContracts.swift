@@ -84,7 +84,7 @@ public enum ModuleRuntimeError: Error, Sendable, Equatable, CustomStringConverti
         case .missingDependency(let module, let missing):
             return "missingDependency:\(module.rawValue)->\(missing.rawValue)"
         case .dependencyCycle(let ids):
-            return "dependencyCycle:\(ids.map(\\.rawValue).joined(separator: ","))"
+            return "dependencyCycle:\(ids.map { $0.rawValue }.joined(separator: ","))"
         }
     }
 }
