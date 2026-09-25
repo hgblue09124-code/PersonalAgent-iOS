@@ -234,7 +234,9 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
                 let memory = await self.deviceCapabilityProvider.memoryPressure
                 if memory == .critical {
-                    _ = try? await self.unload()
+                    // The generation task owns the native pointers for its lifetime.
+                    // Do not release them from inside this task; the caller can unload
+                    // after the task has terminated.
                     throw LlamaCPPEngineError.memoryPressureCritical
                 }
 
