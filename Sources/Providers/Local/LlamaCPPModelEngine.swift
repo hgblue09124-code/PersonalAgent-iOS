@@ -276,12 +276,6 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
                 // 3. Generation loop
                 let configuredMaxTokens = self.stateLock.withLock { self.activeOptions?.maxTokens ?? 512 }
-                let loadedContextWindow = self.stateLock.withLock { self.activeOptions?.contextWindow ?? 8192 }
-                let modelContextLimit = self.parsedMetadata?.contextLength.flatMap { Int(exactly: $0) }
-                let effectiveContextWindow = min(loadedContextWindow, modelContextLimit ?? loadedContextWindow)
-                guard promptTokens.count < effectiveContextWindow else {
-                    throw LlamaCPPEngineError.evalFailed(-2)
-                }
                 let maxTokens = min(request.maxTokens ?? configuredMaxTokens, effectiveGenerationCapacity(contextWindow: effectiveContextWindow, promptTokenCount: promptTokens.count))
                 var currentPos = Int32(promptTokens.count)
                 var generatedCount = 0
