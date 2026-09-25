@@ -70,7 +70,7 @@ jobs:
         env:
           LOG: /tmp/swift-test.log
         run: |
-          import os, re, pathlib, subprocess, sys
+          import os, re, pathlib, subprocess, sys, hashlib
 
           log = pathlib.Path(os.environ["LOG"]).read_text(errors="replace")
           manifest = pathlib.Path("Sources/Architecture/ArchitectureManifest.swift")
@@ -78,6 +78,22 @@ jobs:
           manifest_text = manifest.read_text()
           package_text = package.read_text()
           repairs = []
+
+          # Fingerprint the compiler failure. If the exact fingerprint was already
+          # repaired recently, STOP instead of repeating the same loop.
+          fingerprints = []
+          for m in re.finditer(r"no such module ['\u2018\u2019\"]([^'\u2018\u2019\"]+)['\u2018\u2019\"]", log, re.I):
+              fingerprints.append("no-such-module:" + m.group(1))
+          for m in re.finditer(r"error: (.+)", log):
+              msg = re.sub(r"\\s+", " ", m.group(1)).strip()
+              if msg:
+                  fingerprints.append("error:" + msg[:240])
+          fingerprint = hashlib.sha256("|".join(sorted(set(fingerprints))).encode()).hexdigest()[:12] if fingerprints else ""
+          if fingerprint:
+              recent = subprocess.run(["git", "log", "-10", "--format=%s"], capture_output=True, text=True, check=True).stdout
+              if f"[auto-repair-fp:{fingerprint}]" in recent:
+                  print(f"AUTO-REPAIR: repeated identical failure {fingerprint}; STOP.")
+                  sys.exit(0)
 
           # R1: duplicated consecutive .target( in Package.swift.
           duplicate = re.search(r'(\.target\(\s*)\.target\(', package_text)
@@ -91,6 +107,26 @@ jobs:
               package_text = re.sub(r'^\s*"PAAgency",\s*\n', '', package_text, flags=re.MULTILINE)
               package.write_text(package_text)
               repairs.append("Package.swift stale PAAgency dependency")
+
+          # R4: stale import of a removed module. Safe only when the module
+          # target is already absent from Package.swift. Never substitute another
+          # module; remove the obsolete import and let compilation prove the result.
+          for module in sorted(set(re.findall(r"no such module ['\u2018\u2019\"](PA[A-Za-z0-9]+)['\u2018\u2019\"]", log, re.I))):
+              if re.search(rf'name:\s*"{re.escape(module)}"', package_text):
+                  continue
+              changed = 0
+              for root in ("Sources", "Runtime", "Kernel", "Capabilities", "Providers", "Memory", "Storage", "Composition", "App", "Tests"):
+                  base = pathlib.Path(root)
+                  if not base.exists():
+                      continue
+                  for path in base.rglob("*.swift"):
+                      text = path.read_text(errors="replace")
+                      new_text, count = re.subn(rf'^\s*import\s+{re.escape(module)}\s*$\n?', '', text, flags=re.MULTILINE)
+                      if count:
+                          path.write_text(new_text)
+                          changed += count
+              if changed:
+                  repairs.append(f"remove stale import {module} ({changed} file(s))")
 
           # R3: known deterministic Kernel import-boundary allowlist.
           approved = {"PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"}
@@ -113,9 +149,9 @@ jobs:
           manifest.write_text(manifest_text)
           subprocess.run(["git","config","user.name","github-actions[bot]"],check=True)
           subprocess.run(["git","config","user.email","41898282+github-actions[bot]@users.noreply.github.com"],check=True)
-          subprocess.run(["git","add","Package.swift","Sources/Architecture/ArchitectureManifest.swift"],check=True)
+          subprocess.run(["git","add","-A"],check=True)
           subprocess.run(["git","diff","--cached","--check"],check=True)
-          print("AUTO-REPAIR: DETERMINISTIC: " + " | ".join(repairs))
+          if fingerprint:\n              pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(f"fingerprint={fingerprint}\\n")\n          print("AUTO-REPAIR: DETERMINISTIC: " + " | ".join(repairs))
 
       - name: Regression test repaired tree
         id: regression
@@ -153,7 +189,7 @@ jobs:
         run: |
           set -euo pipefail
           git diff --cached --quiet && { echo "AUTO-REPAIR: no staged change; STOP."; exit 0; }
-          git commit -m "fix: auto-repair approved migration mechanics [auto-repair]"
+          git commit -m "fix: auto-repair approved migration mechanics [auto-repair] [auto-repair-fp:${{ steps.repair.outputs.fingerprint }}]"
           git push origin "HEAD:$GITHUB_REF_NAME"
 
       - name: Dispatch next guarded repair cycle
