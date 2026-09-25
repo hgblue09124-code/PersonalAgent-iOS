@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import PAFoundation
 @testable import PAProviders
 
 @Suite("Provider model selection")
