@@ -23,7 +23,7 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
     public var selectedProviderID: String { catalog.identities.first?.id.rawValue ?? "none" }
     public func currentProviderIdentityID() async -> String { await providerRuntime.identity.id.rawValue }
     public func currentProviderLifecycle() async -> String { await providerRuntime.lifecycle.rawValue }
-    public func registeredModuleIDs() async -> [String] { await moduleCatalog.contracts().map(.id.rawValue) }
+    public func registeredModuleIDs() async -> [String] { await moduleCatalog.contracts().map { $0.id.rawValue } }
 
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
