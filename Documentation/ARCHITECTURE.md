@@ -27,7 +27,7 @@ PAKernel
   ├── PAProviders
   └── PAEvents / PAObservability / PAPolicy
 
-Composition additionally wires Providers / Local / Memory / Modules / Skills / Tools / Storage / Security.
+Composition additionally wires Providers / Local / Memory / Modules / Skills / Tools / Storage / Security / Policy / Cognition / Agency.
 ```
 
 This is the **current implementation**, not the target. In particular, current `PAKernel` contains the AgentRuntime boundary while depending on several domain modules, and `M8CompositionRoot` contains local-model lifecycle coordination and product wiring.
