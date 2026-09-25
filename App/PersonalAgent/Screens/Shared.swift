@@ -2,6 +2,28 @@ import SwiftUI
 import PAArchitecture
 import PAFoundation
 
+struct GlassScreenBackground: View {
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemBackground)
+
+            Circle()
+                .fill(Color.accentColor.opacity(0.055))
+                .frame(width: 230, height: 230)
+                .blur(radius: 65)
+                .offset(x: 150, y: -300)
+
+            Circle()
+                .fill(Color.secondary.opacity(0.035))
+                .frame(width: 210, height: 210)
+                .blur(radius: 70)
+                .offset(x: -145, y: 300)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+    }
+}
+
 struct ScreenScaffold<Content: View>: View {
     let title: String
     let systemImage: String
@@ -17,6 +39,7 @@ struct ScreenScaffold<Content: View>: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 16)
             }
+            .background(GlassScreenBackground())
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.large)
         }
