@@ -42,7 +42,7 @@ struct SettingsScreen: View {
                     }
                 }
 
-                Section {
+                Section(content: {
                     HStack {
                         Label("Active Model", systemImage: "cube.box")
                         Spacer()
@@ -69,9 +69,9 @@ struct SettingsScreen: View {
                         )
                     }
                     .disabled(session.isDownloadingDevModel)
-                } header: {
+                }, header: {
                     Text("Local AI")
-                }
+                })
                 Section("System") {
                     HStack {
                         Label("Storage", systemImage: "externaldrive")
