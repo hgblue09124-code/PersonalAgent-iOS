@@ -4,7 +4,6 @@ import PAFoundation
 import PAEvents
 import PAKernel
 import PARuntime
-import PACognition
 
 @Suite("M1 regression guards")
 struct M1RegressionTests {
