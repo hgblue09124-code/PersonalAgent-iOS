@@ -6,7 +6,9 @@ import PAArchitecture
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImportingGGUF = false
+    @State private var isImportingAnyFile = false
     @State private var lastImportError: String?
+    @State private var universalImportStatus: String?
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gear") {
@@ -134,6 +136,28 @@ struct SettingsScreen: View {
             .padding(14)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
 
+            // MARK: - Developer Diagnostics: Universal File Import Probe
+            #if DEBUG
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Developer Diagnostics", systemImage: "ladybug")
+                    .font(.headline)
+                Button {
+                    isImportingAnyFile = true
+                } label: {
+                    Label("Import Any File", systemImage: "doc.badge.plus")
+                }
+                .buttonStyle(.bordered)
+
+                if let universalImportStatus {
+                    Text(universalImportStatus)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(14)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+            #endif
+
             // MARK: - Capabilities Section: Providers
             VStack(alignment: .leading, spacing: 8) {
                 Label("Providers", systemImage: "server.rack")
@@ -187,6 +211,31 @@ struct SettingsScreen: View {
             .padding(14)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
         }
+        #if DEBUG
+        .fileImporter(
+            isPresented: $isImportingAnyFile,
+            allowedContentTypes: [.item],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let selectedURL = urls.first else { return }
+                let isAccessing = selectedURL.startAccessingSecurityScopedResource()
+                let readable = FileManager.default.isReadableFile(atPath: selectedURL.path)
+                universalImportStatus = "URL received: \(selectedURL.lastPathComponent) · access=\(isAccessing) · readable=\(readable)"
+                Task {
+                    defer {
+                        if isAccessing {
+                            selectedURL.stopAccessingSecurityScopedResource()
+                        }
+                    }
+                    await session.importModel(from: selectedURL)
+                }
+            case .failure(let error):
+                universalImportStatus = "Picker failed: \(error.localizedDescription)"
+            }
+        }
+        #endif
         .fileImporter(
             isPresented: $isImportingGGUF,
             allowedContentTypes: [
