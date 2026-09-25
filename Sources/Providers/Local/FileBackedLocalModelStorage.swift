@@ -151,7 +151,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         #if os(iOS) || os(macOS) || os(tvOS) || os(watchOS) || os(visionOS)
         let coordinator = NSFileCoordinator(filePresenter: nil)
         var result: Result<T, Error>?
-        var coordinationError: Error?
+        var coordinationError: NSError?
         coordinator.coordinate(readingItemAt: sourceURL, options: [], error: &coordinationError) { readableURL in
             do {
                 result = .success(try operation(readableURL))
