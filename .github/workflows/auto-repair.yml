@@ -44,8 +44,8 @@ jobs:
             echo "Invalid repair attempt: $attempt"
             exit 1
           fi
-          if [ "$attempt" -ge 3 ]; then
-            echo "AUTO-REPAIR: loop guard reached (3 attempts); STOP."
+          if [ "$attempt" -ge 5 ]; then
+            echo "AUTO-REPAIR: loop guard reached (5 attempts); STOP."
             echo "### Auto Repair\n- Result: STOP\n- Reason: loop guard reached" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
@@ -85,6 +85,138 @@ jobs:
           log = pathlib.Path(os.environ["LOG"]).read_text(errors="replace")
           manifest = pathlib.Path("Sources/Architecture/ArchitectureManifest.swift")
           text = manifest.read_text()
+
+          # v2 allowlist: only deterministic migration mechanics are repairable.
+          # Unknown or semantic failures STOP; architecture decisions stay human-owned.
+          repairs = []
+
+          duplicate = re.search(r'(\.target\(\s*)\.target\(', text)
+          if duplicate:
+              text = text[:duplicate.start()] + duplicate.group(1) + text[duplicate.end()-len('.target('):]
+              repairs.append('Package.swift duplicate .target declaration')
+
+          if 'name: "PAAgency"' not in text and re.search(r'^\s*"PAAgency",\s*          approved = {
+              "PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"
+          }
+
+          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel ([^)]*\)"', log)
+          modules = sorted(set(m for m in matches if m in approved))
+
+          for module in modules:
+              pattern = rf'("{re.escape(module)}": \\[[^\\]]*)\\]'
+              match = re.search(pattern, text)
+              if not match:
+                  print(f"AUTO-REPAIR: manifest entry not found for {module}; STOP.")
+                  sys.exit(1)
+              entry = match.group(0)
+              if '"PAKernel"' not in entry:
+                  text = text[:match.start()] + entry[:-1] + ', "PAKernel"]' + text[match.end():]
+                  repairs.append(f'ArchitectureManifest allowedImports -> PAKernel ({module})')
+
+          if not repairs:
+              print("AUTO-REPAIR: classifier=UNKNOWN; no approved deterministic repair. STOP.")
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+                  out.write("### Auto Repair\\n- Classifier: UNKNOWN\\n- Result: STOP\\n")
+              sys.exit(0)
+
+          changed = repairs
+
+          manifest.write_text(text)
+          subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+          subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
+          subprocess.run(["git", "add", str(manifest)], check=True)
+          subprocess.run(["git", "diff", "--cached", "--check"], check=True)
+
+          print("AUTO-REPAIR: classifier=DETERMINISTIC")
+          print("AUTO-REPAIR: patch modules=", ",".join(changed))
+          print("AUTO_REPAIR_MODULES=" + ",".join(changed))
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+              out.write("### Auto Repair\\n")
+              out.write("- Classifier: DETERMINISTIC\\n")
+              out.write("- Repair: ArchitectureManifest allowedImports -> PAKernel\\n")
+              out.write("- Modules: " + ", ".join(changed) + "\\n")
+
+      - name: Regression test repaired tree
+        id: regression
+        if: steps.tests.outputs.status != '0' && steps.repair.outcome == 'success'
+        shell: bash
+        run: |
+          set +e
+          swift test --disable-sandbox 2>&1 | tee /tmp/regression.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "AUTO-REPAIR: regression test RED; refusing to commit."
+            {
+              echo "### Auto Repair"
+              echo "- Regression test: RED"
+              echo "- Action: STOP"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit "$status"
+          fi
+          echo "AUTO-REPAIR: regression test GREEN."
+
+      - name: Verify canonical tree and package graph
+        id: verify
+        if: steps.regression.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift package dump-package >/tmp/package.json
+          test -d Kernel
+          test -d Runtime/Agent
+          test -d Runtime/Execution
+          test -d Runtime/Planning
+          test -d Runtime/Observation
+          test -d Runtime/Verification
+          test -d Runtime/Result
+          ! grep -R 'Sources/Core/Agency' -n Sources Runtime Tests Documentation 2>/dev/null
+          ! grep -R 'PAAgency' -n Package.swift Tests Sources Runtime 2>/dev/null
+          git diff --check
+          echo "AUTO-REPAIR: canonical verification GREEN."
+
+      - name: Commit minimal repair
+        id: commit
+        if: steps.regression.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then
+            echo "AUTO-REPAIR: no staged change; STOP."
+            exit 0
+          fi
+          git commit -m "fix: auto-repair approved kernel migration imports [auto-repair]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          echo "AUTO-REPAIR: repair committed."
+
+      - name: Dispatch next guarded repair cycle
+        if: steps.commit.outcome == 'success'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ATTEMPT: ${{ steps.loop.outputs.attempt }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          next_attempt=$((ATTEMPT + 1))
+          if [ "$next_attempt" -ge 5 ]; then
+            echo "AUTO-REPAIR: max repair cycles reached after this patch; STOP."
+            exit 0
+          fi
+
+          curl --fail-with-body \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${REPO}/actions/workflows/auto-repair.yml/dispatches" \
+            -d "{"ref":"${REF}","inputs":{"attempt":"${next_attempt}"}}"
+
+          echo "AUTO-REPAIR: dispatched guarded cycle $next_attempt."
+, text, re.MULTILINE):
+              text = re.sub(r'^\s*"PAAgency",\s*\n', '', text, flags=re.MULTILINE)
+              repairs.append('Package.swift stale PAAgency dependency')
 
           # v1 allowlist: deterministic Kernel-migration import-boundary mismatch only.
           approved = {
@@ -178,7 +310,7 @@ jobs:
         run: |
           set -euo pipefail
           next_attempt=$((ATTEMPT + 1))
-          if [ "$next_attempt" -ge 3 ]; then
+          if [ "$next_attempt" -ge 5 ]; then
             echo "AUTO-REPAIR: max repair cycles reached after this patch; STOP."
             exit 0
           fi
