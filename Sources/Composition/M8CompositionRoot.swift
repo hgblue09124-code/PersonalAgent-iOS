@@ -533,7 +533,16 @@ extension M8CompositionRoot {
         } catch {
             return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
         }
-        return discovered.isEmpty ? (catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]) : discovered
+
+        guard !discovered.isEmpty else {
+            return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
+        }
+
+        let selected = await providerModelSelection.selectedModel()
+        if selected == nil || !discovered.contains(where: { $0.id == selected }) {
+            await providerModelSelection.select(discovered[0].id)
+        }
+        return discovered
     }
 
     public func selectedProviderModelID() async -> ModelID? {
