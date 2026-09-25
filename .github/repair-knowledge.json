@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "policy": {
+    "approved_rules_are_allowlisted_only": true,
+    "candidates_are_observational_only": true,
+    "automatic_rule_creation": false,
+    "automatic_rule_promotion": false,
+    "repeated_failure": "stop"
+  },
+  "approved": [
+    {
+      "id": "r1-package-duplicate-target",
+      "fingerprint": "derived-from-log",
+      "trigger": "consecutive .target( declarations in Package.swift",
+      "action": "remove one duplicated declaration only",
+      "risk": "low",
+      "regression_required": true
+    },
+    {
+      "id": "r2-stale-paagency-dependency",
+      "fingerprint": "derived-from-log",
+      "trigger": "PAAgency dependency remains after PAAgency target removal",
+      "action": "remove stale dependency entry only",
+      "risk": "low",
+      "regression_required": true
+    },
+    {
+      "id": "r3-kernel-import-manifest-allowlist",
+      "fingerprint": "derived-from-log",
+      "trigger": "approved module imports PAKernel but manifest omits PAKernel",
+      "action": "add PAKernel to existing allowlist entry",
+      "risk": "low",
+      "regression_required": true
+    },
+    {
+      "id": "r4-stale-removed-module-import",
+      "fingerprint": "derived-from-log",
+      "trigger": "no such module PA* and target is absent from Package.swift",
+      "action": "remove exact stale import; never substitute another module",
+      "risk": "low",
+      "regression_required": true
+    }
+  ],
+  "candidates": []
+}
