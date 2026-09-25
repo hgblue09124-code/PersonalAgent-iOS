@@ -39,7 +39,7 @@ struct SettingsScreen: View {
                     HStack {
                         Label("Active Model", systemImage: "cube.box")
                         Spacer()
-                        Text(session.activeModelDescriptor?.name ?? "None", verbatim: session.activeModelDescriptor?.name ?? "None")
+                        Text(verbatim: session.activeModelDescriptor?.name ?? "None")
                             .foregroundStyle(Color.secondary)
                             .lineLimit(1)
                     }
