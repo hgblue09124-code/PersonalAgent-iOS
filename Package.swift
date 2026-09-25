@@ -173,6 +173,7 @@ let package = Package(
                 "PAFoundation",
                 "PAArchitecture",
                 "PAKernel",
+                "PARuntime",
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
