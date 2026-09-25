@@ -4,21 +4,57 @@ import PAKernel
 struct AgentScreen: View {
     @ObservedObject var session: KernelSession
     @State private var task = ""
+    @State private var messages: [ChatMessage] = []
+    @State private var isSending = false
     @FocusState private var taskFocused: Bool
+
+    private struct ChatMessage: Identifiable {
+        let id = UUID()
+        let role: Role
+        let text: String
+
+        enum Role {
+            case user
+            case agent
+        }
+    }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    hero
-                    taskComposer
-                    execution
-                    if let error = session.lastError {
-                        errorView(error)
+            VStack(spacing: 0) {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 14) {
+                        if messages.isEmpty {
+                            hero
+                        } else {
+                            ForEach(messages) { message in
+                                messageBubble(message)
+                            }
+                        }
+
+                        if isSending {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("Agent is responding…")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.horizontal, 4)
+                        }
+
+                        if session.executionProgress != nil || session.executionResult != nil {
+                            execution
+                        }
+
+                        if let error = session.lastError {
+                            errorView(error)
+                        }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .scrollDismissesKeyboard(.interactively)
+
+                taskComposer
             }
             .navigationTitle("Agent")
             .toolbar {
@@ -30,134 +66,107 @@ struct AgentScreen: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(greeting)
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Hi, I'm your Agent.")
                 .font(.largeTitle.bold())
                 .tracking(-0.5)
-            Text("Tell me what you want to get done.")
+            Text("Ask anything or give me a task.")
                 .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 20)
+    }
+
+    private func messageBubble(_ message: ChatMessage) -> some View {
+        HStack {
+            if message.role == .agent { Spacer(minLength: 40) }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(message.role == .user ? "You" : "Agent")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Text(message.text)
+                    .textSelection(.enabled)
+            }
+            .padding(12)
+            .background(
+                message.role == .user
+                    ? AnyShapeStyle(Color.accentColor.opacity(0.12))
+                    : AnyShapeStyle(.thinMaterial),
+                in: RoundedRectangle(cornerRadius: 16)
+            )
+            .frame(maxWidth: 340, alignment: .leading)
+
+            if message.role == .user { Spacer(minLength: 40) }
         }
     }
 
     private var taskComposer: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            TextField("Ask Agent to do something…", text: $task, axis: .vertical)
-                .textFieldStyle(.plain)
-                .lineLimit(3...6)
+        HStack(alignment: .bottom, spacing: 10) {
+            TextField("Message Agent…", text: $task, axis: .vertical)
+                .textFieldStyle(.roundedBorder)
+                .lineLimit(1...6)
                 .focused($taskFocused)
                 .submitLabel(.send)
-                .onSubmit(runTask)
+                .onSubmit(sendMessage)
 
-            HStack {
-                Text("The Agent will use available capabilities.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Button(action: runTask) {
-                    Image(systemName: "arrow.up")
-                        .font(.headline.bold())
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.borderedProminent)
-                .clipShape(Circle())
-                .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .accessibilityLabel("Run Agent")
+            Button(action: sendMessage) {
+                Image(systemName: "arrow.up")
+                    .font(.headline.bold())
+                    .frame(width: 34, height: 34)
             }
+            .buttonStyle(.borderedProminent)
+            .clipShape(Circle())
+            .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending)
+            .accessibilityLabel("Send message")
         }
-        .padding(16)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.bar)
     }
 
     @ViewBuilder
     private var execution: some View {
-        if session.executionResult != nil || session.executionProgress != nil {
-            executionSession
-        } else {
-            emptyActivity
-        }
-    }
-
-    private var emptyActivity: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Ready", systemImage: "checkmark.circle")
-                .font(.headline)
-            Text("Give the Agent a task to begin.")
-                .foregroundStyle(.secondary)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.secondary.opacity(0.06), in: RoundedRectangle(cornerRadius: 18))
-    }
-
-    private var executionSession: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            if !session.executionTrace.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(session.executionTrace.enumerated()), id: \.offset) { index, step in
-                        executionTraceRow(step, isLast: index == session.executionTrace.count - 1)
-                    }
+        DisclosureGroup("Agent activity") {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(session.executionTrace.enumerated()), id: \.offset) { index, step in
+                    executionTraceRow(step, isLast: index == session.executionTrace.count - 1)
                 }
-            }
 
-            if let result = session.executionResult {
-                Divider()
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Result", systemImage: "checkmark.circle.fill")
-                        .font(.headline)
+                if let result = session.executionResult {
+                    Divider().padding(.vertical, 8)
                     Text(result)
-                        .textSelection(.enabled)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
             }
-
-            if session.executionResult != nil || session.lastError != nil {
-                HStack {
-                    Button("New Task", action: resetTask)
-                        .buttonStyle(.bordered)
-                    Button("Retry", action: retryTask)
-                        .buttonStyle(.borderedProminent)
-                }
-            }
+            .padding(.top, 6)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .font(.subheadline)
+        .padding(12)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func executionTraceRow(_ step: AgentExecutionProgress, isLast: Bool) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(spacing: 0) {
-                Image(systemName: stepIcon(step))
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 20, height: 20)
-                if !isLast {
-                    Rectangle()
-                        .fill(.quaternary)
-                        .frame(width: 1)
-                        .frame(minHeight: 24)
-                }
-            }
-            VStack(alignment: .leading, spacing: 3) {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: stepIcon(step))
+                .frame(width: 18, height: 18)
+
+            VStack(alignment: .leading, spacing: 2) {
                 Text(step.title)
-                    .font(.subheadline.weight(.semibold))
-                Text(safeDetail(for: step))
-                    .font(.footnote)
+                    .font(.footnote.weight(.semibold))
+                Text(step.detail)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                if step == session.executionProgress {
-                    ProgressView()
-                        .controlSize(.small)
-                        .padding(.top, 3)
-                }
             }
-            .padding(.bottom, isLast ? 0 : 12)
-        }
-    }
 
-    private func safeDetail(for step: AgentExecutionProgress) -> String {
-        if case .reasoningCompleted = step {
-            return "Reasoning completed."
+            if step == session.executionProgress {
+                ProgressView()
+                    .controlSize(.mini)
+            }
         }
-        return step.detail
+        .padding(.vertical, isLast ? 4 : 7)
     }
 
     private func stepIcon(_ step: AgentExecutionProgress) -> String {
@@ -188,29 +197,23 @@ struct AgentScreen: View {
         .accessibilityLabel("Agent runtime controls")
     }
 
-    private var greeting: String {
-        switch session.state.lifecycle.rawValue.lowercased() {
-        case "running": return "I'm working."
-        case "paused": return "I'm paused."
-        case "stopped": return "Ready when you are."
-        default: return "What can I do for you?"
-        }
-    }
-
-    private func runTask() {
+    private func sendMessage() {
         let statement = task.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !statement.isEmpty else { return }
-        taskFocused = false
+        guard !statement.isEmpty, !isSending else { return }
         task = ""
-        Task { await session.submitGoal(statement) }
-    }
+        taskFocused = false
+        messages.append(ChatMessage(role: .user, text: statement))
+        isSending = true
 
-    private func retryTask() {
-        Task { await session.retryTask() }
-    }
-
-    private func resetTask() {
-        session.resetTask()
+        Task {
+            let response = await session.sendChat(statement)
+            await MainActor.run {
+                if let response {
+                    messages.append(ChatMessage(role: .agent, text: response))
+                }
+                isSending = false
+            }
+        }
     }
 
     private func errorView(_ message: String) -> some View {
@@ -220,7 +223,7 @@ struct AgentScreen: View {
             Image(systemName: "exclamationmark.triangle.fill")
         }
         .foregroundStyle(.red)
-        .padding(14)
+        .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
     }
