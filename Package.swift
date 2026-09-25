@@ -149,8 +149,7 @@ let package = Package(
                 "PAEvents",
                 "PAProviders",
                 "PAProvidersLocal",
-                "PAPolicy",
-                "PACognition",
+
                 "PASecurity",
                 "PAModules",
                 "PASkills",
@@ -181,8 +180,7 @@ let package = Package(
                 "PATools",
                 "PAModules",
                 "PASkills",
-                "PAPolicy",
-                "PACognition",
+
                 "PAKernel",
                 "PARuntime",
                 "PAComposition",
