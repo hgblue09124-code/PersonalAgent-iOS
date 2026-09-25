@@ -13,7 +13,7 @@ struct ProviderModelSelectionTests {
 
         let first = ProviderModelSelectionStore(
             initialModel: ModelID(rawValue: "gpt-5.6-luna"),
-            defaults: defaults,
+            suiteName: suiteName,
             persistenceKey: "selected"
         )
         #expect(await first.selectedModel() == ModelID(rawValue: "gpt-5.6-luna"))
@@ -22,7 +22,7 @@ struct ProviderModelSelectionTests {
 
         let restored = ProviderModelSelectionStore(
             initialModel: ModelID(rawValue: "fallback"),
-            defaults: defaults,
+            suiteName: suiteName,
             persistenceKey: "selected"
         )
         #expect(await restored.selectedModel() == ModelID(rawValue: "gpt-5.6-terra"))
