@@ -181,7 +181,7 @@ private struct ModelCatalogContent: View {
                 }
                 .disabled(session.isDownloadingModelPack)
 
-                ForEach(session.remoteModels, id: { model in model.id }) { model in
+                ForEach(session.remoteModels) { model in
                     Button {
                         Task { await session.downloadModel(model) }
                     } label: {
@@ -202,7 +202,7 @@ private struct ModelCatalogContent: View {
             }
 
             if let updated = session.modelCatalogUpdatedAt {
-                Text("Updated \\(updated.formatted(date: .omitted, time: .shortened))")
+                Text("Updated (updated.formatted(date: .omitted, time: .shortened))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
