@@ -47,7 +47,7 @@ jobs:
               "PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"
           }
 
-          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel \\([^)]*\\)"', log)
+          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel \([^)]*\)"', log)
           modules = sorted(set(m for m in matches if m in approved))
 
           if not modules:
@@ -55,7 +55,7 @@ jobs:
               sys.exit(0)
 
           for module in modules:
-              pattern = rf'("{re.escape(module)}": \\[[^\\]]*)\\]'
+              pattern = rf'("{re.escape(module)}": \[[^\]]*)\]'
               match = re.search(pattern, text)
               if not match:
                   print(f"AUTO-REPAIR: manifest entry not found for {module}; stopping.")
