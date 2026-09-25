@@ -25,6 +25,48 @@ struct SettingsScreen: View {
                 .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
             }
 
+            // MARK: - Runtime Controls
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Label("Agent Runtime", systemImage: "play.circle")
+                        .font(.headline)
+                    Spacer()
+                    Text(session.state.lifecycle.rawValue.uppercased())
+                        .font(.caption.bold())
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 8) {
+                    SettingsCommandButton("Start", systemImage: "play.fill") {
+                        Task { await session.start() }
+                    }
+                    SettingsCommandButton("Pause", systemImage: "pause.fill") {
+                        Task { await session.pause() }
+                    }
+                    SettingsCommandButton("Resume", systemImage: "play.fill") {
+                        Task { await session.resume() }
+                    }
+                    SettingsCommandButton("Stop", systemImage: "stop.fill") {
+                        Task { await session.stop() }
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    Button {
+                        Task { await session.refresh() }
+                    } label: {
+                        Label("Refresh State", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
+
+                    Spacer()
+
+                    StatusRow(title: "Phase", value: session.state.phase.rawValue)
+                }
+            }
+            .padding(14)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+
             // MARK: - Capabilities Section: Models / GGUF
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
@@ -207,6 +249,27 @@ struct SettingsScreen: View {
                 lastImportError = error.localizedDescription
             }
         }
+    }
+}
+
+
+private struct SettingsCommandButton: View {
+    let title: String
+    let systemImage: String
+    let action: () -> Void
+
+    init(_ title: String, systemImage: String, action: @escaping () -> Void) {
+        self.title = title
+        self.systemImage = systemImage
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
     }
 }
 
