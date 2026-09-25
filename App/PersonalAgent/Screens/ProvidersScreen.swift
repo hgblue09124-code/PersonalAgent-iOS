@@ -7,6 +7,25 @@ struct ProvidersScreen: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("Provider Route") {
+                    Picker("Route", selection: Binding(
+                        get: { session.providerRoute },
+                        set: { route in
+                            Task { await session.selectProviderRoute(route) }
+                        }
+                    )) {
+                        Text("Remote").tag(ProviderRoute.remote)
+                        Text("Local").tag(ProviderRoute.local)
+                    }
+                    .pickerStyle(.segmented)
+
+                    Text(session.providerRoute == .remote
+                         ? "Chat uses the configured remote provider."
+                         : "Chat uses the active GGUF local model. No remote fallback.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 Section("Active Provider") {
                     HStack {
                         Image(systemName: "server.rack")
@@ -42,7 +61,7 @@ struct ProvidersScreen: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section("Remote Models") {
+                Section(session.providerRoute == .remote ? "Remote Models" : "Local Model") {
                     if session.providerModels.isEmpty {
                         Text("No models available. Configure the provider and test the connection.")
                             .font(.footnote)
