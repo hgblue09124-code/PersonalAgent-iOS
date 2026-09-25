@@ -40,7 +40,7 @@ struct ArchitectureManifestTests {
 
     @Test func agencyLoopMatchesContractEnum() {
         let fromEnum = AgencyStage.allCases.map(\.rawValue)
-        #expect(fromEnum == AgencyStage.allCases.map(\.rawValue))
+        #expect(fromEnum == ArchitectureManifest.agencyLoop)
     }
 
     @Test func runtimeBoundaryIsExplicit() {
