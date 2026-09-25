@@ -21,11 +21,14 @@ struct AgentScreen: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .bottom) {
+            ZStack {
+                AgentBackground()
+
                 conversation
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
                 composer
             }
-            .background(Color(uiColor: .systemBackground))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -33,7 +36,11 @@ struct AgentScreen: View {
                         resetConversation()
                     } label: {
                         Image(systemName: "square.and.pencil")
+                            .font(.body.weight(.medium))
+                            .frame(width: 34, height: 34)
+                            .background(.thinMaterial, in: Circle())
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("New conversation")
                 }
 
@@ -46,6 +53,7 @@ struct AgentScreen: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
+                    .accessibilityElement(children: .combine)
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -58,7 +66,7 @@ struct AgentScreen: View {
     private var conversation: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 18) {
+                LazyVStack(spacing: 22) {
                     if messages.isEmpty {
                         welcome
                     }
@@ -81,11 +89,12 @@ struct AgentScreen: View {
                         errorView(error)
                     }
 
-                    Color.clear.frame(height: 86)
+                    Color.clear.frame(height: 18)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 18)
+                .padding(.horizontal, 18)
+                .padding(.top, 20)
             }
+            .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: messages.count) { _, _ in
                 scrollToBottom(proxy)
@@ -97,91 +106,145 @@ struct AgentScreen: View {
     }
 
     private var welcome: some View {
-        VStack(spacing: 18) {
-            ZStack {
-                Circle()
-                    .fill(.tint.opacity(0.12))
-                    .frame(width: 64, height: 64)
-                Image(systemName: "sparkles")
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(.tint)
+        VStack(spacing: 24) {
+            Spacer(minLength: 44)
+
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(.regularMaterial)
+                        .frame(width: 76, height: 76)
+                        .overlay {
+                            Circle()
+                                .strokeBorder(.white.opacity(0.16), lineWidth: 0.7)
+                        }
+
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 29, weight: .medium))
+                        .foregroundStyle(.tint)
+                }
+
+                VStack(spacing: 7) {
+                    Text("What can I help with?")
+                        .font(.title2.weight(.semibold))
+                        .tracking(-0.2)
+
+                    Text("Ask a question, explore an idea, or give your Agent a task.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 310)
+                }
             }
 
-            VStack(spacing: 6) {
-                Text("What can I help with?")
-                    .font(.title2.weight(.bold))
-                Text("Chat with your Agent. Ask a question or give it a task.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-
-            HStack(spacing: 8) {
-                suggestion("What can you do?")
-                suggestion("2 + 2 = ?")
+            VStack(spacing: 9) {
+                suggestion("What can you do?", systemImage: "sparkles")
+                suggestion("2 + 2 = ?", systemImage: "function")
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 72)
+        .padding(.horizontal, 8)
+        .padding(.bottom, 30)
     }
 
-    private func suggestion(_ text: String) -> some View {
+    private func suggestion(_ text: String, systemImage: String) -> some View {
         Button {
             task = text
             taskFocused = true
         } label: {
-            Text(text)
-                .font(.footnote.weight(.medium))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 9)
-                .background(.thinMaterial, in: Capsule())
+            HStack(spacing: 10) {
+                Image(systemName: systemImage)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                Text(text)
+                    .font(.subheadline.weight(.medium))
+
+                Spacer()
+
+                Image(systemName: "arrow.up.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 14)
+            .frame(maxWidth: 360)
+            .frame(height: 46)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .strokeBorder(.white.opacity(0.10), lineWidth: 0.7)
+            }
         }
         .buttonStyle(.plain)
     }
 
     private func messageRow(_ message: ChatMessage) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            if message.role == .agent {
-                agentAvatar
-            }
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(message.role == .user ? "You" : "Agent")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                Text(message.text)
-                    .font(.body)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contextMenu {
-                        Button {
-                            UIPasteboard.general.string = message.text
-                        } label: {
-                            Label("Copy", systemImage: "doc.on.doc")
-                        }
-                    }
-            }
-
+        Group {
             if message.role == .user {
-                Spacer(minLength: 38)
+                HStack {
+                    Spacer(minLength: 42)
+
+                    Text(message.text)
+                        .font(.body)
+                        .textSelection(.enabled)
+                        .padding(.horizontal, 15)
+                        .padding(.vertical, 11)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 19, style: .continuous)
+                                .strokeBorder(.white.opacity(0.10), lineWidth: 0.6)
+                        }
+                        .contextMenu {
+                            Button {
+                                UIPasteboard.general.string = message.text
+                            } label: {
+                                Label("Copy", systemImage: "doc.on.doc")
+                            }
+                        }
+                }
+            } else {
+                HStack(alignment: .top, spacing: 11) {
+                    agentAvatar
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Agent")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        Text(message.text)
+                            .font(.body)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contextMenu {
+                                Button {
+                                    UIPasteboard.general.string = message.text
+                                } label: {
+                                    Label("Copy", systemImage: "doc.on.doc")
+                                }
+                            }
+                    }
+
+                    Spacer(minLength: 18)
+                }
             }
         }
-        .frame(maxWidth: .infinity, alignment: message.role == .user ? .trailing : .leading)
-        .padding(.leading, message.role == .user ? 44 : 0)
-        .padding(.trailing, message.role == .agent ? 22 : 0)
+        .frame(maxWidth: .infinity)
     }
 
     private var agentAvatar: some View {
         Image(systemName: "sparkles")
-            .font(.caption.weight(.bold))
+            .font(.caption.weight(.semibold))
             .frame(width: 30, height: 30)
-            .background(.tint.opacity(0.12), in: Circle())
+            .background(.thinMaterial, in: Circle())
+            .overlay {
+                Circle().strokeBorder(.white.opacity(0.12), lineWidth: 0.6)
+            }
             .foregroundStyle(.tint)
+            .accessibilityHidden(true)
     }
 
     private var thinkingRow: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 11) {
             agentAvatar
 
             VStack(alignment: .leading, spacing: 7) {
@@ -190,12 +253,12 @@ struct AgentScreen: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 5) {
-                    Circle().frame(width: 6, height: 6)
-                    Circle().frame(width: 6, height: 6)
-                    Circle().frame(width: 6, height: 6)
+                    ForEach(0..<3, id: \.self) { _ in
+                        Circle()
+                            .frame(width: 5, height: 5)
+                    }
                 }
-                .foregroundStyle(.secondary)
-                .opacity(0.7)
+                .foregroundStyle(.secondary.opacity(0.75))
 
                 if let phase = session.chatPhase {
                     Text(phase)
@@ -203,83 +266,116 @@ struct AgentScreen: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
             Spacer()
         }
     }
 
     private var composer: some View {
-        HStack(alignment: .bottom, spacing: 8) {
+        HStack(alignment: .bottom, spacing: 9) {
             TextField("Message Agent", text: $task, axis: .vertical)
                 .textFieldStyle(.plain)
+                .font(.body)
                 .lineLimit(1...7)
                 .focused($taskFocused)
                 .submitLabel(.send)
                 .onSubmit(sendMessage)
+                .accessibilityLabel("Message Agent")
 
             Button(action: sendMessage) {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 15, weight: .bold))
                     .frame(width: 34, height: 34)
-                    .background(
-                        task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
-                            ? AnyShapeStyle(Color.secondary.opacity(0.16))
-                            : AnyShapeStyle(Color.accentColor),
-                        in: Circle()
-                    )
-                    .foregroundStyle(
-                        task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending
-                            ? Color.secondary
-                            : Color.white
-                    )
+                    .background(sendButtonBackground, in: Circle())
+                    .foregroundStyle(sendButtonForeground)
             }
-            .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSending)
+            .disabled(!canSend)
             .accessibilityLabel("Send message")
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
-        .overlay(
-            RoundedRectangle(cornerRadius: 24)
-                .strokeBorder(.quaternary, lineWidth: 0.7)
-        )
+        .padding(.leading, 16)
+        .padding(.trailing, 9)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 25, style: .continuous)
+                .strokeBorder(.white.opacity(0.13), lineWidth: 0.7)
+        }
+        .shadow(color: .black.opacity(0.08), radius: 18, y: 7)
         .padding(.horizontal, 12)
-        .padding(.bottom, 8)
+        .padding(.top, 7)
+        .padding(.bottom, 7)
+        .background(.clear)
+    }
+
+    private var canSend: Bool {
+        !task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSending
+    }
+
+    private var sendButtonBackground: some ShapeStyle {
+        canSend ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.secondary.opacity(0.15))
+    }
+
+    private var sendButtonForeground: some ShapeStyle {
+        canSend ? AnyShapeStyle(Color.white) : AnyShapeStyle(Color.secondary)
     }
 
     @ViewBuilder
     private var execution: some View {
-        DisclosureGroup("Agent activity") {
+        DisclosureGroup {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(session.executionTrace.enumerated()), id: \.offset) { index, step in
                     executionTraceRow(step, isLast: index == session.executionTrace.count - 1)
                 }
+
                 if let result = session.executionResult {
-                    Divider().padding(.vertical, 8)
+                    Divider().padding(.vertical, 9)
+
                     Text(result)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
                 }
             }
-            .padding(.top, 6)
+            .padding(.top, 7)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "waveform.path.ecg")
+                    .foregroundStyle(.tint)
+                Text("Agent activity")
+                    .font(.subheadline.weight(.medium))
+            }
         }
         .font(.subheadline)
-        .padding(12)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(.white.opacity(0.09), lineWidth: 0.6)
+        }
     }
 
     private func executionTraceRow(_ step: AgentExecutionProgress, isLast: Bool) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: stepIcon(step))
+                .font(.caption.weight(.semibold))
                 .frame(width: 18, height: 18)
+
             VStack(alignment: .leading, spacing: 2) {
-                Text(step.title).font(.footnote.weight(.semibold))
+                Text(step.title)
+                    .font(.footnote.weight(.semibold))
+
                 Text(step.detail)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            Spacer(minLength: 6)
+
             if step == session.executionProgress {
-                ProgressView().controlSize(.mini)
+                ProgressView()
+                    .controlSize(.mini)
             }
         }
         .padding(.vertical, isLast ? 4 : 7)
@@ -308,8 +404,12 @@ struct AgentScreen: View {
             Button("Resume") { Task { await session.resume() } }
             Button("Stop", role: .destructive) { Task { await session.stop() } }
         } label: {
-            Image(systemName: "ellipsis.circle")
+            Image(systemName: "ellipsis")
+                .font(.body.weight(.semibold))
+                .frame(width: 34, height: 34)
+                .background(.thinMaterial, in: Circle())
         }
+        .buttonStyle(.plain)
         .accessibilityLabel("Agent runtime controls")
     }
 
@@ -353,13 +453,41 @@ struct AgentScreen: View {
 
     private func errorView(_ message: String) -> some View {
         Label {
-            Text(message).font(.footnote)
+            Text(message)
+                .font(.footnote)
+                .textSelection(.enabled)
         } icon: {
             Image(systemName: "exclamationmark.triangle.fill")
         }
         .foregroundStyle(.red)
-        .padding(12)
+        .padding(13)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(.red.opacity(0.22), lineWidth: 0.7)
+        }
+    }
+}
+
+private struct AgentBackground: View {
+    var body: some View {
+        ZStack {
+            Color(uiColor: .systemBackground)
+
+            Circle()
+                .fill(Color.accentColor.opacity(0.07))
+                .frame(width: 250, height: 250)
+                .blur(radius: 65)
+                .offset(x: 125, y: -270)
+
+            Circle()
+                .fill(Color.secondary.opacity(0.045))
+                .frame(width: 220, height: 220)
+                .blur(radius: 70)
+                .offset(x: -140, y: 250)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
     }
 }
