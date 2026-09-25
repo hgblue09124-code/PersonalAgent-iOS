@@ -208,23 +208,6 @@ private struct ModelCatalogContent: View {
                 .disabled(session.isDownloadingModelPack)
 
                 RemoteModelRows(models: session.remoteModels, session: session)
-                    Button {
-                        Task { await session.downloadModel(model) }
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(model.name)
-                                Text("\(model.parameterCount) · \(model.quantization) · \(ByteCountFormatter.string(fromByteCount: model.sizeBytes, countStyle: .file))")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: session.installedModels.contains(where: { $0.filename == model.filename }) ? "checkmark.circle" : "arrow.down.circle")
-                                .foregroundStyle(session.installedModels.contains(where: { $0.filename == model.filename }) ? .secondary : .tint)
-                        }
-                    }
-                    .disabled(session.isDownloadingModelPack)
-                }
             }
 
             if let updated = session.modelCatalogUpdatedAt {
