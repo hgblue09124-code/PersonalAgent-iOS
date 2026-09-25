@@ -28,6 +28,28 @@ struct M1RegressionTests {
         #expect(await runtime.invariantsHold())
     }
 
+    @Test func stateUpdateProposedFailsClosedWithoutMutation() async throws {
+        let runtime = try await makeRuntime()
+        try await runtime.start()
+
+        let goal = Goal(id: GoalID(rawValue: "state.proposed"), statement: "Remain proposed")
+        try await runtime.submit(goal: goal)
+
+        let update = StateUpdate(
+            goalID: goal.id,
+            targetStatus: .proposed,
+            evidence: ["source": "regression"]
+        )
+
+        await #expect(throws: KernelError.invalidStateUpdate("Unsupported target status: proposed")) {
+            try await runtime.applyStateUpdate(update)
+        }
+
+        #expect(await runtime.goal(id: goal.id)?.status == .proposed)
+        #expect(await runtime.currentState().activeGoalID == nil)
+        #expect(await runtime.invariantsHold())
+    }
+
     @Test func terminalLifecycleDoesNotCommitGoalWhenEventAppendFails() async throws {
         let log = FailingEventLog()
         let runtime = try await AgentRuntime(
