@@ -13,11 +13,10 @@ struct SettingsScreen: View {
             List {
                 if let error = session.lastError ?? lastImportError {
                     Section {
-                        Label {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
                             Text(error)
                                 .font(.footnote)
-                        } icon: {
-                            Image(systemName: "exclamationmark.triangle.fill")
                         }
                         .foregroundStyle(.red)
                     }
