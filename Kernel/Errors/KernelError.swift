@@ -1,5 +1,3 @@
-import PAFoundation
-
 public enum RuntimeCommand: String, Sendable, Codable, Equatable { case start, pause, resume, stop }
 public enum GoalCommand: String, Sendable, Codable, Equatable { case submit, activate, suspend, resume, complete, abort }
 
