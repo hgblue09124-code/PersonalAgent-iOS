@@ -250,18 +250,11 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                     try await activate(goalID: update.goalID)
                 }
             } else {
-                guard let next = GoalMachine.nextStatus(goal.status, command: .suspend) else {
-                    let error = KernelError.invalidGoalTransition(
-                        goalID: update.goalID,
-                        from: goal.status,
-                        command: .suspend
-                    )
-                    try await emitRejection(command: "applyStateUpdate", error: error)
-                    throw error
-                }
-                var updatedGoal = goal
-                updatedGoal.status = next
-                goalStore[update.goalID] = updatedGoal
+                let error = KernelError.invalidStateUpdate(
+                    "Unsupported target status: \(targetStatus.rawValue)"
+                )
+                try await emitRejection(command: "applyStateUpdate", error: error)
+                throw error
             }
 
             var payload = update.evidence
