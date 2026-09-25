@@ -456,14 +456,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         userPrompt: String
     ) -> String {
         let system = systemPrompt?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let messages: [(String, String)] = system.isEmpty
-            ? [("user", userPrompt)]
-            : [("system", system), ("user", userPrompt)]
-
         guard let templatePtr = llama_model_chat_template(model, nil) else {
             return system.isEmpty
                 ? userPrompt
-                : "System: \(system)\\nUser: \(userPrompt)\\nAssistant:"
+                : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
         }
 
         var result = ""
@@ -533,7 +529,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         guard rendered > 0 else {
             return system.isEmpty
                 ? userPrompt
-                : "System: \(system)\\nUser: \(userPrompt)\\nAssistant:"
+                : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
         }
 
         if rendered < Int32(formatted.count) {
@@ -576,7 +572,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         guard secondPass > 0 else {
             return system.isEmpty
                 ? userPrompt
-                : "System: \(system)\\nUser: \(userPrompt)\\nAssistant:"
+                : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
         }
         return String(cString: resized)
     }
