@@ -334,6 +334,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                         deltaText = ""
                     }
 
+                    // Feed the sampled token back into the sampler. Without
+                    // llama_sampler_accept(), the repetition-penalty sampler has no
+                    // history and cannot prevent pathological token loops.
+                    llama_sampler_accept(samplerPtr, nextToken)
+
                     generatedCount += 1
                     let isLastToken = (generatedCount >= maxTokens)
                     let chunk = LocalModelStreamChunk(
