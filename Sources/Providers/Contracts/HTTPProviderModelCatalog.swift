@@ -53,15 +53,30 @@ public struct HTTPProviderModelCatalog: Sendable {
 
         do {
             let payload = try JSONDecoder().decode(Payload.self, from: response.body)
-            return payload.data
+            let models = payload.data
                 .map { ModelIdentity(
                     id: ModelID(rawValue: $0.id),
                     displayName: $0.id,
                     contextTokenLimit: 0
                 ) }
+                .filter { Self.isChatModel($0.id.rawValue) }
                 .sorted { $0.id.rawValue < $1.id.rawValue }
+
+            guard !models.isEmpty else {
+                throw ProviderRuntimeError.invalidConfiguration
+            }
+            return models
         } catch {
             throw ProviderRuntimeError.invalidConfiguration
         }
+    }
+
+    private static func isChatModel(_ id: String) -> Bool {
+        let normalized = id.lowercased()
+        let nonChatMarkers = [
+            "embedding", "embed-", "whisper", "tts", "dall-e",
+            "moderation", "transcription", "realtime"
+        ]
+        return !nonChatMarkers.contains { normalized.contains($0) }
     }
 }
