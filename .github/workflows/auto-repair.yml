@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   repair:
-    if: !contains(github.event.head_commit.message, '[auto-repair]')
+    if: ${{ !contains(github.event.head_commit.message, '[auto-repair]') }}
     runs-on: ubuntu-latest
     container: swift:6.3.2
 
