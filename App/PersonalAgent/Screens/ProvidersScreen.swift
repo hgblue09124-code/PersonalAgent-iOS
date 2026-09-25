@@ -4,6 +4,7 @@ import PAComposition
 
 struct ProvidersScreen: View {
     @ObservedObject var session: KernelSession
+    @State private var apiKey = ""
 
     var body: some View {
         NavigationStack {
@@ -27,9 +28,38 @@ struct ProvidersScreen: View {
                         .foregroundStyle(.secondary)
                 }
 
+                if session.providerRoute == .remote {
+                    Section("Remote API") {
+                        SecureField("OpenAI API key", text: $apiKey)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+
+                        HStack {
+                            Button("Save API Key") {
+                                let value = apiKey
+                                Task {
+                                    await session.configureProviderAPIKey(value)
+                                    apiKey = ""
+                                }
+                            }
+                            .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+                            Spacer()
+
+                            Button("Remove Key", role: .destructive) {
+                                Task { await session.removeProviderAPIKey() }
+                            }
+                        }
+
+                        Text("The key is stored in the iOS Keychain. It is not shown after saving.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 Section("Active Provider") {
                     HStack {
-                        Image(systemName: "server.rack")
+                        Image(systemName: session.providerRoute == .local ? "cpu" : "server.rack")
                             .font(.title2)
                             .foregroundStyle(.tint)
 
@@ -62,32 +92,36 @@ struct ProvidersScreen: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Section(session.providerRoute == .remote ? "Remote Models" : "Local Model") {
+                Section(session.providerRoute == .remote ? "Remote Models" : "Active Local Model") {
                     if session.providerModels.isEmpty {
-                        Text("No models available. Configure the provider and test the connection.")
+                        Text(session.providerRoute == .remote
+                             ? "No models available. Configure the provider and test the connection."
+                             : "No active local model.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(session.providerModels, id: \.id) { model in
-                            Button {
-                                Task { await session.selectProviderModel(id: model.id) }
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(model.displayName)
-                                            .foregroundStyle(.primary)
-                                        Text(model.id.rawValue)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-
-                                    Spacer()
-
-                                    if model.id == session.selectedProviderModelID {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.tint)
-                                    }
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(model.displayName)
+                                        .foregroundStyle(.primary)
+                                    Text(model.id.rawValue)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
+
+                                Spacer()
+
+                                if session.providerRoute == .remote,
+                                   model.id == session.selectedProviderModelID {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.tint)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                guard session.providerRoute == .remote else { return }
+                                Task { await session.selectProviderModel(id: model.id) }
                             }
                         }
 
@@ -123,7 +157,13 @@ struct ProvidersScreen: View {
                 }
             }
             .navigationTitle("Providers")
-            .task { await session.refreshProviderModels() }
+            .task {
+                await session.refresh()
+                if await session.hasProviderAPIKey() {
+                    apiKey = ""
+                }
+                await session.refreshProviderModels()
+            }
         }
     }
 
