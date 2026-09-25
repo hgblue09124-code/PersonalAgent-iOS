@@ -112,12 +112,12 @@ let package = Package(
         ),
         .target(
             name: "PAModules",
-            dependencies: ["PAKernel", "PAPolicy", "PAObservability", "PAEvents"],
+            dependencies: ["PAKernel", "PAObservability", "PAEvents"],
             path: "Sources/Modules/Contracts"
         ),
         .target(
             name: "PASkills",
-            dependencies: ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
+            dependencies: ["PAFoundation", "PAModules", "PATools"],
             path: "Sources/Skills/Contracts"
         ),
         .target(
@@ -134,7 +134,7 @@ let package = Package(
                 "PAProviders",
                 "PAModules",
                 "PAMemory",
-                                                "PAKernel",
+                "PAKernel",
             ],
             path: "Runtime"
         ),
