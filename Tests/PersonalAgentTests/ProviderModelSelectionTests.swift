@@ -36,7 +36,7 @@ struct ProviderModelSelectionTests {
 
         let store = ProviderModelSelectionStore(
             initialModel: ModelID(rawValue: "gpt-5.6-luna"),
-            defaults: defaults,
+            suiteName: suiteName,
             persistenceKey: "selected"
         )
 
