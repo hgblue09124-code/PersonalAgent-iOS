@@ -628,12 +628,33 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     private func addTokenToBatch(_ batch: inout llama_batch, id: llama_token, pos: Int32, seqID: Int32, logits: Bool) {
+        // Fail closed at the Swift/C boundary. llama_batch_init owns the
+        // backing storage; all fields required by llama_decode must exist.
         let idx = Int(batch.n_tokens)
-        batch.token?[idx] = id
-        batch.pos?[idx] = pos
-        batch.n_seq_id?[idx] = 1
-        batch.seq_id?[idx]?[0] = seqID
-        batch.logits?[idx] = logits ? 1 : 0
+        precondition(idx >= 0)
+        precondition(batch.token != nil)
+        precondition(batch.pos != nil)
+        precondition(batch.n_seq_id != nil)
+        precondition(batch.seq_id != nil)
+        precondition(batch.logits != nil)
+
+        guard let token = batch.token,
+              let posBuffer = batch.pos,
+              let nSeqID = batch.n_seq_id,
+              let seqIDs = batch.seq_id,
+              let logitsBuffer = batch.logits else {
+            return
+        }
+
+        token[idx] = id
+        posBuffer[idx] = pos
+        nSeqID[idx] = 1
+
+        guard let seqIDBuffer = seqIDs[idx] else {
+            preconditionFailure("llama_batch_init returned a nil seq_id entry")
+        }
+        seqIDBuffer[0] = seqID
+        logitsBuffer[idx] = logits ? 1 : 0
         batch.n_tokens += 1
     }
 
