@@ -39,6 +39,14 @@
       "action": "remove exact stale import; never substitute another module",
       "risk": "low",
       "regression_required": true
+    },
+    {
+      "id": "r5-stale-swiftpm-dependency",
+      "fingerprint": "derived-from-log",
+      "trigger": "SwiftPM reports unknown dependency PA* and target is absent from Package.swift",
+      "action": "remove exact stale dependency entries only",
+      "risk": "low",
+      "regression_required": true
     }
   ],
   "candidates": []
