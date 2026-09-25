@@ -1,3 +1,4 @@
+import PAKernel
 import PAFoundation
 
 /// Explicit, deterministic registry. Not a global and not reflection-based.
