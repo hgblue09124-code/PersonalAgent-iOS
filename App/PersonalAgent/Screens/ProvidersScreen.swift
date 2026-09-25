@@ -7,25 +7,44 @@ struct ProvidersScreen: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
+                Section("Active Provider") {
                     HStack {
                         Image(systemName: "server.rack")
                             .font(.title2)
                             .foregroundStyle(.tint)
+
                         VStack(alignment: .leading, spacing: 3) {
                             Text(session.providerID)
                                 .font(.headline)
-                            Text(providerSubtitle)
+                            Text(connectionDescription)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
+
+                        Spacer()
+
+                        connectionIcon
                     }
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 4)
+
+                    Button {
+                        Task { await session.testProviderConnection() }
+                    } label: {
+                        Label(
+                            session.providerConnectionState == "Testing…" ? "Testing Connection…" : "Test Connection",
+                            systemImage: "bolt.horizontal.circle"
+                        )
+                    }
+                    .disabled(session.providerConnectionState == "Testing…")
+
+                    Text("Connected means a real provider request succeeded. A saved API key alone is not considered connected.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Remote Models") {
                     if session.providerModels.isEmpty {
-                        Text("No remote models discovered. Configure an API key and refresh.")
+                        Text("No models available. Configure the provider and test the connection.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     } else {
@@ -41,7 +60,9 @@ struct ProvidersScreen: View {
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
+
                                     Spacer()
+
                                     if model.id == session.selectedProviderModelID {
                                         Image(systemName: "checkmark.circle.fill")
                                             .foregroundStyle(.tint)
@@ -58,39 +79,66 @@ struct ProvidersScreen: View {
                     }
                 }
 
-                Section("Available Providers") {
+                Section("Provider Ecosystem") {
                     ForEach(ArchitectureManifest.reservedProviderIDs, id: \.id) { item in
-                        Label {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.id)
-                                Text(item.milestone)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                        HStack {
+                            Label {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.id)
+                                    Text(item.milestone)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: item.id == session.providerID ? "checkmark.circle.fill" : "circle")
                             }
-                        } icon: {
-                            Image(systemName: "circle.fill")
-                                .font(.system(size: 8))
+
+                            Spacer()
+
+                            Text(item.id == session.providerID ? session.providerConnectionState : "Available")
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
-
-                Section {
-                    Text("Provider configuration and connection controls appear here as each provider becomes available.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
             }
             .navigationTitle("Providers")
-        .task { await session.refreshProviderModels() }
+            .task { await session.refreshProviderModels() }
         }
     }
 
-    private var providerSubtitle: String {
-        switch session.providerLifecycle.lowercased() {
-        case "running": return "Active and ready"
-        case "configured": return "Configured"
-        default: return session.providerLifecycle.capitalized
+    private var connectionDescription: String {
+        switch session.providerConnectionState {
+        case "Connected":
+            return "Connected and verified"
+        case "Testing…":
+            return "Checking live connectivity…"
+        case "Connection failed":
+            return "Connection failed — check credentials/network"
+        case "Not configured":
+            return "API key not configured"
+        default:
+            return "Connection not yet verified"
+        }
+    }
+
+    @ViewBuilder
+    private var connectionIcon: some View {
+        switch session.providerConnectionState {
+        case "Connected":
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+        case "Testing…":
+            ProgressView()
+        case "Connection failed":
+            Image(systemName: "xmark.circle.fill")
+                .foregroundStyle(.red)
+        case "Not configured":
+            Image(systemName: "key.slash")
+                .foregroundStyle(.secondary)
+        default:
+            Image(systemName: "questionmark.circle")
+                .foregroundStyle(.secondary)
         }
     }
 }
