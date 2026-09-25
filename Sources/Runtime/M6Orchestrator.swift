@@ -1,5 +1,6 @@
 import Foundation
 import PAFoundation
+import PAKernel
 import PAObservability
 import PAEvents
 import PAPolicy
@@ -77,12 +78,6 @@ public struct DefaultVerifier: Verifying {
     }
 }
 
-public struct DefaultPolicyEvaluator: PolicyEvaluating {
-    public init() {}
-    public func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
-        .allow("Default policy permit")
-    }
-}
 
 public struct DefaultEvaluator: Evaluating {
     public init() {}

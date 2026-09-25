@@ -1,66 +1,86 @@
 # Personal Agent — Architecture
 
-Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented. M4 Memory OS implemented (`Documentation/M4.md`). M5 Local + Cloud Storage / Sync implemented (`Documentation/M5.md`). M6 Cognition / Agency integrated (`Documentation/M6.md`). M7 Durable Run Lifecycle, Checkpointing & Recovery implemented (`Documentation/M7.md`). M8 Product Architecture Foundation specification and boundaries established (`Documentation/M8.md`).
-No live LLM call in default composition.
+## Status
 
-This iOS client is the long-lived Personal Agent / Agent OS *client*.
-It is not a chat wrapper. Kernel is not an LLM.
+**Current baseline:** M8 architecture foundation at verified green commit `e3e7182523daf711ba23cbc9ec67bd450ef44e5d`.
 
-Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`)
-are external material. They must not appear as runtime dependencies.
+The repository currently uses the M8 package graph. This document separates **CURRENT** from **TARGET**; the target is not presented as implemented.
 
-## Axis
+This iOS client is the long-lived Personal Agent / Agent OS client. It is not a chat wrapper. Kernel is not an LLM.
 
+Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`) are external material and must not become runtime dependencies.
+
+## CURRENT — verified source graph
+
+The current SwiftPM graph is:
+
+```text
+App
+  ↓
+Composition
+  ↓
+PARuntime
+  ↓
+PAKernel
+  ├── PACognition → PAProviders / PAMemory / PASkills
+  ├── PAAgency → PACognition / PATools / PAPolicy
+  ├── PAModules
+  ├── PAMemory
+  └── PAProviders / PAEvents / PAObservability / PAPolicy
+
+Composition additionally wires Providers / Local / Memory / Modules / Skills / Tools / Storage / Security / Policy / Cognition / Agency.
 ```
-UI (SwiftUI App)
+
+The runtime slice is now implemented: `AgentRuntime` and `AgentSession` live in `PARuntime`, while Kernel remains the lower stable contract/state boundary. `M8CompositionRoot` explicitly imports `PARuntime` and owns construction/wiring.
+
+The current implementation still has known concentration candidates (for example `KernelCoordinationBoundary` and `LocalModelRuntimeCoordinator`). These are audit targets, not permission for speculative refactoring.
+
+## TARGET — responsibility architecture
+
+```text
+App
   ↓
-App Session / App Lifecycle
+Composition
   ↓
-Composition (M8CompositionRoot)
-  ↓
-Agent Kernel (AgentRuntime / AgentSession)
-  ↓
-Cognition / Memory / Agency / Policy / M7 Run Boundary
-  ↓
-Module / Skill / Tool / Provider contracts / Local Model Engine
-  ↓
-Storage / Sync / Product Persistence Container
-  ↓
-Events / Observability / Security / Device Capabilities
-  ↓
-Foundation
+Runtime ───────── Capabilities
+  ↓                    ↓
+Kernel contracts     Modules / Skills / Tools
+  ↑
+Ports
+  ↑
+Providers / Memory / Storage / Device adapters
 ```
+
+The target further separates stable contracts from runtime orchestration and infrastructure responsibilities. Migration must prove each boundary before moving code.
 
 ## Layer responsibilities
 
 | Layer | Owns | Must not own |
-| --- | --- | --- |
-| UI | rendering, input, safe-area layout | goals, plans, storage, provider calls |
-| App Session | user input boundary, session events | AgentState ownership, direct state mutations |
-| Composition | wiring contracts for a process, product persistence | business logic |
-| Kernel | identity, state, goals, lifecycle, coordination, durable run bounds | SwiftUI, concrete LLM, concrete store |
-| Cognition | perception → reflection pipeline contracts | execution side effects |
-| Agency | goal → adapt loop contracts | bypassing policy |
-| Policy | capability + approval gate | tool implementations |
-| Skills / Tools / Modules / Providers / Local Models | contracts + reserved adapter packages | agent state |
-| Storage / Memory | contracts for local-first + sync, run stores, domain persistence | cloud vendor lock-in |
-| Events | trace / replay / run provenance contracts | UI |
-| Device Capabilities | thermal, memory, network, app lifecycle signals | UIKit/SwiftUI imports in Kernel |
-| Security | secret + network boundaries | agent state |
+|---|---|---|
+| App | rendering, input, presentation | runtime orchestration, provider SDKs, persistence |
+| Composition | construction and wiring | business logic |
+| Runtime | execution, planning, observation, verification, lifecycle orchestration | persistence implementation, vendor details |
+| Kernel | stable contracts, identity, state, lifecycle contracts, events, ports and invariants | UI, concrete providers, infrastructure implementation |
+| Capabilities | Modules, Skills, Tools | provider internals |
+| Providers | provider contracts and remote/local adapters | UI and unrelated policy |
+| Memory | memory semantics, classification and retrieval | physical persistence mechanics |
+| Storage | durable persistence, sync, model/skill/config/cache storage | reasoning semantics |
+| Device | platform/device adapters and capability signals | agent policy |
 
-## Milestone freeze
+## Responsibility gaps to migrate
 
-M0 freezes boundaries and contracts.
-M1 implements Kernel runtime (`Documentation/M1.md`).
-M2 implements the provider contract and runtime (`Documentation/M2.md`).
-M3 implements the module / skill / tool runtime (`Documentation/M3.md`).
-M4 implements the local-first Memory OS runtime & persistence (`Documentation/M4.md`).
-M5 defines the Local + Cloud Storage / Sync architectural specification (`Documentation/M5.md`).
-M6 implements Cognition / Agency integration gate (`Documentation/M6.md`).
-M7 implements Durable Run Lifecycle, Checkpointing, Interruption Recovery & Capability Bounding (`Documentation/M7.md`).
-M8 establishes the Product Architecture Foundation (`Documentation/M8.md`).
+These are audit candidates, not permission for speculative refactoring:
 
-Kernel may hold `any LLMProvider`. It does not import `PAProvidersGrok` / OpenAI / Local.
-Default composition wires `DeterministicFakeProvider`. Live vendor calls are a separate verification gate.
-Kernel may hold `any ModuleExecuting` and request execution. It does not contain concrete modules.
-Kernel may hold `any MemoryExecuting` and request memory operations. It does not contain concrete memory stores.
+1. Kernel coordination: identify which concrete coordination knowledge can move behind stable Kernel ports without changing behavior.
+2. Composition concentration: audit whether `LocalModelRuntimeCoordinator` belongs in Composition or a local-provider/runtime boundary.
+3. Provider boundary: verify routing, provider contract and vendor adapter separation.
+4. Memory/Storage: verify semantic memory is not coupled to physical persistence.
+5. ArchitectureManifest: verify declarations match the actual SwiftPM graph.
+
+## Quality bar
+
+A change is complete only when responsibility is singular, dependencies are explicit, vendor knowledge is isolated, contracts are testable, behavior is preserved unless intentionally changed, and relevant verification gates are green.
+
+## Historical milestone documentation
+
+Existing `Documentation/M4.md` through `M8.md` remain historical/contract evidence. This document is the architecture entry point and does not replace those milestone records.

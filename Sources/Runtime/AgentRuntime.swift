@@ -1,5 +1,6 @@
 import Foundation
 import PAFoundation
+import PAKernel
 import PAObservability
 import PAEvents
 import PAProviders
@@ -7,7 +8,7 @@ import PAModules
 import PAMemory
 import PACognition
 
-/// M1 Kernel Runtime.
+/// Agent Runtime boundary.
 ///
 /// AgentRuntime is the central actor driving the agent state, goal lifecycles,
 /// and subsystem coordination.

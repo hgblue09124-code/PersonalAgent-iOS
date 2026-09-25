@@ -34,7 +34,6 @@ struct RepositoryIntegrityTests {
             .appendingPathComponent("Core")
             .appendingPathComponent("Agent")
         for name in [
-            "AgentRuntime.swift",
             "LifecycleMachine.swift",
             "GoalMachine.swift",
             "GoalManaging.swift",
@@ -47,6 +46,14 @@ struct RepositoryIntegrityTests {
                 FileManager.default.fileExists(atPath: kernel.appendingPathComponent(name).path),
                 "missing kernel source \(name)"
             )
+        }
+    }
+
+
+    @Test func requiredRuntimeSourcesExist() {
+        let runtime = repositoryRoot().appendingPathComponent("Sources").appendingPathComponent("Runtime")
+        for name in ["AgentRuntime.swift", "AgentSession.swift", "M6Orchestrator.swift", "RunLifecycleManager.swift", "RunRecoveryEngine.swift"] {
+            #expect(FileManager.default.fileExists(atPath: runtime.appendingPathComponent(name).path), "missing runtime source \(name)")
         }
     }
 

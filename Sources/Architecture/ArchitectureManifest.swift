@@ -63,6 +63,18 @@ public enum ArchitectureManifest: Sendable {
         "PASkills": ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
         "PACognition": ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
         "PAAgency": ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
+        "PARuntime": [
+            "PAFoundation",
+            "PAKernel",
+            "PAObservability",
+            "PAEvents",
+            "PAProviders",
+            "PAModules",
+            "PAMemory",
+            "PACognition",
+            "PAPolicy",
+            "PAAgency",
+        ],
         "PAKernel": [
             "PAFoundation",
             "PAPolicy",
@@ -79,6 +91,7 @@ public enum ArchitectureManifest: Sendable {
             "PAFoundation",
             "PAArchitecture",
             "PAKernel",
+            "PARuntime",
             "PAObservability",
             "PAEvents",
             "PAProviders",
@@ -91,7 +104,7 @@ public enum ArchitectureManifest: Sendable {
             "PAPolicy",
             "PACognition",
             "PAAgency",
-        ],
+        ]
     ]
 
     public static let kernelMustNotImport: Set<String> = [
