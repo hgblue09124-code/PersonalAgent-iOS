@@ -73,9 +73,14 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             throw LocalModelStorageError.fileNotFound(sourceURL)
         }
 
+        // Files.app / iCloud / other File Provider URLs may require coordinated
+        // reads before the bytes are available to the app. Keep the security-scoped
+        // access alive for the complete coordinated import operation.
         let summary: GGUFMetadataSummary
         do {
-            summary = try parser.parseHeaderAndMetadata(at: sourceURL)
+            summary = try coordinatedRead(sourceURL) { readableURL in
+                try parser.parseHeaderAndMetadata(at: readableURL)
+            }
         } catch let error as GGUFParseError {
             switch error {
             case .invalidMagic(let magic):
@@ -105,10 +110,12 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         }
 
         do {
-            if fileManager.fileExists(atPath: destinationURL.path) {
-                try fileManager.removeItem(at: destinationURL)
+            try coordinatedRead(sourceURL) { readableURL in
+                if fileManager.fileExists(atPath: destinationURL.path) {
+                    try fileManager.removeItem(at: destinationURL)
+                }
+                try fileManager.copyItem(at: readableURL, to: destinationURL)
             }
-            try fileManager.copyItem(at: sourceURL, to: destinationURL)
         } catch {
             if fileManager.fileExists(atPath: destinationURL.path) {
                 try? fileManager.removeItem(at: destinationURL)
@@ -142,6 +149,26 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         }
 
         return descriptor
+    }
+
+    private func coordinatedRead<T>(_ sourceURL: URL, _ operation: (URL) throws -> T) throws -> T {
+        let coordinator = NSFileCoordinator(filePresenter: nil)
+        var result: Result<T, Error>?
+        var coordinationError: Error?
+        coordinator.coordinate(readingItemAt: sourceURL, options: [], error: &coordinationError) { readableURL in
+            do {
+                result = .success(try operation(readableURL))
+            } catch {
+                result = .failure(error)
+            }
+        }
+        if let coordinationError {
+            throw coordinationError
+        }
+        guard let result else {
+            throw LocalModelStorageError.copyFailed("File Provider returned no readable file URL.")
+        }
+        return try result.get()
     }
 
     public func listModels() async throws -> [LocalModelDescriptor] {
