@@ -54,8 +54,8 @@ struct ContractSurfaceTests {
 
     @Test func memoryKindsAndLifecycleAreComplete() {
         #expect(MemoryKind.allCases.count == 10)
-        #expect(MemoryLifecycleStage.allCases.map(\\.rawValue).first == "capture")
-        #expect(MemoryLifecycleStage.allCases.map(\\.rawValue).last == "forget")
+        #expect(MemoryLifecycleStage.allCases.map(\.rawValue).first == "capture")
+        #expect(MemoryLifecycleStage.allCases.map(\.rawValue).last == "forget")
     }
 
     @Test func reservedProvidersLandInM2WithoutLiveVerification() {
@@ -118,7 +118,7 @@ struct ContractSurfaceTests {
             .merge,
             .requireUser,
         ]
-        #expect(Set(values.map(\\.rawValue)).count == 4)
+        #expect(Set(values.map(\.rawValue)).count == 4)
     }
 }
 
