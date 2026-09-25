@@ -142,26 +142,26 @@ func importedModules(in source: String) -> [String] {
 
 func moduleName(for file: URL, sourcesRoot: URL) -> String {
     let relative = file.path.replacingOccurrences(of: sourcesRoot.path + "/", with: "")
-    if relative.hasPrefix("Foundation/") { return "PAFoundation" }
-    if relative.hasPrefix("Observability/") { return "PAObservability" }
-    if relative.hasPrefix("Events/") { return "PAEvents" }
-    if relative.hasPrefix("Security/") { return "PASecurity" }
-    if relative.hasPrefix("Storage/") { return "PAStorage" }
-    if relative.hasPrefix("Memory/") { return "PAMemory" }
+    if relative.hasPrefix("Kernel/Foundation/") { return "PAFoundation" }
+    if relative.hasPrefix("Runtime/Observability/") { return "PAObservability" }
+    if relative.hasPrefix("Kernel/Events/") { return "PAEvents" }
+    if relative.hasPrefix("Storage/Security/") { return "PASecurity" }
+    if relative.hasPrefix("Storage/Core/") { return "PAStorage" }
+    if relative.hasPrefix("Memory/Core/") { return "PAMemory" }
     if relative.hasPrefix("Providers/Contracts/") { return "PAProviders" }
-    if relative.hasPrefix("Providers/Grok/") { return "PAProvidersGrok" }
-    if relative.hasPrefix("Providers/OpenAICompatible/") { return "PAProvidersOpenAICompatible" }
-    if relative.hasPrefix("Providers/OpenAI/") { return "PAProvidersOpenAI" }
+    if relative.hasPrefix("Providers/Remote/Grok/") { return "PAProvidersGrok" }
+    if relative.hasPrefix("Providers/Remote/OpenAICompatible/") { return "PAProvidersOpenAICompatible" }
+    if relative.hasPrefix("Providers/Remote/OpenAI/") { return "PAProvidersOpenAI" }
     if relative.hasPrefix("Providers/Local/") { return "PAProvidersLocal" }
-    if relative.hasPrefix("Core/Policy/") { return "PAPolicy" }
-    if relative.hasPrefix("Tools/") { return "PATools" }
-    if relative.hasPrefix("Modules/") { return "PAModules" }
-    if relative.hasPrefix("Skills/") { return "PASkills" }
-    if relative.hasPrefix("Core/Cognition/") { return "PACognition" }
-    if relative.hasPrefix("Core/Agency/") { return "PAAgency" }
-    if relative.hasPrefix("Core/Agent/") { return "PAKernel" }
-    if relative.hasPrefix("Architecture/") { return "PAArchitecture" }
+    if relative.hasPrefix("Kernel/Policy/") { return "PAPolicy" }
+    if relative.hasPrefix("Capabilities/Tools/") { return "PATools" }
+    if relative.hasPrefix("Capabilities/Modules/") { return "PAModules" }
+    if relative.hasPrefix("Capabilities/Skills/") { return "PASkills" }
+    if relative.hasPrefix("Runtime/Cognition/") { return "PACognition" }
+    if relative.hasPrefix("Runtime/Agency/") { return "PAAgency" }
+    if relative.hasPrefix("Runtime/Execution/") { return "PAKernel" }
+    if relative.hasPrefix("Kernel/Architecture/") { return "PAArchitecture" }
     if relative.hasPrefix("Composition/") { return "PAComposition" }
-    if relative.hasPrefix("cllama/") { return "cllama" }
+    if relative.hasPrefix("Providers/Local/EngineBridge/") { return "cllama" }
     return "UNKNOWN"
 }
