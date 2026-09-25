@@ -1,6 +1,5 @@
 import PAKernel
 import PAMemory
-import PASkills
 
 public enum CognitionStage: String, Sendable, Codable, CaseIterable {
     case perception
