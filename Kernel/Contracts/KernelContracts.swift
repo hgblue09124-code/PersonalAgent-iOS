@@ -1,5 +1,4 @@
 import Foundation
-import PAFoundation
 
 public struct AgentIdentity: Hashable, Sendable, Codable {
     public let id: AgentID
@@ -7,7 +6,6 @@ public struct AgentIdentity: Hashable, Sendable, Codable {
     public let createdAt: Date
     public init(id: AgentID = AgentID(), displayName: String, createdAt: Date = Date()) { self.id = id; self.displayName = displayName; self.createdAt = createdAt }
 }
-
 public struct Goal: Hashable, Sendable, Codable {
     public let id: GoalID
     public let statement: String
@@ -17,11 +15,9 @@ public struct Goal: Hashable, Sendable, Codable {
         self.id = id; self.statement = statement; self.createdAt = createdAt; self.status = status
     }
 }
-
 public enum AgentLifecycle: String, Sendable, Codable {
     case created, starting, running, pausing, paused, stopping, stopped, failed
 }
-
 public struct AgentState: Sendable, Equatable, Codable {
     public var identity: AgentIdentity
     public var lifecycle: AgentLifecycle
@@ -31,14 +27,11 @@ public struct AgentState: Sendable, Equatable, Codable {
         self.identity = identity; self.lifecycle = lifecycle; self.phase = phase; self.activeGoalID = activeGoalID
     }
 }
-
-/// Kernel coordinates. Views do not drive internals. LLM does not own this type.
 public protocol AgentRuntimeCoordinating: Sendable {
     func currentState() async -> AgentState
     func submit(goal: Goal) async throws
     func abort(goalID: GoalID) async throws
 }
-
 public protocol AgentLifecycleManaging: Sendable {
     func start() async throws
     func pause() async throws
