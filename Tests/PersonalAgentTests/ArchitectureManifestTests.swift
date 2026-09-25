@@ -43,6 +43,11 @@ struct ArchitectureManifestTests {
         #expect(fromEnum == AgencyStage.allCases.map(\.rawValue))
     }
 
+    @Test func runtimeBoundaryIsExplicit() {
+        #expect(ArchitectureManifest.allowedImports["PARuntime"]?.contains("PAKernel") == true)
+        #expect(ArchitectureManifest.allowedImports["PAComposition"]?.contains("PARuntime") == true)
+        #expect(ArchitectureManifest.allowedImports["PAKernel"]?.contains("PARuntime") != true)
+    }
     @Test func companionReposAreForbidden() {
         #expect(ArchitectureManifest.forbiddenCompanionDependencies.contains("living-data-ocean"))
         #expect(ArchitectureManifest.forbiddenCompanionDependencies.contains("agent-core"))
