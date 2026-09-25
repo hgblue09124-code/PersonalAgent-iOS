@@ -307,7 +307,9 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     }
                     let currentMemory = await self.deviceCapabilityProvider.memoryPressure
                     if currentMemory == .critical {
-                        _ = try? await self.unload()
+                        // Never unload native handles from inside the active generation
+                        // task. unload() waits for this task; doing so here would either
+                        // deadlock or free llama.cpp pointers while this task still owns them.
                         throw LlamaCPPEngineError.memoryPressureCritical
                     }
 
@@ -408,7 +410,21 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
     public func unload() async throws {
         setLifecycleState(.unloading)
-        await cancel()
+
+        // Native llama.cpp handles must outlive the generation task. Cancelling a
+        // Swift Task does not synchronously stop an in-flight C call, so releasing
+        // model/context/sampler here immediately can cause a use-after-free crash
+        // on the physical device.
+        let task = stateLock.withLock {
+            let t = activeGenerationTask
+            activeGenerationTask = nil
+            return t
+        }
+        task?.cancel()
+        if let task {
+            await task.value
+        }
+
         await residencyCoordinator.releaseResidency(for: identity.id)
         releaseNativeHandles()
         stateLock.withLock {
