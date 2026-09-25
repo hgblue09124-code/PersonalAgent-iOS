@@ -1,3 +1,26 @@
+import Foundation
+
+public enum ModuleExecutionState: String, Sendable, Codable, Equatable {
+    case idle
+    case validating
+    case executing
+    case completed
+    case failed
+    case cancelled
+}
+
+public struct ModulePayload: Sendable, Equatable, Codable {
+    public let schema: SchemaDocument
+    public let fields: [String: String]
+
+    public init(schema: SchemaDocument, fields: [String: String] = [:]) {
+        self.schema = schema
+        self.fields = fields
+    }
+
+    public func value(for key: String) -> String? { fields[key] }
+}
+
 public struct ModuleInvocation: Sendable, Equatable {
     public let moduleID: ModuleID
     public let input: ModulePayload
