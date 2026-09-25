@@ -15,6 +15,9 @@ final class KernelSession: ObservableObject {
     @Published var lastError: String?
     @Published var providerID: String
     @Published var providerLifecycle: String
+    @Published var providerConnectionState: String
+    @Published var providerModels: [ModelIdentity]
+    @Published var selectedProviderModelID: ModelID?
     @Published var moduleIDs: [String]
 
     @Published var installedModels: [LocalModelDescriptor]
@@ -24,7 +27,9 @@ final class KernelSession: ObservableObject {
     @Published var isDownloadingDevModel = false
     @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
+    @Published var executionTrace: [AgentExecutionProgress] = []
     @Published var executionResult: String?
+    private var lastSubmittedTask: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -33,6 +38,9 @@ final class KernelSession: ObservableObject {
         self.lastError = nil
         self.providerID = composition.selectedProviderID
         self.providerLifecycle = "unknown"
+        self.providerConnectionState = "Not tested"
+        self.providerModels = []
+        self.selectedProviderModelID = nil
         self.moduleIDs = []
         self.installedModels = []
         self.activeModelID = nil
@@ -47,6 +55,11 @@ final class KernelSession: ObservableObject {
         goals = await composition.session.activeGoals()
         providerID = await composition.currentProviderIdentityID()
         providerLifecycle = await composition.currentProviderLifecycle()
+        if providerConnectionState == "Not tested" || providerConnectionState == "Connected" {
+            providerConnectionState = await hasProviderAPIKey() ? providerConnectionState : "Not configured"
+        }
+        providerModels = await composition.availableProviderModels()
+        selectedProviderModelID = await composition.selectedProviderModelID()
         moduleIDs = await composition.registeredModuleIDs()
 
         let storage = composition.localModelStorage
@@ -73,13 +86,88 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    func testProviderConnection() async {
+        providerConnectionState = "Testing…"
+        do {
+            let models = try await composition.testProviderConnection()
+            providerModels = models
+            selectedProviderModelID = await composition.selectedProviderModelID()
+            providerConnectionState = models.isEmpty ? "Failed: no models" : "Connected"
+            lastError = nil
+        } catch {
+            providerConnectionState = "Connection failed"
+            lastError = "Provider connection failed: \(error.localizedDescription)"
+        }
+    }
+
+    func sendChat(_ message: String) async -> String? {
+        do {
+            let response = try await composition.chat(message)
+            lastError = nil
+            return response
+        } catch {
+            lastError = "Agent chat failed: \(error.localizedDescription)"
+            return nil
+        }
+    }
+
+    func refreshProviderModels() async {
+        providerModels = await composition.availableProviderModels()
+        selectedProviderModelID = await composition.selectedProviderModelID()
+    }
+
+    func selectProviderModel(id: ModelID?) async {
+        await composition.selectProviderModel(id: id)
+        selectedProviderModelID = id
+    }
+
+    func configureProviderAPIKey(_ apiKey: String) async {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            lastError = "Provider API key cannot be empty."
+            return
+        }
+        do {
+            try composition.secretStore.store(
+                account: "openai-api-key",
+                secret: Data(trimmed.utf8)
+            )
+            lastError = nil
+        } catch {
+            lastError = "Could not save provider API key securely."
+        }
+        await refresh()
+    }
+
+    func removeProviderAPIKey() async {
+        do {
+            try composition.secretStore.delete(account: "openai-api-key")
+            lastError = nil
+            providerConnectionState = "Not configured"
+        } catch {
+            lastError = "Could not remove provider API key."
+        }
+        await refresh()
+    }
+
+    func hasProviderAPIKey() async -> Bool {
+        do {
+            guard let data = try composition.secretStore.load(account: "openai-api-key") else { return false }
+            return !data.isEmpty
+        } catch {
+            return false
+        }
+    }
+
     func start() async { await run { try await composition.session.start() } }
     func pause() async { await run { try await composition.session.pause() } }
     func resume() async { await run { try await composition.session.resume() } }
     func stop() async { await run { try await composition.session.stop() } }
 
     func submitGoal(_ statement: String) async {
+        lastSubmittedTask = statement
         executionProgress = nil
+        executionTrace = []
         executionResult = nil
         await run {
             let goalID = try await composition.session.submitInput(statement)
@@ -87,12 +175,26 @@ final class KernelSession: ObservableObject {
             _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
                 Task { @MainActor in
                     self?.executionProgress = progress
+                    self?.executionTrace.append(progress)
                     if case .completed(let result) = progress {
                         self?.executionResult = result
                     }
                 }
             }
         }
+    }
+
+    func retryTask() async {
+        guard let statement = lastSubmittedTask else { return }
+        await submitGoal(statement)
+    }
+
+    func resetTask() {
+        lastSubmittedTask = nil
+        executionProgress = nil
+        executionTrace = []
+        executionResult = nil
+        lastError = nil
     }
 
     func downloadDevModel() async {
@@ -199,11 +301,11 @@ private enum DevModelDownloadError: LocalizedError {
         case .invalidURL:
             return "Dev model URL is invalid."
         case .httpStatus(let status):
-            return "Dev model download failed with HTTP (status)."
+            return "Dev model download failed with HTTP \(status)."
         case .invalidSize(let size):
-            return "Dev model size is invalid: (size) bytes."
+            return "Dev model size is invalid: \(size) bytes."
         case .checksumMismatch(let expected, let actual):
-            return "Dev model SHA-256 mismatch. Expected (expected), got (actual)."
+            return "Dev model SHA-256 mismatch. Expected \(expected), got \(actual)."
         }
     }
 }
