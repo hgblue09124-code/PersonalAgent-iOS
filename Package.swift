@@ -107,7 +107,7 @@ let package = Package(
         ),
         .target(
             name: "PATools",
-            dependencies: ["PAFoundation", "PAObservability"],
+            dependencies: ["PAFoundation", "PAObservability", "PARuntime"],
             path: "Sources/Tools/Contracts"
         ),
         .target(
