@@ -14,6 +14,7 @@ public enum ProviderRuntimeError: Error, Sendable, Equatable {
     case timeout
     case invalidRequest
     case providerFailure
+    case httpFailure(statusCode: Int, message: String)
     case decodingFailure
     case cancelled
     case unknown
@@ -35,6 +36,7 @@ extension ProviderRuntimeError: CustomStringConvertible {
         case .timeout: return "timeout"
         case .invalidRequest: return "invalidRequest"
         case .providerFailure: return "providerFailure"
+        case .httpFailure(let statusCode, let message): return "httpFailure:\(statusCode):\(message)"
         case .decodingFailure: return "decodingFailure"
         case .cancelled: return "cancelled"
         case .unknown: return "unknown"
@@ -46,7 +48,7 @@ extension ProviderRuntimeError {
     /// Automatic retries are deferred. This only classifies a failure.
     public var retryClassification: RetryClassification {
         switch self {
-        case .rateLimited, .networkFailure, .timeout, .transport, .providerFailure:
+        case .rateLimited, .networkFailure, .timeout, .transport, .providerFailure, .httpFailure:
             return .retryableTransient
         case .unavailable,
              .contextLimitExceeded,
