@@ -76,3 +76,27 @@ extension ProviderRuntimeError {
         }
     }
 }
+
+
+extension ProviderRuntimeError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .unavailable: return "Provider unavailable."
+        case .contextLimitExceeded: return "Provider context limit exceeded."
+        case .unsupportedCapability(let name): return "Unsupported provider capability: \(name)."
+        case .transport(let message): return "Provider transport error: \(message)"
+        case .decoding(let message): return "Provider decoding error: \(message)"
+        case .invalidConfiguration: return "Provider configuration is invalid."
+        case .authenticationFailure: return "Provider authentication failed. Check the API key."
+        case .authorizationFailure: return "Provider authorization failed for this account/model."
+        case .rateLimited: return "Provider rate limit reached."
+        case .networkFailure: return "Could not reach the provider."
+        case .timeout: return "Provider request timed out."
+        case .invalidRequest: return "Provider rejected the request (HTTP 400)."
+        case .providerFailure: return "Provider returned a server error."
+        case .decodingFailure: return "Provider returned an unsupported or malformed response."
+        case .cancelled: return "Provider request was cancelled."
+        case .unknown: return "Unknown provider error."
+        }
+    }
+}

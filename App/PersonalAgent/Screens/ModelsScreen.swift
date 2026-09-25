@@ -103,7 +103,17 @@ struct ModelsScreen: View {
                             .foregroundStyle(.red)
                     }
                 }
+
+                if let sessionError = session.lastError {
+                    Section("Model Error") {
+                        Text(sessionError)
+                            .foregroundStyle(.red)
+                            .textSelection(.enabled)
+                    }
+                }
             }
+            .scrollContentBackground(.hidden)
+            .background(GlassScreenBackground())
             .navigationTitle("Models")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -118,14 +128,16 @@ struct ModelsScreen: View {
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [
-                UTType(filenameExtension: "gguf") ?? .data
-            ],
+            allowedContentTypes: [.data],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
                 guard let url = urls.first else { return }
+                guard url.pathExtension.lowercased() == "gguf" else {
+                    errorMessage = "Please select a .gguf model file."
+                    return
+                }
                 errorMessage = nil
                 Task { await session.importModel(from: url) }
             case .failure(let error):

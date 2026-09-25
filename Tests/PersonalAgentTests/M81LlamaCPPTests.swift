@@ -288,6 +288,36 @@ struct M81LlamaCPPTests {
         func unload() async throws {}
     }
 
+    @Test(.enabled(if: isLocalGGUFModelPathProvided))
+    func testRepeatedNativeInferenceResetsRequestState() async throws {
+        let modelPath = try #require(ProcessInfo.processInfo.environment["LOCAL_GGUF_MODEL_PATH"])
+        guard FileManager.default.fileExists(atPath: modelPath) else {
+            Issue.record("MODEL MISSING: File specified in LOCAL_GGUF_MODEL_PATH does not exist at \(modelPath)")
+            return
+        }
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "repeat-local-llama"),
+            name: "Repeat Local Llama",
+            localURL: URL(fileURLWithPath: modelPath)
+        )
+        let engine = LlamaCPPModelEngine(identity: identity)
+        try await engine.load(options: LocalModelLoadingOptions(contextWindow: 1024))
+        defer { Task { try? await engine.unload() } }
+
+        let first = try await engine.generate(
+            request: LocalModelGenerationRequest(prompt: "Reply with one short greeting.")
+        )
+        let second = try await engine.generate(
+            request: LocalModelGenerationRequest(prompt: "Reply with a different short greeting.")
+        )
+
+        #expect(!first.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(!second.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(first.finishReason == "stop" || first.finishReason == "length")
+        #expect(second.finishReason == "stop" || second.finishReason == "length")
+    }
+
     @Test func testEmptyOutputThrowsExplicitError() async throws {
         // Direct production validator unit test
         #expect(throws: LlamaCPPEngineError.emptyOutput) {
@@ -341,6 +371,47 @@ struct M81LlamaCPPTests {
         } catch let err as LlamaCPPEngineError {
             #expect(err == .emptyOutput)
         }
+    }
+
+    @Test func testUnloadWaitsForActiveGenerationBeforeReleasingNativeResources() async throws {
+        actor Probe {
+            var finished = false
+            func markFinished() { finished = true }
+            func isFinished() -> Bool { finished }
+        }
+
+        let probe = Probe()
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "unload-race-llama"),
+            name: "Unload Race Llama",
+            contextTokenLimit: 2048
+        )
+
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            streamRunner: { _, _ in
+                do {
+                    while !Task.isCancelled {
+                        try await Task.sleep(nanoseconds: 5_000_000)
+                    }
+                } catch {
+                    // Cancellation is the expected shutdown path.
+                }
+                await probe.markFinished()
+                throw LlamaCPPEngineError.cancelled
+            }
+        )
+
+        _ = engine.generateStream(
+            request: LocalModelGenerationRequest(prompt: "hold generation open")
+        )
+
+        // Give the generation task a chance to enter the runner before unload.
+        try await Task.sleep(nanoseconds: 50_000_000)
+        try await engine.unload()
+
+        #expect(await probe.isFinished())
+        #expect(await engine.lifecycleState == .unloaded)
     }
 
     @Test func testCancellationPropagation() async throws {
