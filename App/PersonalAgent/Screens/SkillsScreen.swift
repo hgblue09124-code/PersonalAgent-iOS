@@ -43,7 +43,9 @@ struct SkillsScreen: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .scrollContentBackground(.hidden)\n            .background(GlassScreenBackground())\n            .navigationTitle("Skills")
+            .scrollContentBackground(.hidden)
+            .background(GlassScreenBackground())
+            .navigationTitle("Skills")
         }
     }
 }
