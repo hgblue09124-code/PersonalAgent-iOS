@@ -156,7 +156,9 @@ struct ProvidersScreen: View {
                     }
                 }
             }
-            .scrollContentBackground(.hidden)\n            .background(GlassScreenBackground())\n            .navigationTitle("Providers")
+            .scrollContentBackground(.hidden)
+            .background(GlassScreenBackground())
+            .navigationTitle("Providers")
             .task {
                 await session.refresh()
                 if await session.hasProviderAPIKey() {
