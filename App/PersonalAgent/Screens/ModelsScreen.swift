@@ -78,7 +78,11 @@ struct ModelsScreen: View {
                     }
                 }
 
-                ModelCatalogSection(session: session)
+                Section {
+                    ModelCatalogContent(session: session)
+                } header: {
+                    Text("Model Catalog")
+                }
 
                 if let errorMessage {
                     Section("Import Error") {
@@ -151,11 +155,11 @@ struct ModelsScreen: View {
 }
 
 
-private struct ModelCatalogSection: View {
+private struct ModelCatalogContent: View {
     @ObservedObject var session: KernelSession
 
     var body: some View {
-        Section("Model Catalog") {
+        VStack(alignment: .leading, spacing: 12) {
             Button {
                 Task { await session.updateModelCatalog() }
             } label: {
