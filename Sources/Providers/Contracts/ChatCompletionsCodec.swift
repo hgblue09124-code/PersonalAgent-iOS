@@ -45,8 +45,8 @@ public enum ChatCompletionsCodec: Sendable {
         if response.statusCode == 200 {
             return try decodeSuccess(body: response.body)
         }
-        let message = providerErrorMessage(from: response.body)
-        throw ProviderRuntimeError.transport("HTTP \(response.statusCode): \(message)")
+        _ = providerErrorMessage(from: response.body) // Parse only for compatibility; semantic status mapping is the contract.
+        throw ProviderRuntimeError.from(statusCode: response.statusCode)
     }
 
     private static func providerErrorMessage(from body: Data) -> String {
