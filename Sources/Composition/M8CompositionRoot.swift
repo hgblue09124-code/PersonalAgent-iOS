@@ -6,8 +6,6 @@ import PAMemory
 import PAModules
 import PAKernel
 import PARuntime
-import PACognition
-import PAPolicy
 import PARuntime
 import PAEvents
 import PAArchitecture
