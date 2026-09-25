@@ -161,3 +161,27 @@ Do not move files during the mapping-only audit.
 **Ownership freeze:** all Audit #13 unresolved ownership groups now have a canonical destination. Remaining work is migration mechanics, Package.swift target updates, and verification—not further architecture discovery.
 
 <!-- HANDOFF: Ownership is frozen. Next task starts physical migration with Kernel contracts/errors/ports, then build/test/audit before the next group. -->
+
+
+### Migration Checkpoint #1 — Kernel Agent Group
+
+<!-- TASK-CONTEXT: Issue #85 physical migration checkpoint. -->
+<!-- DECISION: The legacy Sources/Core/Agent group is replaced by Kernel/{Contracts,Errors,Ports}; PAKernel now targets Kernel. -->
+<!-- INVARIANT: Migration must preserve behavior; path-sensitive architecture tests are updated only to reflect the canonical tree. -->
+
+**CONFIRMED**
+- Moved 7 Kernel agent files from `Sources/Core/Agent` into canonical subdomains:
+  - `Kernel/Contracts/{KernelContracts,LifecycleMachine,GoalMachine}.swift`
+  - `Kernel/Errors/KernelError.swift`
+  - `Kernel/Ports/{GoalManaging,KernelClock,KernelCoordination}.swift`
+- Updated `Package.swift` so `PAKernel` targets `Kernel`.
+- Updated repository integrity / Kernel isolation audit tests to inspect canonical paths.
+- No provider, runtime, UI, or behavior logic was changed.
+- First CI run exposed only stale path assertions; minimal test-path repair was applied.
+- Final CI: Swift package tests **PASS** (346 tests / 47 suites); repository integrity **PASS**; iOS arm64 build + unsigned IPA **PASS**.
+
+**DEFERRED**
+- Foundation elimination remains a later migration group; current Kernel still consumes the existing PAFoundation target.
+- Kernel Events remain in the legacy Events group until their dedicated migration checkpoint.
+
+<!-- HANDOFF: Next task migrates Foundation contracts/errors into Kernel and removes the legacy Foundation layer only when all consumers are updated. -->

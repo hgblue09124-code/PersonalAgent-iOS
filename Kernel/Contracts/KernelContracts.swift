@@ -5,12 +5,7 @@ public struct AgentIdentity: Hashable, Sendable, Codable {
     public let id: AgentID
     public let displayName: String
     public let createdAt: Date
-
-    public init(id: AgentID = AgentID(), displayName: String, createdAt: Date = Date()) {
-        self.id = id
-        self.displayName = displayName
-        self.createdAt = createdAt
-    }
+    public init(id: AgentID = AgentID(), displayName: String, createdAt: Date = Date()) { self.id = id; self.displayName = displayName; self.createdAt = createdAt }
 }
 
 public struct Goal: Hashable, Sendable, Codable {
@@ -18,29 +13,13 @@ public struct Goal: Hashable, Sendable, Codable {
     public let statement: String
     public let createdAt: Date
     public var status: GoalStatus
-
-    public init(
-        id: GoalID = GoalID(),
-        statement: String,
-        createdAt: Date = Date(),
-        status: GoalStatus = .proposed
-    ) {
-        self.id = id
-        self.statement = statement
-        self.createdAt = createdAt
-        self.status = status
+    public init(id: GoalID = GoalID(), statement: String, createdAt: Date = Date(), status: GoalStatus = .proposed) {
+        self.id = id; self.statement = statement; self.createdAt = createdAt; self.status = status
     }
 }
 
 public enum AgentLifecycle: String, Sendable, Codable {
-    case created
-    case starting
-    case running
-    case pausing
-    case paused
-    case stopping
-    case stopped
-    case failed
+    case created, starting, running, pausing, paused, stopping, stopped, failed
 }
 
 public struct AgentState: Sendable, Equatable, Codable {
@@ -48,17 +27,8 @@ public struct AgentState: Sendable, Equatable, Codable {
     public var lifecycle: AgentLifecycle
     public var phase: AgentPhase
     public var activeGoalID: GoalID?
-
-    public init(
-        identity: AgentIdentity,
-        lifecycle: AgentLifecycle = .created,
-        phase: AgentPhase = .idle,
-        activeGoalID: GoalID? = nil
-    ) {
-        self.identity = identity
-        self.lifecycle = lifecycle
-        self.phase = phase
-        self.activeGoalID = activeGoalID
+    public init(identity: AgentIdentity, lifecycle: AgentLifecycle = .created, phase: AgentPhase = .idle, activeGoalID: GoalID? = nil) {
+        self.identity = identity; self.lifecycle = lifecycle; self.phase = phase; self.activeGoalID = activeGoalID
     }
 }
 

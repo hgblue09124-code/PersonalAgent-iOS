@@ -11,26 +11,16 @@ public enum GoalMachine: Sendable {
         command: GoalCommand
     ) -> GoalStatus? {
         switch (status, command) {
-        case (.proposed, .submit):
-            return .proposed
-        case (.proposed, .activate):
-            return .active
-        case (.proposed, .abort):
-            return .aborted
-        case (.active, .suspend):
-            return .blocked
-        case (.active, .complete):
-            return .completed
-        case (.active, .abort):
-            return .aborted
-        case (.blocked, .resume):
-            return .active
-        case (.blocked, .abort):
-            return .aborted
-        case (.blocked, .complete):
-            return .completed
-        default:
-            return nil
+        case (.proposed, .submit): return .proposed
+        case (.proposed, .activate): return .active
+        case (.proposed, .abort): return .aborted
+        case (.active, .suspend): return .blocked
+        case (.active, .complete): return .completed
+        case (.active, .abort): return .aborted
+        case (.blocked, .resume): return .active
+        case (.blocked, .abort): return .aborted
+        case (.blocked, .complete): return .completed
+        default: return nil
         }
     }
 

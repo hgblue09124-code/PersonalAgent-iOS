@@ -10,10 +10,7 @@ import PAFoundation
 @Suite("M2 kernel isolation")
 struct M2IsolationTests {
     @Test func kernelSourcesStayClearOfConcreteProvidersAndTransport() throws {
-        let kernelDir = repositoryRoot()
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("Core")
-            .appendingPathComponent("Agent")
+        let kernelDir = repositoryRoot().appendingPathComponent("Kernel")
         let files = try files(under: kernelDir, suffix: ".swift")
         #expect(!files.isEmpty)
         let banned = [

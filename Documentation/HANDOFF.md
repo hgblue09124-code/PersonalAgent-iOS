@@ -6,38 +6,30 @@
 **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
 
 ## Completed
-- Audit #13 mapping completed without moving production code.
-- Audit #14 resolved remaining ownership gaps from actual responsibilities.
-- Canonical ownership is frozen; no new top-level layer is required.
-- No production/test behavior changed during mapping.
+- Ownership freeze completed in Audit #14.
+- Migration group #1 completed: Kernel agent source moved to canonical Kernel subdomains.
+- PAKernel target now uses `Kernel` as its source path.
+- Path-sensitive architecture tests updated and verified.
 
 ## Confirmed Findings
-- Foundation → Kernel contracts/errors/ports.
-- Shared provider boundary contracts → Kernel/Ports; provider/runtime implementation ownership → Providers or Runtime according to responsibility.
-- HTTP transport/codecs/adapters → Providers/Remote.
-- Local inference → Providers/Local; local model persistence → Storage/Models.
-- Security/network protocols → Kernel/Ports; concrete persistence/network infrastructure → Storage/Configuration.
-- Observability contracts → Kernel/Ports.
-- ArchitectureManifest → Tests/Composition.
-- Memory/Storage separated by semantic responsibility.
-- Cognition/Agency/Policy redistributed into Runtime domains.
-- ProductPersistenceContracts split by persistence responsibility; container remains Composition.
+- 7 legacy Kernel agent files now have canonical homes.
+- CI is green: Swift tests, repository integrity, and iOS arm64 build/unsigned IPA all pass.
+- No behavior change was introduced.
 
 ## Deferred Findings
-- Exact type-level grouping inside split-heavy files happens during migration.
-- Package.swift target graph/imports must be updated during moves.
-- Physical iPhone 12 Pro Max validation remains final gate.
+- Foundation remains a compatibility dependency and must be migrated carefully.
+- Kernel Events remain outside Kernel until their migration group.
 
 ## Tests / Gates
-- Mapping-only work made no production/test changes.
-- Migration gate: build + full tests + dependency-direction audit after each group; physical iPhone validation at final gate.
+- Swift package tests: PASS, 346 tests / 47 suites.
+- Repository integrity greps: PASS.
+- iOS arm64 build + unsigned IPA: PASS.
 
 ## Exact Next Action
-1. Migrate Kernel contracts/errors/ports first.
-2. Move before rewrite; update imports/Package.swift only as required.
-3. Build + full tests.
-4. Audit dependency direction.
-5. Record checkpoint in AUDIT.md.
-6. Continue only if green.
+1. Migrate `Sources/Foundation/*` into Kernel Contracts/Errors/Ports according to Audit #14.
+2. Update all consumers/imports and Package.swift only as required.
+3. Remove the legacy PAFoundation target only after dependency graph is green.
+4. Run full tests + iOS build.
+5. Audit dependency direction before continuing.
 
-<!-- DO NOT REDO: Do not restart provider feature work, UI redesign, llama.cpp optimization, or ownership discovery. Ownership is frozen. -->
+<!-- DO NOT REDO: Do not restart provider feature work, UI redesign, llama.cpp optimization, or ownership discovery. -->

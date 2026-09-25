@@ -29,22 +29,19 @@ struct RepositoryIntegrityTests {
 
     @Test func requiredM1KernelSourcesExist() {
         let root = repositoryRoot()
-        let kernel = root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("Core")
-            .appendingPathComponent("Agent")
-        for name in [
-            "LifecycleMachine.swift",
-            "GoalMachine.swift",
-            "GoalManaging.swift",
-            "KernelClock.swift",
-            "KernelCoordination.swift",
-            "KernelError.swift",
-            "KernelContracts.swift",
+        let kernel = root.appendingPathComponent("Kernel")
+        for path in [
+            "Contracts/LifecycleMachine.swift",
+            "Contracts/GoalMachine.swift",
+            "Ports/GoalManaging.swift",
+            "Ports/KernelClock.swift",
+            "Ports/KernelCoordination.swift",
+            "Errors/KernelError.swift",
+            "Contracts/KernelContracts.swift",
         ] {
             #expect(
-                FileManager.default.fileExists(atPath: kernel.appendingPathComponent(name).path),
-                "missing kernel source \(name)"
+                FileManager.default.fileExists(atPath: kernel.appendingPathComponent(path).path),
+                "missing kernel source \(path)"
             )
         }
     }

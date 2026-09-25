@@ -7,14 +7,6 @@ import PAModules
 /// remains outside this contract.
 public struct KernelCoordinationBoundary: Sendable {
     public var modules: (any ModuleExecuting)?
-
-    public init(
-        modules: (any ModuleExecuting)? = nil
-    ) {
-        self.modules = modules
-    }
-
-    public var isWiredForModules: Bool {
-        modules != nil
-    }
+    public init(modules: (any ModuleExecuting)? = nil) { self.modules = modules }
+    public var isWiredForModules: Bool { modules != nil }
 }

@@ -145,7 +145,7 @@ let package = Package(
                 "PAEvents",
                 "PAModules",
             ],
-            path: "Sources/Core/Agent"
+            path: "Kernel"
         ),
         .target(
             name: "PARuntime",
