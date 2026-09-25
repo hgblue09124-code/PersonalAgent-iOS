@@ -4,7 +4,7 @@ import PackageDescription
 /// M0–M6 package graph.
 ///
 /// Dependency direction is downward only:
-///   App -> Composition -> Kernel -> Cognition/Agency/Policy
+///   App -> Composition -> Runtime -> Kernel -> Cognition/Agency/Policy
 ///        -> Skills/Tools/Modules/Providers/Memory
 ///        -> Storage/Events/Observability/Security
 ///        -> Foundation
