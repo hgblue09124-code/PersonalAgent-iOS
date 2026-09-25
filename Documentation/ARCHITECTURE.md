@@ -1,66 +1,51 @@
-# Personal Agent — Architecture
+# PersonalAgent-iOS Architecture
 
-Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented. M4 Memory OS implemented (`Documentation/M4.md`). M5 Local + Cloud Storage / Sync implemented (`Documentation/M5.md`). M6 Cognition / Agency integrated (`Documentation/M6.md`). M7 Durable Run Lifecycle, Checkpointing & Recovery implemented (`Documentation/M7.md`). M8 Product Architecture Foundation specification and boundaries established (`Documentation/M8.md`).
-No live LLM call in default composition.
+## Purpose
 
-This iOS client is the long-lived Personal Agent / Agent OS *client*.
-It is not a chat wrapper. Kernel is not an LLM.
+This is the architecture entry point. It separates the verified current baseline from the intended target so documentation never presents an unimplemented design as fact.
 
-Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`)
-are external material. They must not appear as runtime dependencies.
+## Verified baseline
 
-## Axis
+Recovery anchor: `e3e7182523daf711ba23cbc9ec67bd450ef44e5d`.
 
-```
-UI (SwiftUI App)
+At this checkpoint both the M3 package workflow and Apple Native Build workflow were verified green. The baseline is preserved; migration proceeds in small independently verifiable slices.
+
+## Target
+
+```text
+App
   ↓
-App Session / App Lifecycle
+Composition
   ↓
-Composition (M8CompositionRoot)
-  ↓
-Agent Kernel (AgentRuntime / AgentSession)
-  ↓
-Cognition / Memory / Agency / Policy / M7 Run Boundary
-  ↓
-Module / Skill / Tool / Provider contracts / Local Model Engine
-  ↓
-Storage / Sync / Product Persistence Container
-  ↓
-Events / Observability / Security / Device Capabilities
-  ↓
-Foundation
+Runtime ───────── Capabilities
+  ↓                    ↓
+Kernel              Modules / Skills / Tools
+  ↑
+Ports / Contracts
+  ↑
+Providers / Memory / Storage / Device adapters
 ```
 
-## Layer responsibilities
+This is a dependency intent, not a claim about today's source tree.
+
+## Ownership
 
 | Layer | Owns | Must not own |
-| --- | --- | --- |
-| UI | rendering, input, safe-area layout | goals, plans, storage, provider calls |
-| App Session | user input boundary, session events | AgentState ownership, direct state mutations |
-| Composition | wiring contracts for a process, product persistence | business logic |
-| Kernel | identity, state, goals, lifecycle, coordination, durable run bounds | SwiftUI, concrete LLM, concrete store |
-| Cognition | perception → reflection pipeline contracts | execution side effects |
-| Agency | goal → adapt loop contracts | bypassing policy |
-| Policy | capability + approval gate | tool implementations |
-| Skills / Tools / Modules / Providers / Local Models | contracts + reserved adapter packages | agent state |
-| Storage / Memory | contracts for local-first + sync, run stores, domain persistence | cloud vendor lock-in |
-| Events | trace / replay / run provenance contracts | UI |
-| Device Capabilities | thermal, memory, network, app lifecycle signals | UIKit/SwiftUI imports in Kernel |
-| Security | secret + network boundaries | agent state |
+|---|---|---|
+| App | SwiftUI presentation | Runtime, provider SDKs, persistence |
+| Composition | construction and wiring | business logic |
+| Runtime | execution, planning, observation, verification | persistence implementation |
+| Kernel | stable contracts, ports, events, invariants | UI and concrete vendors |
+| Capabilities | Modules, Skills, Tools | provider internals |
+| Providers | provider contracts and adapters | UI and unrelated policy |
+| Memory | memory semantics and retrieval | physical persistence |
+| Storage | durable persistence and sync | reasoning semantics |
+| Device | platform/device adapters | agent policy |
 
-## Milestone freeze
+## Core rule
 
-M0 freezes boundaries and contracts.
-M1 implements Kernel runtime (`Documentation/M1.md`).
-M2 implements the provider contract and runtime (`Documentation/M2.md`).
-M3 implements the module / skill / tool runtime (`Documentation/M3.md`).
-M4 implements the local-first Memory OS runtime & persistence (`Documentation/M4.md`).
-M5 defines the Local + Cloud Storage / Sync architectural specification (`Documentation/M5.md`).
-M6 implements Cognition / Agency integration gate (`Documentation/M6.md`).
-M7 implements Durable Run Lifecycle, Checkpointing, Interruption Recovery & Capability Bounding (`Documentation/M7.md`).
-M8 establishes the Product Architecture Foundation (`Documentation/M8.md`).
+When current code differs from target, code is authoritative for current behavior and this document is authoritative for intended architecture. A migration task must state the gap before changing it.
 
-Kernel may hold `any LLMProvider`. It does not import `PAProvidersGrok` / OpenAI / Local.
-Default composition wires `DeterministicFakeProvider`. Live vendor calls are a separate verification gate.
-Kernel may hold `any ModuleExecuting` and request execution. It does not contain concrete modules.
-Kernel may hold `any MemoryExecuting` and request memory operations. It does not contain concrete memory stores.
+## Quality bar
+
+A change is architecturally complete only when responsibility is singular, dependencies are explicit, vendor knowledge is isolated, contracts are testable, behavior is preserved unless intentionally changed, and all relevant verification gates are green.
