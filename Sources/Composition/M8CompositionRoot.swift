@@ -135,31 +135,54 @@ public actor LocalModelRuntimeCoordinator: Sendable {
     }
 }
 
-/// Dynamic provider wrapper routing completion/streaming requests to the active local model engine when configured,
-/// propagating local resolution/execution errors fail-closed, and falling back to the configured default provider
-/// strictly when no local model is configured.
+/// Explicitly routes requests to the user-selected remote or local provider.
+/// Provider availability never implicitly changes the selected route.
+public enum ProviderRoute: String, Sendable {
+    case remote
+    case local
+}
+
+public actor ProviderRouteStore: Sendable {
+    private var route: ProviderRoute
+
+    public init(initialRoute: ProviderRoute = .remote) {
+        self.route = initialRoute
+    }
+
+    public func selectedRoute() -> ProviderRoute {
+        route
+    }
+
+    public func select(_ route: ProviderRoute) {
+        self.route = route
+    }
+}
+
 public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     private let fallbackProvider: any LLMProvider
     private let coordinator: LocalModelRuntimeCoordinator
+    private let routeStore: ProviderRouteStore
 
     public init(
         fallbackProvider: any LLMProvider,
-        coordinator: LocalModelRuntimeCoordinator
+        coordinator: LocalModelRuntimeCoordinator,
+        routeStore: ProviderRouteStore
     ) {
         self.fallbackProvider = fallbackProvider
         self.coordinator = coordinator
+        self.routeStore = routeStore
     }
 
-    private enum ActiveResolution {
-        case noActiveModel
-        case activeModel(any LLMProvider)
-    }
-
-    private func resolveActiveProvider() async throws -> ActiveResolution {
-        guard let engine = try await coordinator.activeLocalModelEngine() else {
-            return .noActiveModel
+    private func resolveActiveProvider() async throws -> any LLMProvider {
+        switch await routeStore.selectedRoute() {
+        case .remote:
+            return fallbackProvider
+        case .local:
+            guard let engine = try await coordinator.activeLocalModelEngine() else {
+                throw LlamaCPPEngineError.modelNotLoaded
+            }
+            return LocalModelProviderAdapter(engine: engine)
         }
-        return .activeModel(LocalModelProviderAdapter(engine: engine))
     }
 
     public var identity: ProviderIdentity {
@@ -173,12 +196,23 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     public var health: ProviderHealth {
         get async {
             do {
-                switch try await resolveActiveProvider() {
-                case .noActiveModel:
-                    return await fallbackProvider.health
-                case .activeModel(let adapter):
-                    return await adapter.health
+                return await resolveHealth()
+            } catch {
+                return .unavailable
+            }
+        }
+    }
+
+    private func resolveHealth() async -> ProviderHealth {
+        switch await routeStore.selectedRoute() {
+        case .remote:
+            return await fallbackProvider.health
+        case .local:
+            do {
+                guard let engine = try await coordinator.activeLocalModelEngine() else {
+                    return .unavailable
                 }
+                return await LocalModelProviderAdapter(engine: engine).health
             } catch {
                 return .unavailable
             }
@@ -186,30 +220,29 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
-        switch try await resolveActiveProvider() {
-        case .noActiveModel:
-            return try await fallbackProvider.complete(request)
-        case .activeModel(let adapter):
-            return try await adapter.complete(request)
-        }
+        try await resolveActiveProvider().complete(request)
     }
 
     public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         let fallback = fallbackProvider
         let coord = coordinator
+        let routeStore = routeStore
         return AsyncThrowingStream { continuation in
             Task {
                 do {
-                    guard let engine = try await coord.activeLocalModelEngine() else {
+                    switch await routeStore.selectedRoute() {
+                    case .remote:
                         for try await event in fallback.stream(request) {
                             continuation.yield(event)
                         }
-                        continuation.finish()
-                        return
-                    }
-                    let adapter = LocalModelProviderAdapter(engine: engine)
-                    for try await event in adapter.stream(request) {
-                        continuation.yield(event)
+                    case .local:
+                        guard let engine = try await coord.activeLocalModelEngine() else {
+                            throw LlamaCPPEngineError.modelNotLoaded
+                        }
+                        let adapter = LocalModelProviderAdapter(engine: engine)
+                        for try await event in adapter.stream(request) {
+                            continuation.yield(event)
+                        }
                     }
                     continuation.finish()
                 } catch {
@@ -219,6 +252,7 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         }
     }
 }
+
 
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
@@ -231,6 +265,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let localModelStorage: any LocalModelStorage
     public let deviceCapabilityProvider: any DeviceCapabilityProviding
     public let localModelRuntimeCoordinator: LocalModelRuntimeCoordinator
+    public let providerRouteStore: ProviderRouteStore
     public let providerRuntime: ProviderRuntime?
     public let secretStore: any SecretStore
     public let providerModelSelection: ProviderModelSelectionStore
@@ -303,6 +338,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             engineFactory: localModelEngineFactory
         )
         self.localModelRuntimeCoordinator = coordinator
+        let providerRouteStore = ProviderRouteStore(initialRoute: .remote)
+        self.providerRouteStore = providerRouteStore
 
         let rawLog: any EventLog
         if let eventLog {
@@ -358,7 +395,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         }
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: selectableProvider,
-            coordinator: coordinator
+            coordinator: coordinator,
+            routeStore: providerRouteStore
         )
         self.catalog = ProviderCatalog(providers: [dynamicProvider])
         self.activeProvider = dynamicProvider
@@ -498,9 +536,35 @@ extension M8CompositionRoot {
         catalog.identities.first?.id.rawValue ?? "none"
     }
 
-    /// Performs a real provider connectivity check. Success requires a real /v1/models response.
+    public func selectedProviderRoute() async -> ProviderRoute {
+        await providerRouteStore.selectedRoute()
+    }
+
+    public func selectProviderRoute(_ route: ProviderRoute) async {
+        await providerRouteStore.select(route)
+    }
+
+    /// Performs a real connectivity check against the explicitly selected route.
     public func testProviderConnection() async throws -> [ModelIdentity] {
-        try await providerModelCatalog.discover()
+        switch await providerRouteStore.selectedRoute() {
+        case .remote:
+            return try await providerModelCatalog.discover()
+        case .local:
+            guard let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() else {
+                throw LlamaCPPEngineError.modelNotLoaded
+            }
+            let health = await LocalModelProviderAdapter(engine: engine).health
+            guard health != .unavailable else {
+                throw LlamaCPPEngineError.modelNotLoaded
+            }
+            return [
+                ModelIdentity(
+                    id: engine.identity.id,
+                    displayName: engine.identity.name,
+                    contextTokenLimit: engine.identity.contextTokenLimit
+                )
+            ]
+        }
     }
 
     /// Sends a normal conversational request through the active provider boundary.
@@ -508,9 +572,21 @@ extension M8CompositionRoot {
     public func chat(_ text: String) async throws -> String {
         let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !prompt.isEmpty else { throw ProviderRuntimeError.invalidConfiguration }
+        let route = await providerRouteStore.selectedRoute()
+        let model: ModelID
+        switch route {
+        case .remote:
+            model = (await providerModelSelection.selectedModel()) ?? activeProvider.identity.models.first?.id ?? DefaultLiveProvider.defaultModel
+        case .local:
+            guard let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() else {
+                throw LlamaCPPEngineError.modelNotLoaded
+            }
+            model = engine.identity.id
+        }
+
         let response = try await activeProvider.complete(
             LLMRequest(
-                model: (await providerModelSelection.selectedModel()) ?? activeProvider.identity.models.first?.id ?? ModelID(rawValue: "local"),
+                model: model,
                 messages: [
                     ProviderMessage(
                         role: .system,
@@ -554,19 +630,39 @@ extension M8CompositionRoot {
     }
 
     public func currentProviderIdentityID() async -> String {
-        do {
-            if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
+        switch await providerRouteStore.selectedRoute() {
+        case .remote:
+            return catalog.identities.first?.id.rawValue ?? "none"
+        case .local:
+            do {
+                guard let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() else {
+                    return "local-none"
+                }
                 return "local-\(engine.identity.id.rawValue)"
+            } catch {
+                return "local-error"
             }
-        } catch {
-            return "local-error"
         }
-        return catalog.identities.first?.id.rawValue ?? "none"
     }
 
     public func currentProviderLifecycle() async -> String {
-        do {
-            if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
+        switch await providerRouteStore.selectedRoute() {
+        case .remote:
+            if let providerRuntime {
+                let lifecycle = await providerRuntime.lifecycle.rawValue
+                if dynamicProviderRequiresAPIKey {
+                    let hasKey = (try? secretStore.load(account: "openai-api-key"))?.isEmpty == false
+                    if !hasKey { return "missing-api-key" }
+                }
+                return lifecycle
+            }
+            return "unconfigured"
+
+        case .local:
+            do {
+                guard let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() else {
+                    return "unloaded"
+                }
                 let state = await engine.lifecycleState
                 switch state {
                 case .unloaded: return "unloaded"
@@ -575,21 +671,11 @@ extension M8CompositionRoot {
                 case .unloading: return "unloading"
                 case .failed(let r): return "failed(\(r))"
                 }
+            } catch {
+                return "error(\(error.localizedDescription))"
             }
-        } catch {
-            return "error(\(error.localizedDescription))"
         }
-        if let providerRuntime {
-            let lifecycle = await providerRuntime.lifecycle.rawValue
-            if dynamicProviderRequiresAPIKey {
-                let hasKey = (try? secretStore.load(account: "openai-api-key"))?.isEmpty == false
-                if !hasKey { return "missing-api-key" }
-            }
-            return lifecycle
-        }
-        return "unconfigured"
     }
-
     public func registeredModuleIDs() async -> [String] {
         await moduleCatalog.contracts().map(\.id.rawValue)
     }
