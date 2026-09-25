@@ -1,4 +1,5 @@
 import Foundation
+import PAFoundation
 import PASecurity
 
 /// Discovers models exposed by an OpenAI-compatible HTTP endpoint.
