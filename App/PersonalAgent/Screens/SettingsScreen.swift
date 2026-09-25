@@ -10,7 +10,7 @@ struct SettingsScreen: View {
 
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 if let error = session.lastError ?? lastImportError {
                     Section {
                         HStack(spacing: 8) {
