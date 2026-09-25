@@ -23,7 +23,7 @@ public enum ChatCompletionsCodec: Sendable {
             body["temperature"] = temperature
         }
         if let maxTokens = request.parameters.maxOutputTokens {
-            body["max_tokens"] = maxTokens
+            body["max_completion_tokens"] = maxTokens
         }
         let data = try JSONSerialization.data(withJSONObject: body, options: [])
         var headers = [
@@ -45,8 +45,27 @@ public enum ChatCompletionsCodec: Sendable {
         if response.statusCode == 200 {
             return try decodeSuccess(body: response.body)
         }
+        _ = providerErrorMessage(from: response.body) // Parse only for compatibility; semantic status mapping is the contract.
         throw ProviderRuntimeError.from(statusCode: response.statusCode)
     }
+
+    private static func providerErrorMessage(from body: Data) -> String {
+        if let object = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+           let error = object["error"] as? [String: Any],
+           let message = error["message"] as? String,
+           !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return message
+        }
+        if let text = String(data: body, encoding: .utf8) {
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                return String(trimmed.prefix(240))
+            }
+        }
+        return "HTTP \(responseStatusPlaceholder)"
+    }
+
+    private static let responseStatusPlaceholder = "request failed"
 
     public static func decodeSuccess(body: Data) throws -> LLMResponse {
         let object: Any
