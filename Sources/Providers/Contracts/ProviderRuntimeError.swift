@@ -25,7 +25,7 @@ extension ProviderRuntimeError: CustomStringConvertible {
         case .unavailable: return "unavailable"
         case .contextLimitExceeded: return "contextLimitExceeded"
         case .unsupportedCapability(let name): return "unsupportedCapability:\(name)"
-        case .transport(let message): return "transport:\(message)"
+        case .transport: return "transport"
         case .decoding: return "decoding"
         case .invalidConfiguration: return "invalidConfiguration"
         case .authenticationFailure: return "authenticationFailure"
