@@ -2,7 +2,6 @@ import Testing
 import PAArchitecture
 import PAFoundation
 import PACognition
-import PAAgency
 
 @Suite("M0 architecture manifest")
 struct ArchitectureManifestTests {
