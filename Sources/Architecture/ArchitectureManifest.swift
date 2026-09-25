@@ -45,12 +45,12 @@ public enum ArchitectureManifest: Sendable {
 
     /// Target -> allowed imported PA* modules. Foundation is implicit for all.
     public static let allowedImports: [String: Set<String>] = [
-        "PAFoundation": [],
+        "PAFoundation": ["PAKernel"],
         "PAObservability": ["PAFoundation"],
-        "PAEvents": ["PAFoundation", "PAObservability"],
+        "PAEvents": ["PAFoundation", "PAObservability", "PAKernel"],
         "PASecurity": ["PAFoundation"],
         "PAStorage": ["PAFoundation", "PAEvents", "PAObservability"],
-        "PAMemory": ["PAFoundation", "PAStorage", "PAEvents"],
+        "PAMemory": ["PAFoundation", "PAStorage", "PAEvents", "PAKernel"],
         "PAProviders": ["PAFoundation", "PAObservability", "PASecurity", "PAEvents"],
         "PAProvidersGrok": ["PAProviders", "PAFoundation"],
         "PAProvidersOpenAI": ["PAProviders", "PAFoundation"],
