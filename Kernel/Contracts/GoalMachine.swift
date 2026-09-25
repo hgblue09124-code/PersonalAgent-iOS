@@ -1,4 +1,3 @@
-import PAFoundation
 import PAEvents
 
 /// Goal graph mapped onto M0 `GoalStatus`.
