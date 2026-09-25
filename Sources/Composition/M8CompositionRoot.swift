@@ -603,22 +603,41 @@ extension M8CompositionRoot {
     }
 
     public func availableProviderModels() async -> [ModelIdentity] {
-        let discovered: [ModelIdentity]
-        do {
-            discovered = try await providerModelCatalog.discover()
-        } catch {
-            return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
-        }
+        switch await providerRouteStore.selectedRoute() {
+        case .local:
+            do {
+                guard let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() else {
+                    return []
+                }
+                return [
+                    ModelIdentity(
+                        id: engine.identity.id,
+                        displayName: engine.identity.name,
+                        contextTokenLimit: engine.identity.contextTokenLimit
+                    )
+                ]
+            } catch {
+                return []
+            }
 
-        guard !discovered.isEmpty else {
-            return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
-        }
+        case .remote:
+            let discovered: [ModelIdentity]
+            do {
+                discovered = try await providerModelCatalog.discover()
+            } catch {
+                return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
+            }
 
-        let selected = await providerModelSelection.selectedModel()
-        if selected == nil || !discovered.contains(where: { $0.id == selected }) {
-            await providerModelSelection.select(discovered[0].id)
+            guard !discovered.isEmpty else {
+                return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
+            }
+
+            let selected = await providerModelSelection.selectedModel()
+            if selected == nil || !discovered.contains(where: { $0.id == selected }) {
+                await providerModelSelection.select(discovered[0].id)
+            }
+            return discovered
         }
-        return discovered
     }
 
     public func selectedProviderModelID() async -> ModelID? {
