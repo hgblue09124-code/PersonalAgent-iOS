@@ -236,6 +236,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let providerModelSelection: ProviderModelSelectionStore
     public let providerModelCatalog: HTTPProviderModelCatalog
     public let catalog: ProviderCatalog
+    public let activeProvider: any LLMProvider
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
     public let memoryStore: any MemoryStore
@@ -360,6 +361,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             coordinator: coordinator
         )
         self.catalog = ProviderCatalog(providers: [dynamicProvider])
+        self.activeProvider = dynamicProvider
 
         let providerRuntime = ProviderRuntime(
             provider: dynamicProvider,
@@ -494,6 +496,27 @@ extension M8CompositionRoot {
 
     public var selectedProviderID: String {
         catalog.identities.first?.id.rawValue ?? "none"
+    }
+
+    /// Performs a real provider connectivity check. Success requires a real /v1/models response.
+    public func testProviderConnection() async throws -> [ModelIdentity] {
+        try await providerModelCatalog.discover()
+    }
+
+    /// Sends a normal conversational request through the active provider boundary.
+    /// This is the user-facing chat path; execution/verification remains owned by M6.
+    public func chat(_ text: String) async throws -> String {
+        let prompt = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !prompt.isEmpty else { throw ProviderRuntimeError.invalidConfiguration }
+        let response = try await activeProvider.complete(
+            LLMRequest(
+                model: (await providerModelSelection.selectedModel()) ?? activeProvider.identity.models.first?.id ?? ModelID(rawValue: "local"),
+                prompt: prompt
+            )
+        )
+        let output = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !output.isEmpty else { throw ProviderRuntimeError.emptyOutput }
+        return output
     }
 
     public func availableProviderModels() async -> [ModelIdentity] {
