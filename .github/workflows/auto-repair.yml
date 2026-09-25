@@ -66,10 +66,11 @@ jobs:
       - name: Classify and apply guarded repair
         id: repair
         if: steps.tests.outputs.status != '0'
-        shell: python3
+        shell: bash
         env:
           LOG: /tmp/swift-test.log
         run: |
+          python3 - <<'PY'
           import hashlib
           import json
           import os
@@ -220,6 +221,7 @@ jobs:
                   output.write(f"fingerprint={fingerprint}\n")
                   output.write("repaired=true\n")
           print("AUTO-REPAIR: DETERMINISTIC: " + " | ".join(repairs))
+          PY
 
       - name: Regression test repaired tree
         id: regression
