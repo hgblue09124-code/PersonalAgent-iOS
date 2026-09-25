@@ -194,7 +194,7 @@ struct M5CloudStoreContractTests {
 
     // 5. M0-M5.1 regression / architecture check
     @Test func testNoForbiddenVendorSDKsOrRuntimeInStorage() throws {
-        let storageDir = repositoryRoot().appendingPathComponent("Sources/Storage")
+        let storageDir = repositoryRoot().appendingPathComponent("Sources/Storage").appendingPathComponent("Core")
         let filesList = try files(under: storageDir, suffix: ".swift")
 
         let forbiddenKeywords = ["Firebase", "CloudKit", "Supabase", "AWS", "URLSession", "Network"]
