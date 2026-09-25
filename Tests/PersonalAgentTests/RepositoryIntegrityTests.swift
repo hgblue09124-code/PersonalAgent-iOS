@@ -48,9 +48,18 @@ struct RepositoryIntegrityTests {
 
 
     @Test func requiredRuntimeSourcesExist() {
-        let runtime = repositoryRoot().appendingPathComponent("Sources").appendingPathComponent("Runtime")
-        for name in ["AgentRuntime.swift", "AgentSession.swift", "M6Orchestrator.swift", "RunLifecycleManager.swift", "RunRecoveryEngine.swift"] {
-            #expect(FileManager.default.fileExists(atPath: runtime.appendingPathComponent(name).path), "missing runtime source \(name)")
+        let runtime = repositoryRoot().appendingPathComponent("Runtime")
+        for path in [
+            "Agent/AgentRuntime.swift",
+            "Agent/AgentSession.swift",
+            "Planning/M6Orchestrator.swift",
+            "Execution/RunLifecycleManager.swift",
+            "Execution/RunRecoveryEngine.swift",
+        ] {
+            #expect(
+                FileManager.default.fileExists(atPath: runtime.appendingPathComponent(path).path),
+                "missing runtime source \(path)"
+            )
         }
     }
 
