@@ -1,5 +1,3 @@
-import PAEvents
-
 /// Goal graph mapped onto M0 `GoalStatus`.
 /// Goal pause/resume use `blocked` / `active`. No extra status is introduced.
 public enum GoalMachine: Sendable {
