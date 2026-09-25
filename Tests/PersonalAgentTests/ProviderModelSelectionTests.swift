@@ -12,20 +12,20 @@ struct ProviderModelSelectionTests {
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
         let first = ProviderModelSelectionStore(
-            initialModel: ModelID(rawValue: "gpt-5.6-luna"),
+            initialModel: ModelID(rawValue: "test-model-alpha"),
             suiteName: suiteName,
             persistenceKey: "selected"
         )
-        #expect(await first.selectedModel() == ModelID(rawValue: "gpt-5.6-luna"))
+        #expect(await first.selectedModel() == ModelID(rawValue: "test-model-alpha"))
 
-        await first.select(ModelID(rawValue: "gpt-5.6-terra"))
+        await first.select(ModelID(rawValue: "test-model-beta"))
 
         let restored = ProviderModelSelectionStore(
             initialModel: ModelID(rawValue: "fallback"),
             suiteName: suiteName,
             persistenceKey: "selected"
         )
-        #expect(await restored.selectedModel() == ModelID(rawValue: "gpt-5.6-terra"))
+        #expect(await restored.selectedModel() == ModelID(rawValue: "test-model-beta"))
     }
 
     @Test("selection can be cleared")
@@ -35,7 +35,7 @@ struct ProviderModelSelectionTests {
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
         let store = ProviderModelSelectionStore(
-            initialModel: ModelID(rawValue: "gpt-5.6-luna"),
+            initialModel: ModelID(rawValue: "test-model-alpha"),
             suiteName: suiteName,
             persistenceKey: "selected"
         )
