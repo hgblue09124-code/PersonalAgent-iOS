@@ -1,5 +1,6 @@
 import Foundation
 import PAFoundation
+import PASecurity
 import PAProviders
 import PAProvidersLocal
 import PAMemory
@@ -13,6 +14,17 @@ import PAArchitecture
 import PAObservability
 import PATools
 import PASkills
+
+private enum DefaultLiveProvider {
+    static let providerID = ProviderID(rawValue: "openai")
+    static let endpoint = "https://api.openai.com/v1/chat/completions"
+    static let defaultModel = ModelID(rawValue: "gpt-4o-mini")
+    static let identity = ProviderIdentity(
+        id: providerID,
+        displayName: "OpenAI",
+        models: [ModelIdentity(id: defaultModel, displayName: "GPT-4o mini", contextTokenLimit: 128_000)]
+    )
+}
 
 /// Manages active local model engine instance lifetime and residency in product composition.
 public actor LocalModelRuntimeCoordinator: Sendable {
@@ -220,6 +232,9 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let deviceCapabilityProvider: any DeviceCapabilityProviding
     public let localModelRuntimeCoordinator: LocalModelRuntimeCoordinator
     public let providerRuntime: ProviderRuntime?
+    public let secretStore: any SecretStore
+    public let providerModelSelection: ProviderModelSelectionStore
+    public let providerModelCatalog: HTTPProviderModelCatalog
     public let catalog: ProviderCatalog
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
@@ -254,7 +269,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         attemptStore: (any ExecutionAttemptStore)? = nil,
         checkpointStore: (any RunCheckpointStore)? = nil,
         journalStore: (any StateJournalStore)? = nil,
-        mutationEvidenceStore: (any MutationEvidenceStore)? = nil
+        mutationEvidenceStore: (any MutationEvidenceStore)? = nil,
+        secretStore: (any SecretStore)? = nil
     ) async throws {
         let rootDirectoryURL: URL
         if let storeDirectoryURL {
@@ -300,9 +316,47 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = idempotentLog
         self.idempotentEventLog = idempotentLog
 
-        let fallbackProvider = provider ?? DeterministicFakeProvider()
+        let resolvedSecretStore: any SecretStore = secretStore ?? KeychainSecretStore()
+        self.secretStore = resolvedSecretStore
+        let credentialRef = ProviderCredentialRef(
+            providerID: DefaultLiveProvider.providerID,
+            account: "openai-api-key"
+        )
+        let liveProvider = HTTPChatProvider(
+            identity: DefaultLiveProvider.identity,
+            configuration: ProviderConfiguration(
+                providerID: DefaultLiveProvider.providerID,
+                endpointURL: DefaultLiveProvider.endpoint,
+                defaultModel: DefaultLiveProvider.defaultModel,
+                credential: credentialRef
+            ),
+            transport: SecurityNetworkTransport(network: URLSessionNetworkAccess()),
+            credentials: SecretStoreCredentials(store: resolvedSecretStore),
+            capabilities: [.textGeneration, .streaming],
+            authorizationScheme: .bearer
+        )
+        let baseProvider = provider ?? liveProvider
+        let modelSelection = ProviderModelSelectionStore(initialModel: DefaultLiveProvider.defaultModel)
+        self.providerModelSelection = modelSelection
+        let modelCatalog = HTTPProviderModelCatalog(
+            modelsEndpoint: "https://api.openai.com/v1/models",
+            credentialRef: credentialRef,
+            credentials: SecretStoreCredentials(store: resolvedSecretStore),
+            network: URLSessionNetworkAccess()
+        )
+        self.providerModelCatalog = modelCatalog
+
+        let selectableProvider: any LLMProvider
+        if provider == nil {
+            selectableProvider = ModelSelectingProvider(
+                base: baseProvider,
+                selection: modelSelection
+            )
+        } else {
+            selectableProvider = baseProvider
+        }
         let dynamicProvider = DynamicActiveProvider(
-            fallbackProvider: fallbackProvider,
+            fallbackProvider: selectableProvider,
             coordinator: coordinator
         )
         self.catalog = ProviderCatalog(providers: [dynamicProvider])
@@ -314,8 +368,9 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         )
         let configuration = ProviderConfiguration(
             providerID: dynamicProvider.identity.id,
-            endpointURL: nil,
-            defaultModel: dynamicProvider.identity.models.first?.id ?? ModelID(rawValue: "fake-text")
+            endpointURL: dynamicProvider.identity.id == DefaultLiveProvider.providerID ? DefaultLiveProvider.endpoint : nil,
+            defaultModel: dynamicProvider.identity.models.first?.id ?? ModelID(rawValue: "fake-text"),
+            credential: dynamicProvider.identity.id == DefaultLiveProvider.providerID ? credentialRef : nil
         )
         try await providerRuntime.configure(configuration)
         try await providerRuntime.ready()
@@ -433,8 +488,30 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 }
 
 extension M8CompositionRoot {
+    private var dynamicProviderRequiresAPIKey: Bool {
+        catalog.identities.first?.id == DefaultLiveProvider.providerID
+    }
+
     public var selectedProviderID: String {
         catalog.identities.first?.id.rawValue ?? "none"
+    }
+
+    public func availableProviderModels() async -> [ModelIdentity] {
+        let discovered: [ModelIdentity]
+        do {
+            discovered = try await providerModelCatalog.discover()
+        } catch {
+            return catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]
+        }
+        return discovered.isEmpty ? (catalog.identities.first?.models ?? [DefaultLiveProvider.identity.models[0]]) : discovered
+    }
+
+    public func selectedProviderModelID() async -> ModelID? {
+        await providerModelSelection.selectedModel()
+    }
+
+    public func selectProviderModel(id: ModelID?) async {
+        await providerModelSelection.select(id)
     }
 
     public func currentProviderIdentityID() async -> String {
@@ -464,7 +541,12 @@ extension M8CompositionRoot {
             return "error(\(error.localizedDescription))"
         }
         if let providerRuntime {
-            return await providerRuntime.lifecycle.rawValue
+            let lifecycle = await providerRuntime.lifecycle.rawValue
+            if dynamicProviderRequiresAPIKey {
+                let hasKey = (try? secretStore.load(account: "openai-api-key"))?.isEmpty == false
+                if !hasKey { return "missing-api-key" }
+            }
+            return lifecycle
         }
         return "unconfigured"
     }
