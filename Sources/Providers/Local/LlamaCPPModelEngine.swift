@@ -108,8 +108,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         llama_backend_init()
 
         var modelParams = llama_model_default_params()
-        if let gL = options.gpuLayers {
-            modelParams.n_gpu_layers = Int32(gL)
+        if options.useMetal {
+            modelParams.n_gpu_layers = Int32(options.gpuLayers ?? 99)
+        } else {
+            modelParams.n_gpu_layers = 0
         }
 
         let path = url.path
@@ -119,7 +121,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
 
         var ctxParams = llama_context_default_params()
-        ctxParams.n_ctx = UInt32(options.contextWindow)
+        let modelContextLimit = summary.contextLength.flatMap { Int(exactly: $0) }
+        let requestedContext = max(256, options.contextWindow)
+        let effectiveContext = min(requestedContext, modelContextLimit ?? requestedContext)
+        ctxParams.n_ctx = UInt32(effectiveContext)
+        ctxParams.n_batch = UInt32(min(effectiveContext, 512))
 
         let nThreads = options.threadCount ?? max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
         ctxParams.n_threads = Int32(nThreads)
@@ -140,8 +146,31 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             throw LlamaCPPEngineError.nativeContextCreationFailed
         }
 
-        // Configure greedy sampler by default in the chain
-        llama_sampler_chain_add(samplerPtr, llama_sampler_init_greedy())
+        // Use the request's sampling policy. Greedy-only decoding was causing
+        // deterministic repetition and ignored the provider temperature contract.
+        // Keep a bounded default temperature for normal chat, and add a light
+        // repetition penalty before temperature sampling.
+        let temperature = 0.7
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_penalties(64, 64, Float(1.10), Float(0.0), Float(0.0))
+        )
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_top_k(40)
+        )
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_top_p(Float(0.95), 1)
+        )
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_temp(Float(temperature))
+        )
+        llama_sampler_chain_add(
+            samplerPtr,
+            llama_sampler_init_dist(UInt32.random(in: 0...UInt32.max))
+        )
 
         setLifecycleState(.loading(progress: 0.95))
 
@@ -202,6 +231,13 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.modelNotLoaded
                 }
 
+                // Each generate() call is an independent request. Reset llama.cpp
+                // request state before decoding a new prompt; otherwise the second
+                // request can reuse the previous KV cache/sampler state and fail
+                // during prompt evaluation (for example evalFailed(-1)).
+                llama_memory_clear(llama_get_memory(contextPtr), true)
+                llama_sampler_reset(samplerPtr)
+
                 // Verify device thermal & memory state
                 let thermal = await self.deviceCapabilityProvider.thermalState
                 if thermal == .critical {
@@ -210,17 +246,21 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
                 let memory = await self.deviceCapabilityProvider.memoryPressure
                 if memory == .critical {
-                    _ = try? await self.unload()
+                    // The generation task owns the native pointers for its lifetime.
+                    // Do not release them from inside this task; the caller can unload
+                    // after the task has terminated.
                     throw LlamaCPPEngineError.memoryPressureCritical
                 }
 
-                // 1. Tokenize prompt
-                let promptText: String
-                if let sys = request.systemPrompt, !sys.isEmpty {
-                    promptText = "System: \(sys)\nUser: \(request.prompt)\nAssistant:"
-                } else {
-                    promptText = request.prompt
-                }
+                // 1. Tokenize prompt using the model's GGUF chat template when available.
+                // A generic "System:/User:/Assistant:" wrapper is not equivalent to the
+                // model's trained instruction format and can produce severe quality/repetition
+                // failures on chat-tuned GGUFs.
+                let promptText = self.makeChatPrompt(
+                    model: modelPtr,
+                    systemPrompt: request.systemPrompt,
+                    userPrompt: request.prompt
+                )
 
                 guard let vocabPtr = llama_model_get_vocab(modelPtr) else {
                     throw LlamaCPPEngineError.tokenizationFailed
@@ -231,22 +271,39 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.tokenizationFailed
                 }
 
-                // 2. Decode prompt batch
-                var batch = llama_batch_init(Int32(promptTokens.count), 0, 1)
-                defer { llama_batch_free(batch) }
-
-                for (i, tok) in promptTokens.enumerated() {
-                    let isLast = (i == promptTokens.count - 1)
-                    self.addTokenToBatch(&batch, id: tok, pos: Int32(i), seqID: 0, logits: isLast)
+                // 2. Decode prompt in batches no larger than llama.cpp n_batch.
+                // The context may be large, but n_batch is intentionally capped at 512.
+                // A single batch sized to the full prompt would overflow for long prompts.
+                let loadedContextWindow = self.stateLock.withLock { self.activeOptions?.contextWindow ?? 8192 }
+                let modelContextLimit = self.parsedMetadata?.contextLength.flatMap { Int(exactly: $0) }
+                let effectiveContextWindow = min(loadedContextWindow, modelContextLimit ?? loadedContextWindow)
+                guard promptTokens.count < effectiveContextWindow else {
+                    throw LlamaCPPEngineError.evalFailed(-2)
                 }
 
-                let evalRes = llama_decode(contextPtr, batch)
-                guard evalRes == 0 else {
-                    throw LlamaCPPEngineError.evalFailed(evalRes)
+                let batchCapacity = min(effectiveContextWindow, 512)
+                var batch = llama_batch_init(Int32(batchCapacity), 0, 1)
+                defer { llama_batch_free(batch) }
+
+                var promptOffset = 0
+                while promptOffset < promptTokens.count {
+                    self.clearBatch(&batch)
+                    let end = min(promptOffset + batchCapacity, promptTokens.count)
+                    for index in promptOffset..<end {
+                        let isLast = index == promptTokens.count - 1
+                        try self.addTokenToBatch(&batch, id: promptTokens[index], pos: Int32(index), seqID: 0, logits: isLast)
+                    }
+
+                    let evalRes = llama_decode(contextPtr, batch)
+                    guard evalRes == 0 else {
+                        throw LlamaCPPEngineError.evalFailed(evalRes)
+                    }
+                    promptOffset = end
                 }
 
                 // 3. Generation loop
-                let maxTokens = request.maxTokens ?? 512
+                let configuredMaxTokens = self.stateLock.withLock { self.activeOptions?.maxTokens ?? 512 }
+                let maxTokens = min(request.maxTokens ?? configuredMaxTokens, effectiveGenerationCapacity(contextWindow: effectiveContextWindow, promptTokenCount: promptTokens.count))
                 var currentPos = Int32(promptTokens.count)
                 var generatedCount = 0
 
@@ -264,12 +321,14 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     }
                     let currentMemory = await self.deviceCapabilityProvider.memoryPressure
                     if currentMemory == .critical {
-                        _ = try? await self.unload()
+                        // Never unload native handles from inside the active generation
+                        // task. unload() waits for this task; doing so here would either
+                        // deadlock or free llama.cpp pointers while this task still owns them.
                         throw LlamaCPPEngineError.memoryPressureCritical
                     }
 
                     // Sample next token
-                    let nextToken = llama_sampler_sample(samplerPtr, contextPtr, batch.n_tokens - 1)
+                    let nextToken = llama_sampler_sample(samplerPtr, contextPtr, -1)
 
                     // Check EOS / EOG
                     if llama_vocab_is_eog(vocabPtr, nextToken) {
@@ -293,6 +352,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                         deltaText = ""
                     }
 
+                    // Feed the sampled token back into the sampler. Without
+                    // llama_sampler_accept(), the repetition-penalty sampler has no
+                    // history and cannot prevent pathological token loops.
+                    llama_sampler_accept(samplerPtr, nextToken)
+
                     generatedCount += 1
                     let isLastToken = (generatedCount >= maxTokens)
                     let chunk = LocalModelStreamChunk(
@@ -305,15 +369,19 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                         break
                     }
 
-                    // Decode next step
-                    self.clearBatch(&batch)
-                    self.addTokenToBatch(&batch, id: nextToken, pos: currentPos, seqID: 0, logits: true)
-                    currentPos += 1
-
-                    let stepEval = llama_decode(contextPtr, batch)
+                    // Decode the sampled token using llama.cpp's canonical
+                    // single-token batch helper. This avoids manually touching
+                    // optional seq_id storage on the native batch.
+                    var nextBatch = llama_batch_get_one(
+                        UnsafeMutablePointer<llama_token>(mutating: [nextToken]),
+                        1
+                    )
+                    let stepEval = llama_decode(contextPtr, nextBatch)
+                    llama_batch_free(nextBatch)
                     guard stepEval == 0 else {
                         throw LlamaCPPEngineError.evalFailed(stepEval)
                     }
+                    currentPos += 1
 
                     if currentThermal == .serious {
                         try await Task.sleep(nanoseconds: 20_000_000)
@@ -360,7 +428,21 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
     public func unload() async throws {
         setLifecycleState(.unloading)
-        await cancel()
+
+        // Native llama.cpp handles must outlive the generation task. Cancelling a
+        // Swift Task does not synchronously stop an in-flight C call, so releasing
+        // model/context/sampler here immediately can cause a use-after-free crash
+        // on the physical device.
+        let task = stateLock.withLock {
+            let t = activeGenerationTask
+            activeGenerationTask = nil
+            return t
+        }
+        task?.cancel()
+        if let task {
+            await task.value
+        }
+
         await residencyCoordinator.releaseResidency(for: identity.id)
         releaseNativeHandles()
         stateLock.withLock {
@@ -371,6 +453,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    private func effectiveGenerationCapacity(contextWindow: Int, promptTokenCount: Int) -> Int {
+        max(1, contextWindow - max(0, promptTokenCount))
+    }
 
     private func isLoaded() -> Bool {
         stateLock.withLock {
@@ -397,6 +483,103 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     #if canImport(cllama)
+    private func makeChatPrompt(
+        model: OpaquePointer,
+        systemPrompt: String?,
+        userPrompt: String
+    ) -> String {
+        let system = systemPrompt?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let templatePtr = llama_model_chat_template(model, nil) else {
+            return system.isEmpty
+                ? userPrompt
+                : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
+        }
+
+        // Build the C message array while all backing strings remain alive.
+        var formatted: [CChar] = Array(repeating: 0, count: 4096)
+        let rendered = system.isEmpty
+            ? userPrompt.withCString { userPtr in
+                "user".withCString { rolePtr in
+                    var message = llama_chat_message(role: rolePtr, content: userPtr)
+                    return withUnsafePointer(to: &message) { messagePtr in
+                        llama_chat_apply_template(templatePtr, messagePtr, 1, true, &formatted, Int32(formatted.count))
+                    }
+                }
+            }
+            : system.withCString { systemPtr in
+                userPrompt.withCString { userPtr in
+                    "system".withCString { systemRolePtr in
+                        "user".withCString { userRolePtr in
+                            var messages = [
+                                llama_chat_message(role: systemRolePtr, content: systemPtr),
+                                llama_chat_message(role: userRolePtr, content: userPtr)
+                            ]
+                            return messages.withUnsafeBufferPointer { buffer in
+                                llama_chat_apply_template(
+                                    templatePtr,
+                                    buffer.baseAddress,
+                                    buffer.count,
+                                    true,
+                                    &formatted,
+                                    Int32(formatted.count)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+        guard rendered > 0 else {
+            return system.isEmpty
+                ? userPrompt
+                : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
+        }
+
+        if rendered < Int32(formatted.count) {
+            return String(cString: formatted)
+        }
+
+        var resized = Array<CChar>(repeating: 0, count: Int(rendered) + 1)
+        let secondPass: Int32 = system.isEmpty
+            ? userPrompt.withCString { userPtr in
+                "user".withCString { rolePtr in
+                    var message = llama_chat_message(role: rolePtr, content: userPtr)
+                    return withUnsafePointer(to: &message) { messagePtr in
+                        llama_chat_apply_template(templatePtr, messagePtr, 1, true, &resized, Int32(resized.count))
+                    }
+                }
+            }
+            : system.withCString { systemPtr in
+                userPrompt.withCString { userPtr in
+                    "system".withCString { systemRolePtr in
+                        "user".withCString { userRolePtr in
+                            var messages = [
+                                llama_chat_message(role: systemRolePtr, content: systemPtr),
+                                llama_chat_message(role: userRolePtr, content: userPtr)
+                            ]
+                            return messages.withUnsafeBufferPointer { buffer in
+                                llama_chat_apply_template(
+                                    templatePtr,
+                                    buffer.baseAddress,
+                                    buffer.count,
+                                    true,
+                                    &resized,
+                                    Int32(resized.count)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+        guard secondPass > 0 else {
+            return system.isEmpty
+                ? userPrompt
+                : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
+        }
+        return String(cString: resized)
+    }
+
     private func getNativeHandles() -> (OpaquePointer, OpaquePointer, UnsafeMutablePointer<llama_sampler>)? {
         stateLock.withLock {
             guard let m = nativeModel, let c = nativeContext, let s = nativeSampler else {
@@ -438,11 +621,22 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
     #if canImport(cllama)
     private func tokenize(vocab: OpaquePointer, text: String, addSpecial: Bool) throws -> [llama_token] {
-        let utf8Count = text.utf8.count
+        let utf8 = Array(text.utf8CString)
+        let utf8Count = utf8.count - 1
         let maxTokens = utf8Count + (addSpecial ? 1 : 0) + 16
         var tokens = [llama_token](repeating: 0, count: maxTokens)
 
-        let count = llama_tokenize(vocab, text, Int32(utf8Count), &tokens, Int32(maxTokens), addSpecial, false)
+        let count = utf8.withUnsafeBufferPointer { buffer in
+            llama_tokenize(
+                vocab,
+                buffer.baseAddress,
+                Int32(utf8Count),
+                &tokens,
+                Int32(maxTokens),
+                addSpecial,
+                false
+            )
+        }
         guard count >= 0 else {
             throw LlamaCPPEngineError.tokenizationFailed
         }
@@ -460,13 +654,28 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         return Array(buf.prefix(Int(nTokens)))
     }
 
-    private func addTokenToBatch(_ batch: inout llama_batch, id: llama_token, pos: Int32, seqID: Int32, logits: Bool) {
+    private func addTokenToBatch(_ batch: inout llama_batch, id: llama_token, pos: Int32, seqID: Int32, logits: Bool) throws {
+        // Never use precondition/preconditionFailure at the native boundary:
+        // those turn malformed llama_batch state into an intentional process crash.
         let idx = Int(batch.n_tokens)
-        batch.token?[idx] = id
-        batch.pos?[idx] = pos
-        batch.n_seq_id?[idx] = 1
-        batch.seq_id?[idx]?[0] = seqID
-        batch.logits?[idx] = logits ? 1 : 0
+        guard idx >= 0,
+              let token = batch.token,
+              let posBuffer = batch.pos,
+              let nSeqID = batch.n_seq_id,
+              let seqIDs = batch.seq_id,
+              let logitsBuffer = batch.logits else {
+            throw LlamaCPPEngineError.evalFailed(-3)
+        }
+
+        guard let seqIDBuffer = seqIDs[idx] else {
+            throw LlamaCPPEngineError.evalFailed(-3)
+        }
+
+        token[idx] = id
+        posBuffer[idx] = pos
+        nSeqID[idx] = 1
+        seqIDBuffer[0] = seqID
+        logitsBuffer[idx] = logits ? 1 : 0
         batch.n_tokens += 1
     }
 
