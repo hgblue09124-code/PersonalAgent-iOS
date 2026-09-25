@@ -133,7 +133,6 @@ let package = Package(
             path: "Sources/Core/Cognition"
         ),
         .target(
-        .target(
             name: "PAKernel",
             dependencies: [],
             path: "Kernel"
@@ -198,7 +197,6 @@ let package = Package(
                 "PASkills",
                 "PAPolicy",
                 "PACognition",
-                "PAAgency",
                 "PAKernel",
                 "PARuntime",
                 "PAComposition",
