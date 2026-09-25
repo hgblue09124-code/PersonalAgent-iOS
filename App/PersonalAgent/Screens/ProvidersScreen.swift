@@ -1,5 +1,6 @@
 import SwiftUI
 import PAArchitecture
+import PAComposition
 
 struct ProvidersScreen: View {
     @ObservedObject var session: KernelSession
