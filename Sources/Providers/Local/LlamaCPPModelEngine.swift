@@ -153,7 +153,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         let temperature = 0.7
         llama_sampler_chain_add(
             samplerPtr,
-            llama_sampler_init_penalties(64, Float(1.10), Float(0.0), Float(0.0), Float(0.0))
+            llama_sampler_init_penalties(64, 64, Float(1.10), Float(0.0), Float(0.0))
         )
         llama_sampler_chain_add(
             samplerPtr,
@@ -449,7 +449,6 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     #if canImport(cllama)
-    #if canImport(cllama)
     private func makeChatPrompt(
         model: OpaquePointer,
         systemPrompt: String?,
@@ -460,32 +459,6 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             return system.isEmpty
                 ? userPrompt
                 : "System: \(system)\nUser: \(userPrompt)\nAssistant:"
-        }
-
-        var result = ""
-        roleContents.withUnsafeBufferPointer { _ in
-            func apply(capacity: Int32) -> (Int32, String?) {
-                var output = Array<CChar>(repeating: 0, count: Int(capacity))
-                let applied: Int32 = templatePtr.withMemoryRebound(to: CChar.self, capacity: 1) { template in
-                    var rolePointers: [UnsafePointer<CChar>?] = []
-                    var contentPointers: [UnsafePointer<CChar>?] = []
-                    for (role, content) in roleContents {
-                        role.withCString { rolePtr in
-                            content.withCString { contentPtr in
-                                rolePointers.append(rolePtr)
-                                contentPointers.append(contentPtr)
-                            }
-                        }
-                    }
-                    // The pointers above cannot outlive the nested withCString scopes,
-                    // so construct and apply the message array in one nested scope below.
-                    return Int32(-1)
-                }
-                _ = applied
-                _ = output
-                return (-1, nil)
-            }
-            _ = apply
         }
 
         // Build the C message array while all backing strings remain alive.
