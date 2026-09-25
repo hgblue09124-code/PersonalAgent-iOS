@@ -23,7 +23,7 @@ public enum ChatCompletionsCodec: Sendable {
             body["temperature"] = temperature
         }
         if let maxTokens = request.parameters.maxOutputTokens {
-            body["max_tokens"] = maxTokens
+            body["max_completion_tokens"] = maxTokens
         }
         let data = try JSONSerialization.data(withJSONObject: body, options: [])
         var headers = [
