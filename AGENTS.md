@@ -1,13 +1,102 @@
-# AGENTS.md
+# AGENTS.md — PersonalAgent-iOS Working Rules
 
-## Scope & Operating Instructions for Jules
+<!-- TASK-CONTEXT: This file is the default workflow contract for AI workers operating on this repository. Read it before starting architecture, repair, migration, or audit work. -->
 
-### Primary Scope
-- This repository (`PersonalAgent-iOS`) contains a Swift Package Manager (`Package.swift`) target encompassing core architecture, contracts, kernel, provider runtimes, module runtimes, storage, memory OS, and tests (`Sources/`, `Tests/`).
-- On Linux build environments (e.g. CI / Linux VMs), execution and testing are restricted to the Swift Package Manager targets (`Package.swift`).
+## Mission
 
-### Rules & Instructions
-1. **Target Boundary**: Do NOT touch, open, or attempt to resolve `PersonalAgent.xcodeproj` or anything under `App/` on Linux VMs where Xcode is not installed.
-2. **Package Validation**: All core logic, contracts, runtimes, and test suites must compile and pass cleanly via Swift Package Manager (`swift test --disable-sandbox` or `docker run --rm -v $(pwd):/src -w /src swift:6.3.2 swift test --disable-sandbox`).
-3. **Environment Setup**: If `swift` binary is not present in PATH on Linux VM, execute SPM tests via the official `swift:6.3.2` Docker container:
-   `docker run --rm -v $(pwd):/src -w /src swift:6.3.2 swift test --disable-sandbox`
+Keep PersonalAgent-iOS structurally coherent, testable, and incrementally evolvable.
+
+## Mandatory Workflow
+
+`inspect -> confirm -> minimal change -> regression test -> full gate -> audit -> record -> handoff`
+
+### 1. Inspect
+
+- Read the relevant Issue/PR.
+- Inspect actual repository files and dependency declarations.
+- Identify current ownership before proposing a move.
+- Read `Documentation/ARCHITECTURE.md`, `Documentation/AUDIT.md`, and `Documentation/HANDOFF.md`.
+
+### 2. Confirm
+
+Classify every finding:
+- **CONFIRMED** — repository evidence proves it.
+- **NOT CONFIRMED** — evidence does not establish it.
+- **DEFERRED** — valid but intentionally postponed.
+
+Never manufacture bugs from architectural preference.
+
+### 3. Minimal Change
+
+- Fix only the confirmed scope.
+- Prefer moving code before rewriting it during migration.
+- Do not perform unrelated cleanup.
+- Do not introduce generic folders without a proven boundary.
+
+### 4. Regression Test
+
+Every behavior change gets regression coverage. Architecture-only moves still require build/test verification.
+
+### 5. Full Gate
+
+Run applicable build, unit tests, dependency/architecture checks, and platform validation. Never call a task complete from a partial test.
+
+### 6. Audit
+
+After implementation, inspect the resulting structure and dependency direction again.
+
+### 7. Record
+
+Update the relevant Markdown in the same task.
+
+<!-- INVARIANT: Code without recorded architectural reasoning is incomplete when the change affects ownership, boundaries, dependencies, migration, or future worker behavior. -->
+
+Record: what changed; why; evidence; confirmed/deferred findings; verification; known limitations; exact next step.
+
+### 8. Handoff
+
+Leave the repository in a state where the next worker can continue without reconstructing the previous task from chat history. Update `Documentation/HANDOFF.md`.
+
+## Architecture Rules
+
+- Kernel = contracts/events/errors/ports; no vendor implementation.
+- Runtime = agent execution/orchestration.
+- Capabilities = modules/skills/tools.
+- Providers = provider/model adapters.
+- Memory = agent memory/retrieval semantics.
+- Storage = persistence/data boundary.
+- Composition = construction and wiring.
+- App = presentation; no direct vendor/runtime/storage wiring.
+- Tests mirror production ownership.
+
+<!-- INVARIANT: One concept -> one place. One boundary -> one folder. One execution path -> one Runtime. One wiring point -> Composition. -->
+
+## Stop Conditions
+
+Stop and report instead of guessing when ownership is ambiguous, two canonical destinations appear equally valid, migration would require uncovered behavior changes, a test failure indicates a separate defect, or requested architecture conflicts with documented invariants.
+
+## Handoff Template
+
+```markdown
+## Task Result
+
+### Completed
+- ...
+
+### Confirmed
+- ...
+
+### Deferred
+- ...
+
+### Verification
+- ...
+
+### Next Exact Action
+1. ...
+
+### Do Not Redo
+- ...
+```
+
+<!-- FINAL-CHECK: Before declaring completion, verify that code, tests, documentation, and handoff all describe the same repository state. -->
