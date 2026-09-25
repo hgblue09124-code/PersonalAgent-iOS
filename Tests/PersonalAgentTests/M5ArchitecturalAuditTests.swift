@@ -97,7 +97,7 @@ struct M5ArchitecturalAuditTests {
     // 3. Kernel Cloud Isolation Audit
     @Test func testKernelCloudIsolationAndNoProviderImports() throws {
         let root = repositoryRoot()
-        let kernelSourcesDir = root.appendingPathComponent("Sources").appendingPathComponent("Core").appendingPathComponent("Agent")
+        let kernelSourcesDir = root.appendingPathComponent("Kernel")
         let kernelFiles = try files(under: kernelSourcesDir, suffix: ".swift")
 
         #expect(!kernelFiles.isEmpty)
