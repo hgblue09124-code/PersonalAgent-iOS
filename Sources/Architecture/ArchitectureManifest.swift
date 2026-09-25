@@ -58,9 +58,9 @@ public enum ArchitectureManifest: Sendable {
         "cllama": [],
         "PAProvidersLocal": ["PAProviders", "PAFoundation", "cllama"],
         "PAPolicy": ["PAFoundation", "PAKernel"],
-        "PATools": ["PAFoundation", "PAPolicy", "PAObservability"],
+        "PATools": ["PAFoundation", "PARuntime", "PAObservability"],
         "PAModules": ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents", "PAKernel"],
-        "PASkills": ["PAFoundation", "PAModules", "PATools", "PAPolicy", "PAKernel"],
+        "PASkills": ["PAFoundation", "PAModules", "PATools", "PARuntime", "PAKernel"],
         "PACognition": ["PAFoundation", "PAProviders", "PAMemory", "PASkills", "PAKernel"],
         "PAAgency": ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
         "PARuntime": [
