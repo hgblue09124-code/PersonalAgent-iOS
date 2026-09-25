@@ -53,7 +53,7 @@ let package = Package(
             path: "Sources/cllama",
             exclude: ["README.md"]
         ),
-        .target(name: "PAFoundation", path: "Sources/Foundation"),
+        .target(name: "PAFoundation", dependencies: ["PAKernel"], path: "Sources/Foundation"),
         .target(
             name: "PAObservability",
             dependencies: ["PAFoundation"],
