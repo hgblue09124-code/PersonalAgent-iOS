@@ -70,48 +70,62 @@ jobs:
         env:
           LOG: /tmp/swift-test.log
         run: |
-          import os, re, pathlib, subprocess, sys, hashlib
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import re
+          import subprocess
 
           log = pathlib.Path(os.environ["LOG"]).read_text(errors="replace")
           manifest = pathlib.Path("Sources/Architecture/ArchitectureManifest.swift")
           package = pathlib.Path("Package.swift")
+          knowledge_path = pathlib.Path(".github/repair-knowledge.json")
           manifest_text = manifest.read_text()
           package_text = package.read_text()
           repairs = []
 
-          # Fingerprint the compiler failure. If the exact fingerprint was already
-          # repaired recently, STOP instead of repeating the same loop.
           fingerprints = []
-          for m in re.finditer(r"no such module ['\u2018\u2019\"]([^'\u2018\u2019\"]+)['\u2018\u2019\"]", log, re.I):
-              fingerprints.append("no-such-module:" + m.group(1))
-          for m in re.finditer(r"error: (.+)", log):
-              msg = re.sub(r"\\s+", " ", m.group(1)).strip()
-              if msg:
-                  fingerprints.append("error:" + msg[:240])
+          for match in re.finditer(r"no such module ['‘’\"]([^'‘’\"]+)['‘’\"]", log, re.I):
+              fingerprints.append("no-such-module:" + match.group(1))
+          for match in re.finditer(r"error: (.+)", log):
+              message = re.sub(r"\s+", " ", match.group(1)).strip()
+              if message:
+                  fingerprints.append("error:" + message[:240])
           fingerprint = hashlib.sha256("|".join(sorted(set(fingerprints))).encode()).hexdigest()[:12] if fingerprints else ""
-          if fingerprint:
-              recent = subprocess.run(["git", "log", "-10", "--format=%s"], capture_output=True, text=True, check=True).stdout
-              if f"[auto-repair-fp:{fingerprint}]" in recent:
-                  print(f"AUTO-REPAIR: repeated identical failure {fingerprint}; STOP.")
-                  sys.exit(0)
+
+          knowledge = json.loads(knowledge_path.read_text()) if knowledge_path.exists() else {"version": 1, "approved": [], "candidates": []}
+          approved = {entry["fingerprint"] for entry in knowledge.get("approved", [])}
+          candidate_exists = any(entry.get("fingerprint") == fingerprint for entry in knowledge.get("candidates", []))
+
+          recent = subprocess.run(
+              ["git", "log", "-10", "--format=%s"],
+              capture_output=True, text=True, check=True
+          ).stdout
+          if fingerprint and f"[auto-repair-fp:{fingerprint}]" in recent:
+              print(f"AUTO-REPAIR: repeated identical failure {fingerprint}; STOP.")
+              print("candidate already known:", candidate_exists)
+              raise SystemExit(0)
 
           # R1: duplicated consecutive .target( in Package.swift.
-          duplicate = re.search(r'(\.target\(\s*)\.target\(', package_text)
+          duplicate = re.search(r"(\.target\(\s*)\.target\(", package_text)
           if duplicate:
-              package_text = package_text[:duplicate.start()] + duplicate.group(1) + package_text[duplicate.end()-len('.target('):]
+              package_text = (
+                  package_text[:duplicate.start()]
+                  + duplicate.group(1)
+                  + package_text[duplicate.end() - len(".target("):]
+              )
               package.write_text(package_text)
               repairs.append("Package.swift duplicate .target declaration")
 
           # R2: stale PAAgency dependency after target removal.
           if 'name: "PAAgency"' not in package_text and re.search(r'^\s*"PAAgency",\s*$', package_text, re.MULTILINE):
-              package_text = re.sub(r'^\s*"PAAgency",\s*\n', '', package_text, flags=re.MULTILINE)
+              package_text = re.sub(r'^\s*"PAAgency",\s*\n', "", package_text, flags=re.MULTILINE)
               package.write_text(package_text)
               repairs.append("Package.swift stale PAAgency dependency")
 
-          # R4: stale import of a removed module. Safe only when the module
-          # target is already absent from Package.swift. Never substitute another
-          # module; remove the obsolete import and let compilation prove the result.
-          for module in sorted(set(re.findall(r"no such module ['\u2018\u2019\"](PA[A-Za-z0-9]+)['\u2018\u2019\"]", log, re.I))):
+          # R4: stale import of a removed module. This never substitutes a module.
+          for module in sorted(set(re.findall(r"no such module ['‘’\"](PA[A-Za-z0-9]+)['‘’\"]", log, re.I))):
               if re.search(rf'name:\s*"{re.escape(module)}"', package_text):
                   continue
               changed = 0
@@ -121,7 +135,12 @@ jobs:
                       continue
                   for path in base.rglob("*.swift"):
                       text = path.read_text(errors="replace")
-                      new_text, count = re.subn(rf'^\s*import\s+{re.escape(module)}\s*$\n?', '', text, flags=re.MULTILINE)
+                      new_text, count = re.subn(
+                          rf'^\s*import\s+{re.escape(module)}\s*$\n?',
+                          "",
+                          text,
+                          flags=re.MULTILINE,
+                      )
                       if count:
                           path.write_text(new_text)
                           changed += count
@@ -129,33 +148,67 @@ jobs:
                   repairs.append(f"remove stale import {module} ({changed} file(s))")
 
           # R3: known deterministic Kernel import-boundary allowlist.
-          approved = {"PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"}
+          approved_modules = {"PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"}
           matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel ([^)]*\)"', log)
-          for module in sorted(set(m for m in matches if m in approved)):
+          for module in sorted(set(m for m in matches if m in approved_modules)):
               pattern = rf'("{re.escape(module)}": \[[^\]]*)\]'
               match = re.search(pattern, manifest_text)
               if not match:
                   print(f"AUTO-REPAIR: manifest entry missing for {module}; STOP.")
-                  sys.exit(0)
+                  raise SystemExit(0)
               entry = match.group(0)
               if '"PAKernel"' not in entry:
                   manifest_text = manifest_text[:match.start()] + entry[:-1] + ', "PAKernel"]' + manifest_text[match.end():]
                   repairs.append(f"ArchitectureManifest allowedImports -> PAKernel ({module})")
 
           if not repairs:
-              print("AUTO-REPAIR: UNKNOWN failure; STOP.")
-              sys.exit(0)
+              # Learning is observational only. Unknown failures are recorded as
+              # candidates, never executed as new code.
+              if fingerprint and not candidate_exists:
+                  files = subprocess.run(
+                      ["git", "diff", "--name-only"],
+                      capture_output=True, text=True, check=True
+                  ).stdout.splitlines()
+                  knowledge.setdefault("candidates", []).append({
+                      "fingerprint": fingerprint,
+                      "pattern": sorted(set(fingerprints)),
+                      "first_seen_commit": subprocess.run(
+                          ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+                      ).stdout.strip(),
+                      "status": "observed",
+                      "execution": "forbidden",
+                      "changed_files_at_observation": files[:50],
+                  })
+                  knowledge_path.parent.mkdir(parents=True, exist_ok=True)
+                  knowledge_path.write_text(json.dumps(knowledge, indent=2, sort_keys=True) + "\n")
+                  subprocess.run(["git", "add", str(knowledge_path)], check=True)
+                  subprocess.run(["git", "diff", "--cached", "--check"], check=True)
+                  subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+                  subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
+                  subprocess.run(
+                      ["git", "commit", "-m", f"chore: record repair candidate [auto-learning] [repair-candidate:{fingerprint}]"],
+                      check=True,
+                  )
+                  subprocess.run(["git", "push", "origin", "HEAD:$GITHUB_REF_NAME"], check=True)
+                  print(f"AUTO-LEARNING: recorded candidate {fingerprint}; execution remains forbidden.")
+              else:
+                  print("AUTO-REPAIR: UNKNOWN failure; STOP.")
+              raise SystemExit(0)
 
           manifest.write_text(manifest_text)
-          subprocess.run(["git","config","user.name","github-actions[bot]"],check=True)
-          subprocess.run(["git","config","user.email","41898282+github-actions[bot]@users.noreply.github.com"],check=True)
-          subprocess.run(["git","add","-A"],check=True)
-          subprocess.run(["git","diff","--cached","--check"],check=True)
-          if fingerprint:\n              pathlib.Path(os.environ["GITHUB_OUTPUT"]).write_text(f"fingerprint={fingerprint}\\n")\n          print("AUTO-REPAIR: DETERMINISTIC: " + " | ".join(repairs))
+          subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
+          subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
+          subprocess.run(["git", "add", "-A"], check=True)
+          subprocess.run(["git", "diff", "--cached", "--check"], check=True)
+          if fingerprint:
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+                  output.write(f"fingerprint={fingerprint}\n")
+                  output.write("repaired=true\n")
+          print("AUTO-REPAIR: DETERMINISTIC: " + " | ".join(repairs))
 
       - name: Regression test repaired tree
         id: regression
-        if: steps.tests.outputs.status != '0' && steps.repair.outcome == 'success'
+        if: steps.tests.outputs.status != '0' && steps.repair.outputs.repaired == 'true'
         shell: bash
         run: |
           set +e
@@ -204,4 +257,9 @@ jobs:
           set -euo pipefail
           next_attempt=$((ATTEMPT + 1))
           if [ "$next_attempt" -ge 5 ]; then exit 0; fi
-          curl --fail-with-body -X POST             -H "Accept: application/vnd.github+json"             -H "Authorization: Bearer $GH_TOKEN"             -H "X-GitHub-Api-Version: 2022-11-28"             "https://api.github.com/repos/$REPO/actions/workflows/auto-repair.yml/dispatches"             -d '{"ref":"'$REF'","inputs":{"attempt":"'$next_attempt'"}}'
+          curl --fail-with-body -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPO/actions/workflows/auto-repair.yml/dispatches" \
+            -d '{"ref":"'$REF'","inputs":{"attempt":"'$next_attempt'"}}'
