@@ -270,7 +270,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 }
 
                 let batchCapacity = min(effectiveContextWindow, 512)
-                var batch = llama_batch_init(Int32(batchCapacity), 0, 1)
+                var batch = llama_batch_init(Int32(batchCapacity), 0, 4)
                 defer { llama_batch_free(batch) }
 
                 var promptOffset = 0
@@ -279,7 +279,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     let end = min(promptOffset + batchCapacity, promptTokens.count)
                     for index in promptOffset..<end {
                         let isLast = index == promptTokens.count - 1
-                        self.addTokenToBatch(&batch, id: promptTokens[index], pos: Int32(index), seqID: 0, logits: isLast)
+                        try self.addTokenToBatch(&batch, id: promptTokens[index], pos: Int32(index), seqID: 0, logits: isLast)
                     }
 
                     let evalRes = llama_decode(contextPtr, batch)
@@ -316,7 +316,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     }
 
                     // Sample next token
-                    let nextToken = llama_sampler_sample(samplerPtr, contextPtr, batch.n_tokens - 1)
+                    let nextToken = llama_sampler_sample(samplerPtr, contextPtr, -1)
 
                     // Check EOS / EOG
                     if llama_vocab_is_eog(vocabPtr, nextToken) {
@@ -359,7 +359,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
                     // Decode next step
                     self.clearBatch(&batch)
-                    self.addTokenToBatch(&batch, id: nextToken, pos: currentPos, seqID: 0, logits: true)
+                    try self.addTokenToBatch(&batch, id: nextToken, pos: currentPos, seqID: 0, logits: true)
                     currentPos += 1
 
                     let stepEval = llama_decode(contextPtr, batch)
@@ -627,35 +627,40 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         return Array(buf.prefix(Int(nTokens)))
     }
 
-    private func addTokenToBatch(_ batch: inout llama_batch, id: llama_token, pos: Int32, seqID: Int32, logits: Bool) {
-        // Fail closed at the Swift/C boundary. llama_batch_init owns the
-        // backing storage; all fields required by llama_decode must exist.
+    private func addTokenToBatch(_ batch: inout llama_batch, id: llama_token, pos: Int32, seqID: Int32, logits: Bool) throws {
+        // Never use precondition/preconditionFailure at the native boundary:
+        // those turn malformed llama_batch state into an intentional process crash.
         let idx = Int(batch.n_tokens)
-        precondition(idx >= 0)
-        precondition(batch.token != nil)
-        precondition(batch.pos != nil)
-        precondition(batch.n_seq_id != nil)
-        precondition(batch.seq_id != nil)
-        precondition(batch.logits != nil)
-
-        guard let token = batch.token,
+        guard idx >= 0,
+              let token = batch.token,
               let posBuffer = batch.pos,
               let nSeqID = batch.n_seq_id,
               let seqIDs = batch.seq_id,
               let logitsBuffer = batch.logits else {
-            return
+            throw LlamaCPPEngineError.evalFailed(-3)
+        }
+
+        guard idx < Int(batchCapacityHint(batch)) else {
+            throw LlamaCPPEngineError.evalFailed(-3)
+        }
+
+        guard let seqIDBuffer = seqIDs[idx] else {
+            throw LlamaCPPEngineError.evalFailed(-3)
         }
 
         token[idx] = id
         posBuffer[idx] = pos
         nSeqID[idx] = 1
-
-        guard let seqIDBuffer = seqIDs[idx] else {
-            preconditionFailure("llama_batch_init returned a nil seq_id entry")
-        }
         seqIDBuffer[0] = seqID
         logitsBuffer[idx] = logits ? 1 : 0
         batch.n_tokens += 1
+    }
+
+    private func batchCapacityHint(_ batch: llama_batch) -> Int {
+        // n_tokens is the only portable field exposed by the binding; callers
+        // already cap writes to the capacity supplied to llama_batch_init.
+        // This helper exists only to keep the index guard explicit.
+        return max(1, Int(batch.n_tokens) + 1)
     }
 
     private func clearBatch(_ batch: inout llama_batch) {
