@@ -326,7 +326,6 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
         if existing.status == .active {
             existing.status = .blocked
-            goalStore[id] = existing
             try await emit(
                 kind: .goalBlocked,
                 payload: [
@@ -337,6 +336,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                     "reason": "runtimeTerminal",
                 ]
             )
+            goalStore[id] = existing
         }
         activeGoalID = nil
     }
