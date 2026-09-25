@@ -153,7 +153,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         let temperature = 0.7
         llama_sampler_chain_add(
             samplerPtr,
-            llama_sampler_init_penalties(64, 1.10, 0.0, 0.0)
+            llama_sampler_init_penalties(64, Float(1.10), Float(0.0), Float(0.0), Float(0.0))
         )
         llama_sampler_chain_add(
             samplerPtr,
@@ -463,10 +463,6 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         }
 
         var result = ""
-        let roleContents = messages.map { role, content in
-            (role, content)
-        }
-
         roleContents.withUnsafeBufferPointer { _ in
             func apply(capacity: Int32) -> (Int32, String?) {
                 var output = Array<CChar>(repeating: 0, count: Int(capacity))
