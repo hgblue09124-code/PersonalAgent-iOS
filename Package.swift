@@ -163,6 +163,8 @@ let package = Package(
                 "PAModules",
                 "PAMemory",
                 "PACognition",
+                "PAPolicy",
+                "PAAgency",
                 "PAKernel",
             ],
             path: "Sources/Runtime"
