@@ -1,7 +1,4 @@
-import PAFoundation
-import PAEvents
-
-/// Pure lifecycle graph derived from M0 `AgentLifecycle`.
+/// Pure lifecycle graph derived from M0 AgentLifecycle.
 public enum LifecycleMachine: Sendable {
     public static let stable: Set<AgentLifecycle> = [.created, .running, .paused, .stopped, .failed]
     public static let terminal: Set<AgentLifecycle> = [.stopped, .failed]

@@ -1,7 +1,7 @@
 import Foundation
 import PAFoundation
+import PAKernel
 import PACognition
-import PAAgency
 
 public enum RunState: String, Sendable, Codable, Equatable {
     case initialized

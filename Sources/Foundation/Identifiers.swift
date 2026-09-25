@@ -1,87 +1,16 @@
-
-import Foundation
-
-public struct AgentID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct GoalID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct SkillID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-}
-
-public struct ToolID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-}
-
-public struct ModuleID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-}
-
-public struct ProviderID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-}
-
-public struct ModelID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-}
-
-public struct MemoryRecordID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct TraceID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct EventID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct ActionID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct PlanID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct RunID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct SessionID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
-
-public struct ExecutionAttemptID: Hashable, Sendable, Codable, RawRepresentable {
-    public let rawValue: String
-    public init(rawValue: String) { self.rawValue = rawValue }
-    public init() { self.rawValue = UUID().uuidString }
-}
+import PAKernel
+public typealias AgentID = PAKernel.AgentID
+public typealias GoalID = PAKernel.GoalID
+public typealias SkillID = PAKernel.SkillID
+public typealias ToolID = PAKernel.ToolID
+public typealias ModuleID = PAKernel.ModuleID
+public typealias ProviderID = PAKernel.ProviderID
+public typealias ModelID = PAKernel.ModelID
+public typealias MemoryRecordID = PAKernel.MemoryRecordID
+public typealias TraceID = PAKernel.TraceID
+public typealias EventID = PAKernel.EventID
+public typealias ActionID = PAKernel.ActionID
+public typealias PlanID = PAKernel.PlanID
+public typealias RunID = PAKernel.RunID
+public typealias SessionID = PAKernel.SessionID
+public typealias ExecutionAttemptID = PAKernel.ExecutionAttemptID

@@ -40,6 +40,21 @@ See Issue #85 (RE-ARCH — Canonical PersonalAgent-iOS structure) for the migrat
 
 <!-- DECISION: Do not introduce generic containers such as Core, Manager, Service, Helper, Utils, or Misc unless a concrete boundary is proven and documented. -->
 
+## Re-Architecture Completion Model
+
+Issue #85 is the root Definition of Done for the canonical re-architecture. PRs/groups such as #86 onward are implementation steps toward that issue, not independent declarations that the re-architecture is complete.
+
+A green PR means that its own change is verified. It does not by itself mean Issue #85 is complete.
+
+Before declaring the re-architecture complete:
+1. Finish the planned migration groups under Issue #85.
+2. Verify the canonical structure and dependency direction as one integrated repository state.
+3. Run the full required test/build gates and the required physical iPhone 12 Pro Max validation.
+4. Confirm documentation continuity and the Issue #85 acceptance criteria.
+5. Only then treat the re-architecture as complete and finalize/merge the resulting integration sequence according to its dependency order.
+
+<!-- DECISION: Do not advance to another migration group merely because the previous PR is green. Use Issue #85 as the root completion checkpoint and keep intermediate PRs traceable to that root. -->
+
 ## Change Discipline
 
 For every architecture task:

@@ -1,5 +1,6 @@
 import Foundation
 import PAFoundation
+import PAKernel
 import PAProviders
 import PAMemory
 import PASkills

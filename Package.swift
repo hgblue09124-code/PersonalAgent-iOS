@@ -30,7 +30,6 @@ let package = Package(
         .library(name: "PASkills", targets: ["PASkills"]),
         .library(name: "PAPolicy", targets: ["PAPolicy"]),
         .library(name: "PACognition", targets: ["PACognition"]),
-        .library(name: "PAAgency", targets: ["PAAgency"]),
         .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
@@ -53,7 +52,7 @@ let package = Package(
             path: "Sources/cllama",
             exclude: ["README.md"]
         ),
-        .target(name: "PAFoundation", path: "Sources/Foundation"),
+        .target(name: "PAFoundation", dependencies: ["PAKernel"], path: "Sources/Foundation"),
         .target(
             name: "PAObservability",
             dependencies: ["PAFoundation"],
@@ -61,7 +60,7 @@ let package = Package(
         ),
         .target(
             name: "PAEvents",
-            dependencies: ["PAFoundation", "PAObservability"],
+            dependencies: ["PAKernel"],
             path: "Sources/Events"
         ),
         .target(
@@ -110,7 +109,7 @@ let package = Package(
         ),
         .target(
             name: "PAPolicy",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAFoundation", "PAKernel"],
             path: "Sources/Core/Policy"
         ),
         .target(
@@ -120,7 +119,7 @@ let package = Package(
         ),
         .target(
             name: "PAModules",
-            dependencies: ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
+            dependencies: ["PAKernel", "PAPolicy", "PAObservability", "PAEvents"],
             path: "Sources/Modules/Contracts"
         ),
         .target(
@@ -134,17 +133,8 @@ let package = Package(
             path: "Sources/Core/Cognition"
         ),
         .target(
-            name: "PAAgency",
-            dependencies: ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
-            path: "Sources/Core/Agency"
-        ),
-        .target(
             name: "PAKernel",
-            dependencies: [
-                "PAFoundation",
-                "PAEvents",
-                "PAModules",
-            ],
+            dependencies: [],
             path: "Kernel"
         ),
         .target(
@@ -158,10 +148,9 @@ let package = Package(
                 "PAMemory",
                 "PACognition",
                 "PAPolicy",
-                "PAAgency",
                 "PAKernel",
             ],
-            path: "Sources/Runtime"
+            path: "Runtime"
         ),
         .target(
             name: "PAComposition",
@@ -176,7 +165,6 @@ let package = Package(
                 "PAProvidersLocal",
                 "PAPolicy",
                 "PACognition",
-                "PAAgency",
                 "PASecurity",
                 "PAModules",
                 "PASkills",
@@ -209,7 +197,6 @@ let package = Package(
                 "PASkills",
                 "PAPolicy",
                 "PACognition",
-                "PAAgency",
                 "PAKernel",
                 "PARuntime",
                 "PAComposition",
