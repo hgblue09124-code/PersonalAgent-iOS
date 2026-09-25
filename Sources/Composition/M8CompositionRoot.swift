@@ -361,10 +361,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         }
 
         let coordination = KernelCoordinationBoundary(
-            policy: policy,
-            provider: dynamicProvider,
-            modules: moduleRuntime,
-            memory: memoryRuntime
+            modules: moduleRuntime
         )
 
         let agentRuntime = try await AgentRuntime(
