@@ -194,6 +194,7 @@
 				A10000000000000000000001 /* PersonalAgentApp.swift in Sources */,
 				A10000000000000000000002 /* RootView.swift in Sources */,
 				A1000000000000000000000C /* KernelSession.swift in Sources */,
+				A10000000000000000000010 /* RemoteModelCatalog.swift in Sources */,
 				A10000000000000000000003 /* Shared.swift in Sources */,
 				A10000000000000000000004 /* ChatScreen.swift in Sources */,
 				A10000000000000000000005 /* AgentScreen.swift in Sources */,
