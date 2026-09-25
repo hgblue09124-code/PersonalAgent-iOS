@@ -1,16 +1,38 @@
-# PersonalAgent-iOS Architecture
+# Personal Agent — Architecture
 
-## Purpose
+## Status
 
-This is the architecture entry point. It separates the verified current baseline from the intended target so documentation never presents an unimplemented design as fact.
+**Current baseline:** M8 architecture foundation at verified green commit `e3e7182523daf711ba23cbc9ec67bd450ef44e5d`.
 
-## Verified baseline
+The repository currently uses the M8 package graph. This document therefore separates **CURRENT** from **TARGET**; the target is not presented as implemented.
 
-Recovery anchor: `e3e7182523daf711ba23cbc9ec67bd450ef44e5d`.
+This iOS client is the long-lived Personal Agent / Agent OS client. It is not a chat wrapper. Kernel is not an LLM.
 
-At this checkpoint both the M3 package workflow and Apple Native Build workflow were verified green. The baseline is preserved; migration proceeds in small independently verifiable slices.
+Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`) are external material and must not become runtime dependencies.
 
-## Target
+## CURRENT — verified source graph
+
+The current SwiftPM graph is approximately:
+
+```text
+App
+  ↓
+Composition
+  ↓
+PAKernel
+  ├── PACognition → PAProviders / PAMemory / PASkills
+  ├── PAAgency → PACognition / PATools / PAPolicy
+  ├── PAModules
+  ├── PAMemory
+  ├── PAProviders
+  └── PAEvents / PAObservability / PAPolicy
+
+Composition additionally wires Providers / Local / Memory / Modules / Skills / Tools / Storage / Security.
+```
+
+This is the **current implementation**, not the target. In particular, current `PAKernel` contains the AgentRuntime boundary while depending on several domain modules, and `M8CompositionRoot` contains local-model lifecycle coordination and product wiring.
+
+## TARGET — responsibility architecture
 
 ```text
 App
@@ -19,33 +41,43 @@ Composition
   ↓
 Runtime ───────── Capabilities
   ↓                    ↓
-Kernel              Modules / Skills / Tools
+Kernel contracts     Modules / Skills / Tools
   ↑
-Ports / Contracts
+Ports
   ↑
 Providers / Memory / Storage / Device adapters
 ```
 
-This is a dependency intent, not a claim about today's source tree.
+The target separates stable contracts from runtime orchestration and infrastructure responsibilities. Migration must prove each boundary before moving code.
 
-## Ownership
+## Layer responsibilities
 
 | Layer | Owns | Must not own |
 |---|---|---|
-| App | SwiftUI presentation | Runtime, provider SDKs, persistence |
+| App | rendering, input, presentation | runtime orchestration, provider SDKs, persistence |
 | Composition | construction and wiring | business logic |
-| Runtime | execution, planning, observation, verification | persistence implementation |
-| Kernel | stable contracts, ports, events, invariants | UI and concrete vendors |
+| Runtime | execution, planning, observation, verification, lifecycle orchestration | persistence implementation, vendor details |
+| Kernel | stable contracts, identity, state, lifecycle contracts, events, ports and invariants | UI, concrete providers, infrastructure implementation |
 | Capabilities | Modules, Skills, Tools | provider internals |
-| Providers | provider contracts and adapters | UI and unrelated policy |
-| Memory | memory semantics and retrieval | physical persistence |
-| Storage | durable persistence and sync | reasoning semantics |
-| Device | platform/device adapters | agent policy |
+| Providers | provider contracts and remote/local adapters | UI and unrelated policy |
+| Memory | memory semantics, classification and retrieval | physical persistence mechanics |
+| Storage | durable persistence, sync, model/skill/config/cache storage | reasoning semantics |
+| Device | platform/device adapters and capability signals | agent policy |
 
-## Core rule
+## Responsibility gaps to migrate
 
-When current code differs from target, code is authoritative for current behavior and this document is authoritative for intended architecture. A migration task must state the gap before changing it.
+These are audit candidates, not permission for speculative refactoring:
+
+1. PAKernel concentration: identify which AgentRuntime responsibilities can move behind Runtime-owned contracts.
+2. Composition concentration: audit whether `LocalModelRuntimeCoordinator` belongs in Composition or a local-provider/runtime boundary.
+3. Provider boundary: verify routing, provider contract and vendor adapter separation.
+4. Memory/Storage: verify semantic memory is not coupled to physical persistence.
+5. ArchitectureManifest: verify declarations match the actual SwiftPM graph.
 
 ## Quality bar
 
-A change is architecturally complete only when responsibility is singular, dependencies are explicit, vendor knowledge is isolated, contracts are testable, behavior is preserved unless intentionally changed, and all relevant verification gates are green.
+A change is complete only when responsibility is singular, dependencies are explicit, vendor knowledge is isolated, contracts are testable, behavior is preserved unless intentionally changed, and relevant verification gates are green.
+
+## Historical milestone documentation
+
+Existing `Documentation/M4.md` through `M8.md` remain historical/contract evidence. This document is the architecture entry point and does not replace those milestone records.
