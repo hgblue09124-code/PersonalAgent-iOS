@@ -511,7 +511,14 @@ extension M8CompositionRoot {
         let response = try await activeProvider.complete(
             LLMRequest(
                 model: (await providerModelSelection.selectedModel()) ?? activeProvider.identity.models.first?.id ?? ModelID(rawValue: "local"),
-                prompt: prompt
+                messages: [
+                    ProviderMessage(
+                        role: .system,
+                        content: "You are a concise, helpful personal assistant. Answer the user's question directly. For simple factual or arithmetic questions, give the correct answer first. Do not repeat words, phrases, or the same answer."
+                    ),
+                    ProviderMessage(role: .user, content: prompt)
+                ],
+                parameters: GenerationParameters(temperature: 0.7, maxOutputTokens: 512)
             )
         )
         let output = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
