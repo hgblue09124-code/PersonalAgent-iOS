@@ -4,6 +4,7 @@ import PAFoundation
 import PAEvents
 import PAKernel
 import PARuntime
+import PACognition
 
 @Suite("M1 regression guards")
 struct M1RegressionTests {
@@ -34,7 +35,7 @@ struct M1RegressionTests {
             eventLog: log
         )
 
-        let goal = Goal(id: GoalID(rawValue: "terminal.goal"), statement: "Stay active") 
+        let goal = Goal(id: GoalID(rawValue: "terminal.goal"), statement: "Stay active")
         try await runtime.submit(goal: goal)
         try await runtime.start()
         try await runtime.activate(goalID: goal.id)
@@ -51,7 +52,7 @@ struct M1RegressionTests {
 
         let kinds = await log.kinds()
         #expect(!kinds.contains(.goalBlocked))
-        #expect(!kinds.contains(.stopped))
+        #expect(!kinds.contains(.runtimeStopped))
     }
 
     @Test func goalTransitionDoesNotCommitWhenEventAppendFails() async throws {
