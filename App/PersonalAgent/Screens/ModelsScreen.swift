@@ -103,6 +103,14 @@ struct ModelsScreen: View {
                             .foregroundStyle(.red)
                     }
                 }
+
+                if let sessionError = session.lastError {
+                    Section("Model Error") {
+                        Text(sessionError)
+                            .foregroundStyle(.red)
+                            .textSelection(.enabled)
+                    }
+                }
             }
             .navigationTitle("Models")
             .toolbar {
