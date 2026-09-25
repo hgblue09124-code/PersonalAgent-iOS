@@ -417,7 +417,7 @@ struct M82ActiveModelBindingTests {
 
         let coordinator = LocalModelRuntimeCoordinator(storage: storage, deviceCapabilityProvider: deviceCap)
         let fallback = ObservableFallbackProvider()
-        let dynamicProvider = DynamicActiveProvider(fallbackProvider: fallback, coordinator: coordinator)
+        let dynamicProvider = DynamicActiveProvider(fallbackProvider: fallback, coordinator: coordinator, routeStore: ProviderRouteStore(initialRoute: .remote))
 
         let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Hello fallback")])
         let res = try await dynamicProvider.complete(req)
@@ -451,6 +451,7 @@ struct M82ActiveModelBindingTests {
 
         let fallback = ObservableFallbackProvider()
         let providerID = compositionRoot.catalog.identities.first!.id
+        await compositionRoot.selectProviderRoute(.local)
         let activeProvider = compositionRoot.catalog.resolve(providerID)!
 
         let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Route to local engine")])
@@ -487,6 +488,7 @@ struct M82ActiveModelBindingTests {
         )
 
         let providerID = compositionRoot.catalog.identities.first!.id
+        await compositionRoot.selectProviderRoute(.local)
         let activeProvider = compositionRoot.catalog.resolve(providerID)!
 
         let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Stream to local engine")])
@@ -514,7 +516,7 @@ struct M82ActiveModelBindingTests {
 
         let coordinator = LocalModelRuntimeCoordinator(storage: mockStorage, deviceCapabilityProvider: deviceCap)
         let fallback = ObservableFallbackProvider()
-        let dynamicProvider = DynamicActiveProvider(fallbackProvider: fallback, coordinator: coordinator)
+        let dynamicProvider = DynamicActiveProvider(fallbackProvider: fallback, coordinator: coordinator, routeStore: ProviderRouteStore(initialRoute: .local))
 
         let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Fail closed")])
 
@@ -539,7 +541,7 @@ struct M82ActiveModelBindingTests {
 
         let coordinator = LocalModelRuntimeCoordinator(storage: mockStorage, deviceCapabilityProvider: deviceCap)
         let fallback = ObservableFallbackProvider()
-        let dynamicProvider = DynamicActiveProvider(fallbackProvider: fallback, coordinator: coordinator)
+        let dynamicProvider = DynamicActiveProvider(fallbackProvider: fallback, coordinator: coordinator, routeStore: ProviderRouteStore(initialRoute: .local))
 
         let req = LLMRequest(model: ModelID(rawValue: "test-model"), messages: [ProviderMessage(role: .user, content: "Missing backing file")])
 
@@ -812,6 +814,7 @@ struct M82ActiveModelBindingTests {
             localModelEngineFactory: { _, _ in mockEngine }
         )
 
+        await compositionRoot.selectProviderRoute(.local)
         let providerID = compositionRoot.catalog.identities.first!.id
         let provider = try #require(compositionRoot.catalog.resolve(providerID))
 
