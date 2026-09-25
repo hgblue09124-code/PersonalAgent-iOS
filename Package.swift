@@ -166,7 +166,6 @@ let package = Package(
                 "PAProvidersLocal",
                 "PAPolicy",
                 "PACognition",
-                "PAAgency",
                 "PASecurity",
                 "PAModules",
                 "PASkills",
