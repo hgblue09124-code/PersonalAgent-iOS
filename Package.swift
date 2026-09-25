@@ -1,13 +1,10 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
-/// M0–M6 package graph.
+/// Canonical PersonalAgent-iOS package graph.
 ///
-/// Dependency direction is downward only:
-///   App -> Composition -> Kernel -> Cognition/Agency/Policy
-///        -> Skills/Tools/Modules/Providers/Memory
-///        -> Storage/Events/Observability/Security
-///        -> Foundation
+/// Canonical direction:
+///   App -> Composition -> Runtime -> Capabilities/Providers/Memory/Storage -> Kernel
 ///
 /// Concrete provider modules exist as reserved boundaries for M2.
 /// They must not be imported by Kernel.
@@ -49,34 +46,34 @@ let package = Package(
             dependencies: [
                 .target(name: "llama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
-            path: "Sources/cllama",
+            path: "Sources/Providers/Local/EngineBridge",
             exclude: ["README.md"]
         ),
-        .target(name: "PAFoundation", path: "Sources/Foundation"),
+        .target(name: "PAFoundation", path: "Sources/Kernel/Foundation"),
         .target(
             name: "PAObservability",
             dependencies: ["PAFoundation"],
-            path: "Sources/Observability"
+            path: "Sources/Runtime/Observability"
         ),
         .target(
             name: "PAEvents",
             dependencies: ["PAFoundation", "PAObservability"],
-            path: "Sources/Events"
+            path: "Sources/Kernel/Events"
         ),
         .target(
             name: "PASecurity",
             dependencies: ["PAFoundation"],
-            path: "Sources/Security"
+            path: "Sources/Storage/Security"
         ),
         .target(
             name: "PAStorage",
             dependencies: ["PAFoundation", "PAEvents", "PAObservability"],
-            path: "Sources/Storage"
+            path: "Sources/Storage/Core"
         ),
         .target(
             name: "PAMemory",
             dependencies: ["PAFoundation", "PAStorage", "PAEvents"],
-            path: "Sources/Memory"
+            path: "Sources/Memory/Core"
         ),
         .target(
             name: "PAProviders",
@@ -86,17 +83,17 @@ let package = Package(
         .target(
             name: "PAProvidersGrok",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/Grok"
+            path: "Sources/Providers/Remote/Grok"
         ),
         .target(
             name: "PAProvidersOpenAI",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/OpenAI"
+            path: "Sources/Providers/Remote/OpenAI"
         ),
         .target(
             name: "PAProvidersOpenAICompatible",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/OpenAICompatible"
+            path: "Sources/Providers/Remote/OpenAICompatible"
         ),
         .target(
             name: "PAProvidersLocal",
@@ -105,37 +102,37 @@ let package = Package(
                 "PAFoundation",
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
-            path: "Sources/Providers/Local"
+            path: "Sources/Providers/Local/Runtime"
         ),
         .target(
             name: "PAPolicy",
             dependencies: ["PAFoundation"],
-            path: "Sources/Core/Policy"
+            path: "Sources/Kernel/Policy"
         ),
         .target(
             name: "PATools",
             dependencies: ["PAFoundation", "PAPolicy", "PAObservability"],
-            path: "Sources/Tools/Contracts"
+            path: "Sources/Capabilities/Tools"
         ),
         .target(
             name: "PAModules",
             dependencies: ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
-            path: "Sources/Modules/Contracts"
+            path: "Sources/Capabilities/Modules"
         ),
         .target(
             name: "PASkills",
             dependencies: ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
-            path: "Sources/Skills/Contracts"
+            path: "Sources/Capabilities/Skills"
         ),
         .target(
             name: "PACognition",
             dependencies: ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
-            path: "Sources/Core/Cognition"
+            path: "Sources/Runtime/Cognition"
         ),
         .target(
             name: "PAAgency",
             dependencies: ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
-            path: "Sources/Core/Agency"
+            path: "Sources/Runtime/Agency"
         ),
         .target(
             name: "PAKernel",
@@ -150,7 +147,7 @@ let package = Package(
                 "PAModules",
                 "PAMemory",
             ],
-            path: "Sources/Core/Agent"
+            path: "Sources/Runtime/Execution"
         ),
         .target(
             name: "PAComposition",
@@ -173,7 +170,7 @@ let package = Package(
         .target(
             name: "PAArchitecture",
             dependencies: ["PAFoundation"],
-            path: "Sources/Architecture"
+            path: "Sources/Kernel/Architecture"
         ),
         .testTarget(
             name: "PersonalAgentTests",
