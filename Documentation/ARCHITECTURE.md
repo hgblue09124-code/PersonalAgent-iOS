@@ -4,7 +4,7 @@
 
 **Current baseline:** M8 architecture foundation at verified green commit `e3e7182523daf711ba23cbc9ec67bd450ef44e5d`.
 
-The repository currently uses the M8 package graph. This document therefore separates **CURRENT** from **TARGET**; the target is not presented as implemented.
+The repository currently uses the M8 package graph. This document separates **CURRENT** from **TARGET**; the target is not presented as implemented.
 
 This iOS client is the long-lived Personal Agent / Agent OS client. It is not a chat wrapper. Kernel is not an LLM.
 
@@ -12,25 +12,28 @@ Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-dat
 
 ## CURRENT — verified source graph
 
-The current SwiftPM graph is approximately:
+The current SwiftPM graph is:
 
 ```text
 App
   ↓
 Composition
   ↓
+PARuntime
+  ↓
 PAKernel
   ├── PACognition → PAProviders / PAMemory / PASkills
   ├── PAAgency → PACognition / PATools / PAPolicy
   ├── PAModules
   ├── PAMemory
-  ├── PAProviders
-  └── PAEvents / PAObservability / PAPolicy
+  └── PAProviders / PAEvents / PAObservability / PAPolicy
 
 Composition additionally wires Providers / Local / Memory / Modules / Skills / Tools / Storage / Security / Policy / Cognition / Agency.
 ```
 
-This is the **current implementation**, not the target. In particular, current `PAKernel` contains the AgentRuntime boundary while depending on several domain modules, and `M8CompositionRoot` contains local-model lifecycle coordination and product wiring.
+The runtime slice is now implemented: `AgentRuntime` and `AgentSession` live in `PARuntime`, while Kernel remains the lower stable contract/state boundary. `M8CompositionRoot` explicitly imports `PARuntime` and owns construction/wiring.
+
+The current implementation still has known concentration candidates (for example `KernelCoordinationBoundary` and `LocalModelRuntimeCoordinator`). These are audit targets, not permission for speculative refactoring.
 
 ## TARGET — responsibility architecture
 
@@ -48,7 +51,7 @@ Ports
 Providers / Memory / Storage / Device adapters
 ```
 
-The target separates stable contracts from runtime orchestration and infrastructure responsibilities. Migration must prove each boundary before moving code.
+The target further separates stable contracts from runtime orchestration and infrastructure responsibilities. Migration must prove each boundary before moving code.
 
 ## Layer responsibilities
 
@@ -68,7 +71,7 @@ The target separates stable contracts from runtime orchestration and infrastruct
 
 These are audit candidates, not permission for speculative refactoring:
 
-1. PAKernel concentration: identify which AgentRuntime responsibilities can move behind Runtime-owned contracts.
+1. Kernel coordination: identify which concrete coordination knowledge can move behind stable Kernel ports without changing behavior.
 2. Composition concentration: audit whether `LocalModelRuntimeCoordinator` belongs in Composition or a local-provider/runtime boundary.
 3. Provider boundary: verify routing, provider contract and vendor adapter separation.
 4. Memory/Storage: verify semantic memory is not coupled to physical persistence.
