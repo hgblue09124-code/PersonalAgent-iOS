@@ -42,7 +42,7 @@ struct SettingsScreen: View {
                     }
                 }
 
-                Section {
+                Section("Local AI") {
                     HStack {
                         Label("Active Model", systemImage: "cube.box")
                         Spacer()
