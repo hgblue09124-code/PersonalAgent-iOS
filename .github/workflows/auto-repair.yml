@@ -16,12 +16,12 @@ permissions:
   actions: write
 
 concurrency:
-  group: auto-repair-${github.ref${
+  group: auto-repair-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   repair:
-    if: ${{ !contains(github.event.head_commit.message, '[auto-repair]') || github.event_name == 'workflow_dispatch' ${
+    if: ${{ !contains(github.event.head_commit.message, '[auto-repair]') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     container: swift:6.3.2
     steps:
@@ -34,7 +34,7 @@ jobs:
         id: loop
         shell: bash
         env:
-          INPUT_ATTEMPT: ${ inputs.attempt || '0' ${
+          INPUT_ATTEMPT: ${{ inputs.attempt || '0' }}
         run: |
           set -euo pipefail
           attempt="$INPUT_ATTEMPT"
@@ -160,10 +160,10 @@ jobs:
         if: steps.commit.outcome == 'success'
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token ${
-          ATTEMPT: ${ steps.loop.outputs.attempt ${
-          REPO: ${{ github.repository ${
-          REF: ${{ github.ref_name ${
+          GH_TOKEN: ${{ github.token }}
+          ATTEMPT: ${{ steps.loop.outputs.attempt }}
+          REPO: ${{ github.repository }}
+          REF: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           next_attempt=$((ATTEMPT + 1))
