@@ -32,6 +32,7 @@ let package = Package(
         .library(name: "PACognition", targets: ["PACognition"]),
         .library(name: "PAAgency", targets: ["PAAgency"]),
         .library(name: "PAKernel", targets: ["PAKernel"]),
+        .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
         .library(name: "PAArchitecture", targets: ["PAArchitecture"]),
         .library(name: "PAProvidersGrok", targets: ["PAProvidersGrok"]),
@@ -153,6 +154,20 @@ let package = Package(
             path: "Sources/Core/Agent"
         ),
         .target(
+            name: "PARuntime",
+            dependencies: [
+                "PAFoundation",
+                "PAObservability",
+                "PAEvents",
+                "PAProviders",
+                "PAModules",
+                "PAMemory",
+                "PACognition",
+                "PAKernel",
+            ],
+            path: "Sources/Runtime"
+        ),
+        .target(
             name: "PAComposition",
             dependencies: [
                 "PAFoundation",
@@ -199,6 +214,7 @@ let package = Package(
                 "PACognition",
                 "PAAgency",
                 "PAKernel",
+                "PARuntime",
                 "PAComposition",
                 "PAArchitecture",
             ],
