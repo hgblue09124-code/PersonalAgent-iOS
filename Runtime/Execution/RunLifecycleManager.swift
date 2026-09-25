@@ -3,8 +3,6 @@ import PAFoundation
 import PAKernel
 import PAObservability
 import PAEvents
-import PAPolicy
-import PACognition
 import PAModules
 
 public actor RunLifecycleManager {
