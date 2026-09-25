@@ -15,6 +15,7 @@ public enum AgentExecutionProgress: Sendable, Equatable {
     case planning
     case actionProposed(String)
     case verification
+    case verificationCompleted(Bool, String)
     case executing
     case observation(String)
     case evaluating
@@ -28,7 +29,8 @@ public enum AgentExecutionProgress: Sendable, Equatable {
         case .reasoningCompleted: return "Reasoning ready"
         case .planning: return "Planning"
         case .actionProposed: return "Action proposed"
-        case .verification: return "Verifying"
+        case .verification: return "Verifying plan"
+        case .verificationCompleted(let accepted, _): return accepted ? "Plan verified" : "Verification failed"
         case .executing: return "Executing"
         case .observation: return "Observing"
         case .evaluating: return "Evaluating"
@@ -45,6 +47,7 @@ public enum AgentExecutionProgress: Sendable, Equatable {
         case .planning: return "Building the next action…"
         case .actionProposed(let text): return text
         case .verification: return "Checking the proposed action…"
+        case .verificationCompleted(let accepted, let notes): return accepted ? notes : "The plan was rejected: \(notes)"
         case .executing: return "Running the selected action…"
         case .observation(let text): return text
         case .evaluating: return "Evaluating the execution result…"
@@ -304,6 +307,7 @@ public actor M6Orchestrator {
             // 5. ActionProposals
             let proposals = try await proposer.propose(plan: plan)
             for proposal in proposals {
+                progress?(.actionProposed(proposal.description))
                 var payload: [String: String] = [
                     "goalID": goalID.rawValue,
                     "planID": proposal.planID.rawValue,
@@ -329,6 +333,7 @@ public actor M6Orchestrator {
                     "notes": verification.notes,
                 ]
             )
+            progress?(.verificationCompleted(verification.accepted, verification.notes))
 
             if !verification.accepted {
                 let obs = proposals.map { Observation(actionID: $0.actionID, summary: "Verification rejected: \(verification.notes)", succeeded: false) }
@@ -455,6 +460,7 @@ public actor M6Orchestrator {
             try await runtime.applyStateUpdate(stateUpdate)
 
             finalEvaluation = evaluation
+            progress?(.evaluating)
             if evaluation.disposition == .complete {
                 progress?(.completed(evaluation.reason))
             }
