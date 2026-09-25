@@ -57,7 +57,7 @@ public final class ModelSelectingProvider: LLMProvider, @unchecked Sendable {
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
-        try await base.complete(await bindSelectedModel(to: request))
+        try await base.complete(await Self.bindSelectedModel(to: request, selection: selection))
     }
 
     public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
@@ -80,7 +80,7 @@ public final class ModelSelectingProvider: LLMProvider, @unchecked Sendable {
         }
     }
 
-    private func bindSelectedModel(
+    private static func bindSelectedModel(
         to request: LLMRequest,
         selection: ProviderModelSelectionStore
     ) async -> LLMRequest {
