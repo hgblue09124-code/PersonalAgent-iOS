@@ -160,7 +160,7 @@ private struct RemoteModelRows: View {
     @ObservedObject var session: KernelSession
 
     var body: some View {
-        ForEach(models) { model in
+        ForEach(models, id: \.filename) { model in
             Button {
                 Task { await session.downloadModel(model) }
             } label: {
