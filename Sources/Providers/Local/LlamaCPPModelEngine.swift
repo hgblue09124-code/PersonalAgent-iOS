@@ -244,18 +244,34 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.tokenizationFailed
                 }
 
-                // 2. Decode prompt batch
-                var batch = llama_batch_init(Int32(promptTokens.count), 0, 1)
-                defer { llama_batch_free(batch) }
-
-                for (i, tok) in promptTokens.enumerated() {
-                    let isLast = (i == promptTokens.count - 1)
-                    self.addTokenToBatch(&batch, id: tok, pos: Int32(i), seqID: 0, logits: isLast)
+                // 2. Decode prompt in batches no larger than llama.cpp n_batch.
+                // The context may be large, but n_batch is intentionally capped at 512.
+                // A single batch sized to the full prompt would overflow for long prompts.
+                let loadedContextWindow = self.stateLock.withLock { self.activeOptions?.contextWindow ?? 8192 }
+                let modelContextLimit = self.parsedMetadata?.contextLength.flatMap { Int(exactly: $0) }
+                let effectiveContextWindow = min(loadedContextWindow, modelContextLimit ?? loadedContextWindow)
+                guard promptTokens.count < effectiveContextWindow else {
+                    throw LlamaCPPEngineError.evalFailed(-2)
                 }
 
-                let evalRes = llama_decode(contextPtr, batch)
-                guard evalRes == 0 else {
-                    throw LlamaCPPEngineError.evalFailed(evalRes)
+                let batchCapacity = min(effectiveContextWindow, 512)
+                var batch = llama_batch_init(Int32(batchCapacity), 0, 1)
+                defer { llama_batch_free(batch) }
+
+                var promptOffset = 0
+                while promptOffset < promptTokens.count {
+                    self.clearBatch(&batch)
+                    let end = min(promptOffset + batchCapacity, promptTokens.count)
+                    for index in promptOffset..<end {
+                        let isLast = index == promptTokens.count - 1
+                        self.addTokenToBatch(&batch, id: promptTokens[index], pos: Int32(index), seqID: 0, logits: isLast)
+                    }
+
+                    let evalRes = llama_decode(contextPtr, batch)
+                    guard evalRes == 0 else {
+                        throw LlamaCPPEngineError.evalFailed(evalRes)
+                    }
+                    promptOffset = end
                 }
 
                 // 3. Generation loop
