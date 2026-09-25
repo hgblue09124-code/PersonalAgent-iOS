@@ -29,10 +29,7 @@ struct RepositoryIntegrityTests {
 
     @Test func requiredM1KernelSourcesExist() {
         let root = repositoryRoot()
-        let kernel = root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("Core")
-            .appendingPathComponent("Agent")
+        let kernel = root.appendingPathComponent("Kernel")
         for name in [
             "LifecycleMachine.swift",
             "GoalMachine.swift",
