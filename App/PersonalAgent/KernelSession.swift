@@ -29,6 +29,7 @@ final class KernelSession: ObservableObject {
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionTrace: [AgentExecutionProgress] = []
     @Published var executionResult: String?
+    @Published var chatPhase: String?
     private var lastSubmittedTask: String?
 
     init(composition: M8CompositionRoot, state: AgentState) {
@@ -46,6 +47,7 @@ final class KernelSession: ObservableObject {
         self.activeModelID = nil
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
+        self.chatPhase = nil
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -101,11 +103,16 @@ final class KernelSession: ObservableObject {
     }
 
     func sendChat(_ message: String) async -> String? {
+        chatPhase = "Received"
         do {
+            chatPhase = "Preparing context"
+            chatPhase = "Generating"
             let response = try await composition.chat(message)
+            chatPhase = "Response ready"
             lastError = nil
             return response
         } catch {
+            chatPhase = "Generation failed"
             lastError = "Agent chat failed: \(error.localizedDescription)"
             return nil
         }
