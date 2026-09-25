@@ -238,13 +238,15 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.memoryPressureCritical
                 }
 
-                // 1. Tokenize prompt
-                let promptText: String
-                if let sys = request.systemPrompt, !sys.isEmpty {
-                    promptText = "System: \(sys)\nUser: \(request.prompt)\nAssistant:"
-                } else {
-                    promptText = request.prompt
-                }
+                // 1. Tokenize prompt using the model's GGUF chat template when available.
+                // A generic "System:/User:/Assistant:" wrapper is not equivalent to the
+                // model's trained instruction format and can produce severe quality/repetition
+                // failures on chat-tuned GGUFs.
+                let promptText = self.makeChatPrompt(
+                    model: modelPtr,
+                    systemPrompt: request.systemPrompt,
+                    userPrompt: request.prompt
+                )
 
                 guard let vocabPtr = llama_model_get_vocab(modelPtr) else {
                     throw LlamaCPPEngineError.tokenizationFailed
@@ -447,6 +449,139 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     #if canImport(cllama)
+    #if canImport(cllama)
+    private func makeChatPrompt(
+        model: OpaquePointer,
+        systemPrompt: String?,
+        userPrompt: String
+    ) -> String {
+        let system = systemPrompt?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let messages: [(String, String)] = system.isEmpty
+            ? [("user", userPrompt)]
+            : [("system", system), ("user", userPrompt)]
+
+        guard let templatePtr = llama_model_chat_template(model, nil) else {
+            return system.isEmpty
+                ? userPrompt
+                : "System: \(system)\\nUser: \(userPrompt)\\nAssistant:"
+        }
+
+        var result = ""
+        let roleContents = messages.map { role, content in
+            (role, content)
+        }
+
+        roleContents.withUnsafeBufferPointer { _ in
+            func apply(capacity: Int32) -> (Int32, String?) {
+                var output = Array<CChar>(repeating: 0, count: Int(capacity))
+                let applied: Int32 = templatePtr.withMemoryRebound(to: CChar.self, capacity: 1) { template in
+                    var rolePointers: [UnsafePointer<CChar>?] = []
+                    var contentPointers: [UnsafePointer<CChar>?] = []
+                    for (role, content) in roleContents {
+                        role.withCString { rolePtr in
+                            content.withCString { contentPtr in
+                                rolePointers.append(rolePtr)
+                                contentPointers.append(contentPtr)
+                            }
+                        }
+                    }
+                    // The pointers above cannot outlive the nested withCString scopes,
+                    // so construct and apply the message array in one nested scope below.
+                    return Int32(-1)
+                }
+                _ = applied
+                _ = output
+                return (-1, nil)
+            }
+            _ = apply
+        }
+
+        // Build the C message array while all backing strings remain alive.
+        var formatted: [CChar] = Array(repeating: 0, count: 4096)
+        let rendered = system.isEmpty
+            ? userPrompt.withCString { userPtr in
+                "user".withCString { rolePtr in
+                    var message = llama_chat_message(role: rolePtr, content: userPtr)
+                    return withUnsafePointer(to: &message) { messagePtr in
+                        llama_chat_apply_template(templatePtr, messagePtr, 1, true, &formatted, Int32(formatted.count))
+                    }
+                }
+            }
+            : system.withCString { systemPtr in
+                userPrompt.withCString { userPtr in
+                    "system".withCString { systemRolePtr in
+                        "user".withCString { userRolePtr in
+                            var messages = [
+                                llama_chat_message(role: systemRolePtr, content: systemPtr),
+                                llama_chat_message(role: userRolePtr, content: userPtr)
+                            ]
+                            return messages.withUnsafeBufferPointer { buffer in
+                                llama_chat_apply_template(
+                                    templatePtr,
+                                    buffer.baseAddress,
+                                    buffer.count,
+                                    true,
+                                    &formatted,
+                                    Int32(formatted.count)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+        guard rendered > 0 else {
+            return system.isEmpty
+                ? userPrompt
+                : "System: \(system)\\nUser: \(userPrompt)\\nAssistant:"
+        }
+
+        if rendered < Int32(formatted.count) {
+            return String(cString: formatted)
+        }
+
+        var resized = Array<CChar>(repeating: 0, count: Int(rendered) + 1)
+        let secondPass: Int32 = system.isEmpty
+            ? userPrompt.withCString { userPtr in
+                "user".withCString { rolePtr in
+                    var message = llama_chat_message(role: rolePtr, content: userPtr)
+                    return withUnsafePointer(to: &message) { messagePtr in
+                        llama_chat_apply_template(templatePtr, messagePtr, 1, true, &resized, Int32(resized.count))
+                    }
+                }
+            }
+            : system.withCString { systemPtr in
+                userPrompt.withCString { userPtr in
+                    "system".withCString { systemRolePtr in
+                        "user".withCString { userRolePtr in
+                            var messages = [
+                                llama_chat_message(role: systemRolePtr, content: systemPtr),
+                                llama_chat_message(role: userRolePtr, content: userPtr)
+                            ]
+                            return messages.withUnsafeBufferPointer { buffer in
+                                llama_chat_apply_template(
+                                    templatePtr,
+                                    buffer.baseAddress,
+                                    buffer.count,
+                                    true,
+                                    &resized,
+                                    Int32(resized.count)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+        guard secondPass > 0 else {
+            return system.isEmpty
+                ? userPrompt
+                : "System: \(system)\\nUser: \(userPrompt)\\nAssistant:"
+        }
+        return String(cString: resized)
+    }
+    #endif
+
     private func getNativeHandles() -> (OpaquePointer, OpaquePointer, UnsafeMutablePointer<llama_sampler>)? {
         stateLock.withLock {
             guard let m = nativeModel, let c = nativeContext, let s = nativeSampler else {
