@@ -110,7 +110,7 @@ let package = Package(
         ),
         .target(
             name: "PAPolicy",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAFoundation", "PAKernel"],
             path: "Sources/Core/Policy"
         ),
         .target(
