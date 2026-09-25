@@ -33,12 +33,19 @@ struct AgentScreen: View {
                         }
 
                         if isSending {
-                            HStack(spacing: 8) {
+                            HStack(spacing: 10) {
                                 ProgressView()
-                                Text("Agent is responding…")
-                                    .foregroundStyle(.secondary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Agent")
+                                        .font(.caption.weight(.semibold))
+                                    Text(session.chatPhase ?? "Processing")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
-                            .padding(.horizontal, 4)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 14))
                         }
 
                         if session.executionProgress != nil || session.executionResult != nil {
