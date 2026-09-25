@@ -16,16 +16,6 @@ public enum ModuleLifecycle: String, Sendable, Codable {
     case failed
 }
 
-/// Per-invocation execution state. Isolated from AgentLifecycle and ProviderLifecycle.
-public enum ModuleExecutionState: String, Sendable, Codable, Equatable {
-    case idle
-    case validating
-    case executing
-    case completed
-    case failed
-    case cancelled
-}
-
 public struct ModuleContract: Hashable, Sendable, Codable {
     public let id: ModuleID
     public let name: String
@@ -60,30 +50,6 @@ public struct ModuleContract: Hashable, Sendable, Codable {
         self.outputSchema = outputSchema
         self.lifecycle = lifecycle
         self.requiredFields = requiredFields
-    }
-}
-
-/// Schema-tagged string map. This is not a Swift generic payload and not a JSON Schema engine.
-///
-/// Guarantees enforced by ModuleRuntime:
-/// - `schema.identifier` must equal the contract input/output schema identifier
-/// - each `requiredFields` key must be present and non-blank on input
-///
-/// Deliberately not guaranteed:
-/// - structural typing of field values
-/// - unknown-key rejection
-/// - JSON Schema / Codable model validation
-public struct ModulePayload: Sendable, Equatable, Codable {
-    public let schema: SchemaDocument
-    public let fields: [String: String]
-
-    public init(schema: SchemaDocument, fields: [String: String] = [:]) {
-        self.schema = schema
-        self.fields = fields
-    }
-
-    public func value(for key: String) -> String? {
-        fields[key]
     }
 }
 
