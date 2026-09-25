@@ -1,4 +1,4 @@
-import PAFoundation
+import PAKernel
 import PAPolicy
 
 public enum ModuleKind: String, Sendable, Codable {
@@ -85,84 +85,6 @@ public struct ModulePayload: Sendable, Equatable, Codable {
     public func value(for key: String) -> String? {
         fields[key]
     }
-}
-
-public struct ModuleInvocation: Sendable, Equatable {
-    public let moduleID: ModuleID
-    public let input: ModulePayload
-    public let timeoutNanoseconds: UInt64?
-
-    public init(moduleID: ModuleID, input: ModulePayload, timeoutNanoseconds: UInt64? = nil) {
-        self.moduleID = moduleID
-        self.input = input
-        self.timeoutNanoseconds = timeoutNanoseconds
-    }
-}
-
-public struct ModuleResult: Sendable, Equatable {
-    public let moduleID: ModuleID
-    public let output: ModulePayload
-    public let state: ModuleExecutionState
-
-    public init(moduleID: ModuleID, output: ModulePayload, state: ModuleExecutionState = .completed) {
-        self.moduleID = moduleID
-        self.output = output
-        self.state = state
-    }
-}
-
-public enum ModuleRuntimeError: Error, Sendable, Equatable, CustomStringConvertible {
-    case unknownModule(ModuleID)
-    case duplicateRegistration(ModuleID)
-    case invalidInput(String)
-    case invalidOutput(String)
-    case capabilityDenied(CapabilityLevel)
-    case unavailable(ModuleID)
-    case timeout
-    case cancelled
-    case invalidState(ModuleExecutionState)
-    case executionFailed(String)
-    case compositionFailed(String)
-    case missingDependency(module: ModuleID, missing: ModuleID)
-    case dependencyCycle([ModuleID])
-
-    public var description: String {
-        switch self {
-        case .unknownModule(let id): return "unknownModule:\(id.rawValue)"
-        case .duplicateRegistration(let id): return "duplicateRegistration:\(id.rawValue)"
-        case .invalidInput(let reason): return "invalidInput:\(reason)"
-        case .invalidOutput(let reason): return "invalidOutput:\(reason)"
-        case .capabilityDenied: return "capabilityDenied"
-        case .unavailable(let id): return "unavailable:\(id.rawValue)"
-        case .timeout: return "timeout"
-        case .cancelled: return "cancelled"
-        case .invalidState(let state): return "invalidState:\(state.rawValue)"
-        case .executionFailed(let reason): return "executionFailed:\(reason)"
-        case .compositionFailed(let reason): return "compositionFailed:\(reason)"
-        case .missingDependency(let module, let missing):
-            return "missingDependency:\(module.rawValue)->\(missing.rawValue)"
-        case .dependencyCycle(let ids):
-            return "dependencyCycle:\(ids.map(\.rawValue).joined(separator: ","))"
-        }
-    }
-}
-
-/// A module is an explicit capability boundary.
-/// Implementations must check `Task.checkCancellation()` at await points.
-/// Timeout and cancellation are cooperative; the runtime does not hard-preempt a
-/// module body that never suspends.
-public protocol Module: Sendable {
-    var contract: ModuleContract { get }
-    func execute(_ input: ModulePayload) async throws -> ModulePayload
-}
-
-public protocol ModuleHealthReporting: Sendable {
-    func status() async -> ModuleLifecycle
-}
-
-/// Kernel and skills invoke modules through this port. Not a service locator.
-public protocol ModuleExecuting: Sendable {
-    func execute(_ invocation: ModuleInvocation) async throws -> ModuleResult
 }
 
 public protocol ModuleCataloging: Sendable {
