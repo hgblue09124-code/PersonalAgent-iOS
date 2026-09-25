@@ -104,3 +104,60 @@ Do not move files during the mapping-only audit.
 **Migration status:** Mapping-only audit **COMPLETE**. Physical migration **DEFERRED** until the ownership gaps above are resolved from import/consumer evidence.
 
 <!-- HANDOFF: Next task resolves ownership gaps from imports/consumers, freezes the file-level map, then begins migration groups. -->
+
+
+### Audit #14 — Ownership Freeze (evidence-based)
+
+<!-- TASK-CONTEXT: Resolve Audit #13 ownership gaps from actual file responsibilities. No production/test files moved. -->
+<!-- DECISION: Ownership follows responsibility, not legacy target names. No new top-level layer is introduced. -->
+<!-- INVARIANT: Mixed files are split only when their types have different canonical responsibilities. -->
+
+**Provider contracts — CONFIRMED**
+- `LLMProvider.swift`: vendor-neutral provider boundary types (`LLMProvider`, identity/capabilities/request/response/stream/health/lifecycle/selecting) → `Kernel/Ports`; provider binding/credential-resolution types → `Providers/Remote` after semantic split.
+- `ProviderRuntime.swift` → `Runtime/Execution/ProviderRuntime.swift`; evidence: owns provider invocation lifecycle, timeout, cancellation and execution events.
+- `ProviderRuntimeError.swift` → `Runtime/Execution/ProviderRuntimeError.swift`.
+- `ProviderTransport.swift` → `Providers/Remote/ProviderTransport.swift`; byte-level adapter transport.
+- `ChatCompletionsCodec.swift` → `Providers/Remote/ChatCompletionsCodec.swift`; explicitly maps to OpenAI-compatible wire format.
+- `HTTPChatProvider.swift` → `Providers/Remote/HTTPChatProvider.swift`.
+- `LocalModelContracts.swift`: local inference types → `Providers/Local`; `LocalModelStorage` + `LocalModelStorageError` → `Storage/Models` because they own import/list/delete/active-model persistence.
+- `DeterministicFakeProvider.swift` → `Tests/Providers`.
+
+**Foundation — CONFIRMED**
+- `AgentError.swift` → `Kernel/Errors/AgentError.swift`.
+- `AgentPhase.swift`, `CapabilityLevel.swift`, `Identifiers.swift`, `Provenance.swift`, `SchemaDocument.swift`, `SemanticVersion.swift` → `Kernel/Contracts/*`.
+- `DeviceCapabilityContracts.swift` → `Kernel/Ports/DeviceCapability.swift`; it defines a framework-independent device capability port plus deterministic test implementation.
+- `Sources/Foundation` is eliminated; no replacement Foundation layer.
+
+**Security / Network — CONFIRMED**
+- `SecretStore` + `ProviderCredentialRef` → `Kernel/Ports/Secrets.swift`.
+- `NetworkAccess` + request/response/error contracts → `Kernel/Ports/NetworkAccess.swift`.
+- `InMemorySecretStore` → `Storage/Configuration`.
+- `URLSessionNetworkAccess` → `Storage/Configuration`.
+- Provider transport remains `Providers/Remote` and bridges the Kernel network port.
+
+**Observability — CONFIRMED**
+- `AgentLogger`, `LogEvent`, `LogLevel`, `AgentPhaseObserving` → `Kernel/Ports/Observability.swift`.
+- Concrete logger implementations remain outside Kernel.
+
+**ArchitectureManifest — CONFIRMED**
+- `ArchitectureManifest.swift` → `Tests/Composition/ArchitectureManifest.swift`.
+- Evidence: it contains allowed-import rules, provider reservations and milestone gates for architecture verification; it is not runtime behavior. No `Architecture/` production layer.
+
+**Memory / Storage — CONFIRMED**
+- `MemoryRuntime.swift` → `Memory/Working`; `MemoryIndex.swift` → `Memory/Retrieval`; `InMemoryMemoryStore.swift` → `Memory/Working`; `FileBackedMemoryStore.swift` → `Storage/Memory`.
+- `MemoryContracts.swift` requires type-level split; memory semantics stay under `Memory/{Working,Conversation,LongTerm,Retrieval}`, storage-lineage record types move to `Storage/Models`.
+- `StorageContracts.swift` → `Storage/Models` for generic record/lineage/revision contracts.
+- `PASyncEngine.swift`, `PASyncQueue.swift` → `Storage/Cache` as synchronization/cache infrastructure.
+
+**Cognition / Agency / Policy — CONFIRMED**
+- `CognitionContracts.swift`: perception/context → `Runtime/Observation`; reasoning/planning → `Runtime/Planning`; action proposal → `Runtime/Execution`; verification → `Runtime/Verification`; reflection/state update → `Runtime/Result`.
+- `AgencyContracts.swift`: observation/evaluation → `Runtime/Observation`; action authorization → `Runtime/Verification`; continuation/result → `Runtime/Result`.
+- `PolicyContracts.swift` → `Runtime/Verification`; evidence: policy authorizes/denies actions at the guard boundary.
+- No `Cognition`, `Agency`, or `Policy` production folders survive canonical migration.
+
+**Composition persistence — CONFIRMED**
+- `ProductPersistenceContracts.swift`: model metadata → `Storage/Models`; session data → `Storage/Memory`; preferences/secrets configuration → `Storage/Configuration`; `ProductPersistenceContainer` remains `Composition`.
+
+**Ownership freeze:** all Audit #13 unresolved ownership groups now have a canonical destination. Remaining work is migration mechanics, Package.swift target updates, and verification—not further architecture discovery.
+
+<!-- HANDOFF: Ownership is frozen. Next task starts physical migration with Kernel contracts/errors/ports, then build/test/audit before the next group. -->
