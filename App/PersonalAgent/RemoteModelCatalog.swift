@@ -1,6 +1,5 @@
 import Foundation
 import CryptoKit
-import PAProviders
 
 struct RemoteModelCatalog: Codable, Sendable {
     let schemaVersion: Int
@@ -22,7 +21,6 @@ struct RemoteModel: Codable, Identifiable, Sendable, Equatable {
 }
 
 enum RemoteModelCatalogError: LocalizedError {
-    case invalidURL
     case invalidResponse
     case unsupportedSchema(Int)
     case invalidModel(String)
@@ -32,7 +30,6 @@ enum RemoteModelCatalogError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .invalidURL: return "Model catalog URL is invalid."
         case .invalidResponse: return "Model catalog response is invalid."
         case .unsupportedSchema(let version): return "Unsupported model catalog schema: \(version)."
         case .invalidModel(let id): return "Model catalog entry is invalid: \(id)."
@@ -46,17 +43,13 @@ enum RemoteModelCatalogError: LocalizedError {
 }
 
 enum RemoteModelCatalogClient {
-    static let catalogURL = URL(string: "https://raw.githubusercontent.com/hgblue09124-code/PersonalAgent-iOS/main/RemoteCatalog/models.json")!
+    static let catalogURL = URL(string: "https://raw.githubusercontent.com/hgblue09124-code/PersonalAgent-iOS/feat/big-ui-native-experience/RemoteCatalog/models.json")!
 
     static func fetch() async throws -> RemoteModelCatalog {
         let (data, response) = try await URLSession.shared.data(from: catalogURL)
-        guard let http = response as? HTTPURLResponse else {
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw RemoteModelCatalogError.invalidResponse
         }
-        guard (200..<300).contains(http.statusCode) else {
-            throw RemoteModelCatalogError.httpStatus(http.statusCode)
-        }
-
         let catalog = try JSONDecoder().decode(RemoteModelCatalog.self, from: data)
         guard catalog.schemaVersion == 1 else {
             throw RemoteModelCatalogError.unsupportedSchema(catalog.schemaVersion)
@@ -76,6 +69,7 @@ enum RemoteModelCatalogClient {
     static func download(_ model: RemoteModel) async throws -> URL {
         let (temporaryURL, response) = try await URLSession.shared.download(from: model.downloadURL)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            try? FileManager.default.removeItem(at: temporaryURL)
             throw RemoteModelCatalogError.httpStatus(http.statusCode)
         }
 
@@ -90,7 +84,6 @@ enum RemoteModelCatalogClient {
             try? FileManager.default.removeItem(at: temporaryURL)
             throw RemoteModelCatalogError.checksumMismatch(expected: model.sha256, actual: actualHash)
         }
-
         return temporaryURL
     }
 
