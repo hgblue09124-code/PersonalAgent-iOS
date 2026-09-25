@@ -3,6 +3,7 @@ import PAKernel
 import PAFoundation
 import PAObservability
 import PAEvents
+import PAProviders
 
 /// Owns provider lifecycle and execution. Isolated from AgentRuntime.
 public actor ProviderRuntime {
