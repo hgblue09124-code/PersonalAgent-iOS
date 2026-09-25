@@ -96,7 +96,7 @@ final class KernelSession: ObservableObject {
             lastError = nil
         } catch {
             providerConnectionState = "Connection failed"
-            lastError = "Provider connection failed: \\(error.localizedDescription)"
+            lastError = "Provider connection failed: \(error.localizedDescription)"
         }
     }
 
