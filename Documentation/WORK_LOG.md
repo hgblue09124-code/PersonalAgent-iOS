@@ -35,3 +35,16 @@
 - Workflow #725 / `36255655970` **VERIFIED GREEN**.
 - Confirmed Events → Kernel/Events complete.
 - At that point Memory target-boundary blocker was confirmed; it is now resolved as recorded above.
+
+
+## 2026-09-27 — Agent On: Issue #85 post-merge Markdown audit
+
+- Read `AGENTS.md` first and followed: inspect → confirm → minimal change → regression/full gate evidence → audit → record → handoff.
+- Verified PR #91 is merged at `f31fcce9331c17435b4d31aaa5cdeb000b90bffb`.
+- Verified `@github CI` workflow #753 for the merge commit is **GREEN**.
+- Confirmed Issue #85 remains OPEN and canonical physical migration is incomplete.
+- Confirmed remaining legacy Package.swift paths include Capabilities contracts plus Composition, Architecture, Observability, Security, and parts of Memory.
+- Documentation-only repair: synchronized HANDOFF/AUDIT with the verified merge checkpoint and established a compact Markdown routing protocol.
+- No production code changed.
+- Next exact action: inspect and migrate the smallest remaining Capabilities group, then run the full gate.
+
