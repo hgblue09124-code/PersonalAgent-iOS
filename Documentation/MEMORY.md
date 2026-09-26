@@ -14,13 +14,10 @@
 
 ### Current CI truth
 - Active PR: **#91**, branch `rearch/cognition-policy-runtime`.
-- Current tested commit: `d89321d3798316ab0e6eb5f3899ea730fb923c2b`.
-- Workflow **#712 / 36254250956** is **RED**.
-- iOS arm64 build: PASS.
-- Repository integrity: PASS.
-- Swift package tests: FAIL in **Dependency direction**, exactly 1 issue.
-- Full Gate: FAIL.
-- Never call this HEAD green until a new completed Full Gate proves it.
+- Current tested commit: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`.
+- Workflow **#718 / 36255114608** is **VERIFIED GREEN**.
+- iOS arm64, repository integrity, Swift package tests, Full Gate, and PR Final all passed.
+- The earlier #712 Dependency direction failure is resolved.
 
 ### Completed architecture knowledge
 - Ownership freeze is complete from Audit #14.
@@ -28,7 +25,8 @@
 - Provider ownership migration and App boundary repairs have reached verified-green checkpoints in PR #91 history.
 - Storage Models/Cache migration work is physically present in PR #91.
 - Cognition/Agency/Policy have confirmed canonical Runtime destinations; PR #91 is completing the physical/runtime dependency migration.
-- Events remains a separate migration scope; it is not automatically complete because Foundation is complete.
+- Events → Kernel/Events is physically present in the current tree and included in the current green verification.
+- Remaining physical groups confirmed by tree inspection include Memory, Modules/Skills/Tools contracts, Observability, Security, Architecture support, and Composition/test topology.
 
 ### Agent operating rule
 - Markdown is a **soft memory protocol**: ordering/routing/STOP hints guide retrieval, not a rigid parser.
@@ -64,3 +62,9 @@
 - Current/high-value data is promoted near the top.
 - STOP EARLY is preferred when the current section answers the task.
 - Useful data generation is encouraged; retrieval efficiency comes from routing/indexing rather than suppressing knowledge.
+
+### 2026-09-26 — Agent On verified current tree
+- Confirmed PR #91 HEAD `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b` and workflow #718 / 36255114608 VERIFIED GREEN.
+- Recursive tree inspection confirmed legacy Foundation/Event/Cognition/Agency/Policy paths are absent.
+- Remaining physical groups include `Sources/Memory`, `Sources/Modules/Contracts`, `Sources/Skills/Contracts`, `Sources/Tools/Contracts`, `Sources/Observability`, `Sources/Security`, `Sources/Architecture`, and `Sources/Composition`.
+- The agent should advance to the next confirmed migration group without repairing #712 again.
