@@ -1,3 +1,4 @@
+import PAComposition
 import PARuntime
 import Foundation
 import Testing
