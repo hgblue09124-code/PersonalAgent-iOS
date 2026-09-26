@@ -21,7 +21,6 @@
 		A1000000000000000000000C /* KernelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* KernelSession.swift */; };
 		A10000000000000000000011 /* PAComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000001 /* PAComposition */; };
 		A10000000000000000000012 /* PAArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000002 /* PAArchitecture */; };
-		A10000000000000000000013 /* PAFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000003 /* PAFoundation */; };
 		A10000000000000000000015 /* PAKernel in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000005 /* PAKernel */; };
 /* End PBXBuildFile section */
 
@@ -125,9 +124,7 @@
 			name = PersonalAgent;
 			packageProductDependencies = (
 				A30000000000000000000001 /* PAComposition */,
-				A30000000000000000000002 /* PAArchitecture */,
-				A30000000000000000000003 /* PAFoundation */,
-				A30000000000000000000005 /* PAKernel */,
+				A30000000000000000000002 /* PAArchitecture */,				A30000000000000000000005 /* PAKernel */,
 			);
 			productName = PersonalAgent;
 			productReference = A200000000000000000000FF /* PersonalAgent.app */;
