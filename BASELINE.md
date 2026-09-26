@@ -7,9 +7,8 @@
 - Root task: RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)
 - PR: #91 — rearch: migrate Cognition and Policy into canonical Runtime
 - Branch: `rearch/cognition-policy-runtime`
-- Current HEAD: `a2f8861966a79a86471e070743e1a2abb54c1a9a`
-- Last verified Full Gate: run #685 (`36250123297`) — **VERIFIED GREEN**
-- Verified jobs: repository integrity, Swift package tests, iOS arm64 unsigned IPA, aggregate gate, PR Final Filter — all success.
+- Current HEAD: `52b4cdbfe94dea132fa71a25efe5dbe8dd269411` (documentation checkpoint; requires fresh Full Gate)
+- Last verified Full Gate: run #687 (`36250848595`) — **VERIFIED GREEN**
 
 ## PHASE
 - Ownership freeze: complete.
