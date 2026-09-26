@@ -8,13 +8,14 @@
 
 - Issue #85: **OPEN — late-stage canonical migration, not complete**
 - Active PR/workstream: **#91** — `rearch/cognition-policy-runtime`
-- Current tested commit: `d89321d3798316ab0e6eb5f3899ea730fb923c2b`
-- Latest workflow: **#712 / 36254250956 — RED**
+- Current tested commit: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
+- Latest verified workflow: **#718 / 36255114608 — VERIFIED GREEN**
 - iOS arm64 build: **PASS**
 - Repository integrity: **PASS**
-- Swift package tests: **FAIL** — Dependency direction suite, 1 issue
-- Full Gate: **FAIL**
-- Therefore the next worker must repair the confirmed CI blocker before opening the next migration group.
+- Swift package tests: **PASS**
+- Full Gate: **PASS**
+- PR Final — Filter: **PASS**
+- The previous #712 Dependency direction blocker is **RESOLVED / VERIFIED**.
 
 ## WHAT IS ACTUALLY COMPLETED
 
@@ -38,11 +39,11 @@
 ## WHAT IS NOT COMPLETE
 
 ### P1 — Finish current PR #91 / Runtime + remaining migration mechanics
-- [ ] Fix the current **Dependency direction** test failure in workflow #712.
-- [ ] Re-run the full gate on the repaired HEAD.
-- [ ] Confirm Cognition/Policy legacy ownership is physically removed, not merely mapped.
-- [ ] Confirm Runtime ownership is reflected consistently in Package.swift, tests, and repository integrity.
-- [ ] Record the verified PR #91 result.
+- [x] Fix the #712 **Dependency direction** test failure.
+- [x] Re-run the full gate on the repaired/current HEAD.
+- [x] Confirm Cognition/Policy legacy ownership is physically removed; recursive tree inspection found no `Sources/Core/Cognition`, `Sources/Core/Agency`, `Sources/Core/Policy`, `Cognition`, `Agency`, or `Policy` paths.
+- [x] Confirm Runtime ownership is reflected in Package.swift and repository integrity checks.
+- [x] Record verified PR #91 result: workflow #718 / 36255114608 GREEN.
 
 ### P2 — Remaining canonical migration groups
 These are the remaining queue only after the current PR is green. They are not separate Issue #85 percentages.
@@ -72,9 +73,9 @@ These are the remaining queue only after the current PR is green. They are not s
 
 ## WORK QUEUE ORDER
 
-1. **Repair workflow #712** — confirmed red Dependency direction test.
-2. **Re-verify PR #91 Full Gate.**
-3. **Audit actual remaining legacy paths from the current tree.**
+1. **Audit actual remaining legacy paths from the current tree.**
+2. **Execute the next confirmed migration group.**
+3. **Re-verify PR #91 Full Gate after that migration.**
 4. **Execute only the next confirmed migration group.**
 5. **Final canonical-tree/dependency audit.**
 6. **Physical iPhone validation.**
