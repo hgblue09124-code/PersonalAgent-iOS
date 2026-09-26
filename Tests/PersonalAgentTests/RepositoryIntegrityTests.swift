@@ -12,14 +12,14 @@ struct RepositoryIntegrityTests {
             "Providers/Remote/Grok/GrokBoundary.swift",
             "Runtime/Execution/ProviderRuntime.swift",
             "Providers/Contracts/ProviderRuntimeError.swift",
-            "Providers/Contracts/ProviderTransport.swift",
-            "Providers/Contracts/ChatCompletionsCodec.swift",
-            "Providers/Contracts/HTTPChatProvider.swift",
+            "Providers/Remote/Shared/ProviderTransport.swift",
+            "Providers/Remote/Shared/ChatCompletionsCodec.swift",
+            "Providers/Remote/Shared/HTTPChatProvider.swift",
             "Providers/Contracts/DeterministicFakeProvider.swift",
             "Providers/Remote/OpenAI/OpenAIBoundary.swift",
             "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
-            "Providers/Local/LocalBoundary.swift",
-            "Composition/M2CompositionRoot.swift",
+            "Sources/Providers/Local/LocalBoundary.swift",
+            "Sources/Composition/M2CompositionRoot.swift",
         ] {
             let root = path.hasPrefix("Runtime/") || path.hasPrefix("Providers/Remote/")
                 ? repositoryRootPath
