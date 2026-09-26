@@ -1,6 +1,5 @@
 import Testing
 import Foundation
-import PAFoundation
 import PAMemory
 
 @Suite("M4 Performance & Scale Benchmarks")
@@ -41,7 +40,6 @@ struct M4PerformanceTests {
                 try await store.bulkInsert(records)
             }
 
-            // Benchmark 1: O(1) ID Lookup
             let targetID = MemoryRecordID(rawValue: "perf-rec-\(scale / 2)")
             let startLookup = DispatchTime.now().uptimeNanoseconds
             let fetched = try await store.retrieve(id: targetID)
@@ -51,7 +49,6 @@ struct M4PerformanceTests {
             #expect(fetched != nil)
             #expect(lookupDurationMs < 50.0, "Scale \(scale): ID lookup exceeded 50ms (was \(lookupDurationMs)ms)")
 
-            // Benchmark 2: Scope + Kind Filtered Query
             let query = MemoryQuery(
                 scopes: [.session],
                 kinds: [.fact],
@@ -64,7 +61,6 @@ struct M4PerformanceTests {
             #expect(res.records.count <= 50)
             #expect(queryDurationMs < 200.0, "Scale \(scale): Filtered query exceeded 200ms (was \(queryDurationMs)ms)")
 
-            // Benchmark 3: Full-Text Lexical Search Query
             let textQuery = MemoryQuery(textSearch: "alpha5", limit: 20)
             let textRes = try await store.query(textQuery)
             let textDurationMs = Double(textRes.executionDurationNanoseconds) / 1_000_000.0
@@ -103,7 +99,6 @@ struct M4PerformanceTests {
 
         #expect(writeDurationMs < 3000.0, "Bulk insert 5,000 records exceeded 3s (was \(writeDurationMs)ms)")
 
-        // Benchmark store reload (reads from disk and rebuilds in-memory index)
         let startReload = DispatchTime.now().uptimeNanoseconds
         try await store.reload()
         let endReload = DispatchTime.now().uptimeNanoseconds
