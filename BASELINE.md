@@ -8,14 +8,14 @@
 - PR: #91 — rearch: migrate Cognition and Policy into canonical Runtime
 - Branch: `rearch/cognition-policy-runtime`
 - Current HEAD: `a2f8861966a79a86471e070743e1a2abb54c1a9a`
-- Last verified Full Gate: run #614 (`36233267763`) — **VERIFIED GREEN**
+- Last verified Full Gate: run #685 (`36250123297`) — **VERIFIED GREEN**
 - Verified jobs: repository integrity, Swift package tests, iOS arm64 unsigned IPA, aggregate gate, PR Final Filter — all success.
 
 ## PHASE
 - Ownership freeze: complete.
 - Issue #85: **OPEN / INCOMPLETE**.
-- Foundation → Kernel is the next confirmed migration direction.
-- Events remain a separate migration scope.
+- Connected migration chain currently reaches PR #91: #87 → #88 → #89 → #90 → #91.
+- Issue #85 is one continuous migration, not independent PR completion.
 
 ## WORKER ROUTE
 1. Read this file.
