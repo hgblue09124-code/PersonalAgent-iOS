@@ -214,10 +214,21 @@ public struct ProviderNullLogger: AgentLogger {
 }
 
 public enum SecretRedactor: Sendable {
+    private static let sensitiveHeaderKeys: Set<String> = [
+        "authorization",
+        "proxy-authorization",
+        "x-api-key",
+        "api-key",
+        "api_key",
+        "x-auth-token",
+        "cookie",
+        "set-cookie",
+    ]
+
     public static func stripSecrets(from payload: [String: String]) -> [String: String] {
         var result: [String: String] = [:]
         for (key, value) in payload {
-            if ProviderTransportRequest.sensitiveHeaderKeys.contains(key.lowercased())
+            if sensitiveHeaderKeys.contains(key.lowercased())
                 || key.lowercased().contains("secret")
                 || key.lowercased().contains("token")
                 || key.lowercased().contains("authorization")
