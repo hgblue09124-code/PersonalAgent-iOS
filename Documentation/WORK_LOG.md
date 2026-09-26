@@ -137,3 +137,23 @@ Never leave only prose such as “fixed” or “looks green”.
 - Confirmed: legacy `Sources/Foundation/*` is absent; canonical Foundation contracts are under Kernel; no `PAFoundation` target remains.
 - Verification: Full Gate #687 (`36250848595`) — **VERIFIED GREEN** before this documentation checkpoint.
 - Next: open the separate Events → Kernel/Events migration group after re-checking current HEAD/CI.
+
+
+## 2026-09-26 — Agent On: Issue #85 queue/model correction
+
+- Trigger: user requested **agent on** and asked to update Markdown knowledge/TODO so the queue reflects what Issue #85 has actually completed and what remains.
+- Inspect: Issue #85 + PR chain #87 → #91 + current PR #91 workflow #712.
+- Confirmed:
+  - Issue #85 is one continuous canonical migration; PRs #87–#91 are execution work for the same issue.
+  - Architecture definition and ownership freeze are substantially complete.
+  - Foundation → Kernel and multiple Provider/App/Runtime/Storage checkpoints are already physically implemented and verified at prior checkpoints.
+  - Current commit `d89321d3798316ab0e6eb5f3899ea730fb923c2b` is RED in workflow #712.
+  - iOS arm64 and repository integrity pass.
+  - Swift package tests fail only in **Dependency direction**, with 1 issue; Full Gate therefore fails.
+- Documentation updates:
+  - Rebuilt `Documentation/TODO.md` as a done-vs-remaining execution queue rather than an artificial 8-checkpoint percentage model.
+  - Promoted current Issue #85/CI truth into `Documentation/MEMORY.md`.
+  - Refreshed `Documentation/HANDOFF.md` and `BASELINE.md` with the exact current blocker and next action.
+- Verification: documentation commits themselves require a fresh Full Gate; current latest code evidence remains workflow #712 RED.
+- Next exact action: inspect the Dependency direction failure on current HEAD, identify the exact offending dependency/import from repository evidence, then apply one minimal repair and re-run Full Gate.
+- Deferred: all later migration groups and final iPhone validation until PR #91 is green.
