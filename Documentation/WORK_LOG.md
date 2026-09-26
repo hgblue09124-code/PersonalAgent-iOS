@@ -2,22 +2,49 @@
 
 <!-- TASK-CONTEXT: Shared chronological trace for AI workers. This is an execution log, not an architecture specification. -->
 
+## CURRENT SNAPSHOT — read first
+
+- PR: #91
+- Branch: `rearch/cognition-policy-runtime`
+- HEAD: `4d59cd47c1915d554e0e8c0953ba8d0622e93f90`
+- Latest Full Gate: run #610 (`36232501862`)
+- Latest Full Gate status: **VERIFIED GREEN**
+- Verification jobs: iOS arm64 build, repository integrity, Swift package tests, aggregate gate, PR Final Filter — all **success**
+- Issue #85: still open; this PR is one migration group, not proof of final architecture completion.
+- Next worker rule: re-check PR/HEAD/CI before making changes. Do not trust this snapshot after a new commit.
+
 ## Purpose
 
-This file is the shared trace between agents working on PersonalAgent-iOS.
+This file is the shared chronological trace between agents working on PersonalAgent-iOS.
 
-Record completed inspect/fix/verify cycles so the next agent can continue without reconstructing state from chat history.
+- **WORK_LOG.md** = chronological execution evidence.
+- **HANDOFF.md** = current continuation state and exact next action.
+- **AUDIT.md** = architecture ownership and confirmed structural decisions.
+- **AGENTS.md / AGENT_LEARNING_WORKFLOW.md** = operating rules and verified repair-learning rules.
+
+Do not duplicate architecture reasoning here. Record only the evidence needed to reconstruct execution.
 
 ## Recording Rules
 
-- Record only meaningful work cycles: inspection, confirmed root cause, fix, verification, and handoff.
-- Always include the PR/branch and HEAD SHA known at the time.
-- Use **CONFIRMED** only when repository or CI evidence proves the finding.
-- If a workflow has not completed, record **CHƯA XÁC MINH**; never infer GREEN.
-- Record exact fix commit(s) when available.
-- Do not duplicate architectural reasoning already maintained in `AUDIT.md`; link by filename/section when useful.
-- Append new entries; do not rewrite historical entries except to correct a factual error.
-- A later agent must read the latest entry before acting.
+- Record meaningful inspect/fix/verify/handoff cycles.
+- Always include PR, branch, HEAD, trigger, confirmed finding, fix, verification, and next action.
+- Use **CONFIRMED** only when repository/CI evidence proves the finding.
+- If a workflow has not completed, write **CHƯA XÁC MINH**; never infer GREEN.
+- Record exact fix commit(s) and workflow run number/ID when available.
+- Append entries; do not rewrite history except factual corrections.
+- A later agent must read the **CURRENT SNAPSHOT** and latest entry before acting.
+
+## Agent Footprint Contract
+
+Every agent leaves one compact, machine-readable footprint:
+
+1. **Inspect:** PR/branch/HEAD + relevant files/workflow.
+2. **Confirm:** exact failure or requirement, with evidence.
+3. **Fix:** exact commit(s), minimal scope.
+4. **Verify:** exact workflow run + job conclusions.
+5. **Handoff:** one exact next action and any deferred item.
+
+Never leave only prose such as “fixed” or “looks green”.
 
 ## 2026-09-26 — Provider Migration Group #5
 
@@ -26,9 +53,37 @@ Record completed inspect/fix/verify cycles so the next agent can continue withou
 - Scope: provider ownership migration
 - Confirmed: remote provider transport importing `PARuntime` created an invalid SwiftPM dependency direction.
 - Fix commits: `464fd59027996b0a948076dd66e4f9b684113fa6`, `ac0184b43819b531f75e54fb33109e1113d6c54f`
-- Current known HEAD at log creation: `bc0ff6103e8c8ef94c4c9f26805b34214261b6da`
-- Verification: **CHƯA XÁC MINH** — no completed workflow result was available for this HEAD when recorded.
-- Next: inspect the latest PR/HEAD and Full Gate before further changes.
+- Verification at that point: **CHƯA XÁC MINH**
+- Next: inspect the latest PR/HEAD and Full Gate.
+
+## 2026-09-26 — PR #91 CI repair: App boundary + fake provider test visibility
+
+- PR: #91
+- Branch: `rearch/cognition-policy-runtime`
+- Trigger: Full Gate run #606 (`36231569835`) failed.
+- Confirmed:
+  - Repository integrity: App imported concrete `PAProvidersLocal` from `KernelSession.swift` and `SettingsScreen.swift`.
+  - Swift package tests: `M2ConcurrencyTests.swift` referenced `DeterministicFakeProvider` without importing its owning `PAComposition` module.
+  - iOS arm64 build: success.
+- Fix commits: `346fc417`, `9a15d8a1`, `83830373`, `c78205ba`
+- Verification at that point: **CHƯA XÁC MINH**
+- Next: inspect the new Full Gate; if RED, read the new job log before changing anything.
+
+## 2026-09-26 — PR #91 Full Gate verification
+
+- PR: #91
+- Branch: `rearch/cognition-policy-runtime`
+- HEAD verified: `4d59cd47c1915d554e0e8c0953ba8d0622e93f90`
+- Trigger: Full Gate run #610 (`36232501862`)
+- Confirmed:
+  - iOS arm64 build & unsigned IPA: **success**
+  - Repository integrity greps: **success**
+  - Swift package tests: **success**
+  - Aggregate `Kiểm tra và sửa chữa`: **success**
+  - PR Final — Filter: **success**
+- Verification: **VERIFIED GREEN**
+- Scope: validates the current PR HEAD only; does not complete Issue #85.
+- Next: continue the next confirmed migration task from Issue #85; re-check HEAD/CI first.
 
 ## Entry Template
 
@@ -43,21 +98,3 @@ Record completed inspect/fix/verify cycles so the next agent can continue withou
 - Verification:
 - Deferred:
 - Next:
-
-## 2026-09-26 — PR #91 CI repair: App boundary + fake provider test visibility
-
-- PR: #91
-- Branch: `rearch/cognition-policy-runtime`
-- Trigger: Full Gate run #606 (`36231569835`) failed.
-- Confirmed:
-  - Repository integrity job: App imported concrete `PAProvidersLocal` from `KernelSession.swift` and `SettingsScreen.swift`.
-  - Swift package tests: `M2ConcurrencyTests.swift` referenced `DeterministicFakeProvider` without importing its owning `PAComposition` module.
-  - iOS arm64 build: GREEN.
-- Fix:
-  - Exposed local model UI contracts through `PAComposition`.
-  - Removed concrete provider/storage imports from App files.
-  - Restored `PAComposition` dependency in M2 concurrency tests.
-- Fix commits: `346fc417`, `9a15d8a1`, `83830373`, `c78205ba`
-- Current HEAD: `c78205ba47ece495da1a64996796703c0eb39771`
-- Verification: **CHƯA XÁC MINH** — no workflow run had started for the new HEAD when recorded.
-- Next: inspect the new Full Gate; if RED, read the new job log before changing anything else.
