@@ -15,7 +15,7 @@ struct RepositoryIntegrityTests {
             "Providers/Remote/Shared/ProviderTransport.swift",
             "Providers/Remote/Shared/ChatCompletionsCodec.swift",
             "Providers/Remote/Shared/HTTPChatProvider.swift",
-            "Tests/Providers/DeterministicFakeProvider.swift",
+            "Sources/Composition/DeterministicFakeProvider.swift",
             "Providers/Remote/OpenAI/OpenAIBoundary.swift",
             "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
