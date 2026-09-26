@@ -6,6 +6,7 @@ import PAMemory
 import PAKernel
 import PAComposition
 import PAArchitecture
+import PAStorageMemory
 
 @Suite("M0–M5 Architectural Integrity Audit Tests")
 struct M5ArchitecturalAuditTests {
