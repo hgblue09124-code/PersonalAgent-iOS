@@ -48,7 +48,6 @@ extension ProviderRuntimeError: CustomStringConvertible {
 }
 
 extension ProviderRuntimeError {
-    /// Automatic retries are deferred. This only classifies a failure.
     public var retryClassification: RetryClassification {
         switch self {
         case .rateLimited, .networkFailure, .timeout, .transport, .providerFailure:
