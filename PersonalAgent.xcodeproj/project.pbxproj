@@ -47,7 +47,6 @@
 			files = (
 				A10000000000000000000011 /* PAComposition in Frameworks */,
 				A10000000000000000000012 /* PAArchitecture in Frameworks */,
-				A10000000000000000000013 /* PAFoundation in Frameworks */,
 				A10000000000000000000015 /* PAKernel in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -337,11 +336,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
 			productName = PAArchitecture;
-		};
-		A30000000000000000000003 /* PAFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
-			productName = PAFoundation;
 		};
 		A30000000000000000000005 /* PAKernel */ = {
 			isa = XCSwiftPackageProductDependency;
