@@ -2,6 +2,10 @@
 
 <!-- TASK-CONTEXT: This file records evidence from architecture audits. It is not a wish list. Every finding must state whether it is confirmed, not confirmed, or deferred. -->
 
+## FAST READ
+
+> Read the latest relevant checkpoint first. If the needed ownership/evidence is established, **STOP EARLY**. Older audit history is durable evidence and may grow.
+
 ## Finding Format
 
 - **Confirmed** — evidence exists in the repository.

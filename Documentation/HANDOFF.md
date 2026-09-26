@@ -7,10 +7,11 @@
 - Root task: **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
 - PR: **#91**
 - Branch: `rearch/cognition-policy-runtime`
-- Last code HEAD verified: `4d59cd47c1915d554e0e8c0953ba8d0622e93f90`
-- Full Gate run #610 (`36232501862`): **VERIFIED GREEN**
-- Verified jobs: iOS arm64 build & unsigned IPA, repository integrity greps, Swift package tests, aggregate gate, PR Final Filter — all success.
-- Documentation commits after that verification may create a new HEAD and therefore require a fresh Full Gate check.
+- Current HEAD before this documentation update: `a2f8861966a79a86471e070743e1a2abb54c1a9a`
+- Last verified Full Gate: run #614 (`36233267763`) — **VERIFIED GREEN**
+- Issue #85 remains incomplete.
+
+> FAST STOP: If current state and task boundary are known, STOP. Continue only for next-action details.
 
 ## Agent Communication Map
 

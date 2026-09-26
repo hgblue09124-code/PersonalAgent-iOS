@@ -4,6 +4,11 @@
 
 ## Mission
 
+## FAST READ — soft guidance
+
+> Read from the top. If the current section answers the task, **STOP EARLY**. Read deeper only when evidence/history/ownership is needed. This is guidance, not a rigid parser contract. Useful data may grow below.
+
+
 Keep PersonalAgent-iOS structurally coherent, testable, and incrementally evolvable.
 
 ## Mandatory Workflow

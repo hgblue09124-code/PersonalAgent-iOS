@@ -1,5 +1,7 @@
 # Agent Learning Workflow — Verified Repair & Migration
 
+> FAST READ: use current task/evidence first and stop once the required answer is established. This is a soft guide; useful memory may accumulate without strict schema parsing.
+
 > Canonical operational form for AI workers in PersonalAgent-iOS.
 > This document records **how the agent should work**, not new architecture.
 
