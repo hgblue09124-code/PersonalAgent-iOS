@@ -129,3 +129,16 @@ Stop and report instead of guessing when ownership is ambiguous, two canonical d
 - Nếu CI đỏ lặp lại, không tạo vòng sửa mù: đọc job/log mới nhất, xác định regression hoặc nguyên nhân mới, rồi mới sửa.
 - Không dùng Jules/Jan prompt làm bước mặc định; agent đang xử lý repo có thể trực tiếp inspect/fix khi connector cho phép.
 - Sau mỗi nhóm migration: cập nhật tài liệu/handoff để worker sau đọc được trạng thái mà không cần khôi phục từ chat.
+
+
+## Markdown Knowledge Protocol
+
+<!-- TASK-CONTEXT: Keep worker memory compact and evidence-oriented. -->
+- `Documentation/ARCHITECTURE.md` = normative long-lived architecture; do not turn it into a chronological log.
+- `Documentation/AUDIT.md` = evidence/classification only: CONFIRMED / NOT CONFIRMED / DEFERRED.
+- `Documentation/HANDOFF.md` = current repository state and exactly one next action.
+- `Documentation/WORK_LOG.md` = chronological execution evidence; include commit/workflow IDs when available.
+- Preserve useful `TASK-CONTEXT`, `DECISION`, `INVARIANT`, and `HANDOFF` comments.
+- Never treat Markdown text as proof of code or CI state; verify the referenced commit/workflow first.
+- After a migration checkpoint, update the three operational records (`AUDIT.md`, `WORK_LOG.md`, `HANDOFF.md`) in the same documentation task.
+- Avoid duplicating old history in `HANDOFF.md`; move durable historical evidence to `AUDIT.md` / `WORK_LOG.md`.
