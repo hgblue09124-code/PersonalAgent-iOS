@@ -318,3 +318,24 @@ Do not move files during the mapping-only audit.
 
 **DEFERRED**
 - ArchitectureManifest, Observability, Security, and Memory remain separate migration groups.
+
+
+### Audit #20 — Architecture physical migration
+
+**CONFIRMED**
+- `Sources/Architecture/ArchitectureManifest.swift` was test-only architecture metadata despite containing the production-used `MilestoneGate` type.
+- Production Composition roots use `MilestoneGate`; therefore the type was split rather than blindly moved.
+- `MilestoneGate` is now owned by `Composition/CompositionRoot.swift`.
+- `ArchitectureManifest`, `CognitionPipelineOrder`, and `AgencyLoopOrder` are now test-side under `Tests/PersonalAgentTests/ArchitectureManifest.swift`.
+- `PAArchitecture` production target and Composition dependency were removed from `Package.swift`.
+- Existing Composition imports of `PAArchitecture` were removed without behavior changes.
+
+**INVARIANT**
+- No production Architecture layer remains.
+- Architecture metadata remains available to tests without creating a runtime dependency.
+- Migration is not considered verified until the full CI gate passes.
+
+**NOT CONFIRMED**
+- Full CI for this branch: **CHƯA XÁC MINH**.
+
+<!-- HANDOFF: Run the full gate on the Architecture clean branch; repair only actual failures. -->
