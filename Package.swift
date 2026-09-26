@@ -59,7 +59,7 @@ let package = Package(
         .target(
             name: "PAEvents",
             dependencies: ["PAKernel"],
-            path: "Sources/Events"
+            path: "Kernel/Events"
         ),
         .target(
             name: "PASecurity",
