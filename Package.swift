@@ -80,7 +80,7 @@ let package = Package(
         ),
         .target(
             name: "PAMemory",
-            dependencies: ["PAKernel", "PAStorage", "PAEvents"],
+            dependencies: ["PAKernel", "PAStorage", "PAStorageModels", "PAEvents"],
             path: "Sources/Memory"
         ),
         .target(
