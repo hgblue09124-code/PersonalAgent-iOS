@@ -1,5 +1,5 @@
 import Testing
-import PAArchitecture
+import PAComposition
 import PAFoundation
 import PACognition
 import PAAgency
