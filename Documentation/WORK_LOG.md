@@ -43,3 +43,21 @@ Record completed inspect/fix/verify cycles so the next agent can continue withou
 - Verification:
 - Deferred:
 - Next:
+
+## 2026-09-26 — PR #91 CI repair: App boundary + fake provider test visibility
+
+- PR: #91
+- Branch: `rearch/cognition-policy-runtime`
+- Trigger: Full Gate run #606 (`36231569835`) failed.
+- Confirmed:
+  - Repository integrity job: App imported concrete `PAProvidersLocal` from `KernelSession.swift` and `SettingsScreen.swift`.
+  - Swift package tests: `M2ConcurrencyTests.swift` referenced `DeterministicFakeProvider` without importing its owning `PAComposition` module.
+  - iOS arm64 build: GREEN.
+- Fix:
+  - Exposed local model UI contracts through `PAComposition`.
+  - Removed concrete provider/storage imports from App files.
+  - Restored `PAComposition` dependency in M2 concurrency tests.
+- Fix commits: `346fc417`, `9a15d8a1`, `83830373`, `c78205ba`
+- Current HEAD: `c78205ba47ece495da1a64996796703c0eb39771`
+- Verification: **CHƯA XÁC MINH** — no workflow run had started for the new HEAD when recorded.
+- Next: inspect the new Full Gate; if RED, read the new job log before changing anything else.
