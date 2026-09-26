@@ -34,17 +34,6 @@ public final class InMemorySecretStore: SecretStore, @unchecked Sendable {
     }
 }
 
-/// Provider credentials stay outside AgentState.
-public struct ProviderCredentialRef: Hashable, Sendable, Codable {
-    public let providerID: ProviderID
-    public let account: String
-
-    public init(providerID: ProviderID, account: String) {
-        self.providerID = providerID
-        self.account = account
-    }
-}
-
 public struct NetworkRequest: Sendable, Equatable {
     public let url: String
     public let method: String
