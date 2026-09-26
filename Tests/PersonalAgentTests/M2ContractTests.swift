@@ -2,6 +2,7 @@ import Foundation
 import Testing
 import PAFoundation
 import PAProviders
+import PAProvidersRemote
 import PASecurity
 
 @Suite("M2 provider contract")
