@@ -1,4 +1,5 @@
 import Foundation
+import PAKernel
 import PASecurity
 
 /// Store for user conversation and UI session presentation records (isolated from Agent state).
