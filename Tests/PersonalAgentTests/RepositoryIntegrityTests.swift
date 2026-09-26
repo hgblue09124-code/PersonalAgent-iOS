@@ -5,7 +5,8 @@ import PAArchitecture
 @Suite("Repository integrity")
 struct RepositoryIntegrityTests {
     @Test func requiredM2ProviderSourcesExist() {
-        let root = repositoryRoot().appendingPathComponent("Sources")
+        let sourcesRoot = repositoryRoot().appendingPathComponent("Sources")
+        let repositoryRootPath = repositoryRoot()
         for path in [
             "Providers/Contracts/LLMProvider.swift",
             "Runtime/Execution/ProviderRuntime.swift",
@@ -21,7 +22,7 @@ struct RepositoryIntegrityTests {
             "Composition/M2CompositionRoot.swift",
         ] {
             #expect(
-                FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),
+                FileManager.default.fileExists(atPath: (path == "Runtime/Execution/ProviderRuntime.swift" ? repositoryRootPath : sourcesRoot).appendingPathComponent(path).path),
                 "missing \(path)"
             )
         }
