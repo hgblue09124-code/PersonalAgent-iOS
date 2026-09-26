@@ -19,14 +19,14 @@ struct RepositoryIntegrityTests {
             "Providers/Remote/OpenAI/OpenAIBoundary.swift",
             "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
-            "Sources/Composition/M2CompositionRoot.swift",
+            "Composition/M2CompositionRoot.swift",
         ] {
             let root = path.hasPrefix("Runtime/") || path.hasPrefix("Providers/Remote/")
                 ? repositoryRootPath
                 : sourcesRoot
             #expect(
                 FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),
-                "missing (path)"
+                "missing \(path)"
             )
         }
     }
@@ -45,7 +45,7 @@ struct RepositoryIntegrityTests {
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: kernel.appendingPathComponent(path).path),
-                "missing kernel source (path)"
+                "missing kernel source \(path)"
             )
         }
     }
@@ -61,7 +61,7 @@ struct RepositoryIntegrityTests {
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: runtime.appendingPathComponent(path).path),
-                "missing runtime source (path)"
+                "missing runtime source \(path)"
             )
         }
     }
@@ -89,7 +89,7 @@ struct RepositoryIntegrityTests {
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: tests.appendingPathComponent(name).path),
-                "missing test (name)"
+                "missing test \(name)"
             )
         }
     }
@@ -127,7 +127,7 @@ struct RepositoryIntegrityTests {
             let text = try String(contentsOf: file, encoding: .utf8)
             for name in forbidden {
                 if importedModules(in: text).contains(name) {
-                    violations.append("(file.lastPathComponent) imports (name)")
+                    violations.append("\(file.lastPathComponent) imports \(name)")
                 }
             }
         }

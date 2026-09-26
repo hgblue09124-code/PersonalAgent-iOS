@@ -52,11 +52,12 @@ public enum ArchitectureManifest: Sendable {
         "PAStorage": ["PAFoundation", "PAEvents", "PAObservability"],
         "PAMemory": ["PAFoundation", "PAStorage", "PAEvents", "PAKernel"],
         "PAProviders": ["PAFoundation", "PAObservability", "PASecurity", "PAEvents", "PAKernel"],
-        "PAProvidersGrok": ["PAProviders", "PAFoundation"],
-        "PAProvidersOpenAI": ["PAProviders", "PAFoundation"],
-        "PAProvidersOpenAICompatible": ["PAProviders", "PAFoundation"],
+        "PAProvidersGrok": ["PAProviders", "PAProvidersRemote", "PAFoundation"],
+        "PAProvidersOpenAI": ["PAProviders", "PAProvidersRemote", "PAFoundation"],
+        "PAProvidersOpenAICompatible": ["PAProviders", "PAProvidersRemote", "PAFoundation"],
+        "PAProvidersRemote": ["PAProviders", "PAFoundation", "PASecurity"],
         "cllama": [],
-        "PAProvidersLocal": ["PAProviders", "PAFoundation", "cllama"],
+        "PAProvidersLocal": ["PAProviders", "PAProvidersRemote", "PAFoundation", "cllama"],
         "PATools": ["PAFoundation", "PARuntime", "PAObservability"],
         "PAModules": ["PAFoundation", "PAObservability", "PAEvents", "PAKernel"],
         "PASkills": ["PAFoundation", "PAModules", "PATools", "PARuntime", "PAKernel"],
@@ -140,99 +141,12 @@ public struct MilestoneGate: Sendable, Equatable {
     public let cognitionLoop: Bool
     public let eventReplay: Bool
 
-    public static let m0 = MilestoneGate(
-        milestone: "M0",
-        kernelRuntime: false,
-        providers: false,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: false,
-        toolRuntime: false,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m1 = MilestoneGate(
-        milestone: "M1",
-        kernelRuntime: true,
-        providers: false,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: false,
-        toolRuntime: false,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m2 = MilestoneGate(
-        milestone: "M2",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: false,
-        toolRuntime: false,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m3 = MilestoneGate(
-        milestone: "M3",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m4 = MilestoneGate(
-        milestone: "M4",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m6 = MilestoneGate(
-        milestone: "M6",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: true,
-        eventReplay: false
-    )
-
-    public static let m7 = MilestoneGate(
-        milestone: "M7",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: true,
-        eventReplay: false
-    )
-
-    public static let m8 = MilestoneGate(
-        milestone: "M8",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: true,
-        eventReplay: false
-    )
+    public static let m0 = MilestoneGate(milestone: "M0", kernelRuntime: false, providers: false, storageEngine: false, memoryEngine: false, skillRuntime: false, toolRuntime: false, cognitionLoop: false, eventReplay: false)
+    public static let m1 = MilestoneGate(milestone: "M1", kernelRuntime: true, providers: false, storageEngine: false, memoryEngine: false, skillRuntime: false, toolRuntime: false, cognitionLoop: false, eventReplay: false)
+    public static let m2 = MilestoneGate(milestone: "M2", kernelRuntime: true, providers: true, storageEngine: false, memoryEngine: false, skillRuntime: false, toolRuntime: false, cognitionLoop: false, eventReplay: false)
+    public static let m3 = MilestoneGate(milestone: "M3", kernelRuntime: true, providers: true, storageEngine: false, memoryEngine: false, skillRuntime: true, toolRuntime: true, cognitionLoop: false, eventReplay: false)
+    public static let m4 = MilestoneGate(milestone: "M4", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: false, eventReplay: false)
+    public static let m6 = MilestoneGate(milestone: "M6", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: true, eventReplay: false)
+    public static let m7 = MilestoneGate(milestone: "M7", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: true, eventReplay: false)
+    public static let m8 = MilestoneGate(milestone: "M8", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: true, eventReplay: false)
 }
