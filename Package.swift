@@ -84,7 +84,7 @@ let package = Package(
         ),
         .target(
             name: "PAProvidersRemote",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: ["PAProviders", "PAFoundation", "PASecurity"],
             path: "Providers/Remote/Shared"
         ),
         .target(
