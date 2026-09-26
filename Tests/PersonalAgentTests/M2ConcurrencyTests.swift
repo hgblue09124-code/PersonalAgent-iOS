@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import PAFoundation
 import PAProviders
 import PARuntime
 import PAComposition
