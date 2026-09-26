@@ -132,7 +132,7 @@ let package = Package(
         .target(
             name: "PAModules",
             dependencies: ["PAKernel", "PAObservability", "PAEvents"],
-            path: "Sources/Modules/Contracts"
+            path: "Sources/Capabilities/Modules"
         ),
         .target(
             name: "PASkills",

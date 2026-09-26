@@ -171,7 +171,7 @@ struct M3CompositionIsolationTests {
     }
 
     @Test func moduleSourcesDoNotImportConcreteProvidersOrUI() throws {
-        let root = repositoryRoot().appendingPathComponent("Sources").appendingPathComponent("Modules")
+        let root = repositoryRoot().appendingPathComponent("Sources").appendingPathComponent("Capabilities").appendingPathComponent("Modules")
         let files = try files(under: root, suffix: ".swift")
         #expect(!files.isEmpty)
         for file in files {

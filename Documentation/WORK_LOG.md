@@ -1,3 +1,11 @@
+## 2026-09-27 — Agent On: Modules migration (direct execution)
+- Jules connector unavailable; continued directly on `rearch/kernel-migration-2`.
+- Confirmed Modules ownership from Audit #14.
+- Moved the complete Modules group without behavior change.
+- Updated only path-sensitive Package.swift/CI/tests plus audit/handoff evidence.
+- Verification: **CHƯA XÁC MINH** until CI completes.
+- Next exact action after green: migrate Skills.
+
 # Agent Work Log
 
 ## CURRENT SNAPSHOT
