@@ -37,11 +37,12 @@ PR #87 → #88 → #89 → #90 → #91 are one connected execution chain for Iss
 
 ## EXACT NEXT ACTION
 
-1. Treat workflow #718 as the current verified baseline.
-2. Audit actual remaining legacy physical groups from the current tree.
-3. Start only the next confirmed migration group; no speculative redesign.
-4. Run Swift tests, repository integrity, iOS arm64, and Full Gate.
-5. Update TODO/WORK_LOG/MEMORY/HANDOFF with the new evidence.
+1. Treat workflow #725 / 36255655970 as the current verified baseline for HEAD `ffe4ba3d`.
+2. Events → `Kernel/Events` is now confirmed complete from the actual tree.
+3. Memory ownership is confirmed by Audit #14, but the current Package.swift target graph would create a dependency cycle if `FileBackedMemoryStore` is moved naively.
+4. Resolve that target-boundary issue from actual imports/dependencies, then perform the smallest Memory migration.
+5. Run Swift tests, repository integrity, iOS arm64, and Full Gate.
+6. Update TODO/WORK_LOG/MEMORY/HANDOFF with the new evidence.
 
 ## DO NOT REDO
 
