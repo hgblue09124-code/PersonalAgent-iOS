@@ -28,3 +28,14 @@
 3. Move before rewrite; change no behavior.
 4. Run the full gate (`docker run --rm -v $(pwd):/src -w /src swift:6.3.2 swift test --disable-sandbox`).
 5. Update `AUDIT.md`, `WORK_LOG.md`, and this handoff with the exact verified checkpoint.
+
+
+## 2026-09-27 — PR #94 Apple CI repair checkpoint
+
+- PR #94 Capabilities migration code path is **not the source of the Apple CI failure**.
+- Confirmed: Xcode arm64 build **PASS**.
+- Confirmed: unsigned IPA creation and archive verification **PASS**.
+- Confirmed: artifact upload **PASS**.
+- Failure was only the PR-time `gh release create` call returning HTTP 403 `Resource not accessible by integration`.
+- Minimal repair: remove the PR-time release publication step; keep the verified IPA artifact.
+- Exact next action: re-run PR #94 Apple Native Build and verify the repair commit. Do not start another migration group until this gate is green.

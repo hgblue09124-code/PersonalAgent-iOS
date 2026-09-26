@@ -59,3 +59,14 @@
   - Updated `Package.swift` paths for `PAModules`, `PASkills`, `PATools`
   - Updated `ci.yml`, `ImportBoundaryTests.swift`, and `M3CompositionIsolationTests.swift`
 - **Gate Result**: PASS (340 tests in 46 suites passed cleanly in Docker `swift:6.3.2`)
+
+
+## 2026-09-27 — Agent On: PR #94 Apple CI repair
+
+- Read AGENTS.md and followed **inspect → confirm → minimal change → regression/full gate → audit → record → handoff**.
+- Confirmed PR #94 head `544139733f4452348dd31c12d930f023abe1e6ab`.
+- Confirmed Apple workflow run #368 / `36264674580`: Xcode arm64 build PASS; unsigned IPA package + `unzip -t` PASS; artifact upload PASS.
+- Confirmed failure was isolated to `Publish Pre-release IPA`: GitHub API HTTP 403 `Resource not accessible by integration`.
+- Repair: remove only the PR-time GitHub Release publication step. No production code or Capabilities layout changes.
+- Verification pending: new Apple workflow run after this repair commit.
+- Next exact action: verify the new Apple run is fully green, then continue Issue #85 from HANDOFF.

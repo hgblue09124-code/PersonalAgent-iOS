@@ -54,15 +54,6 @@ jobs:
           retention-days: 14
 
 
-      - name: Publish Pre-release IPA
-        if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="dev-pr-${{ github.event.pull_request.number }}-${GITHUB_SHA::12}"
-          gh release create "$TAG" PersonalAgent-unsigned.ipa \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
-            --title "Dev IPA · PR #${{ github.event.pull_request.number }} · ${GITHUB_SHA::12}" \
-            --notes "Unsigned development IPA generated from PR #${{ github.event.pull_request.number }} at ${GITHUB_SHA}. Verify on physical device before merge." \
-            --prerelease
+      # PR workflows keep the verified IPA as an Actions artifact.
+      # Do not create GitHub Releases from pull_request jobs: the release API
+      # can return 403 Resource not accessible by integration in this context.

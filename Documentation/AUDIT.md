@@ -279,3 +279,27 @@ Do not move files during the mapping-only audit.
 **DEFERRED**
 - Remaining Composition / Architecture / Observability / Security / Memory physical migration.
 - Physical iPhone 12 Pro Max acceptance test for final gate.
+
+
+### Audit #17 — PR #94 Apple CI repair
+
+<!-- TASK-CONTEXT: Repair after PR #94 Capabilities migration. -->
+<!-- DECISION: The migration build itself was not the failure. Repair only the CI publication step that produced a false-negative workflow result. -->
+<!-- INVARIANT: Build + unsigned IPA packaging remain unchanged; PR IPA distribution uses the verified workflow artifact. -->
+
+**CONFIRMED**
+- PR #94 head `544139733f4452348dd31c12d930f023abe1e6ab` builds the iOS arm64 app successfully.
+- Unsigned IPA packaging succeeds and `unzip -t` verifies the archive.
+- The IPA artifact upload succeeds.
+- The only failing step is **Publish Pre-release IPA**, where `gh release create` returns HTTP 403 `Resource not accessible by integration`.
+- The failure is CI publication infrastructure, not a Swift/Xcode build failure and not evidence against the Capabilities migration.
+
+**MINIMAL REPAIR**
+- Removed the PR-time GitHub Release publication step.
+- Kept the verified unsigned IPA as the workflow artifact `PersonalAgent-iOS-unsigned-IPA`.
+- No production source or architecture behavior changed.
+
+**DEFERRED**
+- Dedicated secure PR release publication, if needed later, must use a workflow boundary that safely grants release permissions; do not reintroduce a write-capable release token into arbitrary PR execution.
+
+<!-- HANDOFF: Re-run PR #94 Apple Native Build after this single repair commit; require build, IPA verification, and artifact upload green before continuing Issue #85 migration. -->
