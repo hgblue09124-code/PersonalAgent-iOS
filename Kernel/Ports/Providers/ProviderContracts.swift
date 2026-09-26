@@ -141,6 +141,17 @@ public enum ProviderLifecycle: String, Sendable, Codable, Equatable {
     case cancelled
 }
 
+/// Provider credential reference owned by the provider contract boundary.
+public struct ProviderCredentialRef: Hashable, Sendable, Codable {
+    public let providerID: ProviderID
+    public let account: String
+
+    public init(providerID: ProviderID, account: String) {
+        self.providerID = providerID
+        self.account = account
+    }
+}
+
 public struct ProviderConfiguration: Sendable, Equatable {
     public let providerID: ProviderID
     public let endpointURL: String?
