@@ -318,3 +318,24 @@ Do not move files during the mapping-only audit.
 
 **DEFERRED**
 - ArchitectureManifest, Observability, Security, and Memory remain separate migration groups.
+
+
+### Audit #20 — Operational Markdown + Living Cognitive Data Ocean integration
+
+**CONFIRMED**
+- PR #97 clean Composition migration was merged; PR #98 Architecture production-layer removal was merged.
+- PR #99 durable learning memory, #100 Personal Agent OS Markdown foundation, and #101 Living Cognitive Data Ocean foundation are merged into main.
+- PR #103 seeded the persistent Ocean with a real evidence-backed grain set and was squash-merged as commit `ca026401a5e17ef662651f196d7b31afbb18ef22`.
+- The two Markdown layers have distinct ownership: Operational Markdown governs agent operation/state/history; `Modules/` stores reusable cognitive grains.
+- `Modules/` remains distinct from executable `Sources/Capabilities/Modules`; Markdown does not bypass runtime ownership.
+- Grain lifecycle remains `OBSERVED → CONFIRMED → PROMOTED`; the current seed contains CONFIRMED evidence-backed material only.
+
+**INTEGRATION RULE**
+- Do not merge the two layers into one diary or database.
+- Audit/Handoff/Work Log remain operational state surfaces.
+- Ocean grains remain reusable cognitive data; evidence in the Ocean can originate from audited repository history.
+
+**DEFERRED**
+- Parser, index, retrieval service, or rigid grain schema until actual grain usage demonstrates a concrete retrieval gap.
+
+<!-- HANDOFF: Operational Markdown and Cognitive Ocean are now one product model with separate responsibilities. -->

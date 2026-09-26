@@ -9,44 +9,65 @@ It is not a chat wrapper. Kernel is not an LLM.
 Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`)
 are external material. They must not appear as runtime dependencies.
 
-## Axis
+## Canonical dependency axis
 
 ```
 UI (SwiftUI App)
   ↓
 App Session / App Lifecycle
   ↓
-Composition (M8CompositionRoot)
+Composition
   ↓
-Agent Kernel (AgentRuntime / AgentSession)
+Runtime
   ↓
-Cognition / Memory / Agency / Policy / M7 Run Boundary
+Kernel
   ↓
-Module / Skill / Tool / Provider contracts / Local Model Engine
-  ↓
-Storage / Sync / Product Persistence Container
-  ↓
-Events / Observability / Security / Device Capabilities
-  ↓
-Foundation
+Capabilities / Providers / Memory / Storage
 ```
 
-## Layer responsibilities
+The physical repository layout is canonical. Production ownership follows the current tree rather than legacy target names.
 
-| Layer | Owns | Must not own |
-| --- | --- | --- |
-| UI | rendering, input, safe-area layout | goals, plans, storage, provider calls |
-| App Session | user input boundary, session events | AgentState ownership, direct state mutations |
-| Composition | wiring contracts for a process, product persistence | business logic |
-| Kernel | identity, state, goals, lifecycle, coordination, durable run bounds | SwiftUI, concrete LLM, concrete store |
-| Cognition | perception → reflection pipeline contracts | execution side effects |
-| Agency | goal → adapt loop contracts | bypassing policy |
-| Policy | capability + approval gate | tool implementations |
-| Skills / Tools / Modules / Providers / Local Models | contracts + reserved adapter packages | agent state |
-| Storage / Memory | contracts for local-first + sync, run stores, domain persistence | cloud vendor lock-in |
-| Events | trace / replay / run provenance contracts | UI |
-| Device Capabilities | thermal, memory, network, app lifecycle signals | UIKit/SwiftUI imports in Kernel |
-| Security | secret + network boundaries | agent state |
+| Domain | Owns |
+| --- | --- |
+| App | presentation and user/session boundary |
+| Composition | dependency wiring and product composition |
+| Runtime | execution, observation, planning, verification, result, provider lifecycle |
+| Kernel | stable contracts, identity, state, goals, lifecycle, coordination, ports |
+| Capabilities | executable Modules / Skills / Tools |
+| Providers | remote and local provider adapters/runtime |
+| Memory | working, conversation, long-term, retrieval semantics |
+| Storage | persistence, model/configuration/cache infrastructure |
+| Tests | architecture manifests, gates, regression and verification evidence |
+
+## Operational Markdown + Cognitive Ocean
+
+Personal Agent OS Markdown is the cognitive control/data plane around the executable architecture.
+
+```
+Operational Markdown
+  AGENTS → ARCHITECTURE → AUDIT / HANDOFF / WORK_LOG / LESSONS
+                         ↓
+                   evidence / learning
+                         ↓
+              Living Cognitive Ocean
+                   Modules/
+                         ↓
+                Agent reuse / action
+                         ↓
+                     Verify
+                         ↓
+                 new evidence
+```
+
+The two layers have separate responsibilities:
+
+- **Operational Markdown** records how the Agent operates, what is verified, the current handoff, execution history, and durable lessons.
+- **Living Cognitive Ocean** stores independently reusable evidence-backed grains.
+- `Modules/` is persistent cognitive data and is distinct from executable `Sources/Capabilities/Modules`.
+- Evidence can flow from operational audit/history into a confirmed grain, but neither layer becomes the other's diary or database.
+- Grain lifecycle is `OBSERVED → CONFIRMED → PROMOTED`.
+- Markdown remains canonical human-readable persistence.
+- No parser, index, retrieval service, or rigid schema is introduced until real usage demonstrates a concrete retrieval gap.
 
 ## Markdown Cognitive Plane
 

@@ -1,8 +1,25 @@
-## 2026-09-27 — Agent On: Composition migration branch repair
-- Confirmed PR #96 was based on a branch carrying the `rearch/kernel-migration-2` history, causing unrelated migration commits to appear in a PR targeting `main`.
-- Rebuilt the Composition migration branch directly from `main`.
-- Staged only the nine Composition files plus required Package.swift, CI, and migration documentation changes.
-- Verification: pending full CI on the clean branch.
+## 2026-09-27 — Agent On: Operational Markdown + Cognitive Ocean integration
+
+- Read `AGENTS.md` and `Documentation/LESSONS.md` before non-trivial work.
+- Confirmed PR #97 and #98 are merged; PR #99, #100, #101 are merged; PR #102 is closed/unmerged; PR #103 was open and green before merge.
+- Confirmed PR #103 workflow runs: M3 #799 / `36271351684` GREEN; Apple Native Build & Unsigned IPA #401 / `36271351673` GREEN.
+- Merged PR #103 by squash with expected head `491c1468d479eeeac04b33ce8ea265efa2601d9b`.
+- Resulting main commit: `ca026401a5e17ef662651f196d7b31afbb18ef22`.
+- Integration rule: preserve the mature Operational Markdown surfaces while using `Modules/` as the reusable Cognitive Ocean data plane.
+- No production Swift code changed.
+
+# Agent Work Log
+
+## CURRENT SNAPSHOT
+- **LATEST:** main `ca026401a5e17ef662651f196d7b31afbb18ef22` contains the Personal Agent OS Markdown foundation plus the real Cognitive Ocean seed.
+- Operational Markdown and Cognitive Ocean are now integrated as complementary layers.
+- Next: observe real grain reuse; do not introduce retrieval infrastructure speculatively.
+
+## Recording Rules
+- Record meaningful inspect/fix/verify/handoff cycles.
+- Use **CONFIRMED** only when repository/CI evidence proves the finding.
+- If a workflow has not completed, write **CHƯA XÁC MINH**.
+- Record exact fix commits and workflow IDs when available.
 
 # Agent Work Log
 
