@@ -84,17 +84,17 @@ let package = Package(
         .target(
             name: "PAProvidersGrok",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Providers/Remote"
+            path: "Providers/Remote/Grok"
         ),
         .target(
             name: "PAProvidersOpenAI",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Providers/Remote"
+            path: "Providers/Remote/OpenAI"
         ),
         .target(
             name: "PAProvidersOpenAICompatible",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Providers/Remote"
+            path: "Providers/Remote/OpenAICompatible"
         ),
         .target(
             name: "PAProvidersLocal",
