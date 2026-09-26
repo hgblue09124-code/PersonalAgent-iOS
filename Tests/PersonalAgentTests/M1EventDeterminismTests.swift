@@ -31,7 +31,7 @@ struct M1EventDeterminismTests {
         let log = InMemoryEventLog()
         let runtime = try await AgentRuntime(identity: AgentIdentity(displayName: "E"), eventLog: log)
         await #expect(throws: KernelError.self) { try await runtime.pause() }
-        let rejected = await log.allEvents().last
+        let rejected = try await log.allEvents().last
         #expect(rejected?.kind == .commandRejected)
         #expect(rejected?.payload["command"] == "pause")
         #expect(rejected?.payload["error"] == "invalidLifecycleTransition:created:pause")
