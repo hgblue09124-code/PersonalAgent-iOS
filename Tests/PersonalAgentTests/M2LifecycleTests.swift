@@ -2,6 +2,7 @@ import Foundation
 import Testing
 import PAFoundation
 import PAProviders
+import PARuntime
 
 @Suite("M2 provider lifecycle")
 struct M2LifecycleTests {
