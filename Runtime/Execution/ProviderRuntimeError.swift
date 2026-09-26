@@ -1,5 +1,10 @@
 import Foundation
 
+public enum RetryClassification: Sendable, Equatable {
+    case retryableTransient
+    case doNotRetry
+}
+
 public enum ProviderRuntimeError: Error, Sendable, Equatable {
     case unavailable
     case contextLimitExceeded
