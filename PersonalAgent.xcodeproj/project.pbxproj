@@ -48,7 +48,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000011 /* PAComposition in Frameworks */,
-				A10000000000000000000012 /* PAArchitecture in Frameworks */,
 				A10000000000000000000013 /* PAFoundation in Frameworks */,
 				A10000000000000000000015 /* PAKernel in Frameworks */,
 			);
