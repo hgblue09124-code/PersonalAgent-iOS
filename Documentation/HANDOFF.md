@@ -5,11 +5,12 @@
 ## CURRENT STATE — read first
 
 - Root task: **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
+- Current migration checkpoint: **Foundation → Kernel — VERIFIED COMPLETE**
 - PR: **#91**
 - Branch: `rearch/cognition-policy-runtime`
-- Current HEAD before this documentation update: `a2f8861966a79a86471e070743e1a2abb54c1a9a`
-- Last verified Full Gate: run #614 (`36233267763`) — **VERIFIED GREEN**
-- Issue #85 remains incomplete.
+- Current HEAD after documentation checkpoint: `52b4cdbfe94dea132fa71a25efe5dbe8dd269411`
+- Last verified Full Gate before this documentation commit: run #687 (`36250848595`) — **VERIFIED GREEN**
+- Issue #85 remains incomplete; Events is the next separate migration group.
 
 > FAST STOP: If current state and task boundary are known, STOP. Continue only for next-action details.
 
@@ -53,10 +54,10 @@
 
 ## Exact Next Action
 
-1. On the next agent turn, re-fetch PR #91 and current HEAD.
+1. Re-fetch PR #91 and current HEAD.
 2. Fetch workflow runs for the current HEAD.
 3. If RED, inspect the failing job log and classify the root cause before changing code.
-4. If GREEN, select the next confirmed migration scope from Issue #85/AUDIT.md.
+4. If GREEN, open the **Events → Kernel/Events** migration checkpoint from Issue #85/AUDIT.md.
 5. Keep the footprint synchronized: code change → WORK_LOG entry → HANDOFF current state.
 
 ## Do Not Redo
