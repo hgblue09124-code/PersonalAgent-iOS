@@ -71,7 +71,7 @@ let package = Package(
             name: "PAStorage",
             dependencies: ["PAKernel", "PAEvents", "PAObservability", "PAStorageModels"],
             path: "Storage",
-            exclude: ["Models"]
+            exclude: ["Models", "Memory"]
         ),
         .target(
             name: "PAStorageModels",
@@ -81,8 +81,7 @@ let package = Package(
         .target(
             name: "PAMemory",
             dependencies: ["PAKernel", "PAStorage", "PAEvents"],
-            path: "Sources/Memory",
-            exclude: ["FileBackedMemoryStore.swift"]
+            path: "Sources/Memory"
         ),
         .target(
             name: "PAStorageMemory",
