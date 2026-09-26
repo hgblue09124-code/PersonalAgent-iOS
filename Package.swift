@@ -24,6 +24,7 @@ let package = Package(
         .library(name: "PAStorage", targets: ["PAStorage"]),
         .library(name: "PAStorageModels", targets: ["PAStorageModels"]),
         .library(name: "PAMemory", targets: ["PAMemory"]),
+        .library(name: "PAStorageMemory", targets: ["PAStorageMemory"]),
         .library(name: "PAProviders", targets: ["PAProviders"]),
         .library(name: "PATools", targets: ["PATools"]),
         .library(name: "PAModules", targets: ["PAModules"]),
@@ -80,7 +81,13 @@ let package = Package(
         .target(
             name: "PAMemory",
             dependencies: ["PAKernel", "PAStorage", "PAEvents"],
-            path: "Sources/Memory"
+            path: "Sources/Memory",
+            exclude: ["FileBackedMemoryStore.swift"]
+        ),
+        .target(
+            name: "PAStorageMemory",
+            dependencies: ["PAMemory", "PAStorage", "PAStorageModels", "PAEvents"],
+            path: "Storage/Memory"
         ),
         .target(
             name: "PAProviders",
@@ -186,6 +193,7 @@ let package = Package(
                 "PAStorage",
                 "PAStorageModels",
                 "PAMemory",
+                "PAStorageMemory",
                 "PAProviders",
                 "PAProvidersGrok",
                 "PAProvidersOpenAI",
