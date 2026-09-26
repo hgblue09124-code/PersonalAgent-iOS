@@ -76,7 +76,7 @@ public enum ArchitectureManifest: Sendable {
             "PAEvents",
             "PAModules",
         ],
-        "PAArchitecture": ["PAFoundation"],
+        "PAArchitecture": ["PAFoundation", "PAKernel"],
         "PAComposition": [
             "PAFoundation",
             "PAArchitecture",
