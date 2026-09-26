@@ -1,4 +1,5 @@
-name: CI — Notify Filter — PR #91
+name: PR Final — Filter
+run-name: PR Final — ${{ github.head_ref || github.ref_name }}
 
 on:
   pull_request:
@@ -9,11 +10,11 @@ permissions:
 
 jobs:
   notify-filter:
-    name: CI-NOTIFY-FILTER
+    name: PR-FINAL-FILTER
     runs-on: ubuntu-24.04
     steps:
       - name: Emit stable CI notification key
         run: |
           echo "CI_NOTIFY_KEY=personalagent-ci"
-          echo "CI_NOTIFY_WORKFLOW=CI — Notify Filter — PR #91"
+          echo "CI_NOTIFY_WORKFLOW=PR Final — ${{ github.head_ref || github.ref_name }}"
           echo "CI_NOTIFY_STATUS=started"
