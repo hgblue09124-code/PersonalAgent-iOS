@@ -1,4 +1,4 @@
-# OS Markdown Trajectory Runs 001–085
+# OS Markdown Trajectory Runs 001–1000
 
 Status: OBSERVED
 
@@ -5891,3 +5891,26899 @@ SOURCE
 - Documentation/LESSONS.md.
 - Relevant repository state and applicable evidence.
 
+
+
+---
+
+## RUN-186 — identify the task
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-187 — identify the input
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-188 — identify the output
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-189 — state the goal
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-190 — state the constraint
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-191 — state the scope
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-192 — state the boundary
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-193 — state the evidence
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-194 — state the blocker
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-195 — state what changed
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-196 — state what did not change
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-197 — check the current state
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-198 — check the exact file
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-199 — check the exact commit
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-200 — check the exact branch
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-201 — check the exact PR
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-202 — compare before and after
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-203 — keep the change small
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-204 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-205 — preserve the existing contract
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-206 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-207 — use the canonical location
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-208 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-209 — read LESSONS.md
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-210 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-211 — separate action from verification
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-212 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-213 — record the source
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-214 — record the result
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-215 — record the next gate
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-216 — record the open question
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-217 — record the assumption
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-218 — record the uncertainty
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-219 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-220 — do not claim unverified success
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-221 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-222 — prefer direct evidence
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-223 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-224 — check the negative case
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-225 — check the happy path
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-226 — check the boundary case
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-227 — check the failure case
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-228 — check the naming
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-229 — check the path
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-230 — check the diff
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-231 — check the test result
+
+TYPE
+- Curriculum training at L19 — Basic Evidence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-232 — check the CI result
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-233 — check the lifecycle state
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-234 — check the ownership
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-235 — check the dependency direction
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-236 — check the persistence surface
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-237 — check the task lineage
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-238 — give a concise handoff
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-239 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-240 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-241 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-242 — restate the rule plainly
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-243 — identify the task
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-244 — identify the input
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-245 — identify the output
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-246 — state the goal
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-247 — state the constraint
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-248 — state the scope
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-249 — state the boundary
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-250 — state the evidence
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-251 — state the blocker
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-252 — state what changed
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-253 — state what did not change
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-254 — check the current state
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-255 — check the exact file
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-256 — check the exact commit
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-257 — check the exact branch
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-258 — check the exact PR
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-259 — compare before and after
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-260 — keep the change small
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-261 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-262 — preserve the existing contract
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-263 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-264 — use the canonical location
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-265 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-266 — read LESSONS.md
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-267 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-268 — separate action from verification
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-269 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-270 — record the source
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-271 — record the result
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-272 — record the next gate
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-273 — record the open question
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-274 — record the assumption
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-275 — record the uncertainty
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-276 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-277 — do not claim unverified success
+
+TYPE
+- Curriculum training at L20 — Basic Scope.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-278 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-279 — prefer direct evidence
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-280 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-281 — check the negative case
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-282 — check the happy path
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-283 — check the boundary case
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-284 — check the failure case
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-285 — check the naming
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-286 — check the path
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-287 — check the diff
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-288 — check the test result
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-289 — check the CI result
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-290 — check the lifecycle state
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-291 — check the ownership
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-292 — check the dependency direction
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-293 — check the persistence surface
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-294 — check the task lineage
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-295 — give a concise handoff
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-296 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-297 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-298 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-299 — restate the rule plainly
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-300 — identify the task
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-301 — identify the input
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-302 — identify the output
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-303 — state the goal
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-304 — state the constraint
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-305 — state the scope
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-306 — state the boundary
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-307 — state the evidence
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-308 — state the blocker
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-309 — state what changed
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-310 — state what did not change
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-311 — check the current state
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-312 — check the exact file
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-313 — check the exact commit
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-314 — check the exact branch
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-315 — check the exact PR
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-316 — compare before and after
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-317 — keep the change small
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-318 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-319 — preserve the existing contract
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-320 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-321 — use the canonical location
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-322 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-323 — read LESSONS.md
+
+TYPE
+- Curriculum training at L21 — Basic State.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-324 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-325 — separate action from verification
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-326 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-327 — record the source
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-328 — record the result
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-329 — record the next gate
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-330 — record the open question
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-331 — record the assumption
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-332 — record the uncertainty
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-333 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-334 — do not claim unverified success
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-335 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-336 — prefer direct evidence
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-337 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-338 — check the negative case
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-339 — check the happy path
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-340 — check the boundary case
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-341 — check the failure case
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-342 — check the naming
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-343 — check the path
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-344 — check the diff
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-345 — check the test result
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-346 — check the CI result
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-347 — check the lifecycle state
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-348 — check the ownership
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-349 — check the dependency direction
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-350 — check the persistence surface
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-351 — check the task lineage
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-352 — give a concise handoff
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-353 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-354 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-355 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-356 — restate the rule plainly
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-357 — identify the task
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-358 — identify the input
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-359 — identify the output
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-360 — state the goal
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-361 — state the constraint
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-362 — state the scope
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-363 — state the boundary
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-364 — state the evidence
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-365 — state the blocker
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-366 — state what changed
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-367 — state what did not change
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-368 — check the current state
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-369 — check the exact file
+
+TYPE
+- Curriculum training at L22 — Basic Files.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-370 — check the exact commit
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-371 — check the exact branch
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-372 — check the exact PR
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-373 — compare before and after
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-374 — keep the change small
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-375 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-376 — preserve the existing contract
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-377 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-378 — use the canonical location
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-379 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-380 — read LESSONS.md
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-381 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-382 — separate action from verification
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-383 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-384 — record the source
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-385 — record the result
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-386 — record the next gate
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-387 — record the open question
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-388 — record the assumption
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-389 — record the uncertainty
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-390 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-391 — do not claim unverified success
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-392 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-393 — prefer direct evidence
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-394 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-395 — check the negative case
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-396 — check the happy path
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-397 — check the boundary case
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-398 — check the failure case
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-399 — check the naming
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-400 — check the path
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-401 — check the diff
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-402 — check the test result
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-403 — check the CI result
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-404 — check the lifecycle state
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-405 — check the ownership
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-406 — check the dependency direction
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-407 — check the persistence surface
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-408 — check the task lineage
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-409 — give a concise handoff
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-410 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-411 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-412 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-413 — restate the rule plainly
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-414 — identify the task
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-415 — identify the input
+
+TYPE
+- Curriculum training at L23 — Basic Git.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-416 — identify the output
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-417 — state the goal
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-418 — state the constraint
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-419 — state the scope
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-420 — state the boundary
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-421 — state the evidence
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-422 — state the blocker
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-423 — state what changed
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-424 — state what did not change
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-425 — check the current state
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-426 — check the exact file
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-427 — check the exact commit
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-428 — check the exact branch
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-429 — check the exact PR
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-430 — compare before and after
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-431 — keep the change small
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-432 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-433 — preserve the existing contract
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-434 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-435 — use the canonical location
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-436 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-437 — read LESSONS.md
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-438 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-439 — separate action from verification
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-440 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-441 — record the source
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-442 — record the result
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-443 — record the next gate
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-444 — record the open question
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-445 — record the assumption
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-446 — record the uncertainty
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-447 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-448 — do not claim unverified success
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-449 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-450 — prefer direct evidence
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-451 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-452 — check the negative case
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-453 — check the happy path
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-454 — check the boundary case
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-455 — check the failure case
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-456 — check the naming
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-457 — check the path
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-458 — check the diff
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-459 — check the test result
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-460 — check the CI result
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-461 — check the lifecycle state
+
+TYPE
+- Curriculum training at L24 — Basic Tests.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-462 — check the ownership
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-463 — check the dependency direction
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-464 — check the persistence surface
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-465 — check the task lineage
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-466 — give a concise handoff
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-467 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-468 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-469 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-470 — restate the rule plainly
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-471 — identify the task
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-472 — identify the input
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-473 — identify the output
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-474 — state the goal
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-475 — state the constraint
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-476 — state the scope
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-477 — state the boundary
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-478 — state the evidence
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-479 — state the blocker
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-480 — state what changed
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-481 — state what did not change
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-482 — check the current state
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-483 — check the exact file
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-484 — check the exact commit
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-485 — check the exact branch
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-486 — check the exact PR
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-487 — compare before and after
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-488 — keep the change small
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-489 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-490 — preserve the existing contract
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-491 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-492 — use the canonical location
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-493 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-494 — read LESSONS.md
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-495 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-496 — separate action from verification
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-497 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-498 — record the source
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-499 — record the result
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-500 — record the next gate
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-501 — record the open question
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-502 — record the assumption
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-503 — record the uncertainty
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-504 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-505 — do not claim unverified success
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-506 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-507 — prefer direct evidence
+
+TYPE
+- Curriculum training at L25 — Basic CI.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-508 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-509 — check the negative case
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-510 — check the happy path
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-511 — check the boundary case
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-512 — check the failure case
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-513 — check the naming
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-514 — check the path
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-515 — check the diff
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-516 — check the test result
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-517 — check the CI result
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-518 — check the lifecycle state
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-519 — check the ownership
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-520 — check the dependency direction
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-521 — check the persistence surface
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-522 — check the task lineage
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-523 — give a concise handoff
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-524 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-525 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-526 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-527 — restate the rule plainly
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-528 — identify the task
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-529 — identify the input
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-530 — identify the output
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-531 — state the goal
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-532 — state the constraint
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-533 — state the scope
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-534 — state the boundary
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-535 — state the evidence
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-536 — state the blocker
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-537 — state what changed
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-538 — state what did not change
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-539 — check the current state
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-540 — check the exact file
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-541 — check the exact commit
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-542 — check the exact branch
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-543 — check the exact PR
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-544 — compare before and after
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-545 — keep the change small
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-546 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-547 — preserve the existing contract
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-548 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-549 — use the canonical location
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-550 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-551 — read LESSONS.md
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-552 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-553 — separate action from verification
+
+TYPE
+- Curriculum training at L26 — Basic Contracts.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-554 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-555 — record the source
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-556 — record the result
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-557 — record the next gate
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-558 — record the open question
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-559 — record the assumption
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-560 — record the uncertainty
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-561 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-562 — do not claim unverified success
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-563 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-564 — prefer direct evidence
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-565 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-566 — check the negative case
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-567 — check the happy path
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-568 — check the boundary case
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-569 — check the failure case
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-570 — check the naming
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-571 — check the path
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-572 — check the diff
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-573 — check the test result
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-574 — check the CI result
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-575 — check the lifecycle state
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-576 — check the ownership
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-577 — check the dependency direction
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-578 — check the persistence surface
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-579 — check the task lineage
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-580 — give a concise handoff
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-581 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-582 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-583 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-584 — restate the rule plainly
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-585 — identify the task
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-586 — identify the input
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-587 — identify the output
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-588 — state the goal
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-589 — state the constraint
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-590 — state the scope
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-591 — state the boundary
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-592 — state the evidence
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-593 — state the blocker
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-594 — state what changed
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-595 — state what did not change
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-596 — check the current state
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-597 — check the exact file
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-598 — check the exact commit
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-599 — check the exact branch
+
+TYPE
+- Curriculum training at L27 — Basic Memory.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-600 — check the exact PR
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-601 — compare before and after
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-602 — keep the change small
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-603 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-604 — preserve the existing contract
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-605 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-606 — use the canonical location
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-607 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-608 — read LESSONS.md
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-609 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-610 — separate action from verification
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-611 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-612 — record the source
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-613 — record the result
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-614 — record the next gate
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-615 — record the open question
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-616 — record the assumption
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-617 — record the uncertainty
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-618 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-619 — do not claim unverified success
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-620 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-621 — prefer direct evidence
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-622 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-623 — check the negative case
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-624 — check the happy path
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-625 — check the boundary case
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-626 — check the failure case
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-627 — check the naming
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-628 — check the path
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-629 — check the diff
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-630 — check the test result
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-631 — check the CI result
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-632 — check the lifecycle state
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-633 — check the ownership
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-634 — check the dependency direction
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-635 — check the persistence surface
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-636 — check the task lineage
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-637 — give a concise handoff
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-638 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-639 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-640 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-641 — restate the rule plainly
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-642 — identify the task
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-643 — identify the input
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-644 — identify the output
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-645 — state the goal
+
+TYPE
+- Curriculum training at L28 — Basic Communication.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-646 — state the constraint
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-647 — state the scope
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-648 — state the boundary
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-649 — state the evidence
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-650 — state the blocker
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-651 — state what changed
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-652 — state what did not change
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-653 — check the current state
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-654 — check the exact file
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-655 — check the exact commit
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-656 — check the exact branch
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-657 — check the exact PR
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-658 — compare before and after
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-659 — keep the change small
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-660 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-661 — preserve the existing contract
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-662 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-663 — use the canonical location
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-664 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-665 — read LESSONS.md
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-666 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-667 — separate action from verification
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-668 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-669 — record the source
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-670 — record the result
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-671 — record the next gate
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-672 — record the open question
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-673 — record the assumption
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-674 — record the uncertainty
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-675 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-676 — do not claim unverified success
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-677 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-678 — prefer direct evidence
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-679 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-680 — check the negative case
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-681 — check the happy path
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-682 — check the boundary case
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-683 — check the failure case
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-684 — check the naming
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-685 — check the path
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-686 — check the diff
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-687 — check the test result
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-688 — check the CI result
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-689 — check the lifecycle state
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-690 — check the ownership
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-691 — check the dependency direction
+
+TYPE
+- Curriculum training at L29 — Basic Boundaries.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-692 — check the persistence surface
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-693 — check the task lineage
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-694 — give a concise handoff
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-695 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-696 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-697 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-698 — restate the rule plainly
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-699 — identify the task
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-700 — identify the input
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-701 — identify the output
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-702 — state the goal
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-703 — state the constraint
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-704 — state the scope
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-705 — state the boundary
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-706 — state the evidence
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-707 — state the blocker
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-708 — state what changed
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-709 — state what did not change
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-710 — check the current state
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-711 — check the exact file
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-712 — check the exact commit
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-713 — check the exact branch
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-714 — check the exact PR
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-715 — compare before and after
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-716 — keep the change small
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-717 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-718 — preserve the existing contract
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-719 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-720 — use the canonical location
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-721 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-722 — read LESSONS.md
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-723 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-724 — separate action from verification
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-725 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-726 — record the source
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-727 — record the result
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-728 — record the next gate
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-729 — record the open question
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-730 — record the assumption
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-731 — record the uncertainty
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-732 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-733 — do not claim unverified success
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-734 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-735 — prefer direct evidence
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-736 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-737 — check the negative case
+
+TYPE
+- Curriculum training at L30 — Basic Repetition.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-738 — check the happy path
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-739 — check the boundary case
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-740 — check the failure case
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-741 — check the naming
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-742 — check the path
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-743 — check the diff
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-744 — check the test result
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-745 — check the CI result
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-746 — check the lifecycle state
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-747 — check the ownership
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-748 — check the dependency direction
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-749 — check the persistence surface
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-750 — check the task lineage
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-751 — give a concise handoff
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-752 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-753 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-754 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-755 — restate the rule plainly
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-756 — identify the task
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-757 — identify the input
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-758 — identify the output
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-759 — state the goal
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-760 — state the constraint
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-761 — state the scope
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-762 — state the boundary
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-763 — state the evidence
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-764 — state the blocker
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-765 — state what changed
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-766 — state what did not change
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-767 — check the current state
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-768 — check the exact file
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-769 — check the exact commit
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-770 — check the exact branch
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-771 — check the exact PR
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-772 — compare before and after
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-773 — keep the change small
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-774 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-775 — preserve the existing contract
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-776 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-777 — use the canonical location
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-778 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-779 — read LESSONS.md
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-780 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-781 — separate action from verification
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-782 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-783 — record the source
+
+TYPE
+- Curriculum training at L31 — Basic Generalization.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-784 — record the result
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-785 — record the next gate
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-786 — record the open question
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-787 — record the assumption
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-788 — record the uncertainty
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-789 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-790 — do not claim unverified success
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-791 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-792 — prefer direct evidence
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-793 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-794 — check the negative case
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-795 — check the happy path
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-796 — check the boundary case
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-797 — check the failure case
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-798 — check the naming
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-799 — check the path
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-800 — check the diff
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-801 — check the test result
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-802 — check the CI result
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-803 — check the lifecycle state
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-804 — check the ownership
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-805 — check the dependency direction
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-806 — check the persistence surface
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-807 — check the task lineage
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-808 — give a concise handoff
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-809 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-810 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-811 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-812 — restate the rule plainly
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-813 — identify the task
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-814 — identify the input
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-815 — identify the output
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-816 — state the goal
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-817 — state the constraint
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-818 — state the scope
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-819 — state the boundary
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-820 — state the evidence
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-821 — state the blocker
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-822 — state what changed
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-823 — state what did not change
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-824 — check the current state
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-825 — check the exact file
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-826 — check the exact commit
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-827 — check the exact branch
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-828 — check the exact PR
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-829 — compare before and after
+
+TYPE
+- Curriculum training at L32 — Basic Recovery.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-830 — keep the change small
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-831 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-832 — preserve the existing contract
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-833 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-834 — use the canonical location
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-835 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-836 — read LESSONS.md
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-837 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-838 — separate action from verification
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-839 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-840 — record the source
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-841 — record the result
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-842 — record the next gate
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-843 — record the open question
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-844 — record the assumption
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-845 — record the uncertainty
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-846 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-847 — do not claim unverified success
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-848 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-849 — prefer direct evidence
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-850 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-851 — check the negative case
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-852 — check the happy path
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-853 — check the boundary case
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-854 — check the failure case
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-855 — check the naming
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-856 — check the path
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-857 — check the diff
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-858 — check the test result
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-859 — check the CI result
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-860 — check the lifecycle state
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-861 — check the ownership
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-862 — check the dependency direction
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-863 — check the persistence surface
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-864 — check the task lineage
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-865 — give a concise handoff
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-866 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-867 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-868 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-869 — restate the rule plainly
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-870 — identify the task
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-871 — identify the input
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-872 — identify the output
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-873 — state the goal
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-874 — state the constraint
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-875 — state the scope
+
+TYPE
+- Curriculum training at L33 — Basic Sequencing.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-876 — state the boundary
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-877 — state the evidence
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-878 — state the blocker
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-879 — state what changed
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-880 — state what did not change
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-881 — check the current state
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-882 — check the exact file
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-883 — check the exact commit
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-884 — check the exact branch
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-885 — check the exact PR
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-886 — compare before and after
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-887 — keep the change small
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-888 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-889 — preserve the existing contract
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-890 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-891 — use the canonical location
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-892 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-893 — read LESSONS.md
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-894 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-895 — separate action from verification
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-896 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-897 — record the source
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-898 — record the result
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-899 — record the next gate
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-900 — record the open question
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-901 — record the assumption
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-902 — record the uncertainty
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-903 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-904 — do not claim unverified success
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-905 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-906 — prefer direct evidence
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-907 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-908 — check the negative case
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-909 — check the happy path
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-910 — check the boundary case
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-911 — check the failure case
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-912 — check the naming
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-913 — check the path
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-914 — check the diff
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-915 — check the test result
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-916 — check the CI result
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-917 — check the lifecycle state
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-918 — check the ownership
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-919 — check the dependency direction
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-920 — check the persistence surface
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-921 — check the task lineage
+
+TYPE
+- Curriculum training at L34 — Basic Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-922 — give a concise handoff
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-923 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-924 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-925 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-926 — restate the rule plainly
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-927 — identify the task
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-928 — identify the input
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-929 — identify the output
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-930 — state the goal
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-931 — state the constraint
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-932 — state the scope
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-933 — state the boundary
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-934 — state the evidence
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-935 — state the blocker
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-936 — state what changed
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-937 — state what did not change
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-938 — check the current state
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-939 — check the exact file
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-940 — check the exact commit
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-941 — check the exact branch
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-942 — check the exact PR
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-943 — compare before and after
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-944 — keep the change small
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the change small using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the change small while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-945 — avoid unrelated edits
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- avoid unrelated edits using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen avoid unrelated edits while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-946 — preserve the existing contract
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing contract using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing contract while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-947 — preserve the existing behavior
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- preserve the existing behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen preserve the existing behavior while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-948 — use the canonical location
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- use the canonical location using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen use the canonical location while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-949 — follow AGENTS.md
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- follow AGENTS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen follow AGENTS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-950 — read LESSONS.md
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- read LESSONS.md using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen read LESSONS.md while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-951 — separate fact from interpretation
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate fact from interpretation using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate fact from interpretation while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-952 — separate action from verification
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate action from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate action from verification while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-953 — separate observation from conclusion
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- separate observation from conclusion using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen separate observation from conclusion while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-954 — record the source
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the source using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the source while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-955 — record the result
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-956 — record the next gate
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the next gate while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-957 — record the open question
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the open question using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the open question while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-958 — record the assumption
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the assumption using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the assumption while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-959 — record the uncertainty
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- record the uncertainty using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen record the uncertainty while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-960 — stop when the gate is satisfied
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- stop when the gate is satisfied using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen stop when the gate is satisfied while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-961 — do not claim unverified success
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- do not claim unverified success using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen do not claim unverified success while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-962 — keep the status OBSERVED
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- keep the status OBSERVED using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen keep the status OBSERVED while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-963 — prefer direct evidence
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer direct evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer direct evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-964 — prefer the smallest valid action
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- prefer the smallest valid action using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen prefer the smallest valid action while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-965 — check the negative case
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the negative case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the negative case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-966 — check the happy path
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the happy path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the happy path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-967 — check the boundary case
+
+TYPE
+- Curriculum training at L35 — Basic Persistence.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the boundary case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the boundary case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-968 — check the failure case
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the failure case using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the failure case while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-969 — check the naming
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the naming using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the naming while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-970 — check the path
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the path using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the path while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-971 — check the diff
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the diff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the diff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-972 — check the test result
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the test result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the test result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-973 — check the CI result
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the CI result using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the CI result while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-974 — check the lifecycle state
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the lifecycle state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the lifecycle state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-975 — check the ownership
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the ownership while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-976 — check the dependency direction
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the dependency direction using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the dependency direction while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-977 — check the persistence surface
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the persistence surface using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the persistence surface while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-978 — check the task lineage
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the task lineage using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the task lineage while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-979 — give a concise handoff
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- give a concise handoff using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen give a concise handoff while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-980 — repeat the rule on a simple example
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- repeat the rule on a simple example using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen repeat the rule on a simple example while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-981 — apply the rule to a new simple input
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- apply the rule to a new simple input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen apply the rule to a new simple input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-982 — generalize the simple boundary
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- generalize the simple boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen generalize the simple boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-983 — restate the rule plainly
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- restate the rule plainly using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen restate the rule plainly while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-984 — identify the task
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the task using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the task while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-985 — identify the input
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the input using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the input while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-986 — identify the output
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- identify the output using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen identify the output while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-987 — state the goal
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the goal using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the goal while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-988 — state the constraint
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the constraint using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the constraint while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-989 — state the scope
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the scope using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the scope while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-990 — state the boundary
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the boundary while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-991 — state the evidence
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the evidence while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-992 — state the blocker
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state the blocker using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state the blocker while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-993 — state what changed
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what changed using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what changed while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-994 — state what did not change
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- state what did not change using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen state what did not change while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-995 — check the current state
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the current state using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the current state while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-996 — check the exact file
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact file using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact file while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-997 — check the exact commit
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact commit using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact commit while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-998 — check the exact branch
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact branch using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact branch while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-999 — check the exact PR
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- check the exact PR using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen check the exact PR while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+---
+
+## RUN-1000 — compare before and after
+
+TYPE
+- Curriculum training at L36 — Basic Autonomy.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Start from concrete evidence, keep the task small, preserve canonical architecture, and do not convert inference into durable knowledge.
+- This round is intentionally basic and repetitive so the Agent can strengthen the named behavior before increasing task complexity.
+
+ACTION
+- compare before and after using the smallest evidence-backed action available.
+
+VERIFY
+- Check the exact task boundary, the observable result, and the applicable lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- Strengthen compare before and after while preserving evidence-first reasoning, minimal scope, verification, and fail-closed behavior.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
