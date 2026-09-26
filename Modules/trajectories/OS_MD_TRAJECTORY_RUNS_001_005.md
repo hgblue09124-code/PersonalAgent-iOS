@@ -1,4 +1,4 @@
-# OS Markdown Trajectory Runs 001–005
+# OS Markdown Trajectory Runs 001–085
 
 Status: OBSERVED
 
@@ -493,3 +493,2201 @@ SOURCE
 - Runs 001–014.
 - AGENTS.md.
 - Documentation/LESSONS.md.
+
+
+---
+
+# Curriculum Training — Runs 016–085
+
+These runs extend the first 15 observations into seven additional curriculum levels. The purpose is progressive complexity, not model-weight fine-tuning. Every run remains `OBSERVED` unless independent repository evidence establishes a stronger lifecycle state.
+
+## L2 — Classification
+
+### RUN-016 — classify CI failure by exact failing boundary
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Classify CI failure by exact failing boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-017 — separate test regression from production regression
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Separate test regression from production regression using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-018 — separate inherited failure from current-task failure
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Separate inherited failure from current-task failure using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-019 — classify migration contamination from code defect
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Classify migration contamination from code defect using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-020 — distinguish environment failure from source failure
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Distinguish environment failure from source failure using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-021 — classify evidence as direct or inferred
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Classify evidence as direct or inferred using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-022 — classify scope as task-local or cross-cutting
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Classify scope as task-local or cross-cutting using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-023 — separate documentation inconsistency from runtime defect
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Separate documentation inconsistency from runtime defect using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-024 — classify green execution without verification
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Classify green execution without verification using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-025 — build a failure taxonomy from concrete evidence
+
+TYPE
+- Curriculum training at L2 — Classification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Build a failure taxonomy from concrete evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+
+## L3 — Minimal Repair
+
+### RUN-026 — repair only the confirmed failing file
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Repair only the confirmed failing file using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-027 — restore an assertion without weakening it
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Restore an assertion without weakening it using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-028 — repair a malformed contract at its boundary
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Repair a malformed contract at its boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-029 — remove unrelated diff from a focused task
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Remove unrelated diff from a focused task using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-030 — preserve existing behavior while fixing the defect
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Preserve existing behavior while fixing the defect using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-031 — add the smallest regression test for a confirmed bug
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Add the smallest regression test for a confirmed bug using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-032 — avoid broad refactor during local repair
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Avoid broad refactor during local repair using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-033 — keep one logical task in one commit
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Keep one logical task in one commit using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-034 — compare before/after diff against root cause
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Compare before/after diff against root cause using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-035 — stop after the evidence gate passes
+
+TYPE
+- Curriculum training at L3 — Minimal Repair.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Stop after the evidence gate passes using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+
+## L4 — Verification
+
+### RUN-036 — define evidence required for a claimed fix
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Define evidence required for a claimed fix using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-037 — separate execution from verification
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Separate execution from verification using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-038 — verify a migration with diff and tests
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Verify a migration with diff and tests using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-039 — verify a contract change with focused tests
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Verify a contract change with focused tests using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-040 — verify negative behavior and fail-closed behavior
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Verify negative behavior and fail-closed behavior using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-041 — verify no unrelated files changed
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Verify no unrelated files changed using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-042 — verify CI result belongs to the exact head commit
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Verify CI result belongs to the exact head commit using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-043 — verify lifecycle status against evidence
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Verify lifecycle status against evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-044 — reject a claim when evidence is ambiguous
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Reject a claim when evidence is ambiguous using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-045 — record an independently observable verification result
+
+TYPE
+- Curriculum training at L4 — Verification.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Record an independently observable verification result using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+
+## L5 — Architecture
+
+### RUN-046 — identify Kernel versus Runtime ownership
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Identify Kernel versus Runtime ownership using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-047 — identify Runtime versus Module boundary
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Identify Runtime versus Module boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-048 — identify cognitive grain versus executable module
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Identify cognitive grain versus executable module using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-049 — preserve canonical layout during migration
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Preserve canonical layout during migration using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-050 — detect duplicated ownership in architecture
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Detect duplicated ownership in architecture using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-051 — compose existing grains without inventing infrastructure
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Compose existing grains without inventing infrastructure using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-052 — trace dependency direction before moving code
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Trace dependency direction before moving code using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-053 — keep Markdown persistence separate from runtime execution
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Keep Markdown persistence separate from runtime execution using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-054 — identify the correct integration boundary
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Identify the correct integration boundary using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-055 — validate architecture claims against repository structure
+
+TYPE
+- Curriculum training at L5 — Architecture.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Validate architecture claims against repository structure using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+
+## L6 — Multi-step
+
+### RUN-056 — plan a migration as ordered evidence-preserving steps
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Plan a migration as ordered evidence-preserving steps using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-057 — combine classification repair and verification
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Combine classification repair and verification using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-058 — handle a task with multiple dependent files
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Handle a task with multiple dependent files using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-059 — preserve scope while resolving sequential failures
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Preserve scope while resolving sequential failures using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-060 — use previous evidence to choose the next gate
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Use previous evidence to choose the next gate using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-061 — maintain one logical commit across a multi-step task
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Maintain one logical commit across a multi-step task using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-062 — reconcile architecture intent with current repository reality
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Reconcile architecture intent with current repository reality using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-063 — sequence tests from cheapest to strongest useful gate
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Sequence tests from cheapest to strongest useful gate using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-064 — persist only reusable learning after the full loop
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Persist only reusable learning after the full loop using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-065 — complete Read Act Verify Learn Persist as one workflow
+
+TYPE
+- Curriculum training at L6 — Multi-step.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Complete Read Act Verify Learn Persist as one workflow using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+
+## L7 — Adversarial
+
+### RUN-066 — handle contradictory repository signals
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Handle contradictory repository signals using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-067 — reject a plausible fix lacking evidence
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Reject a plausible fix lacking evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-068 — detect a contaminated branch before repair
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Detect a contaminated branch before repair using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-069 — handle a green CI run with the wrong commit
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Handle a green CI run with the wrong commit using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-070 — resist a tempting broad refactor
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Resist a tempting broad refactor using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-071 — treat ambiguous parser or contract output as fail-closed
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Treat ambiguous parser or contract output as fail-closed using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-072 — detect when documentation and code disagree
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Detect when documentation and code disagree using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-073 — distinguish repeated inference from independent evidence
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Distinguish repeated inference from independent evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-074 — reject unsupported promotion of a candidate lesson
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Reject unsupported promotion of a candidate lesson using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-075 — recover from an invalid earlier assumption using new evidence
+
+TYPE
+- Curriculum training at L7 — Adversarial.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Recover from an invalid earlier assumption using new evidence using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+
+## L8 — Autonomous
+
+### RUN-076 — independently select relevant AGENTS and lesson context
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Independently select relevant AGENTS and lesson context using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-077 — choose the smallest useful cognitive grains for a task
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Choose the smallest useful cognitive grains for a task using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-078 — form an evidence-first action plan without speculative edits
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Form an evidence-first action plan without speculative edits using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-079 — execute a complete diagnose repair verify persist loop
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Execute a complete diagnose repair verify persist loop using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-080 — adapt the next action from observed verification results
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Adapt the next action from observed verification results using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-081 — maintain baseline and training lineage autonomously
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Maintain baseline and training lineage autonomously using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-082 — decide when to stop instead of expanding scope
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Decide when to stop instead of expanding scope using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-083 — produce a concise evidence-backed handoff state
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Produce a concise evidence-backed handoff state using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-084 — identify a reusable candidate lesson without premature promotion
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Identify a reusable candidate lesson without premature promotion using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
+### RUN-085 — complete an autonomous OS training checkpoint
+
+TYPE
+- Curriculum training at L8 — Autonomous.
+
+READ
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant Markdown OS / Cognitive Ocean contracts.
+- Repository evidence directly related to the task.
+
+REASON
+- Treat the task as a bounded training problem: identify the evidence boundary first, preserve the repository's canonical architecture, and avoid converting inference into durable knowledge.
+- Increase complexity only after the preceding level's discipline is preserved.
+
+ACTION
+- Complete an autonomous OS training checkpoint using the smallest evidence-backed action available.
+
+VERIFY
+- Compare the action with the exact task boundary, relevant diff/test/CI evidence, and the lifecycle rules in AGENTS.md and Documentation/LESSONS.md.
+
+LEARN
+- The Agent should improve the named capability while preserving evidence-first reasoning, minimal scope, and verification before promotion.
+
+STATUS: OBSERVED
+
+SOURCE
+- AGENTS.md.
+- Documentation/LESSONS.md.
+- Relevant repository state and applicable evidence.
+
