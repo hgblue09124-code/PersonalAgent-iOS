@@ -2,6 +2,7 @@ import Foundation
 import Testing
 import PAFoundation
 import PAProviders
+import PAComposition
 import PAProvidersRemote
 import PASecurity
 
