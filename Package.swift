@@ -174,6 +174,7 @@ let package = Package(
                 "PASkills",
                 "PATools",
                 "PAMemory",
+                "PAStorageMemory",
             ],
             path: "Sources/Composition"
         ),
