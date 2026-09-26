@@ -1,3 +1,7 @@
+import Foundation
+import PAKernel
+import PASecurity
+
 /// Credential refs may be held by composition, not by AgentState.
 public struct ProviderBinding: Sendable, Equatable {
     public let providerID: ProviderID
