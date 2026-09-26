@@ -8,14 +8,14 @@ struct RepositoryIntegrityTests {
         let sourcesRoot = repositoryRoot().appendingPathComponent("Sources")
         let repositoryRootPath = repositoryRoot()
         for path in [
-            "Providers/Contracts/LLMProvider.swift",
+            "Kernel/Ports/Providers/ProviderContracts.swift",
             "Providers/Remote/Grok/GrokBoundary.swift",
             "Runtime/Execution/ProviderRuntime.swift",
-            "Providers/Contracts/ProviderRuntimeError.swift",
+            "Kernel/Ports/Providers/ProviderRuntimeError.swift",
             "Providers/Remote/Shared/ProviderTransport.swift",
             "Providers/Remote/Shared/ChatCompletionsCodec.swift",
             "Providers/Remote/Shared/HTTPChatProvider.swift",
-            "Providers/Contracts/DeterministicFakeProvider.swift",
+            "Tests/Providers/DeterministicFakeProvider.swift",
             "Providers/Remote/OpenAI/OpenAIBoundary.swift",
             "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
