@@ -4,6 +4,14 @@
 
 ## Mission
 
+## Agent Memory Routing — FAST PATH
+
+> **Read order:** `BASELINE.md` → relevant `Documentation/MEMORY.md` → only then `HANDOFF.md` / `AUDIT.md` / `WORK_LOG.md` when needed.
+>
+> **STOP EARLY:** If BASELINE/MEMORY already answer the task, stop. Do not reconstruct repository state from the full Markdown tree or chat history.
+>
+> Markdown is a **soft memory protocol**: current/high-value knowledge goes near the top; history may grow below; headings and routing hints are retrieval aids, not rigid parser rules.
+
 ## FAST READ — soft guidance
 
 > Read from the top. If the current section answers the task, **STOP EARLY**. Read deeper only when evidence/history/ownership is needed. This is guidance, not a rigid parser contract. Useful data may grow below.
