@@ -9,6 +9,7 @@ struct RepositoryIntegrityTests {
         let repositoryRootPath = repositoryRoot()
         for path in [
             "Providers/Contracts/LLMProvider.swift",
+            "Providers/Remote/GrokBoundary.swift",
             "Runtime/Execution/ProviderRuntime.swift",
             "Providers/Contracts/ProviderRuntimeError.swift",
             "Providers/Contracts/ProviderTransport.swift",
