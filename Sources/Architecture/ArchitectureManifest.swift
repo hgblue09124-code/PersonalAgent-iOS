@@ -49,7 +49,7 @@ public enum ArchitectureManifest: Sendable {
         "PAObservability": ["PAFoundation", "PAKernel"],
         "PAEvents": ["PAFoundation", "PAObservability", "PAKernel"],
         "PASecurity": ["PAFoundation", "PAKernel"],
-        "PAStorage": ["PAFoundation", "PAEvents", "PAObservability"],
+        "PAStorage": ["PAFoundation", "PAEvents", "PAObservability", "PAStorageModels"],
         "PAStorageModels": ["PAFoundation", "PAProviders", "PAProvidersLocal"],
         "PAMemory": ["PAFoundation", "PAStorage", "PAEvents", "PAKernel"],
         "PAProviders": ["PAFoundation", "PAObservability", "PASecurity", "PAEvents", "PAKernel"],
