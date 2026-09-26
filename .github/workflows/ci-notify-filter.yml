@@ -1,4 +1,4 @@
-name: CI — Notify Filter
+name: CI — Notify Filter — PR #91
 
 on:
   pull_request:
@@ -15,5 +15,5 @@ jobs:
       - name: Emit stable CI notification key
         run: |
           echo "CI_NOTIFY_KEY=personalagent-ci"
-          echo "CI_NOTIFY_WORKFLOW=CI — Notify Filter"
+          echo "CI_NOTIFY_WORKFLOW=CI — Notify Filter — PR #91"
           echo "CI_NOTIFY_STATUS=started"
