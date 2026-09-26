@@ -1,6 +1,5 @@
 import Foundation
-import PAFoundation
-import PAProviders
+import PAKernel
 
 public actor LlamaCPPResidencyCoordinator {
     public static let shared = LlamaCPPResidencyCoordinator()
