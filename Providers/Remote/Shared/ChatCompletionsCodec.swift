@@ -1,4 +1,5 @@
 import Foundation
+import PAKernel
 import PAProviders
 
 /// Maps the semantic contract onto the OpenAI-compatible chat.completions wire format.
