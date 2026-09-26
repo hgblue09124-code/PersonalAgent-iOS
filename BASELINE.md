@@ -8,12 +8,13 @@
 - Issue #85: **OPEN — late-stage canonical migration, not complete**
 - Active PR: **#91 — rearch: migrate Cognition and Policy into canonical Runtime**
 - Branch: `rearch/cognition-policy-runtime`
-- Current tested commit: `d89321d3798316ab0e6eb5f3899ea730fb923c2b`
-- Latest workflow: **#712 / 36254250956 — RED**
+- Current tested commit: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
+- Latest verified workflow: **#718 / 36255114608 — VERIFIED GREEN**
 - iOS arm64 build: **PASS**
 - Repository integrity: **PASS**
-- Swift package tests: **FAIL — Dependency direction, 1 issue**
-- Full Gate: **FAIL**
+- Swift package tests: **PASS**
+- Full Gate: **PASS**
+- PR Final — Filter: **PASS**
 
 ## ISSUE #85 PROGRESS MODEL
 
@@ -37,7 +38,7 @@ Issue #85 is one continuous migration. PRs #87 → #91 are execution steps for t
 
 ## VERIFICATION RULE
 
-The current HEAD is **not verified green**. Any later commit requires a new completed Full Gate.
+The current HEAD is **VERIFIED GREEN** by workflow #718 / 36255114608. Any later commit requires a new completed Full Gate.
 
 ## WORKER ROUTE
 
