@@ -9,15 +9,15 @@ struct RepositoryIntegrityTests {
         let repositoryRootPath = repositoryRoot()
         for path in [
             "Providers/Contracts/LLMProvider.swift",
-            "Providers/Remote/GrokBoundary.swift",
+            "Providers/Remote/Grok/GrokBoundary.swift",
             "Runtime/Execution/ProviderRuntime.swift",
             "Providers/Contracts/ProviderRuntimeError.swift",
             "Providers/Contracts/ProviderTransport.swift",
             "Providers/Contracts/ChatCompletionsCodec.swift",
             "Providers/Contracts/HTTPChatProvider.swift",
             "Providers/Contracts/DeterministicFakeProvider.swift",
-            "Providers/Remote/OpenAIBoundary.swift",
-            "Providers/Remote/OpenAICompatibleBoundary.swift",
+            "Providers/Remote/OpenAI/OpenAIBoundary.swift",
+            "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
             "Composition/M2CompositionRoot.swift",
         ] {
