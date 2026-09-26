@@ -115,17 +115,17 @@ let package = Package(
         .target(
             name: "PATools",
             dependencies: ["PAFoundation", "PAPolicy", "PAObservability"],
-            path: "Sources/Tools/Contracts"
+            path: "Sources/Capabilities/Tools"
         ),
         .target(
             name: "PAModules",
             dependencies: ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
-            path: "Sources/Modules/Contracts"
+            path: "Sources/Capabilities/Modules"
         ),
         .target(
             name: "PASkills",
             dependencies: ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
-            path: "Sources/Skills/Contracts"
+            path: "Sources/Capabilities/Skills"
         ),
         .target(
             name: "PACognition",
