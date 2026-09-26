@@ -168,7 +168,7 @@ jobs:
           # R5: stale dependency referencing a removed SwiftPM target.
           # Only acts when SwiftPM explicitly reports an unknown dependency and
           # the named target is absent. Removes exact dependency entries only.
-          unknown_deps = sorted(set(re.findall(r"unknown dependency ['‘’\\\"]([^'‘’\\\"]+)['‘’\\\"] in target", log, re.I)))
+          unknown_deps = sorted(set(re.findall(r"""unknown dependency ['‘’"]([^'‘’"]+)['‘’"] in target""", log, re.I)))
           for module in unknown_deps:
               if not re.fullmatch(r"PA[A-Za-z0-9]+", module):
                   continue
