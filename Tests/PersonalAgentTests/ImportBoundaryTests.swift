@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import PAArchitecture
 
 @Suite("Dependency direction")
 struct ImportBoundaryTests {

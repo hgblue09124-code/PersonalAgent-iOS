@@ -4,7 +4,6 @@ import SwiftUI
 import PAFoundation
 import PAKernel
 import PAComposition
-import PAArchitecture
 import PAProviders
 
 @MainActor

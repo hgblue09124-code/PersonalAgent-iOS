@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import PAArchitecture
 import PAKernel
 import PAProviders
 import PAEvents

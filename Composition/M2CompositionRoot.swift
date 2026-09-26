@@ -1,5 +1,4 @@
 import PAFoundation
-import PAArchitecture
 import PAKernel
 import PAObservability
 import PAEvents

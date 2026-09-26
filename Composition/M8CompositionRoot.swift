@@ -9,7 +9,6 @@ import PACognition
 import PAPolicy
 import PAAgency
 import PAEvents
-import PAArchitecture
 import PAObservability
 import PATools
 import PASkills

@@ -1,5 +1,5 @@
 import SwiftUI
-import PAArchitecture
+import PAComposition
 import PAFoundation
 
 struct ScreenScaffold<Content: View>: View {

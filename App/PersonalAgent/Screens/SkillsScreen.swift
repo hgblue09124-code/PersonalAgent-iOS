@@ -1,5 +1,4 @@
 import SwiftUI
-import PAArchitecture
 
 struct SkillsScreen: View {
     @ObservedObject var session: KernelSession

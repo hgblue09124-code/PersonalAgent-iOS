@@ -1,5 +1,5 @@
 import SwiftUI
-import PAArchitecture
+import PAComposition
 
 struct RootView: View {
     @ObservedObject var session: KernelSession
