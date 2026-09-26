@@ -191,6 +191,169 @@ VALID
 ```
 
 The graph therefore learns routing efficiency without turning popularity into proof.
+
+### 3.5 Neuron contract
+
+A graph node is a **cognitive neuron** only when it has a bounded role, an activation condition, and a falsifiable exit condition. Markdown stores the contract; it does not pretend to be a neural runtime.
+
+```text
+NEURON
+  ID
+  TYPE
+  TRIGGER
+  REQUIRED_STATE
+  ACTION
+  EXIT_CONDITION
+  VERIFY
+  FAILURE_TWIN
+  PROVENANCE
+  STATUS OBSERVED | CONFIRMED | PROMOTED
+```
+
+Minimum semantic rule:
+
+```text
+TRIGGER      = when this neuron may activate
+REQUIRED_STATE = what must already be true
+ACTION       = what the neuron does
+EXIT         = when it must stop firing
+VERIFY       = what can justify the transition
+```
+
+A neuron without a bounded exit condition is a context sink. A neuron without provenance is not durable knowledge.
+
+### 3.6 Synapse contract
+
+A FOLLOW edge is a conditional synapse. Its strength controls routing preference, never truth.
+
+```text
+SYNAPSE
+  SOURCE
+  SIGNAL
+  TARGET
+  WHY
+  VERIFY
+  COST
+  STRENGTH
+  FAILURE_COUNT
+  LAST_EVIDENCE
+  STATUS OBSERVED | CONFIRMED | PROMOTED
+```
+
+Semantics:
+
+- **STRENGTH** = learned routing preference from verified experience; it is not confidence, truth, or authority.
+- **FAILURE_COUNT** = observed failed traversals; it can suppress a route but cannot by itself prove a replacement.
+- **LAST_EVIDENCE** = most recent evidence supporting the transition; stale evidence requires re-verification.
+- **COST** = comparable route cost, measured when telemetry exists and explicitly estimated otherwise.
+- **STATUS** = lifecycle state of the edge, independent of strength.
+
+A route may be strengthened only after a successful traversal with preserved evidence and scope. A route may be weakened after a verified failure. Promotion still requires the existing independent-evidence lifecycle.
+
+### 3.7 Activation, inhibition, and sparse attention
+
+The graph behaves as a sparse cognitive network, not a fully connected neural net.
+
+```text
+TASK
+ ↓ activate
+TRIGGER-MATCHED NEURONS
+ ↓ inhibit
+TRAPS / STALE / SCOPE-MISMATCHED ROUTES
+ ↓ select
+LOWEST-COST VALID ROUTE
+ ↓ expand only on unresolved evidence
+NEIGHBORING NEURONS
+```
+
+Activation priority is:
+
+```text
+CURRENT STATE
+→ TRIGGER MATCH
+→ STATUS
+→ EVIDENCE REQUIREMENT
+→ ROUTE COST
+→ STRENGTH
+```
+
+No single scalar may override the first four gates. In particular, a high-strength route is rejected when its evidence or scope is invalid.
+
+**Inhibition rule:** a trap, stale edge, failed verification, or scope mismatch can block a route before more context is loaded.
+
+**Sparse-context invariant:**
+
+> Memory growth must not imply context growth.
+
+The active set should contain only the smallest subgraph required to produce the next verified transition.
+
+### 3.8 Learning, decay, and consolidation
+
+Learning is a change in routing behavior, not an automatic change in truth.
+
+```text
+OBSERVATION
+  ↓
+SUCCESS / FAILURE SIGNAL
+  ↓
+EDGE UPDATE
+  ↓
+REPLAY / RECHALLENGE
+  ↓
+INDEPENDENT REAL-TASK EVIDENCE
+  ↓
+NODE/EDGE LIFECYCLE ADVANCE
+```
+
+Use bounded decay for routing preference:
+
+```text
+old / stale evidence
+→ lower routing priority
+→ re-verify before reuse
+```
+
+Decay affects **STRENGTH**, never **STATUS**. A CONFIRMED node does not become OBSERVED merely because it was unused; instead, stale evidence can require a fresh verification before activation.
+
+Consolidation rule:
+
+```text
+TRAJECTORY = episodic experience
+DELTA      = learning signal
+GRAPH      = compressed reusable structure
+HOUSE      = durable human-readable memory
+```
+
+Full trajectories remain cold evidence. The hot path should consume the compressed graph representation and fetch historical trajectories only when a verification or novelty trigger requires them.
+
+### 3.9 Route selection and convergence
+
+For a task with multiple valid routes, route selection is lexicographic rather than a single opaque score:
+
+```text
+1. VALIDITY
+2. EVIDENCE PRESERVATION
+3. SCOPE PRESERVATION
+4. REUSE
+5. LOWER COST
+6. STRONGER ROUTING HISTORY
+```
+
+This prevents a cheap but unsafe route from defeating a more expensive verified route.
+
+A route is **preferred**, not **true**, when it wins this comparison. The preferred route must be periodically rechallenged against its failure twin.
+
+The graph is converging when repeated tasks show:
+
+```text
+same-or-better verified result
++ smaller active subgraph
++ fewer actions
++ lower measured/estimated cost
++ no increase in verification escapes
+```
+
+The target is therefore not maximum graph size. It is **minimum sufficient activation for a verified result**.
 ## 4. The house is the memory
 
 A trajectory is temporary training material.
@@ -552,8 +715,6 @@ The next real task should instantiate one graph-aware self-play cycle:
 CHALLENGE → ROUTE → SOLVE → VERIFY → FOLLOW → ADVERSARY → JUDGE → COST COMPARE → COMPRESS → RECHALLENGE
 
 The observable result should record which FOLLOW edges fired, which were rejected, and whether the route became cheaper without weakening evidence or scope.
-
-and record the observable result.
 
 The objective is not to make the Markdown file smarter by being longer.
 
