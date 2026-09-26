@@ -1,3 +1,10 @@
+## 2026-09-27 — Agent On: Composition migration
+- Confirmed the Capabilities Skills group is already canonical; no duplicate Skills migration was created.
+- Moved all nine Sources/Composition/* files to Composition/* without behavior changes.
+- Updated Package.swift and the CI Composition path assertion only.
+- Verification: CHƯA XÁC MINH until the migration commit's CI completes.
+- Next: after green, inspect the remaining canonical gaps from current-tree evidence.
+
 # Agent Work Log
 
 ## CURRENT SNAPSHOT
