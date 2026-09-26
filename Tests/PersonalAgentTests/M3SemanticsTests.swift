@@ -147,7 +147,7 @@ struct M3SemanticsTests {
             )
         )
         #expect(result.output.value(for: "text") == "via-skill")
-        let events = await log.allEvents()
+        let events = try await log.allEvents()
         let invoked = events.filter { $0.kind == .moduleInvoked }.compactMap { $0.payload["moduleID"] }
         #expect(invoked.contains("skill.echo"))
         #expect(invoked.contains("mod.echo"))
@@ -177,7 +177,7 @@ struct M3SemanticsTests {
             }
             #expect(reason.contains("executionFailed:skill-child"))
         }
-        let events = await log.allEvents()
+        let events = try await log.allEvents()
         let invoked = events.filter { $0.kind == .moduleInvoked }.compactMap { $0.payload["moduleID"] }
         #expect(invoked.contains("skill.echo"))
         #expect(invoked.contains("mod.fail-echo"))
