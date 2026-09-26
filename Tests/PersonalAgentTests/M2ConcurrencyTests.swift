@@ -3,6 +3,7 @@ import Testing
 import PAFoundation
 import PAProviders
 import PARuntime
+import PAComposition
 
 @Suite("M2 provider concurrency")
 struct M2ConcurrencyTests {
