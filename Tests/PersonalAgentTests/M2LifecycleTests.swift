@@ -1,4 +1,5 @@
 import PAComposition
+import PAKernel
 import Foundation
 import Testing
 import PAProviders
