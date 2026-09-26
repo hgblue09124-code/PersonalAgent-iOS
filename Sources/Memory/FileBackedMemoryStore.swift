@@ -2,6 +2,7 @@ import Foundation
 import PAKernel
 import PAEvents
 import PAStorage
+import PAStorageModels
 
 public struct MemoryStoreMetadata: Sendable, Codable, Equatable {
     public let version: Int
