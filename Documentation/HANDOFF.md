@@ -22,7 +22,7 @@
 - `Sources/Memory` → remaining Memory semantic split
 
 ## EXACT NEXT ACTION
-1. Run full gate for the Architecture clean branch.
+1. Re-run the full gate after removing the stale Xcode PAArchitecture package reference.
 2. Repair only evidence-backed failures.
 3. Squash-merge the single logical Architecture task after green CI.
 4. Then inspect Observability as the next smallest confirmed gap.
