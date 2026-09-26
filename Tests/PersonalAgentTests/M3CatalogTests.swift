@@ -1,4 +1,5 @@
 import Testing
+import PAKernel
 import PAModules
 
 @Suite("M3 module catalog")
