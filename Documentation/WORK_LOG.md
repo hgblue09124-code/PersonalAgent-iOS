@@ -6,12 +6,14 @@
 
 - PR: #91
 - Branch: `rearch/cognition-policy-runtime`
-- HEAD: `4d59cd47c1915d554e0e8c0953ba8d0622e93f90`
+- Last verified code HEAD: `4d59cd47c1915d554e0e8c0953ba8d0622e93f90`
+- Current documentation HEAD: `97a08a5f288b8ec17e7393de8d81a5bd89980847`
 - Latest Full Gate: run #610 (`36232501862`)
 - Latest Full Gate status: **VERIFIED GREEN**
 - Verification jobs: iOS arm64 build, repository integrity, Swift package tests, aggregate gate, PR Final Filter — all **success**
 - Issue #85: still open; this PR is one migration group, not proof of final architecture completion.
 - Next worker rule: re-check PR/HEAD/CI before making changes. Do not trust this snapshot after a new commit.
+- Documentation-only commits after the verified code HEAD require their own Full Gate verification.
 
 ## Purpose
 
@@ -98,3 +100,11 @@ Never leave only prose such as “fixed” or “looks green”.
 - Verification:
 - Deferred:
 - Next:
+## 2026-09-26 — Agent footprint optimization
+
+- Trigger: user requested cross-chat agent traceability and MD-log deduplication.
+- Confirmed: existing roles were already distinct across AGENTS, WORK_LOG, HANDOFF, AUDIT, and AGENT_LEARNING_WORKFLOW; no second chronological agent log was needed.
+- Change: made WORK_LOG the append-only execution evidence source and HANDOFF the current-state/next-action source; added an explicit Agent Footprint Contract and Communication Map.
+- Documentation commits: `d2b3f8a94f949a1273454af2807db096eade01a3`, `97a08a5f288b8ec17e7393de8d81a5bd89980847`.
+- Verification impact: these documentation commits moved the branch HEAD after the previously verified code HEAD, so a fresh Full Gate is required for the current HEAD.
+- Next: verify CI for the current branch HEAD; if green, record that exact run as the new verified checkpoint.
