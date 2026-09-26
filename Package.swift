@@ -168,7 +168,7 @@ let package = Package(
                 "PATools",
                 "PAMemory",
             ],
-            path: "Sources/Composition"
+            path: "Composition"
         ),
         .target(
             name: "PAArchitecture",

@@ -57,7 +57,7 @@ jobs:
           test -f Sources/Capabilities/Modules/ModuleCatalog.swift
           test -f Sources/Capabilities/Modules/DeterministicModules.swift
           test -f Sources/Capabilities/Skills/ToolModule.swift
-          test -f Sources/Composition/M3CompositionRoot.swift
+          test -f Composition/M3CompositionRoot.swift
           test -f Documentation/M3.md
       - name: App does not import reserved engines
         run: |

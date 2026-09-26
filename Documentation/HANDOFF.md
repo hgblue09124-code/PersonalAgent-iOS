@@ -16,18 +16,17 @@
 - Capabilities group → `Sources/Capabilities/{Modules,Skills,Tools}`
 
 ## CONFIRMED REMAINING CANONICAL GAPS
-- `Sources/Composition` → `Composition`
+- `Sources/Composition` → `Composition` **IN FLIGHT**
 - `Sources/Architecture` → test-side ArchitectureManifest ownership; no production Architecture layer
 - `Sources/Observability` → remaining contract/implementation split
 - `Sources/Security` → remaining contract/configuration split
 - `Sources/Memory` → remaining Memory semantic split
 
 ## EXACT NEXT ACTION
-1. Inspect the actual current tree and `Package.swift` for the next smallest migration group (e.g. Composition or Observability/Security).
-2. Confirm file-level ownership and consumer imports.
-3. Move before rewrite; change no behavior.
-4. Run the full gate (`docker run --rm -v $(pwd):/src -w /src swift:6.3.2 swift test --disable-sandbox`).
-5. Update `AUDIT.md`, `WORK_LOG.md`, and this handoff with the exact verified checkpoint.
+1. Verify the clean Composition branch with full CI.
+2. Squash-merge the single logical Composition task into main only after CI is green.
+3. Close contaminated PR #96; do not merge it.
+4. After merge, inspect the next smallest confirmed canonical gap from current-tree evidence.
 
 
 ## 2026-09-27 — PR #94 Apple CI repair checkpoint

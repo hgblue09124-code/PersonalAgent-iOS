@@ -18,7 +18,7 @@ struct RepositoryIntegrityTests {
             "Providers/OpenAI/OpenAIBoundary.swift",
             "Providers/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
-            "Composition/M2CompositionRoot.swift",
+            "../Composition/M2CompositionRoot.swift",
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),

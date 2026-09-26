@@ -1,3 +1,9 @@
+## 2026-09-27 — Agent On: Composition migration branch repair
+- Confirmed PR #96 was based on a branch carrying the `rearch/kernel-migration-2` history, causing unrelated migration commits to appear in a PR targeting `main`.
+- Rebuilt the Composition migration branch directly from `main`.
+- Staged only the nine Composition files plus required Package.swift, CI, and migration documentation changes.
+- Verification: pending full CI on the clean branch.
+
 # Agent Work Log
 
 ## CURRENT SNAPSHOT

@@ -125,7 +125,7 @@ struct M5ArchitecturalAuditTests {
     // 4. Explicit Dependency Injection Audit
     @Test func testCompositionRootsAndRuntimesUseExplicitDependencyInjection() throws {
         let root = repositoryRoot()
-        let compositionDir = root.appendingPathComponent("Sources").appendingPathComponent("Composition")
+        let compositionDir = root.appendingPathComponent("Composition")
         let compositionFiles = try files(under: compositionDir, suffix: ".swift")
 
         #expect(!compositionFiles.isEmpty)
