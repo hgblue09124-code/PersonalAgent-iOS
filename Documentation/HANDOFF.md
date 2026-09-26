@@ -1,70 +1,63 @@
 # Task Handoff
 
-<!-- TASK-CONTEXT: Current continuation bridge for AI workers. Read this together with AGENTS.md, WORK_LOG.md, ARCHITECTURE.md and AUDIT.md. -->
-
 ## CURRENT STATE — read first
 
 - Root task: **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
-- Current migration checkpoint: **Foundation → Kernel — VERIFIED COMPLETE**
-- PR: **#91**
+- Issue #85: **OPEN — late-stage migration, not final-complete**
+- Active PR: **#91**
 - Branch: `rearch/cognition-policy-runtime`
-- Current HEAD after documentation checkpoint: `52b4cdbfe94dea132fa71a25efe5dbe8dd269411`
-- Last verified Full Gate before this documentation commit: run #687 (`36250848595`) — **VERIFIED GREEN**
-- Issue #85 remains incomplete; Events is the next separate migration group.
+- Current tested commit: `d89321d3798316ab0e6eb5f3899ea730fb923c2b`
+- Latest workflow: **#712 / 36254250956 — RED**
+- iOS arm64: PASS
+- Repository integrity: PASS
+- Swift package tests: FAIL — Dependency direction, 1 issue
+- Full Gate: FAIL
 
-> FAST STOP: If current state and task boundary are known, STOP. Continue only for next-action details.
+> FAST STOP: The immediate task is known. Do not open a new migration group until PR #91 is green.
 
-## Agent Communication Map
+## ISSUE #85 CONTINUITY
 
-| File | Role | Agent action |
-|---|---|---|
-| `AGENTS.md` | mandatory execution contract | Read before work |
-| `Documentation/WORK_LOG.md` | chronological footprint/evidence | Read latest entry; append completed cycles |
-| `Documentation/HANDOFF.md` | current state / next action | Refresh after each completed task |
-| `Documentation/AUDIT.md` | confirmed architecture/ownership | Record structural decisions here, not in WORK_LOG |
-| `Documentation/AGENT_LEARNING_WORKFLOW.md` | verified repair-learning rules | Update only when a repair rule is actually learned/verified |
+PR #87 → #88 → #89 → #90 → #91 are one connected execution chain for Issue #85. A green individual PR is a verified migration checkpoint, not Issue #85 completion.
 
-**Do not create another agent-log Markdown file unless a distinct ownership boundary is proven.**
+### Completed / verified at prior checkpoints
+- Architecture contract and ownership freeze.
+- Kernel agent migration.
+- Foundation → Kernel physical migration.
+- Provider ownership migration checkpoints.
+- App boundary/provider import repairs.
+- Runtime foundation and storage/cache migration work now present in the current chain.
 
-## Completed
+### Remaining
+- Finish PR #91 Cognition/Policy/Runtime dependency migration and get Full Gate green.
+- Complete remaining canonical physical migrations: Events, Memory, Storage, Capabilities, final Provider reconciliation, Composition, App, Tests/legacy duplicate cleanup.
+- Final canonical-tree + dependency-direction audit.
+- Physical iPhone 12 Pro Max validation.
+- Final Issue #85 acceptance and close.
 
-- Ownership freeze completed in Audit #14.
-- Migration group #1 completed: Kernel agent source moved to canonical Kernel subdomains.
-- Migration group #2 completed at its own change scope.
-- Path-sensitive architecture tests and import-boundary checks updated and verified.
-- PR #90 was CI green for its migration group.
-- Auto-repair has a fail-closed Verified Learning loop: only approved deterministic rules may execute automatically; unknown failures are recorded as candidates; repeated fingerprints stop.
-- Repair knowledge is stored in `.github/repair-knowledge.json`; candidate promotion is not automatic.
-- Provider ownership migration for PR #91 has reached a verified-green Full Gate at run #610.
+## EXACT NEXT ACTION
 
-## Confirmed
+1. Inspect the confirmed #712 Dependency direction failure on current HEAD.
+2. Identify the exact offending import/dependency from repository evidence.
+3. Make the smallest repair; do not redesign architecture.
+4. Re-run/check the new Full Gate.
+5. If green, update TODO/HANDOFF/WORK_LOG and open the next confirmed migration scope.
+6. If red again, inspect the new failing log before any further edit.
 
-- Issue #85 remains the root architecture/completion checkpoint.
-- A green migration PR does not prove Issue #85 is complete.
-- PR #91 is open and mergeable, but its current migration group still needs the broader Issue #85 acceptance sequence.
-- Provider/runtime dependency direction is now verified by the green gate.
-- Current repository documentation should distinguish **last verified code HEAD** from any later documentation-only HEAD.
+## DO NOT REDO
 
-## Deferred
-
-- Full canonical migration is not complete.
-- Final physical iPhone 12 Pro Max validation remains pending.
-- Final Issue #85 acceptance review remains pending.
-- Candidate auto-repair rules still require explicit verification/promotion.
-
-## Exact Next Action
-
-1. Re-fetch PR #91 and current HEAD.
-2. Fetch workflow runs for the current HEAD.
-3. If RED, inspect the failing job log and classify the root cause before changing code.
-4. If GREEN, open the **Events → Kernel/Events** migration checkpoint from Issue #85/AUDIT.md.
-5. Keep the footprint synchronized: code change → WORK_LOG entry → HANDOFF current state.
-
-## Do Not Redo
-
-- Do not restart provider feature work.
+- Do not recalculate Issue #85 as 1/8.
+- Do not restart ownership discovery; Audit #14 already froze ownership.
+- Do not redo Foundation migration unless current evidence shows regression.
 - Do not redesign UI.
-- Do not optimize llama.cpp during architecture migration.
-- Do not repeat ownership discovery already frozen in `Documentation/AUDIT.md`.
+- Do not optimize llama.cpp.
 - Do not infer CI state from chat history.
-- Do not create parallel log files that duplicate WORK_LOG/HANDOFF roles.
+
+## COMMUNICATION MAP
+
+- AGENTS.md = execution contract.
+- BASELINE.md = current snapshot.
+- TODO.md = executable queue.
+- WORK_LOG.md = chronological evidence.
+- HANDOFF.md = exact next action.
+- AUDIT.md = confirmed architecture/ownership.
+- MEMORY.md = durable lessons.
