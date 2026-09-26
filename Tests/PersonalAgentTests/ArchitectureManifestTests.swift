@@ -1,7 +1,6 @@
 import Testing
 import PAArchitecture
 import PARuntime
-import PAFoundation
 
 @Suite("M0 architecture manifest")
 struct ArchitectureManifestTests {
