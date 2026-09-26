@@ -6,14 +6,15 @@
 - Issue #85: **OPEN — late-stage migration, not final-complete**
 - Active PR: **#91**
 - Branch: `rearch/cognition-policy-runtime`
-- Current tested commit: `d89321d3798316ab0e6eb5f3899ea730fb923c2b`
-- Latest workflow: **#712 / 36254250956 — RED**
+- Current tested commit: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
+- Latest verified workflow: **#718 / 36255114608 — VERIFIED GREEN**
 - iOS arm64: PASS
 - Repository integrity: PASS
-- Swift package tests: FAIL — Dependency direction, 1 issue
-- Full Gate: FAIL
+- Swift package tests: PASS
+- Full Gate: PASS
+- PR Final — Filter: PASS
 
-> FAST STOP: The immediate task is known. Do not open a new migration group until PR #91 is green.
+> FAST STOP: The previous #712 blocker is resolved. The next action is the confirmed physical-tree audit/migration queue.
 
 ## ISSUE #85 CONTINUITY
 
@@ -36,12 +37,11 @@ PR #87 → #88 → #89 → #90 → #91 are one connected execution chain for Iss
 
 ## EXACT NEXT ACTION
 
-1. Inspect the confirmed #712 Dependency direction failure on current HEAD.
-2. Identify the exact offending import/dependency from repository evidence.
-3. Make the smallest repair; do not redesign architecture.
-4. Re-run/check the new Full Gate.
-5. If green, update TODO/HANDOFF/WORK_LOG and open the next confirmed migration scope.
-6. If red again, inspect the new failing log before any further edit.
+1. Treat workflow #718 as the current verified baseline.
+2. Audit actual remaining legacy physical groups from the current tree.
+3. Start only the next confirmed migration group; no speculative redesign.
+4. Run Swift tests, repository integrity, iOS arm64, and Full Gate.
+5. Update TODO/WORK_LOG/MEMORY/HANDOFF with the new evidence.
 
 ## DO NOT REDO
 
