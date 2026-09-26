@@ -10,6 +10,7 @@ import PAProvidersLocal
 import PAKernel
 import PAEvents
 import PAObservability
+import PARuntime
 
 @Suite("M9 Parallel Track — Real Provider Vertical Slice Tests")
 struct M9RealProviderSliceTests {
