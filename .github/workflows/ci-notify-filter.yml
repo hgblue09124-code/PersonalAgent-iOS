@@ -1,0 +1,19 @@
+name: CI — Notify Filter
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify-filter:
+    name: CI-NOTIFY-FILTER
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Emit stable CI notification key
+        run: |
+          echo "CI_NOTIFY_KEY=personalagent-ci"
+          echo "CI_NOTIFY_WORKFLOW=CI — Notify Filter"
+          echo "CI_NOTIFY_STATUS=started"
