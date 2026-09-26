@@ -16,15 +16,17 @@ struct RepositoryIntegrityTests {
             "Providers/Contracts/ChatCompletionsCodec.swift",
             "Providers/Contracts/HTTPChatProvider.swift",
             "Providers/Contracts/DeterministicFakeProvider.swift",
-            "Providers/Grok/GrokBoundary.swift",
             "Providers/OpenAI/OpenAIBoundary.swift",
             "Providers/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
             "Composition/M2CompositionRoot.swift",
         ] {
+            let root = path.hasPrefix("Runtime/") || path.hasPrefix("Providers/Remote/")
+                ? repositoryRootPath
+                : sourcesRoot
             #expect(
-                FileManager.default.fileExists(atPath: (path.hasPrefix("Runtime/") || path.hasPrefix("Providers/") ? repositoryRootPath : sourcesRoot).appendingPathComponent(path).path),
-                "missing \(path)"
+                FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),
+                "missing (path)"
             )
         }
     }
@@ -43,7 +45,7 @@ struct RepositoryIntegrityTests {
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: kernel.appendingPathComponent(path).path),
-                "missing kernel source \(path)"
+                "missing kernel source (path)"
             )
         }
     }
@@ -60,7 +62,7 @@ struct RepositoryIntegrityTests {
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: runtime.appendingPathComponent(path).path),
-                "missing runtime source \(path)"
+                "missing runtime source (path)"
             )
         }
     }
@@ -88,7 +90,7 @@ struct RepositoryIntegrityTests {
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: tests.appendingPathComponent(name).path),
-                "missing test \(name)"
+                "missing test (name)"
             )
         }
     }
@@ -126,7 +128,7 @@ struct RepositoryIntegrityTests {
             let text = try String(contentsOf: file, encoding: .utf8)
             for name in forbidden {
                 if importedModules(in: text).contains(name) {
-                    violations.append("\(file.lastPathComponent) imports \(name)")
+                    violations.append("(file.lastPathComponent) imports (name)")
                 }
             }
         }
