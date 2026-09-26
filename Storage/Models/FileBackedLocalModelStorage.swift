@@ -1,5 +1,4 @@
 import Foundation
-import PAFoundation
 import PAProviders
 import PAProvidersLocal
 
