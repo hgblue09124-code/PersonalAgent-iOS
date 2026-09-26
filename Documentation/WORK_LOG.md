@@ -1,3 +1,10 @@
+## 2026-09-27 — Agent On: Architecture canonical migration
+- Read AGENTS.md and current AUDIT/HANDOFF before changing code.
+- Confirmed the ownership contradiction: Audit #14 says ArchitectureManifest is test-side, but Composition roots were importing PAArchitecture for MilestoneGate.
+- Minimal repair: split production MilestoneGate into Composition and move ArchitectureManifest metadata to Tests/PersonalAgentTests.
+- Removed PAArchitecture from Package.swift and Composition imports.
+- Verification: **CHƯA XÁC MINH** until full CI completes.
+
 ## 2026-09-27 — Agent On: Composition migration branch repair
 - Confirmed PR #96 was based on a branch carrying the `rearch/kernel-migration-2` history, causing unrelated migration commits to appear in a PR targeting `main`.
 - Rebuilt the Composition migration branch directly from `main`.
