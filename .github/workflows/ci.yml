@@ -76,7 +76,7 @@ jobs:
           fi
       - name: Kernel does not import concrete providers
         run: |
-          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Sources/Core/Agent; then
+          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Kernel; then
             echo "Kernel isolation violated"
             exit 1
           fi
@@ -96,17 +96,7 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
       - name: Build PersonalAgent iOS app target (arm64)
         run: |
-          xcodebuild build \
-            -project PersonalAgent.xcodeproj \
-            -scheme PersonalAgent \
-            -sdk iphoneos \
-            -configuration Release \
-            -arch arm64 \
-            -derivedDataPath DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+          xcodebuild build             -project PersonalAgent.xcodeproj             -scheme PersonalAgent             -sdk iphoneos             -configuration Release             -arch arm64             -derivedDataPath DerivedData             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             CODE_SIGN_IDENTITY=""             AD_HOC_CODE_SIGNING_ALLOWED=YES
       - name: Package unsigned development IPA artifact
         run: |
           mkdir -p Payload
