@@ -48,8 +48,8 @@
 ### P2 — Remaining canonical migration groups
 These are the remaining queue only after the current PR is green. They are not separate Issue #85 percentages.
 
-- [ ] Events → `Kernel/Events` complete and verified.
-- [ ] Memory → canonical `Memory/{Working,Conversation,LongTerm,Retrieval}` complete; storage persistence separated.
+- [x] Events → `Kernel/Events` complete and verified: current tree has `Kernel/Events/*`, no `Sources/Events/*`, and workflow #725 is green.
+- [ ] Memory → canonical `Memory/{Working,Conversation,LongTerm,Retrieval}` complete; storage persistence separated. **BLOCKED FOR NOW:** Audit #14 fixes file ownership, but current SwiftPM topology would create a `PAMemory` ↔ storage persistence cycle if `FileBackedMemoryStore` is moved without first separating the storage target boundary. Do not move blindly.
 - [ ] Storage → canonical `Storage/{Models,Skills,Memory,Configuration,Cache}` complete and dependency direction verified.
 - [ ] Capabilities → canonical `Capabilities/{Modules,Skills,Tools}` complete.
 - [ ] Providers → canonical Remote/Local ownership fully reconciled; retain only deliberate contract targets/boundaries.
@@ -73,9 +73,9 @@ These are the remaining queue only after the current PR is green. They are not s
 
 ## WORK QUEUE ORDER
 
-1. **Audit actual remaining legacy paths from the current tree.**
-2. **Execute the next confirmed migration group.**
-3. **Re-verify PR #91 Full Gate after that migration.**
+1. **Resolve the confirmed Memory target-boundary blocker from actual Package.swift dependencies.**
+2. **Execute Memory physical migration with the smallest dependency-safe split.**
+3. **Re-verify PR #91 Full Gate.**
 4. **Execute only the next confirmed migration group.**
 5. **Final canonical-tree/dependency audit.**
 6. **Physical iPhone validation.**
