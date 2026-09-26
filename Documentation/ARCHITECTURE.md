@@ -48,6 +48,44 @@ Foundation
 | Device Capabilities | thermal, memory, network, app lifecycle signals | UIKit/SwiftUI imports in Kernel |
 | Security | secret + network boundaries | agent state |
 
+## Markdown Cognitive Plane
+
+Personal Agent OS Markdown is a product-level cognitive persistence plane above the runtime implementation.
+
+```
+Human Intent
+    ↓
+Markdown State
+    ↓
+Agent
+    ↓
+Action
+    ↓
+Evidence
+    ↓
+Markdown State
+    ↓
+Learn
+    ↺
+```
+
+Markdown surfaces are assigned explicit roles:
+
+- `AGENTS.md`: identity and operating rules.
+- `Documentation/ARCHITECTURE.md`: world model and ownership.
+- `Documentation/LESSONS.md`: durable evidence-backed learning.
+- `Documentation/AUDIT.md`: verified claims and findings.
+- `Documentation/HANDOFF.md`: current working state and next action.
+- `Documentation/WORK_LOG.md`: execution history.
+
+The Markdown plane does not replace Kernel, Runtime, Composition, or domain ownership. It records and routes cognitive state around them.
+
+The canonical product loop is:
+
+**Read → Act → Verify → Learn → Persist**
+
+Future parser, index, retrieval, or semantic-memory implementations must preserve Markdown as the canonical human-readable persistence surface.
+
 ## Milestone freeze
 
 M0 freezes boundaries and contracts.

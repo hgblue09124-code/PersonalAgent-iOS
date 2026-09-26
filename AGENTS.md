@@ -19,3 +19,10 @@
 - Record a lesson only when the cause is supported by concrete code, test, or CI evidence. Use `OBSERVED` until verified; use `CONFIRMED` after verification.
 - Promote a lesson to this file or `Documentation/ARCHITECTURE.md` only after independent repetition or when it is architecture-critical.
 - Never use durable memory as a volatile session diary. Do not create separate memory commits.
+
+### Personal Agent OS Markdown
+- `Documentation/PERSONAL_AGENT_OS_MARKDOWN.md` is the product foundation for the Markdown-native Personal OS.
+- Markdown is persistent cognitive state, not generated documentation.
+- Agent work follows the product loop: **Read → Act → Verify → Learn → Persist**.
+- Keep Markdown surfaces complementary: identity, architecture, lessons, audit, handoff, and execution history must not become duplicate diaries.
+- Future indexing or retrieval layers must preserve Markdown as the canonical human-readable persistence surface.
