@@ -1,4 +1,5 @@
 import Foundation
+import PAKernel
 import Testing
 @testable import PAProviders
 @testable import PAProvidersLocal
