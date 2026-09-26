@@ -42,7 +42,7 @@ struct M2SecurityTests {
         try await runtime.ready()
         _ = try await runtime.complete(LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "hi"))
 
-        let events = await log.allEvents()
+        let events = try await log.allEvents()
         let logs = logger.snapshot()
         let blobs = events.map { "\($0.kind.rawValue):\($0.payload)" } + logs.map { "\($0.message):\($0.metadata)" }
         for blob in blobs {
