@@ -136,7 +136,7 @@ let package = Package(
             name: "PAKernel",
             dependencies: [],
             path: "Kernel",
-            exclude: ["Ports/Providers"]
+            exclude: ["Events", "Ports/Providers"]
         ),
         .target(
             name: "PARuntime",
