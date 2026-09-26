@@ -38,6 +38,8 @@ jobs:
           INPUT_ATTEMPT: ${{ inputs.attempt || '0' }}
         run: |
           set -euo pipefail
+          apt-get update -qq
+          apt-get install -y --no-install-recommends python3 >/dev/null
           attempt="$INPUT_ATTEMPT"
           [[ "$attempt" =~ ^[0-9]+$ ]] || { echo "Invalid repair attempt: $attempt"; exit 1; }
           if [ "$attempt" -ge 5 ]; then
