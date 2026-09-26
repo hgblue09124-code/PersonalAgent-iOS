@@ -130,7 +130,7 @@ struct M9RealProviderSliceTests {
         try await Task.sleep(nanoseconds: 50_000_000)
 
         // Verify events recorded in event log without leaking secret
-        let events = await eventLog.allEvents()
+        let events = try await eventLog.allEvents()
         #expect(events.contains(where: { $0.kind == .providerInvoked }))
         #expect(events.contains(where: { $0.kind == .providerCompleted }))
     }
