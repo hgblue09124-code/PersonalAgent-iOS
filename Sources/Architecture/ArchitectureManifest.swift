@@ -57,12 +57,9 @@ public enum ArchitectureManifest: Sendable {
         "PAProvidersOpenAICompatible": ["PAProviders", "PAFoundation"],
         "cllama": [],
         "PAProvidersLocal": ["PAProviders", "PAFoundation", "cllama"],
-        "PAPolicy": ["PAFoundation", "PAKernel"],
         "PATools": ["PAFoundation", "PARuntime", "PAObservability"],
-        "PAModules": ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents", "PAKernel"],
+        "PAModules": ["PAFoundation", "PAObservability", "PAEvents", "PAKernel"],
         "PASkills": ["PAFoundation", "PAModules", "PATools", "PARuntime", "PAKernel"],
-        "PACognition": ["PAFoundation", "PAProviders", "PAMemory", "PASkills", "PAKernel"],
-        "PAAgency": ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
         "PARuntime": [
             "PAFoundation",
             "PAKernel",
@@ -71,9 +68,6 @@ public enum ArchitectureManifest: Sendable {
             "PAProviders",
             "PAModules",
             "PAMemory",
-            "PACognition",
-            "PAPolicy",
-            "PAAgency",
         ],
         "PAKernel": [
             "PAFoundation",
@@ -95,9 +89,6 @@ public enum ArchitectureManifest: Sendable {
             "PASkills",
             "PATools",
             "PAMemory",
-            "PAPolicy",
-            "PACognition",
-            "PAAgency",
         ]
     ]
 
