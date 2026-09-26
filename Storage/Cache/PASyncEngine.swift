@@ -1,3 +1,4 @@
+import PAStorageModels
 import Foundation
 
 public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine where Local.Record == Cloud.Record {
