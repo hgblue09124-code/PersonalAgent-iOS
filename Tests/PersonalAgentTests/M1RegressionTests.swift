@@ -1,6 +1,5 @@
 import Testing
 import Foundation
-import PAFoundation
 import PAEvents
 import PAKernel
 import PARuntime
