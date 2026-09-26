@@ -68,7 +68,7 @@ let package = Package(
         ),
         .target(
             name: "PAStorage",
-            dependencies: ["PAKernel", "PAEvents", "PAObservability"],
+            dependencies: ["PAKernel", "PAEvents", "PAObservability", "PAStorageModels"],
             path: "Storage",
             exclude: ["Models"]
         ),
