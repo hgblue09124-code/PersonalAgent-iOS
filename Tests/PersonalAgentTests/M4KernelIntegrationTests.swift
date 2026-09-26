@@ -5,6 +5,7 @@ import PAEvents
 import PAKernel
 import PAComposition
 import PAMemory
+import PAStorageMemory
 
 @Suite("M4 Kernel Integration Tests")
 struct M4KernelIntegrationTests {
