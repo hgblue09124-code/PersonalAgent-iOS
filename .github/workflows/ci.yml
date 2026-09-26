@@ -1,4 +1,4 @@
-name: CI — Full Gate
+name: Kiểm tra và sửa chữa
 
 on:
   push:
@@ -127,7 +127,7 @@ jobs:
           retention-days: 14
 
   full-gate:
-    name: Full Gate
+    name: Kiểm tra và sửa chữa
     if: ${{ always() }}
     needs: [package-tests, repository-integrity, apple-build]
     runs-on: ubuntu-24.04
@@ -137,10 +137,10 @@ jobs:
           if [[ "${{ needs.package-tests.result }}" != "success" ||
                 "${{ needs.repository-integrity.result }}" != "success" ||
                 "${{ needs.apple-build.result }}" != "success" ]]; then
-            echo "Full Gate FAILED"
+            echo "Kiểm tra và sửa chữa FAILED"
             echo "Swift package tests: ${{ needs.package-tests.result }}"
             echo "Repository integrity: ${{ needs.repository-integrity.result }}"
             echo "iOS arm64 build: ${{ needs.apple-build.result }}"
             exit 1
           fi
-          echo "Full Gate PASSED"
+          echo "Kiểm tra và sửa chữa PASSED"

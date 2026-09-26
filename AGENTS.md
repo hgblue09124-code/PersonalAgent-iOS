@@ -100,3 +100,17 @@ Stop and report instead of guessing when ownership is ambiguous, two canonical d
 ```
 
 <!-- FINAL-CHECK: Before declaring completion, verify that code, tests, documentation, and handoff all describe the same repository state. -->
+
+## Kiểm tra và sửa chữa — Agent Protocol
+
+- Workflow chính: **Kiểm tra và sửa chữa** (.github/workflows/ci.yml).
+- Khi nhận báo Run failed / PR run failed, hiểu mặc định là **phải kiểm tra và sửa**, không chỉ báo cáo.
+- Luôn xác minh PR/branch/head SHA và workflow result trước khi sửa.
+- Đọc log của job đỏ để xác định nguyên nhân **CONFIRMED**; không đoán lỗi.
+- Sửa tối thiểu, ưu tiên **một commit cho một logical fix**; không gom nhiều lỗi không liên quan.
+- Sau sửa: chờ/check workflow mới, xác nhận Full Gate xanh rồi mới kết luận hoàn tất.
+- Nếu workflow chưa chạy xong, trạng thái phải ghi rõ **CHƯA XÁC MINH**.
+- **Auto Repair** hiện chỉ workflow_dispatch (manual), không tự chạy theo push. Không được giả định có auto-repair.
+- Nếu CI đỏ lặp lại, không tạo vòng sửa mù: đọc job/log mới nhất, xác định regression hoặc nguyên nhân mới, rồi mới sửa.
+- Không dùng Jules/Jan prompt làm bước mặc định; agent đang xử lý repo có thể trực tiếp inspect/fix khi connector cho phép.
+- Sau mỗi nhóm migration: cập nhật tài liệu/handoff để worker sau đọc được trạng thái mà không cần khôi phục từ chat.
