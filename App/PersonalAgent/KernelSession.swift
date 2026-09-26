@@ -5,6 +5,8 @@ import PAKernel
 import PAComposition
 import PAArchitecture
 import PAProviders
+import PAProvidersLocal
+import PAStorageModels
 
 @MainActor
 final class KernelSession: ObservableObject {
