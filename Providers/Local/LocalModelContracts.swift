@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 
 /// Local model identity representation.
 public struct LocalModelIdentity: Sendable, Codable, Equatable, Identifiable {
