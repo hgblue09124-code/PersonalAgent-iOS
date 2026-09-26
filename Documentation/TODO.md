@@ -1,63 +1,99 @@
-# Issue #85 — RE-ARCH Canonical PersonalAgent-iOS TODO
+# Issue #85 — RE-ARCH execution TODO
 
-> Progress is measured by completed acceptance checkpoints, not by changed-file count.
-> Every checkpoint requires repository evidence. Do not mark DONE from design intent alone.
+> Rebuilt from the actual Issue #85 → PR #87 → #88 → #89 → #90 → #91 chain.
+> PRs are stacked migration checkpoints; a green PR is not automatically completion of Issue #85.
 
-## Progress
-- Total checkpoints: 10
-- Completed: 2 / 10
-- Current completion: 20%
-- Current workstream: PR #91 / Memory–Storage canonicalization
-- Rule: a checkpoint becomes DONE only after code + tests/CI + required documentation evidence are verified.
+## Completion model
+- Issue completion % counts canonical architecture checkpoints only.
+- PR #87 (architecture contract) and PR #88 (runtime atomicity repair) are supporting checkpoints, not separate migration layers.
+- A migration checkpoint is DONE only when its physical repository state and required validation gate are verified.
+- Final Issue #85 acceptance requires all migration checkpoints + documentation continuity + physical iPhone validation.
 
-## TODO by Issue #85
+## Actual chain
+- #87 — architecture contract: SUPPORTING — DONE.
+- #88 — runtime state/event atomicity repair: SUPPORTING — DONE.
+- #89 — Kernel agent sources: KERNEL GROUP — verified in prior checkpoint history.
+- #90 — Foundation + Event contracts toward Kernel: KERNEL GROUP — verified in prior checkpoint history.
+- #91 — Cognition + Policy into Runtime: RUNTIME GROUP — IN PROGRESS; latest verified CI is RED.
 
-### Phase 1 — Canonical foundation
-- [x] T01 — Foundation → Kernel
-  Move/verify Foundation contracts, errors and ports under canonical Kernel ownership.
-  Gate: package graph + tests + repository integrity + iOS arm64 + Full Gate.
-- [x] T02 — Events → Kernel/Events
-  Move/verify Events under canonical Kernel ownership and remove legacy ownership.
-  Gate: package graph + tests + repository integrity + iOS arm64 + Full Gate.
+## Canonical TODO
 
-### Phase 2 — Memory / Storage
-- [ ] T03 — Memory semantic ownership
-  Verify/migrate Working, Conversation, LongTerm, Retrieval to Memory/*.
-- [ ] T04 — Storage ownership
-  Verify/migrate Models, Memory persistence, Configuration, Cache and related storage boundaries to Storage/*.
-- [ ] T05 — Memory/Storage dependency gate
-  Remove stale ownership/targets/imports; verify dependency direction and regression coverage.
-  Gate: Swift tests + repository integrity + iOS arm64 + Full Gate.
+### C1 — Kernel ownership
+- [x] Kernel agent sources moved to canonical Kernel tree.
+- [x] Foundation contracts/errors/ports and Event contracts moved toward canonical Kernel ownership.
+- [x] Compatibility/Package/test ownership updated where verified.
+- Gate: package graph + tests + repository integrity + iOS arm64 + Full Gate.
 
-### Phase 3 — Runtime / Capabilities / Providers
-- [ ] T06 — Runtime canonical ownership
-  Verify Agent, Execution, Planning, Observation, Verification, Result have one canonical home and one execution path.
-- [ ] T07 — Capabilities + Providers canonical ownership
-  Verify Modules, Skills, Tools and Remote/Local provider adapters have one canonical home and correct dependency direction.
+### C2 — Runtime ownership
+- [ ] Cognition split across Runtime/Observation, Planning, Execution, Verification, Result.
+- [ ] Policy contracts owned by Runtime/Verification.
+- [ ] Legacy PACognition/PAPolicy targets removed without breaking dependency direction.
+- [ ] Full Gate green after migration.
+- Current blocker: PR #91 latest run #712 is RED.
 
-### Phase 4 — Composition / App / Tests
-- [ ] T08 — Composition wiring
-  Verify construction/wiring is centralized in Composition and no duplicate dependency wiring remains.
-- [ ] T09 — App + Tests topology
-  Verify App presentation boundaries and Tests mirror production ownership without direct vendor/runtime/storage leakage.
+### C3 — Memory ownership
+- [ ] Working / Conversation / LongTerm / Retrieval have one canonical Memory home.
+- [ ] Legacy Sources/Memory ownership is removed or proven as a deliberate compatibility boundary.
+- [ ] Tests reflect canonical ownership.
 
-### Phase 5 — Final acceptance
-- [ ] T10 — Integrated Issue #85 acceptance
-  Verify one canonical repository form, no duplicate ownership, dependency direction, behavior preservation, green Build/Tests/Full Gate, required Markdown continuity, and physical iPhone 12 Pro Max validation.
+### C4 — Storage ownership
+- [ ] Models / Skills / Memory persistence / Configuration / Cache have one canonical Storage home.
+- [ ] Storage model contracts have correct dependency direction.
+- [ ] No accidental Storage → concrete Provider dependency remains.
+- [ ] Full dependency-direction gate passes.
 
-## Execution contract
-Every unchecked item follows:
-inspect → confirm → minimal change → regression test → full gate → audit → record → handoff
+### C5 — Capabilities ownership
+- [ ] Modules / Skills / Tools have one canonical Capabilities home.
+- [ ] No duplicate Sources/Modules, Sources/Skills, Sources/Tools ownership remains unless explicitly justified.
+- [ ] Runtime reaches capabilities through the canonical boundary.
 
-### Completion accounting
-- Checkpoint DONE only with evidence.
-- Failed CI does not count as completion.
-- A green intermediate PR counts only for the checkpoint it actually verifies.
-- If a checkpoint is split into multiple PRs, count it once when the whole checkpoint is verified.
-- At every final summary report: Completed X/10; Progress Y%; Current Txx; Blocked/Deferred; Evidence.
+### C6 — Providers ownership
+- [ ] Remote and Local providers have one canonical adapter home.
+- [ ] Vendor-specific implementation stays inside Providers.
+- [ ] Kernel/Memory/Storage do not import concrete providers.
+- [ ] Provider tests mirror canonical ownership.
 
-## Stop rules
-- Do not create a new architectural layer just to make a TODO item pass.
-- Do not redesign product UI, optimize llama.cpp, or add providers/models under this issue.
-- Do not mark future architecture as confirmed before repository evidence exists.
-- If ownership is ambiguous, stop and record NOT CONFIRMED.
+### C7 — Composition + App + Tests
+- [ ] Composition is the single wiring point.
+- [ ] App remains presentation-only and does not directly wire concrete providers/storage/runtime.
+- [ ] Tests mirror production ownership.
+- [ ] Duplicate legacy composition ownership is removed or explicitly verified as a compatibility boundary.
+
+### C8 — Final Issue #85 acceptance
+- [ ] One canonical repository form.
+- [ ] One home per concept/boundary.
+- [ ] Dependency direction verified.
+- [ ] Existing behavior preserved except required migration repairs.
+- [ ] Swift tests green.
+- [ ] Repository integrity green.
+- [ ] iOS arm64 unsigned build green.
+- [ ] Full Gate green.
+- [ ] AUDIT / WORK_LOG / HANDOFF / BASELINE / MEMORY synchronized with evidence.
+- [ ] Physical iPhone 12 Pro Max validation.
+- [ ] Issue #85 acceptance complete.
+
+## Current progress
+- Canonical checkpoints: 8
+- Completed: 1 / 8
+- Current: C2 — Runtime ownership
+- Remaining: C3–C8
+- **Issue #85 completion: 12.5% by strict checkpoint accounting.**
+
+> #89/#90 being historically verified does not make C2 complete. C2 is the entire Runtime ownership checkpoint, and PR #91 is currently failing its dependency-direction gate.
+
+## Current CI evidence
+- PR #91 tested commit: d89321d3798316ab0e6eb5f3899ea730fb923c2b
+- Workflow #712: RED
+- iOS arm64 build: PASS
+- Repository integrity: PASS
+- Swift package tests: FAIL — Dependency direction suite, 1 issue
+- Full Gate/filter: FAIL
+- Therefore C2 remains OPEN.
+
+## Worker rule
+Execute only the first incomplete checkpoint, then re-evaluate from repository evidence.
+
+Workflow: inspect → confirm → minimal change → regression test → full gate → audit → record → handoff.
+
+## Summary format
+Issue #85: X/8 — Y% | Current: Cx | CI: GREEN/RED/CHƯA XÁC MINH | Blocker: ... | Next: ...
