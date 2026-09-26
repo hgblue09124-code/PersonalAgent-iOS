@@ -4,15 +4,14 @@
 
 ## CURRENT SNAPSHOT — read first
 
-- **LATEST:** Foundation → Kernel migration is confirmed complete; next scope is Events → Kernel/Events.
+- **LATEST:** PR #91 current HEAD is **VERIFIED GREEN**; #712 Dependency direction blocker is resolved. Actual tree audit shows Foundation/Event/Cognition/Agency/Policy legacy paths absent. Next work is remaining physical canonical migration groups.
 
 - PR: #91
 - Branch: `rearch/cognition-policy-runtime`
-- Current HEAD: `a2f8861966a79a86471e070743e1a2abb54c1a9a`
-- Last verified Full Gate: run #614 (`36233267763`) — **VERIFIED GREEN**
-- Issue #85: still open; this PR is one migration group, not proof of final completion.
+- Current HEAD: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
+- Last verified Full Gate: run #718 (`36255114608`) — **VERIFIED GREEN**
 
-> FAST STOP: If current PR/HEAD/CI state is all you need, STOP here. Read history only for evidence/debugging.
+> FAST STOP: Current CI is green. Read history only for evidence/debugging.
 > Data may grow freely; keep the newest useful snapshot at the top.
 
 ## Purpose
@@ -157,3 +156,19 @@ Never leave only prose such as “fixed” or “looks green”.
 - Verification: documentation commits themselves require a fresh Full Gate; current latest code evidence remains workflow #712 RED.
 - Next exact action: inspect the Dependency direction failure on current HEAD, identify the exact offending dependency/import from repository evidence, then apply one minimal repair and re-run Full Gate.
 - Deferred: all later migration groups and final iPhone validation until PR #91 is green.
+
+
+## 2026-09-26 — Agent On: #712 resolved + physical tree audit
+
+- PR: #91
+- Branch: `rearch/cognition-policy-runtime`
+- HEAD: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
+- Inspect: PR/HEAD, workflow #718, all five validation jobs, and recursive Git tree.
+- Confirmed: Swift package tests, iOS arm64 build, repository integrity, aggregate Full Gate, and PR Final — Filter all **success**.
+- Confirmed: #712 Dependency direction blocker is resolved/verified.
+- Confirmed: legacy `Sources/Foundation`, `Sources/Events`, `Sources/Core/Cognition`, `Sources/Core/Agency`, `Sources/Core/Policy`, `Sources/Providers/Contracts`, and `Sources/Core` paths are absent.
+- Confirmed: canonical `Kernel/Events` and Runtime Observation/Planning/Execution/Verification/Result paths are present.
+- Confirmed remaining physical groups: `Sources/Memory`, `Sources/Modules/Contracts`, `Sources/Skills/Contracts`, `Sources/Tools/Contracts`, `Sources/Observability`, `Sources/Security`, `Sources/Architecture`, and `Sources/Composition`.
+- Fix: no code change; reconciled stale MD/queue state to current repository/CI evidence.
+- Verification: **VERIFIED GREEN**, run #718 / `36255114608`.
+- Next: execute the next confirmed migration group only after exact file ownership is established from the current tree.
