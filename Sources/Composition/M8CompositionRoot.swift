@@ -7,7 +7,6 @@ import PAMemory
 import PAModules
 import PAKernel
 import PARuntime
-import PARuntime
 import PAEvents
 import PAArchitecture
 import PAObservability
@@ -123,7 +122,35 @@ public actor LocalModelRuntimeCoordinator: Sendable {
     }
 }
 
-/// Production-safe fallback used when Composition is created without an injected provider.\n/// It preserves the existing deterministic default behavior without depending on test targets.\nprivate struct DefaultCompositionProvider: LLMProvider {\n    let identity = ProviderIdentity(\n        id: ProviderID(rawValue: "default"),\n        displayName: "Default Composition Provider",\n        models: [ModelIdentity(id: ModelID(rawValue: "default-text"), displayName: "Default Text", contextTokenLimit: 8192)]\n    )\n    let capabilities: ProviderCapabilities = [.textGeneration, .streaming]\n\n    var health: ProviderHealth {\n        get async { .healthy }\n    }\n\n    func complete(_ request: LLMRequest) async throws -> LLMResponse {\n        try Task.checkCancellation()\n        return LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))\n    }\n\n    func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {\n        AsyncThrowingStream { continuation in\n            continuation.yield(.delta("ok"))\n            continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))))\n            continuation.finish()\n        }\n    }\n}\n\n/// Dynamic provider wrapper routing completion/streaming requests to the active local model engine when configured,
+/// Production-safe fallback used when Composition is created without an injected provider.
+/// It preserves the existing deterministic default behavior without depending on test targets.
+private struct DefaultCompositionProvider: LLMProvider {
+    let identity = ProviderIdentity(
+        id: ProviderID(rawValue: "default"),
+        displayName: "Default Composition Provider",
+        models: [ModelIdentity(id: ModelID(rawValue: "default-text"), displayName: "Default Text", contextTokenLimit: 8192)]
+    )
+    let capabilities: ProviderCapabilities = [.textGeneration, .streaming]
+
+    var health: ProviderHealth {
+        get async { .healthy }
+    }
+
+    func complete(_ request: LLMRequest) async throws -> LLMResponse {
+        try Task.checkCancellation()
+        return LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))
+    }
+
+    func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            continuation.yield(.delta("ok"))
+            continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))))
+            continuation.finish()
+        }
+    }
+}
+
+/// Dynamic provider wrapper routing completion/streaming requests to the active local model engine when configured,
 /// propagating local resolution/execution errors fail-closed, and falling back to the configured default provider
 /// strictly when no local model is configured.
 public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
