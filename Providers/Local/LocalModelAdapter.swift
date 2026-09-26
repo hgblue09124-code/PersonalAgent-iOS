@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 import PAProviders
 
 /// Adapter bridging any on-device `LocalModelEngine` (MLX, llama.cpp, Core ML, etc.) into the `LLMProvider` contract.
