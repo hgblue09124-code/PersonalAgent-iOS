@@ -3,6 +3,7 @@ import Testing
 import PAKernel
 import PASecurity
 import PAStorage
+import PAStorageModels
 import PAMemory
 import PAProviders
 import PAProvidersGrok
@@ -12,7 +13,6 @@ import PAProvidersLocal
 import PATools
 import PAModules
 import PASkills
-import PAKernel
 import PARuntime
 import PAComposition
 import PAArchitecture
