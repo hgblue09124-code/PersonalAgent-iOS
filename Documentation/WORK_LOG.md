@@ -4,6 +4,8 @@
 
 ## CURRENT SNAPSHOT — read first
 
+- **LATEST:** Foundation → Kernel migration is confirmed complete; next scope is Events → Kernel/Events.
+
 - PR: #91
 - Branch: `rearch/cognition-policy-runtime`
 - Current HEAD: `a2f8861966a79a86471e070743e1a2abb54c1a9a`
@@ -127,3 +129,11 @@ Never leave only prose such as “fixed” or “looks green”.
 - New memory source: `Documentation/MEMORY.md` stores durable reusable lessons separate from execution history.
 - New baseline source: `BASELINE.md` stores current repository state for shortest-path retrieval.
 - Next: verify this documentation commit with a fresh Full Gate.
+
+
+## 2026-09-26 — Foundation migration checkpoint recorded
+
+- PR: #91
+- Confirmed: legacy `Sources/Foundation/*` is absent; canonical Foundation contracts are under Kernel; no `PAFoundation` target remains.
+- Verification: Full Gate #687 (`36250848595`) — **VERIFIED GREEN** before this documentation checkpoint.
+- Next: open the separate Events → Kernel/Events migration group after re-checking current HEAD/CI.
