@@ -1,8 +1,0 @@
-import PAKernel
-public typealias DeviceThermalState = PAKernel.DeviceThermalState
-public typealias DeviceMemoryPressure = PAKernel.DeviceMemoryPressure
-public typealias DeviceNetworkStatus = PAKernel.DeviceNetworkStatus
-public typealias DeviceApplicationState = PAKernel.DeviceApplicationState
-public typealias DeviceStateSnapshot = PAKernel.DeviceStateSnapshot
-public typealias DeviceCapabilityProviding = PAKernel.DeviceCapabilityProviding
-public typealias DefaultDeviceCapabilityProvider = PAKernel.DefaultDeviceCapabilityProvider

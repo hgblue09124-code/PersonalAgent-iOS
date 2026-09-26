@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 
 /// Thread-safe in-memory index structures for sub-millisecond query performance.
 public struct MemoryIndex: Sendable {

@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 import PARuntime
 import PAObservability
 

@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 
 /// Secrets live in Keychain (or a test double). Never SwiftData / UserDefaults.
 public protocol SecretStore: Sendable {

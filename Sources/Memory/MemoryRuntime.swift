@@ -1,6 +1,5 @@
 import Foundation
 import PAKernel
-import PAFoundation
 import PAEvents
 
 public actor MemoryRuntime: MemoryExecuting, Sendable {
