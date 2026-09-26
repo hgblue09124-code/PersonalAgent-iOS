@@ -339,3 +339,11 @@ Do not move files during the mapping-only audit.
 - Full CI for this branch: **CHƯA XÁC MINH**.
 
 <!-- HANDOFF: Run the full gate on the Architecture clean branch; repair only actual failures. -->
+
+
+### Audit #20 Repair — CONFIRMED
+- Apple Native Build #376 / run `36267675264` failed at the Xcode build step.
+- Root cause: `PersonalAgent.xcodeproj/project.pbxproj` still declared the removed SwiftPM product `PAArchitecture`.
+- Minimal repair: removed only the stale PBX build-file/package-product references for `PAArchitecture`.
+- No App source or runtime behavior changed.
+- Verification: new CI run required; current repair is **CHƯA XÁC MINH**.
