@@ -155,7 +155,7 @@ func moduleName(for file: URL, sourcesRoot: URL) -> String {
     if relative.hasPrefix("Providers/Local/") { return "PAProvidersLocal" }
     if relative.hasPrefix("Core/Policy/") { return "PAPolicy" }
     if relative.hasPrefix("Tools/") { return "PATools" }
-    if relative.hasPrefix("Modules/") { return "PAModules" }
+    if relative.hasPrefix("Capabilities/Modules/") || relative.hasPrefix("Modules/") { return "PAModules" }
     if relative.hasPrefix("Skills/") { return "PASkills" }
     if relative.hasPrefix("Core/Cognition/") { return "PACognition" }
     if relative.hasPrefix("Core/Agency/") { return "PAAgency" }

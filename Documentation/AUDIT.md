@@ -202,3 +202,15 @@ Existing migration checkpoints remain authoritative for physical changes and the
 - The remaining gap is automation, not additional prose.
 
 <!-- HANDOFF: Next worker should continue from the existing Issue #85 migration queue, not expand the Markdown system unless a concrete consistency gap is found. -->
+
+
+### Audit #18 — Capabilities / Modules physical migration
+
+**CONFIRMED**
+- Audit #14 ownership freeze maps Modules → `Capabilities/Modules`.
+- `Sources/Modules/Contracts/{DeterministicModules,ModuleCatalog,ModuleContracts,ModuleRuntime}.swift` is moved to `Sources/Capabilities/Modules/` without behavioral rewrite.
+- Package.swift, CI path assertions, import-boundary mapping, and M3 path assertions now use the canonical Modules path.
+- Verification remains **CHƯA XÁC MINH** until the migration commit's CI completes.
+
+**DEFERRED**
+- Skills, Tools, Composition, ArchitectureManifest, Observability, Security, Memory, and test redistribution remain separate migration groups.

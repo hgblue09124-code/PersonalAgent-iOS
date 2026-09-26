@@ -41,7 +41,7 @@ These are migration targets, not permission to move blindly. Audit #14 remains t
 - Markdown is not proof of code/CI; verify the referenced commit/workflow.
 
 ## EXACT NEXT ACTION
-Inspect the actual current tree and `Package.swift` for the smallest remaining **Capabilities** migration group, confirm ownership/imports, migrate without behavior change, run the full gate, then record the verified checkpoint in `AUDIT.md`, `WORK_LOG.md`, and this handoff.
+After the Modules migration CI gate is green, migrate `Sources/Skills/Contracts` → `Sources/Capabilities/Skills`; update only required path-sensitive references, run the full gate, then record the verified checkpoint in `AUDIT.md`, `WORK_LOG.md`, and this handoff.
 
 ## DO NOT REDO
 - Do not reopen resolved Memory/Foundation/Events/Cognition/Agency/Policy ownership without new evidence.
