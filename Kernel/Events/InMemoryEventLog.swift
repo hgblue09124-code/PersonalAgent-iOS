@@ -1,3 +1,5 @@
+import PAKernel
+
 public actor InMemoryEventLog: EventLog {
     private var stored: [ExecutionEvent] = []
 
