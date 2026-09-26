@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 
 /// Metadata descriptor for an imported local GGUF model in app-owned storage.
 public struct LocalModelDescriptor: Sendable, Codable, Equatable, Identifiable {
