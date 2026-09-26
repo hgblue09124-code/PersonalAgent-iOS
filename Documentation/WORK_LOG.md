@@ -108,3 +108,14 @@ Never leave only prose such as “fixed” or “looks green”.
 - Documentation commits: `d2b3f8a94f949a1273454af2807db096eade01a3`, `97a08a5f288b8ec17e7393de8d81a5bd89980847`.
 - Verification impact: these documentation commits moved the branch HEAD after the previously verified code HEAD, so a fresh Full Gate is required for the current HEAD.
 - Next: verify CI for the current branch HEAD; if green, record that exact run as the new verified checkpoint.
+## 2026-09-26 — PR #91 Full Gate verification (run #613)
+
+- PR: #91
+- Branch: `rearch/cognition-policy-runtime`
+- HEAD verified: `86003f5d99c82b31f63231bfc93d35d0b3caba07`
+- Trigger: Full Gate `Kiểm tra và sửa chữa`, run #613 (`36232933116`)
+- Confirmed: PR is OPEN and mergeable; all Full Gate jobs completed successfully.
+- Verification: **VERIFIED GREEN**
+- Jobs: iOS arm64 build & unsigned IPA — success; Swift package tests — success; Repository integrity greps — success; aggregate gate — success; PR Final — Filter — success.
+- Scope: this verifies the current PR HEAD only; Issue #85 remains incomplete.
+- Next: continue the next confirmed migration scope; re-check PR/HEAD/CI before any new change.
