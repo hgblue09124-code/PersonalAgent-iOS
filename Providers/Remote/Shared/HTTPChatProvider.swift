@@ -1,5 +1,4 @@
 import Foundation
-import PAFoundation
 import PAProviders
 
 /// Shared HTTP chat adapter. Concrete modules supply identity, endpoint, and auth scheme.
