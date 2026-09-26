@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 
 /// Secrets live in Keychain (or a test double). Never SwiftData / UserDefaults.
 public protocol SecretStore: Sendable {
@@ -31,17 +31,6 @@ public final class InMemorySecretStore: SecretStore, @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         secrets.removeValue(forKey: account)
-    }
-}
-
-/// Provider credentials stay outside AgentState.
-public struct ProviderCredentialRef: Hashable, Sendable, Codable {
-    public let providerID: ProviderID
-    public let account: String
-
-    public init(providerID: ProviderID, account: String) {
-        self.providerID = providerID
-        self.account = account
     }
 }
 

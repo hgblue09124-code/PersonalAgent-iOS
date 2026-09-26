@@ -1,12 +1,10 @@
 import Foundation
-import PAFoundation
 import PAKernel
 import PAObservability
 import PAEvents
 import PAProviders
 import PAModules
 import PAMemory
-import PACognition
 
 /// Agent Runtime boundary.
 ///

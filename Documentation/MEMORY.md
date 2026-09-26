@@ -1,20 +1,22 @@
-# Memory Architecture
+# MEMORY — Agent Long-Term Repository Memory
 
-Memory owns information semantics: what constitutes memory, classification, retrieval, ranking and delivery to runtime.
+## HOT MEMORY
+- Issue #85 is one continuous canonical migration; PRs #87 → #91 are execution steps, not independent completion percentages.
+- **Current active PR:** #91, branch `rearch/cognition-policy-runtime`.
+- Latest code checkpoint before documentation sync: `ecc520c0a1871e30cd64c380c3bd8c0a88ed865a`.
+- Workflow #749 / `36260826735` was **VERIFIED GREEN** across Swift package tests, iOS arm64, repository integrity, Full Gate and PR Final.
+- Memory target-boundary blocker is **RESOLVED**. Dedicated `PAStorageMemory` separates persistence from `PAMemory`.
+- Confirmed Memory physical ownership:
+  - `MemoryRuntime` → `Sources/Memory/Working`
+  - `MemoryIndex` → `Sources/Memory/Retrieval`
+  - `FileBackedMemoryStore` → `Storage/Memory`
+  - `MemoryStorageRecord` + storage conformances → `Storage/Memory`
+- Historical Markdown never overrides current repository/CI evidence.
+- **agent on** means: read MD → inspect current repo/CI → execute first incomplete TODO item → verify → record → handoff.
 
-Target semantic domains:
-
-- Working memory
-- Conversation memory
-- Long-term memory
-- Retrieval/indexing
-
-These are semantic domains, not mandatory physical databases.
-
-```text
-Runtime → Memory semantics → Storage contract → Storage implementation
-```
-
-Memory may depend on storage contracts, but does not own file/database/cloud implementation details.
-
-Persistence failures remain distinguishable from successful memory operations. Do not create additional memory layers merely because folders look complex; introduce a boundary only when ownership or dependency evidence requires it.
+## ROUTING
+- `BASELINE.md` = current state.
+- `Documentation/TODO.md` = executable queue.
+- `Documentation/HANDOFF.md` = exact continuation.
+- `Documentation/WORK_LOG.md` = execution evidence.
+- `Documentation/AUDIT.md` = confirmed ownership/evidence.

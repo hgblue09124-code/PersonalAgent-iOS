@@ -1,6 +1,6 @@
 import PAKernel
 import Foundation
-import PAFoundation
+import PAKernel
 
 public enum DeterministicModuleIDs {
     public static let echo = ModuleID(rawValue: "mod.echo")

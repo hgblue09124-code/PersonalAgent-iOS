@@ -1,13 +1,10 @@
 import PARuntime
 import Foundation
 import Testing
-import PAFoundation
 import PAArchitecture
 import PAKernel
 import PAObservability
 import PAEvents
-import PAPolicy
-import PACognition
 import PAModules
 import PASkills
 import PATools
@@ -42,7 +39,7 @@ struct M6SemanticsTests {
         #expect(capturedIntents.first?.toolID == explicitToolID)
         #expect(capturedIntents.first?.summary == "Completely unrelated description text 12345")
 
-        let events = await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let proposed = events.first { $0.kind == .actionProposed }
         let authorized = events.first { $0.kind == .actionAuthorized }
         let executed = events.first { $0.kind == .actionExecuted }
@@ -105,7 +102,7 @@ struct M6SemanticsTests {
         let eval = try await root.orchestrator.run(goalID: goal.id)
         #expect(eval.disposition == .complete)
 
-        let allEvents = await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let allEvents = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let m6Events = allEvents.filter { event in
             [
                 ExecutionEventKind.perceptionReceived,
@@ -209,7 +206,7 @@ struct M6SemanticsTests {
 
         #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
 
-        let events = await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let stateEvent = events.first { $0.kind == .stateUpdated }
         #expect(stateEvent?.payload["goalID"] == goal.id.rawValue)
         #expect(stateEvent?.payload["targetStatus"] == GoalStatus.completed.rawValue)
@@ -236,7 +233,7 @@ struct M6SemanticsTests {
         let status = await root.runtime.goal(id: goal.id)?.status
         #expect(status == .aborted)
 
-        let events = await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         #expect(events.contains { $0.kind == .verificationCompleted && $0.payload["accepted"] == "false" })
         #expect(!events.contains { $0.kind == .actionExecuted })
     }
@@ -261,7 +258,7 @@ struct M6SemanticsTests {
         let eval = try await orchestrator.run(goalID: goal.id)
         #expect(eval.disposition == .complete)
 
-        let events = await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let perceptionCount = events.filter { $0.kind == .perceptionReceived }.count
         #expect(perceptionCount == 2, "Proves multi-cycle continuation loop executed exactly 2 cognitive cycles")
 
@@ -283,7 +280,7 @@ struct M6SemanticsTests {
 
         #expect(eval.disposition == .complete)
 
-        let recordedEvents = await customLog.allEvents()
+        let recordedEvents = try await customLog.allEvents()
         #expect(!recordedEvents.isEmpty, "Custom injected EventLog must record events")
         #expect(recordedEvents.contains { $0.kind == .runtimeInitialized })
         #expect(recordedEvents.contains { $0.kind == .goalSubmitted })
@@ -350,7 +347,7 @@ struct M6SemanticsTests {
         let eval = try await orchestrator.run(goalID: goal.id)
         #expect(eval.disposition == .abort, "Missing execution target must cause evaluation to abort")
 
-        let events = await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let obsEvent = events.first { $0.kind == .observationProduced }
         #expect(obsEvent?.payload["succeeded"] == "false")
         #expect(obsEvent?.payload["summary"]?.contains("Execution target unavailable") == true)

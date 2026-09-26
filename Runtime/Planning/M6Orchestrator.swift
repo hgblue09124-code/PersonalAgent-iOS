@@ -1,27 +1,8 @@
 import Foundation
-import PAFoundation
 import PAKernel
 import PAObservability
 import PAEvents
-import PAPolicy
-import PACognition
 import PAModules
-
-public protocol ContextAssembling: Sendable {
-    func assembleContext(
-        perception: Perception,
-        observations: [Observation],
-        evaluation: Evaluation?
-    ) async throws -> ContextBundle
-}
-
-public protocol Reasoning: Sendable {
-    func reason(context: ContextBundle) async throws -> ReasoningResult
-}
-
-public protocol Verifying: Sendable {
-    func verify(plan: Plan, proposals: [ActionProposal]) async throws -> VerificationResult
-}
 
 public protocol Evaluating: Sendable {
     func evaluate(goalID: GoalID, observations: [Observation]) async throws -> Evaluation

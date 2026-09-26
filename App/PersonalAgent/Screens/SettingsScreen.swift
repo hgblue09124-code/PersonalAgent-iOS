@@ -2,6 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
 import PAArchitecture
+import PAComposition
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession

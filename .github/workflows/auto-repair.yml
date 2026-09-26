@@ -1,8 +1,9 @@
 name: Auto Repair (Guarded)
 
 on:
-  push:
-    branches: [rearch/kernel-migration-2]
+  # Automatic push-triggered repair is disabled so intermediate repair
+  # cycles do not create notification noise. Agent-driven/manual repair
+  # remains available through workflow_dispatch.
   workflow_dispatch:
     inputs:
       attempt:
@@ -37,6 +38,8 @@ jobs:
           INPUT_ATTEMPT: ${{ inputs.attempt || '0' }}
         run: |
           set -euo pipefail
+          apt-get update -qq
+          apt-get install -y --no-install-recommends python3 >/dev/null
           attempt="$INPUT_ATTEMPT"
           [[ "$attempt" =~ ^[0-9]+$ ]] || { echo "Invalid repair attempt: $attempt"; exit 1; }
           if [ "$attempt" -ge 5 ]; then
@@ -66,10 +69,11 @@ jobs:
       - name: Classify and apply guarded repair
         id: repair
         if: steps.tests.outputs.status != '0'
-        shell: python3
+        shell: bash
         env:
           LOG: /tmp/swift-test.log
         run: |
+          python3 - <<'PY'
           import hashlib
           import json
           import os
@@ -86,45 +90,70 @@ jobs:
           repairs = []
 
           fingerprints = []
+          normalized_errors = []
           for match in re.finditer(r"no such module ['‘’\"]([^'‘’\"]+)['‘’\"]", log, re.I):
               fingerprints.append("no-such-module:" + match.group(1))
           for match in re.finditer(r"error: (.+)", log):
               message = re.sub(r"\s+", " ", match.group(1)).strip()
               if message:
+                  message = re.sub(r"(^|\s)[^\s:]+\.swift:\d+(?::\d+)?", r" FILE", message)
+                  normalized_errors.append(message[:240])
                   fingerprints.append("error:" + message[:240])
+          error_family = ("missing-module" if any(x.startswith("no-such-module:") for x in fingerprints) else "compiler-error" if normalized_errors else "unknown")
           fingerprint = hashlib.sha256("|".join(sorted(set(fingerprints))).encode()).hexdigest()[:12] if fingerprints else ""
 
           knowledge = json.loads(knowledge_path.read_text()) if knowledge_path.exists() else {"version": 1, "approved": [], "candidates": []}
-          approved = {entry["fingerprint"] for entry in knowledge.get("approved", [])}
-          candidate_exists = any(entry.get("fingerprint") == fingerprint for entry in knowledge.get("candidates", []))
+          candidates = knowledge.setdefault("candidates", [])
+          candidate = next((entry for entry in candidates if entry.get("fingerprint") == fingerprint), None)
 
-          recent = subprocess.run(
+          if candidate is not None:
+              candidate["observations"] = int(candidate.get("observations", 1)) + 1
+              candidate["last_seen_commit"] = subprocess.run(
+                  ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+              ).stdout.strip()
+              if candidate["observations"] >= 3:
+                  candidate["status"] = "repeated"
+                  candidate["execution"] = "review-required"
+
+          candidate_exists = candidate is not None
+          recent_result = subprocess.run(
               ["git", "log", "-10", "--format=%s"],
-              capture_output=True, text=True, check=True
-          ).stdout
+              capture_output=True, text=True, check=False
+          )
+          recent = recent_result.stdout if recent_result.returncode == 0 else ""
           if fingerprint and f"[auto-repair-fp:{fingerprint}]" in recent:
               print(f"AUTO-REPAIR: repeated identical failure {fingerprint}; STOP.")
-              print("candidate already known:", candidate_exists)
               raise SystemExit(0)
 
-          # R1: duplicated consecutive .target( in Package.swift.
+          if candidate and candidate.get("observations", 0) >= 3:
+              candidate["status"] = "root-cause-review"
+              candidate["execution"] = "forbidden"
+              print("AUTO-REPAIR: repeated failure reached root-cause threshold; STOP symptom patching.")
+              raise SystemExit(0)
+
           duplicate = re.search(r"(\.target\(\s*)\.target\(", package_text)
           if duplicate:
-              package_text = (
-                  package_text[:duplicate.start()]
-                  + duplicate.group(1)
-                  + package_text[duplicate.end() - len(".target("):]
-              )
+              package_text = package_text[:duplicate.start()] + duplicate.group(1) + package_text[duplicate.end() - len(".target("):]
               package.write_text(package_text)
               repairs.append("Package.swift duplicate .target declaration")
 
-          # R2: stale PAAgency dependency after target removal.
           if 'name: "PAAgency"' not in package_text and re.search(r'^\s*"PAAgency",\s*$', package_text, re.MULTILINE):
               package_text = re.sub(r'^\s*"PAAgency",\s*\n', "", package_text, flags=re.MULTILINE)
               package.write_text(package_text)
               repairs.append("Package.swift stale PAAgency dependency")
 
-          # R4: stale import of a removed module. This never substitutes a module.
+          unknown_deps = sorted(set(re.findall(r"""unknown dependency ['‘’"]([^'‘’"]+)['‘’"] in target""", log, re.I)))
+          for module in unknown_deps:
+              if not re.fullmatch(r"PA[A-Za-z0-9]+", module):
+                  continue
+              if re.search(rf'name:\s*"{re.escape(module)}"', package_text):
+                  continue
+              pattern = rf'^\s*"{re.escape(module)}",\s*$\n?'
+              package_text, changed = re.subn(pattern, "", package_text, flags=re.MULTILINE)
+              if changed:
+                  package.write_text(package_text)
+                  repairs.append(f"remove stale SwiftPM dependency {module} ({changed} occurrence(s))")
+
           for module in sorted(set(re.findall(r"no such module ['‘’\"](PA[A-Za-z0-9]+)['‘’\"]", log, re.I))):
               if re.search(rf'name:\s*"{re.escape(module)}"', package_text):
                   continue
@@ -147,9 +176,8 @@ jobs:
               if changed:
                   repairs.append(f"remove stale import {module} ({changed} file(s))")
 
-          # R3: known deterministic Kernel import-boundary allowlist.
           approved_modules = {"PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"}
-          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel ([^)]*\)"', log)
+          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel [^)]*\)"', log)
           for module in sorted(set(m for m in matches if m in approved_modules)):
               pattern = rf'("{re.escape(module)}": \[[^\]]*)\]'
               match = re.search(pattern, manifest_text)
@@ -162,21 +190,17 @@ jobs:
                   repairs.append(f"ArchitectureManifest allowedImports -> PAKernel ({module})")
 
           if not repairs:
-              # Learning is observational only. Unknown failures are recorded as
-              # candidates, never executed as new code.
               if fingerprint and not candidate_exists:
-                  files = subprocess.run(
-                      ["git", "diff", "--name-only"],
-                      capture_output=True, text=True, check=True
-                  ).stdout.splitlines()
+                  files = subprocess.run(["git", "diff", "--name-only"], capture_output=True, text=True, check=True).stdout.splitlines()
                   knowledge.setdefault("candidates", []).append({
                       "fingerprint": fingerprint,
                       "pattern": sorted(set(fingerprints)),
-                      "first_seen_commit": subprocess.run(
-                          ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
-                      ).stdout.strip(),
+                      "family": error_family,
                       "status": "observed",
                       "execution": "forbidden",
+                      "observations": 1,
+                      "first_seen_commit": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip(),
+                      "last_seen_commit": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip(),
                       "changed_files_at_observation": files[:50],
                   })
                   knowledge_path.parent.mkdir(parents=True, exist_ok=True)
@@ -185,10 +209,7 @@ jobs:
                   subprocess.run(["git", "diff", "--cached", "--check"], check=True)
                   subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
                   subprocess.run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"], check=True)
-                  subprocess.run(
-                      ["git", "commit", "-m", f"chore: record repair candidate [auto-learning] [repair-candidate:{fingerprint}]"],
-                      check=True,
-                  )
+                  subprocess.run(["git", "commit", "-m", f"chore: record repair candidate [auto-learning] [repair-candidate:{fingerprint}]"], check=True)
                   subprocess.run(["git", "push", "origin", "HEAD:$GITHUB_REF_NAME"], check=True)
                   print(f"AUTO-LEARNING: recorded candidate {fingerprint}; execution remains forbidden.")
               else:
@@ -205,6 +226,7 @@ jobs:
                   output.write(f"fingerprint={fingerprint}\n")
                   output.write("repaired=true\n")
           print("AUTO-REPAIR: DETERMINISTIC: " + " | ".join(repairs))
+          PY
 
       - name: Regression test repaired tree
         id: regression
@@ -220,9 +242,20 @@ jobs:
           fi
           echo "AUTO-REPAIR: regression GREEN."
 
+      - name: Full gate smoke verification
+        id: full_gate
+        if: steps.regression.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift test --disable-sandbox
+          swift package dump-package >/tmp/package-full-gate.json
+          git diff --check
+          echo "AUTO-REPAIR: full-gate smoke GREEN."
+
       - name: Verify canonical tree and package graph
         id: verify
-        if: steps.regression.outcome == 'success'
+        if: steps.full_gate.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
@@ -247,19 +280,14 @@ jobs:
 
       - name: Dispatch next guarded repair cycle
         if: steps.commit.outcome == 'success'
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           ATTEMPT: ${{ steps.loop.outputs.attempt }}
           REPO: ${{ github.repository }}
           REF: ${{ github.ref_name }}
+        shell: bash
         run: |
           set -euo pipefail
           next_attempt=$((ATTEMPT + 1))
           if [ "$next_attempt" -ge 5 ]; then exit 0; fi
-          curl --fail-with-body -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$REPO/actions/workflows/auto-repair.yml/dispatches" \
-            -d '{"ref":"'$REF'","inputs":{"attempt":"'$next_attempt'"}}'
+          curl --fail-with-body -X POST             -H "Accept: application/vnd.github+json"             -H "Authorization: Bearer $GH_TOKEN"             -H "X-GitHub-Api-Version: 2022-11-28"             "https://api.github.com/repos/$REPO/actions/workflows/auto-repair.yml/dispatches"             -d '{"ref":"'$REF'","inputs":{"attempt":"'$next_attempt'"}}'

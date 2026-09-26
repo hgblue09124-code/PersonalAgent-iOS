@@ -1,8 +1,7 @@
 import Testing
-import PAFoundation
+import PAKernel
 import PAArchitecture
 import PAComposition
-import PAKernel
 import PAProviders
 
 @Suite("M2 composition")

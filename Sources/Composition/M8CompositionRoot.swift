@@ -1,13 +1,12 @@
 import Foundation
-import PAFoundation
+import PAKernel
 import PAProviders
 import PAProvidersLocal
+import PAStorageModels
 import PAMemory
+import PAStorageMemory
 import PAModules
 import PAKernel
-import PARuntime
-import PACognition
-import PAPolicy
 import PARuntime
 import PAEvents
 import PAArchitecture
@@ -121,6 +120,34 @@ public actor LocalModelRuntimeCoordinator: Sendable {
             try await ensureCachedEngineUnloaded()
         }
         try await storage.deleteModel(id: id)
+    }
+}
+
+/// Production-safe fallback used when Composition is created without an injected provider.
+/// It preserves the existing deterministic default behavior without depending on test targets.
+private struct DefaultCompositionProvider: LLMProvider {
+    let identity = ProviderIdentity(
+        id: ProviderID(rawValue: "default"),
+        displayName: "Default Composition Provider",
+        models: [ModelIdentity(id: ModelID(rawValue: "default-text"), displayName: "Default Text", contextTokenLimit: 8192)]
+    )
+    let capabilities: ProviderCapabilities = [.textGeneration, .streaming]
+
+    var health: ProviderHealth {
+        get async { .healthy }
+    }
+
+    func complete(_ request: LLMRequest) async throws -> LLMResponse {
+        try Task.checkCancellation()
+        return LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))
+    }
+
+    func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            continuation.yield(.delta("ok"))
+            continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))))
+            continuation.finish()
+        }
     }
 }
 
@@ -301,7 +328,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = idempotentLog
         self.idempotentEventLog = idempotentLog
 
-        let fallbackProvider = provider ?? DeterministicFakeProvider()
+        let fallbackProvider = provider ?? DefaultCompositionProvider()
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: fallbackProvider,
             coordinator: coordinator
