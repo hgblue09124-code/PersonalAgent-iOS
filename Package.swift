@@ -89,12 +89,12 @@ let package = Package(
         .target(
             name: "PAProvidersOpenAI",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/OpenAI"
+            path: "Providers/Remote"
         ),
         .target(
             name: "PAProvidersOpenAICompatible",
             dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/OpenAICompatible"
+            path: "Providers/Remote"
         ),
         .target(
             name: "PAProvidersLocal",
