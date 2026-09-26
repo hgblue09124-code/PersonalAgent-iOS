@@ -1,4 +1,4 @@
-name: Kiểm tra và sửa chữa
+name: "@github CI"
 
 on:
   push:
@@ -150,7 +150,7 @@ jobs:
       - name: Verify Full Gate result
         run: |
           echo "CI_NOTIFY_KEY=personalagent-ci"
-          echo "CI_NOTIFY_WORKFLOW=PR Final — ${{ github.head_ref || github.ref_name }}"
+          echo "CI_NOTIFY_WORKFLOW=@github CI"
           echo "FULL_GATE_RESULT=${{ needs.full-gate.result }}"
           if [[ "${{ needs.full-gate.result }}" != "success" ]]; then
             echo "PR FINAL FAIL: Full Gate did not pass."
