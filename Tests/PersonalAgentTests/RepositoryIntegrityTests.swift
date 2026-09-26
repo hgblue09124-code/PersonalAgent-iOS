@@ -23,7 +23,7 @@ struct RepositoryIntegrityTests {
             "Composition/M2CompositionRoot.swift",
         ] {
             #expect(
-                FileManager.default.fileExists(atPath: (path == "Runtime/Execution/ProviderRuntime.swift" ? repositoryRootPath : sourcesRoot).appendingPathComponent(path).path),
+                FileManager.default.fileExists(atPath: (path.hasPrefix("Runtime/") || path.hasPrefix("Providers/") ? repositoryRootPath : sourcesRoot).appendingPathComponent(path).path),
                 "missing \(path)"
             )
         }
