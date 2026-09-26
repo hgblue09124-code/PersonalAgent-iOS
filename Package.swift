@@ -18,23 +18,23 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
-        .library(name: "PAFoundation", targets: ["PAFoundation"]),
         .library(name: "PAObservability", targets: ["PAObservability"]),
         .library(name: "PAEvents", targets: ["PAEvents"]),
         .library(name: "PASecurity", targets: ["PASecurity"]),
         .library(name: "PAStorage", targets: ["PAStorage"]),
+        .library(name: "PAStorageModels", targets: ["PAStorageModels"]),
         .library(name: "PAMemory", targets: ["PAMemory"]),
+        .library(name: "PAStorageMemory", targets: ["PAStorageMemory"]),
         .library(name: "PAProviders", targets: ["PAProviders"]),
         .library(name: "PATools", targets: ["PATools"]),
         .library(name: "PAModules", targets: ["PAModules"]),
         .library(name: "PASkills", targets: ["PASkills"]),
-        .library(name: "PAPolicy", targets: ["PAPolicy"]),
-        .library(name: "PACognition", targets: ["PACognition"]),
         .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
         .library(name: "PAArchitecture", targets: ["PAArchitecture"]),
         .library(name: "PAProvidersGrok", targets: ["PAProvidersGrok"]),
+        .library(name: "PAProvidersRemote", targets: ["PAProvidersRemote"]),
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
         .library(name: "PAProvidersOpenAICompatible", targets: ["PAProvidersOpenAICompatible"]),
         .library(name: "PAProvidersLocal", targets: ["PAProvidersLocal"]),
@@ -42,151 +42,158 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "llama",
-            path: "Frameworks/llama.xcframework"
+            path: "Providers/Local/LlamaCPP/llama.xcframework"
         ),
         .target(
             name: "cllama",
             dependencies: [
                 .target(name: "llama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
-            path: "Sources/cllama",
+            path: "Providers/Local/LlamaCPP/cllama",
             exclude: ["README.md"]
         ),
-        .target(name: "PAFoundation", dependencies: ["PAKernel"], path: "Sources/Foundation"),
         .target(
             name: "PAObservability",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAKernel"],
             path: "Sources/Observability"
         ),
         .target(
             name: "PAEvents",
             dependencies: ["PAKernel"],
-            path: "Sources/Events"
+            path: "Kernel/Events"
         ),
         .target(
             name: "PASecurity",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAKernel"],
             path: "Sources/Security"
         ),
         .target(
             name: "PAStorage",
-            dependencies: ["PAFoundation", "PAEvents", "PAObservability"],
-            path: "Sources/Storage"
+            dependencies: ["PAKernel", "PAEvents", "PAObservability", "PAStorageModels"],
+            path: "Storage",
+            exclude: ["Models", "Memory"]
+        ),
+        .target(
+            name: "PAStorageModels",
+            dependencies: ["PAKernel", "PAProviders", "PAProvidersLocal"],
+            path: "Storage/Models"
         ),
         .target(
             name: "PAMemory",
-            dependencies: ["PAFoundation", "PAStorage", "PAEvents"],
+            dependencies: ["PAKernel", "PAStorage", "PAEvents"],
             path: "Sources/Memory"
         ),
         .target(
+            name: "PAStorageMemory",
+            dependencies: ["PAMemory", "PAStorage", "PAStorageModels", "PAEvents"],
+            path: "Storage/Memory"
+        ),
+        .target(
             name: "PAProviders",
-            dependencies: ["PAFoundation", "PAObservability", "PASecurity", "PAEvents"],
-            path: "Sources/Providers/Contracts"
+            dependencies: ["PAKernel"],
+            path: "Kernel/Ports/Providers"
+        ),
+        .target(
+            name: "PAProvidersRemote",
+            dependencies: ["PAProviders", "PAKernel", "PASecurity"],
+            path: "Providers/Remote/Shared"
         ),
         .target(
             name: "PAProvidersGrok",
-            dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/Grok"
+            dependencies: ["PAProvidersRemote", "PAProviders", "PAKernel"],
+            path: "Providers/Remote/Grok"
         ),
         .target(
             name: "PAProvidersOpenAI",
-            dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/OpenAI"
+            dependencies: ["PAProvidersRemote", "PAProviders", "PAKernel"],
+            path: "Providers/Remote/OpenAI"
         ),
         .target(
             name: "PAProvidersOpenAICompatible",
-            dependencies: ["PAProviders", "PAFoundation"],
-            path: "Sources/Providers/OpenAICompatible"
+            dependencies: ["PAProvidersRemote", "PAProviders", "PAKernel"],
+            path: "Providers/Remote/OpenAICompatible"
         ),
         .target(
             name: "PAProvidersLocal",
             dependencies: [
+                "PAProvidersRemote",
                 "PAProviders",
-                "PAFoundation",
+                "PAKernel",
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
-            path: "Sources/Providers/Local"
-        ),
-        .target(
-            name: "PAPolicy",
-            dependencies: ["PAFoundation", "PAKernel"],
-            path: "Sources/Core/Policy"
+            path: "Providers/Local",
+            exclude: ["LlamaCPP/cllama"]
         ),
         .target(
             name: "PATools",
-            dependencies: ["PAFoundation", "PAPolicy", "PAObservability"],
+            dependencies: ["PAKernel", "PAObservability", "PARuntime"],
             path: "Sources/Tools/Contracts"
         ),
         .target(
             name: "PAModules",
-            dependencies: ["PAKernel", "PAPolicy", "PAObservability", "PAEvents"],
+            dependencies: ["PAKernel", "PAObservability", "PAEvents"],
             path: "Sources/Modules/Contracts"
         ),
         .target(
             name: "PASkills",
-            dependencies: ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
+            dependencies: ["PAKernel", "PAModules", "PATools"],
             path: "Sources/Skills/Contracts"
-        ),
-        .target(
-            name: "PACognition",
-            dependencies: ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
-            path: "Sources/Core/Cognition"
         ),
         .target(
             name: "PAKernel",
             dependencies: [],
-            path: "Kernel"
+            path: "Kernel",
+            exclude: ["Events", "Ports/Providers"]
         ),
         .target(
             name: "PARuntime",
             dependencies: [
-                "PAFoundation",
+                "PAKernel",
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
                 "PAModules",
                 "PAMemory",
-                "PACognition",
-                "PAPolicy",
-                "PAKernel",
             ],
             path: "Runtime"
         ),
         .target(
             name: "PAComposition",
             dependencies: [
-                "PAFoundation",
-                "PAArchitecture",
                 "PAKernel",
+                "PAArchitecture",
                 "PARuntime",
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
                 "PAProvidersLocal",
-                "PAPolicy",
-                "PACognition",
+                "PAStorageModels",
+
                 "PASecurity",
                 "PAModules",
                 "PASkills",
                 "PATools",
                 "PAMemory",
+                "PAStorageMemory",
             ],
             path: "Sources/Composition"
         ),
         .target(
             name: "PAArchitecture",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAKernel"],
             path: "Sources/Architecture"
         ),
         .testTarget(
             name: "PersonalAgentTests",
             dependencies: [
-                "PAFoundation",
+                "PAKernel",
                 "PAObservability",
                 "PAEvents",
                 "PASecurity",
                 "PAStorage",
+                "PAStorageModels",
                 "PAMemory",
+                "PAStorageMemory",
                 "PAProviders",
                 "PAProvidersGrok",
                 "PAProvidersOpenAI",
@@ -195,9 +202,6 @@ let package = Package(
                 "PATools",
                 "PAModules",
                 "PASkills",
-                "PAPolicy",
-                "PACognition",
-                "PAKernel",
                 "PARuntime",
                 "PAComposition",
                 "PAArchitecture",

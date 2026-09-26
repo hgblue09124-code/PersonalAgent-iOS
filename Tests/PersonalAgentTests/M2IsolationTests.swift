@@ -1,3 +1,4 @@
+import PAComposition
 import PARuntime
 import Foundation
 import Testing
@@ -5,7 +6,6 @@ import PAArchitecture
 import PAKernel
 import PAProviders
 import PAEvents
-import PAFoundation
 
 @Suite("M2 kernel isolation")
 struct M2IsolationTests {

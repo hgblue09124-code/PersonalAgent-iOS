@@ -1,11 +1,8 @@
 import PARuntime
 import Testing
 import Foundation
-import PAFoundation
 import PAKernel
 import PAEvents
-import PAPolicy
-import PACognition
 import PAModules
 import PAComposition
 

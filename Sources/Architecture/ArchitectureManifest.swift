@@ -1,4 +1,4 @@
-import PAFoundation
+import PAKernel
 
 /// Architecture encoded as data so tests can lock the skeleton without a runtime.
 public enum ArchitectureManifest: Sendable {
@@ -46,23 +46,22 @@ public enum ArchitectureManifest: Sendable {
     /// Target -> allowed imported PA* modules. Foundation is implicit for all.
     public static let allowedImports: [String: Set<String>] = [
         "PAFoundation": ["PAKernel"],
-        "PAObservability": ["PAFoundation"],
+        "PAObservability": ["PAFoundation", "PAKernel"],
         "PAEvents": ["PAFoundation", "PAObservability", "PAKernel"],
-        "PASecurity": ["PAFoundation"],
-        "PAStorage": ["PAFoundation", "PAEvents", "PAObservability"],
-        "PAMemory": ["PAFoundation", "PAStorage", "PAEvents", "PAKernel"],
+        "PASecurity": ["PAFoundation", "PAKernel"],
+        "PAStorage": ["PAFoundation", "PAEvents", "PAObservability", "PAStorageModels"],
+        "PAStorageModels": ["PAFoundation", "PAProviders", "PAProvidersLocal"],
+        "PAMemory": ["PAFoundation", "PAStorage", "PAStorageModels", "PAEvents", "PAKernel"],
         "PAProviders": ["PAFoundation", "PAObservability", "PASecurity", "PAEvents", "PAKernel"],
-        "PAProvidersGrok": ["PAProviders", "PAFoundation"],
-        "PAProvidersOpenAI": ["PAProviders", "PAFoundation"],
-        "PAProvidersOpenAICompatible": ["PAProviders", "PAFoundation"],
+        "PAProvidersGrok": ["PAProviders", "PAProvidersRemote", "PAFoundation"],
+        "PAProvidersOpenAI": ["PAProviders", "PAProvidersRemote", "PAFoundation"],
+        "PAProvidersOpenAICompatible": ["PAProviders", "PAProvidersRemote", "PAFoundation"],
+        "PAProvidersRemote": ["PAProviders", "PAFoundation", "PASecurity"],
         "cllama": [],
-        "PAProvidersLocal": ["PAProviders", "PAFoundation", "cllama"],
-        "PAPolicy": ["PAFoundation", "PAKernel"],
-        "PATools": ["PAFoundation", "PAPolicy", "PAObservability"],
-        "PAModules": ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents", "PAKernel"],
-        "PASkills": ["PAFoundation", "PAModules", "PATools", "PAPolicy", "PAKernel"],
-        "PACognition": ["PAFoundation", "PAProviders", "PAMemory", "PASkills", "PAKernel"],
-        "PAAgency": ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
+        "PAProvidersLocal": ["PAProviders", "PAProvidersRemote", "PAFoundation", "cllama"],
+        "PATools": ["PAFoundation", "PARuntime", "PAObservability", "PAKernel"],
+        "PAModules": ["PAFoundation", "PAObservability", "PAEvents", "PAKernel"],
+        "PASkills": ["PAFoundation", "PAModules", "PATools", "PARuntime", "PAKernel"],
         "PARuntime": [
             "PAFoundation",
             "PAKernel",
@@ -71,16 +70,13 @@ public enum ArchitectureManifest: Sendable {
             "PAProviders",
             "PAModules",
             "PAMemory",
-            "PACognition",
-            "PAPolicy",
-            "PAAgency",
         ],
         "PAKernel": [
             "PAFoundation",
             "PAEvents",
             "PAModules",
         ],
-        "PAArchitecture": ["PAFoundation"],
+        "PAArchitecture": ["PAFoundation", "PAKernel"],
         "PAComposition": [
             "PAFoundation",
             "PAArchitecture",
@@ -95,9 +91,7 @@ public enum ArchitectureManifest: Sendable {
             "PASkills",
             "PATools",
             "PAMemory",
-            "PAPolicy",
-            "PACognition",
-            "PAAgency",
+            "PAStorageModels",
         ]
     ]
 
@@ -149,99 +143,12 @@ public struct MilestoneGate: Sendable, Equatable {
     public let cognitionLoop: Bool
     public let eventReplay: Bool
 
-    public static let m0 = MilestoneGate(
-        milestone: "M0",
-        kernelRuntime: false,
-        providers: false,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: false,
-        toolRuntime: false,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m1 = MilestoneGate(
-        milestone: "M1",
-        kernelRuntime: true,
-        providers: false,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: false,
-        toolRuntime: false,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m2 = MilestoneGate(
-        milestone: "M2",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: false,
-        toolRuntime: false,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m3 = MilestoneGate(
-        milestone: "M3",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: false,
-        memoryEngine: false,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m4 = MilestoneGate(
-        milestone: "M4",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: false,
-        eventReplay: false
-    )
-
-    public static let m6 = MilestoneGate(
-        milestone: "M6",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: true,
-        eventReplay: false
-    )
-
-    public static let m7 = MilestoneGate(
-        milestone: "M7",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: true,
-        eventReplay: false
-    )
-
-    public static let m8 = MilestoneGate(
-        milestone: "M8",
-        kernelRuntime: true,
-        providers: true,
-        storageEngine: true,
-        memoryEngine: true,
-        skillRuntime: true,
-        toolRuntime: true,
-        cognitionLoop: true,
-        eventReplay: false
-    )
+    public static let m0 = MilestoneGate(milestone: "M0", kernelRuntime: false, providers: false, storageEngine: false, memoryEngine: false, skillRuntime: false, toolRuntime: false, cognitionLoop: false, eventReplay: false)
+    public static let m1 = MilestoneGate(milestone: "M1", kernelRuntime: true, providers: false, storageEngine: false, memoryEngine: false, skillRuntime: false, toolRuntime: false, cognitionLoop: false, eventReplay: false)
+    public static let m2 = MilestoneGate(milestone: "M2", kernelRuntime: true, providers: true, storageEngine: false, memoryEngine: false, skillRuntime: false, toolRuntime: false, cognitionLoop: false, eventReplay: false)
+    public static let m3 = MilestoneGate(milestone: "M3", kernelRuntime: true, providers: true, storageEngine: false, memoryEngine: false, skillRuntime: true, toolRuntime: true, cognitionLoop: false, eventReplay: false)
+    public static let m4 = MilestoneGate(milestone: "M4", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: false, eventReplay: false)
+    public static let m6 = MilestoneGate(milestone: "M6", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: true, eventReplay: false)
+    public static let m7 = MilestoneGate(milestone: "M7", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: true, eventReplay: false)
+    public static let m8 = MilestoneGate(milestone: "M8", kernelRuntime: true, providers: true, storageEngine: true, memoryEngine: true, skillRuntime: true, toolRuntime: true, cognitionLoop: true, eventReplay: false)
 }

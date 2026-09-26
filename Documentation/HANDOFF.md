@@ -1,47 +1,64 @@
 # Task Handoff
 
-<!-- TASK-CONTEXT: Issue #85 canonical migration bridge. Read AGENTS.md, ARCHITECTURE.md and AUDIT.md before continuing. -->
+## CURRENT STATE — read first
 
-## Current Task
-**RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
+- Root task: **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
+- Issue #85: **OPEN — late-stage migration, not final-complete**
+- Active PR: **#91**
+- Branch: `rearch/cognition-policy-runtime`
+- Current tested commit: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
+- Latest verified workflow: **#718 / 36255114608 — VERIFIED GREEN**
+- iOS arm64: PASS
+- Repository integrity: PASS
+- Swift package tests: PASS
+- Full Gate: PASS
+- PR Final — Filter: PASS
 
-## Completed
-- Ownership freeze completed in Audit #14.
-- Migration group #1 completed: Kernel agent source moved to canonical Kernel subdomains.
-- Migration group #2 completed at its own change scope: Foundation/event/module execution contracts moved toward canonical Kernel contracts with compatibility bridges retained where required.
-- Path-sensitive architecture tests and import-boundary checks updated and verified.
-- PR #90 is CI green for the current migration group.
-- Auto-repair now has a fail-closed Verified Learning loop: approved deterministic rules execute automatically; unknown failures are recorded as non-executable candidates; repeated fingerprints stop.
-- Auto-repair regression is gated on an explicit `repaired=true` output, so an unknown classification cannot accidentally enter the regression/commit path.
-- Repair knowledge is stored in `.github/repair-knowledge.json`; candidate promotion is intentionally not automatic.
+> FAST STOP: The previous #712 blocker is resolved. The next action is the confirmed physical-tree audit/migration queue.
 
-## Confirmed Findings
-- Issue #85 is the root architecture/completion checkpoint.
-- PRs #86 onward are implementation steps supporting Issue #85; a green individual PR is not equivalent to Issue #85 completion.
-- Current re-architecture work must be evaluated as one integrated canonical migration, with dependency order preserved.
-- No behavior change is intended unless a migration requires a minimal compatibility repair.
-- Automation may learn failure patterns as evidence, but only allowlisted deterministic repairs may execute automatically.
+## ISSUE #85 CONTINUITY
 
-## Deferred Findings
-- The full canonical migration is not yet complete.
-- Intermediate PRs in the migration chain remain open and must not be treated as proof that Issue #85 is done.
-- Final physical iPhone 12 Pro Max validation and complete Issue #85 acceptance review remain pending until the migration is complete.
-- Candidate repair rules require explicit verification/promotion before they can become executable.
+PR #87 → #88 → #89 → #90 → #91 are one connected execution chain for Issue #85. A green individual PR is a verified migration checkpoint, not Issue #85 completion.
 
-## Tests / Gates
-- PR #90 migration-group CI: GREEN.
-- Auto-repair workflow hardening committed on `3da9930f730215d06227175001b4e602d3de5b08`.
-- Repair knowledge registry added on `9711036cab780baba18ed0aa60631c39a7c34571`.
-- Full Issue #85 acceptance: NOT YET CONFIRMED.
+### Completed / verified at prior checkpoints
+- Architecture contract and ownership freeze.
+- Kernel agent migration.
+- Foundation → Kernel physical migration.
+- Provider ownership migration checkpoints.
+- App boundary/provider import repairs.
+- Runtime foundation and storage/cache migration work now present in the current chain.
 
-## Exact Next Action
-1. Observe CI for the hardened auto-repair flow.
-2. If RED, let only the approved deterministic rules repair and regress; unknown failures must stop and record a candidate.
-3. Continue from Issue #85 as the root source of truth.
-4. Determine the remaining migration groups and their dependency order from the actual repository state.
-5. Complete each group with regression tests, full CI, and architecture audit.
-6. Do not declare re-architecture complete from an individual green PR.
-7. At the end, run the integrated full gate, documentation continuity check, and physical iPhone 12 Pro Max validation.
-8. Confirm every Issue #85 acceptance criterion before final integration/merge decisions.
+### Remaining
+- Finish PR #91 Cognition/Policy/Runtime dependency migration and get Full Gate green.
+- Complete remaining canonical physical migrations: Events, Memory, Storage, Capabilities, final Provider reconciliation, Composition, App, Tests/legacy duplicate cleanup.
+- Final canonical-tree + dependency-direction audit.
+- Physical iPhone 12 Pro Max validation.
+- Final Issue #85 acceptance and close.
 
-<!-- DO NOT REDO: Do not restart provider feature work, UI redesign, llama.cpp optimization, or ownership discovery. -->
+## EXACT NEXT ACTION
+
+1. Treat workflow #725 / 36255655970 as the current verified baseline for HEAD `ffe4ba3d`.
+2. Events → `Kernel/Events` is now confirmed complete from the actual tree.
+3. Memory ownership is confirmed by Audit #14, but the current Package.swift target graph would create a dependency cycle if `FileBackedMemoryStore` is moved naively.
+4. Resolve that target-boundary issue from actual imports/dependencies, then perform the smallest Memory migration.
+5. Run Swift tests, repository integrity, iOS arm64, and Full Gate.
+6. Update TODO/WORK_LOG/MEMORY/HANDOFF with the new evidence.
+
+## DO NOT REDO
+
+- Do not recalculate Issue #85 as 1/8.
+- Do not restart ownership discovery; Audit #14 already froze ownership.
+- Do not redo Foundation migration unless current evidence shows regression.
+- Do not redesign UI.
+- Do not optimize llama.cpp.
+- Do not infer CI state from chat history.
+
+## COMMUNICATION MAP
+
+- AGENTS.md = execution contract.
+- BASELINE.md = current snapshot.
+- TODO.md = executable queue.
+- WORK_LOG.md = chronological evidence.
+- HANDOFF.md = exact next action.
+- AUDIT.md = confirmed architecture/ownership.
+- MEMORY.md = durable lessons.

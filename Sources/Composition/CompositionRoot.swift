@@ -1,10 +1,16 @@
-import PAFoundation
+import PAKernel
 import PAArchitecture
 import PAKernel
 import PAObservability
+import PAProvidersLocal
+import PAStorageModels
 
 /// The only surface UI is allowed to hold.
 /// M0 exposes availability, not a running agent.
+public typealias LocalModelDescriptor = PAStorageModels.LocalModelDescriptor
+public typealias LocalModelLifecycleState = PAProvidersLocal.LocalModelLifecycleState
+public typealias LocalModelLoadingOptions = PAProvidersLocal.LocalModelLoadingOptions
+
 public protocol CompositionRoot: Sendable {
     var milestone: MilestoneGate { get }
     var logger: any AgentLogger { get }

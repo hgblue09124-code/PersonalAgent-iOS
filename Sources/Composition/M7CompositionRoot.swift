@@ -1,6 +1,6 @@
 import PARuntime
 import Foundation
-import PAFoundation
+import PAKernel
 import PAArchitecture
 import PAKernel
 import PAObservability
@@ -10,8 +10,7 @@ import PAModules
 import PASkills
 import PATools
 import PAMemory
-import PAPolicy
-import PACognition
+import PAStorageMemory
 import PARuntime
 
 /// Canonical M7 Composition Root wiring Durable Run Lifecycle, ExecutionBoundary,

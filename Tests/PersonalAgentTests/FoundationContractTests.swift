@@ -1,5 +1,5 @@
 import Testing
-import PAFoundation
+import PAKernel
 
 @Suite("Foundation contracts")
 struct FoundationContractTests {

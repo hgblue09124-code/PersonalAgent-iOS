@@ -1,6 +1,6 @@
 import PARuntime
 import Foundation
-import PAFoundation
+import PAKernel
 import PAArchitecture
 import PAKernel
 import PAObservability
@@ -10,6 +10,7 @@ import PAModules
 import PASkills
 import PATools
 import PAMemory
+import PAStorageMemory
 
 /// Wires kernel, provider runtime, module runtime, and memory OS.
 public struct M4CompositionRoot: CompositionRoot, Sendable {

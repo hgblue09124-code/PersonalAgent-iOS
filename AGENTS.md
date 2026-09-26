@@ -4,6 +4,19 @@
 
 ## Mission
 
+## Agent Memory Routing — FAST PATH
+
+> **Read order:** `BASELINE.md` → relevant `Documentation/MEMORY.md` → only then `HANDOFF.md` / `AUDIT.md` / `WORK_LOG.md` when needed.
+>
+> **STOP EARLY:** If BASELINE/MEMORY already answer the task, stop. Do not reconstruct repository state from the full Markdown tree or chat history.
+>
+> Markdown is a **soft memory protocol**: current/high-value knowledge goes near the top; history may grow below; headings and routing hints are retrieval aids, not rigid parser rules.
+
+## FAST READ — soft guidance
+
+> Read from the top. If the current section answers the task, **STOP EARLY**. Read deeper only when evidence/history/ownership is needed. This is guidance, not a rigid parser contract. Useful data may grow below.
+
+
 Keep PersonalAgent-iOS structurally coherent, testable, and incrementally evolvable.
 
 ## Mandatory Workflow
@@ -100,3 +113,19 @@ Stop and report instead of guessing when ownership is ambiguous, two canonical d
 ```
 
 <!-- FINAL-CHECK: Before declaring completion, verify that code, tests, documentation, and handoff all describe the same repository state. -->
+
+## Kiểm tra và sửa chữa — Agent Protocol
+
+- Workflow chính: **Kiểm tra và sửa chữa** (.github/workflows/ci.yml).
+- Khi nhận báo Run failed / PR run failed, hiểu mặc định là **phải kiểm tra và sửa**, không chỉ báo cáo.
+- Luôn xác minh **PR/branch trước**, rồi lấy head SHA hiện tại và workflow run mới nhất. Nếu người dùng chỉ đưa một SHA, coi đó là **tín hiệu để truy tìm run/commit**, không phải lý do để dừng nếu lookup SHA trực tiếp thất bại.
+- Nếu lookup SHA không ra PR/commit: **không yêu cầu người dùng gửi link ngay**. Trước tiên search PR đang mở của repo, chọn workstream mới nhất liên quan, rồi lấy latest workflow run/jobs/logs từ head SHA hiện tại.
+- Chỉ kết luận không xác định được lỗi sau khi đã thử: PR search → PR info → head SHA → workflow runs → failed job → job logs.
+- Đọc log của job đỏ để xác định nguyên nhân **CONFIRMED**; không đoán lỗi.
+- Sửa tối thiểu, ưu tiên **một commit cho một logical fix**; không gom nhiều lỗi không liên quan.
+- Sau sửa: chờ/check workflow mới, xác nhận Full Gate xanh rồi mới kết luận hoàn tất.
+- Nếu workflow chưa chạy xong, trạng thái phải ghi rõ **CHƯA XÁC MINH**.
+- **Auto Repair** chạy tự động trên push vào `rearch/**` và có guarded repair loop. Unknown failure vẫn fail-closed; lỗi lặp được ghi nhớ bằng fingerprint/observation count.
+- Nếu CI đỏ lặp lại, không tạo vòng sửa mù: đọc job/log mới nhất, xác định regression hoặc nguyên nhân mới, rồi mới sửa.
+- Không dùng Jules/Jan prompt làm bước mặc định; agent đang xử lý repo có thể trực tiếp inspect/fix khi connector cho phép.
+- Sau mỗi nhóm migration: cập nhật tài liệu/handoff để worker sau đọc được trạng thái mà không cần khôi phục từ chat.

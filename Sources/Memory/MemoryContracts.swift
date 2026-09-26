@@ -1,7 +1,7 @@
 import Foundation
 import PAKernel
-import PAFoundation
 import PAStorage
+import PAStorageModels
 import PAEvents
 
 public enum MemoryKind: String, Sendable, Codable, CaseIterable {

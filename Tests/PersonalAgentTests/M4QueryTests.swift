@@ -1,7 +1,8 @@
 import Testing
+import PAKernel
 import Foundation
-import PAFoundation
 import PAMemory
+import PAStorageMemory
 
 @Suite("M4 Query Engine Tests")
 struct M4QueryTests {

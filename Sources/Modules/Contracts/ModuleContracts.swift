@@ -1,5 +1,4 @@
 import PAKernel
-import PAPolicy
 
 public enum ModuleKind: String, Sendable, Codable {
     case atomic

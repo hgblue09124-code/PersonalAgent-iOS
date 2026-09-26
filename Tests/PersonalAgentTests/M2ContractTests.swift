@@ -1,7 +1,9 @@
 import Foundation
+import PAKernel
 import Testing
-import PAFoundation
 import PAProviders
+import PAComposition
+import PAProvidersRemote
 import PASecurity
 
 @Suite("M2 provider contract")
