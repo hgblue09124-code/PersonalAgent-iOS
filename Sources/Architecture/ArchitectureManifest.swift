@@ -92,6 +92,7 @@ public enum ArchitectureManifest: Sendable {
             "PATools",
             "PAMemory",
             "PAStorageModels",
+            "PAStorageMemory",
         ]
     ]
 
