@@ -23,6 +23,7 @@ let package = Package(
         .library(name: "PAEvents", targets: ["PAEvents"]),
         .library(name: "PASecurity", targets: ["PASecurity"]),
         .library(name: "PAStorage", targets: ["PAStorage"]),
+        .library(name: "PAStorageModels", targets: ["PAStorageModels"]),
         .library(name: "PAMemory", targets: ["PAMemory"]),
         .library(name: "PAProviders", targets: ["PAProviders"]),
         .library(name: "PATools", targets: ["PATools"]),
@@ -41,14 +42,14 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "llama",
-            path: "Frameworks/llama.xcframework"
+            path: "Providers/Local/LlamaCPP/llama.xcframework"
         ),
         .target(
             name: "cllama",
             dependencies: [
                 .target(name: "llama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
-            path: "Sources/cllama",
+            path: "Providers/Local/LlamaCPP/cllama",
             exclude: ["README.md"]
         ),
         .target(name: "PAFoundation", dependencies: ["PAKernel"], path: "Sources/Foundation"),
@@ -73,14 +74,19 @@ let package = Package(
             path: "Sources/Storage"
         ),
         .target(
+            name: "PAStorageModels",
+            dependencies: ["PAFoundation", "PAProviders", "PAProvidersLocal"],
+            path: "Storage/Models"
+        ),
+        .target(
             name: "PAMemory",
             dependencies: ["PAFoundation", "PAStorage", "PAEvents"],
             path: "Sources/Memory"
         ),
         .target(
             name: "PAProviders",
-            dependencies: ["PAFoundation", "PAObservability", "PASecurity", "PAEvents"],
-            path: "Sources/Providers/Contracts"
+            dependencies: ["PAKernel"],
+            path: "Kernel/Ports/Providers"
         ),
         .target(
             name: "PAProvidersRemote",
@@ -110,7 +116,8 @@ let package = Package(
                 "PAFoundation",
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
-            path: "Sources/Providers/Local"
+            path: "Providers/Local",
+            exclude: ["LlamaCPP/cllama"]
         ),
         .target(
             name: "PATools",
@@ -130,7 +137,8 @@ let package = Package(
         .target(
             name: "PAKernel",
             dependencies: [],
-            path: "Kernel"
+            path: "Kernel",
+            exclude: ["Ports/Providers"]
         ),
         .target(
             name: "PARuntime",
@@ -178,6 +186,7 @@ let package = Package(
                 "PAEvents",
                 "PASecurity",
                 "PAStorage",
+                "PAStorageModels",
                 "PAMemory",
                 "PAProviders",
                 "PAProvidersGrok",

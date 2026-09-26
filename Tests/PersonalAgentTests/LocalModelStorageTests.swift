@@ -3,6 +3,7 @@ import Testing
 import PAFoundation
 import PAProviders
 import PAProvidersLocal
+import PAStorageModels
 import PAComposition
 import PAArchitecture
 

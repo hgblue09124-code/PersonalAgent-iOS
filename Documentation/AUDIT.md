@@ -185,3 +185,18 @@ Do not move files during the mapping-only audit.
 - Kernel Events remain in the legacy Events group until their dedicated migration checkpoint.
 
 <!-- HANDOFF: Next task migrates Foundation contracts/errors into Kernel and removes the legacy Foundation layer only when all consumers are updated. -->
+
+
+### Migration Checkpoint #5 — Provider Ownership Migration
+
+**CONFIRMED**
+- Vendor-neutral provider contracts now live under `Kernel/Ports/Providers`; the existing `PAProviders` module is retained as the provider-contract target while physical ownership follows Kernel Ports.
+- Provider binding and credential-resolution types are separated into `Providers/Remote/Shared/ProviderCredentials.swift`.
+- `ProviderRuntimeError` is owned by `Runtime/Execution`.
+- Local inference contracts are separated from local-model persistence contracts.
+- Local provider implementation is physically under `Providers/Local`; local model persistence is under `Storage/Models`.
+- Deterministic provider fake is test-only under `Tests/Providers`.
+- llama.cpp wrapper sources/framework are physically under `Providers/Local/LlamaCPP`.
+
+**Verification required**
+- Swift package tests, repository integrity, import-boundary checks, iOS arm64 unsigned build, then post-migration audit.

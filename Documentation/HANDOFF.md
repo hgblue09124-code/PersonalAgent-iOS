@@ -34,6 +34,11 @@
 - Repair knowledge registry added on `9711036cab780baba18ed0aa60631c39a7c34571`.
 - Full Issue #85 acceptance: NOT YET CONFIRMED.
 
+## Current Provider Migration Checkpoint
+- Migration Group #5 implementation has been applied to the PR #91 branch.
+- CI for the new migration commit is **CHƯA XÁC MINH** until the new workflow run completes.
+- Issue #85 remains open; physical iPhone validation and final acceptance are pending.
+
 ## Exact Next Action
 1. Observe CI for the hardened auto-repair flow.
 2. If RED, let only the approved deterministic rules repair and regress; unknown failures must stop and record a candidate.
