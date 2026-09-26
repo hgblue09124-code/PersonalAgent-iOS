@@ -109,7 +109,6 @@ public struct MilestoneGate: Sendable, Equatable {
         eventReplay: false
     )
 }
-}
 
 /// The only surface UI is allowed to hold.
 /// M0 exposes availability, not a running agent.
