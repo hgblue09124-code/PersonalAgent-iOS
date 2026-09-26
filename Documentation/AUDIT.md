@@ -115,7 +115,7 @@ Do not move files during the mapping-only audit.
 **Provider contracts — CONFIRMED**
 - `LLMProvider.swift`: vendor-neutral provider boundary types (`LLMProvider`, identity/capabilities/request/response/stream/health/lifecycle/selecting) → `Kernel/Ports`; provider binding/credential-resolution types → `Providers/Remote` after semantic split.
 - `ProviderRuntime.swift` → `Runtime/Execution/ProviderRuntime.swift`; evidence: owns provider invocation lifecycle, timeout, cancellation and execution events.
-- `ProviderRuntimeError.swift` → `Runtime/Execution/ProviderRuntimeError.swift`.
+- `ProviderRuntimeError.swift` → `Kernel/Ports/Providers/ProviderRuntimeError.swift`; shared provider contract error consumed by Runtime and provider adapters to avoid a SwiftPM dependency cycle.
 - `ProviderTransport.swift` → `Providers/Remote/ProviderTransport.swift`; byte-level adapter transport.
 - `ChatCompletionsCodec.swift` → `Providers/Remote/ChatCompletionsCodec.swift`; explicitly maps to OpenAI-compatible wire format.
 - `HTTPChatProvider.swift` → `Providers/Remote/HTTPChatProvider.swift`.
@@ -192,7 +192,7 @@ Do not move files during the mapping-only audit.
 **CONFIRMED**
 - Vendor-neutral provider contracts now live under `Kernel/Ports/Providers`; the existing `PAProviders` module is retained as the provider-contract target while physical ownership follows Kernel Ports.
 - Provider binding and credential-resolution types are separated into `Providers/Remote/Shared/ProviderCredentials.swift`.
-- `ProviderRuntimeError` is owned by `Runtime/Execution`.
+- `ProviderRuntimeError` is owned by `Kernel/Ports/Providers` so Runtime and remote provider adapters share the contract without introducing a dependency cycle.
 - Local inference contracts are separated from local-model persistence contracts.
 - Local provider implementation is physically under `Providers/Local`; local model persistence is under `Storage/Models`.
 - Deterministic provider fake is test-only under `Tests/Providers`.
@@ -200,3 +200,11 @@ Do not move files during the mapping-only audit.
 
 **Verification required**
 - Swift package tests, repository integrity, import-boundary checks, iOS arm64 unsigned build, then post-migration audit.
+
+
+### Migration Checkpoint #5 Audit Repair — CONFIRMED
+
+- Repository integrity assertions were stale after the provider ownership migration and still referenced removed `Providers/Contracts/*` paths.
+- Updated assertions to the canonical provider contract path under `Kernel/Ports/Providers` and the test-only fake under `Tests/Providers`.
+- Updated the ownership record for `ProviderRuntimeError` to match the verified dependency-safe location.
+- CI for the repair commit is pending and remains **CHƯA XÁC MINH** until the new workflow completes.
