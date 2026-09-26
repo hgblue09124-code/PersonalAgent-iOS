@@ -1,5 +1,6 @@
 import PAFoundation
 import PAProviders
+import PAProvidersRemote
 
 public enum GrokProviderBoundary {
     public static let providerID = ProviderID(rawValue: "grok")
