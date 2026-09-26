@@ -13,16 +13,6 @@ public struct MilestoneGate: Sendable, Equatable {
     public let cognitionLoop: Bool
     public let eventReplay: Bool
 
-    public let milestone: String
-    public let kernelRuntime: Bool
-    public let providers: Bool
-    public let storageEngine: Bool
-    public let memoryEngine: Bool
-    public let skillRuntime: Bool
-    public let toolRuntime: Bool
-    public let cognitionLoop: Bool
-    public let eventReplay: Bool
-
     public static let m0 = MilestoneGate(
         milestone: "M0",
         kernelRuntime: false,
