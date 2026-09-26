@@ -1,6 +1,5 @@
 import Foundation
 import PAKernel
-import PAEvents
 
 public protocol RunStore: Sendable {
     func save(_ record: RunRecord) async throws
