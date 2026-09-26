@@ -86,6 +86,34 @@ The canonical product loop is:
 
 Future parser, index, retrieval, or semantic-memory implementations must preserve Markdown as the canonical human-readable persistence surface.
 
+## Living Cognitive Data Ocean
+
+The Markdown cognitive plane is organized as a Living Cognitive Data Ocean.
+
+- **Sea of Chaos** contains observations, thoughts, raw events, and candidate material still requiring evaluation.
+- **Living Ocean** contains evidence-backed cognitive grains ready for direct reuse.
+- A grain is the smallest independently useful semantic unit; it is not defined by file size.
+- Root `Modules/` is the persistent cognitive-data organization surface and is distinct from executable `Sources/Capabilities/Modules`.
+- Grain lifecycle is **OBSERVED → CONFIRMED → PROMOTED**.
+- A Module is a capability composition of relevant grains, not a folder.
+- Future parser/index/retrieval/semantic-memory implementations must preserve Markdown as canonical human-readable persistence and must not silently promote unverified material.
+
+```
+Sea of Chaos
+    ↓ evaluate
+Living Grain
+    ↓ select + compose
+Cognitive Module
+    ↓
+Agent action
+    ↓ verify
+new evidence
+    ↓
+new / refined grain
+```
+
+The cognitive data plane is orthogonal to the executable dependency axis. It may inform runtime decisions only through existing ownership boundaries.
+
 ## Milestone freeze
 
 M0 freezes boundaries and contracts.

@@ -26,3 +26,11 @@
 - Agent work follows the product loop: **Read → Act → Verify → Learn → Persist**.
 - Keep Markdown surfaces complementary: identity, architecture, lessons, audit, handoff, and execution history must not become duplicate diaries.
 - Future indexing or retrieval layers must preserve Markdown as the canonical human-readable persistence surface.
+
+### Living Cognitive Data Ocean
+- `Documentation/LIVING_COGNITIVE_DATA_OCEAN.md` is the normative product model for persistent cognitive grains.
+- Root `Modules/` contains human-readable cognitive grains and is distinct from `Sources/Capabilities/Modules`, which contains executable module runtime code.
+- A grain is the smallest independently useful cognitive knowledge/capability with boundary and evidence.
+- Grain lifecycle is **OBSERVED → CONFIRMED → PROMOTED**.
+- Sea of Chaos is candidate material; the Living Ocean contains usable, evidence-backed grains.
+- Do not introduce a parser, index, database, or rigid schema until real grain usage demonstrates a concrete retrieval need.
