@@ -1,6 +1,5 @@
 import Foundation
 import PAKernel
-import PAFoundation
 import PAProviders
 
 /// Deterministic provider used by composition roots as their offline default.

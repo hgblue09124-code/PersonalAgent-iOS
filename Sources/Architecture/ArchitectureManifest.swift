@@ -1,4 +1,4 @@
-import PAFoundation
+import PAKernel
 
 /// Architecture encoded as data so tests can lock the skeleton without a runtime.
 public enum ArchitectureManifest: Sendable {
