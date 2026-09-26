@@ -85,12 +85,12 @@ struct M7LeaseAndWALTests {
         )
 
         try await log.append(event1)
-        let count1 = (await inner.allEvents()).count
+        let count1 = (try await inner.allEvents()).count
         #expect(count1 == 1)
 
         // Re-append identical eventID + same payload
         try await log.append(event1)
-        let count2 = (await inner.allEvents()).count
+        let count2 = (try await inner.allEvents()).count
         #expect(count2 == 1)
     }
 
