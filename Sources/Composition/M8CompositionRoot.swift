@@ -4,6 +4,7 @@ import PAProviders
 import PAProvidersLocal
 import PAStorageModels
 import PAMemory
+import PAStorageMemory
 import PAModules
 import PAKernel
 import PARuntime
