@@ -1,3 +1,4 @@
+import PAComposition
 import Foundation
 import Testing
 import PAFoundation
