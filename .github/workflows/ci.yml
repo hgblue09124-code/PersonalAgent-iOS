@@ -92,10 +92,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
-
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
-
       - name: Build PersonalAgent iOS app target (arm64)
         run: |
           xcodebuild build \
@@ -109,7 +107,6 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             AD_HOC_CODE_SIGNING_ALLOWED=YES
-
       - name: Package unsigned development IPA artifact
         run: |
           mkdir -p Payload
@@ -118,7 +115,6 @@ jobs:
           cp -R "$APP_PATH" Payload/
           zip -r PersonalAgent-unsigned.ipa Payload
           echo "Created PersonalAgent-unsigned.ipa successfully"
-
       - name: Upload unsigned development IPA artifact
         uses: actions/upload-artifact@v7
         with:
@@ -144,3 +140,21 @@ jobs:
             exit 1
           fi
           echo "Kiểm tra và sửa chữa PASSED"
+
+  ci-filter:
+    name: PR Final — Filter
+    if: ${{ always() }}
+    needs: [full-gate]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify Full Gate result
+        run: |
+          echo "CI_NOTIFY_KEY=personalagent-ci"
+          echo "CI_NOTIFY_WORKFLOW=PR Final — ${{ github.head_ref || github.ref_name }}"
+          echo "FULL_GATE_RESULT=${{ needs.full-gate.result }}"
+          if [[ "${{ needs.full-gate.result }}" != "success" ]]; then
+            echo "PR FINAL FAIL: Full Gate did not pass."
+            exit 1
+          fi
+          echo "CI_NOTIFY_STATUS=success"
+          echo "PR FINAL PASS: Full Gate completed successfully."
