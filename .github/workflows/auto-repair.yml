@@ -90,12 +90,16 @@ jobs:
           repairs = []
 
           fingerprints = []
+          normalized_errors = []
           for match in re.finditer(r"no such module ['‘’\"]([^'‘’\"]+)['‘’\"]", log, re.I):
               fingerprints.append("no-such-module:" + match.group(1))
           for match in re.finditer(r"error: (.+)", log):
               message = re.sub(r"\s+", " ", match.group(1)).strip()
               if message:
+                  message = re.sub(r"(^|\s)[^\s:]+\.swift:\d+(?::\d+)?", r" FILE", message)
+                  normalized_errors.append(message[:240])
                   fingerprints.append("error:" + message[:240])
+          error_family = ("missing-module" if any(x.startswith("no-such-module:") for x in fingerprints) else "compiler-error" if normalized_errors else "unknown")
           fingerprint = hashlib.sha256("|".join(sorted(set(fingerprints))).encode()).hexdigest()[:12] if fingerprints else ""
 
           knowledge = json.loads(knowledge_path.read_text()) if knowledge_path.exists() else {"version": 1, "approved": [], "candidates": []}
@@ -136,6 +140,12 @@ jobs:
           if fingerprint and f"[auto-repair-fp:{fingerprint}]" in recent:
               print(f"AUTO-REPAIR: repeated identical failure {fingerprint}; STOP.")
               print("candidate observations:", candidate.get("observations", 1) if candidate else 1)
+              raise SystemExit(0)
+
+          if candidate and candidate.get("observations", 0) >= 3:
+              candidate["status"] = "root-cause-review"
+              candidate["execution"] = "forbidden"
+              print("AUTO-REPAIR: repeated failure reached root-cause threshold; STOP symptom patching.")
               raise SystemExit(0)
 
           # R1: duplicated consecutive .target( in Package.swift.
@@ -218,6 +228,7 @@ jobs:
                   knowledge.setdefault("candidates", []).append({
                       "fingerprint": fingerprint,
                       "pattern": sorted(set(fingerprints)),
+                      "family": error_family,
                       "status": "observed",
                       "execution": "forbidden",
                       "observations": 1,
@@ -271,9 +282,20 @@ jobs:
           fi
           echo "AUTO-REPAIR: regression GREEN."
 
+      - name: Full gate smoke verification
+        id: full_gate
+        if: steps.regression.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift test --disable-sandbox
+          swift package dump-package >/tmp/package-full-gate.json
+          git diff --check
+          echo "AUTO-REPAIR: full-gate smoke GREEN."
+
       - name: Verify canonical tree and package graph
         id: verify
-        if: steps.regression.outcome == 'success'
+        if: steps.full_gate.outcome == 'success'
         shell: bash
         run: |
           set -euo pipefail
