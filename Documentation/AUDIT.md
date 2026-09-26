@@ -212,3 +212,19 @@ Do not move files during the mapping-only audit.
 - Updated assertions to the canonical provider contract path under `Kernel/Ports/Providers` and the test-only fake under `Tests/Providers`.
 - Updated the ownership record for `ProviderRuntimeError` to match the verified dependency-safe location.
 - CI for the repair commit is pending and remains **CHƯA XÁC MINH** until the new workflow completes.
+
+
+### Migration Checkpoint #6 — Foundation → Kernel
+
+**CONFIRMED**
+- `Sources/Foundation/*` is absent from the current branch.
+- Foundation ownership is physically represented by canonical Kernel destinations: `Kernel/Errors/AgentError.swift`, `Kernel/Contracts/*`, and `Kernel/Ports/DeviceCapability.swift`.
+- `Package.swift` has no legacy `PAFoundation` target/dependency.
+- `FoundationContractTests` imports `PAKernel` and exercises the canonical contracts.
+- PR #91 current Full Gate run #687 is **VERIFIED GREEN** for Swift package tests, repository integrity, and aggregate CI.
+
+**DECISION**
+- Foundation migration is complete at the current verified checkpoint.
+- Events remains a separate migration group; do not combine it into this checkpoint.
+
+<!-- HANDOFF: Next migration group is Events → Kernel/Events. Re-fetch current HEAD/CI before changing code. -->
