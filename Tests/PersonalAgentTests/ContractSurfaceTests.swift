@@ -15,7 +15,6 @@ import PAModules
 import PASkills
 import PAKernel
 import PAComposition
-import PAArchitecture
 import PAObservability
 
 @Suite("Contract surfaces compile and stay honest")
