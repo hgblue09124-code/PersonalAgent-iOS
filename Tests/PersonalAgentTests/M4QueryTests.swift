@@ -1,6 +1,5 @@
 import Testing
 import Foundation
-import PAFoundation
 import PAMemory
 
 @Suite("M4 Query Engine Tests")
