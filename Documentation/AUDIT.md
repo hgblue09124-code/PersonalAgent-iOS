@@ -228,3 +228,32 @@ Do not move files during the mapping-only audit.
 - Events remains a separate migration group; do not combine it into this checkpoint.
 
 <!-- HANDOFF: Next migration group is Events → Kernel/Events. Re-fetch current HEAD/CI before changing code. -->
+
+
+### Audit #15 — Issue #85 post-PR #91 documentation checkpoint
+
+<!-- TASK-CONTEXT: Documentation-only audit performed against merge commit f31fcce9331c17435b4d31aaa5cdeb000b90bffb. -->
+<!-- DECISION: Treat the merged PR as a verified checkpoint, not Issue #85 completion. Keep remaining physical migration work explicit and evidence-driven. -->
+<!-- INVARIANT: Markdown must describe the same repository state as the verified code/CI checkpoint. -->
+
+**CONFIRMED**
+- PR #91 is merged; merge commit: `f31fcce9331c17435b4d31aaa5cdeb000b90bffb`.
+- `@github CI` workflow #753 for the merge commit is **success**.
+- Issue #85 remains **OPEN**; the canonical physical tree is not yet complete.
+- `Package.swift` at the merge checkpoint still contains legacy physical paths for Capabilities, Composition, Architecture, Observability, Security, and parts of Memory.
+- Audit #14 ownership freeze remains the authoritative file-level ownership map.
+- No new architecture-discovery work is required before continuing migration.
+
+**NOT CONFIRMED**
+- Issue #85 final completion: **NOT CONFIRMED**.
+- Full physical canonical-tree compliance: **NOT CONFIRMED**.
+- Physical iPhone 12 Pro Max acceptance for the complete re-architecture: **NOT CONFIRMED**.
+
+**DEFERRED**
+- Remaining Capabilities physical migration.
+- Remaining Composition / Architecture / Observability / Security / Memory physical cleanup and test redistribution.
+
+**Next audit gate**
+`actual tree + Package.swift → ownership/import confirmation → smallest migration → full gate → post-migration audit`.
+
+<!-- HANDOFF: Next worker starts with the Capabilities group; do not redo ownership discovery unless repository evidence contradicts Audit #14. -->
