@@ -354,6 +354,34 @@ same-or-better verified result
 ```
 
 The target is therefore not maximum graph size. It is **minimum sufficient activation for a verified result**.
+
+### 3.10 Traversal safety and cycle inhibition
+
+Self-play exposes a failure mode that route preference alone does not prevent: a valid-looking graph can revisit the same nodes indefinitely.
+
+Every active traversal therefore carries bounded path state:
+
+```
+PATH_STATE
+  TASK_ID
+  VISITED_NODES
+  FIRED_EDGES
+  STEP_BUDGET
+  EXPANSION_COUNT
+  REENTRY_GUARD
+```
+
+Traversal rules:
+
+1. A node already in `VISITED_NODES` cannot re-fire unless a new verification signal explicitly reopens it.
+2. A repeated edge without new evidence is inhibited.
+3. `STEP_BUDGET` bounds a single self-play attempt; exhaustion is a controlled failure, not success.
+4. `EXPANSION_COUNT` bounds context growth as well as graph traversal.
+5. A cycle may be retried only after the adversary changes the challenge or new evidence changes the route validity.
+
+This is a routing guard, not a truth signal. It does not promote a node or edge and it does not replace verification.
+
+**Self-play test:** a route `A → B → A → B` must terminate as `CYCLE_INHIBITED` or `BUDGET_EXHAUSTED`, never as a verified result.
 ## 4. The house is the memory
 
 A trajectory is temporary training material.
@@ -713,6 +741,10 @@ and curriculum that can be exercised by the agent/model loop.
 The next real task should instantiate one graph-aware self-play cycle:
 
 CHALLENGE → ROUTE → SOLVE → VERIFY → FOLLOW → ADVERSARY → JUDGE → COST COMPARE → COMPRESS → RECHALLENGE
+
+**Agent self-play pass completed before this revision:** a synthetic cyclic route `A → B → A → B` was replayed against the V1 routing contract. The route could repeat because V1 had no explicit visited-node, edge-reentry, or traversal-budget guard. This is synthetic evidence only.
+
+**Revision:** add bounded path state and cycle inhibition in §3.10. The expected observable result is now `CYCLE_INHIBITED` or `BUDGET_EXHAUSTED`, never a false verified result. This remains OBSERVED until exercised on an independent real repository task.
 
 The observable result should record which FOLLOW edges fired, which were rejected, and whether the route became cheaper without weakening evidence or scope.
 
