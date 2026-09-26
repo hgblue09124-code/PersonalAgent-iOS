@@ -1,64 +1,37 @@
 # Task Handoff
 
-## CURRENT STATE — read first
-
+## CURRENT STATE
 - Root task: **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
 - Issue #85: **OPEN — late-stage migration, not final-complete**
 - Active PR: **#91**
 - Branch: `rearch/cognition-policy-runtime`
-- Current tested commit: `9b2f3b94ab57ddae7e46ef4cb2564cf2b485c17b`
-- Latest verified workflow: **#718 / 36255114608 — VERIFIED GREEN**
+- Current tested commit: `ecc520c0a1871e30cd64c380c3bd8c0a88ed865a`
+- Latest verified workflow: **#749 / 36260826735 — VERIFIED GREEN**
 - iOS arm64: PASS
 - Repository integrity: PASS
 - Swift package tests: PASS
 - Full Gate: PASS
 - PR Final — Filter: PASS
 
-> FAST STOP: The previous #712 blocker is resolved. The next action is the confirmed physical-tree audit/migration queue.
+## CONTINUITY
+PR #87 → #91 remains one connected execution chain for Issue #85. Green PR #91 is a verified checkpoint, not Issue #85 completion.
 
-## ISSUE #85 CONTINUITY
-
-PR #87 → #88 → #89 → #90 → #91 are one connected execution chain for Issue #85. A green individual PR is a verified migration checkpoint, not Issue #85 completion.
-
-### Completed / verified at prior checkpoints
-- Architecture contract and ownership freeze.
-- Kernel agent migration.
-- Foundation → Kernel physical migration.
-- Provider ownership migration checkpoints.
-- App boundary/provider import repairs.
-- Runtime foundation and storage/cache migration work now present in the current chain.
-
-### Remaining
-- Finish PR #91 Cognition/Policy/Runtime dependency migration and get Full Gate green.
-- Complete remaining canonical physical migrations: Events, Memory, Storage, Capabilities, final Provider reconciliation, Composition, App, Tests/legacy duplicate cleanup.
-- Final canonical-tree + dependency-direction audit.
-- Physical iPhone 12 Pro Max validation.
-- Final Issue #85 acceptance and close.
+## CONFIRMED MEMORY CHECKPOINT
+- `PAStorageMemory` is the dedicated storage-memory target.
+- `MemoryRuntime` → `Sources/Memory/Working`.
+- `MemoryIndex` → `Sources/Memory/Retrieval`.
+- `FileBackedMemoryStore` → `Storage/Memory`.
+- `MemoryStorageRecord` and storage conformances → `Storage/Memory`.
+- Current Full Gate is green.
 
 ## EXACT NEXT ACTION
-
-1. Treat workflow #725 / 36255655970 as the current verified baseline for HEAD `ffe4ba3d`.
-2. Events → `Kernel/Events` is now confirmed complete from the actual tree.
-3. Memory ownership is confirmed by Audit #14, but the current Package.swift target graph would create a dependency cycle if `FileBackedMemoryStore` is moved naively.
-4. Resolve that target-boundary issue from actual imports/dependencies, then perform the smallest Memory migration.
-5. Run Swift tests, repository integrity, iOS arm64, and Full Gate.
-6. Update TODO/WORK_LOG/MEMORY/HANDOFF with the new evidence.
+1. Inspect the next remaining Storage/Capabilities migration group from the actual current tree and Package.swift.
+2. Confirm ownership before moving anything.
+3. Apply the smallest migration only.
+4. Run the full gate and update this handoff again.
 
 ## DO NOT REDO
-
-- Do not recalculate Issue #85 as 1/8.
-- Do not restart ownership discovery; Audit #14 already froze ownership.
-- Do not redo Foundation migration unless current evidence shows regression.
-- Do not redesign UI.
-- Do not optimize llama.cpp.
+- Do not reopen the resolved Memory target-boundary blocker without new evidence.
+- Do not restart ownership discovery; Audit #14 froze ownership.
+- Do not calculate Issue #85 as equal PR percentages.
 - Do not infer CI state from chat history.
-
-## COMMUNICATION MAP
-
-- AGENTS.md = execution contract.
-- BASELINE.md = current snapshot.
-- TODO.md = executable queue.
-- WORK_LOG.md = chronological evidence.
-- HANDOFF.md = exact next action.
-- AUDIT.md = confirmed architecture/ownership.
-- MEMORY.md = durable lessons.
