@@ -1,11 +1,9 @@
 import Foundation
 import PAKernel
-import PAStorage
-import PAStorageModels
 
 public actor InMemoryMemoryStore: MemoryStore {
     private var index: MemoryIndex
-    private var historyMap: [String: [Int: MemoryStorageRecord]] = [:]
+    private var historyMap: [String: [Int: MemoryRecord]] = [:]
     private var knownRevisionTokens: [String: Set<String>] = [:]
 
     public init() {
@@ -17,8 +15,7 @@ public actor InMemoryMemoryStore: MemoryStore {
         if index.record(for: record.id) != nil {
             throw MemoryError.duplicateID(record.id)
         }
-        let storageRec = MemoryStorageRecord(record)
-        try recordHistory(storageRec)
+        try recordHistory(record)
         index.index(record)
     }
 
@@ -61,8 +58,7 @@ public actor InMemoryMemoryStore: MemoryStore {
             parentRevisionToken: existing.revisionToken,
             ancestorRevisionTokens: updatedAncestors
         )
-        let storageRec = MemoryStorageRecord(committedRecord)
-        try recordHistory(storageRec)
+        try recordHistory(committedRecord)
         index.index(committedRecord)
     }
 
@@ -90,8 +86,7 @@ public actor InMemoryMemoryStore: MemoryStore {
             parentRevisionToken: existing.revisionToken,
             ancestorRevisionTokens: updatedAncestors
         )
-        let storageRec = MemoryStorageRecord(updated)
-        try recordHistory(storageRec)
+        try recordHistory(updated)
         index.index(updated)
     }
 
@@ -113,8 +108,7 @@ public actor InMemoryMemoryStore: MemoryStore {
             }
         }
         for record in records {
-            let storageRec = MemoryStorageRecord(record)
-            try recordHistory(storageRec)
+            try recordHistory(record)
             index.index(record)
         }
     }
@@ -129,10 +123,10 @@ public actor InMemoryMemoryStore: MemoryStore {
         knownRevisionTokens.removeAll()
     }
 
-    private func recordHistory(_ storageRecord: MemoryStorageRecord) throws {
-        let id = storageRecord.id
-        let ver = storageRecord.version
-        let token = storageRecord.revisionToken
+    private func recordHistory(_ record: MemoryRecord) throws {
+        let id = record.id.rawValue
+        let ver = record.version
+        let token = record.revisionToken
 
         guard !token.isEmpty else {
             throw MemoryError.corruptRecord("Revision token cannot be empty")
@@ -154,9 +148,10 @@ public actor InMemoryMemoryStore: MemoryStore {
             throw MemoryError.corruptRecord("Duplicate revision history entry detected for \(id) at version \(ver)")
         }
 
-        historyMap[id]?[ver] = storageRecord
+        historyMap[id]?[ver] = record
         knownRevisionTokens[id]?.insert(token)
     }
+
     private func makeFreshRevisionToken(for id: String) -> String {
         var token: String
         repeat {
@@ -165,54 +160,7 @@ public actor InMemoryMemoryStore: MemoryStore {
         return token
     }
 
-}
-
-extension InMemoryMemoryStore: LocalStore {
-    public typealias Record = MemoryStorageRecord
-
-    public func upsert(_ record: MemoryStorageRecord) async throws {
-        let memRecord = record.record
-        if index.record(for: memRecord.id) != nil {
-            let preparedRecord = MemoryRecord(
-                id: memRecord.id,
-                kind: memRecord.kind,
-                content: memRecord.content,
-                provenance: memRecord.provenance,
-                createdAt: memRecord.createdAt,
-                updatedAt: memRecord.updatedAt,
-                scope: memRecord.scope,
-                lifecycle: memRecord.lifecycle,
-                importance: memRecord.importance,
-                metadata: memRecord.metadata,
-                version: memRecord.version,
-                parentVersion: memRecord.parentVersion,
-                revisionToken: memRecord.revisionToken,
-                parentRevisionToken: memRecord.parentRevisionToken,
-                ancestorRevisionTokens: memRecord.ancestorRevisionTokens
-            )
-            try await update(preparedRecord)
-        } else {
-            try await capture(memRecord)
-        }
-    }
-
-    public func fetch(id: String) async throws -> MemoryStorageRecord? {
-        if let memRecord = try await retrieve(id: MemoryRecordID(rawValue: id)) {
-            return MemoryStorageRecord(memRecord)
-        }
-        return nil
-    }
-
-    public func forget(id: String) async throws {
-        try await forget(id: MemoryRecordID(rawValue: id), reason: "Forgotten via LocalStore interface")
-    }
-}
-
-extension InMemoryMemoryStore: RevisionHistoryStore {
-    public func fetchRevision(id: String, version: Int) async throws -> MemoryStorageRecord? {
-        guard let versionMap = historyMap[id] else {
-            return nil
-        }
-        return versionMap[version]
+    public func revisionRecord(id: String, version: Int) -> MemoryRecord? {
+        historyMap[id]?[version]
     }
 }
