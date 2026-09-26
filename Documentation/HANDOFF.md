@@ -2,9 +2,10 @@
 
 ## CURRENT STATE
 - Root task: **RE-ARCH — Canonical PersonalAgent-iOS structure (Issue #85)**
-- Issue #85: **OPEN — late-stage migration, Capabilities group completed**
-- Capabilities Migration: **COMPLETED & VERIFIED GREEN** (340/340 tests pass)
-- This document is the current handoff source; historical checkpoints remain in `AUDIT.md` and `WORK_LOG.md`.
+- Architecture migration: **IN FLIGHT on `rearch/architecture-canonical-clean`**
+- Composition is already merged to `main` via PR #97.
+- Architecture production target is being removed; `MilestoneGate` remains production-owned by Composition.
+- ArchitectureManifest is test-only.
 
 ## CONFIRMED COMPLETED
 - Kernel Agent group → canonical `Kernel/{Contracts,Errors,Ports}`
@@ -16,17 +17,15 @@
 - Capabilities group → `Sources/Capabilities/{Modules,Skills,Tools}`
 
 ## CONFIRMED REMAINING CANONICAL GAPS
-- `Sources/Composition` → `Composition` **IN FLIGHT**
-- `Sources/Architecture` → test-side ArchitectureManifest ownership; no production Architecture layer
-- `Sources/Observability` → remaining contract/implementation split
-- `Sources/Security` → remaining contract/configuration split
+- `Sources/Observability` → Kernel/Ports contract ownership
+- `Sources/Security` → Kernel/Ports + Storage/Configuration split
 - `Sources/Memory` → remaining Memory semantic split
 
 ## EXACT NEXT ACTION
-1. Verify the clean Composition branch with full CI.
-2. Squash-merge the single logical Composition task into main only after CI is green.
-3. Close contaminated PR #96; do not merge it.
-4. After merge, inspect the next smallest confirmed canonical gap from current-tree evidence.
+1. Run full gate for the Architecture clean branch.
+2. Repair only evidence-backed failures.
+3. Squash-merge the single logical Architecture task after green CI.
+4. Then inspect Observability as the next smallest confirmed gap.
 
 
 ## 2026-09-27 — PR #94 Apple CI repair checkpoint
