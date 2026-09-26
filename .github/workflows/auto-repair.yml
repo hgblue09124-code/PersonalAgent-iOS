@@ -1,6 +1,9 @@
 name: Auto Repair (Guarded)
 
 on:
+  push:
+    branches:
+      - "rearch/**"
   workflow_dispatch:
     inputs:
       attempt:
