@@ -12,18 +12,25 @@ fine-tuning is required.
 
 ## 1. Core idea
 
-The OS treats every task as a search problem:
+The OS treats every task as a routed search problem:
 
 TASK
-→ READ current house
-→ SELECT likely branch
+→ SNAPSHOT CURRENT STATE
+→ CLASSIFY
+→ ROUTE
+→ SET CONTEXT BUDGET
+→ LOAD MINIMAL HOUSE
 → SOLVE
 → VERIFY
-→ ADVERSARIAL CHECK
-→ COMPARE COST
-→ COMPRESS
-→ UPDATE HOUSE
-→ GENERATE NEXT CHALLENGE
+→ FOLLOW
+→ RESULT / DELTA
+→ LEARN / PERSIST
+
+The tree is the structural view. The executable cognitive shape is a graph:
+
+NODE → SIGNAL → FOLLOW → NODE
+
+A follow is a conditional transition, not a directory edge. It is created by an observable signal such as verification failure, missing evidence, a scope trap, a novel branch, or a cheaper verified route.
 
 The strong model is a teacher/judge when needed. The durable asset is the OS
 house: reusable skills, decision paths, traps, shortcuts, and challenge rules.
@@ -79,7 +86,112 @@ TREE OS
 The tree is conceptual structure, not a requirement to create a directory or
 runtime object for every node.
 
-## 3. The house is the memory
+## 3. Tree becomes a cognitive graph
+
+The Tree OS is not limited to parent/child traversal. Its nodes form a sparse cognitive graph whose edges are explicit FOLLOW transitions.
+
+```text
+                         ┌──→ FAILURE TRAP ──→ REPAIR SKILL ──┐
+                         │                                     │
+TASK → CLASSIFY → ROUTE → SKILL → ACT → VERIFY → RESULT ──────┤
+             ↑       │                  │                      │
+             │       │                  ├── missing evidence ──→ EVIDENCE
+             │       │                  │
+             │       └── shortcut ──────→ CHEAPER PATH         │
+             │                                              ↓  │
+             └────────────── FOLLOW ←──── DELTA ←──── LEARN ───┘
+```
+
+### 3.1 Node types
+
+- **SKILL** — reusable action rule.
+- **TRAP** — known failure twin and rejection rule.
+- **EVIDENCE** — concrete proof needed to close a branch.
+- **SHORTCUT** — cheaper path that preserves correctness, evidence, and scope.
+- **DECISION** — routing rule selecting the next node.
+- **CHALLENGE** — bounded self-play input used to test a route.
+- **DELTA** — the smallest new fact produced by a completed run.
+
+A node should stay small. The graph stores reusable transitions; trajectories remain the detailed historical record.
+
+### 3.2 FOLLOW is the synapse
+
+Every useful node may expose conditional follows:
+
+```text
+FOLLOW
+  IF <signal>
+  THEN <target node>
+  WHY <transition reason>
+  VERIFY <evidence that the transition was justified>
+  COST <relative/estimated route cost>
+  STATUS OBSERVED | CONFIRMED | PROMOTED
+```
+
+Examples:
+
+```text
+VERIFY
+  PASS              → DONE
+  FAIL              → FOLLOW: FAILURE-TRAP
+  EVIDENCE-MISSING  → FOLLOW: EVIDENCE
+  NOVEL             → FOLLOW: EXPLORE
+  CHEAPER-VALID     → FOLLOW: SHORTCUT
+```
+
+The graph must not grow merely because two nodes are semantically related. A connection earns existence from an observable transition and its verification.
+
+### 3.3 Routing is sparse and conditional
+
+At execution time, do not load the whole graph. Start from the task and follow only edges whose signals match current state:
+
+```text
+L0 TASK
+ ↓
+L1 ROUTED SKILLS
+ ↓ only when triggered
+L2 TRAPS / SHORTCUTS
+ ↓ only when evidence requires
+L3 RELEVANT REPOSITORY EVIDENCE
+ ↓ only when still unresolved
+L4 NEIGHBORING GRAINS
+ ↓ only when novel
+L5 TEACHER
+```
+
+This keeps graph growth from becoming context growth.
+
+### 3.4 Learning changes edge strength, not truth
+
+Repeated successful transitions may make a route preferred, but frequency alone never upgrades a node or edge to CONFIRMED. The lifecycle remains:
+
+```text
+OBSERVED transition
+  ↓
+repeated / self-play tested
+  ↓
+candidate connection
+  ↓
+independent real-task evidence
+  ↓
+CONFIRMED
+  ↓
+independent repetition / architecture-critical
+  ↓
+PROMOTED
+```
+
+A cheaper route may become preferred only when:
+
+```text
+VALID
++ EVIDENCE PRESERVED
++ SCOPE PRESERVED
++ COST LOWER
+```
+
+The graph therefore learns routing efficiency without turning popularity into proof.
+## 4. The house is the memory
 
 A trajectory is temporary training material.
 
@@ -96,7 +208,7 @@ A reusable entry should answer:
 - STATUS: OBSERVED / CONFIRMED / PROMOTED
 - SOURCE: where did the rule come from?
 
-## 4. Skill node
+## 5. Skill node
 
 Use this conceptual shape for future skill entries:
 
@@ -142,7 +254,7 @@ STATUS:
 
 This seed is derived from CL-003/CAND-001. It is not promoted by the corpus alone.
 
-## 5. Self-play loop
+## 6. Self-play loop
 
 The OS should challenge itself instead of endlessly appending easy examples.
 
@@ -224,7 +336,7 @@ Generate a new challenge that targets its weakest assumption.
 If it survives, the branch becomes stronger. If it fails, create or refine a
 failure trap.
 
-## 6. Token economy is an objective, not permission to skip evidence
+## 7. Token economy is an objective, not permission to skip evidence
 
 The OS optimizes:
 
@@ -247,7 +359,7 @@ Token saving must never mean:
 
 The cheapest valid path is the target.
 
-## 7. Failure twins
+## 8. Failure twins
 
 Every useful skill should eventually have a negative twin.
 
@@ -282,7 +394,7 @@ Other seed traps:
 These are challenge/judging patterns, not automatically confirmed repository
 lessons.
 
-## 8. Teacher role
+## 9. Teacher role
 
 The strong model should be used selectively.
 
@@ -309,7 +421,7 @@ repeated independent real-task success
 Do not copy hidden chain-of-thought. Persist observable decisions, actions,
 verification, failures, costs, and reusable rules.
 
-## 9. Tree growth rule
+## 10. Tree growth rule
 
 Do not grow the tree because a file became large.
 
@@ -337,7 +449,7 @@ PROMOTED
 Synthetic self-play can strengthen or reject a candidate, but synthetic
 evidence alone cannot turn it into a repository-confirmed lesson.
 
-## 10. Current seeds from the 1,000-run corpus
+## 11. Current seeds from the 1,000-run corpus
 
 The existing ten clusters become the first decision forest:
 
@@ -356,7 +468,7 @@ The existing ten clusters become the first decision forest:
 
 The corpus supplies seeds, not proof.
 
-## 11. First self-play curriculum
+## 12. First self-play curriculum
 
 Start with cheap challenges before creating more trajectory volume.
 
@@ -390,7 +502,7 @@ Replay a previous success with one hidden assumption changed.
 ### T-010 — teacher boundary
 Ask the teacher only for the missing fact, not for a full solution.
 
-## 12. What success looks like
+## 13. What success looks like
 
 The OS is improving when the same class of task requires:
 
@@ -414,7 +526,7 @@ The stronger signal is:
 → fewer tokens per valid solve
 ```
 
-## 13. Guardrails
+## 14. Guardrails
 
 - One repository task remains one logical commit.
 - Current repository state outranks remembered state.
@@ -427,7 +539,7 @@ The stronger signal is:
   executable boundaries.
 - Token optimization may remove waste, never required evidence.
 
-## 14. Current implementation boundary
+## 15. Current implementation boundary
 
 This V1 is the cognitive architecture for the next phase of OS Markdown.
 
@@ -435,9 +547,11 @@ It intentionally does not claim that the repository already has an autonomous
 self-playing runtime. The current implementation is a Markdown-native house
 and curriculum that can be exercised by the agent/model loop.
 
-The next real task should instantiate one self-play cycle:
+The next real task should instantiate one graph-aware self-play cycle:
 
-CHALLENGE → SOLVE → ADVERSARY → JUDGE → COST COMPARE → COMPRESS → RECHALLENGE
+CHALLENGE → ROUTE → SOLVE → VERIFY → FOLLOW → ADVERSARY → JUDGE → COST COMPARE → COMPRESS → RECHALLENGE
+
+The observable result should record which FOLLOW edges fired, which were rejected, and whether the route became cheaper without weakening evidence or scope.
 
 and record the observable result.
 
