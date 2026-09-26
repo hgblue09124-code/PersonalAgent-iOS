@@ -1,6 +1,7 @@
 import Foundation
 import PAFoundation
 import PAProviders
+import PAProvidersLocal
 
 /// Internal persistent index state for local model metadata and active selection.
 private struct LocalModelIndex: Codable, Sendable {
