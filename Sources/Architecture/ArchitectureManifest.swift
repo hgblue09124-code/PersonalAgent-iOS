@@ -91,6 +91,7 @@ public enum ArchitectureManifest: Sendable {
             "PASkills",
             "PATools",
             "PAMemory",
+            "PAStorageModels",
         ]
     ]
 
