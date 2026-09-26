@@ -1,6 +1,5 @@
 import Testing
 import Foundation
-import PAArchitecture
 import PAFoundation
 import PAMemory
 import PAKernel
