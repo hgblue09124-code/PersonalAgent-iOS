@@ -1,6 +1,7 @@
 import Foundation
 import PAKernel
 import PAStorage
+import PAStorageModels
 
 public actor InMemoryMemoryStore: MemoryStore {
     private var index: MemoryIndex
