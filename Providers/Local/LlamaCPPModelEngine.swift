@@ -1,4 +1,5 @@
 import Foundation
+import PAKernel
 import PAProviders
 #if canImport(cllama)
 import cllama
