@@ -1,5 +1,4 @@
 import Testing
-import PAFoundation
 import PAModules
 
 @Suite("M3 module catalog")
