@@ -68,3 +68,9 @@
 - Recursive tree inspection confirmed legacy Foundation/Event/Cognition/Agency/Policy paths are absent.
 - Remaining physical groups include `Sources/Memory`, `Sources/Modules/Contracts`, `Sources/Skills/Contracts`, `Sources/Tools/Contracts`, `Sources/Observability`, `Sources/Security`, `Sources/Architecture`, and `Sources/Composition`.
 - The agent should advance to the next confirmed migration group without repairing #712 again.
+
+### 2026-09-26 — Agent On Memory migration boundary
+- Events → `Kernel/Events` is physically complete and verified by workflow #725 / 36255655970.
+- Audit #14 fixes Memory ownership: `MemoryRuntime → Memory/Working`, `MemoryIndex → Memory/Retrieval`, `InMemoryMemoryStore → Memory/Working`, `FileBackedMemoryStore → Storage/Memory`, and `MemoryContracts` requires type-level splitting.
+- Current `Package.swift` makes `PAMemory` depend on `PAStorage`; moving `FileBackedMemoryStore` into the existing PAStorage target without a target split would create a dependency cycle.
+- Rule: resolve the SwiftPM target boundary first; never perform a blind physical move that introduces a cycle.
