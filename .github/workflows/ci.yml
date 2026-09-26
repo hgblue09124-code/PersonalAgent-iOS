@@ -53,10 +53,10 @@ jobs:
           test -f Tests/PersonalAgentTests/M3CatalogTests.swift
           test -f Tests/PersonalAgentTests/M3CompositionIsolationTests.swift
           test -f Tests/PersonalAgentTests/M3SemanticsTests.swift
-          test -f Sources/Modules/Contracts/ModuleRuntime.swift
-          test -f Sources/Modules/Contracts/ModuleCatalog.swift
-          test -f Sources/Modules/Contracts/DeterministicModules.swift
-          test -f Sources/Skills/Contracts/ToolModule.swift
+          test -f Sources/Capabilities/Modules/ModuleRuntime.swift
+          test -f Sources/Capabilities/Modules/ModuleCatalog.swift
+          test -f Sources/Capabilities/Modules/DeterministicModules.swift
+          test -f Sources/Capabilities/Skills/ToolModule.swift
           test -f Sources/Composition/M3CompositionRoot.swift
           test -f Documentation/M3.md
       - name: App does not import reserved engines
