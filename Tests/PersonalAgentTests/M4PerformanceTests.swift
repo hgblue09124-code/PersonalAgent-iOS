@@ -2,6 +2,7 @@ import Testing
 import PAKernel
 import Foundation
 import PAMemory
+import PAStorageMemory
 
 @Suite("M4 Performance & Scale Benchmarks")
 struct M4PerformanceTests {
