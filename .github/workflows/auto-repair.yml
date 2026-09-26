@@ -205,7 +205,7 @@ jobs:
 
           # R3: known deterministic Kernel import-boundary allowlist.
           approved_modules = {"PAProviders", "PASkills", "PAModules", "PAPolicy", "PACognition"}
-          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel ([^)]*\)"', log)
+          matches = re.findall(r'"(PA[A-Za-z0-9]+) imports PAKernel [^)]*\)"', log)
           for module in sorted(set(m for m in matches if m in approved_modules)):
               pattern = rf'("{re.escape(module)}": \[[^\]]*)\]'
               match = re.search(pattern, manifest_text)
