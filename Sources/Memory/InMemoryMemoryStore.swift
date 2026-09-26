@@ -1,5 +1,5 @@
 import Foundation
-import PAFoundation
+import PAKernel
 import PAStorage
 
 public actor InMemoryMemoryStore: MemoryStore {
