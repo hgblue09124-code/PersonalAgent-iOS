@@ -33,6 +33,7 @@ let package = Package(
         .library(name: "PAComposition", targets: ["PAComposition"]),
         .library(name: "PAArchitecture", targets: ["PAArchitecture"]),
         .library(name: "PAProvidersGrok", targets: ["PAProvidersGrok"]),
+        .library(name: "PAProvidersRemote", targets: ["PAProvidersRemote"]),
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
         .library(name: "PAProvidersOpenAICompatible", targets: ["PAProvidersOpenAICompatible"]),
         .library(name: "PAProvidersLocal", targets: ["PAProvidersLocal"]),
@@ -82,18 +83,23 @@ let package = Package(
             path: "Sources/Providers/Contracts"
         ),
         .target(
-            name: "PAProvidersGrok",
+            name: "PAProvidersRemote",
             dependencies: ["PAProviders", "PAFoundation"],
+            path: "Providers/Remote/Shared"
+        ),
+        .target(
+            name: "PAProvidersGrok",
+            dependencies: ["PAProvidersRemote", "PAProviders", "PAFoundation"],
             path: "Providers/Remote/Grok"
         ),
         .target(
             name: "PAProvidersOpenAI",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: ["PAProvidersRemote", "PAProviders", "PAFoundation"],
             path: "Providers/Remote/OpenAI"
         ),
         .target(
             name: "PAProvidersOpenAICompatible",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: ["PAProvidersRemote", "PAProviders", "PAFoundation"],
             path: "Providers/Remote/OpenAICompatible"
         ),
         .target(
