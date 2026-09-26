@@ -3,7 +3,6 @@ import Foundation
 import PAFoundation
 import PAStorage
 import PAMemory
-import PAArchitecture
 
 /// Private test double strictly isolated as test support in M5CloudStoreContractTests.
 /// Does not exist in production PAStorage runtime.
