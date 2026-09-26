@@ -303,3 +303,19 @@ Do not move files during the mapping-only audit.
 - Dedicated secure PR release publication, if needed later, must use a workflow boundary that safely grants release permissions; do not reintroduce a write-capable release token into arbitrary PR execution.
 
 <!-- HANDOFF: Re-run PR #94 Apple Native Build after this single repair commit; require build, IPA verification, and artifact upload green before continuing Issue #85 migration. -->
+
+
+### Audit #19 — Composition physical migration
+
+**CONFIRMED**
+- Audit #14 maps Sources/Composition/* to canonical Composition/*.
+- The complete Composition group was moved without source rewrites or behavior changes.
+- Package.swift now points PAComposition at Composition.
+- CI's Composition path assertion now targets Composition/M3CompositionRoot.swift.
+- Skills was already physically migrated by the earlier Capabilities checkpoint; the stale Skills next-action text is superseded by current-tree evidence.
+
+**VERIFICATION**
+- Migration commit is pending CI verification at this checkpoint.
+
+**DEFERRED**
+- ArchitectureManifest, Observability, Security, and Memory remain separate migration groups.
