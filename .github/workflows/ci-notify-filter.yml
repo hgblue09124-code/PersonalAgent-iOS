@@ -1,9 +1,12 @@
 name: PR Final — Filter
-run-name: PR Final — ${{ github.head_ref || github.ref_name }}
+run-name: PR Final — ${{ github.event.workflow_run.head_branch || github.ref_name }}
 
 on:
-  pull_request:
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Kiểm tra và sửa chữa
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -11,10 +14,19 @@ permissions:
 jobs:
   notify-filter:
     name: PR-FINAL-FILTER
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
     runs-on: ubuntu-24.04
     steps:
-      - name: Emit stable CI notification key
+      - name: Verify final CI gate
         run: |
           echo "CI_NOTIFY_KEY=personalagent-ci"
-          echo "CI_NOTIFY_WORKFLOW=PR Final — ${{ github.head_ref || github.ref_name }}"
-          echo "CI_NOTIFY_STATUS=started"
+          echo "CI_NOTIFY_WORKFLOW=PR Final — ${{ github.event.workflow_run.head_branch }}"
+          echo "UPSTREAM_RUN_ID=${{ github.event.workflow_run.id }}"
+          echo "UPSTREAM_STATUS=${{ github.event.workflow_run.status }}"
+          echo "UPSTREAM_CONCLUSION=${{ github.event.workflow_run.conclusion }}"
+          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "PR FINAL FAIL: Kiểm tra và sửa chữa did not pass."
+            exit 1
+          fi
+          echo "CI_NOTIFY_STATUS=success"
+          echo "PR FINAL PASS: all required CI components passed through Full Gate."
