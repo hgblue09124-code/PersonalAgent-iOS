@@ -1,7 +1,6 @@
 import PAComposition
 import Foundation
 import Testing
-import PAFoundation
 import PAProviders
 
 @Suite("M2 deterministic fake provider")
