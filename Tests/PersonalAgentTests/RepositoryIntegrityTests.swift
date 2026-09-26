@@ -18,7 +18,7 @@ struct RepositoryIntegrityTests {
             "Providers/Contracts/DeterministicFakeProvider.swift",
             "Providers/Remote/OpenAI/OpenAIBoundary.swift",
             "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
-            "Sources/Providers/Local/LocalBoundary.swift",
+            "Providers/Local/LocalBoundary.swift",
             "Sources/Composition/M2CompositionRoot.swift",
         ] {
             let root = path.hasPrefix("Runtime/") || path.hasPrefix("Providers/Remote/")
@@ -49,7 +49,6 @@ struct RepositoryIntegrityTests {
             )
         }
     }
-
 
     @Test func requiredRuntimeSourcesExist() {
         let runtime = repositoryRoot().appendingPathComponent("Runtime")
