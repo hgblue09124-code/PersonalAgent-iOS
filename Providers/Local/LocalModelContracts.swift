@@ -1,3 +1,6 @@
+import Foundation
+import PAFoundation
+
 /// Local model identity representation.
 public struct LocalModelIdentity: Sendable, Codable, Equatable, Identifiable {
     public let id: ModelID
