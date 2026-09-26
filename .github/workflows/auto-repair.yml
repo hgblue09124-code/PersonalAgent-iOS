@@ -98,7 +98,26 @@ jobs:
 
           knowledge = json.loads(knowledge_path.read_text()) if knowledge_path.exists() else {"version": 1, "approved": [], "candidates": []}
           approved = {entry["fingerprint"] for entry in knowledge.get("approved", [])}
-          candidate_exists = any(entry.get("fingerprint") == fingerprint for entry in knowledge.get("candidates", []))
+          candidates = knowledge.setdefault("candidates", [])
+          candidate = next((entry for entry in candidates if entry.get("fingerprint") == fingerprint), None)
+
+          # Repetition memory: the same unknown failure is evidence that the
+          # current repair vocabulary is incomplete. Count observations across
+          # commits instead of treating each CI failure as a new event.
+          if candidate is not None:
+              candidate["observations"] = int(candidate.get("observations", 1)) + 1
+              candidate["last_seen_commit"] = subprocess.run(
+                  ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+              ).stdout.strip()
+              if candidate["observations"] >= 3:
+                  candidate["status"] = "repeated"
+                  candidate["execution"] = "review-required"
+                  print(
+                      f"AUTO-LEARNING: repeated failure {fingerprint} "
+                      f"({candidate['observations']} observations); "
+                      "promoting to review-required pattern."
+                  )
+          candidate_exists = candidate is not None
 
           recent = subprocess.run(
               ["git", "log", "-10", "--format=%s"],
@@ -106,7 +125,7 @@ jobs:
           ).stdout
           if fingerprint and f"[auto-repair-fp:{fingerprint}]" in recent:
               print(f"AUTO-REPAIR: repeated identical failure {fingerprint}; STOP.")
-              print("candidate already known:", candidate_exists)
+              print("candidate observations:", candidate.get("observations", 1) if candidate else 1)
               raise SystemExit(0)
 
           # R1: duplicated consecutive .target( in Package.swift.
@@ -189,11 +208,15 @@ jobs:
                   knowledge.setdefault("candidates", []).append({
                       "fingerprint": fingerprint,
                       "pattern": sorted(set(fingerprints)),
+                      "status": "observed",
+                      "execution": "forbidden",
+                      "observations": 1,
                       "first_seen_commit": subprocess.run(
                           ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
                       ).stdout.strip(),
-                      "status": "observed",
-                      "execution": "forbidden",
+                      "last_seen_commit": subprocess.run(
+                          ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
+                      ).stdout.strip(),
                       "changed_files_at_observation": files[:50],
                   })
                   knowledge_path.parent.mkdir(parents=True, exist_ok=True)
