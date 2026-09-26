@@ -69,7 +69,8 @@ let package = Package(
         .target(
             name: "PAStorage",
             dependencies: ["PAKernel", "PAEvents", "PAObservability"],
-            path: "Storage"
+            path: "Storage",
+            exclude: ["Models"]
         ),
         .target(
             name: "PAStorageModels",
@@ -147,7 +148,6 @@ let package = Package(
                 "PAProviders",
                 "PAModules",
                 "PAMemory",
-                "PAKernel",
             ],
             path: "Runtime"
         ),
@@ -156,7 +156,6 @@ let package = Package(
             dependencies: [
                 "PAKernel",
                 "PAArchitecture",
-                "PAKernel",
                 "PARuntime",
                 "PAObservability",
                 "PAEvents",
@@ -195,8 +194,6 @@ let package = Package(
                 "PATools",
                 "PAModules",
                 "PASkills",
-
-                "PAKernel",
                 "PARuntime",
                 "PAComposition",
                 "PAArchitecture",
