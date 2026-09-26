@@ -1,5 +1,6 @@
 import Foundation
 import PAFoundation
+import PAProviders
 
 /// Maps the semantic contract onto the OpenAI-compatible chat.completions wire format.
 /// Used by Grok, OpenAI, OpenAI-compatible, and local HTTP adapters.

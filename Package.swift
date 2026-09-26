@@ -105,6 +105,7 @@ let package = Package(
         .target(
             name: "PAProvidersLocal",
             dependencies: [
+                "PAProvidersRemote",
                 "PAProviders",
                 "PAFoundation",
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))

@@ -1,5 +1,6 @@
 import Foundation
 import PASecurity
+import PAProviders
 
 /// Byte-level transport. Semantic providers must not expose this type to Kernel callers.
 public struct ProviderTransportRequest: Sendable, Equatable {
