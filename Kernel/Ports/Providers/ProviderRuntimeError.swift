@@ -1,6 +1,3 @@
-import Foundation
-
-
 public enum ProviderRuntimeError: Error, Sendable, Equatable {
     case unavailable
     case contextLimitExceeded

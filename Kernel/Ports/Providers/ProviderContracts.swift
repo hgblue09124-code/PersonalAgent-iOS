@@ -1,6 +1,15 @@
 import Foundation
 import PAKernel
 
+public struct ProviderCredentialRef: Hashable, Sendable, Codable {
+    public let providerID: ProviderID
+    public let account: String
+    public init(providerID: ProviderID, account: String) {
+        self.providerID = providerID
+        self.account = account
+    }
+}
+
 public struct ProviderIdentity: Hashable, Sendable, Codable {
     public let id: ProviderID
     public let displayName: String
