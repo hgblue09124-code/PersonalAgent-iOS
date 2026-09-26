@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import PAArchitecture
 
 @Suite("Repository integrity")
 struct RepositoryIntegrityTests {
