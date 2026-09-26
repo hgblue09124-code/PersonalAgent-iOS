@@ -13,7 +13,7 @@ public actor InMemoryEventLog: EventLog {
         stored.filter { $0.traceID == traceID }
     }
 
-    public func allEvents() async throws -> [ExecutionEvent] {
+    public func allEvents() async -> [ExecutionEvent] {
         stored
     }
 
