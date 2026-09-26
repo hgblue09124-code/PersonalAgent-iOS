@@ -12,6 +12,8 @@
 - Historical memory never silently overrides current repository evidence.
 
 ## CURRENT REPOSITORY MEMORY
+- Foundation migration is physically complete and verified on the current chain; old `Sources/Foundation` is absent.
+- Next separate migration scope is Events → `Kernel/Events`.
 - Issue #85 is the root canonical-architecture checkpoint.
 - PR #91 is open on `rearch/cognition-policy-runtime`.
 - Last verified PR HEAD: `a2f8861966a79a86471e070743e1a2abb54c1a9a`.
