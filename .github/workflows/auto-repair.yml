@@ -1,8 +1,6 @@
 name: Auto Repair (Guarded)
 
 on:
-  push:
-    branches: [rearch/kernel-migration-2, rearch/cognition-policy-runtime]
   workflow_dispatch:
     inputs:
       attempt:
