@@ -172,3 +172,15 @@ Never leave only prose such as “fixed” or “looks green”.
 - Fix: no code change; reconciled stale MD/queue state to current repository/CI evidence.
 - Verification: **VERIFIED GREEN**, run #718 / `36255114608`.
 - Next: execute the next confirmed migration group only after exact file ownership is established from the current tree.
+
+
+## 2026-09-26 — Agent On: Events verified, Memory boundary blocker confirmed
+
+- PR: #91
+- HEAD baseline: `ffe4ba3d07402abb1eaef708eebc9ec78dba7059`
+- Verification: workflow #725 / `36255655970` **VERIFIED GREEN** across Swift package tests, iOS arm64, repository integrity, aggregate Full Gate, and PR Final.
+- Tree audit: `Kernel/Events` is present; legacy `Sources/Events` is absent. Events migration is therefore physically complete at this verified checkpoint.
+- Memory audit: Audit #14 confirms `MemoryRuntime → Memory/Working`, `MemoryIndex → Memory/Retrieval`, `InMemoryMemoryStore → Memory/Working`, `FileBackedMemoryStore → Storage/Memory`, and a type-level split for `MemoryContracts`.
+- Confirmed blocker: current `Package.swift` has `PAMemory` depending on `PAStorage`, while `FileBackedMemoryStore` currently belongs to the PAMemory implementation. Moving it into the existing `PAStorage` target would create a circular dependency unless the storage target boundary is split first.
+- Decision: **no speculative move**. Resolve the target boundary from actual dependency evidence, then perform the smallest migration.
+- Next: inspect the complete PAMemory/PAStorage target graph and tests, choose the minimal dependency-safe target split, then migrate Memory.
