@@ -6,7 +6,6 @@ import PackageDescription
 /// App -> Composition -> Kernel -> Cognition/Agency/Policy
 /// -> Skills/Tools/Modules/Providers/Memory
 /// -> Storage/Events/Observability/Security
-/// -> Foundation
 
 let package = Package(
     name: "PersonalAgent",
