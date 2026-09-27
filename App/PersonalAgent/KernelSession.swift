@@ -4,6 +4,8 @@ import SwiftUI
 import PAKernel
 import PAComposition
 import PAProviders
+import PAProvidersLocal
+import PAStorageModels
 import PARuntime
 
 @MainActor
