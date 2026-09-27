@@ -32,7 +32,7 @@ let package = Package(
         .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
-        .library(name: "PAArchitecture", targets: ["PAArchitecture"]),
+
         .library(name: "PAProvidersGrok", targets: ["PAProvidersGrok"]),
         .library(name: "PAProvidersRemote", targets: ["PAProvidersRemote"]),
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
@@ -127,7 +127,7 @@ let package = Package(
         .target(
             name: "PATools",
             dependencies: ["PAKernel", "PAObservability", "PARuntime"],
-            path: "Sources/Tools/Contracts"
+            path: "Sources/Capabilities/Tools"
         ),
         .target(
             name: "PAModules",
@@ -137,7 +137,7 @@ let package = Package(
         .target(
             name: "PASkills",
             dependencies: ["PAKernel", "PAModules", "PATools"],
-            path: "Sources/Skills/Contracts"
+            path: "Sources/Capabilities/Skills"
         ),
         .target(
             name: "PAKernel",
@@ -161,7 +161,6 @@ let package = Package(
             name: "PAComposition",
             dependencies: [
                 "PAKernel",
-                "PAArchitecture",
                 "PARuntime",
                 "PAObservability",
                 "PAEvents",
@@ -176,12 +175,7 @@ let package = Package(
                 "PAMemory",
                 "PAStorageMemory",
             ],
-            path: "Sources/Composition"
-        ),
-        .target(
-            name: "PAArchitecture",
-            dependencies: ["PAKernel"],
-            path: "Sources/Architecture"
+            path: "Composition"
         ),
         .testTarget(
             name: "PersonalAgentTests",
@@ -204,7 +198,6 @@ let package = Package(
                 "PASkills",
                 "PARuntime",
                 "PAComposition",
-                "PAArchitecture",
             ],
             path: "Tests/PersonalAgentTests"
         ),

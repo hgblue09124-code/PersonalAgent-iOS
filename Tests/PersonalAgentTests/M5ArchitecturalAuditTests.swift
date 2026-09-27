@@ -5,7 +5,6 @@ import PAStorageModels
 import PAMemory
 import PAKernel
 import PAComposition
-import PAArchitecture
 import PAStorageMemory
 
 @Suite("M0–M5 Architectural Integrity Audit Tests")
@@ -126,7 +125,7 @@ struct M5ArchitecturalAuditTests {
     // 4. Explicit Dependency Injection Audit
     @Test func testCompositionRootsAndRuntimesUseExplicitDependencyInjection() throws {
         let root = repositoryRoot()
-        let compositionDir = root.appendingPathComponent("Sources").appendingPathComponent("Composition")
+        let compositionDir = root.appendingPathComponent("Composition")
         let compositionFiles = try files(under: compositionDir, suffix: ".swift")
 
         #expect(!compositionFiles.isEmpty)

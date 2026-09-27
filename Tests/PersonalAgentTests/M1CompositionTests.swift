@@ -1,5 +1,4 @@
 import Testing
-import PAArchitecture
 import PAComposition
 import PAKernel
 

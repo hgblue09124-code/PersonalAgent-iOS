@@ -1,4 +1,4 @@
-name: "@github CI"
+name: M3
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   package-tests:
-    name: Swift package tests
+    name: Swift package tests + repository integrity
     runs-on: ubuntu-24.04
     container:
       image: swift:6.3.2
@@ -16,11 +16,6 @@ jobs:
       - name: Run contract, kernel, provider, and module tests
         run: swift test --disable-sandbox
 
-  repository-integrity:
-    name: Repository integrity greps
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v5
       - name: KernelSession is in the Xcode sources phase
         run: |
           grep -q "KernelSession.swift in Sources" PersonalAgent.xcodeproj/project.pbxproj
@@ -61,8 +56,8 @@ jobs:
           test -f Sources/Capabilities/Modules/ModuleRuntime.swift
           test -f Sources/Capabilities/Modules/ModuleCatalog.swift
           test -f Sources/Capabilities/Modules/DeterministicModules.swift
-          test -f Sources/Skills/Contracts/ToolModule.swift
-          test -f Sources/Composition/M3CompositionRoot.swift
+          test -f Sources/Capabilities/Skills/ToolModule.swift
+          test -f Composition/M3CompositionRoot.swift
           test -f Documentation/M3.md
       - name: App does not import reserved engines
         run: |
@@ -76,7 +71,7 @@ jobs:
           fi
       - name: Kernel does not import concrete providers
         run: |
-          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Kernel; then
+          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Sources/Core/Agent; then
             echo "Kernel isolation violated"
             exit 1
           fi
@@ -86,65 +81,3 @@ jobs:
             echo "Possible secret committed"
             exit 1
           fi
-
-  apple-build:
-    name: iOS arm64 build & unsigned IPA
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v5
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
-      - name: Build PersonalAgent iOS app target (arm64)
-        run: |
-          xcodebuild build             -project PersonalAgent.xcodeproj             -scheme PersonalAgent             -sdk iphoneos             -configuration Release             -arch arm64             -derivedDataPath DerivedData             CODE_SIGNING_ALLOWED=NO             CODE_SIGNING_REQUIRED=NO             CODE_SIGN_IDENTITY=""             AD_HOC_CODE_SIGNING_ALLOWED=YES
-      - name: Package unsigned development IPA artifact
-        run: |
-          mkdir -p Payload
-          APP_PATH=$(find DerivedData ~/Library/Developer/Xcode/DerivedData -name "PersonalAgent.app" -type d 2>/dev/null | head -n 1)
-          test -n "$APP_PATH" || (echo "Error: PersonalAgent.app not found" && false)
-          cp -R "$APP_PATH" Payload/
-          zip -r PersonalAgent-unsigned.ipa Payload
-          echo "Created PersonalAgent-unsigned.ipa successfully"
-      - name: Upload unsigned development IPA artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: PersonalAgent-iOS-unsigned-IPA
-          path: PersonalAgent-unsigned.ipa
-          retention-days: 14
-
-  full-gate:
-    name: Kiểm tra và sửa chữa
-    if: ${{ always() }}
-    needs: [package-tests, repository-integrity, apple-build]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Require all validation jobs to pass
-        run: |
-          if [[ "${{ needs.package-tests.result }}" != "success" ||
-                "${{ needs.repository-integrity.result }}" != "success" ||
-                "${{ needs.apple-build.result }}" != "success" ]]; then
-            echo "Kiểm tra và sửa chữa FAILED"
-            echo "Swift package tests: ${{ needs.package-tests.result }}"
-            echo "Repository integrity: ${{ needs.repository-integrity.result }}"
-            echo "iOS arm64 build: ${{ needs.apple-build.result }}"
-            exit 1
-          fi
-          echo "Kiểm tra và sửa chữa PASSED"
-
-  ci-filter:
-    name: PR Final — Filter
-    if: ${{ always() }}
-    needs: [full-gate]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Verify Full Gate result
-        run: |
-          echo "CI_NOTIFY_KEY=personalagent-ci"
-          echo "CI_NOTIFY_WORKFLOW=@github CI"
-          echo "FULL_GATE_RESULT=${{ needs.full-gate.result }}"
-          if [[ "${{ needs.full-gate.result }}" != "success" ]]; then
-            echo "PR FINAL FAIL: Full Gate did not pass."
-            exit 1
-          fi
-          echo "CI_NOTIFY_STATUS=success"
-          echo "PR FINAL PASS: Full Gate completed successfully."

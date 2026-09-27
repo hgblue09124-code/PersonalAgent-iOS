@@ -3,6 +3,53 @@ import PAKernel
 import PAObservability
 import PAEvents
 import PAModules
+import PAProviders
+
+public enum AgentExecutionProgress: Sendable, Equatable {
+    case perception
+    case reasoning
+    case reasoningCompleted(String)
+    case planning
+    case actionProposed(String)
+    case verification
+    case executing
+    case observation(String)
+    case evaluating
+    case completed(String)
+    case failed(String)
+
+    public var title: String {
+        switch self {
+        case .perception: return "Receiving task"
+        case .reasoning: return "Thinking"
+        case .reasoningCompleted: return "Reasoning ready"
+        case .planning: return "Planning"
+        case .actionProposed: return "Action proposed"
+        case .verification: return "Verifying"
+        case .executing: return "Executing"
+        case .observation: return "Observing"
+        case .evaluating: return "Evaluating"
+        case .completed: return "Completed"
+        case .failed: return "Failed"
+        }
+    }
+
+    public var detail: String {
+        switch self {
+        case .perception: return "Reading your task…"
+        case .reasoning: return "Local model is generating a decision…"
+        case .reasoningCompleted(let text): return text
+        case .planning: return "Building the next action…"
+        case .actionProposed(let text): return text
+        case .verification: return "Checking the proposed action…"
+        case .executing: return "Running the selected action…"
+        case .observation(let text): return text
+        case .evaluating: return "Evaluating the execution result…"
+        case .completed(let text): return text
+        case .failed(let text): return text
+        }
+    }
+}
 
 public protocol Evaluating: Sendable {
     func evaluate(goalID: GoalID, observations: [Observation]) async throws -> Evaluation
@@ -20,6 +67,43 @@ public struct DefaultContextAssembler: ContextAssembling {
         evaluation: Evaluation? = nil
     ) async throws -> ContextBundle {
         ContextBundle(perception: perception, memoryIDs: [], skillIDs: [])
+    }
+}
+
+public struct LLMReasoner: Reasoning {
+    private let provider: any LLMProvider
+
+    public init(provider: any LLMProvider) {
+        self.provider = provider
+    }
+
+    public func reason(context: ContextBundle) async throws -> ReasoningResult {
+        let prompt = """
+        You are the reasoning component of a personal agent.
+        Return a concise plan/decision for the user's task.
+        Do not claim an action was executed.
+
+        User task:
+        \(context.perception.rawInput)
+        """
+
+        let response = try await provider.complete(
+            LLMRequest(
+                model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
+                prompt: prompt
+            )
+        )
+
+        let text = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            throw KernelError.invalidStateUpdate("LLM reasoning returned empty output")
+        }
+
+        return ReasoningResult(
+            summary: text,
+            providerID: provider.identity.id,
+            modelID: nil
+        )
     }
 }
 
@@ -131,7 +215,7 @@ public actor M6Orchestrator {
         self.maxCycles = maxCycles
     }
 
-    public func run(goalID: GoalID, rawInput: String? = nil) async throws -> Evaluation {
+    public func run(goalID: GoalID, rawInput: String? = nil, progress: (@Sendable (AgentExecutionProgress) -> Void)? = nil) async throws -> Evaluation {
         let traceID = TraceID()
         if await runtime.currentState().lifecycle == .created {
             try await runtime.start()
@@ -156,6 +240,8 @@ public actor M6Orchestrator {
             cycleCount += 1
             let perception = Perception(rawInput: input, source: "user")
 
+            progress?(.perception)
+
             // 1. Perception
             try await emit(
                 traceID: traceID,
@@ -176,9 +262,13 @@ public actor M6Orchestrator {
             )
 
             // 3. Reasoning
+            progress?(.reasoning)
             let reasoningResult = try await reasoner.reason(context: context)
 
+            progress?(.reasoningCompleted(reasoningResult.summary))
+
             // 4. Planning
+            progress?(.planning)
             let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
             try await emit(
                 traceID: traceID,
@@ -202,6 +292,7 @@ public actor M6Orchestrator {
             }
 
             // 6. Verification
+            progress?(.verification)
             let verification = try await verifier.verify(plan: plan, proposals: proposals)
             try await emit(
                 traceID: traceID,
@@ -284,8 +375,10 @@ public actor M6Orchestrator {
                 try await emit(traceID: traceID, kind: .actionAuthorized, payload: authPayload)
 
                 // Execute action
+                progress?(.executing)
                 let obs = try await executeProposal(proposal, traceID: traceID, goalID: goalID)
                 observations.append(obs)
+                progress?(.observation(obs.summary))
             }
 
             // 8. Evaluation
@@ -337,6 +430,9 @@ public actor M6Orchestrator {
             try await runtime.applyStateUpdate(stateUpdate)
 
             finalEvaluation = evaluation
+            if evaluation.disposition == .complete {
+                progress?(.completed(evaluation.reason))
+            }
             previousObservations = observations
             previousEvaluation = evaluation
 

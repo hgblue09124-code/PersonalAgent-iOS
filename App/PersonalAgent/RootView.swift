@@ -1,27 +1,22 @@
 import SwiftUI
-import PAArchitecture
+import PAComposition
 
 struct RootView: View {
     @ObservedObject var session: KernelSession
 
     var body: some View {
         TabView {
-            ChatScreen(session: session)
-                .tabItem { Label("Chat", systemImage: "bubble.left.and.bubble.right") }
             AgentScreen(session: session)
-                .tabItem { Label("Agent", systemImage: "cpu") }
-            TasksScreen()
-                .tabItem { Label("Tasks", systemImage: "checklist") }
-            MemoryScreen()
-                .tabItem { Label("Memory", systemImage: "brain") }
-            SkillsScreen(session: session)
-                .tabItem { Label("Skills", systemImage: "puzzlepiece") }
+                .tabItem { Label("Agent", systemImage: "sparkles") }
+            ModelsScreen(session: session)
+                .tabItem { Label("Models", systemImage: "cube.box") }
             ProvidersScreen(session: session)
                 .tabItem { Label("Providers", systemImage: "server.rack") }
+            SkillsScreen(session: session)
+                .tabItem { Label("Skills", systemImage: "puzzlepiece") }
             SettingsScreen(session: session)
-                .tabItem { Label("Settings", systemImage: "gear") }
+                .tabItem { Label("Settings", systemImage: "gearshape") }
         }
-        .environment(\.milestoneGate, session.milestone)
         .task { await session.refresh() }
     }
 }

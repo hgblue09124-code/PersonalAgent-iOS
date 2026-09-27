@@ -1,63 +1,132 @@
-# PersonalAgent-iOS Architecture
+# Personal Agent — Architecture
 
-<!-- TASK-CONTEXT: This is the long-lived architectural source of truth. Future workers MUST read this before changing structure, ownership, or dependency boundaries. Do not infer architecture from historical folder names alone. -->
+Status: M0 contracts frozen. M1 kernel runtime implemented. M2 provider runtime implemented. M3 module runtime implemented. M4 Memory OS implemented (`Documentation/M4.md`). M5 Local + Cloud Storage / Sync implemented (`Documentation/M5.md`). M6 Cognition / Agency integrated (`Documentation/M6.md`). M7 Durable Run Lifecycle, Checkpointing & Recovery implemented (`Documentation/M7.md`). M8 Product Architecture Foundation specification and boundaries established (`Documentation/M8.md`).
+No live LLM call in default composition.
 
-## Purpose
+This iOS client is the long-lived Personal Agent / Agent OS *client*.
+It is not a chat wrapper. Kernel is not an LLM.
 
-PersonalAgent-iOS is organized around explicit boundaries:
-- Kernel — stable contracts, events, errors, and ports.
-- Runtime — agent execution and orchestration.
-- Capabilities — executable skills, tools, and modules.
-- Providers — model/provider adapters.
-- Memory — agent data and retrieval semantics.
-- Storage — persistence and data boundaries.
-- Composition — dependency construction and wiring.
-- App — presentation only.
-- Tests — mirror production ownership.
+Companion repositories (`agent-os`, `agent-core`, `agent-core-next`, `living-data-ocean`)
+are external material. They must not appear as runtime dependencies.
 
-## Canonical Structure
+## Axis
 
-See Issue #85 (RE-ARCH — Canonical PersonalAgent-iOS structure) for the migration target.
+```
+UI (SwiftUI App)
+  ↓
+App Session / App Lifecycle
+  ↓
+Composition (M8CompositionRoot)
+  ↓
+Agent Kernel (AgentRuntime / AgentSession)
+  ↓
+Cognition / Memory / Agency / Policy / M7 Run Boundary
+  ↓
+Module / Skill / Tool / Provider contracts / Local Model Engine
+  ↓
+Storage / Sync / Product Persistence Container
+  ↓
+Events / Observability / Security / Device Capabilities
+  ↓
+Foundation
+```
 
-<!-- INVARIANT: One concept -> one place. One boundary -> one folder. One execution path -> one Runtime. One wiring point -> Composition. Vendor-specific implementation stays behind an adapter boundary. -->
+## Layer responsibilities
 
-## Dependency Direction
+| Layer | Owns | Must not own |
+| --- | --- | --- |
+| UI | rendering, input, safe-area layout | goals, plans, storage, provider calls |
+| App Session | user input boundary, session events | AgentState ownership, direct state mutations |
+| Composition | wiring contracts for a process, product persistence | business logic |
+| Kernel | identity, state, goals, lifecycle, coordination, durable run bounds | SwiftUI, concrete LLM, concrete store |
+| Cognition | perception → reflection pipeline contracts | execution side effects |
+| Agency | goal → adapt loop contracts | bypassing policy |
+| Policy | capability + approval gate | tool implementations |
+| Skills / Tools / Modules / Providers / Local Models | contracts + reserved adapter packages | agent state |
+| Storage / Memory | contracts for local-first + sync, run stores, domain persistence | cloud vendor lock-in |
+| Events | trace / replay / run provenance contracts | UI |
+| Device Capabilities | thermal, memory, network, app lifecycle signals | UIKit/SwiftUI imports in Kernel |
+| Security | secret + network boundaries | agent state |
 
-`App -> Composition -> Runtime -> Capabilities / Providers / Memory / Storage -> Kernel`
+## Markdown Cognitive Plane
 
-<!-- INVARIANT: A lower layer must not depend upward on presentation or orchestration. Kernel must remain vendor- and UI-independent. -->
+Personal Agent OS Markdown is a product-level cognitive persistence plane above the runtime implementation.
 
-## Migration Rule
+```
+Human Intent
+    ↓
+Markdown State
+    ↓
+Agent
+    ↓
+Action
+    ↓
+Evidence
+    ↓
+Markdown State
+    ↓
+Learn
+    ↺
+```
 
-1. Audit before moving.
-2. Map every current component to exactly one canonical home.
-3. Move before rewriting.
-4. Preserve behavior unless migration requires a minimal compatibility repair.
-5. Verify after each move group.
-6. Audit dependency direction after migration.
-7. Record confirmed findings and deferred decisions.
-8. Stop when one canonical form remains.
+Markdown surfaces are assigned explicit roles:
 
-<!-- DECISION: Do not introduce generic containers such as Core, Manager, Service, Helper, Utils, or Misc unless a concrete boundary is proven and documented. -->
+- `AGENTS.md`: identity and operating rules.
+- `Documentation/ARCHITECTURE.md`: world model and ownership.
+- `Documentation/LESSONS.md`: durable evidence-backed learning.
+- `Documentation/AUDIT.md`: verified claims and findings.
+- `Documentation/HANDOFF.md`: current working state and next action.
+- `Documentation/WORK_LOG.md`: execution history.
 
-## Re-Architecture Completion Model
+The Markdown plane does not replace Kernel, Runtime, Composition, or domain ownership. It records and routes cognitive state around them.
 
-Issue #85 is the root Definition of Done for the canonical re-architecture. PRs/groups such as #86 onward are implementation steps toward that issue, not independent declarations that the re-architecture is complete.
+The canonical product loop is:
 
-A green PR means that its own change is verified. It does not by itself mean Issue #85 is complete.
+**Read → Act → Verify → Learn → Persist**
 
-Before declaring the re-architecture complete:
-1. Finish the planned migration groups under Issue #85.
-2. Verify the canonical structure and dependency direction as one integrated repository state.
-3. Run the full required test/build gates and the required physical iPhone 12 Pro Max validation.
-4. Confirm documentation continuity and the Issue #85 acceptance criteria.
-5. Only then treat the re-architecture as complete and finalize/merge the resulting integration sequence according to its dependency order.
+Future parser, index, retrieval, or semantic-memory implementations must preserve Markdown as the canonical human-readable persistence surface.
 
-<!-- DECISION: Do not advance to another migration group merely because the previous PR is green. Use Issue #85 as the root completion checkpoint and keep intermediate PRs traceable to that root. -->
+## Living Cognitive Data Ocean
 
-## Change Discipline
+The Markdown cognitive plane is organized as a Living Cognitive Data Ocean.
 
-For every architecture task:
-`inspect -> confirm -> minimal change -> regression test -> full gate -> audit -> record -> handoff`
+- **Sea of Chaos** contains observations, thoughts, raw events, and candidate material still requiring evaluation.
+- **Living Ocean** contains evidence-backed cognitive grains ready for direct reuse.
+- A grain is the smallest independently useful semantic unit; it is not defined by file size.
+- Root `Modules/` is the persistent cognitive-data organization surface and is distinct from executable `Sources/Capabilities/Modules`.
+- Grain lifecycle is **OBSERVED → CONFIRMED → PROMOTED**.
+- A Module is a capability composition of relevant grains, not a folder.
+- Future parser/index/retrieval/semantic-memory implementations must preserve Markdown as canonical human-readable persistence and must not silently promote unverified material.
 
-<!-- HANDOFF: If a task discovers an issue but does not fix it, record CONFIRMED / NOT CONFIRMED / DEFERRED. Never leave future workers to infer status from prose. -->
+```
+Sea of Chaos
+    ↓ evaluate
+Living Grain
+    ↓ select + compose
+Cognitive Module
+    ↓
+Agent action
+    ↓ verify
+new evidence
+    ↓
+new / refined grain
+```
+
+The cognitive data plane is orthogonal to the executable dependency axis. It may inform runtime decisions only through existing ownership boundaries.
+
+## Milestone freeze
+
+M0 freezes boundaries and contracts.
+M1 implements Kernel runtime (`Documentation/M1.md`).
+M2 implements the provider contract and runtime (`Documentation/M2.md`).
+M3 implements the module / skill / tool runtime (`Documentation/M3.md`).
+M4 implements the local-first Memory OS runtime & persistence (`Documentation/M4.md`).
+M5 defines the Local + Cloud Storage / Sync architectural specification (`Documentation/M5.md`).
+M6 implements Cognition / Agency integration gate (`Documentation/M6.md`).
+M7 implements Durable Run Lifecycle, Checkpointing, Interruption Recovery & Capability Bounding (`Documentation/M7.md`).
+M8 establishes the Product Architecture Foundation (`Documentation/M8.md`).
+
+Kernel may hold `any LLMProvider`. It does not import `PAProvidersGrok` / OpenAI / Local.
+Default composition wires `DeterministicFakeProvider`. Live vendor calls are a separate verification gate.
+Kernel may hold `any ModuleExecuting` and request execution. It does not contain concrete modules.
+Kernel may hold `any MemoryExecuting` and request memory operations. It does not contain concrete memory stores.

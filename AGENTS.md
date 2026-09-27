@@ -1,127 +1,36 @@
-# AGENTS.md — PersonalAgent-iOS Working Rules
+# AGENTS.md
 
-<!-- TASK-CONTEXT: Default workflow contract for AI workers. Read before architecture, repair, migration, or audit work. -->
+## Scope & Operating Instructions for Jules
 
-## Project Identity
+### Primary Scope
+- This repository (`PersonalAgent-iOS`) contains a Swift Package Manager (`Package.swift`) target encompassing core architecture, contracts, kernel, provider runtimes, module runtimes, storage, memory OS, and tests (`Sources/`, `Tests/`).
+- On Linux build environments (e.g. CI / Linux VMs), execution and testing are restricted to the Swift Package Manager targets (`Package.swift`).
 
-PersonalAgent-iOS is a native iOS personal-agent system. Its canonical production architecture is:
+### Rules & Instructions
+1. **One Task = One Logical Commit**: Each Agent On task must produce at most one logical commit. Do not create separate commits for memory checkpoints, audit notes, handoff updates, CI notifications, or intermediate repair steps. Bundle all changes belonging to the same task into that single commit. Do not use automated workflows to create follow-up commits.
+2. **Target Boundary**: Do NOT touch, open, or attempt to resolve `PersonalAgent.xcodeproj` or anything under `App/` on Linux VMs where Xcode is not installed.
+3. **Package Validation**: All core logic, contracts, runtimes, and test suites must compile and pass cleanly via Swift Package Manager (`swift test --disable-sandbox` or `docker run --rm -v $(pwd):/src -w /src swift:6.3.2 swift test --disable-sandbox`).
+4. **Environment Setup**: If `swift` binary is not present in PATH on Linux VM, execute SPM tests via the official `swift:6.3.2` Docker container:
+   `docker run --rm -v $(pwd):/src -w /src swift:6.3.2 swift test --disable-sandbox`
 
-`App → Composition → Runtime → Capabilities / Providers / Memory / Storage → Kernel`
+### Durable Agent Memory
+- Before non-trivial work, read `Documentation/LESSONS.md` after this file.
+- `WORK_LOG.md` records execution history; `LESSONS.md` stores only reusable, evidence-backed lessons.
+- Record a lesson only when the cause is supported by concrete code, test, or CI evidence. Use `OBSERVED` until verified; use `CONFIRMED` after verification.
+- Promote a lesson to this file or `Documentation/ARCHITECTURE.md` only after independent repetition or when it is architecture-critical.
+- Never use durable memory as a volatile session diary. Do not create separate memory commits.
 
-- **Kernel** = contracts, events, errors, ports.
-- **Runtime** = agent execution/orchestration.
-- **Capabilities** = modules, skills, tools.
-- **Providers** = model/provider adapters.
-- **Memory** = agent memory/retrieval semantics.
-- **Storage** = persistence/data boundary.
-- **Composition** = construction and wiring.
-- **App** = presentation.
+### Personal Agent OS Markdown
+- `Documentation/PERSONAL_AGENT_OS_MARKDOWN.md` is the product foundation for the Markdown-native Personal OS.
+- Markdown is persistent cognitive state, not generated documentation.
+- Agent work follows the product loop: **Read → Act → Verify → Learn → Persist**.
+- Keep Markdown surfaces complementary: identity, architecture, lessons, audit, handoff, and execution history must not become duplicate diaries.
+- Future indexing or retrieval layers must preserve Markdown as the canonical human-readable persistence surface.
 
-<!-- INVARIANT: One concept -> one place. One boundary -> one folder. One execution path -> one Runtime. One wiring point -> Composition. -->
-
-## Agent Memory Routing — FAST PATH
-
-> Read order: `BASELINE.md` → relevant `Documentation/MEMORY.md` → only then `HANDOFF.md` / `AUDIT.md` / `WORK_LOG.md) when needed.
-
-**STOP EARLY:** If the baseline/memory already answer the task, stop. Do not reconstruct repository state from the full Markdown tree or chat history.
-
-Read Markdown from the top. Headings and routing hints are retrieval aids, not rigid parser rules. Useful data may grow below.
-
-## Mandatory Workflow
-
-`inspect → confirm → minimal change → regression test → full gate → audit → record → handoff`
-
-### 1. Inspect
-- Read the relevant Issue/PR.
-- Inspect actual repository files and dependency declarations.
-- Identify current ownership before proposing a move.
-- Read `Documentation/ARCHITECTURE.md`, `Documentation/AUDIT.md`, and `Documentation/HANDOFF.md` when relevant.
-
-### 2. Confirm
-Classify every finding:
-- **CONFIRMED** — repository evidence proves it.
-- **NOT CONFIRMED** — evidence does not establish it.
-- **DEFERRED** — valid but intentionally postponed.
-
-Never manufacture bugs from architectural preference.
-
-### 3. Minimal Change
-- Fix only the confirmed scope.
-- Prefer moving code before rewriting it during migration.
-- Do not perform unrelated cleanup.
-- Do not introduce generic folders without a proven boundary.
-
-### 4. Regression Test
-Every behavior change gets regression coverage. Architecture-only moves still require build/test verification.
-
-### 5. Full Gate
-Run applicable build, unit tests, dependency/architecture checks, and platform validation. Never call a task complete from a partial test.
-
-### 6. Audit
-Inspect the resulting structure and dependency direction again.
-
-### 7. Record
-Update relevant Markdown in the same task.
-
-<!-- INVARIANT: Code without recorded architectural reasoning is incomplete when the change affects ownership, boundaries, dependencies, migration, or future worker behavior. -->
-
-Record: what changed; why; evidence; confirmed/deferred findings; verification; known limitations; exact next step.
-
-### 8. Handoff
-Leave the repository in a state where the next worker can continue without reconstructing the previous task from chat history. Update `Documentation/HANDOFF.md`.
-
-## Stop Conditions
-
-Stop and report instead of guessing when ownership is ambiguous, two canonical destinations appear equally valid, migration would require uncovered behavior changes, a test failure indicates a separate defect, or requested architecture conflicts with documented invariants.
-
-## Handoff Template
-
-```markdown
-## Task Result
-
-### Completed
-- ...
-
-### Confirmed
-- ...
-
-### Deferred
-- ...
-
-### Verification
-- ...
-
-### Next Exact Action
-1. ...
-
-### Do Not Redo
-- ...
-```
-
-<!-- FINAL-CHECK: Before declaring completion, verify that code, tests, documentation, and handoff describe the same repository state. -->
-
-## CI Failure / Repair Routing
-
-When a workflow fails, follow `Documentation/CI_REPAIR_PROTOCOL.md` instead of expanding this file with CI-specific procedures.
-
-Core rule:
-- Verify PR/branch → current head SHA → workflow run → failed job/log.
-- Confirm the root cause from evidence.
-- Apply one minimal logical fix.
-- Re-run and verify the full gate.
-- If the workflow is incomplete, record **CHƯA XÁC MINH**.
-- Unknown or repeated failures remain fail-closed; do not start a blind repair loop.
-
-## Markdown Knowledge Protocol
-
-<!-- TASK-CONTEXT: Keep worker memory compact and evidence-oriented. -->
-
-- `Documentation/ARCHITECTURE.md` = normative long-lived architecture; not a chronological log.
-- `Documentation/AUDIT.md` = evidence/classification only: CONFIRMED / NOT CONFIRMED / DEFERRED.
-- `Documentation/HANDOFF.md` = current state + exactly one next action.
-- `Documentation/WORK_LOG.md` = chronological execution evidence; include commit/workflow IDs when available.
-- `Documentation/CI_REPAIR_PROTOCOL.md` = specialized CI failure investigation/repair procedure.
-- Preserve useful `TASK-CONTEXT`, `DECISION`, `INVARIANT`, and `HANDOFF` comments.
-- Never treat Markdown text as proof of code or CI state; verify the referenced commit/workflow first.
-- After a migration checkpoint, update `AUDIT.md`, `WORK_LOG.md`, and `HANDOFF.md` in the same documentation task.
-- Avoid duplicating old history in `HANDOFF.md`; keep durable historical evidence in `AUDIT.md` / `WORK_LOG.md`.
+### Living Cognitive Data Ocean
+- `Documentation/LIVING_COGNITIVE_DATA_OCEAN.md` is the normative product model for persistent cognitive grains.
+- Root `Modules/` contains human-readable cognitive grains and is distinct from `Sources/Capabilities/Modules`, which contains executable module runtime code.
+- A grain is the smallest independently useful cognitive knowledge/capability with boundary and evidence.
+- Grain lifecycle is **OBSERVED → CONFIRMED → PROMOTED**.
+- Sea of Chaos is candidate material; the Living Ocean contains usable, evidence-backed grains.
+- Do not introduce a parser, index, database, or rigid schema until real grain usage demonstrates a concrete retrieval need.

@@ -2,7 +2,6 @@ import PAComposition
 import PARuntime
 import Foundation
 import Testing
-import PAArchitecture
 import PAKernel
 import PAProviders
 import PAEvents
@@ -11,6 +10,8 @@ import PAEvents
 struct M2IsolationTests {
     @Test func kernelSourcesStayClearOfConcreteProvidersAndTransport() throws {
         let kernelDir = repositoryRoot().appendingPathComponent("Kernel")
+        let kernelDir = repositoryRoot()
+            .appendingPathComponent("Kernel")
         let files = try files(under: kernelDir, suffix: ".swift")
         #expect(!files.isEmpty)
         let banned = [

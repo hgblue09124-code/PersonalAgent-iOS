@@ -1,6 +1,5 @@
 import Testing
 import PAKernel
-import PAArchitecture
 import PAComposition
 import PAProviders
 

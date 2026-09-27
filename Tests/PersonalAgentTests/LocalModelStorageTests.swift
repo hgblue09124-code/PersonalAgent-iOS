@@ -5,7 +5,6 @@ import PAProviders
 import PAProvidersLocal
 import PAStorageModels
 import PAComposition
-import PAArchitecture
 
 @Suite("Local Model Storage & Selection Tests")
 struct LocalModelStorageTests {

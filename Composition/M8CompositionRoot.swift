@@ -6,10 +6,8 @@ import PAStorageModels
 import PAMemory
 import PAStorageMemory
 import PAModules
-import PAKernel
 import PARuntime
 import PAEvents
-import PAArchitecture
 import PAObservability
 import PATools
 import PASkills
@@ -407,6 +405,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             runtime: agentRuntime,
             eventLog: idempotentLog,
             logger: logger,
+            reasoner: LLMReasoner(provider: dynamicProvider),
             policy: policy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime

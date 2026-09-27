@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import PAArchitecture
 
 @Suite("Dependency direction")
 struct ImportBoundaryTests {
@@ -11,7 +10,7 @@ struct ImportBoundaryTests {
 
         var violations: [String] = []
         for file in sources {
-            let module = moduleName(for: file, sourcesRoot: root.appendingPathComponent("Sources"))
+            let module = moduleName(for: file, repositoryRoot: root)
             guard let allowed = ArchitectureManifest.allowedImports[module] else {
                 violations.append("Unknown module mapping for \(file.path) -> \(module)")
                 continue
@@ -140,29 +139,43 @@ func importedModules(in source: String) -> [String] {
     }
 }
 
-func moduleName(for file: URL, sourcesRoot: URL) -> String {
-    let relative = file.path.replacingOccurrences(of: sourcesRoot.path + "/", with: "")
-    if relative.hasPrefix("Foundation/") { return "PAFoundation" }
-    if relative.hasPrefix("Observability/") { return "PAObservability" }
-    if relative.hasPrefix("Events/") { return "PAEvents" }
-    if relative.hasPrefix("Security/") { return "PASecurity" }
-    if relative.hasPrefix("Storage/") { return "PAStorage" }
-    if relative.hasPrefix("Memory/") { return "PAMemory" }
-    if relative.hasPrefix("Providers/Contracts/") { return "PAProviders" }
-    if relative.hasPrefix("Providers/Grok/") { return "PAProvidersGrok" }
-    if relative.hasPrefix("Providers/OpenAICompatible/") { return "PAProvidersOpenAICompatible" }
-    if relative.hasPrefix("Providers/OpenAI/") { return "PAProvidersOpenAI" }
-    if relative.hasPrefix("Providers/Local/") { return "PAProvidersLocal" }
-    if relative.hasPrefix("Core/Policy/") { return "PAPolicy" }
-    if relative.hasPrefix("Tools/") { return "PATools" }
-    if relative.hasPrefix("Capabilities/Modules/") || relative.hasPrefix("Modules/") { return "PAModules" }
-    if relative.hasPrefix("Skills/") { return "PASkills" }
-    if relative.hasPrefix("Core/Cognition/") { return "PACognition" }
-    if relative.hasPrefix("Core/Agency/") { return "PAAgency" }
-    if relative.hasPrefix("Core/Agent/") { return "PAKernel" }
+func moduleName(for file: URL, repositoryRoot: URL) -> String {
+    let path = file.path
+    let rootPath = repositoryRoot.path + "/"
+
+    guard path.hasPrefix(rootPath) else { return "UNKNOWN" }
+
+    let relative = String(path.dropFirst(rootPath.count))
+
+    if relative.hasPrefix("Kernel/Ports/Providers/") { return "PAProviders" }
+    if relative.hasPrefix("Kernel/") { return "PAKernel" }
+
     if relative.hasPrefix("Runtime/") { return "PARuntime" }
-    if relative.hasPrefix("Architecture/") { return "PAArchitecture" }
+
     if relative.hasPrefix("Composition/") { return "PAComposition" }
+
+    if relative.hasPrefix("Providers/Remote/Grok/") { return "PAProvidersGrok" }
+    if relative.hasPrefix("Providers/Remote/OpenAICompatible/") {
+        return "PAProvidersOpenAICompatible"
+    }
+    if relative.hasPrefix("Providers/Remote/OpenAI/") { return "PAProvidersOpenAI" }
+    if relative.hasPrefix("Providers/Remote/Shared/") { return "PAProvidersRemote" }
+    if relative.hasPrefix("Providers/Local/") { return "PAProvidersLocal" }
+
+    if relative.hasPrefix("Storage/Models/") { return "PAStorageModels" }
+    if relative.hasPrefix("Storage/Memory/") { return "PAStorageMemory" }
+    if relative.hasPrefix("Storage/") { return "PAStorage" }
+
+    if relative.hasPrefix("Sources/Observability/") { return "PAObservability" }
+    if relative.hasPrefix("Sources/Events/") { return "PAEvents" }
+    if relative.hasPrefix("Sources/Security/") { return "PASecurity" }
+    if relative.hasPrefix("Sources/Memory/") { return "PAMemory" }
+
+    if relative.hasPrefix("Sources/Capabilities/Tools/") { return "PATools" }
+    if relative.hasPrefix("Sources/Capabilities/Modules/") { return "PAModules" }
+    if relative.hasPrefix("Sources/Capabilities/Skills/") { return "PASkills" }
+
     if relative.hasPrefix("cllama/") { return "cllama" }
+
     return "UNKNOWN"
 }

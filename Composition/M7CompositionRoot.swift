@@ -1,8 +1,6 @@
 import PARuntime
 import Foundation
 import PAKernel
-import PAArchitecture
-import PAKernel
 import PAObservability
 import PAEvents
 import PAProviders
@@ -11,7 +9,6 @@ import PASkills
 import PATools
 import PAMemory
 import PAStorageMemory
-import PARuntime
 
 /// Canonical M7 Composition Root wiring Durable Run Lifecycle, ExecutionBoundary,
 /// RunLifecycleManager, RunRecoveryEngine, Stores, and IdempotentEventLog.

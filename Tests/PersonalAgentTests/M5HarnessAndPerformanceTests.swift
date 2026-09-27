@@ -5,7 +5,6 @@ import PAStorage
 import PAStorageModels
 import PAMemory
 import PAStorageMemory
-import PAArchitecture
 
 /// Configuration options for fault injection in simulated cloud stores.
 public enum CloudFaultPolicy: Sendable, Equatable {

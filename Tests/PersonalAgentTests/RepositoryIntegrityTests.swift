@@ -1,6 +1,5 @@
 import Foundation
 import Testing
-import PAArchitecture
 
 @Suite("Repository integrity")
 struct RepositoryIntegrityTests {
@@ -14,11 +13,11 @@ struct RepositoryIntegrityTests {
             "Providers/Remote/Shared/ProviderTransport.swift",
             "Providers/Remote/Shared/ChatCompletionsCodec.swift",
             "Providers/Remote/Shared/HTTPChatProvider.swift",
-            "Sources/Composition/DeterministicFakeProvider.swift",
+            "Composition/DeterministicFakeProvider.swift",
             "Providers/Remote/OpenAI/OpenAIBoundary.swift",
             "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
-            "Sources/Composition/M2CompositionRoot.swift",
+            "Composition/M2CompositionRoot.swift",
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),

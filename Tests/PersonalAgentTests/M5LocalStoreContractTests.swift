@@ -5,7 +5,6 @@ import PAStorage
 import PAStorageModels
 import PAStorageMemory
 import PAMemory
-import PAArchitecture
 
 private final class AtomicBool: @unchecked Sendable {
     private let lock = NSLock()

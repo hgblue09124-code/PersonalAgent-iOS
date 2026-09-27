@@ -1,7 +1,5 @@
 import PARuntime
 import PAKernel
-import PAArchitecture
-import PAKernel
 import PAObservability
 import PAEvents
 import PAProviders

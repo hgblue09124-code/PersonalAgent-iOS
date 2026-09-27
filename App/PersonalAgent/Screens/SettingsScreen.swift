@@ -1,8 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
-import PAArchitecture
-import PAComposition
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
@@ -11,7 +9,6 @@ struct SettingsScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gear") {
-            MilestoneBanner()
 
             if let error = session.lastError ?? lastImportError {
                 VStack(alignment: .leading, spacing: 4) {
@@ -33,6 +30,19 @@ struct SettingsScreen: View {
                     Label("Models / GGUF", systemImage: "cube.box")
                         .font(.headline)
                     Spacer()
+                    Button {
+                        Task { await session.downloadDevModel() }
+                    } label: {
+                        if session.isDownloadingDevModel {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Downloading…")
+                        } else {
+                            Label("Dev Model", systemImage: "arrow.down.circle")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(session.isDownloadingDevModel)
                     Button {
                         isImportingGGUF = true
                     } label: {
@@ -82,6 +92,18 @@ struct SettingsScreen: View {
                 .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
 
                 // Installed Models List
+                if session.isDownloadingDevModel {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Downloading SmolLM2-135M…")
+                            .font(.caption.bold())
+                        ProgressView(value: session.devModelDownloadProgress)
+                        Text("Verified public GGUF • 271 MB • dev-only")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+
                 if session.installedModels.isEmpty {
                     Text("No local GGUF models installed. Import a .gguf file to get started.")
                         .font(.subheadline)
