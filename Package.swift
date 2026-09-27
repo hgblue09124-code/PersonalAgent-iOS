@@ -152,7 +152,6 @@ let package = Package(
             name: "PAComposition",
             dependencies: [
                 "PAKernel",
-                "PAKernel",
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
@@ -185,7 +184,6 @@ let package = Package(
                 "PAPolicy",
                 "PACognition",
                 "PAAgency",
-                "PAKernel",
                 "PAComposition",
             ],
             path: "Tests/PersonalAgentTests"

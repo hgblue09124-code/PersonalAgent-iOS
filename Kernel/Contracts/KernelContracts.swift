@@ -1,10 +1,4 @@
-﻿import Foundation
-import PAKernel
-import PAPolicy
-import PAAgency
-import PACognition
-import PAObservability
-import PAEvents
+import Foundation
 
 public struct AgentIdentity: Hashable, Sendable, Codable {
     public let id: AgentID
