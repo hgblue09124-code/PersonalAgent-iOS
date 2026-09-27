@@ -9,7 +9,6 @@ import PAEvents
 @Suite("M2 kernel isolation")
 struct M2IsolationTests {
     @Test func kernelSourcesStayClearOfConcreteProvidersAndTransport() throws {
-        let kernelDir = repositoryRoot().appendingPathComponent("Kernel")
         let kernelDir = repositoryRoot()
             .appendingPathComponent("Kernel")
         let files = try files(under: kernelDir, suffix: ".swift")

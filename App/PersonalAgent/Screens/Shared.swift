@@ -1,5 +1,6 @@
 import SwiftUI
 import PAComposition
+import PAKernel
 
 struct ScreenScaffold<Content: View>: View {
     let title: String
