@@ -96,6 +96,16 @@ public struct EventObservabilityBridge {
     public static let category = "events"
 }
 
+extension LifecycleMachine {
+    public static func eventKind(for command: RuntimeCommand) -> ExecutionEventKind {
+        switch command {
+        case .start: return .runtimeStarted
+        case .pause: return .runtimePaused
+        case .resume: return .runtimeResumed
+        case .stop: return .runtimeStopped
+        }
+    }
+}
 
 extension GoalMachine {
     public static func eventKind(for command: GoalCommand) -> ExecutionEventKind {
