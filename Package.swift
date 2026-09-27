@@ -136,7 +136,7 @@ let package = Package(
             dependencies: ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
             path: "Sources/Core/Agency"
         ),
-                .target(
+        .target(
             name: "PAKernel",
             dependencies: [
                 "PAFoundation",
@@ -151,8 +151,6 @@ let package = Package(
             ],
             path: "Kernel",
             exclude: ["Events"]
-        ),
-        
         ),
         .target(
             name: "PAComposition",
