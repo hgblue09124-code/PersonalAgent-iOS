@@ -9,104 +9,38 @@ struct ModelsScreen: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(session.activeModelDescriptor?.name ?? "No active model")
-                            .font(.headline)
-                        Text(activeSubtitle)
+        ScreenScaffold(title: "Models", systemImage: "cube.box") {
+            GlassPanel {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Active model").font(.headline)
+                        Text(session.activeModelDescriptor?.name ?? "None selected")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-
-                        HStack {
-                            Text(lifecycleTitle)
-                                .font(.caption.bold())
-                            Spacer()
-                            if session.activeModelDescriptor != nil {
-                                Button(session.activeEngineState == .loaded ? "Unload" : "Load") {
-                                    Task {
-                                        if session.activeEngineState == .loaded {
-                                            await session.unloadActiveModel()
-                                        } else {
-                                            await session.loadActiveModel()
-                                        }
-                                    }
-                                }
-                                .buttonStyle(.borderedProminent)
-                            }
-                        }
                     }
-                    .padding(.vertical, 6)
-                }
-
-                Section("Installed Models") {
-                    if session.installedModels.isEmpty {
-                        ContentUnavailableView(
-                            "No Models",
-                            systemImage: "cube.box",
-                            description: Text("Import a GGUF model or download the development model.")
-                        )
-                    } else {
-                        ForEach(session.installedModels, id: \.id) { model in
-                            Button {
-                                Task { await session.selectActiveModel(id: model.id) }
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(model.name)
-                                            .foregroundStyle(.primary)
-                                        Text(ByteCountFormatter.string(
-                                            fromByteCount: model.fileSizeBytes,
-                                            countStyle: .file
-                                        ))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    if model.id == session.activeModelID {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundStyle(.tint)
-                                    }
-                                }
-                            }
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    Task { await session.deleteModel(id: model.id) }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Section("Development") {
+                    Spacer()
                     Button {
-                        Task { await session.downloadDevModel() }
+                        Task {
+                            if session.activeEngineState == .loaded {
+                                await session.unloadActiveModel()
+                            } else {
+                                await session.loadActiveModel()
+                            }
+                        }
                     } label: {
-                        Label(
-                            session.isDownloadingDevModel ? "Downloading…" : "Download Small Dev Model",
-                            systemImage: "arrow.down.circle"
-                        )
+                        Text(session.activeEngineState == .loaded ? "Unload" : "Load")
                     }
-                    .disabled(session.isDownloadingDevModel)
-
-                    if session.isDownloadingDevModel {
-                        ProgressView(value: session.devModelDownloadProgress)
-                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(session.activeModelDescriptor == nil)
                 }
-
-                if let errorMessage {
-                    Section("Import Error") {
-                        Text(errorMessage)
-                            .foregroundStyle(.red)
-                    }
-                }
+                StatusRow(title: "State", value: lifecycleTitle)
             }
-            .navigationTitle("Models")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+
+            GlassPanel {
+                HStack {
+                    Label("Installed models", systemImage: "square.stack.3d.up")
+                        .font(.headline)
+                    Spacer()
                     Button {
                         isImporting = true
                     } label: {
@@ -114,13 +48,72 @@ struct ModelsScreen: View {
                     }
                     .accessibilityLabel("Import GGUF")
                 }
+
+                if session.installedModels.isEmpty {
+                    Text("No GGUF models installed.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(session.installedModels, id: \.id) { model in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(model.name).font(.subheadline.weight(.semibold))
+                                Text(ByteCountFormatter.string(fromByteCount: model.fileSizeBytes, countStyle: .file))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if model.id == session.activeModelID {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                            } else {
+                                Button("Use") {
+                                    Task { await session.selectActiveModel(id: model.id) }
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                Task { await session.deleteModel(id: model.id) }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+            }
+
+            GlassPanel {
+                Label("Development", systemImage: "arrow.down.circle")
+                    .font(.headline)
+                Button {
+                    Task { await session.downloadDevModel() }
+                } label: {
+                    Label(
+                        session.isDownloadingDevModel ? "Downloading…" : "Download Small Dev Model",
+                        systemImage: "arrow.down.circle"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .disabled(session.isDownloadingDevModel)
+                if session.isDownloadingDevModel {
+                    ProgressView(value: session.devModelDownloadProgress)
+                }
+            }
+
+            if let errorMessage {
+                GlassPanel {
+                    Text(errorMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
             }
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [
-                UTType(filenameExtension: "gguf") ?? .data
-            ],
+            allowedContentTypes: [UTType(filenameExtension: "gguf") ?? .data],
             allowsMultipleSelection: false
         ) { result in
             switch result {
@@ -134,28 +127,13 @@ struct ModelsScreen: View {
         }
     }
 
-    private var activeSubtitle: String {
-        switch session.activeEngineState {
-        case .unloaded:
-            return "Selected · ready to load"
-        case .loading:
-            return "Loading local model…"
-        case .loaded:
-            return "Loaded · ready for local inference"
-        case .unloading:
-            return "Unloading local model…"
-        case .failed(let reason):
-            return "Failed · \(reason)"
-        }
-    }
-
     private var lifecycleTitle: String {
         switch session.activeEngineState {
         case .unloaded: return "UNLOADED"
         case .loading(let progress): return "LOADING \(Int(progress * 100))%"
         case .loaded: return "LOADED"
         case .unloading: return "UNLOADING"
-        case .failed: return "FAILED"
+        case .failed(let reason): return "FAILED · \(reason)"
         }
     }
 }
