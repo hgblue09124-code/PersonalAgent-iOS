@@ -32,7 +32,6 @@ let package = Package(
         .library(name: "PACognition", targets: ["PACognition"]),
         .library(name: "PAAgency", targets: ["PAAgency"]),
         .library(name: "PAKernel", targets: ["PAKernel"]),
-        .library(name: "PARuntime", targets: ["PARuntime"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
         .library(name: "PAProvidersGrok", targets: ["PAProvidersGrok"]),
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
@@ -150,31 +149,13 @@ let package = Package(
                 "PAModules",
                 "PAMemory",
             ],
-            path: "Kernel",
-            exclude: ["Events"]
-        ),
-        .target(
-            name: "PARuntime",
-            dependencies: [
-                "PAFoundation",
-                "PAKernel",
-                "PAPolicy",
-                "PAAgency",
-                "PACognition",
-                "PAObservability",
-                "PAEvents",
-                "PAProviders",
-                "PAModules",
-                "PAMemory",
-            ],
-            path: "Runtime"
+            path: "Sources/Core/Agent"
         ),
         .target(
             name: "PAComposition",
             dependencies: [
                 "PAFoundation",
                 "PAKernel",
-                "PARuntime",
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
@@ -208,7 +189,6 @@ let package = Package(
                 "PACognition",
                 "PAAgency",
                 "PAKernel",
-                "PARuntime",
                 "PAComposition",
             ],
             path: "Tests/PersonalAgentTests"
