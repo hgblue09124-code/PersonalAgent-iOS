@@ -10,33 +10,7 @@ struct AgentScreen: View {
     var body: some View {
         ZStack {
             background
-
-            ScrollView {
-                VStack(spacing: 0) {
-                    topBar
-                    hero
-                    taskComposer
-
-                    if let progress = session.executionProgress {
-                        progressView(progress)
-                            .padding(.top, 16)
-                    }
-
-                    if let result = session.executionResult {
-                        resultView(result)
-                            .padding(.top, 16)
-                    }
-
-                    if let error = session.lastError {
-                        errorView(error)
-                            .padding(.top, 16)
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
-            }
-            .scrollIndicators(.hidden)
+            content
         }
         .toolbar(.hidden, for: .navigationBar)
     }
@@ -44,8 +18,8 @@ struct AgentScreen: View {
     private var background: some View {
         LinearGradient(
             colors: [
-                Color(red: 0.11, green: 0.18, blue: 0.88),
-                Color(red: 0.08, green: 0.13, blue: 0.55)
+                Color(red: 0.106, green: 0.184, blue: 0.878),
+                Color(red: 0.075, green: 0.110, blue: 0.520)
             ],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -53,44 +27,55 @@ struct AgentScreen: View {
         .ignoresSafeArea()
     }
 
+    private var content: some View {
+        VStack(spacing: 0) {
+            topBar
+            Spacer(minLength: 24)
+            hero
+            Spacer(minLength: 22)
+            composer
+            status
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 18)
+    }
+
     private var topBar: some View {
         HStack {
-            Image(systemName: "circle.grid.2x2.fill")
-                .font(.headline)
-                .foregroundStyle(.white.opacity(0.9))
+            Text("PERSONAL AGENT")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .tracking(1.6)
+                .foregroundStyle(.white.opacity(0.82))
 
             Spacer()
 
             lifecycleMenu
         }
-        .padding(.vertical, 8)
     }
 
     private var hero: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 16) {
             AgentOrb(
                 isActive: session.state.lifecycle.rawValue.lowercased() == "running",
                 isThinking: session.executionProgress != nil
             )
-            .padding(.top, 22)
-            .padding(.bottom, 18)
 
             Text(greeting)
-                .font(.system(size: 38, weight: .black, design: .rounded))
-                .tracking(-1.2)
+                .font(.system(size: 36, weight: .black, design: .rounded))
+                .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Text("Tell me what you want to get done.")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.78))
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.bottom, 28)
     }
 
-    private var taskComposer: some View {
+    private var composer: some View {
         HStack(spacing: 12) {
             TextField("Ask Agent…", text: $task, axis: .vertical)
                 .textFieldStyle(.plain)
@@ -102,43 +87,54 @@ struct AgentScreen: View {
                 .submitLabel(.send)
                 .onSubmit { runTask() }
 
-            Button { runTask() } label: {
+            Button(action: runTask) {
                 Image(systemName: "arrow.up")
-                    .font(.headline.bold())
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.black)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 42, height: 42)
                     .background(.white, in: Circle())
             }
             .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .opacity(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.45 : 1)
+            .opacity(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.42 : 1)
             .accessibilityLabel("Run Agent")
         }
-        .padding(.leading, 18)
-        .padding(.trailing, 8)
-        .padding(.vertical, 8)
-        .background(.black.opacity(0.28), in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.16), lineWidth: 1))
+        .padding(.leading, 17)
+        .padding(.trailing, 7)
+        .padding(.vertical, 7)
+        .background(.black.opacity(0.27), in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.17), lineWidth: 1))
+        .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
     }
 
-    private func progressView(_ progress: AgentExecutionProgress) -> some View {
-        statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
-    }
-
-    private func resultView(_ result: String) -> some View {
-        statusCard(title: "Result", detail: result, symbol: "checkmark.circle.fill")
+    @ViewBuilder
+    private var status: some View {
+        if let progress = session.executionProgress {
+            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
+        } else if let result = session.executionResult {
+            statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill")
+        } else if let error = session.lastError {
+            statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill")
+        }
     }
 
     private func statusCard(title: String, detail: String, symbol: String) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Label(title, systemImage: symbol)
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: symbol)
                 .font(.headline)
-            Text(detail)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.subheadline.bold())
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+            }
+            Spacer(minLength: 0)
         }
-        .padding(16)
+        .foregroundStyle(.primary)
+        .padding(13)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .padding(.top, 12)
     }
 
     private var lifecycleMenu: some View {
@@ -152,7 +148,8 @@ struct AgentScreen: View {
                 .font(.headline.bold())
                 .foregroundStyle(.white)
                 .frame(width: 38, height: 38)
-                .background(.white.opacity(0.12), in: Circle())
+                .background(.white.opacity(0.11), in: Circle())
+                .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
         }
         .accessibilityLabel("Agent runtime controls")
     }
@@ -173,18 +170,6 @@ struct AgentScreen: View {
         task = ""
         Task { await session.submitGoal(statement) }
     }
-
-    private func errorView(_ message: String) -> some View {
-        Label {
-            Text(message).font(.footnote)
-        } icon: {
-            Image(systemName: "exclamationmark.triangle.fill")
-        }
-        .foregroundStyle(.red)
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
-    }
 }
 
 private struct AgentOrb: View {
@@ -198,31 +183,28 @@ private struct AgentOrb: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            .white.opacity(0.72),
-                            Color(red: 0.58, green: 0.66, blue: 1.0).opacity(0.72),
+                            .white.opacity(0.78),
+                            Color(red: 0.58, green: 0.66, blue: 1).opacity(0.76),
                             Color(red: 0.16, green: 0.25, blue: 0.91).opacity(0.98)
                         ],
                         center: UnitPoint(x: 0.34, y: 0.28),
                         startRadius: 2,
-                        endRadius: 82
+                        endRadius: 42
                     )
                 )
-
             Circle()
-                .stroke(.white.opacity(0.34), lineWidth: 1)
-                .blur(radius: 0.4)
-
+                .stroke(.white.opacity(0.35), lineWidth: 1)
             Circle()
-                .fill(.white.opacity(0.42))
-                .frame(width: 16, height: 9)
-                .blur(radius: 3)
-                .offset(x: -14, y: -22)
+                .fill(.white.opacity(0.46))
+                .frame(width: 9, height: 6)
+                .blur(radius: 2.5)
+                .offset(x: -10, y: -15)
         }
-        .frame(width: 116, height: 116)
-        .shadow(color: .black.opacity(0.24), radius: 18, y: 10)
-        .scaleEffect(pulse ? 1.035 : 1)
+        .frame(width: 74, height: 74)
+        .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
+        .scaleEffect(pulse ? 1.045 : 1)
         .animation(
-            .easeInOut(duration: isThinking ? 0.8 : 2.4).repeatForever(autoreverses: true),
+            .easeInOut(duration: isThinking ? 0.7 : 2.2).repeatForever(autoreverses: true),
             value: pulse
         )
         .onAppear { pulse = true }
