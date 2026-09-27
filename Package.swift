@@ -60,7 +60,8 @@ let package = Package(
                 "Agent",
                 "Events",
                 "Execution",
-                "Planning"
+                "Planning",
+                "Ports/KernelCoordination.swift"
                 // Loại trừ các thư mục con đã được tách thành target riêng nếu có
             ]
         ),
