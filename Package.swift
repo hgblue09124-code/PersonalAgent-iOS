@@ -51,7 +51,23 @@ let package = Package(
             path: "Sources/cllama",
             exclude: ["README.md"]
         ),
-        .target(name: "PAKernel", path: "Sources/Foundation"),
+        .target(
+            name: "PAKernel",
+            dependencies: [
+                "PAPolicy",
+                "PAAgency",
+                "PACognition",
+                "PAObservability",
+                "PAEvents",
+                "PAProviders",
+                "PAModules",
+                "PAMemory"
+            ],
+            path: "Kernel",
+            exclude: [
+                "Events" // Loại trừ nếu Events đã được khai báo target riêng là PAEvents
+            ]
+        ),  
         .target(
             name: "PAObservability",
             dependencies: ["PAKernel"],
