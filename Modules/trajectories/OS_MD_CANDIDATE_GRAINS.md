@@ -44,17 +44,6 @@ CONFIRMATION GATE
 - If the new evidence contradicts the candidate, revise or discard the candidate rather than promoting it.
 
 SOURCE
-- Modules/trajectories/OS_MD_TRAJECTORY_RUNS_001_005.md
+- (removed 2026-09-27: simulation-only trajectory log with no CONFIRMED evidence; superseded by Documentation/LESSONS.md)
 - Documentation/LESSONS.md
 - AGENTS.md
-
-## Extraction rule
-
-1. Start from observed trajectories.
-2. Select a repeated behavior that has a bounded meaning.
-3. Attach exact trajectory references.
-4. Attach independent repository evidence when available.
-5. Keep status OBSERVED until the confirmation gate is satisfied.
-6. Promote only after the lifecycle rule in AGENTS.md is met.
-
-This is intentionally Markdown-native. No parser, index, database, or automatic promotion engine is introduced.

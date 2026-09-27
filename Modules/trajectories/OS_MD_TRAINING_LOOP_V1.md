@@ -67,7 +67,7 @@ Do not copy hidden chain-of-thought or store raw model output as knowledge.
 
 Append the execution evidence to:
 
-`Modules/trajectories/OS_MD_TRAJECTORY_RUNS_001_005.md`
+`Documentation/LESSONS.md` (simulation-only trajectory log removed 2026-09-27; no CONFIRMED evidence)
 
 A trajectory records what happened. It is not itself a grain.
 

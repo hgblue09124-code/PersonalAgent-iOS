@@ -112,7 +112,7 @@ Observed pattern:
 STATUS: OBSERVED
 
 SOURCE:
-- `Modules/trajectories/OS_MD_TRAJECTORY_RUNS_001_005.md`
+- `Documentation/LESSONS.md` (simulation-only trajectory log removed 2026-09-27; no CONFIRMED evidence)
 - RUN-001 through RUN-1000
 - Existing `AGENTS.md` operating rules
 - Existing Living Cognitive Data Ocean contract

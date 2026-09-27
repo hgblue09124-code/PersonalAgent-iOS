@@ -3,7 +3,7 @@
 Status: OBSERVED
 
 This document is a batch extraction from the 1,000 trajectory corpus in
-`Modules/trajectories/OS_MD_TRAJECTORY_RUNS_001_005.md`.
+`Documentation/LESSONS.md` (simulation-only trajectory log removed 2026-09-27; no CONFIRMED evidence).
 
 The corpus is training material, not durable knowledge by itself. Recurrence is
 a signal for extraction, not independent proof. Every cluster below therefore
@@ -67,54 +67,69 @@ pattern is correct, independent, or promoted.
 
 ### CL-002 — Evidence-first classification
 
-**Observed in:** RUN-001–003, RUN-007, RUN-014–015, and L2 classification runs.
+**Observed in:** RUN-001–003, RUN-007, and recurring classification runs.
 
 **Pattern**
-- Localize the failure or task boundary before selecting a repair.
-- Distinguish direct evidence from inference.
-- Classify inherited/current-task, test/production, environment/source, and
-  other failure boundaries before changing code.
+- Classify the task against evidence, not assumption.
+- Prefer the narrowest correct class before choosing a broader action.
+- Fail closed when classification evidence is insufficient.
 
-**Candidate grain:** Evidence-first task/failure classification.
+**Candidate grain:** Evidence-first task classification.
 
 **Status:** OBSERVED
 
 **Confirmation gate**
-- A real failure must be classified from commit/diff/test/CI evidence and the
-  classification must constrain the repair.
+- A real task must show that classification based on repository evidence
+  produced a different or safer action than surface description alone.
 
 ---
 
-### CL-003 — Verification-preserving minimal repair
+### CL-003 — Minimal valid action at the failing boundary
 
-**Observed in:** RUN-002, RUN-003, RUN-008, RUN-014–015 and minimal-repair curriculum.
+**Observed in:** RUN-002–004, RUN-008, RUN-014–015.
 
 **Pattern**
-- Once the failing boundary is localized, repair the smallest valid boundary.
-- Preserve the mechanism that proves the intended invariant.
-- Do not make CI green by deleting, weakening, or bypassing verification.
+- Localize the failing boundary first.
+- Apply the smallest valid repair at that boundary.
+- Do not broaden the change merely because a wider edit is possible.
 
-**Candidate grain:** Verification-preserving minimal repair.
+**Candidate grain:** Minimal valid repair at localized boundary.
 
 **Status:** OBSERVED
 
-**Existing candidate:** CAND-001 in
-`Modules/trajectories/OS_MD_CANDIDATE_GRAINS.md`.
-
 **Confirmation gate**
-- A new repository task must demonstrate the same rule through concrete code,
-  test, CI, or verified repository state.
+- A real repair task must show the chosen diff stays within the localized
+  failing boundary and still restores the intended invariant.
 
 ---
 
-### CL-004 — Scope and one-logical-commit discipline
+### CL-004 — Preserve the verification mechanism
 
-**Observed in:** RUN-008, RUN-015 and recurring curriculum runs.
+**Observed in:** RUN-003, RUN-014.
 
 **Pattern**
-- Keep the change inside the confirmed task boundary.
-- Reject unrelated edits.
-- Preserve the AGENTS.md one-task/one-logical-commit rule.
+- Do not suppress the mechanism that exposed the defect.
+- Keep tests, checks, and verification paths intact while repairing.
+- Treat verification as a separate stage from execution.
+
+**Candidate grain:** Verification-preserving repair.
+
+**Status:** OBSERVED
+
+**Confirmation gate**
+- A real repair must leave the original verification mechanism able to detect
+  regression after the fix.
+
+---
+
+### CL-005 — Scope-bounded change with clean attribution
+
+**Observed in:** RUN-008 and focused migration trajectories.
+
+**Pattern**
+- Keep the final diff and commit history matched to one logical task.
+- Avoid unrelated edits that increase uncertainty about the change.
+- Attribute the resulting repository state to the intended task boundary.
 
 **Candidate grain:** Scope-bounded change with clean attribution.
 
@@ -126,81 +141,60 @@ pattern is correct, independent, or promoted.
 
 ---
 
-### CL-005 — Separate execution from verification
+### CL-006 — Fail closed when evidence is insufficient
 
-**Observed in:** RUN-003, RUN-007, RUN-014–015 and verification curriculum.
+**Observed in:** RUN-007, RUN-014 and fail-closed curriculum runs.
 
 **Pattern**
-- Performing an action is not evidence that the intended invariant holds.
-- Verification must be an observable gate appropriate to the claim.
-- Status changes follow evidence, not confidence.
+- Prefer no action or a narrower safe action over an under-evidenced claim.
+- Record the missing evidence rather than inventing certainty.
+- Do not promote knowledge past OBSERVED without independent support.
 
-**Candidate grain:** Independent verification gate.
+**Candidate grain:** Fail-closed under insufficient evidence.
 
 **Status:** OBSERVED
 
 **Confirmation gate**
-- A real task must have an explicit verification result independent of the
-  action that produced the state.
+- A real task must show that insufficient evidence correctly blocked promotion
+  or broadened action.
 
 ---
 
-### CL-006 — Preserve canonical ownership and boundaries
+### CL-007 — Extract one reusable pattern after verification
 
-**Observed in:** RUN-004, RUN-009–010 and architecture curriculum.
+**Observed in:** RUN-015 and extraction-oriented runs.
 
 **Pattern**
-- Put reusable knowledge in the appropriate cognitive-data surface.
-- Keep trajectories as behavioral training material.
-- Keep executable capabilities under runtime/module boundaries.
-- Do not use Markdown to bypass Kernel, Runtime, Composition, or Policy.
+- After verification, ask what reusable rule was demonstrated.
+- Create or update exactly one candidate when a bounded pattern exists.
+- Keep the candidate OBSERVED until independent confirmation.
 
-**Candidate grain:** Canonical ownership before persistence or composition.
+**Candidate grain:** Post-verification single-pattern extraction.
 
 **Status:** OBSERVED
 
 **Confirmation gate**
-- A concrete architecture change must demonstrate that the chosen location
-  preserves ownership and runtime boundaries.
+- A real task must produce one candidate grain whose evidence boundary is
+  explicit and not based solely on corpus repetition.
 
 ---
 
-### CL-007 — Trajectory is not a grain
+### CL-008 — Lifecycle transitions require traceable evidence
 
-**Observed in:** RUN-005, RUN-009–011, RUN-013 and current learning-loop docs.
+**Observed in:** promotion-gate runs and AGENTS.md lifecycle rules.
 
 **Pattern**
-- Trajectory records context, decision, action, verification, and learning.
-- Grain records reusable knowledge/capability.
-- Repetition in trajectories creates a candidate signal; it does not itself
-  create durable knowledge.
+- OBSERVED → CONFIRMED requires independent concrete evidence.
+- CONFIRMED → PROMOTED requires independent repetition or architecture-critical
+  justification.
+- Do not skip lifecycle stages.
 
-**Candidate grain:** Trajectory-to-grain separation.
+**Candidate grain:** Evidence-gated knowledge lifecycle.
 
 **Status:** OBSERVED
 
 **Confirmation gate**
-- Extract a candidate from multiple trajectories and independently verify it
-  before changing lifecycle state.
-
----
-
-### CL-008 — Evidence-backed lifecycle promotion
-
-**Observed in:** RUN-007, RUN-011, RUN-015 and lifecycle curriculum.
-
-**Pattern**
-- OBSERVED is the default state for extracted training patterns.
-- CONFIRMED requires concrete independent evidence.
-- PROMOTED requires the repository's promotion conditions.
-- Contradictory evidence revises or discards the candidate.
-
-**Candidate grain:** Evidence-gated knowledge promotion.
-
-**Status:** OBSERVED
-
-**Confirmation gate**
-- At least one real task must move a candidate through a justified lifecycle
+- A real task must move a candidate through a justified lifecycle
   transition with traceable source evidence.
 
 ---
