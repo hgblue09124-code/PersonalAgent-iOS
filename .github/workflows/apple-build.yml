@@ -18,6 +18,13 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
+      - name: Normalize AppIcon image for asset catalog
+        run: |
+          APP_ICON="App/PersonalAgent/Assets.xcassets/AppIcon.appiconset/AppIcon.jpg"
+          test -f "$APP_ICON"
+          sips -Z 1024 "$APP_ICON"
+          sips -g pixelWidth -g pixelHeight "$APP_ICON"
+
       - name: Build PersonalAgent iOS app target (arm64)
         run: |
           xcodebuild build \
