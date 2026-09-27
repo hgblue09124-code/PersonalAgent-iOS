@@ -1,8 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
-import PAProvidersLocal
-import PAStorageModels
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession

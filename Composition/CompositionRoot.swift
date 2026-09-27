@@ -1,5 +1,7 @@
 import PAKernel
 import PAObservability
+import PAProvidersLocal
+import PAStorageModels
 
 public struct MilestoneGate: Sendable, Equatable {
     public let milestone: String
@@ -108,6 +110,11 @@ public struct MilestoneGate: Sendable, Equatable {
         eventReplay: false
     )
 }
+
+/// Stable app-facing aliases keep local-model implementation modules behind Composition.
+public typealias LocalModelDescriptor = PAStorageModels.LocalModelDescriptor
+public typealias LocalModelLifecycleState = PAProvidersLocal.LocalModelLifecycleState
+public typealias LocalModelLoadingOptions = PAProvidersLocal.LocalModelLoadingOptions
 
 /// The only surface UI is allowed to hold.
 /// M0 exposes availability, not a running agent.
