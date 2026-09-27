@@ -2,7 +2,7 @@ name: Apple Native Build & Unsigned IPA
 
 on:
   push:
-    branches: [main]
+    branches: [main, ui/agent-orb-real-glass-ipa]
   pull_request:
 
 permissions:
@@ -53,6 +53,19 @@ jobs:
           path: PersonalAgent-unsigned.ipa
           retention-days: 14
 
+
+      - name: Publish branch Pre-release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/ui/agent-orb-real-glass-ipa'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="dev-pr-117-${GITHUB_SHA::12}"
+          gh release create "$TAG" PersonalAgent-unsigned.ipa \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Dev IPA · PR #117 · ${GITHUB_SHA::12}" \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --notes "Unsigned development IPA generated from PR #117 at $GITHUB_SHA. Verify on physical device before merge."
 
       # PR workflows keep the verified IPA as an Actions artifact.
       # Do not create GitHub Releases from pull_request jobs: the release API
