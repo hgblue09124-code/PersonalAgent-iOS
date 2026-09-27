@@ -2,11 +2,15 @@
 import PackageDescription
 
 /// M0–M6 package graph.
+///
 /// Dependency direction is downward only:
-/// App -> Composition -> Kernel -> Cognition/Agency/Policy
-/// -> Skills/Tools/Modules/Providers/Memory
-/// -> Storage/Events/Observability/Security
-
+///   App -> Composition -> Kernel -> Cognition/Agency/Policy
+///        -> Skills/Tools/Modules/Providers/Memory
+///        -> Storage/Events/Observability/Security
+///        -> Foundation
+///
+/// Concrete provider modules exist as reserved boundaries for M2.
+/// They must not be imported by Kernel.
 let package = Package(
     name: "PersonalAgent",
     platforms: [
@@ -27,6 +31,7 @@ let package = Package(
         .library(name: "PAPolicy", targets: ["PAPolicy"]),
         .library(name: "PACognition", targets: ["PACognition"]),
         .library(name: "PAAgency", targets: ["PAAgency"]),
+        .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PAComposition", targets: ["PAComposition"]),
         .library(name: "PAProvidersGrok", targets: ["PAProvidersGrok"]),
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
@@ -49,17 +54,16 @@ let package = Package(
         .target(
             name: "PAKernel",
             dependencies: [
-                "PAPolicy",
-                "PAAgency",
-                "PACognition",
-                "PAObservability",
-                "PAEvents",
-                "PAProviders",
-                "PAModules",
-                "PAMemory"
+                // Các dependencies thực tế
             ],
             path: "Kernel",
-            exclude: ["Events"]
+            exclude: [
+                "Agent",
+                "Events",
+                "Execution",
+                "Planning"
+                // Loại trừ các thư mục con đã được tách thành target riêng nếu có
+            ]
         ),
         .target(
             name: "PAObservability",
@@ -116,6 +120,26 @@ let package = Package(
             path: "Sources/Providers/Local"
         ),
         .target(
+            name: "PAPolicy",
+            dependencies: ["PAKernel"],
+            path: "Sources/Core/Policy"
+        ),
+        .target(
+            name: "PATools",
+            dependencies: ["PAKernel", "PAPolicy", "PAObservability"],
+            path: "Sources/Capabilities/Tools"
+        ),
+        .target(
+            name: "PAModules",
+            dependencies: ["PAKernel", "PAPolicy", "PAObservability", "PAEvents"],
+            path: "Sources/Capabilities/Modules"
+        ),
+        .target(
+            name: "PASkills",
+            dependencies: ["PAKernel", "PAModules", "PATools", "PAPolicy"],
+            path: "Sources/Capabilities/Skills"
+        ),
+        .target(
             name: "PACognition",
             dependencies: ["PAKernel", "PAProviders", "PAMemory", "PASkills"],
             path: "Sources/Core/Cognition"
@@ -126,8 +150,25 @@ let package = Package(
             path: "Sources/Core/Agency"
         ),
         .target(
+            name: "PAKernel",
+            dependencies: [
+                "PAKernel",
+                "PAPolicy",
+                "PAAgency",
+                "PACognition",
+                "PAObservability",
+                "PAEvents",
+                "PAProviders",
+                "PAModules",
+                "PAMemory",
+            ],
+            path: "Kernel",
+            exclude: ["Events"]
+        ),
+        .target(
             name: "PAComposition",
             dependencies: [
+                "PAKernel",
                 "PAKernel",
                 "PAObservability",
                 "PAEvents",
@@ -161,6 +202,7 @@ let package = Package(
                 "PAPolicy",
                 "PACognition",
                 "PAAgency",
+                "PAKernel",
                 "PAComposition",
             ],
             path: "Tests/PersonalAgentTests"
