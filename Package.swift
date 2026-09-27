@@ -18,7 +18,7 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
-        .library(name: "PAFoundation", targets: ["PAFoundation"]),
+        .library(name: "PAKernel", targets: ["PAKernel"]),
         .library(name: "PAObservability", targets: ["PAObservability"]),
         .library(name: "PAEvents", targets: ["PAEvents"]),
         .library(name: "PASecurity", targets: ["PASecurity"]),
@@ -51,95 +51,95 @@ let package = Package(
             path: "Sources/cllama",
             exclude: ["README.md"]
         ),
-        .target(name: "PAFoundation", path: "Sources/Foundation"),
+        .target(name: "PAKernel", path: "Sources/Foundation"),
         .target(
             name: "PAObservability",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAKernel"],
             path: "Sources/Observability"
         ),
         .target(
             name: "PAEvents",
-            dependencies: ["PAFoundation", "PAObservability"],
+            dependencies: ["PAKernel", "PAObservability"],
             path: "Kernel/Events"
         ),
         .target(
             name: "PASecurity",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAKernel"],
             path: "Sources/Security"
         ),
         .target(
             name: "PAStorage",
-            dependencies: ["PAFoundation", "PAEvents", "PAObservability"],
+            dependencies: ["PAKernel", "PAEvents", "PAObservability"],
             path: "Sources/Storage"
         ),
         .target(
             name: "PAMemory",
-            dependencies: ["PAFoundation", "PAStorage", "PAEvents"],
+            dependencies: ["PAKernel", "PAStorage", "PAEvents"],
             path: "Sources/Memory"
         ),
         .target(
             name: "PAProviders",
-            dependencies: ["PAFoundation", "PAObservability", "PASecurity", "PAEvents"],
+            dependencies: ["PAKernel", "PAObservability", "PASecurity", "PAEvents"],
             path: "Sources/Providers/Contracts"
         ),
         .target(
             name: "PAProvidersGrok",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: ["PAProviders", "PAKernel"],
             path: "Sources/Providers/Grok"
         ),
         .target(
             name: "PAProvidersOpenAI",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: ["PAProviders", "PAKernel"],
             path: "Sources/Providers/OpenAI"
         ),
         .target(
             name: "PAProvidersOpenAICompatible",
-            dependencies: ["PAProviders", "PAFoundation"],
+            dependencies: ["PAProviders", "PAKernel"],
             path: "Sources/Providers/OpenAICompatible"
         ),
         .target(
             name: "PAProvidersLocal",
             dependencies: [
                 "PAProviders",
-                "PAFoundation",
+                "PAKernel",
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
             path: "Sources/Providers/Local"
         ),
         .target(
             name: "PAPolicy",
-            dependencies: ["PAFoundation"],
+            dependencies: ["PAKernel"],
             path: "Sources/Core/Policy"
         ),
         .target(
             name: "PATools",
-            dependencies: ["PAFoundation", "PAPolicy", "PAObservability"],
+            dependencies: ["PAKernel", "PAPolicy", "PAObservability"],
             path: "Sources/Capabilities/Tools"
         ),
         .target(
             name: "PAModules",
-            dependencies: ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
+            dependencies: ["PAKernel", "PAPolicy", "PAObservability", "PAEvents"],
             path: "Sources/Capabilities/Modules"
         ),
         .target(
             name: "PASkills",
-            dependencies: ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
+            dependencies: ["PAKernel", "PAModules", "PATools", "PAPolicy"],
             path: "Sources/Capabilities/Skills"
         ),
         .target(
             name: "PACognition",
-            dependencies: ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
+            dependencies: ["PAKernel", "PAProviders", "PAMemory", "PASkills"],
             path: "Sources/Core/Cognition"
         ),
         .target(
             name: "PAAgency",
-            dependencies: ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
+            dependencies: ["PAKernel", "PAPolicy", "PATools", "PACognition"],
             path: "Sources/Core/Agency"
         ),
         .target(
             name: "PAKernel",
             dependencies: [
-                "PAFoundation",
+                "PAKernel",
                 "PAPolicy",
                 "PAAgency",
                 "PACognition",
@@ -155,7 +155,7 @@ let package = Package(
         .target(
             name: "PAComposition",
             dependencies: [
-                "PAFoundation",
+                "PAKernel",
                 "PAKernel",
                 "PAObservability",
                 "PAEvents",
@@ -172,7 +172,7 @@ let package = Package(
         .testTarget(
             name: "PersonalAgentTests",
             dependencies: [
-                "PAFoundation",
+                "PAKernel",
                 "PAObservability",
                 "PAEvents",
                 "PASecurity",

@@ -1,6 +1,6 @@
-import Foundation
+﻿import Foundation
 import Testing
-import PAFoundation
+import PAKernel
 import PAProviders
 import PASecurity
 

@@ -1,5 +1,5 @@
-import Foundation
-import PAFoundation
+﻿import Foundation
+import PAKernel
 
 /// Test and composition double. Not a live model. Behavior is scripted and deterministic.
 public struct DeterministicFakeProvider: LLMProvider {

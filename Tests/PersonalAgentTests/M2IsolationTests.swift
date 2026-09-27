@@ -1,9 +1,9 @@
-import Foundation
+﻿import Foundation
 import Testing
 import PAKernel
 import PAProviders
 import PAEvents
-import PAFoundation
+import PAKernel
 
 @Suite("M2 kernel isolation")
 struct M2IsolationTests {

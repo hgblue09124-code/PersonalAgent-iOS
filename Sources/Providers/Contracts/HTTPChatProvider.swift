@@ -1,5 +1,5 @@
-import Foundation
-import PAFoundation
+﻿import Foundation
+import PAKernel
 
 /// Shared HTTP chat adapter. Concrete modules supply identity, endpoint, and auth scheme.
 public struct HTTPChatProvider: LLMProvider {

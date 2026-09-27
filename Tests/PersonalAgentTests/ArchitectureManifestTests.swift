@@ -1,6 +1,6 @@
-import Testing
+﻿import Testing
 import PAComposition
-import PAFoundation
+import PAKernel
 import PACognition
 import PAAgency
 

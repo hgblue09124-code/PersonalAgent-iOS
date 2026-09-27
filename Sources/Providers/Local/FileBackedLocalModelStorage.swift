@@ -1,5 +1,5 @@
-import Foundation
-import PAFoundation
+﻿import Foundation
+import PAKernel
 import PAProviders
 
 /// Internal persistent index state for local model metadata and active selection.

@@ -1,5 +1,5 @@
-import Foundation
-import PAFoundation
+﻿import Foundation
+import PAKernel
 
 /// Maps the semantic contract onto the OpenAI-compatible chat.completions wire format.
 /// Used by Grok, OpenAI, OpenAI-compatible, and local HTTP adapters.

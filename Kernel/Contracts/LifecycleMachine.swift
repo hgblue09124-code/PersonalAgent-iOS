@@ -1,4 +1,4 @@
-import PAFoundation
+﻿import PAKernel
 import PAEvents
 
 /// Pure lifecycle graph derived from M0 `AgentLifecycle`.

@@ -1,5 +1,5 @@
-import Foundation
-import PAFoundation
+﻿import Foundation
+import PAKernel
 import PAObservability
 
 public enum ExecutionEventKind: String, Sendable, Codable {

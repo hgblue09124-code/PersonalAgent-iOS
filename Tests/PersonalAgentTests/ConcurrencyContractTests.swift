@@ -1,5 +1,5 @@
-import Testing
-import PAFoundation
+﻿import Testing
+import PAKernel
 import PAKernel
 
 @Suite("Concurrency surface")

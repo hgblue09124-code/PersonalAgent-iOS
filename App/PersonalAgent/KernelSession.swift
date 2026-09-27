@@ -1,7 +1,7 @@
-import Foundation
+﻿import Foundation
 import CryptoKit
 import SwiftUI
-import PAFoundation
+import PAKernel
 import PAKernel
 import PAComposition
 import PAProviders

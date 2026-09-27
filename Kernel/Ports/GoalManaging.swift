@@ -1,4 +1,4 @@
-import PAFoundation
+﻿import PAKernel
 
 public protocol GoalManaging: Sendable {
     func goals() async -> [Goal]

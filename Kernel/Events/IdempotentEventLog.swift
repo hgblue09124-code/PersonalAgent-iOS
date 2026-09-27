@@ -1,5 +1,5 @@
-import Foundation
-import PAFoundation
+﻿import Foundation
+import PAKernel
 
 public enum EventLogError: Error, Sendable, Equatable {
     case conflictingPayload(eventID: EventID, existing: String, new: String)

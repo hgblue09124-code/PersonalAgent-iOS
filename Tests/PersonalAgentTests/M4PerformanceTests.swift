@@ -1,6 +1,6 @@
-import Testing
+﻿import Testing
 import Foundation
-import PAFoundation
+import PAKernel
 import PAMemory
 
 @Suite("M4 Performance & Scale Benchmarks")

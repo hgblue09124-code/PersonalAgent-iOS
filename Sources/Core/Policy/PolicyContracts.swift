@@ -1,4 +1,4 @@
-import PAFoundation
+﻿import PAKernel
 
 public struct PolicyDecision: Sendable, Equatable {
     public let allowed: Bool

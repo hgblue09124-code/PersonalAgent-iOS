@@ -1,4 +1,4 @@
-import PAFoundation
+﻿import PAKernel
 import PAPolicy
 
 public enum ModuleKind: String, Sendable, Codable {

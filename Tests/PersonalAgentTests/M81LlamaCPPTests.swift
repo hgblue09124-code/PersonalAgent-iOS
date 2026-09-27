@@ -1,6 +1,6 @@
-import Foundation
+﻿import Foundation
 import Testing
-@testable import PAFoundation
+@testable import PAKernel
 @testable import PAProviders
 @testable import PAProvidersLocal
 @testable import PAComposition
