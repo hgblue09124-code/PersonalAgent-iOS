@@ -1,8 +1,11 @@
 import Testing
 import Foundation
-import PAFoundation
+import PAKernel
 import PAStorage
+import PAStorageModels
 import PAMemory
+import PAStorageMemory
+import PAArchitecture
 
 /// Private test double strictly isolated as test support in M5CloudStoreContractTests.
 /// Does not exist in production PAStorage runtime.

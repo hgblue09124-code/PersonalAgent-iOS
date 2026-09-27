@@ -1,7 +1,5 @@
-import Foundation
-import PAFoundation
+import PAKernel
 
-/// Process-local event sink. Not a persistence engine and not M8 replay storage.
 public actor InMemoryEventLog: EventLog {
     private var stored: [ExecutionEvent] = []
 

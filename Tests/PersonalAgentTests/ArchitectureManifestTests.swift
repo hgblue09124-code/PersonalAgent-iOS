@@ -1,8 +1,6 @@
 import Testing
-import PAComposition
-import PAFoundation
-import PACognition
-import PAAgency
+import PAArchitecture
+import PARuntime
 
 @Suite("M0 architecture manifest")
 struct ArchitectureManifestTests {
@@ -40,9 +38,14 @@ struct ArchitectureManifestTests {
 
     @Test func agencyLoopMatchesContractEnum() {
         let fromEnum = AgencyStage.allCases.map(\.rawValue)
-        #expect(fromEnum == AgencyStage.allCases.map(\.rawValue))
+        #expect(fromEnum == ArchitectureManifest.agencyLoop)
     }
 
+    @Test func runtimeBoundaryIsExplicit() {
+        #expect(ArchitectureManifest.allowedImports["PARuntime"]?.contains("PAKernel") == true)
+        #expect(ArchitectureManifest.allowedImports["PAComposition"]?.contains("PARuntime") == true)
+        #expect(ArchitectureManifest.allowedImports["PAKernel"]?.contains("PARuntime") != true)
+    }
     @Test func companionReposAreForbidden() {
         #expect(ArchitectureManifest.forbiddenCompanionDependencies.contains("living-data-ocean"))
         #expect(ArchitectureManifest.forbiddenCompanionDependencies.contains("agent-core"))

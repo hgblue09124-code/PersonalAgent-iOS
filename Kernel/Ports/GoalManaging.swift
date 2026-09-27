@@ -1,5 +1,3 @@
-import PAFoundation
-
 public protocol GoalManaging: Sendable {
     func goals() async -> [Goal]
     func goal(id: GoalID) async -> Goal?

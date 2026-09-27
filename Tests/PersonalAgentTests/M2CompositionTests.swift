@@ -1,7 +1,7 @@
 import Testing
-import PAFoundation
-import PAComposition
 import PAKernel
+import PAArchitecture
+import PAComposition
 import PAProviders
 
 @Suite("M2 composition")
@@ -15,7 +15,7 @@ struct M2CompositionTests {
         #expect(root.milestone.kernelRuntime)
         let state = await root.runtime.currentState()
         #expect(state.lifecycle == .created)
-        #expect(await root.runtime.coordination.isWiredForProvider)
+        #expect(await root.runtime.coordination.isWiredForModules == false)
         #expect(await root.providerRuntime.lifecycle == .ready)
         #expect(root.catalog.resolve(ProviderID(rawValue: "fake")) != nil)
     }

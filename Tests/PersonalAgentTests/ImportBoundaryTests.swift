@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+import PAArchitecture
 
 @Suite("Dependency direction")
 struct ImportBoundaryTests {
@@ -153,12 +154,13 @@ func moduleName(for file: URL, sourcesRoot: URL) -> String {
     if relative.hasPrefix("Providers/OpenAI/") { return "PAProvidersOpenAI" }
     if relative.hasPrefix("Providers/Local/") { return "PAProvidersLocal" }
     if relative.hasPrefix("Core/Policy/") { return "PAPolicy" }
-    if relative.hasPrefix("Capabilities/Tools/") || relative.hasPrefix("Tools/") { return "PATools" }
+    if relative.hasPrefix("Tools/") { return "PATools" }
     if relative.hasPrefix("Capabilities/Modules/") || relative.hasPrefix("Modules/") { return "PAModules" }
-    if relative.hasPrefix("Capabilities/Skills/") || relative.hasPrefix("Skills/") { return "PASkills" }
+    if relative.hasPrefix("Skills/") { return "PASkills" }
     if relative.hasPrefix("Core/Cognition/") { return "PACognition" }
     if relative.hasPrefix("Core/Agency/") { return "PAAgency" }
     if relative.hasPrefix("Core/Agent/") { return "PAKernel" }
+    if relative.hasPrefix("Runtime/") { return "PARuntime" }
     if relative.hasPrefix("Architecture/") { return "PAArchitecture" }
     if relative.hasPrefix("Composition/") { return "PAComposition" }
     if relative.hasPrefix("cllama/") { return "cllama" }

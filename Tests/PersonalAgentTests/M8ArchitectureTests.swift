@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-import PAFoundation
+import PAArchitecture
 import PAKernel
 import PAObservability
 import PAEvents
@@ -67,7 +67,6 @@ struct M8ArchitectureTests {
         #expect(goalsAfter.first?.id == goalID)
         #expect(goalsAfter.first?.statement == "Build M8 Product Foundation")
 
-        // Confirm session state matches AgentRuntime state directly without duplication
         let runtimeState = await root.runtime.currentState()
         let sessionState = await session.currentState()
         #expect(runtimeState == sessionState)

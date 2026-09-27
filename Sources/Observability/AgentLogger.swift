@@ -1,4 +1,4 @@
-import PAFoundation
+import PAKernel
 
 /// Structured logging surface. Production code must not use `print()`.
 public protocol AgentLogger: Sendable {

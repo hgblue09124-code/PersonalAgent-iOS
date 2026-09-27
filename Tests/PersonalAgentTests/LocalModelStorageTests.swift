@@ -1,9 +1,11 @@
 import Foundation
+import PAKernel
 import Testing
-import PAFoundation
 import PAProviders
 import PAProvidersLocal
+import PAStorageModels
 import PAComposition
+import PAArchitecture
 
 @Suite("Local Model Storage & Selection Tests")
 struct LocalModelStorageTests {

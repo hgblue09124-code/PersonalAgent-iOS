@@ -1,20 +1,21 @@
 import Foundation
 import Testing
-import PAFoundation
+import PAKernel
 import PASecurity
 import PAStorage
+import PAStorageModels
 import PAMemory
 import PAProviders
 import PAProvidersGrok
 import PAProvidersOpenAI
 import PAProvidersOpenAICompatible
 import PAProvidersLocal
-import PAPolicy
 import PATools
 import PAModules
 import PASkills
-import PAKernel
+import PARuntime
 import PAComposition
+import PAArchitecture
 import PAObservability
 
 @Suite("Contract surfaces compile and stay honest")
