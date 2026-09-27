@@ -76,3 +76,10 @@
 - Repair: remove only the PR-time GitHub Release publication step. No production code or Capabilities layout changes.
 - Verification pending: new Apple workflow run after this repair commit.
 - Next exact action: verify the new Apple run is fully green, then continue Issue #85 from HANDOFF.
+
+
+## 2026-09-27 — Agent On: Issue #85 Physical Migration Final Verification & Completion
+- Verified canonical layout for Kernel (`Kernel/`), Capabilities (`Sources/Capabilities/{Modules,Skills,Tools}`), Composition (`Composition/`), and Providers (`Kernel/Ports/Providers`, `Sources/Providers/*`).
+- Updated `ImportBoundaryTests.swift` so `kernelSourcesDoNotMentionConcreteProviders()` inspects `Kernel/` directly.
+- Verified test suite: 340 tests in 46 suites passed cleanly via Docker `swift:6.3.2`.
+- Issue #85 physical migration is **COMPLETED**.

@@ -67,11 +67,9 @@ struct ImportBoundaryTests {
     }
 
     @Test func kernelSourcesDoNotMentionConcreteProviders() throws {
-        let kernelDir = repositoryRoot()
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("Core")
-            .appendingPathComponent("Agent")
+        let kernelDir = repositoryRoot().appendingPathComponent("Kernel")
         let files = try files(under: kernelDir, suffix: ".swift")
+        #expect(!files.isEmpty)
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
             #expect(!text.contains("PAProvidersGrok"))

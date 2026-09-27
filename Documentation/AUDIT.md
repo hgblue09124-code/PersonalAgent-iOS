@@ -318,3 +318,19 @@ Do not move files during the mapping-only audit.
 
 **DEFERRED**
 - ArchitectureManifest, Observability, Security, and Memory remain separate migration groups.
+
+
+### Audit #20 — Issue #85 Canonical Physical Migration Final Verification
+
+<!-- TASK-CONTEXT: Final physical migration verification for Issue #85. -->
+<!-- DECISION: Confirm full canonical physical tree layout and completion of Issue #85. -->
+<!-- INVARIANT: All 340 tests across 46 test suites pass cleanly in Swift 6.3.2 SPM test gate. -->
+
+**CONFIRMED**
+- Kernel layout is verified at `Kernel/{Contracts,Errors,Ports,Agent,Planning,Execution,Events}` with `PAKernel` targeting `Kernel`.
+- Capabilities layout is verified at `Sources/Capabilities/{Modules,Skills,Tools}` with `PAModules`, `PASkills`, `PATools` targets updated.
+- Composition layout is verified at `Composition/` with `PAComposition` target updated.
+- Provider layout is verified at `Kernel/Ports/Providers` and `Sources/Providers/{Grok,OpenAI,OpenAICompatible,Local}`.
+- Test assertions in `ImportBoundaryTests.swift` are updated to inspect `Kernel/` directly.
+- Full Swift Package Manager test suite (340 tests across 46 suites) passed cleanly in Docker `swift:6.3.2`.
+- Issue #85 physical migration is **COMPLETED**.
