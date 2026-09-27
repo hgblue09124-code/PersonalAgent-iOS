@@ -110,3 +110,14 @@ private struct AgentWorkspaceSheet: View {
         }
     }
 }
+
+private struct MilestoneKey: EnvironmentKey {
+    static let defaultValue: MilestoneGate = .m0
+}
+
+extension EnvironmentValues {
+    var milestoneGate: MilestoneGate {
+        get { self[MilestoneKey.self] }
+        set { self[MilestoneKey.self] = newValue }
+    }
+}
