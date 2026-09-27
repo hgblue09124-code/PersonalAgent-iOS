@@ -2,201 +2,68 @@
 
 Status: DESIGN + SELF-PLAY READY
 
-Purpose: turn the existing 1,000-run Markdown corpus into a self-playing cognitive
-tree. The OS does not merely store more trajectories. It uses trajectories as
-seed material to build reusable decision paths, failure traps, token shortcuts,
-and progressively harder challenges.
+Purpose: turn trajectory evidence into a sparse, reusable cognitive graph while
+keeping Markdown as the canonical human-readable memory surface.
 
-This remains Markdown-native. No Swift runtime, parser, index, database, or model
-fine-tuning is required.
+This is a Markdown contract, not a Swift runtime. No parser, index, database, or
+model fine-tuning is required.
 
-## 1. Core idea
+## 1. Core loop
 
-The OS treats every task as a routed search problem:
-
+```
 TASK
-→ SNAPSHOT CURRENT STATE
+→ SNAPSHOT
 → CLASSIFY
 → ROUTE
-→ SET CONTEXT BUDGET
 → LOAD MINIMAL HOUSE
 → SOLVE
 → VERIFY
 → FOLLOW
 → RESULT / DELTA
 → LEARN / PERSIST
+```
 
-The tree is the structural view. The executable cognitive shape is a graph:
+Structural view: **tree**. Operational view: sparse graph.
 
+```
 NODE → SIGNAL → FOLLOW → NODE
-
-A follow is a conditional transition, not a directory edge. It is created by an observable signal such as verification failure, missing evidence, a scope trap, a novel branch, or a cheaper verified route.
-
-The strong model is a teacher/judge when needed. The durable asset is the OS
-house: reusable skills, decision paths, traps, shortcuts, and challenge rules.
-
-## 2. Tree shape
-
-```text
-TREE OS
-├── ROOT: task
-│
-├── CLASSIFY
-│   ├── current-state
-│   ├── failure
-│   ├── architecture
-│   ├── verification
-│   └── unknown
-│
-├── DECISION
-│   ├── known skill
-│   ├── nearby skill
-│   └── explore
-│
-├── SOLVE
-│   ├── shortest known path
-│   ├── alternate path
-│   └── teacher-assisted path
-│
-├── VERIFY
-│   ├── invariant
-│   ├── evidence
-│   └── repository state
-│
-├── ADVERSARY
-│   ├── hidden scope trap
-│   ├── false-success trap
-│   ├── overengineering trap
-│   └── token-waste trap
-│
-├── COMPARE
-│   ├── correctness
-│   ├── evidence quality
-│   ├── scope
-│   └── token cost
-│
-└── HOUSE
-    ├── Skills
-    ├── Decision Maps
-    ├── Failure Traps
-    ├── Shortcuts
-    └── Challenges
 ```
 
-The tree is conceptual structure, not a requirement to create a directory or
-runtime object for every node.
+A FOLLOW edge exists only when an observable transition and its verification justify it.
 
-## 3. Tree becomes a cognitive graph
+## 2. Cognitive structure
 
-The Tree OS is not limited to parent/child traversal. Its nodes form a sparse cognitive graph whose edges are explicit FOLLOW transitions.
-
-```text
-                         ┌──→ FAILURE TRAP ──→ REPAIR SKILL ──┐
-                         │                                     │
-TASK → CLASSIFY → ROUTE → SKILL → ACT → VERIFY → RESULT ──────┤
-             ↑       │                  │                      │
-             │       │                  ├── missing evidence ──→ EVIDENCE
-             │       │                  │
-             │       └── shortcut ──────→ CHEAPER PATH         │
-             │                                              ↓  │
-             └────────────── FOLLOW ←──── DELTA ←──── LEARN ───┘
+```
+TASK
+ └→ CLASSIFY
+     └→ ROUTE
+         └→ SKILL → ACT → VERIFY
+                    ├→ DONE
+                    ├→ TRAP / REPAIR
+                    ├→ EVIDENCE
+                    ├→ SHORTCUT
+                    └→ EXPLORE
 ```
 
-### 3.1 Node types
+Node types:
 
 - **SKILL** — reusable action rule.
-- **TRAP** — known failure twin and rejection rule.
-- **EVIDENCE** — concrete proof needed to close a branch.
-- **SHORTCUT** — cheaper path that preserves correctness, evidence, and scope.
-- **DECISION** — routing rule selecting the next node.
-- **CHALLENGE** — bounded self-play input used to test a route.
-- **DELTA** — the smallest new fact produced by a completed run.
+- **TRAP** — failure twin / rejection rule.
+- **EVIDENCE** — proof needed to close a branch.
+- **SHORTCUT** — cheaper verified route.
+- **DECISION** — routing rule.
+- **CHALLENGE** — bounded self-play input.
+- **DELTA** — smallest new fact from a run.
 
-A node should stay small. The graph stores reusable transitions; trajectories remain the detailed historical record.
+The tree is conceptual; nodes do not imply directories or runtime objects.
 
-### 3.2 FOLLOW is the synapse
+## 3. Neuron / synapse contract
 
-Every useful node may expose conditional follows:
+A neuron is an existing OS skill, trap, decision, evidence rule, shortcut, or
+challenge with explicit activation and exit conditions. This is an **upgrade to
+the existing OS**, not a replacement architecture.
 
-```text
-FOLLOW
-  IF <signal>
-  THEN <target node>
-  WHY <transition reason>
-  VERIFY <evidence that the transition was justified>
-  COST <relative/estimated route cost>
-  STATUS OBSERVED | CONFIRMED | PROMOTED
 ```
-
-Examples:
-
-```text
-VERIFY
-  PASS              → DONE
-  FAIL              → FOLLOW: FAILURE-TRAP
-  EVIDENCE-MISSING  → FOLLOW: EVIDENCE
-  NOVEL             → FOLLOW: EXPLORE
-  CHEAPER-VALID     → FOLLOW: SHORTCUT
-```
-
-The graph must not grow merely because two nodes are semantically related. A connection earns existence from an observable transition and its verification.
-
-### 3.3 Routing is sparse and conditional
-
-At execution time, do not load the whole graph. Start from the task and follow only edges whose signals match current state:
-
-```text
-L0 TASK
- ↓
-L1 ROUTED SKILLS
- ↓ only when triggered
-L2 TRAPS / SHORTCUTS
- ↓ only when evidence requires
-L3 RELEVANT REPOSITORY EVIDENCE
- ↓ only when still unresolved
-L4 NEIGHBORING GRAINS
- ↓ only when novel
-L5 TEACHER
-```
-
-This keeps graph growth from becoming context growth.
-
-### 3.4 Learning changes edge strength, not truth
-
-Repeated successful transitions may make a route preferred, but frequency alone never upgrades a node or edge to CONFIRMED. The lifecycle remains:
-
-```text
-OBSERVED transition
-  ↓
-repeated / self-play tested
-  ↓
-candidate connection
-  ↓
-independent real-task evidence
-  ↓
-CONFIRMED
-  ↓
-independent repetition / architecture-critical
-  ↓
-PROMOTED
-```
-
-A cheaper route may become preferred only when:
-
-```text
-VALID
-+ EVIDENCE PRESERVED
-+ SCOPE PRESERVED
-+ COST LOWER
-```
-
-The graph therefore learns routing efficiency without turning popularity into proof.
-
-### 3.5 Neuron contract
-
-A graph node is a **cognitive neuron** only when it has a bounded role, an activation condition, and a falsifiable exit condition. Markdown stores the contract; it does not pretend to be a neural runtime.
-
-```text
 NEURON
   ID
   TYPE
@@ -210,23 +77,12 @@ NEURON
   STATUS OBSERVED | CONFIRMED | PROMOTED
 ```
 
-Minimum semantic rule:
+A neuron without a bounded exit is a context sink. Without provenance it is not
+durable knowledge.
 
-```text
-TRIGGER      = when this neuron may activate
-REQUIRED_STATE = what must already be true
-ACTION       = what the neuron does
-EXIT         = when it must stop firing
-VERIFY       = what can justify the transition
+A FOLLOW edge is a synapse:
+
 ```
-
-A neuron without a bounded exit condition is a context sink. A neuron without provenance is not durable knowledge.
-
-### 3.6 Synapse contract
-
-A FOLLOW edge is a conditional synapse. Its strength controls routing preference, never truth.
-
-```text
 SYNAPSE
   SOURCE
   SIGNAL
@@ -240,126 +96,102 @@ SYNAPSE
   STATUS OBSERVED | CONFIRMED | PROMOTED
 ```
 
-Semantics:
+**STRENGTH is routing preference, never truth.** Failure count may suppress a
+route but cannot prove a replacement. Stale evidence requires re-verification.
 
-- **STRENGTH** = learned routing preference from verified experience; it is not confidence, truth, or authority.
-- **FAILURE_COUNT** = observed failed traversals; it can suppress a route but cannot by itself prove a replacement.
-- **LAST_EVIDENCE** = most recent evidence supporting the transition; stale evidence requires re-verification.
-- **COST** = comparable route cost, measured when telemetry exists and explicitly estimated otherwise.
-- **STATUS** = lifecycle state of the edge, independent of strength.
+## 4. Sparse routing
 
-A route may be strengthened only after a successful traversal with preserved evidence and scope. A route may be weakened after a verified failure. Promotion still requires the existing independent-evidence lifecycle.
+Never load the whole graph.
 
-### 3.7 Activation, inhibition, and sparse attention
-
-The graph behaves as a sparse cognitive network, not a fully connected neural net.
-
-```text
+```
 TASK
- ↓ activate
+ ↓
 TRIGGER-MATCHED NEURONS
  ↓ inhibit
 TRAPS / STALE / SCOPE-MISMATCHED ROUTES
  ↓ select
 LOWEST-COST VALID ROUTE
- ↓ expand only on unresolved evidence
-NEIGHBORING NEURONS
+ ↓ expand only when evidence requires
+NEIGHBORING GRAINS
+ ↓ only when novel
+TEACHER
 ```
 
-Activation priority is:
+Priority:
 
-```text
+```
 CURRENT STATE
-→ TRIGGER MATCH
+→ TRIGGER
 → STATUS
 → EVIDENCE REQUIREMENT
-→ ROUTE COST
-→ STRENGTH
+→ COST
+→ ROUTING HISTORY
 ```
 
-No single scalar may override the first four gates. In particular, a high-strength route is rejected when its evidence or scope is invalid.
+No cost or strength value may override validity, evidence, or scope.
 
-**Inhibition rule:** a trap, stale edge, failed verification, or scope mismatch can block a route before more context is loaded.
+**Invariant:** memory growth must not imply context growth.
 
-**Sparse-context invariant:**
+## 5. Learning and lifecycle
 
-> Memory growth must not imply context growth.
-
-The active set should contain only the smallest subgraph required to produce the next verified transition.
-
-### 3.8 Learning, decay, and consolidation
-
-Learning is a change in routing behavior, not an automatic change in truth.
-
-```text
+```
 OBSERVATION
-  ↓
-SUCCESS / FAILURE SIGNAL
-  ↓
-EDGE UPDATE
-  ↓
-REPLAY / RECHALLENGE
-  ↓
-INDEPENDENT REAL-TASK EVIDENCE
-  ↓
-NODE/EDGE LIFECYCLE ADVANCE
+→ SUCCESS / FAILURE SIGNAL
+→ EDGE UPDATE
+→ REPLAY / RECHALLENGE
+→ INDEPENDENT REAL-TASK EVIDENCE
+→ LIFECYCLE ADVANCE
 ```
 
-Use bounded decay for routing preference:
-
-```text
-old / stale evidence
-→ lower routing priority
-→ re-verify before reuse
 ```
-
-Decay affects **STRENGTH**, never **STATUS**. A CONFIRMED node does not become OBSERVED merely because it was unused; instead, stale evidence can require a fresh verification before activation.
-
-Consolidation rule:
-
-```text
-TRAJECTORY = episodic experience
+TRAJECTORY = episodic evidence
 DELTA      = learning signal
 GRAPH      = compressed reusable structure
 HOUSE      = durable human-readable memory
 ```
 
-Full trajectories remain cold evidence. The hot path should consume the compressed graph representation and fetch historical trajectories only when a verification or novelty trigger requires them.
+Routing preference may decay when evidence becomes stale. STATUS does not decay
+automatically.
 
-### 3.9 Route selection and convergence
+Lifecycle remains:
 
-For a task with multiple valid routes, route selection is lexicographic rather than a single opaque score:
-
-```text
-1. VALIDITY
-2. EVIDENCE PRESERVATION
-3. SCOPE PRESERVATION
-4. REUSE
-5. LOWER COST
-6. STRONGER ROUTING HISTORY
+```
+OBSERVED → CONFIRMED → PROMOTED
 ```
 
-This prevents a cheap but unsafe route from defeating a more expensive verified route.
+- Synthetic self-play can reject or refine a candidate.
+- Repetition is a signal, not proof.
+- CONFIRMED requires concrete independent evidence.
+- PROMOTED requires independent repetition or architecture-critical justification.
 
-A route is **preferred**, not **true**, when it wins this comparison. The preferred route must be periodically rechallenged against its failure twin.
+## 6. Route selection
 
-The graph is converging when repeated tasks show:
+Compare valid routes lexicographically:
 
-```text
-same-or-better verified result
-+ smaller active subgraph
-+ fewer actions
-+ lower measured/estimated cost
-+ no increase in verification escapes
+1. validity;
+2. evidence preservation;
+3. scope preservation;
+4. reuse;
+5. lower cost;
+6. routing history.
+
+A cheaper route becomes preferred only when:
+
+```
+VALID
++ EVIDENCE PRESERVED
++ SCOPE PRESERVED
++ COST LOWER
 ```
 
-The target is therefore not maximum graph size. It is **minimum sufficient activation for a verified result**.
+Convergence means the same-or-better verified result with less active context,
+fewer actions, and no increase in verification escapes.
 
-### 3.10 Traversal safety and cycle inhibition
+Target: **minimum sufficient activation for a verified result**.
 
-Self-play exposes a failure mode that route preference alone does not prevent: a valid-looking graph can revisit the same nodes indefinitely.
+## 7. Traversal safety
 
-Every active traversal therefore carries bounded path state:
+Self-play must not loop indefinitely.
 
 ```
 PATH_STATE
@@ -371,167 +203,98 @@ PATH_STATE
   REENTRY_GUARD
 ```
 
-Traversal rules:
+Rules:
 
-1. A node already in `VISITED_NODES` cannot re-fire unless a new verification signal explicitly reopens it.
-2. A repeated edge without new evidence is inhibited.
-3. `STEP_BUDGET` bounds a single self-play attempt; exhaustion is a controlled failure, not success.
-4. `EXPANSION_COUNT` bounds context growth as well as graph traversal.
-5. A cycle may be retried only after the adversary changes the challenge or new evidence changes the route validity.
+1. visited nodes do not re-fire without a new verification signal;
+2. repeated edges without new evidence are inhibited;
+3. step budget bounds one self-play attempt;
+4. expansion count bounds context/traversal growth;
+5. retrying a cycle requires changed challenge or new evidence.
 
-This is a routing guard, not a truth signal. It does not promote a node or edge and it does not replace verification.
+A cyclic route such as `A → B → A → B` must terminate as
+`CYCLE_INHIBITED` or `BUDGET_EXHAUSTED`, never as a verified result.
 
-**Self-play test:** a route `A → B → A → B` must terminate as `CYCLE_INHIBITED` or `BUDGET_EXHAUSTED`, never as a verified result.
-## 4. The house is the memory
+This guard is routing safety, not truth.
 
-A trajectory is temporary training material.
+## 8. House entry
 
-A house entry is reusable cognitive infrastructure.
+Reusable memory should answer:
 
-A reusable entry should answer:
-
-- WHEN does this branch apply?
-- SIGNALS: what tells the OS it applies?
-- DO: what is the shortest safe action?
-- DON'T: what common trap should be avoided?
-- VERIFY: what evidence closes the branch?
-- COST: what makes this path cheap?
-- STATUS: OBSERVED / CONFIRMED / PROMOTED
-- SOURCE: where did the rule come from?
-
-## 5. Skill node
-
-Use this conceptual shape for future skill entries:
-
-```text
-SKILL
-  WHEN
-  SIGNALS
-  ACTION
-  DO NOT
-  VERIFY
-  TOKEN STRATEGY
-  FAILURE TRAPS
-  EVIDENCE
-  STATUS
+```
+WHEN / SIGNALS / ACTION / DO NOT / VERIFY / COST / STATUS / SOURCE
 ```
 
-Example seed from the current corpus:
+Seed:
 
-```text
+```
 SKILL: verification-preserving-minimal-repair
 
 WHEN:
-  a failing boundary has been localized
-
-SIGNALS:
-  concrete failure + matching code/test boundary
+  failure boundary is localized
 
 ACTION:
-  repair only the smallest valid boundary
+  repair the smallest valid boundary
 
 DO NOT:
-  widen scope or weaken the verification mechanism
+  widen scope or weaken verification
 
 VERIFY:
-  run evidence appropriate to the claimed invariant
-
-TOKEN STRATEGY:
-  start at the failure boundary; expand context only when evidence requires it
+  evidence appropriate to the claimed invariant
 
 STATUS:
   OBSERVED until independently verified
 ```
 
-This seed is derived from CL-003/CAND-001. It is not promoted by the corpus alone.
+The seed is not promoted by corpus volume alone.
 
-## 6. Self-play loop
+## 9. Self-play
 
-The OS should challenge itself instead of endlessly appending easy examples.
+Each bounded cycle is:
 
-### PASS A — Generator
-
-Create a bounded challenge from an existing skill or decision branch.
+```
+CHALLENGE
+→ ROUTE
+→ SOLVE
+→ VERIFY
+→ FOLLOW
+→ ADVERSARY
+→ JUDGE
+→ COST COMPARE
+→ COMPRESS
+→ RECHALLENGE
+```
 
 Challenge families:
 
-1. same task, less context;
-2. same task, noisy context;
-3. same task, misleading signal;
-4. same invariant, multiple possible repairs;
-5. same result, cheaper route;
-6. previous failure with one trap removed;
-7. previous success with a hidden scope trap.
+- same task with less/noisy context;
+- misleading signal or hidden scope trap;
+- multiple valid repairs;
+- same result through a cheaper route;
+- stale-memory or execution-vs-verification trap;
+- previous success with one assumption changed;
+- novel branch requiring bounded teacher help.
 
-### PASS B — Solver
-
-The OS selects a path from the house.
-
-Priority:
-
-1. confirmed reusable skill;
-2. observed skill with strong matching signals;
-3. nearest decision branch;
-4. exploration;
-5. teacher assistance.
-
-The solver should not reread the entire corpus when a bounded branch is enough.
-
-### PASS C — Adversary
-
-Generate the strongest plausible reason the chosen path is wrong.
-
-Ask:
-
-- Did the solver confuse execution with verification?
-- Did it cross the task boundary?
-- Did it assume remembered state?
-- Did it weaken the evidence mechanism?
-- Did it choose a longer route merely because it is familiar?
-- Did it spend context on irrelevant files?
-- Did it claim CONFIRMED without independent evidence?
-
-### PASS D — Judge
-
-Judge the result against the task invariant, not against confidence.
-
-A passing solve needs:
+Judge against the invariant:
 
 - correct result;
-- evidence appropriate to the claim;
-- preserved boundary;
+- required evidence present;
+- boundary preserved;
 - no prohibited shortcut;
-- acceptable token cost.
+- acceptable cost.
 
-### PASS E — Compress
+If two safe routes solve the same task, prefer the cheaper one and rechallenge it
+before treating the shortcut as durable.
 
-If two paths solve the same challenge safely:
+Teacher use is selective: unknown branch → bounded demonstration → observable
+pattern → challenge → independent real-task evidence.
 
-```text
-PATH A: correct + 140 units
-PATH B: correct + 52 units
+Never persist hidden chain-of-thought; persist observable decisions, actions,
+verification, failures, costs, and reusable rules.
 
-→ retain B as preferred shortcut
-→ retain A only if it covers a distinct evidence case
+## 10. Token economy
+
 ```
-
-The exact token count may be estimated when real token accounting is unavailable.
-Never present an estimate as measured telemetry.
-
-### PASS F — Rechallenge
-
-Do not immediately trust the compressed shortcut.
-
-Generate a new challenge that targets its weakest assumption.
-
-If it survives, the branch becomes stronger. If it fails, create or refine a
-failure trap.
-
-## 7. Token economy is an objective, not permission to skip evidence
-
-The OS optimizes:
-
-```correctness
+correctness
 + evidence
 + scope discipline
 + reuse
@@ -540,40 +303,21 @@ The OS optimizes:
 - unnecessary repetition
 ```
 
-Token saving must never mean:
+Token optimization never permits:
 
-- skipping required verification;
-- hiding uncertainty;
-- deleting tests;
-- ignoring AGENTS.md;
-- treating synthetic success as repository evidence.
+- skipped required verification;
+- hidden uncertainty;
+- deleted tests;
+- ignored AGENTS.md;
+- synthetic success presented as repository evidence.
 
-The cheapest valid path is the target.
+The cheapest **valid** path is the target.
 
-## 8. Failure twins
+## 11. Failure twins
 
-Every useful skill should eventually have a negative twin.
+Core traps:
 
-Example:
-
-```SKILL
-verification-preserving-minimal-repair
-```
-
-paired with:
-
-```TRAP
-green-by-bypass
-
-SIGNAL:
-  proposed change removes/weakens the mechanism that exposes failure
-
-RESPONSE:
-  reject path and restore the verification boundary
-```
-
-Other seed traps:
-
+- GREEN-BY-BYPASS
 - BROAD-FIX-before-localization
 - EXECUTION-EQUALS-VERIFICATION
 - MEMORY-EQUALS-CURRENT-STATE
@@ -582,173 +326,75 @@ Other seed traps:
 - CONTEXT-READ-EVERYTHING
 - TOKEN-SAVING-BY-SKIPPING-EVIDENCE
 
-These are challenge/judging patterns, not automatically confirmed repository
-lessons.
+These are judging/challenge patterns, not automatically confirmed lessons.
 
-## 9. Teacher role
+## 12. Curriculum seeds
 
-The strong model should be used selectively.
+The first decision forest maps the existing corpus:
 
-```text
-OS confident + evidence sufficient
-    → act alone
-
-OS has candidate but weak evidence
-    → self-play + adversary
-
-OS encounters novel branch
-    → ask teacher for a bounded demonstration
-
-teacher demonstrates
-    → OS extracts observable pattern
-
-OS creates challenge
-    → teacher judges edge cases
-
-repeated independent real-task success
-    → candidate may advance lifecycle
-```
-
-Do not copy hidden chain-of-thought. Persist observable decisions, actions,
-verification, failures, costs, and reusable rules.
-
-## 10. Tree growth rule
-
-Do not grow the tree because a file became large.
-
-Grow it when a branch earns reuse.
-
-```OBSERVED
-  ↓
-repeated pattern
-  ↓
-candidate skill
-  ↓
-self-play challenge
-  ↓
-adversarial failure check
-  ↓
-independent real-task evidence
-  ↓
-CONFIRMED
-  ↓
-independent repetition / architecture-critical
-  ↓
-PROMOTED
-```
-
-Synthetic self-play can strengthen or reject a candidate, but synthetic
-evidence alone cannot turn it into a repository-confirmed lesson.
-
-## 11. Current seeds from the 1,000-run corpus
-
-The existing ten clusters become the first decision forest:
-
-| Cluster | Tree role |
+| Cluster | Role |
 |---|---|
 | CL-001 | current-state gate |
-| CL-002 | classification branch |
-| CL-003 | minimal-repair skill |
-| CL-004 | scope/commit gate |
-| CL-005 | verification gate |
-| CL-006 | ownership/boundary gate |
-| CL-007 | trajectory-to-grain extractor |
-| CL-008 | lifecycle gate |
-| CL-009 | persistence-cost gate |
-| CL-010 | replay/evidence branch |
+| CL-002 | classification |
+| CL-003 | minimal repair |
+| CL-004 | scope / commit |
+| CL-005 | verification |
+| CL-006 | ownership / boundary |
+| CL-007 | trajectory → grain |
+| CL-008 | lifecycle |
+| CL-009 | persistence cost |
+| CL-010 | replay / evidence |
+
+First challenges:
+
+```
+T-001 shortest safe repair
+T-002 false shortcut
+T-003 minimum context
+T-004 noisy scope
+T-005 stale memory
+T-006 execution trap
+T-007 compression + rechallenge
+T-008 novel branch
+T-009 adversarial replay
+T-010 teacher boundary
+```
 
 The corpus supplies seeds, not proof.
 
-## 12. First self-play curriculum
+## 13. Guardrails
 
-Start with cheap challenges before creating more trajectory volume.
-
-### T-001 — shortest safe repair
-Given a localized failure, produce two valid paths and select the cheaper one.
-
-### T-002 — false shortcut
-Offer a faster path that weakens verification. Reject it.
-
-### T-003 — context minimization
-Solve with the smallest sufficient repository context.
-
-### T-004 — noisy task
-Inject unrelated files and test whether the OS keeps scope bounded.
-
-### T-005 — stale-memory trap
-Provide remembered state that conflicts with current repository state.
-
-### T-006 — execution trap
-Make the command succeed while the intended invariant remains false.
-
-### T-007 — compression test
-Replace a long successful path with a shorter reusable skill, then rechallenge it.
-
-### T-008 — novel branch
-Withhold a known skill and require the OS to identify the nearest safe branch.
-
-### T-009 — adversarial replay
-Replay a previous success with one hidden assumption changed.
-
-### T-010 — teacher boundary
-Ask the teacher only for the missing fact, not for a full solution.
-
-## 13. What success looks like
-
-The OS is improving when the same class of task requires:
-
-```more reuse
-less context
-fewer actions
-fewer repeated mistakes
-same-or-better verification
-```
-
-A larger trajectory corpus is not itself success.
-
-The stronger signal is:
-
-```1000 trajectories
-→ 10 clusters
-→ reusable skills
-→ negative twins
-→ short decision paths
-→ self-generated challenges
-→ fewer tokens per valid solve
-```
-
-## 14. Guardrails
-
-- One repository task remains one logical commit.
+- One repository task = one logical commit.
 - Current repository state outranks remembered state.
 - Synthetic runs are not repository evidence.
-- CONFIRMED requires concrete independent evidence.
-- PROMOTED follows existing lifecycle rules.
-- Markdown remains the canonical human-readable surface.
-- No parser/index/database is introduced until real usage demonstrates the need.
-- The tree must not bypass Kernel, Runtime, Composition, Policy, or other
-  executable boundaries.
+- CONFIRMED requires independent concrete evidence.
+- Markdown remains canonical human-readable persistence.
+- No parser/index/database until real usage demonstrates a retrieval need.
+- The cognitive graph must not bypass Kernel, Runtime, Composition, Policy, or
+  other executable ownership boundaries.
 - Token optimization may remove waste, never required evidence.
 
-## 15. Current implementation boundary
+## 14. Current implementation boundary
 
-This V1 is the cognitive architecture for the next phase of OS Markdown.
+V1 is the cognitive architecture for the next OS Markdown phase. The repository
+does **not** yet claim an autonomous self-playing runtime.
 
-It intentionally does not claim that the repository already has an autonomous
-self-playing runtime. The current implementation is a Markdown-native house
-and curriculum that can be exercised by the agent/model loop.
+Current implementation: Markdown-native house + curriculum exercised by the
+agent/model loop.
 
-The next real task should instantiate one graph-aware self-play cycle:
+Synthetic cycle test already exposed the need for explicit traversal bounds;
+the cycle guard above records that repair as **OBSERVED** until an independent
+real repository task exercises it.
 
-CHALLENGE → ROUTE → SOLVE → VERIFY → FOLLOW → ADVERSARY → JUDGE → COST COMPARE → COMPRESS → RECHALLENGE
+Next real task:
 
-**Agent self-play pass completed before this revision:** a synthetic cyclic route `A → B → A → B` was replayed against the V1 routing contract. The route could repeat because V1 had no explicit visited-node, edge-reentry, or traversal-budget guard. This is synthetic evidence only.
+```
+CHALLENGE → ROUTE → SOLVE → VERIFY → FOLLOW
+→ ADVERSARY → JUDGE → COST COMPARE → COMPRESS → RECHALLENGE
+```
 
-**Revision:** add bounded path state and cycle inhibition in §3.10. The expected observable result is now `CYCLE_INHIBITED` or `BUDGET_EXHAUSTED`, never a false verified result. This remains OBSERVED until exercised on an independent real repository task.
+Record only observable outcomes: fired/rejected FOLLOW edges, verification,
+scope preservation, and route cost.
 
-The observable result should record which FOLLOW edges fired, which were rejected, and whether the route became cheaper without weakening evidence or scope.
-
-The objective is not to make the Markdown file smarter by being longer.
-
-The objective is to make the OS need **less context and fewer tokens to reach the
-same verified result**.
+**Success is not a larger Markdown file. Success is the same verified result with
+less active context and fewer unnecessary actions.**
