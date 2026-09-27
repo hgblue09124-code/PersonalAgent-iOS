@@ -48,7 +48,16 @@ let package = Package(
         ),
         .target(
             name: "PAKernel",
-            dependencies: [],
+            dependencies: [
+                "PAPolicy",
+                "PAAgency",
+                "PACognition",
+                "PAObservability",
+                "PAEvents",
+                "PAProviders",
+                "PAModules",
+                "PAMemory"
+            ],
             path: "Kernel",
             exclude: ["Events"]
         ),
