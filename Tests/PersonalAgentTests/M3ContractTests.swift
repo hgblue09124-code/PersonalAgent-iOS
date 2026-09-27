@@ -1,5 +1,5 @@
 import Testing
-import PAFoundation
+import PAKernel
 import PAModules
 import PATools
 import PASkills

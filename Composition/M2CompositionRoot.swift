@@ -1,4 +1,4 @@
-import PAFoundation
+import PARuntime
 import PAKernel
 import PAObservability
 import PAEvents
@@ -51,8 +51,7 @@ public struct M2CompositionRoot: CompositionRoot, Sendable {
         self.runtime = try await AgentRuntime(
             identity: identity,
             eventLog: log,
-            logger: logger,
-            coordination: KernelCoordinationBoundary(provider: provider)
+            logger: logger
         )
     }
 }

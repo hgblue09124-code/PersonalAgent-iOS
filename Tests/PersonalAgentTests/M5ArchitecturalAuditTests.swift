@@ -1,10 +1,11 @@
 import Testing
 import Foundation
-import PAFoundation
 import PAStorage
+import PAStorageModels
 import PAMemory
 import PAKernel
 import PAComposition
+import PAStorageMemory
 
 @Suite("M0–M5 Architectural Integrity Audit Tests")
 struct M5ArchitecturalAuditTests {

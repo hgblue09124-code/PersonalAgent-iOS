@@ -4,20 +4,20 @@ import Testing
 @Suite("Repository integrity")
 struct RepositoryIntegrityTests {
     @Test func requiredM2ProviderSourcesExist() {
-        let root = repositoryRoot().appendingPathComponent("Sources")
+        let root = repositoryRoot()
         for path in [
-            "Providers/Contracts/LLMProvider.swift",
-            "Providers/Contracts/ProviderRuntime.swift",
-            "Providers/Contracts/ProviderRuntimeError.swift",
-            "Providers/Contracts/ProviderTransport.swift",
-            "Providers/Contracts/ChatCompletionsCodec.swift",
-            "Providers/Contracts/HTTPChatProvider.swift",
-            "Providers/Contracts/DeterministicFakeProvider.swift",
-            "Providers/Grok/GrokBoundary.swift",
-            "Providers/OpenAI/OpenAIBoundary.swift",
-            "Providers/OpenAICompatible/OpenAICompatibleBoundary.swift",
+            "Kernel/Ports/Providers/ProviderContracts.swift",
+            "Providers/Remote/Grok/GrokBoundary.swift",
+            "Runtime/Execution/ProviderRuntime.swift",
+            "Kernel/Ports/Providers/ProviderRuntimeError.swift",
+            "Providers/Remote/Shared/ProviderTransport.swift",
+            "Providers/Remote/Shared/ChatCompletionsCodec.swift",
+            "Providers/Remote/Shared/HTTPChatProvider.swift",
+            "Composition/DeterministicFakeProvider.swift",
+            "Providers/Remote/OpenAI/OpenAIBoundary.swift",
+            "Providers/Remote/OpenAICompatible/OpenAICompatibleBoundary.swift",
             "Providers/Local/LocalBoundary.swift",
-            "../Composition/M2CompositionRoot.swift",
+            "Composition/M2CompositionRoot.swift",
         ] {
             #expect(
                 FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path),
@@ -30,7 +30,6 @@ struct RepositoryIntegrityTests {
         let root = repositoryRoot()
         let kernel = root.appendingPathComponent("Kernel")
         for path in [
-            "Agent/AgentRuntime.swift",
             "Contracts/LifecycleMachine.swift",
             "Contracts/GoalMachine.swift",
             "Ports/GoalManaging.swift",
@@ -42,6 +41,22 @@ struct RepositoryIntegrityTests {
             #expect(
                 FileManager.default.fileExists(atPath: kernel.appendingPathComponent(path).path),
                 "missing kernel source \(path)"
+            )
+        }
+    }
+
+    @Test func requiredRuntimeSourcesExist() {
+        let runtime = repositoryRoot().appendingPathComponent("Runtime")
+        for path in [
+            "Agent/AgentRuntime.swift",
+            "Agent/AgentSession.swift",
+            "Planning/M6Orchestrator.swift",
+            "Execution/RunLifecycleManager.swift",
+            "Execution/RunRecoveryEngine.swift",
+        ] {
+            #expect(
+                FileManager.default.fileExists(atPath: runtime.appendingPathComponent(path).path),
+                "missing runtime source \(path)"
             )
         }
     }

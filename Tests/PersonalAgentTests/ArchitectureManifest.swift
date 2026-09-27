@@ -1,4 +1,4 @@
-import PAFoundation
+import PAKernel
 
 /// Architecture encoded as data so tests can lock the skeleton without a runtime.
 public enum ArchitectureManifest: Sendable {
@@ -43,40 +43,36 @@ public enum ArchitectureManifest: Sendable {
         ("local", "M2"),
     ]
 
-    /// Target -> allowed imported PA* modules. Foundation is implicit for all.
+    /// Target -> allowed imported PA* modules.
     public static let allowedImports: [String: Set<String>] = [
-        "PAFoundation": [],
-        "PAObservability": ["PAFoundation"],
-        "PAEvents": ["PAFoundation", "PAObservability"],
-        "PASecurity": ["PAFoundation"],
-        "PAStorage": ["PAFoundation", "PAEvents", "PAObservability"],
-        "PAMemory": ["PAFoundation", "PAStorage", "PAEvents"],
-        "PAProviders": ["PAFoundation", "PAObservability", "PASecurity", "PAEvents"],
-        "PAProvidersGrok": ["PAProviders", "PAFoundation"],
-        "PAProvidersOpenAI": ["PAProviders", "PAFoundation"],
-        "PAProvidersOpenAICompatible": ["PAProviders", "PAFoundation"],
+        "PAObservability": ["PAKernel"],
+        "PAEvents": ["PAObservability", "PAKernel"],
+        "PASecurity": ["PAKernel"],
+        "PAStorage": ["PAEvents", "PAObservability", "PAStorageModels"],
+        "PAStorageModels": ["PAProviders", "PAProvidersLocal"],
+        "PAMemory": ["PAStorage", "PAStorageModels", "PAEvents", "PAKernel"],
+        "PAProviders": ["PAObservability", "PASecurity", "PAEvents", "PAKernel"],
+        "PAProvidersGrok": ["PAProviders", "PAProvidersRemote"],
+        "PAProvidersOpenAI": ["PAProviders", "PAProvidersRemote"],
+        "PAProvidersOpenAICompatible": ["PAProviders", "PAProvidersRemote"],
+        "PAProvidersRemote": ["PAProviders", "PASecurity"],
         "cllama": [],
-        "PAProvidersLocal": ["PAProviders", "PAFoundation", "cllama"],
-        "PAPolicy": ["PAFoundation"],
-        "PATools": ["PAFoundation", "PAPolicy", "PAObservability"],
-        "PAModules": ["PAFoundation", "PAPolicy", "PAObservability", "PAEvents"],
-        "PASkills": ["PAFoundation", "PAModules", "PATools", "PAPolicy"],
-        "PACognition": ["PAFoundation", "PAProviders", "PAMemory", "PASkills"],
-        "PAAgency": ["PAFoundation", "PAPolicy", "PATools", "PACognition"],
-        "PAKernel": [
-            "PAFoundation",
-            "PAPolicy",
-            "PAAgency",
-            "PACognition",
+        "PAProvidersLocal": ["PAProviders", "PAProvidersRemote", "cllama"],
+        "PATools": ["PARuntime", "PAObservability", "PAKernel"],
+        "PAModules": ["PAObservability", "PAEvents", "PAKernel"],
+        "PASkills": ["PAModules", "PATools", "PARuntime", "PAKernel"],
+        "PARuntime": [
+            "PAKernel",
             "PAObservability",
             "PAEvents",
             "PAProviders",
             "PAModules",
             "PAMemory",
         ],
+        "PAKernel": ["PAEvents", "PAModules"],
         "PAComposition": [
-            "PAFoundation",
             "PAKernel",
+            "PARuntime",
             "PAObservability",
             "PAEvents",
             "PAProviders",
@@ -86,10 +82,9 @@ public enum ArchitectureManifest: Sendable {
             "PASkills",
             "PATools",
             "PAMemory",
-            "PAPolicy",
-            "PACognition",
-            "PAAgency",
-        ],
+            "PAStorageModels",
+            "PAStorageMemory",
+        ]
     ]
 
     public static let kernelMustNotImport: Set<String> = [

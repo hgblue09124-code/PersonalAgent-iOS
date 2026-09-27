@@ -1,5 +1,5 @@
+import PARuntime
 import Foundation
-import PAFoundation
 import PAKernel
 import PAObservability
 import PAEvents
@@ -8,9 +8,7 @@ import PAModules
 import PASkills
 import PATools
 import PAMemory
-import PAPolicy
-import PACognition
-import PAAgency
+import PAStorageMemory
 
 /// Canonical M7 Composition Root wiring Durable Run Lifecycle, ExecutionBoundary,
 /// RunLifecycleManager, RunRecoveryEngine, Stores, and IdempotentEventLog.
@@ -142,10 +140,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         }
 
         let coordination = KernelCoordinationBoundary(
-            policy: policy,
-            provider: activeProvider,
-            modules: moduleRuntime,
-            memory: memoryRuntime
+            modules: moduleRuntime
         )
 
         let agentRuntime = try await AgentRuntime(

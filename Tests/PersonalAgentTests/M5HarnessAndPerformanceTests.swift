@@ -1,8 +1,10 @@
 import Testing
 import Foundation
-import PAFoundation
+import PAKernel
 import PAStorage
+import PAStorageModels
 import PAMemory
+import PAStorageMemory
 
 /// Configuration options for fault injection in simulated cloud stores.
 public enum CloudFaultPolicy: Sendable, Equatable {

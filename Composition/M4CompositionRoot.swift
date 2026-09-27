@@ -1,5 +1,5 @@
+import PARuntime
 import Foundation
-import PAFoundation
 import PAKernel
 import PAObservability
 import PAEvents
@@ -8,6 +8,7 @@ import PAModules
 import PASkills
 import PATools
 import PAMemory
+import PAStorageMemory
 
 /// Wires kernel, provider runtime, module runtime, and memory OS.
 public struct M4CompositionRoot: CompositionRoot, Sendable {
@@ -118,9 +119,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
             eventLog: log,
             logger: logger,
             coordination: KernelCoordinationBoundary(
-                provider: provider,
-                modules: moduleRuntime,
-                memory: memoryRuntime
+                modules: moduleRuntime
             )
         )
     }

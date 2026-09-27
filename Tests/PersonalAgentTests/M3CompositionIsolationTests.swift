@@ -1,5 +1,5 @@
+import PARuntime
 import Testing
-import PAFoundation
 import PAComposition
 import PAKernel
 import PAModules

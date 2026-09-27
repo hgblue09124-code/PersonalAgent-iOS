@@ -1,5 +1,6 @@
 import SwiftUI
 import PAKernel
+import PARuntime
 
 struct AgentScreen: View {
     @ObservedObject var session: KernelSession

@@ -1,7 +1,8 @@
+import PAComposition
 import Foundation
 import Testing
-import PAFoundation
 import PASecurity
+import PAProvidersRemote
 import PAProviders
 import PAProvidersGrok
 import PAProvidersOpenAI
@@ -10,6 +11,7 @@ import PAProvidersLocal
 import PAKernel
 import PAEvents
 import PAObservability
+import PARuntime
 
 @Suite("M9 Parallel Track — Real Provider Vertical Slice Tests")
 struct M9RealProviderSliceTests {
@@ -128,7 +130,7 @@ struct M9RealProviderSliceTests {
         try await Task.sleep(nanoseconds: 50_000_000)
 
         // Verify events recorded in event log without leaking secret
-        let events = await eventLog.allEvents()
+        let events = try await eventLog.allEvents()
         #expect(events.contains(where: { $0.kind == .providerInvoked }))
         #expect(events.contains(where: { $0.kind == .providerCompleted }))
     }

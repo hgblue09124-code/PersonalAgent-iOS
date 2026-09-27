@@ -1,6 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
+import PAComposition
 
 struct ModelsScreen: View {
     @ObservedObject var session: KernelSession

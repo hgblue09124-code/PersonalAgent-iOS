@@ -1,10 +1,10 @@
 import Foundation
 import CryptoKit
 import SwiftUI
-import PAFoundation
 import PAKernel
 import PAComposition
 import PAProviders
+import PARuntime
 
 @MainActor
 final class KernelSession: ObservableObject {
