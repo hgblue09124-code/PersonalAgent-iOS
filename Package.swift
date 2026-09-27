@@ -149,8 +149,7 @@ let package = Package(
                 "PAModules",
                 "PAMemory",
             ],
-            path: "Kernel",
-            exclude: ["Events"]
+            path: "Sources/Core/Agent"
         ),
         .target(
             name: "PAComposition",
