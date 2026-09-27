@@ -1,6 +1,3 @@
-﻿import PAKernel
-import PAEvents
-
 /// Pure lifecycle graph derived from M0 `AgentLifecycle`.
 ///
 /// Stable states: created, running, paused, stopped, failed.
@@ -38,15 +35,6 @@ public enum LifecycleMachine: Sendable {
             return .success(.stopped)
         default:
             return .failure(.invalidLifecycleTransition(from: state, command: command))
-        }
-    }
-
-    public static func eventKind(for command: RuntimeCommand) -> ExecutionEventKind {
-        switch command {
-        case .start: return .runtimeStarted
-        case .pause: return .runtimePaused
-        case .resume: return .runtimeResumed
-        case .stop: return .runtimeStopped
         }
     }
 
