@@ -77,7 +77,7 @@ private struct AgentWorkspaceSheet: View {
                     }
 
                     NavigationLink {
-                        MemoryScreen(session: session)
+                        MemoryScreen()
                     } label: {
                         workspaceRow("Memory", "Persistent agent memory", "brain")
                     }
