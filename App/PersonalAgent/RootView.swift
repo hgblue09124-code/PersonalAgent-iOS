@@ -57,7 +57,7 @@ private struct AgentWorkspaceSheet: View {
                     .padding(.vertical, 6)
                 }
 
-                Section("Capabilities") {
+                Section {
                     NavigationLink {
                         ModelsScreen(session: session)
                     } label: {
@@ -81,14 +81,18 @@ private struct AgentWorkspaceSheet: View {
                     } label: {
                         workspaceRow("Memory", "Persistent agent memory", "brain")
                     }
+                } header: {
+                    Text("Capabilities")
                 }
 
-                Section("System") {
+                Section {
                     NavigationLink {
                         SettingsScreen(session: session)
                     } label: {
                         workspaceRow("Settings", "Agent and device configuration", "gearshape")
                     }
+                } header: {
+                    Text("System")
                 }
             }
             .navigationTitle("Workspace")
