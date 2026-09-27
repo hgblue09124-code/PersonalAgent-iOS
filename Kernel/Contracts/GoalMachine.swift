@@ -1,6 +1,3 @@
-﻿import PAKernel
-import PAEvents
-
 /// Goal graph mapped onto M0 `GoalStatus`.
 /// Goal pause/resume use `blocked` / `active`. No extra status is introduced.
 public enum GoalMachine: Sendable {
@@ -34,14 +31,4 @@ public enum GoalMachine: Sendable {
         }
     }
 
-    public static func eventKind(for command: GoalCommand) -> ExecutionEventKind {
-        switch command {
-        case .submit: return .goalSubmitted
-        case .activate: return .goalActivated
-        case .suspend: return .goalBlocked
-        case .resume: return .goalActivated
-        case .complete: return .goalCompleted
-        case .abort: return .goalAborted
-        }
-    }
 }

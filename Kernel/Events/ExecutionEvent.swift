@@ -95,3 +95,17 @@ public protocol ExecutionReplaying: Sendable {
 public struct EventObservabilityBridge {
     public static let category = "events"
 }
+
+
+extension GoalMachine {
+    public static func eventKind(for command: GoalCommand) -> ExecutionEventKind {
+        switch command {
+        case .submit: return .goalSubmitted
+        case .activate: return .goalActivated
+        case .suspend: return .goalBlocked
+        case .resume: return .goalActivated
+        case .complete: return .goalCompleted
+        case .abort: return .goalAborted
+        }
+    }
+}
