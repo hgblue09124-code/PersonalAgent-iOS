@@ -386,23 +386,23 @@ struct M6SemanticsTests {
 
 // MARK: - Test Helpers & Doubles
 
-@preconcurrency private actor RecordingProvider: LLMProvider {
+private actor RecordingProvider: LLMProvider {
     let identity = ProviderIdentity(
         id: ProviderID(rawValue: "recording"),
         displayName: "Recording",
         models: [ModelIdentity(id: ModelID(rawValue: "recording-model"), displayName: "Recording Model", contextTokenLimit: 2048)]
     )
     let capabilities: ProviderCapabilities = [.textGeneration, .streaming]
-    var lastRequest: LLMRequest?
+    nonisolated(unsafe) var lastRequest: LLMRequest?
 
-    var health: ProviderHealth { get async { .healthy } }
+    nonisolated var health: ProviderHealth { .healthy }
 
-    func complete(_ request: LLMRequest) async throws -> LLMResponse {
+    nonisolated func complete(_ request: LLMRequest) async throws -> LLMResponse {
         lastRequest = request
         return LLMResponse(text: "ok", finishReason: "stop", model: request.model)
     }
 
-    func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+    nonisolated func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
             continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: request.model)))
             continuation.finish()
