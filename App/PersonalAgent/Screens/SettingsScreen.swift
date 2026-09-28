@@ -295,7 +295,7 @@ private struct LatestRelease: Decodable {
 
     var preReleaseCode: String? {
         let source = "\(tag_name) \(name)"
-        let pattern = #"(?i)dev-pr-\\d+-([0-9a-f]{12})(?:\\s|$)"#
+        let pattern = #"(?i)dev-pr-\d+-([0-9a-f]{12})(?:\s|$)"#
         guard let match = source.range(of: pattern, options: .regularExpression) else {
             return nil
         }
