@@ -216,7 +216,7 @@ final class KernelSession: ObservableObject {
             // picker/open-document callback returns. Copy while the security
             // scope is alive, then let LocalModelStorage consume a stable local URL.
             let temporaryURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("import-(UUID().uuidString)")
+                .appendingPathComponent("import-\(UUID().uuidString)")
                 .appendingPathExtension("gguf")
             try FileManager.default.copyItem(at: url, to: temporaryURL)
             defer { try? FileManager.default.removeItem(at: temporaryURL) }
@@ -225,6 +225,7 @@ final class KernelSession: ObservableObject {
                 from: temporaryURL,
                 name: name
             )
+            await refresh()
         }
     }
 
