@@ -8,7 +8,7 @@ struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImportingGGUF = false
     @State private var lastImportError: String?
-    @AppStorage("app.language") private var appLanguage = "en"
+    @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
 
     var body: some View {

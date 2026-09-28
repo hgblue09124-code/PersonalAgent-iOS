@@ -6,7 +6,7 @@ import PAKernel
 struct PersonalAgentApp: App {
     @State private var session: KernelSession?
     @State private var initializationError: String?
-    @AppStorage("app.language") private var appLanguage = "en"
+    @AppStorage("app.language") private var appLanguage = "vi"
 
     var body: some Scene {
         WindowGroup {
@@ -32,8 +32,16 @@ struct PersonalAgentApp: App {
                 }
             }
             .dynamicTypeSize(.xSmall ... .accessibility3)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(.all)
             .environment(\.locale, Locale(identifier: appLanguage))
             .id(appLanguage)
+            .onAppear {
+                if !UserDefaults.standard.bool(forKey: "app.language.configured") {
+                    appLanguage = "vi"
+                    UserDefaults.standard.set(true, forKey: "app.language.configured")
+                }
+            }
         }
     }
 

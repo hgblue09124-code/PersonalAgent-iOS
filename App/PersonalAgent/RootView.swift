@@ -27,6 +27,8 @@ struct RootView: View {
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
         .environment(\.locale, Locale(identifier: appLanguage))
         .id(appLanguage)
         .task { await session.refresh() }
