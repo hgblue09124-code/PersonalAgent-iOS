@@ -20,6 +20,7 @@
 		A1000000000000000000000D /* ModelsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* ModelsScreen.swift */; };
 		A1000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000B /* Assets.xcassets */; };
 		A1000000000000000000000C /* KernelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000C /* KernelSession.swift */; };
+		A10000000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* Localizable.strings */; };
 		A10000000000000000000011 /* PAComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000001 /* PAComposition */; };
 		A10000000000000000000015 /* PAKernel in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000005 /* PAKernel */; };
 /* End PBXBuildFile section */
@@ -39,6 +40,8 @@
 		A2000000000000000000000D /* ModelsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsScreen.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A200000000000000000000FF /* PersonalAgent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PersonalAgent.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000017 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A20000000000000000000018 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +55,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		A50000000000000000000016 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A20000000000000000000017 /* en */,
+				A20000000000000000000018 /* vi */,
+			);
+			name = Localizable.strings;
+			path = .;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin PBXGroup section */
 		A50000000000000000000001 = {
@@ -78,6 +94,7 @@
 				A2000000000000000000000C /* KernelSession.swift */,
 				A50000000000000000000004 /* Screens */,
 				A2000000000000000000000B /* Assets.xcassets */,
+				A50000000000000000000016 /* Localizable.strings */,
 			);
 			path = PersonalAgent;
 			sourceTree = "<group>";
@@ -151,6 +168,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				vi,
 				Base,
 			);
 			mainGroup = A50000000000000000000001;
@@ -172,6 +190,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000000000000000000000B /* Assets.xcassets in Resources */,
+				A10000000000000000000016 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
