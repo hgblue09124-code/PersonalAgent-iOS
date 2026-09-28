@@ -4,6 +4,7 @@ import PAComposition
 struct RootView: View {
     @ObservedObject var session: KernelSession
     @State private var showWorkspace = false
+    @AppStorage("app.language") private var appLanguage = "en"
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -26,6 +27,8 @@ struct RootView: View {
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
         }
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
         .task { await session.refresh() }
         .onOpenURL { url in
             guard url.pathExtension.lowercased() == "gguf" else { return }
