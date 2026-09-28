@@ -12,11 +12,13 @@ struct AgentScreen: View {
     @FocusState private var taskFocused: Bool
 
     var body: some View {
-        ZStack {
-            background
-            content
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 12)
+        GeometryReader { proxy in
+            ZStack {
+                background
+                content(height: proxy.size.height)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 12)
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
@@ -37,20 +39,22 @@ struct AgentScreen: View {
         .ignoresSafeArea()
     }
 
-    private var content: some View {
-        VStack(spacing: 0) {
+    private func content(height: CGFloat) -> some View {
+        let compact = height < 790
+        return VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 10)
+            Spacer(minLength: compact ? 6 : 10)
             quickActions
-            Spacer(minLength: 8)
-            hero
-            Spacer(minLength: 14)
+            Spacer(minLength: compact ? 4 : 8)
+            hero(compact: compact)
+            Spacer(minLength: compact ? 8 : 14)
             composer
-            status
+            status(compact: compact)
         }
-        .padding(.horizontal, 18)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        .padding(.horizontal, compact ? 14 : 18)
+        .padding(.top, compact ? 4 : 8)
+        .padding(.bottom, compact ? 6 : 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var topBar: some View {
@@ -106,24 +110,25 @@ struct AgentScreen: View {
             .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
     }
 
-    private var hero: some View {
-        VStack(spacing: 16) {
+    private func hero(compact: Bool) -> some View {
+        VStack(spacing: compact ? 9 : 16) {
             Button { showAgentPanel = true } label: {
                 AgentOrb(
                     isActive: session.state.lifecycle.rawValue.lowercased() == "running",
                     isThinking: session.executionProgress != nil
                 )
+                .frame(width: compact ? 58 : 68, height: compact ? 58 : 68)
             }
             .buttonStyle(.plain)
 
             Text(greeting)
-                .font(.system(size: 32, weight: .black, design: .rounded))
+                .font(.system(size: compact ? 28 : 32, weight: .black, design: .rounded))
                 .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Text(phaseSubtitle)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: compact ? 13 : 15, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
         }
@@ -163,20 +168,20 @@ struct AgentScreen: View {
     }
 
     @ViewBuilder
-    private var status: some View {
+    private func status(compact: Bool) -> some View {
         if let result = session.executionResult {
-            statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill")
+            statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill", compact: compact)
                 .transition(.scale(scale: 0.96).combined(with: .opacity))
         } else if let progress = session.executionProgress {
-            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
+            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles", compact: compact)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         } else if let error = session.lastError {
-            statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill")
+            statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill", compact: compact)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
 
-    private func statusCard(title: String, detail: String, symbol: String) -> some View {
+    private func statusCard(title: String, detail: String, symbol: String, compact: Bool) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: symbol)
                 .font(.headline)
@@ -188,7 +193,7 @@ struct AgentScreen: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxHeight: 132)
+                .frame(maxHeight: compact ? 92 : 132)
                 .scrollDismissesKeyboard(.interactively)
             }
             Spacer(minLength: 0)
@@ -197,7 +202,7 @@ struct AgentScreen: View {
         .padding(13)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .padding(.top, 12)
+        .padding(.top, compact ? 7 : 12)
     }
 
     private var lifecycleMenu: some View {
