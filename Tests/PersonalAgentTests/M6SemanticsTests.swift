@@ -351,6 +351,27 @@ struct M6SemanticsTests {
         #expect(obsEvent?.payload["succeeded"] == "false")
         #expect(obsEvent?.payload["summary"]?.contains("Execution target unavailable") == true)
     }
+    @Test func test10_LLMReasonerUsesStructuredUserMessage() async throws {
+        let provider = RecordingProvider()
+        let reasoner = LLMReasoner(provider: provider)
+        let context = ContextBundle(
+            perception: Perception(rawInput: "I am a user", source: "user"),
+            memoryIDs: [],
+            skillIDs: []
+        )
+
+        let result = try await reasoner.reason(context: context)
+        #expect(result.summary == "ok")
+
+        let request = await provider.lastRequest
+        #expect(request?.messages.count == 2)
+        #expect(request?.messages.first?.role == .system)
+        #expect(request?.messages.last?.role == .user)
+        #expect(request?.messages.last?.content == "I am a user")
+        #expect(request?.parameters.maxOutputTokens == 128)
+        #expect(request?.messages.first?.content.contains("Do not repeat the user's task") == true)
+    }
+
     @Test func test9_AnswerOnlyProjectsReasoningResult() async throws {
         let root = try await M6CompositionRoot()
         let goal = Goal(statement: "1 + 1 = ?")
@@ -362,7 +383,31 @@ struct M6SemanticsTests {
     }
 }
 
-// MARK: - Test Helpers & Doubles
+// MARK: - Test Helpers & Doubles\n\nprivate actor RecordingProvider: LLMProvider {
+    let identity = ProviderIdentity(
+        id: ProviderID(rawValue: "recording"),
+        displayName: "Recording",
+        models: [ModelIdentity(id: ModelID(rawValue: "recording-model"), displayName: "Recording Model", contextTokenLimit: 2048)]
+    )
+    let capabilities: ProviderCapabilities = [.textGeneration, .streaming]
+    var lastRequest: LLMRequest?
+
+    var health: ProviderHealth { get async { .healthy } }
+
+    func complete(_ request: LLMRequest) async throws -> LLMResponse {
+        lastRequest = request
+        return LLMResponse(text: "ok", finishReason: "stop", model: request.model)
+    }
+
+    func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: request.model)))
+            continuation.finish()
+        }
+    }
+}
+
+
 
 private struct FixedReasoner: Reasoning {
     let answer: String

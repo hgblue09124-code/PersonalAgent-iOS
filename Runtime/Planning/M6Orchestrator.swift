@@ -78,19 +78,21 @@ public struct LLMReasoner: Reasoning {
     }
 
     public func reason(context: ContextBundle) async throws -> ReasoningResult {
-        let prompt = """
+        let systemPrompt = """
         You are the reasoning component of a personal agent.
-        Return a concise plan/decision for the user's task.
+        Answer the user's task directly and concisely.
+        Do not repeat the user's task, prompt labels, or instructions.
         Do not claim an action was executed.
-
-        User task:
-        \(context.perception.rawInput)
         """
 
         let response = try await provider.complete(
             LLMRequest(
                 model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
-                prompt: prompt
+                messages: [
+                    ProviderMessage(role: .system, content: systemPrompt),
+                    ProviderMessage(role: .user, content: context.perception.rawInput),
+                ],
+                parameters: GenerationParameters(maxOutputTokens: 128)
             )
         )
 
