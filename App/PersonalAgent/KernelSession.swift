@@ -65,7 +65,12 @@ final class KernelSession: ObservableObject {
 
         do {
             if let engine = try await composition.activeLocalModelEngine() {
-                activeEngineState = await engine.lifecycleState
+                var engineState = await engine.lifecycleState
+                if case .unloaded = engineState {
+                    let loadedEngine = try await composition.loadActiveLocalModel()
+                    engineState = await loadedEngine.lifecycleState
+                }
+                activeEngineState = engineState
             } else {
                 activeEngineState = .unloaded
             }
