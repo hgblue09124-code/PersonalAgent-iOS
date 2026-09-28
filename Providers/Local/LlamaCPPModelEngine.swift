@@ -215,12 +215,10 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 }
 
                 // 1. Tokenize prompt
-                let promptText: String
-                if let sys = request.systemPrompt, !sys.isEmpty {
-                    promptText = "\(sys)\n\n\(request.prompt)"
-                } else {
-                    promptText = request.prompt
-                }
+                // This native path does not apply the model's chat template.
+                // Feeding a raw system prompt makes some GGUF models echo the
+                // instruction instead of answering the user's request.
+                let promptText = request.prompt
 
                 guard let vocabPtr = llama_model_get_vocab(modelPtr) else {
                     throw LlamaCPPEngineError.tokenizationFailed
