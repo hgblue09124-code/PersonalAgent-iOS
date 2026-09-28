@@ -397,7 +397,12 @@ struct M6SemanticsTests {
 
         let second = Goal(statement: "1 + 1 = ?")
         try await root.runtime.submit(goal: second)
-        let secondEval = try await orchestrator.run(goalID: second.id)
+        let secondOrchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "2")
+        )
+        let secondEval = try await secondOrchestrator.run(goalID: second.id)
         #expect(secondEval.reason == "2")
         #expect(await root.runtime.currentState().activeGoalID == nil)
         #expect(await root.runtime.invariantsHold())
