@@ -221,6 +221,12 @@ struct AgentScreen: View {
         task = ""
         Task { await session.submitGoal(statement) }
     }
+
+    private var agentAccessibilityLabel: String {
+        if isThinking { return "Agent thinking" }
+        if isActive { return "Agent working" }
+        return "Agent idle"
+    }
 }
 
 private struct AgentContextSheet: View {
@@ -343,13 +349,16 @@ private struct AgentOrb: View {
         }
         .frame(width: 74, height: 74)
         .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
-        .scaleEffect(pulse ? 1.045 : 1)
+        .scaleEffect(pulse ? (isThinking ? 1.075 : 1.045) : 1)
+        .rotationEffect(.degrees(isThinking ? (pulse ? 2 : -2) : 0))
+        .brightness(isThinking && pulse ? 0.035 : 0)
         .animation(
-            .easeInOut(duration: isThinking ? 0.7 : 2.2).repeatForever(autoreverses: true),
+            .easeInOut(duration: isThinking ? 0.62 : (isActive ? 1.8 : 2.4))
+                .repeatForever(autoreverses: true),
             value: pulse
         )
         .onAppear { pulse = true }
         .opacity(isActive || isThinking ? 1 : 0.94)
-        .accessibilityLabel(isThinking ? "Agent thinking" : "Agent")
+        .accessibilityLabel(agentAccessibilityLabel)
     }
 }
