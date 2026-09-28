@@ -6,6 +6,7 @@ import PAKernel
 struct PersonalAgentApp: App {
     @State private var session: KernelSession?
     @State private var initializationError: String?
+    @AppStorage("app.language") private var appLanguage = "en"
 
     var body: some Scene {
         WindowGroup {
@@ -31,6 +32,7 @@ struct PersonalAgentApp: App {
                 }
             }
             .dynamicTypeSize(.xSmall ... .accessibility3)
+            .environment(\.locale, Locale(identifier: appLanguage))
         }
     }
 
