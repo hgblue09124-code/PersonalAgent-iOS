@@ -9,7 +9,6 @@ struct SettingsScreen: View {
     @State private var isImportingGGUF = false
     @State private var lastImportError: String?
     @AppStorage("app.language") private var appLanguage = "en"
-    @Environment(\.openURL) private var openURL
     @State private var updateState: UpdateState = .idle
 
     var body: some View {
@@ -151,7 +150,7 @@ struct SettingsScreen: View {
                 Button {
                     Task { await checkForUpdate() }
                 } label: {
-                    Label(updateState.buttonTitle, systemImage: updateState.isChecking ? "arrow.triangle.2.circlepath" : "arrow.down.circle")
+                    Label(updateState.buttonTitleKey, systemImage: updateState.isChecking ? "arrow.triangle.2.circlepath" : "arrow.down.circle")
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(updateState.isChecking)
@@ -268,8 +267,8 @@ private enum UpdateState {
         return false
     }
 
-    var buttonTitle: String {
-        isChecking ? "Đang kiểm tra…" : "Kiểm tra cập nhật"
+    var buttonTitleKey: LocalizedStringKey {
+        isChecking ? "Checking…" : "Check for updates"
     }
 }
 
