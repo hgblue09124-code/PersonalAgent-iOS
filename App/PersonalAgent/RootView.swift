@@ -29,7 +29,11 @@ struct RootView: View {
         .task { await session.refresh() }
         .onOpenURL { url in
             guard url.pathExtension.lowercased() == "gguf" else { return }
-            Task { await session.importModel(from: url) }
+            Task {
+                let securityScoped = url.startAccessingSecurityScopedResource()
+                defer { if securityScoped { url.stopAccessingSecurityScopedResource() } }
+                await session.importModel(from: url)
+            }
         }
     }
 }
