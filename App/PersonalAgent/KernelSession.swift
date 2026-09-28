@@ -114,9 +114,14 @@ final class KernelSession: ObservableObject {
                 }
                 goalID = try await self.composition.session.submitInput(statement)
                 await self.refresh()
-                let evaluation = try await self.composition.orchestrator.run(goalID: goalID!) { [weak self] progress in
-                    self?.executionProgress = progress
+                guard let goalID else {
+                    throw KernelError.invalidStateUpdate("Runtime accepted input without a goal identifier")
                 }
+                self.executionProgress = .executing
+                let evaluation = try await self.composition.lifecycleManager.run(
+                    goalID: goalID,
+                    rawInput: statement
+                )
                 let result = evaluation.reason.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !result.isEmpty else {
                     throw KernelError.invalidStateUpdate("Agent completed without a result")
