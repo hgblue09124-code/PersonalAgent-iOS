@@ -3,7 +3,7 @@ import PAComposition
 import PAKernel
 
 struct ScreenScaffold<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String
     @ViewBuilder var content: () -> Content
 
@@ -35,7 +35,7 @@ struct ScreenScaffold<Content: View>: View {
 }
 
 struct StatusRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
 
     var body: some View {
