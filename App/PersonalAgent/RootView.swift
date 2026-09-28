@@ -23,7 +23,10 @@ struct RootView: View {
                         .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
                 }
                 .padding(.leading, 20)
-                .padding(.top, proxy.safeAreaInsets.top + 10)
+                // The root content intentionally ignores the safe area so the Agent
+                // surface is truly fullscreen. Apply the safe-area offset to this
+                // control itself so it cannot land inside the Dynamic Island/notch.
+                .safeAreaPadding(.top, 10)
                 .accessibilityLabel("Open Agent workspace")
             }
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
