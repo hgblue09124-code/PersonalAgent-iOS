@@ -197,16 +197,22 @@ struct SettingsScreen: View {
             isPresented: $isImportingGGUF,
             allowedContentTypes: [
                 UTType(filenameExtension: "gguf") ?? .data,
-                .data,
             ],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
                 guard let selectedURL = urls.first else { return }
+                guard selectedURL.pathExtension.lowercased() == "gguf" else {
+                    lastImportError = "Chỉ hỗ trợ tệp GGUF."
+                    return
+                }
                 Task {
                     lastImportError = nil
+                    let scoped = selectedURL.startAccessingSecurityScopedResource()
+                    defer { if scoped { selectedURL.stopAccessingSecurityScopedResource() } }
                     await session.importModel(from: selectedURL)
+                    lastImportError = session.lastError
                 }
             case .failure(let error):
                 lastImportError = error.localizedDescription
