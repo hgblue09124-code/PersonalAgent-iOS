@@ -161,12 +161,12 @@ struct AgentScreen: View {
 
     @ViewBuilder
     private var status: some View {
-        if let progress = session.executionProgress {
-            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        } else if let result = session.executionResult {
+        if let result = session.executionResult {
             statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill")
                 .transition(.scale(scale: 0.96).combined(with: .opacity))
+        } else if let progress = session.executionProgress {
+            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
+                .transition(.move(edge: .bottom).combined(with: .opacity))
         } else if let error = session.lastError {
             statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill")
                 .transition(.move(edge: .bottom).combined(with: .opacity))

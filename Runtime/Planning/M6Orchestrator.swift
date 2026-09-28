@@ -237,6 +237,7 @@ public actor M6Orchestrator {
         var previousEvaluation: Evaluation? = nil
 
         while cycleCount < maxCycles {
+            try await waitUntilRunnable()
             cycleCount += 1
             let perception = Perception(rawInput: input, source: "user")
 
@@ -445,6 +446,22 @@ public actor M6Orchestrator {
             throw KernelError.invalidStateUpdate("M6 cycle did not produce an evaluation")
         }
         return result
+    }
+
+    private func waitUntilRunnable() async throws {
+        while true {
+            let lifecycle = await runtime.currentState().lifecycle
+            switch lifecycle {
+            case .running:
+                return
+            case .paused:
+                try await Task.sleep(for: .milliseconds(100))
+            case .stopped, .failed:
+                throw KernelError.runtimeNotExecutable(lifecycle)
+            case .created, .starting, .pausing, .stopping:
+                try await Task.sleep(for: .milliseconds(50))
+            }
+        }
     }
 
     private func executeProposal(_ proposal: ActionProposal, traceID: TraceID, goalID: GoalID) async throws -> Observation {
