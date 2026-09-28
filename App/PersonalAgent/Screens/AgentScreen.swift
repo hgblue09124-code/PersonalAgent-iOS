@@ -40,17 +40,17 @@ struct AgentScreen: View {
     private var content: some View {
         VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 18)
+            Spacer(minLength: 10)
             quickActions
-            Spacer(minLength: 12)
+            Spacer(minLength: 8)
             hero
-            Spacer(minLength: 22)
+            Spacer(minLength: 14)
             composer
             status
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 18)
+        .padding(.horizontal, 18)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
     }
 
     private var topBar: some View {
@@ -117,13 +117,13 @@ struct AgentScreen: View {
             .buttonStyle(.plain)
 
             Text(greeting)
-                .font(.system(size: 36, weight: .black, design: .rounded))
+                .font(.system(size: 32, weight: .black, design: .rounded))
                 .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Text(phaseSubtitle)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
         }
@@ -454,7 +454,7 @@ private struct AgentOrb: View {
                 .blur(radius: 2.5)
                 .offset(x: -10, y: -15)
         }
-        .frame(width: 74, height: 74)
+        .frame(width: 68, height: 68)
         .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
         .scaleEffect(pulse ? (isThinking ? 1.075 : 1.045) : 1)
         .rotationEffect(.degrees(isThinking ? (pulse ? 2 : -2) : 0))
