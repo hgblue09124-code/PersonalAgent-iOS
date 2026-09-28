@@ -25,6 +25,16 @@ jobs:
           sips -Z 1024 "$APP_ICON"
           sips -g pixelWidth -g pixelHeight "$APP_ICON"
 
+      - name: Resolve Pre-release version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/ui/native-agent-surface'
+        run: |
+          BASE_VERSION=$(grep -m1 'MARKETING_VERSION = ' PersonalAgent.xcodeproj/project.pbxproj | sed 's/.*MARKETING_VERSION = //; s/;//')
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
+          NEXT_PATCH=$((PATCH + 1))
+          VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Pre-release version: $VERSION"
+
       - name: Build PersonalAgent iOS app target (arm64)
         run: |
           xcodebuild build \
@@ -34,6 +44,7 @@ jobs:
             -configuration Release \
             -arch arm64 \
             -derivedDataPath DerivedData \
+            MARKETING_VERSION="${APP_VERSION:-0.1.0}" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -66,13 +77,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="dev-pr-117-${GITHUB_SHA::12}"
+          TAG="dev-v${APP_VERSION}-${GITHUB_SHA::12}"
           gh release create "$TAG" PersonalAgent-unsigned.ipa \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Dev IPA · PR #117 · ${GITHUB_SHA::12}" \
+            --title "Dev IPA · v${APP_VERSION} · ${GITHUB_SHA::12}" \
             --prerelease \
             --target "$GITHUB_SHA" \
-            --notes "Unsigned development IPA generated from PR #117 at $GITHUB_SHA. Verify on physical device before merge."
+            --notes "Unsigned development IPA v${APP_VERSION} generated at $GITHUB_SHA. Verify on physical device before merge."
 
       # PR workflows keep the verified IPA as an Actions artifact.
       # Do not create GitHub Releases from pull_request jobs: the release API
