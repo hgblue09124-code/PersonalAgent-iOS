@@ -9,7 +9,9 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
     public private(set) var lifecycle: ProviderLifecycle
     public private(set) var configuration: ProviderConfiguration?
 
-    private var provider: any LLMProvider
+    private let provider: any LLMProvider
+    private let providerIdentity: ProviderIdentity
+    private let providerCapabilities: ProviderCapabilities
     private let eventLog: (any EventLog)?
     private let logger: any AgentLogger
     private let sessionTrace: TraceID
@@ -21,6 +23,8 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         sessionTrace: TraceID = TraceID()
     ) {
         self.provider = provider
+        self.providerIdentity = provider.identity
+        self.providerCapabilities = provider.capabilities
         self.eventLog = eventLog
         self.logger = logger
         self.sessionTrace = sessionTrace
@@ -28,9 +32,12 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         self.configuration = nil
     }
 
-    public var identity: ProviderIdentity { provider.identity }
+    // LLMProvider exposes identity/capabilities synchronously. These values are immutable
+    // provider metadata, so they must be nonisolated; otherwise the protocol witness can be
+    // invoked from a non-actor executor and Swift Concurrency aborts at runtime.
+    nonisolated public var identity: ProviderIdentity { providerIdentity }
 
-    public var capabilities: ProviderCapabilities { provider.capabilities }
+    nonisolated public var capabilities: ProviderCapabilities { providerCapabilities }
 
     public var health: ProviderHealth {
         get async { await provider.health }
