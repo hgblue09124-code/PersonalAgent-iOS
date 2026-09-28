@@ -5,14 +5,20 @@ import PARuntime
 struct AgentScreen: View {
     @ObservedObject var session: KernelSession
     @State private var task = ""
+    @State private var showAgentPanel = false
+    @State private var appeared = false
     @FocusState private var taskFocused: Bool
 
     var body: some View {
         ZStack {
             background
             content
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 12)
         }
         .toolbar(.hidden, for: .navigationBar)
+        .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
+        .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
     private var background: some View {
@@ -56,10 +62,13 @@ struct AgentScreen: View {
 
     private var hero: some View {
         VStack(spacing: 16) {
-            AgentOrb(
+            Button { showAgentPanel = true } label: {
+                AgentOrb(
                 isActive: session.state.lifecycle.rawValue.lowercased() == "running",
                 isThinking: session.executionProgress != nil
-            )
+                )
+            }
+            .buttonStyle(.plain)
 
             Text(greeting)
                 .font(.system(size: 36, weight: .black, design: .rounded))
@@ -73,6 +82,7 @@ struct AgentScreen: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
+        .transition(.opacity.combined(with: .scale(scale: 0.96)))
     }
 
     private var composer: some View {
@@ -172,6 +182,44 @@ struct AgentScreen: View {
     }
 }
 
+private struct AgentContextSheet: View {
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 18) {
+                HStack(spacing: 14) {
+                    AgentOrb(isActive: session.state.lifecycle.rawValue.lowercased() == "running", isThinking: session.executionProgress != nil)
+                        .frame(width: 58, height: 58)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Agent").font(.title2.bold())
+                        Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+                VStack(spacing: 10) {
+                    row("Lifecycle", session.state.lifecycle.rawValue.capitalized, "bolt.fill")
+                    row("Mode", session.executionProgress == nil ? "Idle" : "Working", "waveform")
+                    row("Surface", "Living Agent", "sparkles")
+                }
+                .padding(16)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                Spacer()
+            }
+            .padding(20)
+            .navigationTitle("Agent")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+    private var subtitle: String { session.executionProgress != nil ? "Thinking through the current task." : "Quiet, ready and waiting." }
+    private func row(_ title: String, _ value: String, _ symbol: String) -> some View {
+        HStack {
+            Image(systemName: symbol).frame(width: 28, height: 28).background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            Text(title).foregroundStyle(.secondary)
+            Spacer()
+            Text(value).fontWeight(.semibold)
+        }
+    }
+}
 private struct AgentOrb: View {
     let isActive: Bool
     let isThinking: Bool
