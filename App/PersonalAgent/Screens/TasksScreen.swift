@@ -7,6 +7,7 @@ struct TasksScreen: View {
                 Label("Agent activity", systemImage: "waveform.path.ecg")
                     .font(.headline)
                 Text("Task progress is surfaced by the living Agent on the home surface.")
+                StatusRow(title: "Surface", value: "Living Agent")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

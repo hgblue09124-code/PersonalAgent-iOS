@@ -19,7 +19,10 @@ struct SkillsScreen: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(session.moduleIDs, id: \.self) { id in
-                        StatusRow(title: "Skill", value: id)
+                        HStack(spacing: 10) {
+                            Image(systemName: "sparkles").frame(width: 30, height: 30).background(.thinMaterial, in: Circle())
+                            StatusRow(title: "Skill", value: id)
+                        }
                     }
                 }
             }

@@ -18,7 +18,7 @@ struct MemoryScreen: View {
             ForEach(reservedKinds, id: \.self) { kind in
                 GlassPanel {
                     HStack {
-                        Text(kind.capitalized)
+                        Label(kind.capitalized, systemImage: memoryIcon(kind))
                             .font(.subheadline.weight(.semibold))
                         Spacer()
                         Text("contract")
@@ -27,6 +27,16 @@ struct MemoryScreen: View {
                     }
                 }
             }
+        }
+    }
+
+    private func memoryIcon(_ kind: String) -> String {
+        switch kind {
+        case "working": return "bolt.fill"
+        case "episodic": return "clock.arrow.circlepath"
+        case "semantic": return "brain.head.profile"
+        case "preference": return "slider.horizontal.3"
+        default: return "arrow.triangle.2.circlepath"
         }
     }
 }

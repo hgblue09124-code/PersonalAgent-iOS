@@ -10,6 +10,7 @@ struct ProvidersScreen: View {
                     .font(.headline)
                 StatusRow(title: "Provider", value: session.providerID)
                 StatusRow(title: "Lifecycle", value: session.providerLifecycle)
+                StatusRow(title: "Connection", value: session.providerLifecycle.lowercased().contains("error") ? "Attention" : "Available")
             }
 
             GlassPanel {

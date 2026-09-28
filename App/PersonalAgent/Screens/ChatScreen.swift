@@ -3,6 +3,7 @@ import SwiftUI
 struct ChatScreen: View {
     @ObservedObject var session: KernelSession
     @State private var message = ""
+    @FocusState private var focused: Bool
 
     var body: some View {
         ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right") {
@@ -17,6 +18,7 @@ struct ChatScreen: View {
             GlassPanel {
                 HStack(spacing: 10) {
                     TextField("Message Agent…", text: $message)
+                        .focused($focused)
                         .textFieldStyle(.roundedBorder)
                     Button {
                         let value = message.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -27,6 +29,7 @@ struct ChatScreen: View {
                         Image(systemName: "arrow.up")
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }

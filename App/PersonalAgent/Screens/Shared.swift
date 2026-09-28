@@ -60,6 +60,7 @@ struct GlassPanel<Content: View>: View {
         VStack(alignment: .leading, spacing: 10, content: content)
             .padding(15)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .shadow(color: .black.opacity(0.07), radius: 18, y: 8)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)

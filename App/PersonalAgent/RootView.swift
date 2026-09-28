@@ -34,7 +34,6 @@ private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
     @State private var workspaceExpanded = false
     @State private var appeared = false
-    @State private var workspaceExpanded = false
 
     var body: some View {
         NavigationStack {
@@ -94,6 +93,7 @@ private struct AgentWorkspaceSheet: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
+            .scrollDismissesKeyboard(.interactively)
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 10)
             .animation(.spring(response: 0.55, dampingFraction: 0.84), value: appeared)
