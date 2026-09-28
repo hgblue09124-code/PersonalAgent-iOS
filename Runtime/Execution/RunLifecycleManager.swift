@@ -190,6 +190,8 @@ public actor RunLifecycleManager {
         try await waitUntilRunnable()
         var observations: [Observation] = []
         for proposal in proposals {
+            try Task.checkCancellation()
+            try await waitUntilRunnable()
             let (obs, _) = try await executionBoundary.executeProposal(
                 proposal: proposal,
                 runID: runID,
