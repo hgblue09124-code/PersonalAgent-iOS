@@ -49,6 +49,18 @@ struct M9RealProviderSliceTests {
         #expect(await runtime.identity.id == GrokProviderBoundary.providerID)
     }
 
+    // Regression: ProviderRuntime must satisfy synchronous LLMProvider metadata
+    // requirements without crossing an actor isolation boundary.
+    @Test func p1b_providerRuntimeMetadataIsSafeThroughProtocolWitness() async throws {
+        let provider = DeterministicFakeProvider()
+        let runtime = ProviderRuntime(provider: provider)
+        let erased: any LLMProvider = runtime
+
+        // This is intentionally synchronous: the protocol requirement is non-async.
+        #expect(erased.identity.id == provider.identity.id)
+        #expect(erased.capabilities == provider.capabilities)
+    }
+
     // MARK: - P2: Valid request reaches provider boundary
     @Test func p2_validRequestReachesProviderBoundary() async throws {
         let responseBody = Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"verified-response"},"finish_reason":"stop"}]}"#.utf8)
