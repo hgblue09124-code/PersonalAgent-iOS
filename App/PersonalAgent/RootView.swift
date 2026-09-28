@@ -33,6 +33,7 @@ struct RootView: View {
 private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
     @State private var workspaceExpanded = false
+    @State private var workspaceExpanded = false
 
     var body: some View {
         NavigationStack {
