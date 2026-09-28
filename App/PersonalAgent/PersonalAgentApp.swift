@@ -41,7 +41,7 @@ struct PersonalAgentApp: App {
                     appLanguage = "vi"
                     UserDefaults.standard.set(true, forKey: "app.language.vi-migrated-v1")
                 }
-            }            }
+            }
         }
     }
 
