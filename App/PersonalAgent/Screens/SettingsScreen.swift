@@ -293,16 +293,13 @@ private struct LatestRelease: Decodable {
     let prerelease: Bool
     let created_at: String
 
-    var version: String? {
+    var preReleaseCode: String? {
         let source = "\(tag_name) \(name)"
-        for part in source.split(separator: " ") {
-            let value = part.trimmingCharacters(in: CharacterSet(charactersIn: "v"))
-            let pieces = value.split(separator: ".")
-            if pieces.count == 3 && pieces.allSatisfy({ Int($0) != nil }) {
-                return value
-            }
+        let pattern = #"(?i)dev-pr-\\d+-([0-9a-f]{12})(?:\\s|$)"#
+        guard let match = source.range(of: pattern, options: .regularExpression) else {
+            return nil
         }
-        return nil
+        return String(source[match]).split(separator: "-").last.map(String.init)
     }
 }
 
@@ -316,22 +313,20 @@ private extension SettingsScreen {
             guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
                 throw URLError(.badServerResponse)
             }
+
             let releases = try JSONDecoder().decode([LatestRelease].self, from: data)
-            let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+            let currentPreReleaseCode = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CODE") as? String
             let candidates = releases
                 .filter(\.prerelease)
-                .compactMap { release -> (LatestRelease, String)? in
-                    guard let version = release.version else { return nil }
-                    return (release, version)
-                }
-                .sorted(by: { $0.0.created_at > $1.0.created_at })
+                .sorted(by: { $0.created_at > $1.created_at })
 
-            guard let (release, releaseVersion) = candidates.first else {
+            guard let release = candidates.first,
+                  let releasePreCode = release.preReleaseCode else {
                 updateState = .current
                 return
             }
 
-            guard compareVersions(currentVersion, releaseVersion) == .orderedAscending else {
+            guard currentPreReleaseCode != releasePreCode else {
                 updateState = .current
                 return
             }
@@ -339,20 +334,9 @@ private extension SettingsScreen {
             let downloadURL = release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url
                 ?? release.html_url
             copiedUpdateLink = false
-            updateState = .available(releaseVersion, downloadURL)
+            updateState = .available(releasePreCode, downloadURL)
         } catch {
             updateState = .failed
         }
-    }
-
-    func compareVersions(_ lhs: String, _ rhs: String) -> ComparisonResult {
-        let a = lhs.split(separator: ".").compactMap { Int($0) }
-        let b = rhs.split(separator: ".").compactMap { Int($0) }
-        for i in 0..<max(a.count, b.count) {
-            let av = i < a.count ? a[i] : 0
-            let bv = i < b.count ? b[i] : 0
-            if av != bv { return av < bv ? .orderedAscending : .orderedDescending }
-        }
-        return .orderedSame
     }
 }
