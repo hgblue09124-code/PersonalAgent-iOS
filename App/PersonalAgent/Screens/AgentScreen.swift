@@ -175,10 +175,10 @@ struct AgentScreen: View {
             statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill", scale: scale)
                 .transition(.scale(scale: 0.96).combined(with: .opacity))
         } else if let progress = session.executionProgress {
-            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles", compact: compact)
+            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles", scale: scale)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         } else if let error = session.lastError {
-            statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill", compact: compact)
+            statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill", scale: scale)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
