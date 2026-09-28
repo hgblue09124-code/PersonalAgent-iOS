@@ -108,6 +108,9 @@ public actor RunLifecycleManager {
         let goalID = record.goalID
         let traceID = record.traceID
 
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
+
         guard let goal = await runtime.goal(id: goalID) else {
             throw KernelError.goalNotFound(goalID)
         }
@@ -132,15 +135,24 @@ public actor RunLifecycleManager {
         let input = rawInput ?? goal.statement
         let perception = Perception(rawInput: input, source: "user")
 
+        try Task.checkCancellation()
+
         // 1. Perception & Context
         let context = try await contextAssembler.assembleContext(perception: perception, observations: [], evaluation: nil)
+
+        try Task.checkCancellation()
 
         // 2. Reasoning & Planning
         let reasoningResult = try await reasoner.reason(context: context)
         let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
 
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
+
         // 3. ActionProposals
         let proposals = try await proposer.propose(plan: plan)
+
+        try Task.checkCancellation()
 
         // 4. Verification
         let verification = try await verifier.verify(plan: plan, proposals: proposals)
@@ -174,6 +186,8 @@ public actor RunLifecycleManager {
         try await runStore.save(record)
 
         // 6. Execution Loop via ExecutionBoundary
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
         var observations: [Observation] = []
         for proposal in proposals {
             let (obs, _) = try await executionBoundary.executeProposal(
@@ -187,6 +201,8 @@ public actor RunLifecycleManager {
             observations.append(obs)
         }
 
+        try Task.checkCancellation()
+
         // 7. Post-Execution Checkpoint
         let postCheckpoint = RunCheckpoint(
             runID: runID,
@@ -197,6 +213,9 @@ public actor RunLifecycleManager {
             completedObservations: observations
         )
         try await checkpointStore.saveCheckpoint(postCheckpoint)
+
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
 
         // 8. Evaluation & Reflection
         var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
@@ -214,6 +233,9 @@ public actor RunLifecycleManager {
             )
         }
         let reflection = try await reflector.reflect(goalID: goalID, observations: observations, evaluation: evaluation)
+
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
 
         // 9. WAL StateUpdate Transaction
         let targetGoalStatus: GoalStatus
@@ -253,6 +275,22 @@ public actor RunLifecycleManager {
         try await runStore.save(record)
 
         return evaluation
+    }
+
+    private func waitUntilRunnable() async throws {
+        while true {
+            try Task.checkCancellation()
+            switch await runtime.currentState().lifecycle {
+            case .running:
+                return
+            case .paused:
+                try await Task.sleep(for: .milliseconds(100))
+            case .stopped, .failed:
+                throw KernelError.runtimeNotExecutable(await runtime.currentState().lifecycle)
+            case .created, .starting, .pausing, .stopping:
+                try await Task.sleep(for: .milliseconds(50))
+            }
+        }
     }
 
     private func commitStateUpdate(
