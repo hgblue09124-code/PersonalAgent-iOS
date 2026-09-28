@@ -122,7 +122,7 @@ final class KernelSession: ObservableObject {
                     goalID: goalID,
                     rawInput: statement
                 )
-                let result = evaluation.reason.trimmingCharacters(in: .whitespacesAndNewlines)
+                let result = Self.cleanModelResult(evaluation.reason)
                 guard !result.isEmpty else {
                     throw KernelError.invalidStateUpdate("Agent completed without a result")
                 }
@@ -250,6 +250,24 @@ final class KernelSession: ObservableObject {
         await run {
             try await composition.deleteLocalModel(id: id)
         }
+    }
+
+    private static func cleanModelResult(_ raw: String) -> String {
+        var result = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Qwen and other chat templates may leak control tokens into the
+        // final UI result. They are transport markers, not user-facing text.
+        for token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>", "<|eot_id|>", "<|assistant|>", "<|user|>"] {
+            result = result.replacingOccurrences(of: token, with: "")
+        }
+
+        if result.hasPrefix("Kết quả:") {
+            result.removeFirst("Kết quả:".count)
+        } else if result.hasPrefix("Kết quả") {
+            result.removeFirst("Kết quả".count)
+        }
+
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private static func sha256(of url: URL) throws -> String {
