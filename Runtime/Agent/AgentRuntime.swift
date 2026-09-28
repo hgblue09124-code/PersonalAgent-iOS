@@ -162,7 +162,11 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         // StateUpdate is replayable by design. A durable mutation token makes
         // retries idempotent instead of re-applying a terminal transition.
         if let token = update.mutationToken {
-            if appliedMutationTokens.contains(token) || await mutationEvidenceStore.hasAppliedMutation(token: token) {
+            let alreadyApplied = appliedMutationTokens.contains(token)
+            if alreadyApplied {
+                return
+            }
+            if await mutationEvidenceStore.hasAppliedMutation(token: token) {
                 appliedMutationTokens.insert(token)
                 return
             }
