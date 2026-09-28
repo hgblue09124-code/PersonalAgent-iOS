@@ -105,8 +105,8 @@ struct AgentScreen: View {
         VStack(spacing: 16) {
             Button { showAgentPanel = true } label: {
                 AgentOrb(
-                isActive: session.state.lifecycle.rawValue.lowercased() == "running",
-                isThinking: session.executionProgress != nil
+                    isActive: session.state.lifecycle.rawValue.lowercased() == "running",
+                    isThinking: session.executionProgress != nil
                 )
             }
             .buttonStyle(.plain)
@@ -224,12 +224,6 @@ struct AgentScreen: View {
         task = ""
         Task { await session.submitGoal(statement) }
     }
-
-    private var agentAccessibilityLabel: String {
-        if isThinking { return "Agent thinking" }
-        if isActive { return "Agent working" }
-        return "Agent idle"
-    }
 }
 
 private struct AgentContextSheet: View {
@@ -260,16 +254,23 @@ private struct AgentContextSheet: View {
             .navigationBarTitleDisplayMode(.inline)
         }
     }
-    private var subtitle: String { session.executionProgress != nil ? "Thinking through the current task." : "Quiet, ready and waiting." }
+
+    private var subtitle: String {
+        session.executionProgress != nil ? "Thinking through the current task." : "Quiet, ready and waiting."
+    }
+
     private func row(_ title: String, _ value: String, _ symbol: String) -> some View {
         HStack {
-            Image(systemName: symbol).frame(width: 28, height: 28).background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            Image(systemName: symbol)
+                .frame(width: 28, height: 28)
+                .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             Text(title).foregroundStyle(.secondary)
             Spacer()
             Text(value).fontWeight(.semibold)
         }
     }
 }
+
 private struct ActivitySheet: View {
     @ObservedObject var session: KernelSession
 
@@ -327,6 +328,12 @@ private struct AgentOrb: View {
     let isThinking: Bool
     @State private var pulse = false
 
+    private var accessibilityLabel: String {
+        if isThinking { return "Agent thinking" }
+        if isActive { return "Agent working" }
+        return "Agent idle"
+    }
+
     var body: some View {
         ZStack {
             Circle()
@@ -362,6 +369,6 @@ private struct AgentOrb: View {
         )
         .onAppear { pulse = true }
         .opacity(isActive || isThinking ? 1 : 0.94)
-        .accessibilityLabel(agentAccessibilityLabel)
+        .accessibilityLabel(accessibilityLabel)
     }
 }
