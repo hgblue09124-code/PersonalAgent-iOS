@@ -8,27 +8,8 @@ struct RootView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .topLeading) {
-                AgentScreen(session: session)
-                    .padding(.top, proxy.safeAreaInsets.top)
-
-                Button {
-                    showWorkspace = true
-                } label: {
-                    Image(systemName: "circle.grid.2x2.fill")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 38, height: 38)
-                        .background(.black.opacity(0.20), in: Circle())
-                        .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
-                }
-                .padding(.leading, 20)
-                // The root content intentionally ignores the safe area so the Agent
-                // surface is truly fullscreen. Apply the safe-area offset to this
-                // control itself so it cannot land inside the Dynamic Island/notch.
-                .safeAreaPadding(.top, 10)
-                .accessibilityLabel("Open Agent workspace")
-            }
+            AgentScreen(session: session, showWorkspace: $showWorkspace)
+                .padding(.top, proxy.safeAreaInsets.top)
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
