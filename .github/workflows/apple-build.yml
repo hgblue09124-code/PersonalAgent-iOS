@@ -29,8 +29,14 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/ui/native-agent-surface'
         run: |
           BASE_VERSION=$(grep -m1 'MARKETING_VERSION = ' PersonalAgent.xcodeproj/project.pbxproj | sed 's/.*MARKETING_VERSION = //; s/;//')
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
-          NEXT_PATCH=$((PATCH + 1))
+          IFS='.' read -r MAJOR MINOR BASE_PATCH <<< "$BASE_VERSION"
+          NEXT_PATCH=$((BASE_PATCH + 1))
+          for TAG in $(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName --jq '.[].tagName'); do
+            if [[ "$TAG" =~ ^dev-v${MAJOR}.${MINOR}.([0-9]+)- ]]; then
+              PATCH="${BASH_REMATCH[1]}"
+              if (( PATCH >= NEXT_PATCH )); then NEXT_PATCH=$((PATCH + 1)); fi
+            fi
+          done
           VERSION="$MAJOR.$MINOR.$NEXT_PATCH"
           echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "Pre-release version: $VERSION"
