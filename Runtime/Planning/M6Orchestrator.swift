@@ -117,7 +117,9 @@ public struct DefaultReasoner: Reasoning {
 public struct DefaultPlanner: Planning {
     public init() {}
     public func plan(goalID: GoalID, context: ContextBundle, reasoning: ReasoningResult) async throws -> Plan {
-        let step = PlanStep(index: 0, description: context.perception.rawInput, skillID: nil)
+        // The first useful vertical slice is a truthful Ask path:
+        // the provider reasoning output becomes the user-facing answer.
+        let step = PlanStep(index: 0, description: reasoning.summary, skillID: nil)
         return Plan(goalID: goalID, steps: [step])
     }
 }
@@ -148,10 +150,13 @@ public struct DefaultEvaluator: Evaluating {
     public func evaluate(goalID: GoalID, observations: [Observation]) async throws -> Evaluation {
         let allSucceeded = !observations.isEmpty && observations.allSatisfy(\.succeeded)
         let disposition: AgencyDisposition = allSucceeded ? .complete : .abort
+        let reason = allSucceeded
+            ? (observations.last?.summary ?? "Completed")
+            : "Execution failed"
         return Evaluation(
             goalID: goalID,
             disposition: disposition,
-            reason: allSucceeded ? "All actions succeeded" : "Execution failed"
+            reason: reason
         )
     }
 }
@@ -448,7 +453,8 @@ public actor M6Orchestrator {
     }
 
     private func executeProposal(_ proposal: ActionProposal, traceID: TraceID, goalID: GoalID) async throws -> Observation {
-        var obsSummary = "Executed proposal"
+        // A proposal without a tool is an answer-only step, not a fabricated side effect.
+        var obsSummary = proposal.description
         var succeeded = true
 
         if let toolID = proposal.toolID {
