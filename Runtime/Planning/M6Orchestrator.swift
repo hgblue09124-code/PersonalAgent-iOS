@@ -237,7 +237,9 @@ public actor M6Orchestrator {
         var previousEvaluation: Evaluation? = nil
 
         while cycleCount < maxCycles {
+            try Task.checkCancellation()
             try await waitUntilRunnable()
+            try Task.checkCancellation()
             cycleCount += 1
             let perception = Perception(rawInput: input, source: "user")
 
@@ -256,6 +258,7 @@ public actor M6Orchestrator {
                 observations: previousObservations,
                 evaluation: previousEvaluation
             )
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .contextBuilt,
@@ -265,12 +268,14 @@ public actor M6Orchestrator {
             // 3. Reasoning
             progress?(.reasoning)
             let reasoningResult = try await reasoner.reason(context: context)
+            try Task.checkCancellation()
 
             progress?(.reasoningCompleted(reasoningResult.summary))
 
             // 4. Planning
             progress?(.planning)
             let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .planProduced,
@@ -279,6 +284,7 @@ public actor M6Orchestrator {
 
             // 5. ActionProposals
             let proposals = try await proposer.propose(plan: plan)
+            try Task.checkCancellation()
             for proposal in proposals {
                 var payload: [String: String] = [
                     "goalID": goalID.rawValue,
@@ -295,6 +301,7 @@ public actor M6Orchestrator {
             // 6. Verification
             progress?(.verification)
             let verification = try await verifier.verify(plan: plan, proposals: proposals)
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .verificationCompleted,
@@ -378,12 +385,14 @@ public actor M6Orchestrator {
                 // Execute action
                 progress?(.executing)
                 let obs = try await executeProposal(proposal, traceID: traceID, goalID: goalID)
+                try Task.checkCancellation()
                 observations.append(obs)
                 progress?(.observation(obs.summary))
             }
 
             // 8. Evaluation
             let evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .evaluationCompleted,
@@ -417,6 +426,7 @@ public actor M6Orchestrator {
                 targetGoalStatus = .active
             }
 
+            try Task.checkCancellation()
             let stateUpdate = StateUpdate(
                 goalID: goalID,
                 targetStatus: targetGoalStatus,

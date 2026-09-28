@@ -22,6 +22,18 @@ struct AgentScreen: View {
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showCommandCenter) { CommandCenterSheet(task: $task, focused: $taskFocused).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
+        .alert(
+            "Agent result",
+            isPresented: Binding(
+                get: { session.presentedResult != nil },
+                set: { if !$0 { session.presentedResult = nil } }
+            ),
+            presenting: session.presentedResult
+        ) { _ in
+            Button("OK") { session.presentedResult = nil }
+        } message: { result in
+            Text(result)
+        }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 

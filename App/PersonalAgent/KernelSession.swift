@@ -24,6 +24,7 @@ final class KernelSession: ObservableObject {
     @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionResult: String?
+    @Published var presentedResult: String?
     private var executionTask: Task<Void, Never>?
 
     init(composition: M8CompositionRoot, state: AgentState) {
@@ -38,6 +39,7 @@ final class KernelSession: ObservableObject {
         self.activeModelID = nil
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
+        self.presentedResult = nil
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -77,15 +79,24 @@ final class KernelSession: ObservableObject {
     func pause() async { await run { try await composition.session.pause() } }
     func resume() async { await run { try await composition.session.resume() } }
     func stop() async {
-        executionTask?.cancel()
-        executionTask = nil
+        let task = executionTask
+        task?.cancel()
         await run { try await composition.session.stop() }
+        if let task {
+            await task.value
+        }
+        executionTask = nil
     }
 
     func submitGoal(_ statement: String) async {
-        executionTask?.cancel()
+        guard executionTask == nil else {
+            lastError = "Agent is still working. Wait for the current task to finish or stop it before starting another."
+            await refresh()
+            return
+        }
         executionProgress = nil
         executionResult = nil
+        presentedResult = nil
         lastError = nil
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
@@ -101,6 +112,7 @@ final class KernelSession: ObservableObject {
                         self?.executionProgress = progress
                         if case .completed(let result) = progress {
                             self?.executionResult = result
+                            self?.presentedResult = result
                             self?.executionProgress = nil
                         }
                     }
