@@ -428,6 +428,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             }
 
             var output = Array(repeating: CChar(0), count: Int(required) + 1)
+            let outputCapacity = output.count
             let written = chat.withUnsafeMutableBufferPointer { buffer in
                 output.withUnsafeMutableBufferPointer { outputBuffer in
                     llama_chat_apply_template(
@@ -436,7 +437,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                         buffer.count,
                         true,
                         outputBuffer.baseAddress,
-                        Int32(output.count)
+                        Int32(outputCapacity)
                     )
                 }
             }
