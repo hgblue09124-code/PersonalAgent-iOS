@@ -217,7 +217,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 // 1. Tokenize prompt
                 let promptText: String
                 if let sys = request.systemPrompt, !sys.isEmpty {
-                    promptText = "System: \(sys)\nUser: \(request.prompt)\nAssistant:"
+                    promptText = "\(sys)\n\n\(request.prompt)"
                 } else {
                     promptText = request.prompt
                 }
