@@ -124,6 +124,7 @@ struct ModelsScreen: View {
                     let securityScoped = url.startAccessingSecurityScopedResource()
                     defer { if securityScoped { url.stopAccessingSecurityScopedResource() } }
                     await session.importModel(from: url)
+                    errorMessage = session.lastError
                 }
             case .failure(let error):
                 errorMessage = error.localizedDescription
