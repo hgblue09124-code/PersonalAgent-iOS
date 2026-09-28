@@ -40,20 +40,22 @@ struct AgentScreen: View {
     }
 
     private func content(height: CGFloat) -> some View {
-        let compact = height < 790
+        // 844pt is the iPhone 12 Pro Max reference height. The whole surface
+        // scales continuously instead of switching between fixed-size layouts.
+        let scale = min(max(height / 844.0, 0.84), 1.12)
         return VStack(spacing: 0) {
             topBar
-            Spacer(minLength: compact ? 6 : 10)
+            Spacer(minLength: 6 * scale)
             quickActions
-            Spacer(minLength: compact ? 4 : 8)
-            hero(compact: compact)
-            Spacer(minLength: compact ? 8 : 14)
+            Spacer(minLength: 5 * scale)
+            hero(scale: scale)
+            Spacer(minLength: 9 * scale)
             composer
-            status(compact: compact)
+            status(scale: scale)
         }
-        .padding(.horizontal, compact ? 14 : 18)
-        .padding(.top, compact ? 4 : 8)
-        .padding(.bottom, compact ? 6 : 12)
+        .padding(.horizontal, 16 * scale)
+        .padding(.top, 6 * scale)
+        .padding(.bottom, 8 * scale)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -110,25 +112,25 @@ struct AgentScreen: View {
             .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
     }
 
-    private func hero(compact: Bool) -> some View {
-        VStack(spacing: compact ? 9 : 16) {
+    private func hero(scale: CGFloat) -> some View {
+        VStack(spacing: 11 * scale) {
             Button { showAgentPanel = true } label: {
                 AgentOrb(
                     isActive: session.state.lifecycle.rawValue.lowercased() == "running",
                     isThinking: session.executionProgress != nil
                 )
-                .frame(width: compact ? 58 : 68, height: compact ? 58 : 68)
+                .frame(width: 64 * scale, height: 64 * scale)
             }
             .buttonStyle(.plain)
 
             Text(greeting)
-                .font(.system(size: compact ? 28 : 32, weight: .black, design: .rounded))
+                .font(.system(size: 31 * scale, weight: .black, design: .rounded))
                 .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Text(phaseSubtitle)
-                .font(.system(size: compact ? 13 : 15, weight: .semibold))
+                .font(.system(size: 14 * scale, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
         }
@@ -168,9 +170,9 @@ struct AgentScreen: View {
     }
 
     @ViewBuilder
-    private func status(compact: Bool) -> some View {
+    private func status(scale: CGFloat) -> some View {
         if let result = session.executionResult {
-            statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill", compact: compact)
+            statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill", scale: scale)
                 .transition(.scale(scale: 0.96).combined(with: .opacity))
         } else if let progress = session.executionProgress {
             statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles", compact: compact)
@@ -181,7 +183,7 @@ struct AgentScreen: View {
         }
     }
 
-    private func statusCard(title: String, detail: String, symbol: String, compact: Bool) -> some View {
+    private func statusCard(title: String, detail: String, symbol: String, scale: CGFloat) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: symbol)
                 .font(.headline)
@@ -193,7 +195,7 @@ struct AgentScreen: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxHeight: compact ? 92 : 132)
+                .frame(maxHeight: 116 * scale)
                 .scrollDismissesKeyboard(.interactively)
             }
             Spacer(minLength: 0)
@@ -202,7 +204,7 @@ struct AgentScreen: View {
         .padding(13)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .padding(.top, compact ? 7 : 12)
+        .padding(.top, 9 * scale)
     }
 
     private var lifecycleMenu: some View {
