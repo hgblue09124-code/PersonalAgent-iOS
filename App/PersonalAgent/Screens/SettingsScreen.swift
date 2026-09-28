@@ -7,6 +7,9 @@ struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImportingGGUF = false
     @State private var lastImportError: String?
+    @AppStorage("app.language") private var appLanguage = "en"
+    @Environment(\.openURL) private var openURL
+    @State private var updateState: UpdateState = .idle
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -121,6 +124,55 @@ struct SettingsScreen: View {
                 }
             }
 
+
+
+            GlassPanel {
+                Label("Language", systemImage: "globe")
+                    .font(.headline)
+
+                Picker("Language", selection: $appLanguage) {
+                    Text("English").tag("en")
+                    Text("Tiếng Việt").tag("vi")
+                }
+                .pickerStyle(.segmented)
+            }
+
+            GlassPanel {
+                HStack {
+                    Label("App update", systemImage: "arrow.down.circle")
+                        .font(.headline)
+                    Spacer()
+                    Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1.0")
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                }
+
+                Button {
+                    Task { await checkForUpdate() }
+                } label: {
+                    Label(updateState.buttonTitle, systemImage: updateState.isChecking ? "arrow.triangle.2.circlepath" : "arrow.down.circle")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(updateState.isChecking)
+
+                if case .available(let version, let url) = updateState {
+                    Text("Có bản mới: \(version)")
+                        .font(.subheadline.weight(.semibold))
+                    Button("Mở trang cập nhật") {
+                        openURL(url)
+                    }
+                    .buttonStyle(.bordered)
+                } else if case .current = updateState {
+                    Text("Bạn đang dùng bản mới nhất.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if case .failed(let message) = updateState {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             GlassPanel {
                 Label("Runtime", systemImage: "bolt.circle")
                     .font(.headline)
@@ -146,7 +198,6 @@ struct SettingsScreen: View {
             allowedContentTypes: [
                 UTType(filenameExtension: "gguf") ?? .data,
                 .data,
-                .item
             ],
             allowsMultipleSelection: false
         ) { result in
@@ -194,5 +245,61 @@ private struct LifecycleStateBadge: View {
         case .unloading: return .orange
         case .failed: return .red
         }
+    }
+}
+
+
+private enum UpdateState {
+    case idle
+    case checking
+    case current
+    case available(String, URL)
+    case failed(String)
+
+    var isChecking: Bool {
+        if case .checking = self { return true }
+        return false
+    }
+
+    var buttonTitle: String {
+        isChecking ? "Đang kiểm tra…" : "Kiểm tra cập nhật"
+    }
+}
+
+private struct LatestRelease: Decodable {
+    let tag_name: String
+    let html_url: URL
+}
+
+private extension SettingsScreen {
+    func checkForUpdate() async {
+        updateState = .checking
+        do {
+            var request = URLRequest(url: URL(string: "https://api.github.com/repos/hgblue09124-code/PersonalAgent-iOS/releases/latest")!)
+            request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+                throw URLError(.badServerResponse)
+            }
+            let release = try JSONDecoder().decode(LatestRelease.self, from: data)
+            let remote = release.tag_name.replacingOccurrences(of: "v", with: "")
+            let local = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "0.0.0"
+            updateState = compareVersions(remote, local) == .orderedDescending
+                ? .available(release.tag_name, release.html_url)
+                : .current
+        } catch {
+            updateState = .failed("Không kiểm tra được cập nhật lúc này.")
+        }
+    }
+
+    func compareVersions(_ lhs: String, _ rhs: String) -> ComparisonResult {
+        let a = lhs.split(separator: ".").compactMap { Int($0) }
+        let b = rhs.split(separator: ".").compactMap { Int($0) }
+        for i in 0..<max(a.count, b.count) {
+            let av = i < a.count ? a[i] : 0
+            let bv = i < b.count ? b[i] : 0
+            if av != bv { return av < bv ? .orderedAscending : .orderedDescending }
+        }
+        return .orderedSame
     }
 }
