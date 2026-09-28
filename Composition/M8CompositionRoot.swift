@@ -203,8 +203,9 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         switch try await resolveActiveProvider() {
         case .noActiveModel:
             return try await fallbackProvider.complete(request)
-        case .activeModel(let adapter):
-            return try await adapter.complete(request)
+        case .activeModel:
+            let engine = try await coordinator.loadActiveModel()
+            return try await LocalModelProviderAdapter(engine: engine).complete(request)
         }
     }
 
@@ -221,7 +222,8 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
                         continuation.finish()
                         return
                     }
-                    let adapter = LocalModelProviderAdapter(engine: engine)
+                    let loadedEngine = try await coord.loadActiveModel()
+                    let adapter = LocalModelProviderAdapter(engine: loadedEngine)
                     for try await event in adapter.stream(request) {
                         continuation.yield(event)
                     }
