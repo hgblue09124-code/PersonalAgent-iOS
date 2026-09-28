@@ -413,7 +413,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             }
 
             var chat = messages
-            let required = withUnsafeMutableBufferPointer(to: &chat) { buffer in
+            let required = chat.withUnsafeMutableBufferPointer { buffer in
                 llama_chat_apply_template(
                     template,
                     buffer.baseAddress,
