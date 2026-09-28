@@ -318,10 +318,13 @@ private extension SettingsScreen {
             let currentPreReleaseCode = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CODE") as? String
             let candidates = releases
                 .filter(\.prerelease)
-                .sorted(by: { $0.created_at > $1.created_at })
+                .compactMap { release -> (LatestRelease, String)? in
+                    guard let code = release.preReleaseCode else { return nil }
+                    return (release, code)
+                }
+                .sorted(by: { $0.0.created_at > $1.0.created_at })
 
-            guard let release = candidates.first,
-                  let releasePreCode = release.preReleaseCode else {
+            guard let (release, releasePreCode) = candidates.first else {
                 updateState = .current
                 return
             }
