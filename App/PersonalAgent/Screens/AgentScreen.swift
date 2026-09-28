@@ -38,19 +38,25 @@ struct AgentScreen: View {
     }
 
     private var content: some View {
+        // Keep the Agent surface on its compact design rhythm. In a true
+        // fullscreen window, unconstrained Spacers expand with the viewport
+        // and destroy the proportions that were correct on the original
+        // compact canvas. Fixed rhythm + centered composition preserves that
+        // visual geometry without changing the native fullscreen canvas.
         VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 18)
+            Color.clear.frame(height: 18)
             quickActions
-            Spacer(minLength: 12)
+            Color.clear.frame(height: 12)
             hero
-            Spacer(minLength: 22)
+            Color.clear.frame(height: 22)
             composer
             status
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 18)
+        .frame(maxWidth: .infinity)
     }
 
     private var topBar: some View {
