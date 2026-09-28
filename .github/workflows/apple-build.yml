@@ -2,7 +2,7 @@ name: Apple Native Build & Unsigned IPA
 
 on:
   push:
-    branches: [main, ui/agent-orb-real-glass]
+    branches: [main, ui/agent-orb-real-glass, ui/native-agent-surface]
   pull_request:
 
 permissions:
@@ -79,7 +79,7 @@ jobs:
 
 
       - name: Publish branch Pre-release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/ui/agent-orb-real-glass'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/ui/native-agent-surface'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
