@@ -24,6 +24,8 @@ final class KernelSession: ObservableObject {
     @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionResult: String?
+    @Published var presentedResult: String?
+    private var executionTask: Task<Void, Never>?
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -37,6 +39,7 @@ final class KernelSession: ObservableObject {
         self.activeModelID = nil
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
+        self.presentedResult = nil
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -72,26 +75,88 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    /// Startup-only residency preparation. Refresh remains observational and side-effect free.
+    func prepareActiveModel() async {
+        guard activeModelID != nil else { return }
+        await run { _ = try await composition.loadActiveLocalModel() }
+    }
+
     func start() async { await run { try await composition.session.start() } }
     func pause() async { await run { try await composition.session.pause() } }
     func resume() async { await run { try await composition.session.resume() } }
-    func stop() async { await run { try await composition.session.stop() } }
+    func stop() async {
+        let task = executionTask
+        task?.cancel()
+        await run { try await composition.session.stop() }
+        if let task {
+            await task.value
+        }
+        executionTask = nil
+    }
 
     func submitGoal(_ statement: String) async {
+        guard executionTask == nil else {
+            lastError = "Agent is still working. Wait for the current task to finish or stop it before starting another."
+            await refresh()
+            return
+        }
         executionProgress = nil
         executionResult = nil
-        await run {
-            let goalID = try await composition.session.submitInput(statement)
-            await refresh()
-            _ = try await composition.orchestrator.run(goalID: goalID) { [weak self] progress in
-                Task { @MainActor in
-                    self?.executionProgress = progress
-                    if case .completed(let result) = progress {
-                        self?.executionResult = result
-                    }
+        presentedResult = nil
+        lastError = nil
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            var goalID: GoalID?
+            do {
+                let lifecycle = self.state.lifecycle
+                if lifecycle == .stopped {
+                    try await self.composition.session.start()
+                }
+                goalID = try await self.composition.session.submitInput(statement)
+                await self.refresh()
+                guard let goalID else {
+                    throw KernelError.invalidStateUpdate("Runtime accepted input without a goal identifier")
+                }
+                self.executionProgress = .executing
+                let evaluation = try await self.composition.lifecycleManager.run(
+                    goalID: goalID,
+                    rawInput: statement
+                )
+                let result = evaluation.reason.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !result.isEmpty else {
+                    throw KernelError.invalidStateUpdate("Agent completed without a result")
+                }
+                self.executionResult = result
+                self.presentedResult = result
+                self.executionProgress = nil
+            } catch is CancellationError {
+                // Cancellation is not success. Clear the active goal so Stop cannot
+                // strand it and block the next Start/submit cycle.
+                if let goalID,
+                   let status = await self.composition.runtime.goal(id: goalID)?.status,
+                   status == .active || status == .proposed {
+                    try? await self.composition.runtime.abort(goalID: goalID)
+                }
+                self.executionProgress = nil
+            } catch {
+                // Provider/model failure must not strand an active goal and block the next turn.
+                if let goalID,
+                   let status = await self.composition.runtime.goal(id: goalID)?.status,
+                   status == .active || status == .proposed {
+                    try? await self.composition.runtime.abort(goalID: goalID)
+                }
+                self.executionProgress = nil
+                if let kernelError = error as? KernelError {
+                    self.lastError = kernelError.description
+                } else {
+                    self.lastError = String(describing: error)
                 }
             }
+            await self.refresh()
         }
+        executionTask = task
+        await task.value
+        executionTask = nil
     }
 
     func downloadDevModel() async {
@@ -180,6 +245,15 @@ final class KernelSession: ObservableObject {
         do {
             try await operation()
             lastError = nil
+        } catch let error as KernelError {
+            switch error {
+            case .runtimeNotExecutable(.stopped):
+                lastError = "Agent runtime is stopped. Start the Agent runtime before submitting another task."
+            default:
+                lastError = error.description
+            }
+        } catch is CancellationError {
+            // Stop intentionally cancels an active execution; lifecycle state is authoritative.
         } catch {
             lastError = String(describing: error)
         }
@@ -198,11 +272,11 @@ private enum DevModelDownloadError: LocalizedError {
         case .invalidURL:
             return "Dev model URL is invalid."
         case .httpStatus(let status):
-            return "Dev model download failed with HTTP (status)."
+            return "Dev model download failed with HTTP \(status)."
         case .invalidSize(let size):
-            return "Dev model size is invalid: (size) bytes."
+            return "Dev model size is invalid: \(size) bytes."
         case .checksumMismatch(let expected, let actual):
-            return "Dev model SHA-256 mismatch. Expected (expected), got (actual)."
+            return "Dev model SHA-256 mismatch. Expected \(expected), got \(actual)."
         }
     }
 }

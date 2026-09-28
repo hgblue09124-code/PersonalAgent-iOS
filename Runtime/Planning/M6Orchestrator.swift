@@ -78,19 +78,21 @@ public struct LLMReasoner: Reasoning {
     }
 
     public func reason(context: ContextBundle) async throws -> ReasoningResult {
-        let prompt = """
+        let systemPrompt = """
         You are the reasoning component of a personal agent.
-        Return a concise plan/decision for the user's task.
+        Answer the user's task directly and concisely.
+        Do not repeat the user's task, prompt labels, or instructions.
         Do not claim an action was executed.
-
-        User task:
-        \(context.perception.rawInput)
         """
 
         let response = try await provider.complete(
             LLMRequest(
                 model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
-                prompt: prompt
+                messages: [
+                    ProviderMessage(role: .system, content: systemPrompt),
+                    ProviderMessage(role: .user, content: context.perception.rawInput),
+                ],
+                parameters: GenerationParameters(maxOutputTokens: 128)
             )
         )
 
@@ -237,6 +239,9 @@ public actor M6Orchestrator {
         var previousEvaluation: Evaluation? = nil
 
         while cycleCount < maxCycles {
+            try Task.checkCancellation()
+            try await waitUntilRunnable()
+            try Task.checkCancellation()
             cycleCount += 1
             let perception = Perception(rawInput: input, source: "user")
 
@@ -255,6 +260,7 @@ public actor M6Orchestrator {
                 observations: previousObservations,
                 evaluation: previousEvaluation
             )
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .contextBuilt,
@@ -264,12 +270,14 @@ public actor M6Orchestrator {
             // 3. Reasoning
             progress?(.reasoning)
             let reasoningResult = try await reasoner.reason(context: context)
+            try Task.checkCancellation()
 
             progress?(.reasoningCompleted(reasoningResult.summary))
 
             // 4. Planning
             progress?(.planning)
             let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .planProduced,
@@ -278,6 +286,7 @@ public actor M6Orchestrator {
 
             // 5. ActionProposals
             let proposals = try await proposer.propose(plan: plan)
+            try Task.checkCancellation()
             for proposal in proposals {
                 var payload: [String: String] = [
                     "goalID": goalID.rawValue,
@@ -294,6 +303,7 @@ public actor M6Orchestrator {
             // 6. Verification
             progress?(.verification)
             let verification = try await verifier.verify(plan: plan, proposals: proposals)
+            try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
                 kind: .verificationCompleted,
@@ -377,12 +387,20 @@ public actor M6Orchestrator {
                 // Execute action
                 progress?(.executing)
                 let obs = try await executeProposal(proposal, traceID: traceID, goalID: goalID)
+                try Task.checkCancellation()
                 observations.append(obs)
                 progress?(.observation(obs.summary))
             }
 
             // 8. Evaluation
-            let evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+            var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+            try Task.checkCancellation()
+            // Answer-only proposals have no tool target. Execution success is not the answer.
+            if proposals.allSatisfy({ $0.toolID == nil }) {
+                let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !answer.isEmpty else { throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output") }
+                evaluation = Evaluation(goalID: evaluation.goalID, disposition: evaluation.disposition, reason: answer)
+            }
             try await emit(
                 traceID: traceID,
                 kind: .evaluationCompleted,
@@ -416,6 +434,7 @@ public actor M6Orchestrator {
                 targetGoalStatus = .active
             }
 
+            try Task.checkCancellation()
             let stateUpdate = StateUpdate(
                 goalID: goalID,
                 targetStatus: targetGoalStatus,
@@ -445,6 +464,22 @@ public actor M6Orchestrator {
             throw KernelError.invalidStateUpdate("M6 cycle did not produce an evaluation")
         }
         return result
+    }
+
+    private func waitUntilRunnable() async throws {
+        while true {
+            let lifecycle = await runtime.currentState().lifecycle
+            switch lifecycle {
+            case .running:
+                return
+            case .paused:
+                try await Task.sleep(for: .milliseconds(100))
+            case .stopped, .failed:
+                throw KernelError.runtimeNotExecutable(lifecycle)
+            case .created, .starting, .pausing, .stopping:
+                try await Task.sleep(for: .milliseconds(50))
+            }
+        }
     }
 
     private func executeProposal(_ proposal: ActionProposal, traceID: TraceID, goalID: GoalID) async throws -> Observation {

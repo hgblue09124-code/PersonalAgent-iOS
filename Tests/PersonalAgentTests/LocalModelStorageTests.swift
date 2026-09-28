@@ -226,7 +226,7 @@ struct LocalModelStorageTests {
         #expect(try await storage2.activeModelDescriptor() == descriptor)
     }
 
-    @Test func testActiveModelDescriptorReconcilesSafelyWhenBackingFileIsMissing() async throws {
+    @Test func testActiveModelDescriptorFailsClosedWhenBackingFileIsMissing() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -240,8 +240,12 @@ struct LocalModelStorageTests {
         let fileURL = try #require(try await storage.modelFileURL(for: descriptor.id))
         try FileManager.default.removeItem(at: fileURL)
 
-        #expect(try await storage.activeModelDescriptor() == nil)
-        #expect(try await storage.activeModelID() == nil)
+        await #expect(throws: LocalModelStorageError.fileNotFound(fileURL)) {
+            _ = try await storage.activeModelDescriptor()
+        }
+        await #expect(throws: LocalModelStorageError.fileNotFound(fileURL)) {
+            _ = try await storage.activeModelID()
+        }
     }
 
     @Test func testM8CompositionRootWiresLocalModelStorage() async throws {
@@ -287,6 +291,7 @@ struct M82ActiveModelBindingTests {
         let shouldFailUnload: Bool
         let shouldFailGenerate: Bool
 
+        private(set) var loadCallCount = 0
         private(set) var completeCallCount = 0
         private(set) var streamCallCount = 0
         private(set) var unloadCallCount = 0
@@ -315,7 +320,10 @@ struct M82ActiveModelBindingTests {
         }
 
         func load(options: LocalModelLoadingOptions) async throws {
-            lock.withLock { _state = .loaded }
+            lock.withLock {
+                loadCallCount += 1
+                _state = .loaded
+            }
         }
 
         func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
@@ -788,6 +796,67 @@ struct M82ActiveModelBindingTests {
         let res = try await mockAfter.generate(request: req)
         #expect(res.text == "Observable mock output for: Usable test")
         #expect(try await storage.activeModelID() != mB.id)
+    }
+
+    @Test func testApplicationChatProviderPathCoalescesConcurrentModelLoads() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "chat-load-concurrent.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+        let descriptor = try await storage.importModel(from: source, name: "Concurrent Load Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let mockEngine = ObservableMockEngine(
+            identity: LocalModelIdentity(id: descriptor.id, name: descriptor.name),
+            state: .unloaded
+        )
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: storage,
+            deviceCapabilityProvider: DefaultDeviceCapabilityProvider(),
+            engineFactory: { _, _ in mockEngine }
+        )
+
+        async let first = coordinator.loadActiveModel()
+        async let second = coordinator.loadActiveModel()
+        _ = try await (first, second)
+
+        #expect(mockEngine.loadCallCount == 1)
+        #expect(await mockEngine.lifecycleState == .loaded)
+    }
+
+    @Test func testApplicationChatProviderPathLoadsUnloadedActiveEngine() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "chat-load.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+        let descriptor = try await storage.importModel(from: source, name: "Chat Load Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let mockEngine = ObservableMockEngine(
+            identity: LocalModelIdentity(id: descriptor.id, name: descriptor.name),
+            state: .unloaded
+        )
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: root.appendingPathComponent("M8Product"),
+            localModelStorage: storage,
+            localModelEngineFactory: { _, _ in mockEngine }
+        )
+        let providerID = compositionRoot.catalog.identities.first!.id
+        let provider = try #require(compositionRoot.catalog.resolve(providerID))
+
+        let request = LLMRequest(
+            model: ModelID(rawValue: "test-model"),
+            messages: [ProviderMessage(role: .user, content: "Load before chat")]
+        )
+        let response = try await provider.complete(request)
+
+        #expect(response.text == "Observable mock output for: Load before chat")
+        #expect(mockEngine.loadCallCount == 1)
+        #expect(mockEngine.completeCallCount == 1)
     }
 
     @Test func testApplicationChatProviderPathRoutesToActiveLocalEngine() async throws {

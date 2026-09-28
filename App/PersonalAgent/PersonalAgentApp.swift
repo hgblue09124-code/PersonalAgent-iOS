@@ -39,7 +39,10 @@ struct PersonalAgentApp: App {
         do {
             let root = try await M8CompositionRoot()
             let state = await root.session.currentState()
-            session = KernelSession(composition: root, state: state)
+            let newSession = KernelSession(composition: root, state: state)
+            session = newSession
+            await newSession.refresh()
+            await newSession.prepareActiveModel()
         } catch {
             initializationError = String(describing: error)
         }

@@ -5,11 +5,13 @@ import PAEvents
 import PAProviders
 
 /// Owns provider lifecycle and execution. Isolated from AgentRuntime.
-public actor ProviderRuntime {
+public actor ProviderRuntime: @preconcurrency LLMProvider {
     public private(set) var lifecycle: ProviderLifecycle
     public private(set) var configuration: ProviderConfiguration?
 
-    private var provider: any LLMProvider
+    private let provider: any LLMProvider
+    private let providerIdentity: ProviderIdentity
+    private let providerCapabilities: ProviderCapabilities
     private let eventLog: (any EventLog)?
     private let logger: any AgentLogger
     private let sessionTrace: TraceID
@@ -21,6 +23,8 @@ public actor ProviderRuntime {
         sessionTrace: TraceID = TraceID()
     ) {
         self.provider = provider
+        self.providerIdentity = provider.identity
+        self.providerCapabilities = provider.capabilities
         self.eventLog = eventLog
         self.logger = logger
         self.sessionTrace = sessionTrace
@@ -28,36 +32,57 @@ public actor ProviderRuntime {
         self.configuration = nil
     }
 
-    public var identity: ProviderIdentity { provider.identity }
+    // LLMProvider exposes identity/capabilities synchronously. These values are immutable
+    // provider metadata, so they must be nonisolated; otherwise the protocol witness can be
+    // invoked from a non-actor executor and Swift Concurrency aborts at runtime.
+    nonisolated public var identity: ProviderIdentity { providerIdentity }
 
-    public var capabilities: ProviderCapabilities { provider.capabilities }
+    nonisolated public var capabilities: ProviderCapabilities { providerCapabilities }
 
-    public func configure(_ configuration: ProviderConfiguration) throws {
+    public var health: ProviderHealth {
+        get async { await provider.health }
+    }
+
+    public func configure(_ configuration: ProviderConfiguration) async throws {
         guard configuration.providerID == provider.identity.id else {
             throw ProviderRuntimeError.invalidConfiguration
         }
         guard lifecycle == .unconfigured || lifecycle == .configured || lifecycle == .failed else {
             throw ProviderRuntimeError.invalidConfiguration
         }
+        let previousConfiguration = self.configuration
+        let previousLifecycle = lifecycle
         self.configuration = configuration
         lifecycle = .configured
-        emit(kind: .providerConfigured, payload: [
-            "providerID": configuration.providerID.rawValue,
-            "hasCredentialRef": configuration.credential == nil ? "false" : "true",
-        ])
+        do {
+            try await emit(kind: .providerConfigured, payload: [
+                "providerID": configuration.providerID.rawValue,
+                "hasCredentialRef": configuration.credential == nil ? "false" : "true",
+            ])
+        } catch {
+            self.configuration = previousConfiguration
+            lifecycle = previousLifecycle
+            throw error
+        }
     }
 
-    public func ready() throws {
+    public func ready() async throws {
         guard lifecycle == .configured else {
             throw ProviderRuntimeError.invalidConfiguration
         }
+        let previousLifecycle = lifecycle
         lifecycle = .ready
-        emit(kind: .providerReady, payload: ["providerID": provider.identity.id.rawValue])
+        do {
+            try await emit(kind: .providerReady, payload: ["providerID": provider.identity.id.rawValue])
+        } catch {
+            lifecycle = previousLifecycle
+            throw error
+        }
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
         try prepareExecution()
-        emit(kind: .providerInvoked, payload: [
+        try await emit(kind: .providerInvoked, payload: [
             "providerID": provider.identity.id.rawValue,
             "model": request.model.rawValue,
             "mode": "complete",
@@ -69,20 +94,21 @@ public actor ProviderRuntime {
                 try await boundProvider.complete(request)
             }
             lifecycle = .completed
-            emit(kind: .providerCompleted, payload: [
+            try await emit(kind: .providerCompleted, payload: [
                 "providerID": boundProvider.identity.id.rawValue,
                 "finishReason": response.finishReason,
             ])
             return response
         } catch let error as ProviderRuntimeError {
-            applyFailure(error)
+            await applyFailure(error)
             throw error
         } catch is CancellationError {
-            applyFailure(.cancelled)
+            await applyFailure(.cancelled)
             throw ProviderRuntimeError.cancelled
         } catch {
-            applyFailure(.unknown)
-            throw ProviderRuntimeError.unknown
+            await applyFailure(.unknown)
+            // Preserve the provider/engine error so callers can diagnose the real root cause.
+            throw error
         }
     }
 
@@ -91,7 +117,7 @@ public actor ProviderRuntime {
             let work = Task {
                 do {
                     try await self.prepareExecution()
-                    await self.emitInvoked(model: request.model, mode: "stream")
+                    try await self.emitInvoked(model: request.model, mode: "stream")
                     let bound = await self.currentProvider()
                     for try await event in bound.stream(request) {
                         try Task.checkCancellation()
@@ -110,7 +136,7 @@ public actor ProviderRuntime {
                     continuation.finish(throwing: error)
                 } catch {
                     await self.applyFailure(.unknown)
-                    continuation.finish(throwing: ProviderRuntimeError.unknown)
+                    continuation.finish(throwing: error)
                 }
             }
             continuation.onTermination = { _ in work.cancel() }
@@ -119,14 +145,15 @@ public actor ProviderRuntime {
 
     public func cancel() {
         if lifecycle == .executing {
-            applyFailure(.cancelled)
+            lifecycle = .cancelled
+            Task { try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) }
         }
     }
 
     private func currentProvider() -> any LLMProvider { provider }
 
-    private func emitInvoked(model: ModelID, mode: String) {
-        emit(kind: .providerInvoked, payload: [
+    private func emitInvoked(model: ModelID, mode: String) async throws {
+        try await emit(kind: .providerInvoked, payload: [
             "providerID": provider.identity.id.rawValue,
             "model": model.rawValue,
             "mode": mode,
@@ -150,13 +177,13 @@ public actor ProviderRuntime {
         lifecycle = .executing
     }
 
-    private func applyFailure(_ error: ProviderRuntimeError) {
+    private func applyFailure(_ error: ProviderRuntimeError) async {
         if error == .cancelled {
             lifecycle = .cancelled
-            emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue])
+            try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue])
         } else {
             lifecycle = .failed
-            emit(kind: .providerFailed, payload: [
+            try? await emit(kind: .providerFailed, payload: [
                 "providerID": provider.identity.id.rawValue,
                 "error": error.description,
             ])
@@ -185,7 +212,7 @@ public actor ProviderRuntime {
         }
     }
 
-    private func emit(kind: ExecutionEventKind, payload: [String: String]) {
+    private func emit(kind: ExecutionEventKind, payload: [String: String]) async throws {
         let sanitized = SecretRedactor.stripSecrets(from: payload)
         logger.log(
             LogEvent(
@@ -201,9 +228,7 @@ public actor ProviderRuntime {
             kind: kind,
             payload: sanitized
         )
-        Task {
-            try? await eventLog.append(event)
-        }
+        try await eventLog.append(event)
     }
 }
 

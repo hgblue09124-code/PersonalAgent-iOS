@@ -1,11 +1,11 @@
 /// Pure lifecycle graph derived from M0 AgentLifecycle.
 public enum LifecycleMachine: Sendable {
     public static let stable: Set<AgentLifecycle> = [.created, .running, .paused, .stopped, .failed]
-    public static let terminal: Set<AgentLifecycle> = [.stopped, .failed]
+    public static let terminal: Set<AgentLifecycle> = [.failed]
     public static func canExecute(in state: AgentLifecycle) -> Bool { state == .running }
     public static func apply(_ state: AgentLifecycle, command: RuntimeCommand) -> Result<AgentLifecycle, KernelError> {
         switch (state, command) {
-        case (.created, .start): return .success(.running)
+        case (.created, .start), (.stopped, .start): return .success(.running)
         case (.created, .stop): return .success(.stopped)
         case (.running, .pause): return .success(.paused)
         case (.running, .stop): return .success(.stopped)

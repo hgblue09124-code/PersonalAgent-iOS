@@ -160,8 +160,42 @@ public actor RunRecoveryEngine {
                     entry.updatedAt = Date()
                     try await journalStore.saveEntry(entry)
                 } else {
-                    // State update was not applied; abort journal entry
-                    entry.status = .aborted
+                    // Without StateUpdate evidence there is no safe basis to replay or
+                    // infer an authoritative mutation. Fail closed and abort the journal.
+                    // Evidence-bearing entries may cross the crash window and be reconciled
+                    // against AgentRuntime state without executing the transition twice.
+                    guard !entry.evidence.isEmpty else {
+                        entry.status = .aborted
+                        entry.updatedAt = Date()
+                        try await journalStore.saveEntry(entry)
+                        continue
+                    }
+                    let update = StateUpdate(
+                        goalID: entry.goalID,
+                        targetStatus: entry.targetStatus,
+                        evidence: entry.evidence,
+                        mutationToken: entry.journalID
+                    )
+                    try await runtime.reconcileStateUpdate(update)
+                    entry.status = .stateCommitted
+                    entry.updatedAt = Date()
+                    try await journalStore.saveEntry(entry)
+
+                    let payload = IdempotentEventLog.parseCanonicalPayload(entry.canonicalEventPayload)
+                    let auditEvent = ExecutionEvent(
+                        id: entry.eventID,
+                        traceID: traceID,
+                        kind: .stateUpdated,
+                        timestamp: Date(),
+                        payload: payload
+                    )
+                    try await eventLog.append(auditEvent)
+
+                    entry.status = .auditCommitted
+                    entry.updatedAt = Date()
+                    try await journalStore.saveEntry(entry)
+
+                    entry.status = .finalized
                     entry.updatedAt = Date()
                     try await journalStore.saveEntry(entry)
                 }

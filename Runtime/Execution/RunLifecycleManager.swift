@@ -96,6 +96,18 @@ public actor RunLifecycleManager {
         return record
     }
 
+    /// Canonical production entry point. Every app execution must acquire a
+    /// durable run identity and capability lease before entering the execution cycle.
+    public func run(
+        goalID: GoalID,
+        sessionID: SessionID = SessionID(),
+        rawInput: String? = nil
+    ) async throws -> Evaluation {
+        let record = try await createRun(goalID: goalID, sessionID: sessionID)
+        let lease = CapabilityLease(runID: record.runID)
+        return try await runCycle(runID: record.runID, lease: lease, rawInput: rawInput)
+    }
+
     public func runCycle(
         runID: RunID,
         lease: CapabilityLease,
@@ -107,6 +119,9 @@ public actor RunLifecycleManager {
 
         let goalID = record.goalID
         let traceID = record.traceID
+
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
 
         guard let goal = await runtime.goal(id: goalID) else {
             throw KernelError.goalNotFound(goalID)
@@ -132,15 +147,24 @@ public actor RunLifecycleManager {
         let input = rawInput ?? goal.statement
         let perception = Perception(rawInput: input, source: "user")
 
+        try Task.checkCancellation()
+
         // 1. Perception & Context
         let context = try await contextAssembler.assembleContext(perception: perception, observations: [], evaluation: nil)
+
+        try Task.checkCancellation()
 
         // 2. Reasoning & Planning
         let reasoningResult = try await reasoner.reason(context: context)
         let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
 
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
+
         // 3. ActionProposals
         let proposals = try await proposer.propose(plan: plan)
+
+        try Task.checkCancellation()
 
         // 4. Verification
         let verification = try await verifier.verify(plan: plan, proposals: proposals)
@@ -174,8 +198,12 @@ public actor RunLifecycleManager {
         try await runStore.save(record)
 
         // 6. Execution Loop via ExecutionBoundary
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
         var observations: [Observation] = []
         for proposal in proposals {
+            try Task.checkCancellation()
+            try await waitUntilRunnable()
             let (obs, _) = try await executionBoundary.executeProposal(
                 proposal: proposal,
                 runID: runID,
@@ -186,6 +214,8 @@ public actor RunLifecycleManager {
             )
             observations.append(obs)
         }
+
+        try Task.checkCancellation()
 
         // 7. Post-Execution Checkpoint
         let postCheckpoint = RunCheckpoint(
@@ -198,9 +228,28 @@ public actor RunLifecycleManager {
         )
         try await checkpointStore.saveCheckpoint(postCheckpoint)
 
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
+
         // 8. Evaluation & Reflection
-        let evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+        var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+        // Answer-only runs have no external execution target. Their authoritative
+        // user-visible result is the reasoning artifact, not the generic executor summary.
+        if proposals.allSatisfy({ $0.toolID == nil }) {
+            let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !answer.isEmpty else {
+                throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output")
+            }
+            evaluation = Evaluation(
+                goalID: evaluation.goalID,
+                disposition: evaluation.disposition,
+                reason: answer
+            )
+        }
         let reflection = try await reflector.reflect(goalID: goalID, observations: observations, evaluation: evaluation)
+
+        try Task.checkCancellation()
+        try await waitUntilRunnable()
 
         // 9. WAL StateUpdate Transaction
         let targetGoalStatus: GoalStatus
@@ -240,6 +289,22 @@ public actor RunLifecycleManager {
         try await runStore.save(record)
 
         return evaluation
+    }
+
+    private func waitUntilRunnable() async throws {
+        while true {
+            try Task.checkCancellation()
+            switch await runtime.currentState().lifecycle {
+            case .running:
+                return
+            case .paused:
+                try await Task.sleep(for: .milliseconds(100))
+            case .stopped, .failed:
+                throw KernelError.runtimeNotExecutable(await runtime.currentState().lifecycle)
+            case .created, .starting, .pausing, .stopping:
+                try await Task.sleep(for: .milliseconds(50))
+            }
+        }
     }
 
     private func commitStateUpdate(

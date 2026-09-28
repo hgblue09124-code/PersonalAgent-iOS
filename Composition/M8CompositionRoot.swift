@@ -87,9 +87,21 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         guard let engine = try await activeLocalModelEngine() else {
             throw LlamaCPPEngineError.modelNotLoaded
         }
+
         let opts = options ?? LocalModelLoadingOptions()
-        try await engine.load(options: opts)
-        return engine
+        while true {
+            switch await engine.lifecycleState {
+            case .loaded:
+                return engine
+            case .loading:
+                try await Task.sleep(for: .milliseconds(50))
+            case .unloaded, .failed:
+                try await engine.load(options: opts)
+                return engine
+            case .unloading:
+                try await Task.sleep(for: .milliseconds(50))
+            }
+        }
     }
 
     public func unloadActiveModel() async throws {
@@ -203,8 +215,9 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         switch try await resolveActiveProvider() {
         case .noActiveModel:
             return try await fallbackProvider.complete(request)
-        case .activeModel(let adapter):
-            return try await adapter.complete(request)
+        case .activeModel:
+            let engine = try await coordinator.loadActiveModel()
+            return try await LocalModelProviderAdapter(engine: engine).complete(request)
         }
     }
 
@@ -212,24 +225,30 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         let fallback = fallbackProvider
         let coord = coordinator
         return AsyncThrowingStream { continuation in
-            Task {
+            let task = Task {
                 do {
                     guard let engine = try await coord.activeLocalModelEngine() else {
                         for try await event in fallback.stream(request) {
+                            try Task.checkCancellation()
                             continuation.yield(event)
                         }
                         continuation.finish()
                         return
                     }
-                    let adapter = LocalModelProviderAdapter(engine: engine)
+                    let loadedEngine = try await coord.loadActiveModel()
+                    let adapter = LocalModelProviderAdapter(engine: loadedEngine)
                     for try await event in adapter.stream(request) {
+                        try Task.checkCancellation()
                         continuation.yield(event)
                     }
                     continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish(throwing: CancellationError())
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 }
@@ -405,7 +424,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             runtime: agentRuntime,
             eventLog: idempotentLog,
             logger: logger,
-            reasoner: LLMReasoner(provider: dynamicProvider),
+            reasoner: LLMReasoner(provider: providerRuntime),
             policy: policy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime
@@ -439,7 +458,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             journalStore: jStore,
             executionBoundary: boundary,
             eventLog: idempotentLog,
-            logger: logger
+            logger: logger,
+            reasoner: LLMReasoner(provider: providerRuntime)
         )
 
         self.recoveryEngine = RunRecoveryEngine(

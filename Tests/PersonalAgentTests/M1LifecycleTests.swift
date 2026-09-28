@@ -23,11 +23,12 @@ struct M1LifecycleTests {
         #expect(await runtime.currentState().phase == .completed)
     }
 
-    @Test func stopFromCreatedIsTerminal() async throws {
+    @Test func stoppedRuntimeCanRestartWithStart() async throws {
         let runtime = try await makeRuntime()
         try await runtime.stop()
         #expect(await runtime.currentState().lifecycle == .stopped)
-        await #expect(throws: KernelError.self) { try await runtime.start() }
+        try await runtime.start()
+        #expect(await runtime.currentState().lifecycle == .running)
         await #expect(throws: KernelError.self) { try await runtime.resume() }
     }
 
@@ -96,7 +97,7 @@ struct M1LifecycleTests {
         #expect(LifecycleMachine.apply(.failed, command: .start).isFailure)
         #expect(LifecycleMachine.canExecute(in: .running))
         #expect(!LifecycleMachine.canExecute(in: .paused))
-        #expect(LifecycleMachine.terminal.contains(.stopped))
+        #expect(!LifecycleMachine.terminal.contains(.stopped))
     }
 
     @Test func exhaustiveStableGraph() {
@@ -116,8 +117,8 @@ struct M1LifecycleTests {
                 }
             }
         }
-        #expect(allowed == 6)
-        #expect(rejected == 14)
+        #expect(allowed == 7)
+        #expect(rejected == 13)
     }
 
     @Test func stopParksActiveGoal() async throws {
@@ -131,9 +132,7 @@ struct M1LifecycleTests {
         #expect(await runtime.currentState().activeGoalID == nil)
         #expect(await runtime.goal(id: goal.id)?.status == .blocked)
         #expect(await runtime.invariantsHold())
-        await #expect(throws: KernelError.runtimeNotExecutable(.stopped)) {
-            try await runtime.submit(goal: Goal(statement: "Too late"))
-        }
+        try await runtime.submit(goal: Goal(statement: "After stop, submit is accepted for the next start cycle"))
     }
 
     @Test func pauseKeepsActiveGoalPointer() async throws {

@@ -22,6 +22,18 @@ struct AgentScreen: View {
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showCommandCenter) { CommandCenterSheet(task: $task, focused: $taskFocused).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
+        .alert(
+            "Agent result",
+            isPresented: Binding(
+                get: { session.presentedResult != nil },
+                set: { if !$0 { session.presentedResult = nil } }
+            ),
+            presenting: session.presentedResult
+        ) { _ in
+            Button("OK") { session.presentedResult = nil }
+        } message: { result in
+            Text(result)
+        }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
@@ -161,12 +173,12 @@ struct AgentScreen: View {
 
     @ViewBuilder
     private var status: some View {
-        if let progress = session.executionProgress {
-            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        } else if let result = session.executionResult {
+        if let result = session.executionResult {
             statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill")
                 .transition(.scale(scale: 0.96).combined(with: .opacity))
+        } else if let progress = session.executionProgress {
+            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
+                .transition(.move(edge: .bottom).combined(with: .opacity))
         } else if let error = session.lastError {
             statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill")
                 .transition(.move(edge: .bottom).combined(with: .opacity))

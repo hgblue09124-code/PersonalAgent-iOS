@@ -2,6 +2,7 @@ import PARuntime
 import Foundation
 import Testing
 import PAKernel
+import PAProviders
 import PAObservability
 import PAEvents
 import PAModules
@@ -351,9 +352,149 @@ struct M6SemanticsTests {
         #expect(obsEvent?.payload["succeeded"] == "false")
         #expect(obsEvent?.payload["summary"]?.contains("Execution target unavailable") == true)
     }
+    @Test func test10_LLMReasonerUsesStructuredUserMessage() async throws {
+        let provider = RecordingProvider()
+        let reasoner = LLMReasoner(provider: provider)
+        let context = ContextBundle(
+            perception: Perception(rawInput: "I am a user", source: "user"),
+            memoryIDs: [],
+            skillIDs: []
+        )
+
+        let result = try await reasoner.reason(context: context)
+        #expect(result.summary == "ok")
+
+        let request = await provider.lastRequest
+        #expect(request?.messages.count == 2)
+        #expect(request?.messages.first?.role == .system)
+        #expect(request?.messages.last?.role == .user)
+        #expect(request?.messages.last?.content == "I am a user")
+        #expect(request?.parameters.maxOutputTokens == 128)
+        #expect(request?.messages.first?.content.contains("Do not repeat the user's task") == true)
+    }
+
+    @Test func test9_AnswerOnlyProjectsReasoningResult() async throws {
+        let root = try await M6CompositionRoot()
+        let goal = Goal(statement: "1 + 1 = ?")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(runtime: root.runtime, eventLog: root.eventLog, reasoner: FixedReasoner(answer: "2"))
+        let eval = try await orchestrator.run(goalID: goal.id)
+        #expect(eval.disposition == .complete)
+        #expect(eval.reason == "2")
+    }
+
+    @Test func test13_PreparedJournalReconcilesAlreadyAppliedRuntimeState() async throws {
+        let root = try await M8CompositionRoot()
+        let goal = Goal(statement: "recover committed state")
+        try await root.runtime.submit(goal: goal)
+        let run = try await root.lifecycleManager.createRun(goalID: goal.id)
+
+        // Simulate the crash window: authoritative state changed, but mutation
+        // evidence was not persisted and the journal is still .prepared.
+        try await root.runtime.complete(goalID: goal.id)
+        let journal = StateJournalEntry(
+            runID: run.runID,
+            goalID: goal.id,
+            targetStatus: .completed,
+            eventID: EventID(),
+            canonicalEventPayload: IdempotentEventLog.canonicalString(for: [
+                "goalID": goal.id.rawValue,
+                "targetStatus": GoalStatus.completed.rawValue,
+                "reason": "crash-window"
+            ]),
+            evidence: ["reason": "crash-window"],
+            status: .prepared
+        )
+        try await root.journalStore.saveEntry(journal)
+
+        try await root.recoveryEngine.recoverStateJournal(runID: run.runID, traceID: run.traceID)
+
+        #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
+        #expect(await root.runtime.hasAppliedMutation(token: journal.journalID))
+        let entries = try await root.journalStore.entries(for: run.runID)
+        #expect(entries.first(where: { $0.journalID == journal.journalID })?.status == .finalized)
+    }
+
+    @Test func test12_StateUpdateMutationTokenIsIdempotent() async throws {
+        let root = try await M6CompositionRoot()
+        let goal = Goal(statement: "idempotent state update")
+        try await root.runtime.submit(goal: goal)
+        try await root.runtime.activate(goalID: goal.id)
+
+        let token = UUID()
+        let update = StateUpdate(
+            goalID: goal.id,
+            targetStatus: .completed,
+            evidence: ["reason": "verified"],
+            mutationToken: token
+        )
+
+        try await root.runtime.applyStateUpdate(update)
+        try await root.runtime.applyStateUpdate(update)
+
+        #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
+        #expect(await root.runtime.hasAppliedMutation(token: token))
+    }
+
+    @Test func test11_RepeatedGoalsRunOnSameRuntime() async throws {
+        let root = try await M6CompositionRoot()
+        let first = Goal(statement: "hello")
+        try await root.runtime.submit(goal: first)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "hello response")
+        )
+        let firstEval = try await orchestrator.run(goalID: first.id)
+        #expect(firstEval.reason == "hello response")
+        #expect(await root.runtime.currentState().activeGoalID == nil)
+
+        let second = Goal(statement: "1 + 1 = ?")
+        try await root.runtime.submit(goal: second)
+        let secondOrchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "2")
+        )
+        let secondEval = try await secondOrchestrator.run(goalID: second.id)
+        #expect(secondEval.reason == "2")
+        #expect(await root.runtime.currentState().activeGoalID == nil)
+        #expect(await root.runtime.invariantsHold())
+    }
 }
 
 // MARK: - Test Helpers & Doubles
+
+private actor RecordingProvider: LLMProvider {
+    let identity = ProviderIdentity(
+        id: ProviderID(rawValue: "recording"),
+        displayName: "Recording",
+        models: [ModelIdentity(id: ModelID(rawValue: "recording-model"), displayName: "Recording Model", contextTokenLimit: 2048)]
+    )
+    let capabilities: ProviderCapabilities = [.textGeneration, .streaming]
+    nonisolated(unsafe) var lastRequest: LLMRequest?
+
+    nonisolated var health: ProviderHealth { .healthy }
+
+    nonisolated func complete(_ request: LLMRequest) async throws -> LLMResponse {
+        lastRequest = request
+        return LLMResponse(text: "ok", finishReason: "stop", model: request.model)
+    }
+
+    nonisolated func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: request.model)))
+            continuation.finish()
+        }
+    }
+}
+
+
+
+private struct FixedReasoner: Reasoning {
+    let answer: String
+    func reason(context: ContextBundle) async throws -> ReasoningResult { ReasoningResult(summary: answer, providerID: nil, modelID: nil) }
+}
 
 private struct DirectProposer: Executing {
     let toolID: ToolID

@@ -17,6 +17,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private var currentLifecycleState: LocalModelLifecycleState = .unloaded
     private var activeOptions: LocalModelLoadingOptions?
     private var activeGenerationTask: Task<Void, Never>?
+    private var generationInFlight = false
     private var parsedMetadata: GGUFMetadataSummary?
 
     // Native llama.cpp handles
@@ -184,7 +185,18 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     public func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
         let (stream, continuation) = AsyncThrowingStream<LocalModelStreamChunk, Error>.makeStream()
 
+        let admitted = stateLock.withLock { () -> Bool in
+            guard !generationInFlight else { return false }
+            generationInFlight = true
+            return true
+        }
+        guard admitted else {
+            continuation.finish(throwing: LlamaCPPEngineError.generationInProgress)
+            return stream
+        }
+
         let task = Task {
+            defer { self.clearGenerationTask() }
             do {
                 if let runner = self.streamRunner {
                     let generatedCount = try await runner(request, continuation)
@@ -214,13 +226,21 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.memoryPressureCritical
                 }
 
-                // 1. Tokenize prompt
-                let promptText: String
-                if let sys = request.systemPrompt, !sys.isEmpty {
-                    promptText = "System: \(sys)\nUser: \(request.prompt)\nAssistant:"
-                } else {
-                    promptText = request.prompt
-                }
+                // Each Agent request is an independent turn.
+                // The Agent currently does not persist a conversational KV history,
+                // so reusing the previous context would make the next request attend
+                // to stale tokens and can produce repeated or nonsensical output.
+                llama_memory_clear(llama_get_memory(contextPtr), true)
+                llama_sampler_reset(samplerPtr)
+
+                // Format the semantic system/user request with the model's own
+                // GGUF chat template. The native path must not hand raw role text
+                // to the tokenizer: instruct models otherwise commonly echo it.
+                let promptText = try self.makePrompt(
+                    model: modelPtr,
+                    systemPrompt: request.systemPrompt,
+                    userPrompt: request.prompt
+                )
 
                 guard let vocabPtr = llama_model_get_vocab(modelPtr) else {
                     throw LlamaCPPEngineError.tokenizationFailed
@@ -246,7 +266,15 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 }
 
                 // 3. Generation loop
-                let maxTokens = request.maxTokens ?? 512
+                let contextWindow = stateLock.withLock { activeOptions?.contextWindow ?? identity.contextTokenLimit }
+                guard promptTokens.count < contextWindow else {
+                    throw LlamaCPPEngineError.contextWindowExceeded
+                }
+                let requestedMaxTokens = request.maxTokens ?? 512
+                let maxTokens = min(requestedMaxTokens, contextWindow - promptTokens.count)
+                guard maxTokens > 0 else {
+                    throw LlamaCPPEngineError.contextWindowExceeded
+                }
                 var currentPos = Int32(promptTokens.count)
                 var generatedCount = 0
 
@@ -356,6 +384,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             return t
         }
         task?.cancel()
+        await task?.value
     }
 
     public func unload() async throws {
@@ -371,6 +400,71 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     }
 
     // MARK: - Private Helpers
+
+    #if canImport(cllama)
+    private func makePrompt(
+        model: OpaquePointer,
+        systemPrompt: String?,
+        userPrompt: String
+    ) throws -> String {
+        func render(_ messages: [llama_chat_message]) throws -> String {
+            guard let template = llama_model_chat_template(model, nil) else {
+                return userPrompt
+            }
+
+            var chat = messages
+            let required = chat.withUnsafeMutableBufferPointer { buffer in
+                llama_chat_apply_template(
+                    template,
+                    buffer.baseAddress,
+                    buffer.count,
+                    true,
+                    nil,
+                    0
+                )
+            }
+            guard required >= 0 else {
+                throw LlamaCPPEngineError.tokenizationFailed
+            }
+
+            var output = Array(repeating: CChar(0), count: Int(required) + 1)
+            let outputCapacity = output.count
+            let written = chat.withUnsafeMutableBufferPointer { buffer in
+                output.withUnsafeMutableBufferPointer { outputBuffer in
+                    llama_chat_apply_template(
+                        template,
+                        buffer.baseAddress,
+                        buffer.count,
+                        true,
+                        outputBuffer.baseAddress,
+                        Int32(outputCapacity)
+                    )
+                }
+            }
+            guard written >= 0, written <= output.count else {
+                throw LlamaCPPEngineError.tokenizationFailed
+            }
+            return String(decoding: output.prefix(Int(written)).map(UInt8.init(bitPattern:)), as: UTF8.self)
+        }
+
+        if let systemPrompt, !systemPrompt.isEmpty {
+            return try systemPrompt.withCString { systemPtr in
+                try userPrompt.withCString { userPtr in
+                    try render([
+                        llama_chat_message(role: "system", content: systemPtr),
+                        llama_chat_message(role: "user", content: userPtr),
+                    ])
+                }
+            }
+        }
+
+        return try userPrompt.withCString { userPtr in
+            try render([
+                llama_chat_message(role: "user", content: userPtr),
+            ])
+        }
+    }
+    #endif
 
     private func isLoaded() -> Bool {
         stateLock.withLock {
@@ -393,6 +487,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private func clearGenerationTask() {
         stateLock.withLock {
             self.activeGenerationTask = nil
+            self.generationInFlight = false
         }
     }
 
