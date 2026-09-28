@@ -199,7 +199,20 @@ public actor RunLifecycleManager {
         try await checkpointStore.saveCheckpoint(postCheckpoint)
 
         // 8. Evaluation & Reflection
-        let evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+        var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+        // Answer-only runs have no external execution target. Their authoritative
+        // user-visible result is the reasoning artifact, not the generic executor summary.
+        if proposals.allSatisfy({ $0.toolID == nil }) {
+            let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !answer.isEmpty else {
+                throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output")
+            }
+            evaluation = Evaluation(
+                goalID: evaluation.goalID,
+                disposition: evaluation.disposition,
+                reason: answer
+            )
+        }
         let reflection = try await reflector.reflect(goalID: goalID, observations: observations, evaluation: evaluation)
 
         // 9. WAL StateUpdate Transaction
