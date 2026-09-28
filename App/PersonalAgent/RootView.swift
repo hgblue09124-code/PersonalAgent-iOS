@@ -69,6 +69,15 @@ private struct AgentWorkspaceSheet: View {
                     .padding(.vertical, 6)
                 }
 
+                Section("Live status") {
+                    HStack(spacing: 8) {
+                        statusPill("Agent", session.state.lifecycle.rawValue, "sparkles")
+                        statusPill("Provider", session.providerLifecycle, "server.rack")
+                        statusPill("Models", "\(session.installedModels.count)", "cube.box")
+                    }
+                    .listRowBackground(Color.clear)
+                }
+
                 Section("Capabilities") {
                     workspaceLink("Models", "Local GGUF models", "cube.box") {
                         ModelsScreen(session: session)
@@ -103,6 +112,18 @@ private struct AgentWorkspaceSheet: View {
         }
         .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+
+    private func statusPill(_ title: String, _ value: String, _ symbol: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Image(systemName: symbol).font(.caption.bold())
+            Text(title).font(.caption2.weight(.bold))
+            Text(value).font(.caption).lineLimit(1)
+        }
+        .foregroundStyle(.primary)
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
     }
 
     private func workspaceLink<Destination: View>(
