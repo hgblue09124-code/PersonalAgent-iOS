@@ -225,7 +225,10 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             try await applyStateUpdate(update)
             return
         }
-        if appliedMutationTokens.contains(token) || await mutationEvidenceStore.hasAppliedMutation(token: token) {
+        if appliedMutationTokens.contains(token) {
+            return
+        }
+        if await mutationEvidenceStore.hasAppliedMutation(token: token) {
             appliedMutationTokens.insert(token)
             return
         }
