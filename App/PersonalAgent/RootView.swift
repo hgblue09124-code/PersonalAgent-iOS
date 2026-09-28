@@ -10,6 +10,7 @@ struct RootView: View {
         GeometryReader { proxy in
             ZStack(alignment: .topLeading) {
                 AgentScreen(session: session)
+                    .padding(.top, proxy.safeAreaInsets.top)
 
                 Button {
                     showWorkspace = true
@@ -22,7 +23,7 @@ struct RootView: View {
                         .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
                 }
                 .padding(.leading, 20)
-                .padding(.top, 10)
+                .padding(.top, proxy.safeAreaInsets.top + 10)
                 .accessibilityLabel("Open Agent workspace")
             }
             .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
