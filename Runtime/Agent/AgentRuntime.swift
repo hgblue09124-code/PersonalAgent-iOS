@@ -217,6 +217,43 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
     }
 
+    /// Reconciles a journaled StateUpdate after a crash. If the authoritative goal
+    /// already reflects the requested target, only the durable mutation evidence is
+    /// repaired; the transition is not executed a second time.
+    public func reconcileStateUpdate(_ update: StateUpdate) async throws {
+        guard let token = update.mutationToken else {
+            try await applyStateUpdate(update)
+            return
+        }
+        if appliedMutationTokens.contains(token) || await mutationEvidenceStore.hasAppliedMutation(token: token) {
+            appliedMutationTokens.insert(token)
+            return
+        }
+        guard let goal = goalStore[update.goalID] else {
+            try await applyStateUpdate(update)
+            return
+        }
+
+        let activeMatches = activeGoalID == update.goalID
+        let stateAlreadyMatches: Bool = {
+            switch update.targetStatus {
+            case .completed, .aborted, .blocked:
+                return goal.status == update.targetStatus && !activeMatches
+            case .active:
+                return goal.status == .active && activeMatches
+            default:
+                return false
+            }
+        }()
+
+        if stateAlreadyMatches {
+            appliedMutationTokens.insert(token)
+            try await mutationEvidenceStore.recordMutation(token: token)
+            return
+        }
+        try await applyStateUpdate(update)
+    }
+
     public func invokeModule(_ invocation: ModuleInvocation) async throws -> ModuleResult {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
