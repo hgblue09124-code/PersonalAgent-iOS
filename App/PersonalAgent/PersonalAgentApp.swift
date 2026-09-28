@@ -37,11 +37,11 @@ struct PersonalAgentApp: App {
             .environment(\.locale, Locale(identifier: appLanguage))
             .id(appLanguage)
             .onAppear {
-                if !UserDefaults.standard.bool(forKey: "app.language.configured") {
+                if !UserDefaults.standard.bool(forKey: "app.language.vi-migrated-v1") {
                     appLanguage = "vi"
-                    UserDefaults.standard.set(true, forKey: "app.language.configured")
+                    UserDefaults.standard.set(true, forKey: "app.language.vi-migrated-v1")
                 }
-            }
+            }            }
         }
     }
 
