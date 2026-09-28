@@ -113,7 +113,7 @@ struct ModelsScreen: View {
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [UTType(filenameExtension: "gguf") ?? .data],
+            allowedContentTypes: [.gguf],
             allowsMultipleSelection: false
         ) { result in
             switch result {
@@ -136,4 +136,8 @@ struct ModelsScreen: View {
         case .failed(let reason): return "FAILED · \(reason)"
         }
     }
+}
+
+private extension UTType {
+    static let gguf = UTType(importedAs: "org.ggml.gguf", conformingTo: .data)
 }

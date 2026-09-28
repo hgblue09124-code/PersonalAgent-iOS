@@ -22,18 +22,6 @@ struct AgentScreen: View {
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showCommandCenter) { CommandCenterSheet(task: $task, focused: $taskFocused).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
-        .alert(
-            "Agent result",
-            isPresented: Binding(
-                get: { session.presentedResult != nil },
-                set: { if !$0 { session.presentedResult = nil } }
-            ),
-            presenting: session.presentedResult
-        ) { _ in
-            Button("OK") { session.presentedResult = nil }
-        } message: { result in
-            Text(result)
-        }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
@@ -68,6 +56,7 @@ struct AgentScreen: View {
     private var topBar: some View {
         HStack {
             Text("PERSONAL AGENT")
+                .padding(.leading, 44)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .tracking(1.6)
                 .foregroundStyle(.white.opacity(0.82))
@@ -90,6 +79,8 @@ struct AgentScreen: View {
         }
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 8)
+        .offset(x: taskFocused ? -12 : 0, y: taskFocused ? -8 : 0)
+        .animation(.spring(response: 0.42, dampingFraction: 0.82), value: taskFocused)
         .animation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.08), value: appeared)
     }
 
@@ -191,10 +182,14 @@ struct AgentScreen: View {
                 .font(.headline)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title).font(.subheadline.bold())
-                Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
+                ScrollView(.vertical, showsIndicators: true) {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 132)
+                .scrollDismissesKeyboard(.interactively)
             }
             Spacer(minLength: 0)
         }

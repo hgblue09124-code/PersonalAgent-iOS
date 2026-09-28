@@ -27,6 +27,10 @@ struct RootView: View {
             AgentWorkspaceSheet(session: session)
         }
         .task { await session.refresh() }
+        .onOpenURL { url in
+            guard url.pathExtension.lowercased() == "gguf" else { return }
+            Task { await session.importModel(from: url) }
+        }
     }
 }
 
