@@ -5,7 +5,7 @@ import PAEvents
 import PAProviders
 
 /// Owns provider lifecycle and execution. Isolated from AgentRuntime.
-public actor ProviderRuntime {
+public actor ProviderRuntime: LLMProvider {
     public private(set) var lifecycle: ProviderLifecycle
     public private(set) var configuration: ProviderConfiguration?
 
@@ -82,7 +82,8 @@ public actor ProviderRuntime {
             throw ProviderRuntimeError.cancelled
         } catch {
             applyFailure(.unknown)
-            throw ProviderRuntimeError.unknown
+            // Preserve the provider/engine error so callers can diagnose the real root cause.
+            throw error
         }
     }
 
@@ -110,7 +111,7 @@ public actor ProviderRuntime {
                     continuation.finish(throwing: error)
                 } catch {
                     await self.applyFailure(.unknown)
-                    continuation.finish(throwing: ProviderRuntimeError.unknown)
+                    continuation.finish(throwing: error)
                 }
             }
             continuation.onTermination = { _ in work.cancel() }

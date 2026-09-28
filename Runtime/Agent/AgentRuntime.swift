@@ -159,6 +159,15 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     }
 
     public func applyStateUpdate(_ update: StateUpdate) async throws {
+        // StateUpdate is replayable by design. A durable mutation token makes
+        // retries idempotent instead of re-applying a terminal transition.
+        if let token = update.mutationToken {
+            if appliedMutationTokens.contains(token) || await mutationEvidenceStore.hasAppliedMutation(token: token) {
+                appliedMutationTokens.insert(token)
+                return
+            }
+        }
+
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
             try await emitRejection(command: "applyStateUpdate", error: error)

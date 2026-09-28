@@ -13,4 +13,6 @@ public enum LlamaCPPEngineError: Error, Sendable, Equatable {
     case memoryPressureCritical
     case cancelled
     case emptyOutput
+    case generationInProgress
+    case contextWindowExceeded
 }

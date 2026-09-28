@@ -17,6 +17,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private var currentLifecycleState: LocalModelLifecycleState = .unloaded
     private var activeOptions: LocalModelLoadingOptions?
     private var activeGenerationTask: Task<Void, Never>?
+    private var generationInFlight = false
     private var parsedMetadata: GGUFMetadataSummary?
 
     // Native llama.cpp handles
@@ -184,7 +185,18 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     public func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
         let (stream, continuation) = AsyncThrowingStream<LocalModelStreamChunk, Error>.makeStream()
 
+        let admitted = stateLock.withLock { () -> Bool in
+            guard !generationInFlight else { return false }
+            generationInFlight = true
+            return true
+        }
+        guard admitted else {
+            continuation.finish(throwing: LlamaCPPEngineError.generationInProgress)
+            return stream
+        }
+
         let task = Task {
+            defer { self.clearGenerationTask() }
             do {
                 if let runner = self.streamRunner {
                     let generatedCount = try await runner(request, continuation)
@@ -254,7 +266,15 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 }
 
                 // 3. Generation loop
-                let maxTokens = request.maxTokens ?? 512
+                let contextWindow = stateLock.withLock { activeOptions?.contextWindow ?? identity.contextTokenLimit }
+                guard promptTokens.count < contextWindow else {
+                    throw LlamaCPPEngineError.contextWindowExceeded
+                }
+                let requestedMaxTokens = request.maxTokens ?? 512
+                let maxTokens = min(requestedMaxTokens, contextWindow - promptTokens.count)
+                guard maxTokens > 0 else {
+                    throw LlamaCPPEngineError.contextWindowExceeded
+                }
                 var currentPos = Int32(promptTokens.count)
                 var generatedCount = 0
 
@@ -364,6 +384,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             return t
         }
         task?.cancel()
+        await task?.value
     }
 
     public func unload() async throws {
@@ -465,6 +486,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
     private func clearGenerationTask() {
         stateLock.withLock {
             self.activeGenerationTask = nil
+            self.generationInFlight = false
         }
     }
 

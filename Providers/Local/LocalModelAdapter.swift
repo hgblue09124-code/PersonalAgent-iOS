@@ -57,10 +57,11 @@ public final class LocalModelProviderAdapter: LLMProvider, @unchecked Sendable {
         let engineStream = engine.generateStream(request: genRequest)
 
         return AsyncThrowingStream { continuation in
-            Task {
+            let task = Task {
                 do {
                     var accumulated = ""
                     for try await chunk in engineStream {
+                        try Task.checkCancellation()
                         accumulated += chunk.textDelta
                         continuation.yield(.delta(chunk.textDelta))
                     }
@@ -72,10 +73,13 @@ public final class LocalModelProviderAdapter: LLMProvider, @unchecked Sendable {
                     )
                     continuation.yield(.completed(finalResponse))
                     continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish(throwing: CancellationError())
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
+            continuation.onTermination = { _ in task.cancel() }
         }
     }
 

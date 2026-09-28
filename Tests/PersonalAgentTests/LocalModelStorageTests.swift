@@ -226,7 +226,7 @@ struct LocalModelStorageTests {
         #expect(try await storage2.activeModelDescriptor() == descriptor)
     }
 
-    @Test func testActiveModelDescriptorReconcilesSafelyWhenBackingFileIsMissing() async throws {
+    @Test func testActiveModelDescriptorFailsClosedWhenBackingFileIsMissing() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
 
@@ -240,8 +240,12 @@ struct LocalModelStorageTests {
         let fileURL = try #require(try await storage.modelFileURL(for: descriptor.id))
         try FileManager.default.removeItem(at: fileURL)
 
-        #expect(try await storage.activeModelDescriptor() == nil)
-        #expect(try await storage.activeModelID() == nil)
+        await #expect(throws: LocalModelStorageError.fileNotFound(fileURL)) {
+            _ = try await storage.activeModelDescriptor()
+        }
+        await #expect(throws: LocalModelStorageError.fileNotFound(fileURL)) {
+            _ = try await storage.activeModelID()
+        }
     }
 
     @Test func testM8CompositionRootWiresLocalModelStorage() async throws {
@@ -792,6 +796,34 @@ struct M82ActiveModelBindingTests {
         let res = try await mockAfter.generate(request: req)
         #expect(res.text == "Observable mock output for: Usable test")
         #expect(try await storage.activeModelID() != mB.id)
+    }
+
+    @Test func testApplicationChatProviderPathCoalescesConcurrentModelLoads() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "chat-load-concurrent.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+        let descriptor = try await storage.importModel(from: source, name: "Concurrent Load Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let mockEngine = ObservableMockEngine(
+            identity: LocalModelIdentity(id: descriptor.id, name: descriptor.name),
+            state: .unloaded
+        )
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: storage,
+            deviceCapabilityProvider: DefaultDeviceCapabilityProvider(),
+            engineFactory: { _, _ in mockEngine }
+        )
+
+        async let first = coordinator.loadActiveModel()
+        async let second = coordinator.loadActiveModel()
+        _ = try await (first, second)
+
+        #expect(mockEngine.loadCallCount == 1)
+        #expect(await mockEngine.lifecycleState == .loaded)
     }
 
     @Test func testApplicationChatProviderPathLoadsUnloadedActiveEngine() async throws {

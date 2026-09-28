@@ -158,21 +158,26 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             throw LocalModelStorageError.modelNotFound(id)
         }
 
+        let previousIndex = index
         let fileURL = modelsDirectoryURL.appendingPathComponent(descriptor.filename)
-        if fileManager.fileExists(atPath: fileURL.path) {
-            try fileManager.removeItem(at: fileURL)
+        do {
+            if fileManager.fileExists(atPath: fileURL.path) {
+                try fileManager.removeItem(at: fileURL)
+            }
+
+            index.descriptors.removeValue(forKey: id.rawValue)
+            if index.activeModelID == id.rawValue {
+                index.activeModelID = nil
+            }
+            try persistIndex()
+        } catch {
+            index = previousIndex
+            throw error
         }
-
-        index.descriptors.removeValue(forKey: id.rawValue)
-
-        if index.activeModelID == id.rawValue {
-            index.activeModelID = nil
-        }
-
-        try persistIndex()
     }
 
     public func setActiveModel(id: ModelID?) async throws {
+        let previousActiveModelID = index.activeModelID
         if let id {
             guard index.descriptors[id.rawValue] != nil else {
                 throw LocalModelStorageError.modelNotFound(id)
@@ -181,7 +186,12 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         } else {
             index.activeModelID = nil
         }
-        try persistIndex()
+        do {
+            try persistIndex()
+        } catch {
+            index.activeModelID = previousActiveModelID
+            throw error
+        }
     }
 
     public func activeModelID() async throws -> ModelID? {
@@ -201,9 +211,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
 
         let fileURL = modelsDirectoryURL.appendingPathComponent(descriptor.filename)
         guard fileManager.fileExists(atPath: fileURL.path) else {
-            index.activeModelID = nil
-            try? persistIndex()
-            return nil
+            throw LocalModelStorageError.fileNotFound(fileURL)
         }
 
         return descriptor

@@ -383,6 +383,27 @@ struct M6SemanticsTests {
         #expect(eval.reason == "2")
     }
 
+    @Test func test12_StateUpdateMutationTokenIsIdempotent() async throws {
+        let root = try await M6CompositionRoot()
+        let goal = Goal(statement: "idempotent state update")
+        try await root.runtime.submit(goal: goal)
+        try await root.runtime.activate(goalID: goal.id)
+
+        let token = UUID()
+        let update = StateUpdate(
+            goalID: goal.id,
+            targetStatus: .completed,
+            evidence: ["reason": "verified"],
+            mutationToken: token
+        )
+
+        try await root.runtime.applyStateUpdate(update)
+        try await root.runtime.applyStateUpdate(update)
+
+        #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
+        #expect(await root.runtime.hasAppliedMutation(token: token))
+    }
+
     @Test func test11_RepeatedGoalsRunOnSameRuntime() async throws {
         let root = try await M6CompositionRoot()
         let first = Goal(statement: "hello")

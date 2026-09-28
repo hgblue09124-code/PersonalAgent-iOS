@@ -65,12 +65,7 @@ final class KernelSession: ObservableObject {
 
         do {
             if let engine = try await composition.activeLocalModelEngine() {
-                var engineState = await engine.lifecycleState
-                if case .unloaded = engineState {
-                    let loadedEngine = try await composition.loadActiveLocalModel()
-                    engineState = await loadedEngine.lifecycleState
-                }
-                activeEngineState = engineState
+                activeEngineState = await engine.lifecycleState
             } else {
                 activeEngineState = .unloaded
             }
@@ -78,6 +73,12 @@ final class KernelSession: ObservableObject {
             activeEngineState = .failed(reason: error.localizedDescription)
             lastError = String(describing: error)
         }
+    }
+
+    /// Startup-only residency preparation. Refresh remains observational and side-effect free.
+    func prepareActiveModel() async {
+        guard activeModelID != nil else { return }
+        await run { _ = try await composition.loadActiveLocalModel() }
     }
 
     func start() async { await run { try await composition.session.start() } }
@@ -105,14 +106,15 @@ final class KernelSession: ObservableObject {
         lastError = nil
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
-            await self.run {
+            var goalID: GoalID?
+            do {
                 let lifecycle = self.state.lifecycle
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                let goalID = try await self.composition.session.submitInput(statement)
+                goalID = try await self.composition.session.submitInput(statement)
                 await self.refresh()
-                let evaluation = try await self.composition.orchestrator.run(goalID: goalID) { [weak self] progress in
+                let evaluation = try await self.composition.orchestrator.run(goalID: goalID!) { [weak self] progress in
                     self?.executionProgress = progress
                 }
                 let result = evaluation.reason.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -122,7 +124,23 @@ final class KernelSession: ObservableObject {
                 self.executionResult = result
                 self.presentedResult = result
                 self.executionProgress = nil
+            } catch is CancellationError {
+                self.executionProgress = nil
+            } catch {
+                // Provider/model failure must not strand an active goal and block the next turn.
+                if let goalID,
+                   let status = await self.composition.runtime.goal(id: goalID)?.status,
+                   status == .active || status == .proposed {
+                    try? await self.composition.runtime.abort(goalID: goalID)
+                }
+                self.executionProgress = nil
+                if let kernelError = error as? KernelError {
+                    self.lastError = kernelError.description
+                } else {
+                    self.lastError = String(describing: error)
+                }
             }
+            await self.refresh()
         }
         executionTask = task
         await task.value
@@ -242,11 +260,11 @@ private enum DevModelDownloadError: LocalizedError {
         case .invalidURL:
             return "Dev model URL is invalid."
         case .httpStatus(let status):
-            return "Dev model download failed with HTTP (status)."
+            return "Dev model download failed with HTTP \(status)."
         case .invalidSize(let size):
-            return "Dev model size is invalid: (size) bytes."
+            return "Dev model size is invalid: \(size) bytes."
         case .checksumMismatch(let expected, let actual):
-            return "Dev model SHA-256 mismatch. Expected (expected), got (actual)."
+            return "Dev model SHA-256 mismatch. Expected \(expected), got \(actual)."
         }
     }
 }
