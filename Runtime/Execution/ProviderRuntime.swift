@@ -45,23 +45,23 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         }
         self.configuration = configuration
         lifecycle = .configured
-        emit(kind: .providerConfigured, payload: [
+        try await emit(kind: .providerConfigured, payload: [
             "providerID": configuration.providerID.rawValue,
             "hasCredentialRef": configuration.credential == nil ? "false" : "true",
         ])
     }
 
-    public func ready() throws {
+    public func ready() async throws {
         guard lifecycle == .configured else {
             throw ProviderRuntimeError.invalidConfiguration
         }
         lifecycle = .ready
-        emit(kind: .providerReady, payload: ["providerID": provider.identity.id.rawValue])
+        try await emit(kind: .providerReady, payload: ["providerID": provider.identity.id.rawValue])
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
         try prepareExecution()
-        emit(kind: .providerInvoked, payload: [
+        try await emit(kind: .providerInvoked, payload: [
             "providerID": provider.identity.id.rawValue,
             "model": request.model.rawValue,
             "mode": "complete",
@@ -73,7 +73,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
                 try await boundProvider.complete(request)
             }
             lifecycle = .completed
-            emit(kind: .providerCompleted, payload: [
+            try await emit(kind: .providerCompleted, payload: [
                 "providerID": boundProvider.identity.id.rawValue,
                 "finishReason": response.finishReason,
             ])
@@ -158,10 +158,10 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
     private func applyFailure(_ error: ProviderRuntimeError) {
         if error == .cancelled {
             lifecycle = .cancelled
-            emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue])
+            Task { try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) }
         } else {
             lifecycle = .failed
-            emit(kind: .providerFailed, payload: [
+            Task { try? await emit(kind: .providerFailed, payload: [
                 "providerID": provider.identity.id.rawValue,
                 "error": error.description,
             ])
@@ -190,7 +190,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         }
     }
 
-    private func emit(kind: ExecutionEventKind, payload: [String: String]) {
+    private func emit(kind: ExecutionEventKind, payload: [String: String]) async throws {
         let sanitized = SecretRedactor.stripSecrets(from: payload)
         logger.log(
             LogEvent(
