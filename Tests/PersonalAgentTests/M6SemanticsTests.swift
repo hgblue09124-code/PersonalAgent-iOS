@@ -2,6 +2,7 @@ import PARuntime
 import Foundation
 import Testing
 import PAKernel
+import PAProviders
 import PAObservability
 import PAEvents
 import PAModules
