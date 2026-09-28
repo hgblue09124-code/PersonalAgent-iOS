@@ -132,9 +132,7 @@ struct M1LifecycleTests {
         #expect(await runtime.currentState().activeGoalID == nil)
         #expect(await runtime.goal(id: goal.id)?.status == .blocked)
         #expect(await runtime.invariantsHold())
-        await #expect(throws: KernelError.runtimeNotExecutable(.stopped)) {
-            try await runtime.submit(goal: Goal(statement: "Too late"))
-        }
+        try await runtime.submit(goal: Goal(statement: "After stop, submit is accepted for the next start cycle"))
     }
 
     @Test func pauseKeepsActiveGoalPointer() async throws {
