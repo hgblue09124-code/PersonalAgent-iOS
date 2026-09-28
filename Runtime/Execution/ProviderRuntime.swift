@@ -125,7 +125,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
     public func cancel() {
         if lifecycle == .executing {
             lifecycle = .cancelled
-            try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) 
+            Task { try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) }
         }
     }
 
@@ -159,7 +159,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
     private func applyFailure(_ error: ProviderRuntimeError) async {
         if error == .cancelled {
             lifecycle = .cancelled
-            Task { try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) }
+            try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue])
         } else {
             lifecycle = .failed
             try? await emit(kind: .providerFailed, payload: [
