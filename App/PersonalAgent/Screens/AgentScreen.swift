@@ -12,17 +12,12 @@ struct AgentScreen: View {
     @FocusState private var taskFocused: Bool
 
     var body: some View {
-        GeometryReader { proxy in
-            ZStack {
-                background
-                content(height: proxy.size.height)
-                    .opacity(appeared ? 1 : 0)
-                    .offset(y: appeared ? 0 : 12)
-            }
+        ZStack {
+            background
+            content
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 12)
         }
-        // Keep the Agent canvas full-screen while the keyboard is presented or dragged.
-        .ignoresSafeArea(.all)
-        .ignoresSafeArea(.keyboard, edges: .bottom)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
@@ -42,30 +37,25 @@ struct AgentScreen: View {
         .ignoresSafeArea()
     }
 
-    private func content(height: CGFloat) -> some View {
-        // iPhone 12 Pro Max logical canvas: 428 × 926 pt.
-        // Keep the native component dimensions fixed; let the available
-        // vertical space distribute naturally instead of scaling the UI.
+    private var content: some View {
         VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 6)
+            Spacer(minLength: 18)
             quickActions
-            Spacer(minLength: 5)
+            Spacer(minLength: 12)
             hero
-            Spacer(minLength: 9)
+            Spacer(minLength: 22)
             composer
             status
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 6)
-        .padding(.bottom, 8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 18)
     }
 
     private var topBar: some View {
         HStack {
             Text("PERSONAL AGENT")
-                .padding(.leading, 44)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .tracking(1.6)
                 .foregroundStyle(.white.opacity(0.82))
@@ -88,8 +78,6 @@ struct AgentScreen: View {
         }
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 8)
-        .offset(x: taskFocused ? -12 : 0, y: taskFocused ? -8 : 0)
-        .animation(.spring(response: 0.42, dampingFraction: 0.82), value: taskFocused)
         .animation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.08), value: appeared)
     }
 
@@ -116,24 +104,23 @@ struct AgentScreen: View {
     }
 
     private var hero: some View {
-        VStack(spacing: 11) {
+        VStack(spacing: 16) {
             Button { showAgentPanel = true } label: {
                 AgentOrb(
                     isActive: session.state.lifecycle.rawValue.lowercased() == "running",
                     isThinking: session.executionProgress != nil
                 )
-                .frame(width: 68, height: 68)
             }
             .buttonStyle(.plain)
 
             Text(LocalizedStringKey(greeting))
-                .font(.system(size: 31, weight: .black, design: .rounded))
+                .font(.system(size: 36, weight: .black, design: .rounded))
                 .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
             Text(LocalizedStringKey(phaseSubtitle))
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
         }
@@ -207,7 +194,7 @@ struct AgentScreen: View {
         .padding(13)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .padding(.top, 9)
+        .padding(.top, 12)
     }
 
     private var lifecycleMenu: some View {
@@ -464,7 +451,7 @@ private struct AgentOrb: View {
                 .blur(radius: 2.5)
                 .offset(x: -10, y: -15)
         }
-        .frame(width: 68, height: 68)
+        .frame(width: 74, height: 74)
         .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
         .scaleEffect(pulse ? (isThinking ? 1.075 : 1.045) : 1)
         .rotationEffect(.degrees(isThinking ? (pulse ? 2 : -2) : 0))
