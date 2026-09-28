@@ -54,15 +54,9 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
     }
 
     public func currentState() -> AgentState {
-        AgentState(
-            identity: identity,
-            lifecycle: lifecycle,
-            phase: phase,
-            activeGoalID: activeGoalID
-        )
+        AgentState(identity: identity, lifecycle: lifecycle, phase: phase, activeGoalID: activeGoalID)
     }
 
-    /// Authoritative invariants the runtime must hold after every command.
     public func invariantsHold() -> Bool {
         if let active = activeGoalID {
             guard let goal = goalStore[active], goal.status == .active else { return false }
@@ -74,21 +68,10 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         return true
     }
 
-    public func start() async throws {
-        try await applyRuntime(.start)
-    }
-
-    public func pause() async throws {
-        try await applyRuntime(.pause)
-    }
-
-    public func resume() async throws {
-        try await applyRuntime(.resume)
-    }
-
-    public func stop() async throws {
-        try await applyRuntime(.stop)
-    }
+    public func start() async throws { try await applyRuntime(.start) }
+    public func pause() async throws { try await applyRuntime(.pause) }
+    public func resume() async throws { try await applyRuntime(.resume) }
+    public func stop() async throws { try await applyRuntime(.stop) }
 
     public func submit(goal: Goal) async throws {
         if LifecycleMachine.terminal.contains(lifecycle) {
@@ -96,34 +79,22 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             try await emitRejection(command: GoalCommand.submit.rawValue, error: error)
             throw error
         }
-
         let statement = goal.statement.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !statement.isEmpty else {
             let error = KernelError.emptyGoalStatement
             try await emitRejection(command: GoalCommand.submit.rawValue, error: error)
             throw error
         }
-
         var stored = goal
         stored.status = .proposed
         if goalStore[stored.id] != nil {
-            let error = KernelError.invalidGoalTransition(
-                goalID: stored.id,
-                from: goalStore[stored.id]!.status,
-                command: .submit
-            )
+            let error = KernelError.invalidGoalTransition(goalID: stored.id, from: goalStore[stored.id]!.status, command: .submit)
             try await emitRejection(command: GoalCommand.submit.rawValue, error: error)
             throw error
         }
         goalStore[stored.id] = stored
         do {
-            try await emit(
-                kind: .goalSubmitted,
-                payload: [
-                    "goalID": stored.id.rawValue,
-                    "status": stored.status.rawValue,
-                ]
-            )
+            try await emit(kind: .goalSubmitted, payload: ["goalID": stored.id.rawValue, "status": stored.status.rawValue])
         } catch {
             goalStore.removeValue(forKey: stored.id)
             throw error
@@ -132,18 +103,11 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
 
     public func abort(goalID: GoalID) async throws {
         try await applyGoal(goalID, command: .abort)
-        if activeGoalID == goalID {
-            activeGoalID = nil
-        }
+        if activeGoalID == goalID { activeGoalID = nil }
     }
 
-    public func goals() -> [Goal] {
-        goalStore.values.sorted { $0.createdAt < $1.createdAt }
-    }
-
-    public func goal(id: GoalID) -> Goal? {
-        goalStore[id]
-    }
+    public func goals() -> [Goal] { goalStore.values.sorted { $0.createdAt < $1.createdAt } }
+    public func goal(id: GoalID) -> Goal? { goalStore[id] }
 
     public func activate(goalID: GoalID) async throws {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
@@ -158,21 +122,13 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
         let previousActive = activeGoalID
         activeGoalID = goalID
-        do {
-            try await applyGoal(goalID, command: .activate)
-        } catch {
-            if activeGoalID == goalID {
-                activeGoalID = previousActive
-            }
-            throw error
-        }
+        do { try await applyGoal(goalID, command: .activate) }
+        catch { if activeGoalID == goalID { activeGoalID = previousActive }; throw error }
     }
 
     public func suspend(goalID: GoalID) async throws {
         try await applyGoal(goalID, command: .suspend)
-        if activeGoalID == goalID {
-            activeGoalID = nil
-        }
+        if activeGoalID == goalID { activeGoalID = nil }
     }
 
     public func resumeGoal(goalID: GoalID) async throws {
@@ -188,28 +144,17 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
         let previousActive = activeGoalID
         activeGoalID = goalID
-        do {
-            try await applyGoal(goalID, command: .resume)
-        } catch {
-            if activeGoalID == goalID {
-                activeGoalID = previousActive
-            }
-            throw error
-        }
+        do { try await applyGoal(goalID, command: .resume) }
+        catch { if activeGoalID == goalID { activeGoalID = previousActive }; throw error }
     }
 
     public func complete(goalID: GoalID) async throws {
         try await applyGoal(goalID, command: .complete)
-        if activeGoalID == goalID {
-            activeGoalID = nil
-        }
+        if activeGoalID == goalID { activeGoalID = nil }
     }
 
-    /// Authoritative StateUpdate entry point.
     public func hasAppliedMutation(token: UUID) async -> Bool {
-        if appliedMutationTokens.contains(token) {
-            return true
-        }
+        if appliedMutationTokens.contains(token) { return true }
         return await mutationEvidenceStore.hasAppliedMutation(token: token)
     }
 
@@ -229,32 +174,21 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             try await emitRejection(command: "applyStateUpdate", error: error)
             throw error
         }
-
         let previousGoal = goal
         let previousActiveGoalID = activeGoalID
-
         do {
             let targetStatus = update.targetStatus
-            if targetStatus == .completed {
-                try await complete(goalID: update.goalID)
-            } else if targetStatus == .aborted {
-                try await abort(goalID: update.goalID)
-            } else if targetStatus == .blocked {
-                try await suspend(goalID: update.goalID)
-            } else if targetStatus == .active {
-                if goal.status == .blocked {
-                    try await resumeGoal(goalID: update.goalID)
-                } else if goal.status != .active {
-                    try await activate(goalID: update.goalID)
-                }
+            if targetStatus == .completed { try await complete(goalID: update.goalID) }
+            else if targetStatus == .aborted { try await abort(goalID: update.goalID) }
+            else if targetStatus == .blocked { try await suspend(goalID: update.goalID) }
+            else if targetStatus == .active {
+                if goal.status == .blocked { try await resumeGoal(goalID: update.goalID) }
+                else if goal.status != .active { try await activate(goalID: update.goalID) }
             } else {
-                let error = KernelError.invalidStateUpdate(
-                    "Unsupported target status: \(targetStatus.rawValue)"
-                )
+                let error = KernelError.invalidStateUpdate("Unsupported target status: \(targetStatus.rawValue)")
                 try await emitRejection(command: "applyStateUpdate", error: error)
                 throw error
             }
-
             var payload = update.evidence
             payload["goalID"] = update.goalID.rawValue
             payload["targetStatus"] = update.targetStatus.rawValue
@@ -270,7 +204,6 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
         }
     }
 
-    /// Minimum coordination port: kernel requests execution, runtime owns it.
     public func invokeModule(_ invocation: ModuleInvocation) async throws -> ModuleResult {
         guard LifecycleMachine.canExecute(in: lifecycle) else {
             let error = KernelError.runtimeNotExecutable(lifecycle)
@@ -291,26 +224,31 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             try await emitRejection(command: command.rawValue, error: error)
             throw error
         case .success(let next):
-            if LifecycleMachine.terminal.contains(next) {
-                try await parkActiveGoalForTerminalLifecycle()
+            let previousLifecycle = lifecycle
+            let previousPhase = phase
+            let previousActiveGoalID = activeGoalID
+            let previousGoals = goalStore
+            do {
+                if next == .stopped { try await parkActiveGoalForStop() }
+                lifecycle = next
+                phase = LifecycleMachine.phase(for: next)
+                try await emit(
+                    kind: LifecycleMachine.eventKind(for: command),
+                    payload: ["from": previousLifecycle.rawValue, "to": next.rawValue, "command": command.rawValue]
+                )
+            } catch {
+                lifecycle = previousLifecycle
+                phase = previousPhase
+                activeGoalID = previousActiveGoalID
+                goalStore = previousGoals
+                throw error
             }
-            let previous = lifecycle
-            lifecycle = next
-            phase = LifecycleMachine.phase(for: next)
-            try await emit(
-                kind: LifecycleMachine.eventKind(for: command),
-                payload: [
-                    "from": previous.rawValue,
-                    "to": next.rawValue,
-                    "command": command.rawValue,
-                ]
-            )
         }
     }
 
-    /// Stop is terminal. An active goal cannot remain executable.
-    /// Pause keeps the pointer: execution is frozen, the goal is still current.
-    private func parkActiveGoalForTerminalLifecycle() async throws {
+    /// Stop freezes the current goal as blocked, but the runtime itself can be
+    /// started again. Pause deliberately keeps the active goal executable later.
+    private func parkActiveGoalForStop() async throws {
         guard let id = activeGoalID, var existing = goalStore[id] else {
             activeGoalID = nil
             return
@@ -324,7 +262,7 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
                     "from": GoalStatus.active.rawValue,
                     "to": GoalStatus.blocked.rawValue,
                     "command": GoalCommand.suspend.rawValue,
-                    "reason": "runtimeTerminal",
+                    "reason": "runtimeStopped",
                 ]
             )
             goalStore[id] = existing
@@ -339,77 +277,36 @@ public actor AgentRuntime: AgentRuntimeCoordinating, AgentLifecycleManaging, Goa
             throw error
         }
         guard let next = GoalMachine.nextStatus(existing.status, command: command) else {
-            let error = KernelError.invalidGoalTransition(
-                goalID: id,
-                from: existing.status,
-                command: command
-            )
+            let error = KernelError.invalidGoalTransition(goalID: id, from: existing.status, command: command)
             try await emitRejection(command: command.rawValue, error: error)
             throw error
         }
         let previous = existing.status
         existing.status = next
         do {
-            try await emit(
-                kind: GoalMachine.eventKind(for: command),
-                payload: [
-                    "goalID": id.rawValue,
-                    "from": previous.rawValue,
-                    "to": next.rawValue,
-                    "command": command.rawValue,
-                ]
-            )
-        } catch {
-            // Preserve state/event atomicity: a failed authoritative event append
-            // must not leave the in-memory goal transition committed.
-            throw error
-        }
+            try await emit(kind: GoalMachine.eventKind(for: command), payload: [
+                "goalID": id.rawValue, "from": previous.rawValue, "to": next.rawValue, "command": command.rawValue
+            ])
+        } catch { throw error }
         goalStore[id] = existing
     }
 
     private func emitRejection(command: String, error: KernelError) async throws {
-        try await emit(
-            kind: .commandRejected,
-            payload: [
-                "command": command,
-                "error": error.description,
-            ]
-        )
+        try await emit(kind: .commandRejected, payload: ["command": command, "error": error.description])
     }
 
     private func emit(kind: ExecutionEventKind, payload: [String: String]) async throws {
         let timestamp = await clock.now()
-        let event = ExecutionEvent(
-            traceID: sessionTrace,
-            kind: kind,
-            timestamp: timestamp,
-            payload: payload
-        )
-        logger.log(
-            LogEvent(
-                level: kind == .commandRejected ? .warning : .info,
-                category: "kernel",
-                message: kind.rawValue,
-                metadata: payload
-            )
-        )
-        do {
-            try await eventLog.append(event)
-        } catch {
-            logger.log(
-                LogEvent(
-                    level: .error,
-                    category: "kernel",
-                    message: "eventAppendFailed",
-                    metadata: ["kind": kind.rawValue]
-                )
-            )
+        let event = ExecutionEvent(traceID: sessionTrace, kind: kind, timestamp: timestamp, payload: payload)
+        logger.log(LogEvent(level: kind == .commandRejected ? .warning : .info, category: "kernel", message: kind.rawValue, metadata: payload))
+        do { try await eventLog.append(event) }
+        catch {
+            logger.log(LogEvent(level: .error, category: "kernel", message: "eventAppendFailed", metadata: ["kind": kind.rawValue]))
             throw error
         }
     }
 }
 
-/// Isolates PAObservability from requiring PAComposition.
 public struct NullLoggerBridge: AgentLogger {
     public init() {}
     public func log(_ event: LogEvent) {}
