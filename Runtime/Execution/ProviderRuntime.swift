@@ -5,7 +5,7 @@ import PAEvents
 import PAProviders
 
 /// Owns provider lifecycle and execution. Isolated from AgentRuntime.
-public actor ProviderRuntime: LLMProvider {
+public actor ProviderRuntime: @preconcurrency LLMProvider {
     public private(set) var lifecycle: ProviderLifecycle
     public private(set) var configuration: ProviderConfiguration?
 
