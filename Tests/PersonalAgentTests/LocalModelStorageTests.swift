@@ -287,6 +287,7 @@ struct M82ActiveModelBindingTests {
         let shouldFailUnload: Bool
         let shouldFailGenerate: Bool
 
+        private(set) var loadCallCount = 0
         private(set) var completeCallCount = 0
         private(set) var streamCallCount = 0
         private(set) var unloadCallCount = 0
@@ -315,7 +316,10 @@ struct M82ActiveModelBindingTests {
         }
 
         func load(options: LocalModelLoadingOptions) async throws {
-            lock.withLock { _state = .loaded }
+            lock.withLock {
+                loadCallCount += 1
+                _state = .loaded
+            }
         }
 
         func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
@@ -788,6 +792,39 @@ struct M82ActiveModelBindingTests {
         let res = try await mockAfter.generate(request: req)
         #expect(res.text == "Observable mock output for: Usable test")
         #expect(try await storage.activeModelID() != mB.id)
+    }
+
+    @Test func testApplicationChatProviderPathLoadsUnloadedActiveEngine() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "chat-load.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+        let descriptor = try await storage.importModel(from: source, name: "Chat Load Model")
+        try await storage.setActiveModel(id: descriptor.id)
+
+        let mockEngine = ObservableMockEngine(
+            identity: LocalModelIdentity(id: descriptor.id, name: descriptor.name),
+            state: .unloaded
+        )
+        let compositionRoot = try await M8CompositionRoot(
+            storeDirectoryURL: root.appendingPathComponent("M8Product"),
+            localModelStorage: storage,
+            localModelEngineFactory: { _, _ in mockEngine }
+        )
+        let providerID = compositionRoot.catalog.identities.first!.id
+        let provider = try #require(compositionRoot.catalog.resolve(providerID))
+
+        let request = LLMRequest(
+            model: ModelID(rawValue: "test-model"),
+            messages: [ProviderMessage(role: .user, content: "Load before chat")]
+        )
+        let response = try await provider.complete(request)
+
+        #expect(response.text == "Observable mock output for: Load before chat")
+        #expect(mockEngine.loadCallCount == 1)
+        #expect(mockEngine.completeCallCount == 1)
     }
 
     @Test func testApplicationChatProviderPathRoutesToActiveLocalEngine() async throws {
