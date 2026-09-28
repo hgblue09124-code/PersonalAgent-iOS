@@ -4,6 +4,7 @@ import PARuntime
 
 struct AgentScreen: View {
     @ObservedObject var session: KernelSession
+    @Binding var showWorkspace: Bool
     @State private var task = ""
     @State private var showAgentPanel = false
     @State private var appeared = false
@@ -69,6 +70,7 @@ struct AgentScreen: View {
             Spacer()
 
             HStack(spacing: 8) {
+                Button { showWorkspace = true } label: { topButton("circle.grid.2x2.fill") }
                 Button { showActivity = true } label: { topButton("waveform.path.ecg") }
                 lifecycleMenu
             }
