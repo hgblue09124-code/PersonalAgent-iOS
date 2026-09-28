@@ -6,35 +6,25 @@ struct RootView: View {
     @State private var showWorkspace = false
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             AgentScreen(session: session)
 
-            VStack {
-                HStack {
-                    Button {
-                        showWorkspace = true
-                    } label: {
-                        Image(systemName: "circle.grid.2x2.fill")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(width: 38, height: 38)
-                            .background(.white.opacity(0.12), in: Circle())
-                    }
-                    .accessibilityLabel("Open Agent workspace")
-
-                    Spacer()
-                }
-
-                Spacer()
+            Button {
+                showWorkspace = true
+            } label: {
+                Image(systemName: "circle.grid.2x2.fill")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 38, height: 38)
+                    .background(.black.opacity(0.20), in: Circle())
+                    .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .allowsHitTesting(true)
+            .padding(.leading, 20)
+            .padding(.top, 10)
+            .accessibilityLabel("Open Agent workspace")
         }
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
         }
         .task { await session.refresh() }
     }
@@ -42,71 +32,121 @@ struct RootView: View {
 
 private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
+    @State private var workspaceExpanded = false
+    @State private var appeared = false
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "circle.hexagongrid.fill")
+                            .font(.title3.bold())
+                            .frame(width: 40, height: 40)
+                            .background(.thinMaterial, in: Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Living workspace").font(.headline)
+                            Text("Tap a surface to expand it.").font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { workspaceExpanded.toggle() }
+                        } label: {
+                            Image(systemName: workspaceExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                                .font(.caption.bold()).frame(width: 34, height: 34)
+                                .background(.secondary.opacity(0.10), in: Circle())
+                        }.buttonStyle(.plain)
+                    }.padding(.vertical, 4)
+                }
+                Section {
+                    VStack(alignment: .leading, spacing: 5) {
                         Text("Agent workspace")
-                            .font(.title2.bold())
-                        Text("Everything else stays contextual to the living Agent.")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                        Text("Models, providers, skills, memory and settings appear here when you need them.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 6)
                 }
 
-                Section(header: Text("Capabilities")) {
-                    NavigationLink {
+                Section("Live status") {
+                    HStack(spacing: 8) {
+                        statusPill("Agent", session.state.lifecycle.rawValue, "sparkles")
+                        statusPill("Provider", session.providerLifecycle, "server.rack")
+                        statusPill("Models", "\(session.installedModels.count)", "cube.box")
+                    }
+                    .listRowBackground(Color.clear)
+                }
+
+                Section("Capabilities") {
+                    workspaceLink("Models", "Local GGUF models", "cube.box") {
                         ModelsScreen(session: session)
-                    } label: {
-                        workspaceRow("Models", "Local GGUF models", "cube.box")
                     }
-
-                    NavigationLink {
+                    workspaceLink("Providers", "Remote and local adapters", "server.rack") {
                         ProvidersScreen(session: session)
-                    } label: {
-                        workspaceRow("Providers", "Remote and local providers", "server.rack")
                     }
-
-                    NavigationLink {
+                    workspaceLink("Skills", "Agent capabilities", "puzzlepiece") {
                         SkillsScreen(session: session)
-                    } label: {
-                        workspaceRow("Skills", "Available capabilities", "puzzlepiece")
                     }
-
-                    NavigationLink {
+                    workspaceLink("Memory", "Persistent context", "brain") {
                         MemoryScreen()
-                    } label: {
-                        workspaceRow("Memory", "Persistent agent memory", "brain")
                     }
                 }
 
-                Section(header: Text("System")) {
-                    NavigationLink {
+                Section("System") {
+                    workspaceLink("Settings", "Agent and device configuration", "gearshape") {
                         SettingsScreen(session: session)
-                    } label: {
-                        workspaceRow("Settings", "Agent and device configuration", "gearshape")
                     }
                 }
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
+            .scrollDismissesKeyboard(.interactively)
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 10)
+            .animation(.spring(response: 0.55, dampingFraction: 0.84), value: appeared)
+            .onAppear { appeared = true }
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
-    private func workspaceRow(_ title: String, _ subtitle: String, _ symbol: String) -> some View {
-        Label {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+    private func statusPill(_ title: String, _ value: String, _ symbol: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Image(systemName: symbol).font(.caption.bold())
+            Text(title).font(.caption2.weight(.bold))
+            Text(value).font(.caption).lineLimit(1)
+        }
+        .foregroundStyle(.primary)
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+    }
+
+    private func workspaceLink<Destination: View>(
+        _ title: String,
+        _ subtitle: String,
+        _ symbol: String,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
+        NavigationLink(destination: destination()) {
+            HStack(spacing: 13) {
+                Image(systemName: symbol)
+                    .font(.headline)
+                    .frame(width: 34, height: 34)
+                    .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.subheadline.weight(.semibold))
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
-        } icon: {
-            Image(systemName: symbol)
-                .frame(width: 28)
+            .padding(.vertical, 3)
+            .contentShape(Rectangle())
         }
     }
 }

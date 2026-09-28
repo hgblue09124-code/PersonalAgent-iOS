@@ -1,17 +1,42 @@
 import SwiftUI
 
 struct MemoryScreen: View {
-    /// Names from the M0 memory contract. The app does not import PAMemory.
     private let reservedKinds = [
-        "working", "episodic", "semantic", "preference", "procedural",
+        "working", "episodic", "semantic", "preference", "procedural"
     ]
 
     var body: some View {
         ScreenScaffold(title: "Memory", systemImage: "brain") {
-            MilestoneBanner()
-            ForEach(reservedKinds, id: \.self) { kind in
-                StatusRow(title: kind, value: "contract only · M4")
+            GlassPanel {
+                Label("Memory layers", systemImage: "square.stack.3d.up")
+                    .font(.headline)
+                Text("Persistent memory remains a contextual Agent capability.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
+
+            ForEach(reservedKinds, id: \.self) { kind in
+                GlassPanel {
+                    HStack {
+                        Label(kind.capitalized, systemImage: memoryIcon(kind))
+                            .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Text("contract")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private func memoryIcon(_ kind: String) -> String {
+        switch kind {
+        case "working": return "bolt.fill"
+        case "episodic": return "clock.arrow.circlepath"
+        case "semantic": return "brain.head.profile"
+        case "preference": return "slider.horizontal.3"
+        default: return "arrow.triangle.2.circlepath"
         }
     }
 }

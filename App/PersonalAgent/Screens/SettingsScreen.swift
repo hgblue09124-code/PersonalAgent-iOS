@@ -9,183 +9,137 @@ struct SettingsScreen: View {
     @State private var lastImportError: String?
 
     var body: some View {
-        ScreenScaffold(title: "Settings", systemImage: "gear") {
-
+        ScreenScaffold(title: "Settings", systemImage: "gearshape") {
             if let error = session.lastError ?? lastImportError {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Error")
-                        .font(.caption.bold())
+                GlassPanel {
+                    Label("Attention", systemImage: "exclamationmark.triangle.fill")
+                        .font(.headline)
                         .foregroundStyle(.red)
                     Text(error)
                         .font(.footnote)
                         .foregroundStyle(.red)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
             }
 
-            // MARK: - Capabilities Section: Models / GGUF
-            VStack(alignment: .leading, spacing: 12) {
+            GlassPanel {
                 HStack {
-                    Label("Models / GGUF", systemImage: "cube.box")
+                    Label("Active model", systemImage: "cube.box")
+                        .font(.headline)
+                    Spacer()
+                    LifecycleStateBadge(state: session.activeEngineState)
+                }
+
+                Text(session.activeModelDescriptor?.name ?? "No model selected")
+                    .font(.subheadline.weight(.semibold))
+
+                if let active = session.activeModelDescriptor {
+                    HStack {
+                        Button(session.activeEngineState == .loaded ? "Unload" : "Load") {
+                            Task {
+                                if session.activeEngineState == .loaded {
+                                    await session.unloadActiveModel()
+                                } else {
+                                    await session.loadActiveModel()
+                                }
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button("Deselect", role: .destructive) {
+                            Task { await session.selectActiveModel(id: nil) }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                } else {
+                    Text("Import a GGUF model or download the small development model.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            GlassPanel {
+                HStack {
+                    Label("Model library", systemImage: "square.stack.3d.up")
                         .font(.headline)
                     Spacer()
                     Button {
-                        Task { await session.downloadDevModel() }
-                    } label: {
-                        if session.isDownloadingDevModel {
-                            ProgressView()
-                                .controlSize(.small)
-                            Text("Downloading…")
-                        } else {
-                            Label("Dev Model", systemImage: "arrow.down.circle")
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(session.isDownloadingDevModel)
-                    Button {
                         isImportingGGUF = true
                     } label: {
-                        Label("Import GGUF", systemImage: "square.and.arrow.down")
-                            .font(.subheadline.bold())
+                        Image(systemName: "plus")
                     }
-                    .buttonStyle(.borderedProminent)
-                }
-
-                // Active Model Status Banner
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Active Model:")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Text(session.activeModelDescriptor?.name ?? "None Selected")
-                            .font(.subheadline.bold())
-                        Spacer()
-                        LifecycleStateBadge(state: session.activeEngineState)
-                    }
-
-                    if let active = session.activeModelDescriptor {
-                        HStack(spacing: 12) {
-                            if session.activeEngineState == .loaded {
-                                Button("Unload Model") {
-                                    Task { await session.unloadActiveModel() }
-                                }
-                                .buttonStyle(.bordered)
-                                .tint(.orange)
-                            } else {
-                                Button("Load Model") {
-                                    Task { await session.loadActiveModel() }
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.green)
-                            }
-
-                            Button("Deselect Active") {
-                                Task { await session.selectActiveModel(id: nil) }
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.secondary)
-                        }
-                    }
-                }
-                .padding(12)
-                .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
-
-                // Installed Models List
-                if session.isDownloadingDevModel {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Downloading SmolLM2-135M…")
-                            .font(.caption.bold())
-                        ProgressView(value: session.devModelDownloadProgress)
-                        Text("Verified public GGUF • 271 MB • dev-only")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.vertical, 4)
+                    .accessibilityLabel("Import GGUF")
                 }
 
                 if session.installedModels.isEmpty {
-                    Text("No local GGUF models installed. Import a .gguf file to get started.")
+                    Text("No local models installed.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                        .padding(.vertical, 8)
                 } else {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Installed Models (\(session.installedModels.count))")
-                            .font(.subheadline.bold())
-                            .foregroundStyle(.secondary)
-
-                        ForEach(session.installedModels, id: \.id) { model in
-                            ModelRow(
-                                model: model,
-                                isActive: model.id == session.activeModelID,
-                                onSelectActive: {
+                    ForEach(session.installedModels, id: \.id) { model in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(model.name).font(.subheadline.weight(.semibold))
+                                Text(ByteCountFormatter.string(fromByteCount: model.fileSizeBytes, countStyle: .file))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if model.id == session.activeModelID {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                            } else {
+                                Button("Use") {
                                     Task { await session.selectActiveModel(id: model.id) }
-                                },
-                                onDelete: {
-                                    Task { await session.deleteModel(id: model.id) }
                                 }
-                            )
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                Task { await session.deleteModel(id: model.id) }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
                     }
                 }
-            }
-            .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
 
-            // MARK: - Capabilities Section: Providers
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Providers", systemImage: "server.rack")
-                    .font(.headline)
-                StatusRow(title: "Active Provider", value: session.providerID)
-                StatusRow(title: "Provider Lifecycle", value: session.providerLifecycle)
-            }
-            .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                Button {
+                    Task { await session.downloadDevModel() }
+                } label: {
+                    Label(
+                        session.isDownloadingDevModel ? "Downloading…" : "Download Small Dev Model",
+                        systemImage: "arrow.down.circle"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .disabled(session.isDownloadingDevModel)
 
-            // MARK: - Capabilities Section: Skills
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Skills", systemImage: "puzzlepiece")
-                    .font(.headline)
-                StatusRow(title: "Registered Modules", value: "\(session.moduleIDs.count)")
+                if session.isDownloadingDevModel {
+                    ProgressView(value: session.devModelDownloadProgress)
+                }
             }
-            .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
 
-            // MARK: - Capabilities Section: Memory
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Memory", systemImage: "brain")
+            GlassPanel {
+                Label("Runtime", systemImage: "bolt.circle")
                     .font(.headline)
-                StatusRow(title: "Store Contract", value: "FileBackedMemoryStore (M4)")
-            }
-            .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
-
-            // MARK: - Capabilities Section: Runtime
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Runtime", systemImage: "cpu")
-                    .font(.headline)
-                StatusRow(title: "Lifecycle State", value: session.state.lifecycle.rawValue)
+                StatusRow(title: "Lifecycle", value: session.state.lifecycle.rawValue)
                 StatusRow(title: "Phase", value: session.state.phase.rawValue)
-                StatusRow(title: "Local Engine State", value: lifecycleStateTitle(session.activeEngineState))
+                StatusRow(title: "Provider", value: session.providerID)
+                StatusRow(title: "Provider state", value: session.providerLifecycle)
             }
-            .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
 
-            // MARK: - Capabilities Section: Storage & System
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Storage & System", systemImage: "externaldrive")
+            GlassPanel {
+                Label("System", systemImage: "iphone")
                     .font(.headline)
-                StatusRow(title: "Secrets", value: "Keychain contract (M0)")
                 StatusRow(title: "Target", value: "iPhone 12 Pro Max")
-                StatusRow(title: "UI", value: "SwiftUI, local-first")
-                Text("API keys will never be stored in SwiftData or UserDefaults.")
+                StatusRow(title: "UI", value: "Native SwiftUI")
+                StatusRow(title: "Secrets", value: "Keychain contract")
+                Text("Configuration remains contextual; execution stays in the Agent runtime.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
         }
         .fileImporter(
             isPresented: $isImportingGGUF,
@@ -217,15 +171,15 @@ private struct LifecycleStateBadge: View {
         Text(title)
             .font(.caption.bold())
             .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(color.opacity(0.2), in: Capsule())
+            .padding(.vertical, 4)
+            .background(color.opacity(0.14), in: Capsule())
             .foregroundStyle(color)
     }
 
     private var title: String {
         switch state {
         case .unloaded: return "UNLOADED"
-        case .loading(let p): return "LOADING (\(Int(p * 100))%)"
+        case .loading(let p): return "LOADING \(Int(p * 100))%"
         case .loaded: return "LOADED"
         case .unloading: return "UNLOADING"
         case .failed: return "FAILED"
@@ -240,83 +194,5 @@ private struct LifecycleStateBadge: View {
         case .unloading: return .orange
         case .failed: return .red
         }
-    }
-}
-
-private struct ModelRow: View {
-    let model: LocalModelDescriptor
-    let isActive: Bool
-    let onSelectActive: () -> Void
-    let onDelete: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack {
-                        Text(model.name)
-                            .font(.subheadline.bold())
-                        if isActive {
-                            Text("ACTIVE")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Color.green.opacity(0.2), in: Capsule())
-                                .foregroundStyle(.green)
-                        }
-                    }
-                    Text(formattedFileSize(model.fileSizeBytes))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                HStack(spacing: 8) {
-                    if !isActive {
-                        Button("Set Active", action: onSelectActive)
-                            .buttonStyle(.bordered)
-                            .font(.caption)
-                    }
-
-                    Button(role: .destructive, action: onDelete) {
-                        Image(systemName: "trash")
-                    }
-                    .buttonStyle(.bordered)
-                    .font(.caption)
-                }
-            }
-
-            if model.architecture != nil || model.contextWindow != nil {
-                HStack(spacing: 12) {
-                    if let arch = model.architecture {
-                        Text("Arch: \(arch)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    if let ctx = model.contextWindow {
-                        Text("Context: \(ctx) tokens")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .padding(10)
-        .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
-    }
-
-    private func formattedFileSize(_ bytes: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
-    }
-}
-
-private func lifecycleStateTitle(_ state: LocalModelLifecycleState) -> String {
-    switch state {
-    case .unloaded: return "unloaded"
-    case .loading(let p): return "loading (\(Int(p * 100))%)"
-    case .loaded: return "loaded"
-    case .unloading: return "unloading"
-    case .failed(let r): return "failed (\(r))"
     }
 }
