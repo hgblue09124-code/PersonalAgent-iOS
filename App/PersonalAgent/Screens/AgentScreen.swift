@@ -8,6 +8,7 @@ struct AgentScreen: View {
     @State private var showAgentPanel = false
     @State private var appeared = false
     @State private var showActivity = false
+    @State private var showCommandCenter = false
     @FocusState private var taskFocused: Bool
 
     var body: some View {
@@ -20,6 +21,7 @@ struct AgentScreen: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showCommandCenter) { CommandCenterSheet(task: $task, focused: $taskFocused).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
@@ -69,7 +71,7 @@ struct AgentScreen: View {
 
     private var quickActions: some View {
         HStack(spacing: 8) {
-            quickAction("New task", "plus") { taskFocused = true }
+            quickAction("New task", "plus") { showCommandCenter = true }
             quickAction("Activity", "waveform.path.ecg") { showActivity = true }
             quickAction("Agent", "sparkles") { showAgentPanel = true }
             Spacer()
@@ -117,7 +119,7 @@ struct AgentScreen: View {
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text("Tell me what you want to get done.")
+            Text(phaseSubtitle)
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
@@ -208,6 +210,13 @@ struct AgentScreen: View {
         .accessibilityLabel("Agent runtime controls")
     }
 
+    private var phaseSubtitle: String {
+        if session.executionProgress != nil { return "I’m thinking through it now." }
+        if session.executionResult != nil { return "That task is complete. What’s next?" }
+        if session.lastError != nil { return "Let’s adjust the request and try again." }
+        return "Tell me what you want to get done."
+    }
+
     private var greeting: String {
         switch session.state.lifecycle.rawValue.lowercased() {
         case "running": return "I’m working."
@@ -223,6 +232,87 @@ struct AgentScreen: View {
         taskFocused = false
         task = ""
         Task { await session.submitGoal(statement) }
+    }
+}
+
+
+private struct CommandCenterSheet: View {
+    @Binding var task: String
+    @FocusState.Binding var focused: Bool
+    @Environment(\.dismiss) private var dismiss
+
+    private let suggestions = [
+        ("Plan my next step", "sparkles"),
+        ("Summarize what changed", "text.alignleft"),
+        ("Check my local setup", "checkmark.shield"),
+        ("Help me get started", "arrow.right.circle")
+    ]
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("What should we do?")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                    Text("Start with a thought. The Agent will turn it into an action.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack(spacing: 10) {
+                    TextField("Tell Agent…", text: $task, axis: .vertical)
+                        .textFieldStyle(.plain)
+                        .font(.body)
+                        .focused($focused)
+                        .lineLimit(1...4)
+                    Button {
+                        focused = false
+                        dismiss()
+                    } label: {
+                        Image(systemName: "arrow.up")
+                            .font(.headline.bold())
+                            .foregroundStyle(.black)
+                            .frame(width: 42, height: 42)
+                            .background(.primary.opacity(0.92), in: Circle())
+                    }
+                    .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                .padding(9)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.primary.opacity(0.08), lineWidth: 1))
+
+                Text("TRY ONE")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    ForEach(suggestions, id: \.0) { suggestion in
+                        Button {
+                            task = suggestion.0
+                            focused = false
+                            dismiss()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: suggestion.1)
+                                Text(suggestion.0)
+                                    .font(.subheadline.weight(.semibold))
+                                    .multilineTextAlignment(.leading)
+                                Spacer(minLength: 0)
+                            }
+                            .padding(13)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                Spacer()
+            }
+            .padding(20)
+            .navigationTitle("New task")
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear { focused = true }
+        }
     }
 }
 
