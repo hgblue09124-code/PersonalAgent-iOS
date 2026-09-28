@@ -57,7 +57,6 @@ struct AgentScreen: View {
         .padding(.horizontal, 16)
         .padding(.top, 6)
         .padding(.bottom, 8)
-        .frame(maxWidth: 428, maxHeight: .infinity)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
