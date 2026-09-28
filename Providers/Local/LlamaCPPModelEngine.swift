@@ -428,8 +428,8 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             }
 
             var output = Array(repeating: CChar(0), count: Int(required) + 1)
-            let written = output.withUnsafeMutableBufferPointer { outputBuffer in
-                withUnsafeMutableBufferPointer(to: &chat) { buffer in
+            let written = chat.withUnsafeMutableBufferPointer { buffer in
+                output.withUnsafeMutableBufferPointer { outputBuffer in
                     llama_chat_apply_template(
                         template,
                         buffer.baseAddress,
