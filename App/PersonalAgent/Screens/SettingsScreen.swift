@@ -156,9 +156,13 @@ struct SettingsScreen: View {
                 .disabled(updateState.isChecking)
 
                 if case .available(let version, let url) = updateState {
-                    Text("Có bản mới: \(version)")
-                        .font(.subheadline.weight(.semibold))
-                    Button("Sao chép link bản cập nhật") {
+                    HStack(spacing: 5) {
+                        Text("New version available")
+                            .font(.subheadline.weight(.semibold))
+                        Text(version)
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    Button("Copy update link") {
                         UIPasteboard.general.string = url.absoluteString
                     }
                     .buttonStyle(.bordered)
@@ -166,8 +170,8 @@ struct SettingsScreen: View {
                     Text("Bạn đang dùng bản mới nhất.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                } else if case .failed(let message) = updateState {
-                    Text(message)
+                } else if case .failed = updateState {
+                    Text("Could not check for updates right now.")
                         .font(.caption)
                         .foregroundStyle(.red)
                 }
@@ -260,7 +264,7 @@ private enum UpdateState {
     case checking
     case current
     case available(String, URL)
-    case failed(String)
+    case failed
 
     var isChecking: Bool {
         if case .checking = self { return true }
@@ -283,7 +287,7 @@ private extension SettingsScreen {
     func checkForUpdate() async {
         updateState = .checking
         do {
-            var request = URLRequest(url: URL(string: "https://api.github.com/repos/hgblue09124-code/PersonalAgent-iOS/releases?per_page=20")!)
+            var request = URLRequest(url: URL(string: "https://api.github.com/repos/hgblue09124-code/PersonalAgent-iOS/releases?per_page=100")!)
             request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
@@ -300,7 +304,7 @@ private extension SettingsScreen {
                 ? .available(release.tag_name, release.html_url)
                 : .current
         } catch {
-            updateState = .failed("Không kiểm tra được cập nhật lúc này.")
+            updateState = .failed
         }
     }
 
