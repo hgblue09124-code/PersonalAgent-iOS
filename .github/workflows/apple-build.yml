@@ -51,6 +51,7 @@ jobs:
             -arch arm64 \
             -derivedDataPath DerivedData \
             MARKETING_VERSION="${APP_VERSION:-0.1.0}" \
+            PA_PRE_RELEASE_CODE="${GITHUB_SHA::12}" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
