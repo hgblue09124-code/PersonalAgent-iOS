@@ -43,20 +43,34 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         guard lifecycle == .unconfigured || lifecycle == .configured || lifecycle == .failed else {
             throw ProviderRuntimeError.invalidConfiguration
         }
+        let previousConfiguration = self.configuration
+        let previousLifecycle = lifecycle
         self.configuration = configuration
         lifecycle = .configured
-        try await emit(kind: .providerConfigured, payload: [
-            "providerID": configuration.providerID.rawValue,
-            "hasCredentialRef": configuration.credential == nil ? "false" : "true",
-        ])
+        do {
+            try await emit(kind: .providerConfigured, payload: [
+                "providerID": configuration.providerID.rawValue,
+                "hasCredentialRef": configuration.credential == nil ? "false" : "true",
+            ])
+        } catch {
+            self.configuration = previousConfiguration
+            lifecycle = previousLifecycle
+            throw error
+        }
     }
 
     public func ready() async throws {
         guard lifecycle == .configured else {
             throw ProviderRuntimeError.invalidConfiguration
         }
+        let previousLifecycle = lifecycle
         lifecycle = .ready
-        try await emit(kind: .providerReady, payload: ["providerID": provider.identity.id.rawValue])
+        do {
+            try await emit(kind: .providerReady, payload: ["providerID": provider.identity.id.rawValue])
+        } catch {
+            lifecycle = previousLifecycle
+            throw error
+        }
     }
 
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
