@@ -384,7 +384,9 @@ struct M6SemanticsTests {
     }
 }
 
-// MARK: - Test Helpers & Doubles\n\nprivate actor RecordingProvider: LLMProvider {
+// MARK: - Test Helpers & Doubles
+
+private actor RecordingProvider: LLMProvider {
     let identity = ProviderIdentity(
         id: ProviderID(rawValue: "recording"),
         displayName: "Recording",
