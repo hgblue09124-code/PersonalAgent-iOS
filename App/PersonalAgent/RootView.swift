@@ -4,7 +4,6 @@ import PAComposition
 struct RootView: View {
     @ObservedObject var session: KernelSession
     @State private var showWorkspace = false
-    @State private var workspaceExpanded = false
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -26,8 +25,6 @@ struct RootView: View {
         }
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
-                .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
-                .presentationDragIndicator(.visible)
         }
         .task { await session.refresh() }
     }
@@ -35,6 +32,7 @@ struct RootView: View {
 
 private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
+    @State private var workspaceExpanded = false
 
     var body: some View {
         NavigationStack {
@@ -97,6 +95,8 @@ private struct AgentWorkspaceSheet: View {
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     private func workspaceLink<Destination: View>(
