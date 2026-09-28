@@ -383,6 +383,38 @@ struct M6SemanticsTests {
         #expect(eval.reason == "2")
     }
 
+    @Test func test13_PreparedJournalReconcilesAlreadyAppliedRuntimeState() async throws {
+        let root = try await M8CompositionRoot()
+        let goal = Goal(statement: "recover committed state")
+        try await root.runtime.submit(goal: goal)
+        let run = try await root.lifecycleManager.createRun(goalID: goal.id)
+
+        // Simulate the crash window: authoritative state changed, but mutation
+        // evidence was not persisted and the journal is still .prepared.
+        try await root.runtime.complete(goalID: goal.id)
+        let journal = StateJournalEntry(
+            runID: run.runID,
+            goalID: goal.id,
+            targetStatus: .completed,
+            eventID: EventID(),
+            canonicalEventPayload: IdempotentEventLog.canonicalString(for: [
+                "goalID": goal.id.rawValue,
+                "targetStatus": GoalStatus.completed.rawValue,
+                "reason": "crash-window"
+            ]),
+            evidence: ["reason": "crash-window"],
+            status: .prepared
+        )
+        try await root.journalStore.saveEntry(journal)
+
+        try await root.recoveryEngine.recoverStateJournal(runID: run.runID, traceID: run.traceID)
+
+        #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
+        #expect(await root.runtime.hasAppliedMutation(token: journal.journalID))
+        let entries = try await root.journalStore.entries(for: run.runID)
+        #expect(entries.first(where: { $0.journalID == journal.journalID })?.status == .finalized)
+    }
+
     @Test func test12_StateUpdateMutationTokenIsIdempotent() async throws {
         let root = try await M6CompositionRoot()
         let goal = Goal(statement: "idempotent state update")
