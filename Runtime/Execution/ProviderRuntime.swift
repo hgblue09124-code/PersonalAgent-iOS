@@ -79,13 +79,13 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
             ])
             return response
         } catch let error as ProviderRuntimeError {
-            applyFailure(error)
+            await applyFailure(error)
             throw error
         } catch is CancellationError {
-            applyFailure(.cancelled)
+            await applyFailure(.cancelled)
             throw ProviderRuntimeError.cancelled
         } catch {
-            applyFailure(.unknown)
+            await applyFailure(.unknown)
             // Preserve the provider/engine error so callers can diagnose the real root cause.
             throw error
         }
@@ -124,7 +124,8 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
 
     public func cancel() {
         if lifecycle == .executing {
-            applyFailure(.cancelled)
+            lifecycle = .cancelled
+            try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) 
         }
     }
 
@@ -155,17 +156,16 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         lifecycle = .executing
     }
 
-    private func applyFailure(_ error: ProviderRuntimeError) {
+    private func applyFailure(_ error: ProviderRuntimeError) async {
         if error == .cancelled {
             lifecycle = .cancelled
             Task { try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) }
         } else {
             lifecycle = .failed
-            Task { try? await emit(kind: .providerFailed, payload: [
+            try? await emit(kind: .providerFailed, payload: [
                 "providerID": provider.identity.id.rawValue,
                 "error": error.description,
             ])
-            )
         }
     }
 
