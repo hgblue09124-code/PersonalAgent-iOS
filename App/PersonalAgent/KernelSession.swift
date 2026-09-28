@@ -201,7 +201,30 @@ final class KernelSession: ObservableObject {
 
     func importModel(from url: URL, name: String? = nil) async {
         await run {
-            _ = try await composition.localModelStorage.importModel(from: url, name: name)
+            guard url.pathExtension.lowercased() == "gguf" else {
+                throw KernelError.invalidStateUpdate("Only GGUF model files can be imported.")
+            }
+
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer {
+                if scoped {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            // Files/iCloud providers can invalidate the external URL after the
+            // picker/open-document callback returns. Copy while the security
+            // scope is alive, then let LocalModelStorage consume a stable local URL.
+            let temporaryURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("import-(UUID().uuidString)")
+                .appendingPathExtension("gguf")
+            try FileManager.default.copyItem(at: url, to: temporaryURL)
+            defer { try? FileManager.default.removeItem(at: temporaryURL) }
+
+            _ = try await composition.localModelStorage.importModel(
+                from: temporaryURL,
+                name: name
+            )
         }
     }
 
