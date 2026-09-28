@@ -31,6 +31,13 @@
 	<string>$(PA_PRE_RELEASE_CODE)</string>
 	<key>UIRequiresFullScreen</key>
 	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>UILaunchScreen</key>
+	<dict/>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
