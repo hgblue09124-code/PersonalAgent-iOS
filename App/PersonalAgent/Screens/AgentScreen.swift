@@ -48,24 +48,23 @@ struct AgentScreen: View {
         // vertical space distribute naturally instead of scaling the UI.
         VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 6)
+            Spacer(minLength: 18)
             quickActions
-            Spacer(minLength: 5)
+            Spacer(minLength: 12)
             hero
-            Spacer(minLength: 9)
+            Spacer(minLength: 22)
             composer
             status
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 6)
-        .padding(.bottom, 8)
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 18)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var topBar: some View {
         HStack {
             Text("PERSONAL AGENT")
-                .padding(.leading, 44)
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .tracking(1.6)
                 .foregroundStyle(.white.opacity(0.82))
@@ -88,8 +87,6 @@ struct AgentScreen: View {
         }
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 8)
-        .offset(x: taskFocused ? -12 : 0, y: taskFocused ? -8 : 0)
-        .animation(.spring(response: 0.42, dampingFraction: 0.82), value: taskFocused)
         .animation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.08), value: appeared)
     }
 
@@ -464,7 +461,7 @@ private struct AgentOrb: View {
                 .blur(radius: 2.5)
                 .offset(x: -10, y: -15)
         }
-        .frame(width: 68, height: 68)
+        .frame(width: 74, height: 74)
         .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
         .scaleEffect(pulse ? (isThinking ? 1.075 : 1.045) : 1)
         .rotationEffect(.degrees(isThinking ? (pulse ? 2 : -2) : 0))

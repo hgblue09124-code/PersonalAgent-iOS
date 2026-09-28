@@ -4,7 +4,7 @@ import PAComposition
 struct RootView: View {
     @ObservedObject var session: KernelSession
     @State private var showWorkspace = false
-    @AppStorage("app.language") private var appLanguage = "en"
+    @AppStorage("app.language") private var appLanguage = "vi"
 
     var body: some View {
         ZStack(alignment: .topLeading) {

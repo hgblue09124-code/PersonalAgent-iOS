@@ -169,7 +169,7 @@ struct SettingsScreen: View {
                     }
                     .buttonStyle(.bordered)
                 } else if case .current = updateState {
-                    Text("Bạn đang dùng bản mới nhất.")
+                    Text("You are using the latest version.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else if case .failed = updateState {
@@ -316,8 +316,13 @@ private extension SettingsScreen {
 
             let releases = try JSONDecoder().decode([LatestRelease].self, from: data)
             let currentPreReleaseCode = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CODE") as? String
+            let currentChannel = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CHANNEL") as? String
             let candidates = releases
                 .filter(\.prerelease)
+                .filter { release in
+                    guard let channel = currentChannel, !channel.isEmpty else { return true }
+                    return release.tag_name == channel
+                }
                 .compactMap { release -> (LatestRelease, String)? in
                     guard let code = release.preReleaseCode else { return nil }
                     return (release, code)

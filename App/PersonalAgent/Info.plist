@@ -25,6 +25,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>PA_PRE_RELEASE_CHANNEL</key>
+	<string>$(PA_PRE_RELEASE_CHANNEL)</string>
 	<key>PA_PRE_RELEASE_CODE</key>
 	<string>$(PA_PRE_RELEASE_CODE)</string>
 	<key>CFBundleDocumentTypes</key>
