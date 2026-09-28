@@ -7,6 +7,7 @@ struct AgentScreen: View {
     @State private var task = ""
     @State private var showAgentPanel = false
     @State private var appeared = false
+    @State private var showActivity = false
     @FocusState private var taskFocused: Bool
 
     var body: some View {
@@ -18,6 +19,7 @@ struct AgentScreen: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
@@ -36,7 +38,9 @@ struct AgentScreen: View {
     private var content: some View {
         VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 24)
+            Spacer(minLength: 18)
+            quickActions
+            Spacer(minLength: 12)
             hero
             Spacer(minLength: 22)
             composer
@@ -56,8 +60,45 @@ struct AgentScreen: View {
 
             Spacer()
 
-            lifecycleMenu
+            HStack(spacing: 8) {
+                Button { showActivity = true } label: { topButton("waveform.path.ecg") }
+                lifecycleMenu
+            }
         }
+    }
+
+    private var quickActions: some View {
+        HStack(spacing: 8) {
+            quickAction("New task", "plus") { taskFocused = true }
+            quickAction("Activity", "waveform.path.ecg") { showActivity = true }
+            quickAction("Agent", "sparkles") { showAgentPanel = true }
+            Spacer()
+        }
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 8)
+        .animation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.08), value: appeared)
+    }
+
+    private func quickAction(_ title: String, _ symbol: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.92))
+                .padding(.horizontal, 11)
+                .padding(.vertical, 8)
+                .background(.white.opacity(0.10), in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.14), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func topButton(_ symbol: String) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 13, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: 38, height: 38)
+            .background(.white.opacity(0.10), in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
     }
 
     private var hero: some View {
@@ -220,6 +261,58 @@ private struct AgentContextSheet: View {
         }
     }
 }
+private struct ActivitySheet: View {
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(spacing: 14) {
+                        AgentOrb(isActive: session.state.lifecycle.rawValue.lowercased() == "running", isThinking: session.executionProgress != nil)
+                            .frame(width: 52, height: 52)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Agent activity").font(.title2.bold())
+                            Text(session.state.lifecycle.rawValue.capitalized).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    }
+                    if let progress = session.executionProgress {
+                        card("WORKING NOW", progress.title, progress.detail, "sparkles")
+                    } else if let result = session.executionResult {
+                        card("COMPLETED", "Latest result", result, "checkmark.circle.fill")
+                    } else if let error = session.lastError {
+                        card("NEEDS ATTENTION", "Latest error", error, "exclamationmark.triangle.fill")
+                    } else {
+                        card("QUIET", "No active task", "The Agent is ready for your next instruction.", "moon.stars.fill")
+                    }
+                    card("WORKSPACE", "Contextual surfaces", "Models, providers, skills, memory and settings stay one tap away.", "circle.hexagongrid.fill")
+                }
+                .padding(20)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Activity")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func card(_ eyebrow: String, _ title: String, _ detail: String, _ symbol: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: symbol)
+                .font(.headline)
+                .frame(width: 36, height: 36)
+                .background(.thinMaterial, in: Circle())
+            VStack(alignment: .leading, spacing: 4) {
+                Text(eyebrow).font(.caption2.weight(.bold)).foregroundStyle(.secondary)
+                Text(title).font(.headline)
+                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+    }
+}
+
 private struct AgentOrb: View {
     let isActive: Bool
     let isThinking: Bool
