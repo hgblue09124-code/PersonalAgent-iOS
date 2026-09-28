@@ -386,61 +386,61 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         systemPrompt: String?,
         userPrompt: String
     ) throws -> String {
-        let messages: [llama_chat_message]
+        func render(_ messages: [llama_chat_message]) throws -> String {
+            guard let template = llama_model_chat_template(model, nil) else {
+                return userPrompt
+            }
+
+            var chat = messages
+            let required = withUnsafeMutableBufferPointer(to: &chat) { buffer in
+                llama_chat_apply_template(
+                    template,
+                    buffer.baseAddress,
+                    buffer.count,
+                    true,
+                    nil,
+                    0
+                )
+            }
+            guard required >= 0 else {
+                throw LlamaCPPEngineError.tokenizationFailed
+            }
+
+            var output = Array(repeating: CChar(0), count: Int(required) + 1)
+            let written = output.withUnsafeMutableBufferPointer { outputBuffer in
+                withUnsafeMutableBufferPointer(to: &chat) { buffer in
+                    llama_chat_apply_template(
+                        template,
+                        buffer.baseAddress,
+                        buffer.count,
+                        true,
+                        outputBuffer.baseAddress,
+                        Int32(output.count)
+                    )
+                }
+            }
+            guard written >= 0, written <= output.count else {
+                throw LlamaCPPEngineError.tokenizationFailed
+            }
+            return String(decoding: output.prefix(Int(written)).map(UInt8.init(bitPattern:)), as: UTF8.self)
+        }
+
         if let systemPrompt, !systemPrompt.isEmpty {
-            messages = try systemPrompt.withCString { systemPtr in
+            return try systemPrompt.withCString { systemPtr in
                 try userPrompt.withCString { userPtr in
-                    try applyChatTemplate(model: model, messages: [
+                    try render([
                         llama_chat_message(role: "system", content: systemPtr),
                         llama_chat_message(role: "user", content: userPtr),
                     ])
                 }
             }
-        } else {
-            messages = try userPrompt.withCString { userPtr in
-                try applyChatTemplate(model: model, messages: [
-                    llama_chat_message(role: "user", content: userPtr),
-                ])
-            }
         }
 
-        return String(cString: UnsafePointer(messages[0].content))
-    }
-
-    private func applyChatTemplate(
-        model: OpaquePointer,
-        messages: [llama_chat_message]
-    ) throws -> [llama_chat_message] {
-        guard let template = llama_model_chat_template(model, nil) else {
-            return messages
+        return try userPrompt.withCString { userPtr in
+            try render([
+                llama_chat_message(role: "user", content: userPtr),
+            ])
         }
-        var firstPassMessages = messages
-        let required = withUnsafeMutableBufferPointer(to: &firstPassMessages) { buffer in
-            llama_chat_apply_template(template, buffer.baseAddress, buffer.count, true, nil, 0)
-        }
-        guard required >= 0 else {
-            throw LlamaCPPEngineError.tokenizationFailed
-        }
-
-        var output = Array(repeating: CChar(0), count: Int(required) + 1)
-        var secondPassMessages = messages
-        let written = output.withUnsafeMutableBufferPointer { outputBuffer in
-            withUnsafeMutableBufferPointer(to: &secondPassMessages) { messageBuffer in
-                llama_chat_apply_template(
-                    template,
-                    messageBuffer.baseAddress,
-                    messageBuffer.count,
-                    true,
-                    outputBuffer.baseAddress,
-                    Int32(output.count)
-                )
-            }
-        }
-        guard written >= 0, written <= output.count else {
-            throw LlamaCPPEngineError.tokenizationFailed
-        }
-        output[Int(written)] = 0
-        return [llama_chat_message(role: "formatted", content: UnsafePointer(output.withUnsafeBufferPointer { $0.baseAddress! }))]
     }
     #endif
 
