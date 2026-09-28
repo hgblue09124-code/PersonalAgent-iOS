@@ -214,10 +214,16 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     throw LlamaCPPEngineError.memoryPressureCritical
                 }
 
-                // 1. Tokenize prompt
-                // This native path does not apply the model's chat template.
-                // Feeding a raw system prompt makes some GGUF models echo the
-                // instruction instead of answering the user's request.
+                // Each Agent request is an independent turn.
+                // The Agent currently does not persist a conversational KV history,
+                // so reusing the previous context would make the next request attend
+                // to stale tokens and can produce repeated or nonsensical output.
+                llama_memory_clear(llama_get_memory(contextPtr), true)
+                llama_sampler_reset(samplerPtr)
+
+                // Tokenize only the already-composed request prompt.
+                // Chat-template composition belongs at the provider boundary;
+                // this native path must never leak the previous turn into it.
                 let promptText = request.prompt
 
                 guard let vocabPtr = llama_model_get_vocab(modelPtr) else {
