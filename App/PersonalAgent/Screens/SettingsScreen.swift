@@ -2,6 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
 import PAComposition
+import UIKit
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
@@ -158,8 +159,8 @@ struct SettingsScreen: View {
                 if case .available(let version, let url) = updateState {
                     Text("Có bản mới: \(version)")
                         .font(.subheadline.weight(.semibold))
-                    Button("Mở trang cập nhật") {
-                        openURL(url)
+                    Button("Sao chép link bản cập nhật") {
+                        UIPasteboard.general.string = url.absoluteString
                     }
                     .buttonStyle(.bordered)
                 } else if case .current = updateState {
@@ -275,19 +276,25 @@ private enum UpdateState {
 private struct LatestRelease: Decodable {
     let tag_name: String
     let html_url: URL
+    let prerelease: Bool
+    let created_at: String
 }
 
 private extension SettingsScreen {
     func checkForUpdate() async {
         updateState = .checking
         do {
-            var request = URLRequest(url: URL(string: "https://api.github.com/repos/hgblue09124-code/PersonalAgent-iOS/releases/latest")!)
+            var request = URLRequest(url: URL(string: "https://api.github.com/repos/hgblue09124-code/PersonalAgent-iOS/releases?per_page=20")!)
             request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
                 throw URLError(.badServerResponse)
             }
-            let release = try JSONDecoder().decode(LatestRelease.self, from: data)
+            let releases = try JSONDecoder().decode([LatestRelease].self, from: data)
+            guard let release = releases.filter(\.prerelease).sorted(by: { $0.created_at > $1.created_at }).first else {
+                updateState = .current
+                return
+            }
             let remote = release.tag_name.replacingOccurrences(of: "v", with: "")
             let local = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "0.0.0"
             updateState = compareVersions(remote, local) == .orderedDescending
