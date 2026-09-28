@@ -278,7 +278,12 @@ private enum UpdateState {
     }
 }
 
-private struct ReleaseAsset: Decodable {\n    let name: String\n    let browser_download_url: URL\n}\n\nprivate struct LatestRelease: Decodable {
+private struct ReleaseAsset: Decodable {
+    let name: String
+    let browser_download_url: URL
+}
+
+private struct LatestRelease: Decodable {
     let tag_name: String
     let html_url: URL
     let assets: [ReleaseAsset]
