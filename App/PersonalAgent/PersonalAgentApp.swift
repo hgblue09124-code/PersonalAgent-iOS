@@ -9,15 +9,8 @@ struct PersonalAgentApp: App {
     @AppStorage("app.language") private var appLanguage = "vi"
 
     var body: some Scene {
-        if #available(iOS 26.0, *) {
-            WindowGroup {
-                rootContent
-            }
-            .windowManagerRole(.principal)
-        } else {
-            WindowGroup {
-                rootContent
-            }
+        WindowGroup {
+            rootContent
         }
     }
 
