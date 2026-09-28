@@ -197,6 +197,8 @@ struct SettingsScreen: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
         .fileImporter(
             isPresented: $isImportingGGUF,
             allowedContentTypes: [
@@ -276,9 +278,10 @@ private enum UpdateState {
     }
 }
 
-private struct LatestRelease: Decodable {
+private struct ReleaseAsset: Decodable {\n    let name: String\n    let browser_download_url: URL\n}\n\nprivate struct LatestRelease: Decodable {
     let tag_name: String
     let html_url: URL
+    let assets: [ReleaseAsset]
     let prerelease: Bool
     let created_at: String
 }
@@ -301,7 +304,7 @@ private extension SettingsScreen {
             let remote = release.tag_name.replacingOccurrences(of: "v", with: "")
             let local = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "0.0.0"
             updateState = compareVersions(remote, local) == .orderedDescending
-                ? .available(release.tag_name, release.html_url)
+                ? .available(release.tag_name, release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url ?? release.html_url)
                 : .current
         } catch {
             updateState = .failed
