@@ -33,6 +33,7 @@ struct PersonalAgentApp: App {
             }
             .dynamicTypeSize(.xSmall ... .accessibility3)
             .environment(\.locale, Locale(identifier: appLanguage))
+            .id(appLanguage)
         }
     }
 
