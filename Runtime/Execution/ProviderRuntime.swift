@@ -32,6 +32,10 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
 
     public var capabilities: ProviderCapabilities { provider.capabilities }
 
+    public var health: ProviderHealth {
+        get async { await provider.health }
+    }
+
     public func configure(_ configuration: ProviderConfiguration) throws {
         guard configuration.providerID == provider.identity.id else {
             throw ProviderRuntimeError.invalidConfiguration
