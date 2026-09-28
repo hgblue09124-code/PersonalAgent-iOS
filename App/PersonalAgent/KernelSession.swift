@@ -125,6 +125,13 @@ final class KernelSession: ObservableObject {
                 self.presentedResult = result
                 self.executionProgress = nil
             } catch is CancellationError {
+                // Cancellation is not success. Clear the active goal so Stop cannot
+                // strand it and block the next Start/submit cycle.
+                if let goalID,
+                   let status = await self.composition.runtime.goal(id: goalID)?.status,
+                   status == .active || status == .proposed {
+                    try? await self.composition.runtime.abort(goalID: goalID)
+                }
                 self.executionProgress = nil
             } catch {
                 // Provider/model failure must not strand an active goal and block the next turn.
