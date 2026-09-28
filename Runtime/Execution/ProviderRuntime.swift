@@ -36,7 +36,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         get async { await provider.health }
     }
 
-    public func configure(_ configuration: ProviderConfiguration) throws {
+    public func configure(_ configuration: ProviderConfiguration) async throws {
         guard configuration.providerID == provider.identity.id else {
             throw ProviderRuntimeError.invalidConfiguration
         }
@@ -96,7 +96,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
             let work = Task {
                 do {
                     try await self.prepareExecution()
-                    await self.emitInvoked(model: request.model, mode: "stream")
+                    try await self.emitInvoked(model: request.model, mode: "stream")
                     let bound = await self.currentProvider()
                     for try await event in bound.stream(request) {
                         try Task.checkCancellation()
@@ -130,8 +130,8 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
 
     private func currentProvider() -> any LLMProvider { provider }
 
-    private func emitInvoked(model: ModelID, mode: String) {
-        emit(kind: .providerInvoked, payload: [
+    private func emitInvoked(model: ModelID, mode: String) async throws {
+        try await emit(kind: .providerInvoked, payload: [
             "providerID": provider.identity.id.rawValue,
             "model": model.rawValue,
             "mode": mode,
@@ -165,6 +165,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
                 "providerID": provider.identity.id.rawValue,
                 "error": error.description,
             ])
+            )
         }
     }
 
@@ -206,9 +207,7 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
             kind: kind,
             payload: sanitized
         )
-        Task {
-            try? await eventLog.append(event)
-        }
+        try await eventLog.append(event)
     }
 }
 
