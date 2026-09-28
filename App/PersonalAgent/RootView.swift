@@ -4,6 +4,7 @@ import PAComposition
 struct RootView: View {
     @ObservedObject var session: KernelSession
     @State private var showWorkspace = false
+    @State private var workspaceExpanded = false
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -25,7 +26,7 @@ struct RootView: View {
         }
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
-                .presentationDetents([.medium, .large])
+                .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
                 .presentationDragIndicator(.visible)
         }
         .task { await session.refresh() }
@@ -38,6 +39,26 @@ private struct AgentWorkspaceSheet: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: "circle.hexagongrid.fill")
+                            .font(.title3.bold())
+                            .frame(width: 40, height: 40)
+                            .background(.thinMaterial, in: Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Living workspace").font(.headline)
+                            Text("Tap a surface to expand it.").font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { workspaceExpanded.toggle() }
+                        } label: {
+                            Image(systemName: workspaceExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                                .font(.caption.bold()).frame(width: 34, height: 34)
+                                .background(.secondary.opacity(0.10), in: Circle())
+                        }.buttonStyle(.plain)
+                    }.padding(.vertical, 4)
+                }
                 Section {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Agent workspace")
@@ -71,6 +92,8 @@ private struct AgentWorkspaceSheet: View {
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }
