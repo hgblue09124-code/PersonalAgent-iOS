@@ -9,40 +9,52 @@ struct PersonalAgentApp: App {
     @AppStorage("app.language") private var appLanguage = "vi"
 
     var body: some Scene {
-        WindowGroup {
-            Group {
-                if let session {
-                    RootView(session: session)
-                } else if let initializationError {
-                    VStack(spacing: 12) {
-                        Text("Initialization failed: \(initializationError)")
-                            .multilineTextAlignment(.center)
-                        Button("Retry") {
-                            Task {
-                                await initialize()
-                            }
-                        }
-                    }
-                    .padding()
-                } else {
-                    ProgressView("Starting kernel")
-                        .task {
+        if #available(iOS 26.0, *) {
+            WindowGroup {
+                rootContent
+            }
+            .windowManagerRole(.principal)
+        } else {
+            WindowGroup {
+                rootContent
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var rootContent: some View {
+        Group {
+            if let session {
+                RootView(session: session)
+            } else if let initializationError {
+                VStack(spacing: 12) {
+                    Text("Initialization failed: \(initializationError)")
+                        .multilineTextAlignment(.center)
+                    Button("Retry") {
+                        Task {
                             await initialize()
                         }
-                }
-            }
-            .dynamicTypeSize(.xSmall ... .accessibility3)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea(.all)
-            .environment(\.locale, Locale(identifier: appLanguage))
-            .id(appLanguage)
-            .onAppear {
-                if !UserDefaults.standard.bool(forKey: "app.language.vi-migrated-v2") {
-                    if UserDefaults.standard.object(forKey: "app.language") == nil || appLanguage == "en" {
-                        appLanguage = "vi"
                     }
-                    UserDefaults.standard.set(true, forKey: "app.language.vi-migrated-v2")
                 }
+                .padding()
+            } else {
+                ProgressView("Starting kernel")
+                    .task {
+                        await initialize()
+                    }
+            }
+        }
+        .dynamicTypeSize(.xSmall ... .accessibility3)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
+        .onAppear {
+            if !UserDefaults.standard.bool(forKey: "app.language.vi-migrated-v2") {
+                if UserDefaults.standard.object(forKey: "app.language") == nil || appLanguage == "en" {
+                    appLanguage = "vi"
+                }
+                UserDefaults.standard.set(true, forKey: "app.language.vi-migrated-v2")
             }
         }
     }
