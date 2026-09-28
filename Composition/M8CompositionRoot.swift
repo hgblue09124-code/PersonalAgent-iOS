@@ -403,11 +403,12 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
         self.session = DefaultAgentSession(runtime: agentRuntime, logger: logger)
 
+        let cognitiveReasoner = LLMReasoner(provider: dynamicProvider)
         self.orchestrator = M6Orchestrator(
             runtime: agentRuntime,
             eventLog: idempotentLog,
             logger: logger,
-            reasoner: LLMReasoner(provider: dynamicProvider),
+            reasoner: cognitiveReasoner,
             policy: policy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime
@@ -441,7 +442,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             journalStore: jStore,
             executionBoundary: boundary,
             eventLog: idempotentLog,
-            logger: logger
+            logger: logger,
+            reasoner: cognitiveReasoner
         )
 
         self.recoveryEngine = RunRecoveryEngine(
