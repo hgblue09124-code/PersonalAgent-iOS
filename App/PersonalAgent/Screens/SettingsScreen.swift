@@ -301,11 +301,9 @@ private extension SettingsScreen {
                 updateState = .current
                 return
             }
-            let remote = release.tag_name.replacingOccurrences(of: "v", with: "")
-            let local = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "0.0.0"
-            updateState = compareVersions(remote, local) == .orderedDescending
-                ? .available(release.tag_name, release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url ?? release.html_url)
-                : .current
+            let downloadURL = release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url
+                ?? release.html_url
+            updateState = .available(release.tag_name, downloadURL)
         } catch {
             updateState = .failed
         }
