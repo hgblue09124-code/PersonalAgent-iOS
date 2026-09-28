@@ -10,6 +10,7 @@ struct SettingsScreen: View {
     @State private var lastImportError: String?
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
+    @State private var copiedUpdateLink = false
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -162,8 +163,9 @@ struct SettingsScreen: View {
                         Text(version)
                             .font(.subheadline.weight(.semibold))
                     }
-                    Button("Copy update link") {
+                    Button(copiedUpdateLink ? "Copied" : "Copy update link") {
                         UIPasteboard.general.string = url.absoluteString
+                        copiedUpdateLink = true
                     }
                     .buttonStyle(.bordered)
                 } else if case .current = updateState {
@@ -286,9 +288,22 @@ private struct ReleaseAsset: Decodable {
 private struct LatestRelease: Decodable {
     let tag_name: String
     let html_url: URL
+    let name: String
     let assets: [ReleaseAsset]
     let prerelease: Bool
     let created_at: String
+
+    var version: String? {
+        let source = "\(tag_name) \(name)"
+        for part in source.split(separator: " ") {
+            let value = part.trimmingCharacters(in: CharacterSet(charactersIn: "v"))
+            let pieces = value.split(separator: ".")
+            if pieces.count == 3 && pieces.allSatisfy({ Int($0) != nil }) {
+                return value
+            }
+        }
+        return nil
+    }
 }
 
 private extension SettingsScreen {
@@ -302,13 +317,29 @@ private extension SettingsScreen {
                 throw URLError(.badServerResponse)
             }
             let releases = try JSONDecoder().decode([LatestRelease].self, from: data)
-            guard let release = releases.filter(\.prerelease).sorted(by: { $0.created_at > $1.created_at }).first else {
+            let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+            let candidates = releases
+                .filter(\.prerelease)
+                .compactMap { release -> (LatestRelease, String)? in
+                    guard let version = release.version else { return nil }
+                    return (release, version)
+                }
+                .sorted(by: { $0.0.created_at > $1.0.created_at })
+
+            guard let (release, releaseVersion) = candidates.first else {
                 updateState = .current
                 return
             }
+
+            guard compareVersions(currentVersion, releaseVersion) == .orderedAscending else {
+                updateState = .current
+                return
+            }
+
             let downloadURL = release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url
                 ?? release.html_url
-            updateState = .available(release.tag_name, downloadURL)
+            copiedUpdateLink = false
+            updateState = .available(releaseVersion, downloadURL)
         } catch {
             updateState = .failed
         }
