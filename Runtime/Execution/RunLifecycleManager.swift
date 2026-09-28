@@ -96,6 +96,18 @@ public actor RunLifecycleManager {
         return record
     }
 
+    /// Canonical production entry point. Every app execution must acquire a
+    /// durable run identity and capability lease before entering the execution cycle.
+    public func run(
+        goalID: GoalID,
+        sessionID: SessionID = SessionID(),
+        rawInput: String? = nil
+    ) async throws -> Evaluation {
+        let record = try await createRun(goalID: goalID, sessionID: sessionID)
+        let lease = CapabilityLease(runID: record.runID)
+        return try await runCycle(runID: record.runID, lease: lease, rawInput: rawInput)
+    }
+
     public func runCycle(
         runID: RunID,
         lease: CapabilityLease,
