@@ -381,6 +381,7 @@ struct M6SemanticsTests {
         let eval = try await orchestrator.run(goalID: goal.id)
         #expect(eval.disposition == .complete)
         #expect(eval.reason == "2")
+    }
 
     @Test func test11_RepeatedGoalsRunOnSameRuntime() async throws {
         let root = try await M6CompositionRoot()
@@ -406,7 +407,6 @@ struct M6SemanticsTests {
         #expect(secondEval.reason == "2")
         #expect(await root.runtime.currentState().activeGoalID == nil)
         #expect(await root.runtime.invariantsHold())
-    }
     }
 }
 
