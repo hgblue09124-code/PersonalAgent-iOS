@@ -112,16 +112,16 @@ final class KernelSession: ObservableObject {
                 }
                 let goalID = try await self.composition.session.submitInput(statement)
                 await self.refresh()
-                _ = try await self.composition.orchestrator.run(goalID: goalID) { [weak self] progress in
-                    Task { @MainActor in
-                        self?.executionProgress = progress
-                        if case .completed(let result) = progress {
-                            self?.executionResult = result
-                            self?.presentedResult = result
-                            self?.executionProgress = nil
-                        }
-                    }
+                let evaluation = try await self.composition.orchestrator.run(goalID: goalID) { [weak self] progress in
+                    self?.executionProgress = progress
                 }
+                let result = evaluation.reason.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !result.isEmpty else {
+                    throw KernelError.invalidStateUpdate("Agent completed without a result")
+                }
+                self.executionResult = result
+                self.presentedResult = result
+                self.executionProgress = nil
             }
         }
         executionTask = task
