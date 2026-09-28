@@ -20,7 +20,9 @@ struct AgentScreen: View {
                     .offset(y: appeared ? 0 : 12)
             }
         }
+        // Keep the Agent canvas full-screen while the keyboard is presented or dragged.
         .ignoresSafeArea(.all)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
