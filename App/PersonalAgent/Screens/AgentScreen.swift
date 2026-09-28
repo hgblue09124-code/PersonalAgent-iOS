@@ -20,6 +20,7 @@ struct AgentScreen: View {
                     .offset(y: appeared ? 0 : 12)
             }
         }
+        .ignoresSafeArea(.all)
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
@@ -93,7 +94,7 @@ struct AgentScreen: View {
 
     private func quickAction(_ title: String, _ symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Label(title, systemImage: symbol)
+            Label(LocalizedStringKey(title), systemImage: symbol)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.92))
                 .padding(.horizontal, 11)
@@ -124,13 +125,13 @@ struct AgentScreen: View {
             }
             .buttonStyle(.plain)
 
-            Text(greeting)
+            Text(LocalizedStringKey(greeting))
                 .font(.system(size: 31, weight: .black, design: .rounded))
                 .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text(phaseSubtitle)
+            Text(LocalizedStringKey(phaseSubtitle))
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
@@ -189,7 +190,7 @@ struct AgentScreen: View {
             Image(systemName: symbol)
                 .font(.headline)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.subheadline.bold())
+                Text(LocalizedStringKey(title)).font(.subheadline.bold())
                 ScrollView(.vertical, showsIndicators: true) {
                     Text(detail)
                         .font(.caption)
@@ -309,7 +310,7 @@ private struct CommandCenterSheet: View {
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: suggestion.1)
-                                Text(suggestion.0)
+                                Text(LocalizedStringKey(suggestion.0))
                                     .font(.subheadline.weight(.semibold))
                                     .multilineTextAlignment(.leading)
                                 Spacer(minLength: 0)
@@ -369,7 +370,7 @@ private struct AgentContextSheet: View {
             Image(systemName: symbol)
                 .frame(width: 28, height: 28)
                 .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            Text(title).foregroundStyle(.secondary)
+            Text(LocalizedStringKey(title)).foregroundStyle(.secondary)
             Spacer()
             Text(value).fontWeight(.semibold)
         }
