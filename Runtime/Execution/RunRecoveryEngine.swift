@@ -160,9 +160,16 @@ public actor RunRecoveryEngine {
                     entry.updatedAt = Date()
                     try await journalStore.saveEntry(entry)
                 } else {
-                    // A crash can occur after AgentRuntime mutates authoritative state
-                    // but before mutation evidence is durably recorded. Reconcile the
-                    // journal target against actual runtime state before aborting.
+                    // Without StateUpdate evidence there is no safe basis to replay or
+                    // infer an authoritative mutation. Fail closed and abort the journal.
+                    // Evidence-bearing entries may cross the crash window and be reconciled
+                    // against AgentRuntime state without executing the transition twice.
+                    guard !entry.evidence.isEmpty else {
+                        entry.status = .aborted
+                        entry.updatedAt = Date()
+                        try await journalStore.saveEntry(entry)
+                        continue
+                    }
                     let update = StateUpdate(
                         goalID: entry.goalID,
                         targetStatus: entry.targetStatus,
