@@ -33,6 +33,7 @@ struct RootView: View {
 private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
     @State private var workspaceExpanded = false
+    @State private var appeared = false
     @State private var workspaceExpanded = false
 
     var body: some View {
@@ -93,6 +94,10 @@ private struct AgentWorkspaceSheet: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 10)
+            .animation(.spring(response: 0.55, dampingFraction: 0.84), value: appeared)
+            .onAppear { appeared = true }
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -120,6 +125,7 @@ private struct AgentWorkspaceSheet: View {
                 }
             }
             .padding(.vertical, 3)
+            .contentShape(Rectangle())
         }
     }
 }
