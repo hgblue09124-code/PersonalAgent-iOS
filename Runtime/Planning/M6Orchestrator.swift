@@ -391,8 +391,14 @@ public actor M6Orchestrator {
             }
 
             // 8. Evaluation
-            let evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
+            var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
             try Task.checkCancellation()
+            // Answer-only proposals have no tool target. Execution success is not the answer.
+            if proposals.allSatisfy({ $0.toolID == nil }) {
+                let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !answer.isEmpty else { throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output") }
+                evaluation = Evaluation(goalID: evaluation.goalID, disposition: evaluation.disposition, reason: answer)
+            }
             try await emit(
                 traceID: traceID,
                 kind: .evaluationCompleted,

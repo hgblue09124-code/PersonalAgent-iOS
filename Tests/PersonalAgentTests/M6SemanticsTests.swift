@@ -351,9 +351,23 @@ struct M6SemanticsTests {
         #expect(obsEvent?.payload["succeeded"] == "false")
         #expect(obsEvent?.payload["summary"]?.contains("Execution target unavailable") == true)
     }
+    @Test func test9_AnswerOnlyProjectsReasoningResult() async throws {
+        let root = try await M6CompositionRoot()
+        let goal = Goal(statement: "1 + 1 = ?")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(runtime: root.runtime, eventLog: root.eventLog, reasoner: FixedReasoner(answer: "2"))
+        let eval = try await orchestrator.run(goalID: goal.id)
+        #expect(eval.disposition == .complete)
+        #expect(eval.reason == "2")
+    }
 }
 
 // MARK: - Test Helpers & Doubles
+
+private struct FixedReasoner: Reasoning {
+    let answer: String
+    func reason(context: ContextBundle) async throws -> ReasoningResult { ReasoningResult(summary: answer, providerID: nil, modelID: nil) }
+}
 
 private struct DirectProposer: Executing {
     let toolID: ToolID
