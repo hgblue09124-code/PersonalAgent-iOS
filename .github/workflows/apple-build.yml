@@ -123,13 +123,25 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
           TITLE="PersonalAgent ${TAG}"
-          gh release create "$TAG" PersonalAgent-unsigned.ipa \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "$TITLE" \
-            --prerelease \
-            --target "$GITHUB_SHA" \
-            --latest=false \
-            --notes "Native unsigned IPA for ${TAG}. Download the .ipa asset below; do not use GitHub's Source code ZIP."
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TITLE" \
+              --target "$GITHUB_SHA" \
+              --prerelease \
+              --latest=false
+            gh release upload "$TAG" PersonalAgent-unsigned.ipa \
+              --repo "$GITHUB_REPOSITORY" \
+              --clobber
+          else
+            gh release create "$TAG" PersonalAgent-unsigned.ipa \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TITLE" \
+              --prerelease \
+              --target "$GITHUB_SHA" \
+              --latest=false \
+              --notes "Native unsigned IPA for ${TAG}. Download the .ipa asset below; do not use GitHub's Source code ZIP."
+          fi
 
       # PR workflows also keep the verified IPA as an Actions artifact.
       # Same-repository PRs additionally receive a direct .ipa release asset.
