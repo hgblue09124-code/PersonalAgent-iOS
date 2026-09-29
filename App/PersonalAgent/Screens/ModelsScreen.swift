@@ -113,14 +113,19 @@ struct ModelsScreen: View {
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [UTType(filenameExtension: "gguf") ?? .data],
+            allowedContentTypes: [.gguf],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
                 guard let url = urls.first else { return }
                 errorMessage = nil
-                Task { await session.importModel(from: url) }
+                Task {
+                    let securityScoped = url.startAccessingSecurityScopedResource()
+                    defer { if securityScoped { url.stopAccessingSecurityScopedResource() } }
+                    await session.importModel(from: url)
+                    errorMessage = session.lastError
+                }
             case .failure(let error):
                 errorMessage = error.localizedDescription
             }
@@ -136,4 +141,8 @@ struct ModelsScreen: View {
         case .failed(let reason): return "FAILED · \(reason)"
         }
     }
+}
+
+private extension UTType {
+    static let gguf = UTType(importedAs: "org.ggml.gguf", conformingTo: .data)
 }

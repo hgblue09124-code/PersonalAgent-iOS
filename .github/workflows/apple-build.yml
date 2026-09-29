@@ -51,6 +51,8 @@ jobs:
             -arch arm64 \
             -derivedDataPath DerivedData \
             MARKETING_VERSION="${APP_VERSION:-0.1.0}" \
+            PA_PRE_RELEASE_CHANNEL="${{ github.event_name == 'pull_request' && format('dev-pr-{0}', github.event.pull_request.number) || '' }}" \
+            PA_PRE_RELEASE_CODE="${GITHUB_SHA::12}" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -82,17 +84,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="dev-pr-${{ github.event.pull_request.number }}-${GITHUB_SHA::12}"
+          TAG="dev-pr-${{ github.event.pull_request.number }}"
+          TITLE="PR #${{ github.event.pull_request.number }} · Dev IPA · ${GITHUB_SHA::12}"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --target "$GITHUB_SHA" --prerelease --latest=false
             gh release upload "$TAG" PersonalAgent-unsigned.ipa --repo "$GITHUB_REPOSITORY" --clobber
           else
             gh release create "$TAG" PersonalAgent-unsigned.ipa \
               --repo "$GITHUB_REPOSITORY" \
-              --title "PR #${{ github.event.pull_request.number }} · Dev IPA · ${GITHUB_SHA::12}" \
+              --title "$TITLE" \
               --prerelease \
               --target "$GITHUB_SHA" \
               --latest=false \
-              --notes "Unsigned development IPA for PR #${{ github.event.pull_request.number }} at $GITHUB_SHA. Verify on physical device before merge."
+              --notes "Unsigned development IPA for PR #${{ github.event.pull_request.number }}. The asset is replaced on every successful build."
           fi
 
       - name: Publish branch Pre-release

@@ -2,11 +2,15 @@ import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
 import PAComposition
+import UIKit
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImportingGGUF = false
     @State private var lastImportError: String?
+    @AppStorage("app.language") private var appLanguage = "vi"
+    @State private var updateState: UpdateState = .idle
+    @State private var copiedUpdateLink = false
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -121,6 +125,60 @@ struct SettingsScreen: View {
                 }
             }
 
+
+
+            GlassPanel {
+                Label("Language", systemImage: "globe")
+                    .font(.headline)
+
+                Picker("Language", selection: $appLanguage) {
+                    Text("English").tag("en")
+                    Text("Tiếng Việt").tag("vi")
+                }
+                .pickerStyle(.segmented)
+            }
+
+            GlassPanel {
+                HStack {
+                    Label("App update", systemImage: "arrow.down.circle")
+                        .font(.headline)
+                    Spacer()
+                    Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1.0")
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                }
+
+                Button {
+                    Task { await checkForUpdate() }
+                } label: {
+                    Label(updateState.buttonTitleKey, systemImage: updateState.isChecking ? "arrow.triangle.2.circlepath" : "arrow.down.circle")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(updateState.isChecking)
+
+                if case .available(let version, let url) = updateState {
+                    HStack(spacing: 5) {
+                        Text("New version available")
+                            .font(.subheadline.weight(.semibold))
+                        Text(version)
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    Button(copiedUpdateLink ? "Copied" : "Copy update link") {
+                        UIPasteboard.general.string = url.absoluteString
+                        copiedUpdateLink = true
+                    }
+                    .buttonStyle(.bordered)
+                } else if case .current = updateState {
+                    Text("You are using the latest version.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if case .failed = updateState {
+                    Text("Could not check for updates right now.")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             GlassPanel {
                 Label("Runtime", systemImage: "bolt.circle")
                     .font(.headline)
@@ -141,21 +199,28 @@ struct SettingsScreen: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
         .fileImporter(
             isPresented: $isImportingGGUF,
             allowedContentTypes: [
                 UTType(filenameExtension: "gguf") ?? .data,
-                .data,
-                .item
             ],
             allowsMultipleSelection: false
         ) { result in
             switch result {
             case .success(let urls):
                 guard let selectedURL = urls.first else { return }
+                guard selectedURL.pathExtension.lowercased() == "gguf" else {
+                    lastImportError = "Chỉ hỗ trợ tệp GGUF."
+                    return
+                }
                 Task {
                     lastImportError = nil
+                    let scoped = selectedURL.startAccessingSecurityScopedResource()
+                    defer { if scoped { selectedURL.stopAccessingSecurityScopedResource() } }
                     await session.importModel(from: selectedURL)
+                    lastImportError = session.lastError
                 }
             case .failure(let error):
                 lastImportError = error.localizedDescription
@@ -193,6 +258,93 @@ private struct LifecycleStateBadge: View {
         case .loaded: return .green
         case .unloading: return .orange
         case .failed: return .red
+        }
+    }
+}
+
+
+private enum UpdateState {
+    case idle
+    case checking
+    case current
+    case available(String, URL)
+    case failed
+
+    var isChecking: Bool {
+        if case .checking = self { return true }
+        return false
+    }
+
+    var buttonTitleKey: LocalizedStringKey {
+        isChecking ? "Checking…" : "Check for updates"
+    }
+}
+
+private struct ReleaseAsset: Decodable {
+    let name: String
+    let browser_download_url: URL
+}
+
+private struct LatestRelease: Decodable {
+    let tag_name: String
+    let html_url: URL
+    let name: String
+    let assets: [ReleaseAsset]
+    let prerelease: Bool
+    let created_at: String
+
+    var preReleaseCode: String? {
+        let source = "\(tag_name) \(name)"
+        let pattern = #"(?i)dev-pr-\d+-([0-9a-f]{12})(?:\s|$)"#
+        guard let match = source.range(of: pattern, options: .regularExpression) else {
+            return nil
+        }
+        return String(source[match]).split(separator: "-").last.map(String.init)
+    }
+}
+
+private extension SettingsScreen {
+    func checkForUpdate() async {
+        updateState = .checking
+        do {
+            var request = URLRequest(url: URL(string: "https://api.github.com/repos/hgblue09124-code/PersonalAgent-iOS/releases?per_page=100")!)
+            request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+                throw URLError(.badServerResponse)
+            }
+
+            let releases = try JSONDecoder().decode([LatestRelease].self, from: data)
+            let currentPreReleaseCode = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CODE") as? String
+            let currentChannel = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CHANNEL") as? String
+            let candidates = releases
+                .filter(\.prerelease)
+                .filter { release in
+                    guard let channel = currentChannel, !channel.isEmpty else { return true }
+                    return release.tag_name == channel
+                }
+                .compactMap { release -> (LatestRelease, String)? in
+                    guard let code = release.preReleaseCode else { return nil }
+                    return (release, code)
+                }
+                .sorted(by: { $0.0.created_at > $1.0.created_at })
+
+            guard let (release, releasePreCode) = candidates.first else {
+                updateState = .current
+                return
+            }
+
+            guard currentPreReleaseCode != releasePreCode else {
+                updateState = .current
+                return
+            }
+
+            let downloadURL = release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url
+                ?? release.html_url
+            copiedUpdateLink = false
+            updateState = .available(releasePreCode, downloadURL)
+        } catch {
+            updateState = .failed
         }
     }
 }

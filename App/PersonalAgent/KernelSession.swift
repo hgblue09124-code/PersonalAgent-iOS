@@ -122,7 +122,7 @@ final class KernelSession: ObservableObject {
                     goalID: goalID,
                     rawInput: statement
                 )
-                let result = evaluation.reason.trimmingCharacters(in: .whitespacesAndNewlines)
+                let result = Self.cleanModelResult(evaluation.reason)
                 guard !result.isEmpty else {
                     throw KernelError.invalidStateUpdate("Agent completed without a result")
                 }
@@ -166,9 +166,9 @@ final class KernelSession: ObservableObject {
         lastError = nil
         defer { isDownloadingDevModel = false }
 
-        let urlString = "https://huggingface.co/ggml-org/SmolLM2-135M-GGUF/resolve/main/SmolLM2-135M-BF16.gguf?download=true"
-        let expectedSHA256 = "9d00c56fe60a70659db0d905dfec6b95ea52b8d5f3f8c9b1229448b04402e6bf"
-        let maximumBytes: Int64 = 350 * 1024 * 1024
+        let urlString = "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf?download=true"
+        let expectedSHA256 = "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
+        let maximumBytes: Int64 = 600 * 1024 * 1024
 
         do {
             guard let remoteURL = URL(string: urlString) else { throw DevModelDownloadError.invalidURL }
@@ -189,7 +189,7 @@ final class KernelSession: ObservableObject {
 
             _ = try await composition.localModelStorage.importModel(
                 from: temporaryURL,
-                name: "SmolLM2-135M (Dev)"
+                name: "Qwen2.5-0.5B-Instruct Q4_K_M (Dev)"
             )
             try? FileManager.default.removeItem(at: temporaryURL)
             devModelDownloadProgress = 1
@@ -201,7 +201,31 @@ final class KernelSession: ObservableObject {
 
     func importModel(from url: URL, name: String? = nil) async {
         await run {
-            _ = try await composition.localModelStorage.importModel(from: url, name: name)
+            guard url.pathExtension.lowercased() == "gguf" else {
+                throw KernelError.invalidStateUpdate("Only GGUF model files can be imported.")
+            }
+
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer {
+                if scoped {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            // Files/iCloud providers can invalidate the external URL after the
+            // picker/open-document callback returns. Copy while the security
+            // scope is alive, then let LocalModelStorage consume a stable local URL.
+            let temporaryURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("import-\(UUID().uuidString)")
+                .appendingPathExtension("gguf")
+            try FileManager.default.copyItem(at: url, to: temporaryURL)
+            defer { try? FileManager.default.removeItem(at: temporaryURL) }
+
+            _ = try await composition.localModelStorage.importModel(
+                from: temporaryURL,
+                name: name
+            )
+            await refresh()
         }
     }
 
@@ -227,6 +251,24 @@ final class KernelSession: ObservableObject {
         await run {
             try await composition.deleteLocalModel(id: id)
         }
+    }
+
+    private static func cleanModelResult(_ raw: String) -> String {
+        var result = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Qwen and other chat templates may leak control tokens into the
+        // final UI result. They are transport markers, not user-facing text.
+        for token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>", "<|eot_id|>", "<|assistant|>", "<|user|>"] {
+            result = result.replacingOccurrences(of: token, with: "")
+        }
+
+        if result.hasPrefix("Kết quả:") {
+            result.removeFirst("Kết quả:".count)
+        } else if result.hasPrefix("Kết quả") {
+            result.removeFirst("Kết quả".count)
+        }
+
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private static func sha256(of url: URL) throws -> String {

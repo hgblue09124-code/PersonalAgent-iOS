@@ -4,6 +4,7 @@ import PARuntime
 
 struct AgentScreen: View {
     @ObservedObject var session: KernelSession
+    @Binding var showWorkspace: Bool
     @State private var task = ""
     @State private var showAgentPanel = false
     @State private var appeared = false
@@ -22,18 +23,6 @@ struct AgentScreen: View {
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showCommandCenter) { CommandCenterSheet(task: $task, focused: $taskFocused).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
-        .alert(
-            "Agent result",
-            isPresented: Binding(
-                get: { session.presentedResult != nil },
-                set: { if !$0 { session.presentedResult = nil } }
-            ),
-            presenting: session.presentedResult
-        ) { _ in
-            Button("OK") { session.presentedResult = nil }
-        } message: { result in
-            Text(result)
-        }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
@@ -50,19 +39,25 @@ struct AgentScreen: View {
     }
 
     private var content: some View {
+        // Keep the Agent surface on its compact design rhythm. In a true
+        // fullscreen window, unconstrained Spacers expand with the viewport
+        // and destroy the proportions that were correct on the original
+        // compact canvas. Fixed rhythm + centered composition preserves that
+        // visual geometry without changing the native fullscreen canvas.
         VStack(spacing: 0) {
             topBar
-            Spacer(minLength: 18)
+            Color.clear.frame(height: 18)
             quickActions
-            Spacer(minLength: 12)
+            Color.clear.frame(height: 12)
             hero
-            Spacer(minLength: 22)
+            Color.clear.frame(height: 22)
             composer
             status
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 18)
+        .frame(maxWidth: .infinity)
     }
 
     private var topBar: some View {
@@ -75,6 +70,7 @@ struct AgentScreen: View {
             Spacer()
 
             HStack(spacing: 8) {
+                Button { showWorkspace = true } label: { topButton("circle.grid.2x2.fill") }
                 Button { showActivity = true } label: { topButton("waveform.path.ecg") }
                 lifecycleMenu
             }
@@ -95,7 +91,7 @@ struct AgentScreen: View {
 
     private func quickAction(_ title: String, _ symbol: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Label(title, systemImage: symbol)
+            Label(LocalizedStringKey(title), systemImage: symbol)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.92))
                 .padding(.horizontal, 11)
@@ -125,13 +121,13 @@ struct AgentScreen: View {
             }
             .buttonStyle(.plain)
 
-            Text(greeting)
+            Text(LocalizedStringKey(greeting))
                 .font(.system(size: 36, weight: .black, design: .rounded))
                 .tracking(-1.1)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text(phaseSubtitle)
+            Text(LocalizedStringKey(phaseSubtitle))
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.72))
                 .multilineTextAlignment(.center)
@@ -190,11 +186,15 @@ struct AgentScreen: View {
             Image(systemName: symbol)
                 .font(.headline)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.subheadline.bold())
-                Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
+                Text(LocalizedStringKey(title)).font(.subheadline.bold())
+                ScrollView(.vertical, showsIndicators: true) {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 116)
+                .scrollDismissesKeyboard(.interactively)
             }
             Spacer(minLength: 0)
         }
@@ -306,7 +306,7 @@ private struct CommandCenterSheet: View {
                         } label: {
                             HStack(spacing: 8) {
                                 Image(systemName: suggestion.1)
-                                Text(suggestion.0)
+                                Text(LocalizedStringKey(suggestion.0))
                                     .font(.subheadline.weight(.semibold))
                                     .multilineTextAlignment(.leading)
                                 Spacer(minLength: 0)
@@ -366,7 +366,7 @@ private struct AgentContextSheet: View {
             Image(systemName: symbol)
                 .frame(width: 28, height: 28)
                 .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            Text(title).foregroundStyle(.secondary)
+            Text(LocalizedStringKey(title)).foregroundStyle(.secondary)
             Spacer()
             Text(value).fontWeight(.semibold)
         }

@@ -4,29 +4,31 @@ import PAComposition
 struct RootView: View {
     @ObservedObject var session: KernelSession
     @State private var showWorkspace = false
+    @AppStorage("app.language") private var appLanguage = "vi"
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            AgentScreen(session: session)
-
-            Button {
-                showWorkspace = true
-            } label: {
-                Image(systemName: "circle.grid.2x2.fill")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 38, height: 38)
-                    .background(.black.opacity(0.20), in: Circle())
-                    .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
-            }
-            .padding(.leading, 20)
-            .padding(.top, 10)
-            .accessibilityLabel("Open Agent workspace")
+        GeometryReader { proxy in
+            AgentScreen(session: session, showWorkspace: $showWorkspace)
+                .padding(.top, proxy.safeAreaInsets.top)
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
         }
         .task { await session.refresh() }
+        .onOpenURL { url in
+            guard url.pathExtension.lowercased() == "gguf" else { return }
+            Task {
+                let securityScoped = url.startAccessingSecurityScopedResource()
+                defer { if securityScoped { url.stopAccessingSecurityScopedResource() } }
+                await session.importModel(from: url)
+            }
+        }
     }
 }
 
