@@ -19,6 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: One-shot move Alpha tag
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.head_commit.message == 'ci(release): one-shot move v0.1.0-alpha'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v0.1.0-alpha"
+          git fetch origin --tags
+          git tag -f "$TAG" "$GITHUB_SHA"
+          git push origin "refs/tags/$TAG" --force
+          echo "Moved $TAG -> $GITHUB_SHA"
+
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
