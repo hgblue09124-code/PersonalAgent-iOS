@@ -317,6 +317,37 @@ struct M9RealProviderSliceTests {
         #expect(adapterRes.text == "local-engine-output")
     }
 
+    // Cancellation must propagate from the provider task through the transport boundary.
+    @Test func p3_cancellationPropagatesToTransport() async throws {
+        let transport = ScriptedTransport(scripts: [.hang])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "cancel.test")
+        await vault.store(Data("cancel-key".utf8), for: ref)
+
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                timeoutNanoseconds: 60_000_000_000,
+                credential: ref
+            )
+        )
+
+        let task = Task {
+            try await provider.complete(LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "cancel"))
+        }
+
+        try await Task.sleep(nanoseconds: 50_000_000)
+        task.cancel()
+
+        await #expect(throws: ProviderRuntimeError.cancelled) {
+            _ = try await task.value
+        }
+    }
+
     // MARK: - Live Provider Network Execution Gate
     @Test func testRealLiveProviderExecutionWhenKeyProvided() async throws {
         let envKey = ProcessInfo.processInfo.environment["LIVE_PROVIDER_API_KEY"]
