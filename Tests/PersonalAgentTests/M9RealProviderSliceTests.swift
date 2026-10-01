@@ -375,6 +375,34 @@ struct M9RealProviderSliceTests {
         #expect((await transport.recordedRequests()).count == 2)
     }
 
+    @Test func p3_retryDoesNotRetryNonTransientFailure() async throws {
+        let transport = ScriptedTransport(scripts: [
+            .response(ProviderTransportResponse(statusCode: 401, body: Data())),
+            .response(ProviderTransportResponse(statusCode: 200, body: Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"should-not-reach"},"finish_reason":"stop"}]}"#.utf8)))
+        ])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "retry-classification.test")
+        await vault.store(Data("retry-key".utf8), for: ref)
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref,
+                maxRetryAttempts: 3
+            )
+        )
+
+        await #expect(throws: ProviderRuntimeError.authenticationFailure) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "do-not-retry")
+            )
+        }
+        #expect((await transport.recordedRequests()).count == 1)
+    }
+
     @Test func p3_retryBudgetFailsClosed() async throws {
         let transport = ScriptedTransport(scripts: [.fail(.networkFailure), .fail(.networkFailure)])
         let vault = InMemoryCredentialVault()
