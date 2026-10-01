@@ -96,6 +96,31 @@ struct M2AdapterFixtureTests {
         }
     }
 
+    @Test func truncatedStreamFailsClosed() async {
+        let sse = """
+        data: {"model":"local","choices":[{"delta":{"content":"partial"}}]}
+        """
+        let transport = ScriptedTransport(
+            scripts: [.response(ProviderTransportResponse(statusCode: 200, body: Data(sse.utf8)))]
+        )
+        let provider = LocalProvider(
+            transport: transport,
+            credentials: InMemoryCredentialVault(),
+            configuration: ProviderConfiguration(
+                providerID: LocalProviderBoundary.providerID,
+                endpointURL: LocalProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "local")
+            )
+        )
+
+        var iterator = provider.stream(
+            LLMRequest(model: ModelID(rawValue: "local"), prompt: "x")
+        ).makeAsyncIterator()
+        await #expect(throws: ProviderRuntimeError.decodingFailure) {
+            while try await iterator.next() != nil {}
+        }
+    }
+
     @Test func localDecodesStreamFixture() async throws {
         let sse = """
         data: {"model":"local","choices":[{"delta":{"content":"hel"}}]}
