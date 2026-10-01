@@ -105,6 +105,39 @@ struct M2AdapterFixtureTests {
         #expect(LocalProviderBoundary.liveNetworkVerified == false)
     }
 
+
+
+    @Test func localModelProviderAdapterRejectsEmptyCompletion() async throws {
+        struct EmptyEngine: LocalModelEngine {
+            let identity = LocalModelIdentity(
+                id: ModelID(rawValue: "empty"),
+                name: "Empty",
+                contextTokenLimit: 2048
+            )
+            var availability: LocalModelAvailability { get async { .ready } }
+            var lifecycleState: LocalModelLifecycleState { get async { .loaded } }
+            func load(options: LocalModelLoadingOptions) async throws {}
+            func unload() async throws {}
+            func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
+                LocalModelResponse(text: "")
+            }
+            func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
+                AsyncThrowingStream { continuation in
+                    continuation.finish()
+                }
+            }
+            func cancel() async {}
+        }
+
+        let adapter = LocalModelProviderAdapter(engine: EmptyEngine())
+
+        await #expect(throws: LlamaCPPEngineError.emptyOutput) {
+            _ = try await adapter.complete(
+                LLMRequest(model: ModelID(rawValue: "empty"), prompt: "hello")
+            )
+        }
+    }
+
     @Test func adaptersDoNotClaimUnimplementedCapabilities() {
         let grok = GrokProvider(transport: UnavailableTransport(), credentials: InMemoryCredentialVault())
         #expect(grok.capabilities.contains(.textGeneration))
