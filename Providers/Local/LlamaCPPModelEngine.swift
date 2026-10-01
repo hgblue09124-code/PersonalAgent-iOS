@@ -199,8 +199,31 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             defer { self.clearGenerationTask() }
             do {
                 if let runner = self.streamRunner {
-                    let generatedCount = try await runner(request, continuation)
-                    try LocalModelOutputValidator.validate(text: "non-empty-if-generated", generatedCount: generatedCount)
+                    let (capturedStream, capturedContinuation) = AsyncThrowingStream<LocalModelStreamChunk, Error>.makeStream()
+                    let forwardingTask = Task {
+                        var streamedText = ""
+                        do {
+                            for try await chunk in capturedStream {
+                                streamedText += chunk.textDelta
+                                continuation.yield(chunk)
+                            }
+                            return streamedText
+                        } catch {
+                            throw error
+                        }
+                    }
+
+                    do {
+                        let generatedCount = try await runner(request, capturedContinuation)
+                        capturedContinuation.finish()
+                        let streamedText = try await forwardingTask.value
+                        try LocalModelOutputValidator.validate(text: streamedText, generatedCount: generatedCount)
+                    } catch {
+                        capturedContinuation.finish(throwing: error)
+                        _ = try? await forwardingTask.value
+                        throw error
+                    }
+
                     if self.isLoaded() {
                         self.setLifecycleState(.loaded)
                     }
@@ -277,6 +300,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                 }
                 var currentPos = Int32(promptTokens.count)
                 var generatedCount = 0
+                var streamedText = ""
 
                 var invalidBytes: [CChar] = []
 
@@ -323,6 +347,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
                     generatedCount += 1
                     let isLastToken = (generatedCount >= maxTokens)
+                    streamedText += deltaText
                     let chunk = LocalModelStreamChunk(
                         textDelta: deltaText,
                         finishReason: isLastToken ? "length" : nil
@@ -348,7 +373,7 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
                     }
                 }
 
-                try LocalModelOutputValidator.validate(text: "non-empty-if-generated", generatedCount: generatedCount)
+                try LocalModelOutputValidator.validate(text: streamedText, generatedCount: generatedCount)
 
                 if self.isLoaded() {
                     self.setLifecycleState(.loaded)
