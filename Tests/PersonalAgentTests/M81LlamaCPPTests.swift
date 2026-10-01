@@ -407,6 +407,58 @@ struct M81LlamaCPPTests {
         #expect(state == .unloaded)
     }
 
+    @Test func testCancellationAllowsSubsequentGeneration() async throws {
+        actor CallCounter {
+            private var value = 0
+            func next() -> Int {
+                value += 1
+                return value
+            }
+        }
+
+        let counter = CallCounter()
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "cancel-recovery-llama"),
+            name: "Cancel Recovery Llama",
+            contextTokenLimit: 2048
+        )
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            streamRunner: { _, continuation in
+                if await counter.next() == 1 {
+                    try await Task.sleep(nanoseconds: 5_000_000_000)
+                    return 1
+                }
+
+                continuation.yield(LocalModelStreamChunk(textDelta: "recovered"))
+                return 1
+            }
+        )
+
+        let firstConsumer = Task {
+            do {
+                for try await _ in engine.generateStream(
+                    request: LocalModelGenerationRequest(prompt: "first")
+                ) {}
+            } catch {
+                return
+            }
+        }
+
+        try await Task.sleep(nanoseconds: 50_000_000)
+        await engine.cancel()
+        await firstConsumer.value
+
+        var recovered = ""
+        for try await chunk in engine.generateStream(
+            request: LocalModelGenerationRequest(prompt: "second")
+        ) {
+            recovered += chunk.textDelta
+        }
+
+        #expect(recovered == "recovered")
+    }
+
     @Test func testActiveModelIdentityMatchesEngineModelIdentity() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M8P3IdentityTest_\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
