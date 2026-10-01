@@ -348,6 +348,57 @@ struct M9RealProviderSliceTests {
         }
     }
 
+    @Test func p3_retryExecutionRecoversTransientFailure() async throws {
+        let responseBody = Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"recovered"},"finish_reason":"stop"}]}"#.utf8)
+        let transport = ScriptedTransport(scripts: [
+            .fail(.networkFailure),
+            .response(ProviderTransportResponse(statusCode: 200, body: responseBody))
+        ])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "retry.test")
+        await vault.store(Data("retry-key".utf8), for: ref)
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref,
+                maxRetryAttempts: 1
+            )
+        )
+        let response = try await provider.complete(
+            LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "retry")
+        )
+        #expect(response.text == "recovered")
+        #expect((await transport.recordedRequests()).count == 2)
+    }
+
+    @Test func p3_retryBudgetFailsClosed() async throws {
+        let transport = ScriptedTransport(scripts: [.fail(.networkFailure), .fail(.networkFailure)])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "retry-budget.test")
+        await vault.store(Data("retry-key".utf8), for: ref)
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref,
+                maxRetryAttempts: 1
+            )
+        )
+        await #expect(throws: ProviderRuntimeError.networkFailure) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "retry")
+            )
+        }
+        #expect((await transport.recordedRequests()).count == 2)
+    }
+
     // MARK: - Live Provider Network Execution Gate
     @Test func testRealLiveProviderExecutionWhenKeyProvided() async throws {
         let envKey = ProcessInfo.processInfo.environment["LIVE_PROVIDER_API_KEY"]

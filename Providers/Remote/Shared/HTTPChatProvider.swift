@@ -43,7 +43,7 @@ public struct HTTPChatProvider: LLMProvider {
         let wire = try await encode(request, stream: false)
         let response: ProviderTransportResponse
         do {
-            response = try await sendWithTimeout(wire, nanoseconds: request.timeoutNanoseconds ?? configuration.timeoutNanoseconds)
+            response = try await sendWithRetry(wire, request: request)
         } catch let error as ProviderRuntimeError {
             throw error
         } catch is CancellationError {
@@ -60,7 +60,7 @@ public struct HTTPChatProvider: LLMProvider {
                 do {
                     try Task.checkCancellation()
                     let wire = try await encode(request, stream: true)
-                    let response = try await sendWithTimeout(wire, nanoseconds: request.timeoutNanoseconds ?? configuration.timeoutNanoseconds)
+                    let response = try await sendWithRetry(wire, request: request)
                     if response.statusCode != 200 {
                         throw ProviderRuntimeError.from(statusCode: response.statusCode)
                     }
@@ -80,6 +80,35 @@ public struct HTTPChatProvider: LLMProvider {
             continuation.onTermination = { _ in
                 task.cancel()
             }
+        }
+    }
+
+    private func sendWithRetry(
+        _ request: ProviderTransportRequest,
+        request llmRequest: LLMRequest
+    ) async throws -> ProviderTransportResponse {
+        var attempt = 0
+        while true {
+            try Task.checkCancellation()
+            do {
+                let response = try await sendWithTimeout(
+                    request,
+                    nanoseconds: llmRequest.timeoutNanoseconds ?? configuration.timeoutNanoseconds
+                )
+                if response.statusCode == 200 || attempt >= configuration.maxRetryAttempts {
+                    return response
+                }
+                let error = ProviderRuntimeError.from(statusCode: response.statusCode)
+                guard error.retryClassification == .retryableTransient else { return response }
+            } catch let error as ProviderRuntimeError {
+                guard error.retryClassification == .retryableTransient,
+                      attempt < configuration.maxRetryAttempts else {
+                    throw error
+                }
+            } catch is CancellationError {
+                throw ProviderRuntimeError.cancelled
+            }
+            attempt += 1
         }
     }
 

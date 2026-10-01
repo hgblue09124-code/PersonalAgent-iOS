@@ -156,19 +156,22 @@ public struct ProviderConfiguration: Sendable, Equatable {
     public let defaultModel: ModelID
     public let timeoutNanoseconds: UInt64
     public let credential: ProviderCredentialRef?
+    public let maxRetryAttempts: Int
 
     public init(
         providerID: ProviderID,
         endpointURL: String? = nil,
         defaultModel: ModelID,
         timeoutNanoseconds: UInt64 = 30_000_000_000,
-        credential: ProviderCredentialRef? = nil
+        credential: ProviderCredentialRef? = nil,
+        maxRetryAttempts: Int = 0
     ) {
         self.providerID = providerID
         self.endpointURL = endpointURL
         self.defaultModel = defaultModel
         self.timeoutNanoseconds = timeoutNanoseconds
         self.credential = credential
+        self.maxRetryAttempts = max(0, maxRetryAttempts)
     }
 }
 
