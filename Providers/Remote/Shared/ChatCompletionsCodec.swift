@@ -88,7 +88,10 @@ public enum ChatCompletionsCodec: Sendable {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             guard trimmed.hasPrefix("data:") else { continue }
             let payload = trimmed.dropFirst(5).trimmingCharacters(in: .whitespaces)
-            if payload == "[DONE]" { continue }
+            if payload == "[DONE]" {
+                sawTerminalMarker = true
+                continue
+            }
             guard let data = payload.data(using: .utf8),
                   let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
             else {
