@@ -109,6 +109,41 @@ struct M81LlamaCPPTests {
         }
     }
 
+    @Test func testFailedLoadReleasesResidencyForRecovery() async throws {
+        let fileURL = try createDummyHeaderGGUFFile(name: "failed-residency.gguf")
+        defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
+
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "failed-residency"),
+            name: "Failed Residency",
+            localURL: fileURL
+        )
+        let coordinator = LlamaCPPResidencyCoordinator()
+        let engine = LlamaCPPModelEngine(identity: identity, residencyCoordinator: coordinator)
+
+        do {
+            try await engine.load(options: LocalModelLoadingOptions())
+            #expect(Bool(false), "Expected native model load to fail for dummy GGUF")
+        } catch let error as LlamaCPPEngineError {
+            if case .nativeModelLoadFailed = error {
+                #expect(Bool(true))
+            } else {
+                #expect(Bool(false), "Expected nativeModelLoadFailed, got \(error)")
+            }
+        }
+
+        #expect(await coordinator.residentModelID == nil)
+        if case .failed = await engine.lifecycleState {
+            #expect(Bool(true))
+        } else {
+            #expect(Bool(false), "Expected failed lifecycle state")
+        }
+
+        try? await engine.unload()
+        #expect(await coordinator.residentModelID == nil)
+        #expect(await engine.lifecycleState == .unloaded)
+    }
+
     @Test func testSingleResidentModelExclusivityInvariant() async throws {
         let ggufURL1 = try createDummyHeaderGGUFFile(name: "model1.gguf")
         let ggufURL2 = try createDummyHeaderGGUFFile(name: "model2.gguf")
