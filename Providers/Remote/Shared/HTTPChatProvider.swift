@@ -43,7 +43,7 @@ public struct HTTPChatProvider: LLMProvider {
         let wire = try await encode(request, stream: false)
         let response: ProviderTransportResponse
         do {
-            response = try await transport.send(wire)
+            response = try await sendWithTimeout(wire, nanoseconds: request.timeoutNanoseconds ?? configuration.timeoutNanoseconds)
         } catch let error as ProviderRuntimeError {
             throw error
         } catch is CancellationError {
@@ -60,7 +60,7 @@ public struct HTTPChatProvider: LLMProvider {
                 do {
                     try Task.checkCancellation()
                     let wire = try await encode(request, stream: true)
-                    let response = try await transport.send(wire)
+                    let response = try await sendWithTimeout(wire, nanoseconds: request.timeoutNanoseconds ?? configuration.timeoutNanoseconds)
                     if response.statusCode != 200 {
                         throw ProviderRuntimeError.from(statusCode: response.statusCode)
                     }
@@ -80,6 +80,27 @@ public struct HTTPChatProvider: LLMProvider {
             continuation.onTermination = { _ in
                 task.cancel()
             }
+        }
+    }
+
+    private func sendWithTimeout(
+        _ request: ProviderTransportRequest,
+        nanoseconds: UInt64
+    ) async throws -> ProviderTransportResponse {
+        try await withThrowingTaskGroup(of: ProviderTransportResponse.self) { group in
+            group.addTask {
+                try await self.transport.send(request)
+            }
+            group.addTask {
+                try await Task.sleep(nanoseconds: nanoseconds)
+                throw ProviderRuntimeError.timeout
+            }
+
+            defer { group.cancelAll() }
+            guard let response = try await group.next() else {
+                throw ProviderRuntimeError.timeout
+            }
+            return response
         }
     }
 
