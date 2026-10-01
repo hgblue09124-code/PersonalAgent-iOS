@@ -36,6 +36,30 @@ struct M2AdapterFixtureTests {
         #expect(GrokProviderBoundary.liveNetworkVerified == false)
     }
 
+    @Test func requestTimeoutFailsClosed() async {
+        let transport = ScriptedTransport(scripts: [.hang])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "timeout")
+        await vault.store(Data("token".utf8), for: ref)
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                timeoutNanoseconds: 20_000_000,
+                credential: ref
+            )
+        )
+
+        await #expect(throws: ProviderRuntimeError.timeout) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "timeout")
+            )
+        }
+    }
+
     @Test func openaiMapsRateLimit() async throws {
         let transport = ScriptedTransport(scripts: [.response(ProviderTransportResponse(statusCode: 429, body: Data()))])
         let vault = InMemoryCredentialVault()
