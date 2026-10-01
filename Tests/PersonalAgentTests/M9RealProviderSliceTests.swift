@@ -455,6 +455,36 @@ struct M9RealProviderSliceTests {
         #expect((await transport.recordedRequests()).count == 2)
     }
 
+
+    @Test func p3_negativeRetryBudgetIsNormalizedToZero() async throws {
+        let transport = ScriptedTransport(scripts: [.fail(.networkFailure), .response(ProviderTransportResponse(
+            statusCode: 200,
+            body: Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"should-not-reach"},"finish_reason":"stop"}]}"#.utf8)
+        ))])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "retry-normalization.test")
+        await vault.store(Data("retry-key".utf8), for: ref)
+
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref,
+                maxRetryAttempts: -1
+            )
+        )
+
+        await #expect(throws: ProviderRuntimeError.networkFailure) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "negative-budget")
+            )
+        }
+        #expect((await transport.recordedRequests()).count == 1)
+    }
+
     // MARK: - Live Provider Network Execution Gate
     @Test func testRealLiveProviderExecutionWhenKeyProvided() async throws {
         let envKey = ProcessInfo.processInfo.environment["LIVE_PROVIDER_API_KEY"]
