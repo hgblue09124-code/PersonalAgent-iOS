@@ -343,6 +343,57 @@ struct M81LlamaCPPTests {
         }
     }
 
+    @Test func testStreamRunnerRejectsGeneratedTokensWithEmptyText() async throws {
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "empty-stream-llama"),
+            name: "Empty Stream Llama",
+            contextTokenLimit: 2048
+        )
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            streamRunner: { _, continuation in
+                continuation.yield(LocalModelStreamChunk(textDelta: ""))
+                return 1
+            }
+        )
+
+        let stream = engine.generateStream(
+            request: LocalModelGenerationRequest(prompt: "Hello empty stream")
+        )
+
+        do {
+            for try await _ in stream {}
+            #expect(Bool(false), "Expected generated tokens with empty text to fail closed")
+        } catch let error as LlamaCPPEngineError {
+            #expect(error == .emptyOutput)
+        }
+    }
+
+    @Test func testStreamRunnerForwardsNonEmptyTextAndCompletes() async throws {
+        let identity = LocalModelIdentity(
+            id: ModelID(rawValue: "stream-llama"),
+            name: "Stream Llama",
+            contextTokenLimit: 2048
+        )
+        let engine = LlamaCPPModelEngine(
+            identity: identity,
+            streamRunner: { _, continuation in
+                continuation.yield(LocalModelStreamChunk(textDelta: "OK"))
+                return 1
+            }
+        )
+
+        let stream = engine.generateStream(
+            request: LocalModelGenerationRequest(prompt: "Hello stream")
+        )
+
+        var text = ""
+        for try await chunk in stream {
+            text += chunk.textDelta
+        }
+        #expect(text == "OK")
+    }
+
     @Test func testCancellationPropagation() async throws {
         let identity = LocalModelIdentity(
             id: ModelID(rawValue: "cancel-llama"),
