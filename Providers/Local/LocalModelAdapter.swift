@@ -45,6 +45,7 @@ public final class LocalModelProviderAdapter: LLMProvider, @unchecked Sendable {
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
         let genRequest = mapRequest(request)
         let response = try await engine.generate(request: genRequest)
+        try LocalModelOutputValidator.validate(text: response.text)
         return LLMResponse(
             text: response.text,
             finishReason: response.finishReason,
