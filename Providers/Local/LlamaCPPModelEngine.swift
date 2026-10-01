@@ -106,55 +106,59 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
         // 4. Real native model and context initialization via llama.cpp
         #if canImport(cllama)
-        llama_backend_init()
+        do {
+            llama_backend_init()
 
-        var modelParams = llama_model_default_params()
-        if let gL = options.gpuLayers {
-            modelParams.n_gpu_layers = Int32(gL)
-        }
+            var modelParams = llama_model_default_params()
+            if let gL = options.gpuLayers {
+                modelParams.n_gpu_layers = Int32(gL)
+            }
 
-        let path = url.path
-        guard let modelPtr = llama_model_load_from_file(path, modelParams) else {
-            setLifecycleState(.failed(reason: "llama_model_load_from_file failed for \(path)"))
-            throw LlamaCPPEngineError.nativeModelLoadFailed(path)
-        }
+            let path = url.path
+            guard let modelPtr = llama_model_load_from_file(path, modelParams) else {
+                throw LlamaCPPEngineError.nativeModelLoadFailed(path)
+            }
 
-        var ctxParams = llama_context_default_params()
-        ctxParams.n_ctx = UInt32(options.contextWindow)
+            var ctxParams = llama_context_default_params()
+            ctxParams.n_ctx = UInt32(options.contextWindow)
 
-        let nThreads = options.threadCount ?? max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
-        ctxParams.n_threads = Int32(nThreads)
-        ctxParams.n_threads_batch = Int32(nThreads)
+            let nThreads = options.threadCount ?? max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
+            ctxParams.n_threads = Int32(nThreads)
+            ctxParams.n_threads_batch = Int32(nThreads)
 
-        guard let contextPtr = llama_init_from_model(modelPtr, ctxParams) else {
-            llama_model_free(modelPtr)
-            setLifecycleState(.failed(reason: "llama_init_from_model failed"))
-            throw LlamaCPPEngineError.nativeContextCreationFailed
-        }
+            guard let contextPtr = llama_init_from_model(modelPtr, ctxParams) else {
+                llama_model_free(modelPtr)
+                throw LlamaCPPEngineError.nativeContextCreationFailed
+            }
 
-        // Initialize sampler chain and configure real samplers
-        let chainParams = llama_sampler_chain_default_params()
-        guard let samplerPtr = llama_sampler_chain_init(chainParams) else {
-            llama_free(contextPtr)
-            llama_model_free(modelPtr)
-            setLifecycleState(.failed(reason: "llama_sampler_chain_init failed"))
-            throw LlamaCPPEngineError.nativeContextCreationFailed
-        }
+            // Initialize sampler chain and configure real samplers
+            let chainParams = llama_sampler_chain_default_params()
+            guard let samplerPtr = llama_sampler_chain_init(chainParams) else {
+                llama_free(contextPtr)
+                llama_model_free(modelPtr)
+                throw LlamaCPPEngineError.nativeContextCreationFailed
+            }
 
-        // Configure greedy sampler by default in the chain
-        llama_sampler_chain_add(samplerPtr, llama_sampler_init_greedy())
+            // Configure greedy sampler by default in the chain
+            llama_sampler_chain_add(samplerPtr, llama_sampler_init_greedy())
 
-        setLifecycleState(.loading(progress: 0.95))
+            setLifecycleState(.loading(progress: 0.95))
 
-        stateLock.withLock {
-            self.nativeModel = modelPtr
-            self.nativeContext = contextPtr
-            self.nativeSampler = samplerPtr
-            self.parsedMetadata = summary
-            self.activeOptions = options
-            self.currentLifecycleState = .loaded
+            stateLock.withLock {
+                self.nativeModel = modelPtr
+                self.nativeContext = contextPtr
+                self.nativeSampler = samplerPtr
+                self.parsedMetadata = summary
+                self.activeOptions = options
+                self.currentLifecycleState = .loaded
+            }
+        } catch {
+            await residencyCoordinator.releaseResidency(for: identity.id)
+            setLifecycleState(.failed(reason: error.localizedDescription))
+            throw error
         }
         #else
+        await residencyCoordinator.releaseResidency(for: identity.id)
         setLifecycleState(.failed(reason: "cllama target is supported on Apple platforms"))
         throw LlamaCPPEngineError.nativeModelLoadFailed(url.path)
         #endif
