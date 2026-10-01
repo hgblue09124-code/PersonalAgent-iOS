@@ -138,6 +138,55 @@ struct M2AdapterFixtureTests {
         }
     }
 
+    @Test func localAdapterMapsGenerationParametersAndSystemPrompt() async throws {
+        final class CaptureEngine: LocalModelEngine, @unchecked Sendable {
+            let identity = LocalModelIdentity(
+                id: ModelID(rawValue: "capture-local"),
+                name: "Capture Local",
+                contextTokenLimit: 4096
+            )
+            var availability: LocalModelAvailability { get async { .ready } }
+            var lifecycleState: LocalModelLifecycleState { get async { .loaded } }
+            var capturedRequest: LocalModelGenerationRequest?
+
+            func load(options: LocalModelLoadingOptions) async throws {}
+            func unload() async throws {}
+            func cancel() async {}
+
+            func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
+                capturedRequest = request
+                return LocalModelResponse(text: "ok", finishReason: "stop")
+            }
+
+            func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
+                AsyncThrowingStream { continuation in
+                    continuation.finish()
+                }
+            }
+        }
+
+        let engine = CaptureEngine()
+        let adapter = LocalModelProviderAdapter(engine: engine)
+        let request = LLMRequest(
+            model: ModelID(rawValue: "capture-local"),
+            messages: [
+                ProviderMessage(role: .system, content: "system text"),
+                ProviderMessage(role: .user, content: "user text")
+            ],
+            parameters: GenerationParameters(
+                temperature: 0.7,
+                maxOutputTokens: 37
+            )
+        )
+
+        _ = try await adapter.complete(request)
+
+        #expect(engine.capturedRequest?.prompt == "user text")
+        #expect(engine.capturedRequest?.systemPrompt == "system text")
+        #expect(engine.capturedRequest?.temperature == 0.7)
+        #expect(engine.capturedRequest?.maxTokens == 37)
+    }
+
     @Test func adaptersDoNotClaimUnimplementedCapabilities() {
         let grok = GrokProvider(transport: UnavailableTransport(), credentials: InMemoryCredentialVault())
         #expect(grok.capabilities.contains(.textGeneration))
