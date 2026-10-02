@@ -3,10 +3,54 @@ import PAKernel
 import PAModules
 import PAMemory
 
+/// Minimal Skill model: Grammar + 1 Rule = 1 Skill.
+/// A Skill describes one executable capability; execution remains behind Module.
+public struct SkillDefinition: Sendable, Equatable {
+    public let id: String
+    public let grammar: String
+    public let rule: String
+    public let moduleID: ModuleID
+
+    public init(id: String, grammar: String, rule: String, moduleID: ModuleID) {
+        self.id = id
+        self.grammar = grammar
+        self.rule = rule
+        self.moduleID = moduleID
+    }
+}
+
+public protocol Skill: Sendable {
+    static var definition: SkillDefinition { get }
+}
+
+public struct SkillCatalog: Sendable {
+    private var definitions: [String: SkillDefinition] = [:]
+
+    public init() {}
+
+    public mutating func register<S: Skill>(_ skill: S.Type) {
+        definitions[skill.definition.id] = skill.definition
+    }
+
+    public func resolve(id: String) -> SkillDefinition? {
+        definitions[id]
+    }
+
+    public var all: [SkillDefinition] {
+        definitions.values.sorted { $0.id < $1.id }
+    }
+}
+
 /// Memory Skill: skill-facing boundary for chat memory capture/retrieval.
 /// Persistence remains owned by MemoryRuntime.
-public struct MemorySkillModule: Module {
+public struct MemorySkillModule: Module, Skill {
     public static let id = ModuleID(rawValue: "skill.memory")
+    public static let definition = SkillDefinition(
+        id: "skill.memory",
+        grammar: "memory",
+        rule: "capture or retrieve conversation memory",
+        moduleID: Self.id
+    )
     private enum Action: String { case capture, retrieve }
     private let memory: MemoryRuntime
     public let contract: ModuleContract
