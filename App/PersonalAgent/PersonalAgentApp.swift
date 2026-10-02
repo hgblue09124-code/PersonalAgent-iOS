@@ -42,7 +42,7 @@ struct PersonalAgentApp: App {
         .ignoresSafeArea(.all)
         .environment(\.locale, Locale(identifier: appLanguage))
         .id(appLanguage)
-        .onAppear {
+        .onReceive(NotificationCenter.default.publisher(for: .providerConfigurationChanged)) { _ in\n            Task {\n                session = nil\n                await initialize()\n            }\n        }\n        .onAppear {
             if !UserDefaults.standard.bool(forKey: "app.language.vi-migrated-v2") {
                 if UserDefaults.standard.object(forKey: "app.language") == nil || appLanguage == "en" {
                     appLanguage = "vi"
@@ -55,7 +55,7 @@ struct PersonalAgentApp: App {
     private func initialize() async {
         initializationError = nil
         do {
-            let root = try await M8CompositionRoot()
+            let providerConfiguration = ProviderConfigurationStore()\n            let provider = AppProviderFactory.makeProvider(configuration: providerConfiguration)\n            let root = try await M8CompositionRoot(provider: provider)
             let state = await root.session.currentState()
             let newSession = KernelSession(composition: root, state: state)
             session = newSession

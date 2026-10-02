@@ -11,6 +11,12 @@ struct SettingsScreen: View {
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
     @State private var copiedUpdateLink = false
+    @StateObject private var providerConfiguration = ProviderConfigurationStore()
+    @State private var providerAPIKey = ""
+    @State private var providerSaving = false
+    @State private var providerTesting = false
+    @State private var providerStatus: String?
+    @State private var providerStatusIsError = false
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -126,6 +132,24 @@ struct SettingsScreen: View {
             }
 
 
+
+            GlassPanel {
+                Label("Provider", systemImage: "server.rack").font(.headline)
+                Picker("Provider", selection: Binding(get: { providerConfiguration.selected ?? .openAI }, set: { providerConfiguration.selected = $0 })) {
+                    ForEach(ProviderConfigurationStore.Provider.allCases) { provider in Text(provider.title).tag(provider) }
+                }.pickerStyle(.segmented)
+                SecureField("API Key", text: $providerAPIKey)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled().textContentType(.password)
+                    .font(.body.monospaced())
+                HStack {
+                    Button(providerSaving ? "Saving…" : "Save") { saveProviderCredential() }.buttonStyle(.borderedProminent)
+                        .disabled(providerSaving || providerAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button(providerTesting ? "Testing…" : "Test connection") { Task { await testProviderConnection() } }.buttonStyle(.bordered)
+                        .disabled(providerSaving || providerTesting || providerAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                if let providerStatus { Text(providerStatus).font(.caption).foregroundStyle(providerStatusIsError ? .red : .secondary) }
+                Text("API keys are stored in the Apple Keychain and are never written to UserDefaults or logs.").font(.caption).foregroundStyle(.secondary)
+            }
 
             GlassPanel {
                 Label("Language", systemImage: "globe")
@@ -301,6 +325,43 @@ private struct LatestRelease: Decodable {
         }
         return String(source[match]).split(separator: "-").last.map(String.init)
     }
+}
+
+
+private extension SettingsScreen {
+    func saveProviderCredential() {
+        let value = providerAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let provider = providerConfiguration.selected, !value.isEmpty else { return }
+        providerSaving = true
+        defer { providerSaving = false }
+        do {
+            try KeychainSecretStore().store(account: provider.account, secret: Data(value.utf8))
+            providerStatusIsError = false
+            providerStatus = "Saved securely. Provider runtime is restarting…"
+            NotificationCenter.default.post(name: .providerConfigurationChanged, object: nil)
+        } catch {
+            providerStatusIsError = true
+            providerStatus = "Could not save API key securely."
+        }
+    }
+    func testProviderConnection() async {
+        let value = providerAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let provider = providerConfiguration.selected, !value.isEmpty else { return }
+        providerTesting = true
+        defer { providerTesting = false }
+        do {
+            let response = try await AppProviderFactory.testConnection(provider: provider, apiKey: value)
+            providerStatusIsError = false
+            providerStatus = "Connection OK: " + response.prefix(80)
+        } catch {
+            providerStatusIsError = true
+            providerStatus = "Connection failed. Check the provider and API key."
+        }
+    }
+}
+
+extension Notification.Name {
+    static let providerConfigurationChanged = Notification.Name("PersonalAgent.providerConfigurationChanged")
 }
 
 private extension SettingsScreen {
