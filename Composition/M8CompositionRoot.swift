@@ -270,6 +270,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let moduleRuntime: ModuleRuntime
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
+    public let skillCatalog: SkillCatalog
+    public let skillInvoker: SkillInvoker
     public let orchestrator: M6Orchestrator
     public let runStore: any RunStore
     public let attemptStore: any ExecutionAttemptStore
@@ -398,6 +400,11 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.memoryRuntime = memoryRuntime
         try await moduleCatalog.register(MemorySkillModule(memory: memoryRuntime))
 
+        var skillCatalog = SkillCatalog()
+        skillCatalog.register(MemorySkillModule.self)
+        self.skillCatalog = skillCatalog
+        self.skillInvoker = SkillInvoker(catalog: skillCatalog, moduleRuntime: moduleRuntime)
+
         let mutStore: any MutationEvidenceStore
         if let mutationEvidenceStore {
             mutStore = mutationEvidenceStore
@@ -515,6 +522,10 @@ extension M8CompositionRoot {
 
     public func registeredModuleIDs() async -> [String] {
         await moduleCatalog.contracts().map(\.id.rawValue)
+    }
+
+    public func registeredSkillIDs() -> [String] {
+        skillCatalog.all.map(\.id)
     }
 
     public func activeLocalModelEngine() async throws -> (any LocalModelEngine)? {
