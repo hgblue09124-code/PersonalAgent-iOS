@@ -15,6 +15,8 @@ final class KernelSession: ObservableObject {
     @Published var providerID: String
     @Published var providerLifecycle: String
     @Published var moduleIDs: [String]
+    @Published private(set) var chatMessages: [ChatMessage] = []
+    let conversationID: String
 
     @Published var installedModels: [LocalModelDescriptor]
     @Published var activeModelID: ModelID?
@@ -40,9 +42,67 @@ final class KernelSession: ObservableObject {
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
         self.presentedResult = nil
+        let key = "PersonalAgent.chat.conversation.id"
+        if let existing = UserDefaults.standard.string(forKey: key), !existing.isEmpty {
+            self.conversationID = existing
+        } else {
+            let created = UUID().uuidString
+            UserDefaults.standard.set(created, forKey: key)
+            self.conversationID = created
+        }
     }
 
     var milestone: MilestoneGate { composition.milestone }
+
+    func refreshChatHistory() async {
+        do {
+            let payload = ModulePayload(
+                schema: SchemaDocument(identifier: "skill.memory.in"),
+                fields: ["action": "retrieve", "conversationID": conversationID, "limit": "100"]
+            )
+            let result = try await composition.runtime.invokeModule(
+                ModuleInvocation(moduleID: MemorySkillModule.id, input: payload)
+            )
+            guard let raw = result.output.value(for: "items"), let data = raw.data(using: .utf8) else { return }
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let items = try decoder.decode([ChatMemoryItem].self, from: data)
+            chatMessages = items.map {
+                ChatMessage(id: $0.id, role: ChatMessage.Role(rawValue: $0.role) ?? .system, content: $0.content, createdAt: $0.createdAt)
+            }
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    private func captureChatMemory(role: ChatMessage.Role, content: String) async throws {
+        let payload = ModulePayload(
+            schema: SchemaDocument(identifier: "skill.memory.in"),
+            fields: [
+                "action": "capture",
+                "conversationID": conversationID,
+                "role": role.rawValue,
+                "content": content
+            ]
+        )
+        _ = try await composition.runtime.invokeModule(
+            ModuleInvocation(moduleID: MemorySkillModule.id, input: payload)
+        )
+    }
+
+    private func promptWithConversationMemory(for statement: String) -> String {
+        let recent = chatMessages.suffix(12).map { message in
+            let role = message.role == .user ? "User" : "Agent"
+            return "(role): (message.content)"
+        }
+        guard !recent.isEmpty else { return statement }
+        return "Conversation memory (recent history):
+" + recent.joined(separator: "
+") + "
+
+Current user message:
+" + statement
+    }
 
     func refresh() async {
         state = await composition.session.currentState()
@@ -102,6 +162,9 @@ final class KernelSession: ObservableObject {
         }
         executionProgress = nil
         executionResult = nil
+        let userMessage = ChatMessage(role: .user, content: statement.trimmingCharacters(in: .whitespacesAndNewlines))
+        chatMessages.append(userMessage)
+        try? await captureChatMemory(role: .user, content: userMessage.content)
         presentedResult = nil
         lastError = nil
         let task = Task { @MainActor [weak self] in
@@ -112,7 +175,8 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                goalID = try await self.composition.session.submitInput(statement)
+                let runtimePrompt = self.promptWithConversationMemory(for: statement)
+                goalID = try await self.composition.session.submitInput(runtimePrompt)
                 await self.refresh()
                 guard let goalID else {
                     throw KernelError.invalidStateUpdate("Runtime accepted input without a goal identifier")
@@ -128,6 +192,9 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionResult = result
                 self.presentedResult = result
+                let assistantMessage = ChatMessage(role: .assistant, content: result)
+                self.chatMessages.append(assistantMessage)
+                try? await self.captureChatMemory(role: .assistant, content: result)
                 self.executionProgress = nil
             } catch is CancellationError {
                 // Cancellation is not success. Clear the active goal so Stop cannot
