@@ -396,6 +396,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             eventLog: idempotentLog
         )
         self.memoryRuntime = memoryRuntime
+        try await moduleCatalog.register(MemorySkillModule(memory: memoryRuntime))
 
         let mutStore: any MutationEvidenceStore
         if let mutationEvidenceStore {
