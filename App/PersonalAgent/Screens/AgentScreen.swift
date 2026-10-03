@@ -397,6 +397,28 @@ private struct ActivitySheet: View {
                     } else {
                         card("QUIET", "No active task", "The Agent is ready for your next instruction.", "moon.stars.fill")
                     }
+                    if !session.chatHistory.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Text("CHAT HISTORY").font(.caption2.weight(.bold)).foregroundStyle(.secondary)
+                                Spacer()
+                                Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
+                            }
+                            ForEach(session.chatHistory.suffix(12)) { turn in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(turn.role == .user ? "You" : "Agent")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(.secondary)
+                                    Text(turn.content)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.primary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(12)
+                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            }
+                        }
+                    }
                     card("WORKSPACE", "Contextual surfaces", "Models, providers, skills, memory and settings stay one tap away.", "circle.hexagongrid.fill")
                 }
                 .padding(20)
