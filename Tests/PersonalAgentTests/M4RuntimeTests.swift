@@ -22,6 +22,20 @@ private struct FailingEventLog: EventLog {
 
 @Suite("M4 Memory Runtime")
 struct M4RuntimeTests {
+    @Test func memoryRecordSupportsUserRememberFlow() throws {
+        let record = MemoryRecord(
+            kind: .fact,
+            content: "Remember this",
+            provenance: Provenance(source: "user"),
+            scope: .agent,
+            importance: 0.8
+        )
+        try MemoryRecordValidator.validate(record)
+        #expect(record.lifecycle == .active)
+        #expect(record.provenance.source == "user")
+    }
+
+
     @Test func runtimeCaptureAndRetrieveRecord() async throws {
         let store = InMemoryMemoryStore()
         let eventLog = InMemoryEventLog()
