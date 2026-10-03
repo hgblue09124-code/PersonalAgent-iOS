@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 import PAProviders
 import PAComposition
 import UIKit
+import Security
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
@@ -11,6 +12,10 @@ struct SettingsScreen: View {
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
     @State private var copiedUpdateLink = false
+    @State private var remoteProvider = UserDefaults.standard.string(forKey: "provider.remote.id") ?? "openai"
+    @State private var apiKey = ""
+    @State private var credentialState: CredentialState = .unknown
+    @State private var connectionState: ConnectionState = .idle
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -126,6 +131,73 @@ struct SettingsScreen: View {
             }
 
 
+
+            GlassPanel {
+                Label("Remote Provider", systemImage: "server.rack")
+                    .font(.headline)
+
+                Picker("Provider", selection: $remoteProvider) {
+                    Text("OpenAI").tag("openai")
+                    Text("Grok").tag("grok")
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: remoteProvider) { _, newValue in
+                    UserDefaults.standard.set(newValue, forKey: "provider.remote.id")
+                    apiKey = ""
+                    credentialState = loadCredentialState(for: newValue)
+                    connectionState = .idle
+                }
+
+                SecureField("API Key", text: $apiKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .textContentType(.password)
+
+                HStack(spacing: 8) {
+                    Button("Save") { saveProviderCredential() }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("Test connection") {
+                        Task { await testProviderConnection() }
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || connectionState == .testing)
+                    Button("Delete", role: .destructive) { deleteProviderCredential() }
+                        .buttonStyle(.bordered)
+                }
+
+                switch credentialState {
+                case .unknown:
+                    Text("Enter an API key to configure remote inference.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .saved:
+                    Text("API key saved securely in Keychain.")
+                        .font(.caption)
+                        .foregroundStyle(.green)
+                case .missing:
+                    Text("No API key saved.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                case .error(let message):
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+
+                if case .success = connectionState {
+                    Text("Connection successful.")
+                        .font(.caption)
+                        .foregroundStyle(.green)
+                } else if case .failure(let message) = connectionState {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                } else if connectionState == .testing {
+                    ProgressView("Testing connection…")
+                        .font(.caption)
+                }
+            }
 
             GlassPanel {
                 Label("Language", systemImage: "globe")
@@ -345,6 +417,113 @@ private extension SettingsScreen {
             updateState = .available(releasePreCode, downloadURL)
         } catch {
             updateState = .failed
+        }
+    }
+}
+
+private enum CredentialState: Equatable {
+    case unknown, saved, missing, error(String)
+}
+
+private enum ConnectionState: Equatable {
+    case idle, testing, success, failure(String)
+}
+
+private extension SettingsScreen {
+    var credentialAccount: String { "provider.api-key.\(remoteProvider)" }
+
+    func loadCredentialState(for provider: String) -> CredentialState {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "PersonalAgent.Provider",
+            kSecAttrAccount as String: "provider.api-key.\(provider)",
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        if status == errSecItemNotFound { return .missing }
+        guard status == errSecSuccess else { return .error("Keychain read failed.") }
+        return .saved
+    }
+
+    func saveProviderCredential() {
+        let value = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        do {
+            let data = Data(value.utf8)
+            let base: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: "PersonalAgent.Provider",
+                kSecAttrAccount as String: credentialAccount
+            ]
+            let status = SecItemUpdate(base as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+            if status == errSecItemNotFound {
+                var item = base
+                item[kSecValueData as String] = data
+                let addStatus = SecItemAdd(item as CFDictionary, nil)
+                guard addStatus == errSecSuccess else { throw NSError(domain: "Keychain", code: Int(addStatus)) }
+            } else if status != errSecSuccess {
+                throw NSError(domain: "Keychain", code: Int(status))
+            }
+            apiKey = ""
+            credentialState = .saved
+            connectionState = .idle
+            UserDefaults.standard.set(remoteProvider, forKey: "provider.remote.id")
+        } catch {
+            credentialState = .error("Could not save API key securely.")
+        }
+    }
+
+    func deleteProviderCredential() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "PersonalAgent.Provider",
+            kSecAttrAccount as String: credentialAccount
+        ]
+        let status = SecItemDelete(query as CFDictionary)
+        if status == errSecSuccess || status == errSecItemNotFound {
+            credentialState = .missing
+            connectionState = .idle
+            apiKey = ""
+        } else {
+            credentialState = .error("Could not delete API key.")
+        }
+    }
+
+    func testProviderConnection() async {
+        let value = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        connectionState = .testing
+        let endpoint: String
+        let model: String
+        switch remoteProvider {
+        case "grok":
+            endpoint = "https://api.x.ai/v1/chat/completions"
+            model = "grok-3"
+        default:
+            endpoint = "https://api.openai.com/v1/chat/completions"
+            model = "gpt-4o-mini"
+        }
+        do {
+            guard let url = URL(string: endpoint) else { throw URLError(.badURL) }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(value)", forHTTPHeaderField: "Authorization")
+            request.httpBody = try JSONSerialization.data(withJSONObject: [
+                "model": model,
+                "messages": [["role": "user", "content": "Reply with OK."]],
+                "max_tokens": 8,
+                "temperature": 0
+            ])
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                throw URLError(.badServerResponse)
+            }
+            await MainActor.run { connectionState = .success }
+        } catch {
+            await MainActor.run { connectionState = .failure("Connection failed. Check the key and provider access.") }
         }
     }
 }
