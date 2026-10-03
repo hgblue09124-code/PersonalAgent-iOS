@@ -25,6 +25,7 @@ final class KernelSession: ObservableObject {
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionResult: String?
     @Published var presentedResult: String?
+    @Published private(set) var chatHistory: [ChatTurn]
     private var executionTask: Task<Void, Never>?
 
     init(composition: M8CompositionRoot, state: AgentState) {
@@ -40,6 +41,7 @@ final class KernelSession: ObservableObject {
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
         self.presentedResult = nil
+        self.chatHistory = Self.loadChatHistory()
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -104,6 +106,8 @@ final class KernelSession: ObservableObject {
         executionResult = nil
         presentedResult = nil
         lastError = nil
+        appendChatTurn(role: .user, content: statement)
+        let contextualInput = buildContextualInput(for: statement)
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
             var goalID: GoalID?
@@ -112,7 +116,7 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                goalID = try await self.composition.session.submitInput(statement)
+                goalID = try await self.composition.session.submitInput(contextualInput)
                 await self.refresh()
                 guard let goalID else {
                     throw KernelError.invalidStateUpdate("Runtime accepted input without a goal identifier")
@@ -120,7 +124,7 @@ final class KernelSession: ObservableObject {
                 self.executionProgress = .executing
                 let evaluation = try await self.composition.lifecycleManager.run(
                     goalID: goalID,
-                    rawInput: statement
+                    rawInput: contextualInput
                 )
                 let result = Self.cleanModelResult(evaluation.reason)
                 guard !result.isEmpty else {
@@ -128,6 +132,7 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionResult = result
                 self.presentedResult = result
+                self.appendChatTurn(role: .assistant, content: result)
                 self.executionProgress = nil
             } catch is CancellationError {
                 // Cancellation is not success. Clear the active goal so Stop cannot
@@ -253,6 +258,29 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    private func appendChatTurn(role: ChatTurn.Role, content: String) {
+        let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        chatHistory.append(ChatTurn(role: role, content: value))
+        if chatHistory.count > 100 { chatHistory.removeFirst(chatHistory.count - 100) }
+        if let data = try? JSONEncoder().encode(chatHistory) {
+            UserDefaults.standard.set(data, forKey: "chat.history.v1")
+        }
+    }
+
+    private func buildContextualInput(for statement: String) -> String {
+        let recent = chatHistory.suffix(12)
+        guard !recent.isEmpty else { return statement }
+        let transcript = recent.map { "\($0.role.rawValue): \($0.content)" }.joined(separator: "\n")
+        return "Conversation context:\n\(transcript)\n\nCurrent user request:\n\(statement)"
+    }
+
+    private static func loadChatHistory() -> [ChatTurn] {
+        guard let data = UserDefaults.standard.data(forKey: "chat.history.v1"),
+              let history = try? JSONDecoder().decode([ChatTurn].self, from: data) else { return [] }
+        return history
+    }
+
     private static func cleanModelResult(_ raw: String) -> String {
         var result = raw.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -320,5 +348,15 @@ private enum DevModelDownloadError: LocalizedError {
         case .checksumMismatch(let expected, let actual):
             return "Dev model SHA-256 mismatch. Expected \(expected), got \(actual)."
         }
+    }
+}
+
+struct ChatTurn: Codable, Equatable, Identifiable, Sendable {
+    enum Role: String, Codable, Sendable { case user, assistant }
+    let id: UUID
+    let role: Role
+    let content: String
+    init(id: UUID = UUID(), role: Role, content: String) {
+        self.id = id; self.role = role; self.content = content
     }
 }
