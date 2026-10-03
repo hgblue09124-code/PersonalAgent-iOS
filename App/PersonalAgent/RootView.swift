@@ -16,6 +16,7 @@ struct RootView: View {
         .ignoresSafeArea(.all)
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .environment(\.locale, Locale(identifier: appLanguage))
+        .environment(\.kernelSession, session)
         .id(appLanguage)
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
@@ -161,5 +162,16 @@ extension EnvironmentValues {
     var milestoneGate: MilestoneGate {
         get { self[MilestoneKey.self] }
         set { self[MilestoneKey.self] = newValue }
+    }
+}
+
+private struct KernelSessionEnvironmentKey: EnvironmentKey {
+    static let defaultValue: KernelSession? = nil
+}
+
+extension EnvironmentValues {
+    var kernelSession: KernelSession? {
+        get { self[KernelSessionEnvironmentKey.self] }
+        set { self[KernelSessionEnvironmentKey.self] = newValue }
     }
 }
