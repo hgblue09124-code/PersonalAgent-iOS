@@ -175,11 +175,11 @@ final class KernelSession: ObservableObject {
         }
     }
 
-    func remember(_ content: String, kind: MemoryKind = .fact) async {
+    func remember(_ content: String, kind: String = "fact") async {
         let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }
         await run {
-            try await composition.remember(value, kind: kind.rawValue)
+            try await composition.remember(value, kind: kind)
         }
         await refreshMemory()
     }
