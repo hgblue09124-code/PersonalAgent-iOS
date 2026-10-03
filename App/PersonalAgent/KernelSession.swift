@@ -5,6 +5,7 @@ import PAKernel
 import PAComposition
 import PAProviders
 import PARuntime
+import PAMemory
 
 @MainActor
 final class KernelSession: ObservableObject {
@@ -26,6 +27,7 @@ final class KernelSession: ObservableObject {
     @Published var executionResult: String?
     @Published var presentedResult: String?
     @Published private(set) var chatHistory: [ChatTurn]
+    @Published private(set) var memoryRecords: [MemoryRecord]
     private var executionTask: Task<Void, Never>?
 
     init(composition: M8CompositionRoot, state: AgentState) {
@@ -42,6 +44,7 @@ final class KernelSession: ObservableObject {
         self.activeEngineState = .unloaded
         self.presentedResult = nil
         self.chatHistory = Self.loadChatHistory()
+        self.memoryRecords = []
     }
 
     var milestone: MilestoneGate { composition.milestone }
@@ -50,6 +53,7 @@ final class KernelSession: ObservableObject {
         state = await composition.session.currentState()
         goals = await composition.session.activeGoals()
         providerID = await composition.currentProviderIdentityID()
+        await refreshMemory()
         providerLifecycle = await composition.currentProviderLifecycle()
         moduleIDs = await composition.registeredModuleIDs()
 
@@ -162,6 +166,40 @@ final class KernelSession: ObservableObject {
         executionTask = task
         await task.value
         executionTask = nil
+    }
+
+    func refreshMemory() async {
+        do {
+            let result = try await composition.memoryRuntime.query(
+                MemoryQuery(limit: 50, sortOrder: .createdAtDescending)
+            )
+            memoryRecords = result.records
+        } catch {
+            lastError = String(describing: error)
+        }
+    }
+
+    func remember(_ content: String, kind: MemoryKind = .fact) async {
+        let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        await run {
+            let record = MemoryRecord(
+                kind: kind,
+                content: value,
+                provenance: Provenance(source: "user"),
+                scope: .agent,
+                importance: 0.8
+            )
+            try await composition.memoryRuntime.capture(record)
+        }
+        await refreshMemory()
+    }
+
+    func clearMemory() async {
+        await run {
+            try await composition.memoryRuntime.clear()
+        }
+        memoryRecords = []
     }
 
     func downloadDevModel() async {
