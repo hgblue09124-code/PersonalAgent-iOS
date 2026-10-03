@@ -624,7 +624,47 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     }
 }
 
+public struct MemorySnapshotItem: Sendable, Equatable, Identifiable {
+    public let id: String
+    public let kind: String
+    public let content: String
+
+    public init(id: String, kind: String, content: String) {
+        self.id = id
+        self.kind = kind
+        self.content = content
+    }
+}
+
 extension M8CompositionRoot {
+    public func memorySnapshot(limit: Int = 50) async throws -> [MemorySnapshotItem] {
+        let result = try await memoryRuntime.query(
+            MemoryQuery(limit: max(1, limit), sortOrder: .createdAtDescending)
+        )
+        return result.records.map {
+            MemorySnapshotItem(id: $0.id.rawValue, kind: $0.kind.rawValue, content: $0.content)
+        }
+    }
+
+    public func remember(_ content: String, kind: String = "fact") async throws {
+        let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { throw MemoryError.invalidRecord("content") }
+        let memoryKind = MemoryKind(rawValue: kind) ?? .fact
+        try await memoryRuntime.capture(
+            MemoryRecord(
+                kind: memoryKind,
+                content: value,
+                provenance: Provenance(source: "user"),
+                scope: .agent,
+                importance: 0.8
+            )
+        )
+    }
+
+    public func clearMemory() async throws {
+        try await memoryRuntime.clear()
+    }
+
     public var selectedProviderID: String {
         catalog.identities.first?.id.rawValue ?? "none"
     }
