@@ -15,6 +15,16 @@ import PARuntime
 
 @Suite("M9 Parallel Track — Real Provider Vertical Slice Tests")
 struct M9RealProviderSliceTests {
+    @Test func productProviderBaselineKeepsRetryFailClosedByDefault() {
+        let configuration = ProviderConfiguration(
+            providerID: GrokProviderBoundary.providerID,
+            endpointURL: GrokProviderBoundary.defaultEndpoint,
+            defaultModel: ModelID(rawValue: "grok-3")
+        )
+        #expect(configuration.maxRetryAttempts == 0)
+    }
+
+
 
     // MARK: - P1: Provider construction/configuration
     @Test func p1_providerConstructionAndConfiguration() async throws {
