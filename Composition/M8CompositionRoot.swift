@@ -11,6 +11,7 @@ import PAEvents
 import PAObservability
 import PATools
 import PASkills
+import PASecurity
 
 /// Manages active local model engine instance lifetime and residency in product composition.
 public actor LocalModelRuntimeCoordinator: Sendable {
@@ -253,6 +254,154 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     }
 }
 
+
+private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
+    private let fallback: any LLMProvider
+
+    init(fallback: any LLMProvider) {
+        self.fallback = fallback
+    }
+
+    private var enabled: Bool {
+        UserDefaults.standard.bool(forKey: "provider.remote.enabled")
+    }
+
+    private var selectedID: String {
+        UserDefaults.standard.string(forKey: "provider.remote.id") ?? "openai"
+    }
+
+    private var keychainAccount: String { "provider.api-key.\(selectedID)" }
+
+    var identity: ProviderIdentity {
+        switch selectedID {
+        case "grok":
+            return ProviderIdentity(
+                id: ProviderID(rawValue: "grok"),
+                displayName: "Grok",
+                models: [ModelIdentity(id: ModelID(rawValue: "grok-3"), displayName: "Grok 3", contextTokenLimit: 131_072)]
+            )
+        default:
+            return ProviderIdentity(
+                id: ProviderID(rawValue: "openai"),
+                displayName: "OpenAI",
+                models: [ModelIdentity(id: ModelID(rawValue: "gpt-4o-mini"), displayName: "GPT-4o mini", contextTokenLimit: 128_000)]
+            )
+        }
+    }
+
+    var capabilities: ProviderCapabilities { [.textGeneration, .streaming] }
+
+    var health: ProviderHealth {
+        get async {
+            guard enabled else { return await fallback.health }
+            return (try? credential()) == nil ? .unavailable : .unknown
+        }
+    }
+
+    func complete(_ request: LLMRequest) async throws -> LLMResponse {
+        guard enabled else { return try await fallback.complete(request) }
+        let token = try credential()
+        let endpoint: String
+        let model: String
+        switch selectedID {
+        case "grok":
+            endpoint = "https://api.x.ai/v1/chat/completions"
+            model = request.model.rawValue.isEmpty ? "grok-3" : request.model.rawValue
+        default:
+            endpoint = "https://api.openai.com/v1/chat/completions"
+            model = request.model.rawValue.isEmpty ? "gpt-4o-mini" : request.model.rawValue
+        }
+
+        let messages = request.messages.map { ["role": $0.role.rawValue, "content": $0.content] }
+        var body: [String: Any] = [
+            "model": model,
+            "messages": messages,
+            "stream": false
+        ]
+        if let temperature = request.parameters.temperature { body["temperature"] = temperature }
+        if let maxTokens = request.parameters.maxOutputTokens { body["max_tokens"] = maxTokens }
+        let data = try JSONSerialization.data(withJSONObject: body)
+        let response = try await URLSessionNetworkAccess().data(for: NetworkRequest(
+            url: endpoint,
+            method: "POST",
+            headers: [
+                "Authorization": "Bearer \(token)",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            ],
+            body: data
+        ))
+        guard response.statusCode == 200 else {
+            throw ProviderRuntimeError.from(statusCode: response.statusCode)
+        }
+        let root = try JSONDecoder().decode(ChatResponseEnvelope.self, from: response.body)
+        guard let text = root.choices.first?.message.content?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else {
+            throw ProviderRuntimeError.decodingFailure
+        }
+        return LLMResponse(text: text, finishReason: root.choices.first?.finishReason ?? "stop", model: ModelID(rawValue: model))
+    }
+
+    func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let response = try await complete(request)
+                    try Task.checkCancellation()
+                    continuation.yield(.delta(response.text))
+                    continuation.yield(.completed(response))
+                    continuation.finish()
+                } catch is CancellationError {
+                    continuation.finish(throwing: ProviderRuntimeError.cancelled)
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    private func credential() throws -> String {
+        #if canImport(Security)
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: "PersonalAgent.Provider",
+            kSecAttrAccount as String: keychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess,
+              let data = result as? Data,
+              let token = String(data: data, encoding: .utf8),
+              !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ProviderRuntimeError.authenticationFailure
+        }
+        return token
+        #else
+        throw ProviderRuntimeError.authenticationFailure
+        #endif
+    }
+}
+
+private struct ChatResponseEnvelope: Decodable, Sendable {
+    let choices: [ChatChoice]
+}
+
+private struct ChatChoice: Decodable, Sendable {
+    let message: ChatMessageEnvelope
+    let finishReason: String?
+
+    enum CodingKeys: String, CodingKey {
+        case message
+        case finishReason = "finish_reason"
+    }
+}
+
+private struct ChatMessageEnvelope: Decodable, Sendable {
+    let content: String?
+}
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
@@ -345,7 +494,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.eventLog = idempotentLog
         self.idempotentEventLog = idempotentLog
 
-        let fallbackProvider = provider ?? DefaultCompositionProvider()
+        let fallbackProvider = ConfiguredRemoteProvider(fallback: provider ?? DefaultCompositionProvider())
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: fallbackProvider,
             coordinator: coordinator
