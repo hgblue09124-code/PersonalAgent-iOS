@@ -5,7 +5,6 @@ import PAKernel
 import PAComposition
 import PAProviders
 import PARuntime
-import PAMemory
 
 @MainActor
 final class KernelSession: ObservableObject {
@@ -27,7 +26,7 @@ final class KernelSession: ObservableObject {
     @Published var executionResult: String?
     @Published var presentedResult: String?
     @Published private(set) var chatHistory: [ChatTurn]
-    @Published private(set) var memoryRecords: [MemoryRecord]
+    @Published private(set) var memoryRecords: [MemorySnapshotItem]
     private var executionTask: Task<Void, Never>?
 
     init(composition: M8CompositionRoot, state: AgentState) {
@@ -170,10 +169,7 @@ final class KernelSession: ObservableObject {
 
     func refreshMemory() async {
         do {
-            let result = try await composition.memoryRuntime.query(
-                MemoryQuery(limit: 50, sortOrder: .createdAtDescending)
-            )
-            memoryRecords = result.records
+            memoryRecords = try await composition.memorySnapshot(limit: 50)
         } catch {
             lastError = String(describing: error)
         }
@@ -183,21 +179,14 @@ final class KernelSession: ObservableObject {
         let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }
         await run {
-            let record = MemoryRecord(
-                kind: kind,
-                content: value,
-                provenance: Provenance(source: "user"),
-                scope: .agent,
-                importance: 0.8
-            )
-            try await composition.memoryRuntime.capture(record)
+            try await composition.remember(value, kind: kind.rawValue)
         }
         await refreshMemory()
     }
 
     func clearMemory() async {
         await run {
-            try await composition.memoryRuntime.clear()
+            try await composition.clearMemory()
         }
         memoryRecords = []
     }
