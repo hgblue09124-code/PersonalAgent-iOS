@@ -470,6 +470,7 @@ private extension SettingsScreen {
             credentialState = .saved
             connectionState = .idle
             UserDefaults.standard.set(remoteProvider, forKey: "provider.remote.id")
+            UserDefaults.standard.set(true, forKey: "provider.remote.enabled")
         } catch {
             credentialState = .error("Could not save API key securely.")
         }
@@ -486,6 +487,7 @@ private extension SettingsScreen {
             credentialState = .missing
             connectionState = .idle
             apiKey = ""
+            UserDefaults.standard.set(false, forKey: "provider.remote.enabled")
         } else {
             credentialState = .error("Could not delete API key.")
         }
