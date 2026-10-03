@@ -28,9 +28,9 @@ struct MemoryScreen: View {
                             .font(.title3.bold())
                     }
 
-                    ForEach(session.memoryRecords.prefix(12)) { record in
+                    ForEach(Array(session.memoryRecords.prefix(12))) { record in
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(record.kind.rawValue.capitalized)
+                            Text(record.kind.capitalized)
                                 .font(.caption.weight(.bold))
                                 .foregroundStyle(.secondary)
                             Text(record.content)
