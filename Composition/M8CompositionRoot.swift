@@ -418,6 +418,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
     public let skillRuntime: SkillRuntime
+    public let skillAgentOrchestrator: SkillAgentOrchestrator
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
     public let orchestrator: M6Orchestrator
@@ -533,6 +534,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
         self.skillRuntime = SkillRuntime()
+        self.skillAgentOrchestrator = SkillAgentOrchestrator(runtime: self.skillRuntime)
 
         let store: any MemoryStore
         if let memoryStore {
@@ -654,6 +656,18 @@ extension M8CompositionRoot {
     ) async throws -> String {
         try await skillRuntime.execute(
             id: id,
+            inputJSON: inputJSON,
+            policy: policy ?? DefaultPolicyEvaluator()
+        )
+    }
+
+    public func runSkillAgent(
+        goalStatement: String,
+        inputJSON: String,
+        policy: (any PolicyEvaluating)? = nil
+    ) async throws -> SkillAgentResult {
+        try await skillAgentOrchestrator.run(
+            goalStatement: goalStatement,
             inputJSON: inputJSON,
             policy: policy ?? DefaultPolicyEvaluator()
         )
