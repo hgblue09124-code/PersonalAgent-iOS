@@ -36,10 +36,11 @@ public struct KeywordSkillSelector: SkillSelecting, Sendable {
     public init() {}
     public func select(goalStatement: String, available: [SkillManifest]) async throws -> SkillID? {
         let goal = goalStatement.lowercased()
-        if let exact = available.first(where: { goal.contains($0.id.rawValue.lowercased()) }) { return exact.id }
-        return available.filter {
-            goal.contains($0.name.lowercased()) || goal.contains($0.description.lowercased())
-        }.sorted { $0.id.rawValue < $1.id.rawValue }.first?.id
+        let goalTokens = Set(goal.split(separator: " ").map(String.init))
+        return available.map { manifest in
+            let words = Set((manifest.id.rawValue + " " + manifest.name + " " + manifest.description).lowercased().split(separator: " ").map(String.init))
+            return (manifest, goalTokens.intersection(words).count)
+        }.filter { $0.1 > 0 }.sorted { $0.1 > $1.1 }.first?.0.id
     }
 }
 
