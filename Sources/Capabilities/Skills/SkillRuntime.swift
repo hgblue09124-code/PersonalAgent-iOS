@@ -45,11 +45,11 @@ public struct KeywordSkillSelector: SkillSelecting, Sendable {
 }
 
 public actor SkillRuntime: SkillExecuting, SkillVerifying {
-    private let store: InMemorySkillStore
+    private let store: any SkillStore
     private let selector: any SkillSelecting
 
     public init(
-        store: InMemorySkillStore = InMemorySkillStore(manifests: [SkillRuntime.normalizationManifest]),
+        store: any SkillStore = InMemorySkillStore(manifests: [SkillRuntime.normalizationManifest]),
         selector: any SkillSelecting = KeywordSkillSelector()
     ) {
         self.store = store
