@@ -1,13 +1,10 @@
 import Testing
 import PAKernel
 import PASkills
+import PAComposition
 
 @Suite("Skill Runtime")
 struct SkillRuntimeTests {
-    private struct AllowAllPolicy: PolicyEvaluating {
-        func evaluate(_ intent: ActionIntent) async throws -> PolicyDecision { .allow }
-    }
-
     @Test func discoverSelectExecuteAndVerify() async throws {
         let runtime = SkillRuntime()
         let discovered = try await runtime.discover(query: "normalize")
@@ -19,7 +16,7 @@ struct SkillRuntimeTests {
         let output = try await runtime.execute(
             id: selected,
             inputJSON: "{\"text\":\"  hello agent  \"}",
-            policy: AllowAllPolicy()
+            policy: DefaultPolicyEvaluator()
         )
         #expect(output.contains("hello agent"))
         #expect(try await runtime.verify(id: selected, outputJSON: output))
