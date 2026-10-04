@@ -417,6 +417,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let catalog: ProviderCatalog
     public let moduleCatalog: ModuleCatalog
     public let moduleRuntime: ModuleRuntime
+    public let skillRuntime: SkillRuntime
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
     public let orchestrator: M6Orchestrator
@@ -531,6 +532,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         )
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
+        self.skillRuntime = SkillRuntime()
 
         let store: any MemoryStore
         if let memoryStore {
@@ -637,6 +639,26 @@ public struct MemorySnapshotItem: Sendable, Equatable, Identifiable {
 }
 
 extension M8CompositionRoot {
+    public func discoverSkills(query: String = "") async throws -> [SkillManifest] {
+        try await skillRuntime.discover(query: query)
+    }
+
+    public func selectSkill(goalStatement: String) async throws -> SkillID {
+        try await skillRuntime.select(goalStatement: goalStatement)
+    }
+
+    public func executeSkill(
+        id: SkillID,
+        inputJSON: String,
+        policy: (any PolicyEvaluating)? = nil
+    ) async throws -> String {
+        try await skillRuntime.execute(
+            id: id,
+            inputJSON: inputJSON,
+            policy: policy ?? DefaultPolicyEvaluator()
+        )
+    }
+
     public func memorySnapshot(limit: Int = 50) async throws -> [MemorySnapshotItem] {
         let result = try await memoryRuntime.query(
             MemoryQuery(limit: max(1, limit), sortOrder: .createdAtDescending)
