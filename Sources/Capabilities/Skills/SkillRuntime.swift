@@ -9,6 +9,8 @@ public enum SkillRuntimeError: Error, Sendable, Equatable {
     case invalidInput(SkillID)
     case invalidOutput(SkillID)
     case noSelection
+    case policyDenied(String)
+    case policyRequiresApproval(String)
 }
 
 public actor InMemorySkillStore: SkillStore {
@@ -68,12 +70,25 @@ public actor SkillRuntime: SkillExecuting, SkillVerifying {
         return selected
     }
 
-    public func execute(id: SkillID, inputJSON: String, policy _: any PolicyEvaluating) async throws -> String {
+    public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
         let manifest = try await store.load(id: id)
         guard !inputJSON.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw SkillRuntimeError.invalidInput(id)
         }
         guard id == Self.normalizationManifest.id else { throw SkillRuntimeError.unknownSkill(id) }
+
+        let decision = await policy.evaluate(
+            ActionIntent(
+                capabilities: manifest.requiredCapabilities,
+                summary: "Execute skill \(manifest.id.rawValue): \(manifest.description)"
+            )
+        )
+        guard decision.allowed else {
+            if decision.requiresApproval {
+                throw SkillRuntimeError.policyRequiresApproval(decision.reason)
+            }
+            throw SkillRuntimeError.policyDenied(decision.reason)
+        }
         guard let data = inputJSON.data(using: .utf8),
               let object = try? JSONSerialization.jsonObject(with: data),
               let fields = object as? [String: Any],
