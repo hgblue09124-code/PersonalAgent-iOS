@@ -49,7 +49,10 @@ public struct SkillMarkdownParser: Sendable {
             inputSchema: SchemaDocument(identifier: input.trimmingCharacters(in: .whitespacesAndNewlines)),
             outputSchema: SchemaDocument(identifier: output.trimmingCharacters(in: .whitespacesAndNewlines)),
             requiredCapabilities: [.read, .execute],
-            metadata: ["source": "Skill.md"]
+            metadata: [
+                "source": "Skill.md",
+                "executor": fields["executor"] ?? id
+            ]
         )
     }
 
@@ -118,6 +121,7 @@ public actor FileSkillStore: SkillStore {
     name: Text Normalize
     version: 1.0.0
     description: Normalize user text by trimming surrounding whitespace.
+    executor: text.normalize
     ---
     ## Input
     skill.text.normalize.in
