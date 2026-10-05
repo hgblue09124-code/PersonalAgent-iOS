@@ -26,7 +26,7 @@ struct SkillExecutorRegistryTests {
         )
         let store = InMemorySkillStore(manifests: [manifest])
         let registry = SkillExecutorRegistry()
-        await registry.register(EchoExecutor(), for: id)
+        await registry.register(EchoExecutor(), for: id.rawValue)
         let runtime = SkillRuntime(store: store, executors: registry)
         let output = try await runtime.execute(id: id, inputJSON: "{\"value\":\"input\"}", policy: AllowPolicy())
         #expect(output == "{\"value\":\"custom\"}")
