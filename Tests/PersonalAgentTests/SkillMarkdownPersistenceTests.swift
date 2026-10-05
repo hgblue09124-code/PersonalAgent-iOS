@@ -61,4 +61,19 @@ struct SkillMarkdownPersistenceTests {
         #expect(found.count == 1)
         #expect(found.first?.id.rawValue == "text.normalize")
     }
+
+    @Test("file store seeds the canonical default Skill.md once")
+    func seedsDefaultSkill() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("skills-seed-(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = FileSkillStore(directoryURL: directory)
+        try await store.ensureDefaultSkill()
+        try await store.ensureDefaultSkill()
+
+        let found = try await store.discover(query: "text.normalize")
+        #expect(found.count == 1)
+        #expect(found.first?.metadata["source"] == "Skill.md")
+    }
 }
