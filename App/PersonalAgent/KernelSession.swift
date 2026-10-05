@@ -26,6 +26,8 @@ final class KernelSession: ObservableObject {
     @Published var executionResult: String?
     @Published var presentedResult: String?
     @Published private(set) var chatHistory: [ChatTurn]
+    @Published private(set) var conversations: [ChatConversation]
+    @Published private(set) var currentConversationID: UUID
     @Published private(set) var memoryRecords: [MemorySnapshotItem]
     private var executionTask: Task<Void, Never>?
 
@@ -42,7 +44,10 @@ final class KernelSession: ObservableObject {
         self.activeModelDescriptor = nil
         self.activeEngineState = .unloaded
         self.presentedResult = nil
-        self.chatHistory = Self.loadChatHistory()
+        let loaded = Self.loadConversations()
+        self.conversations = loaded.conversations
+        self.currentConversationID = loaded.currentID
+        self.chatHistory = loaded.conversations.first(where: { $0.id == loaded.currentID })?.turns ?? []
         self.memoryRecords = []
     }
 
@@ -295,12 +300,58 @@ final class KernelSession: ObservableObject {
 
     private func appendChatTurn(role: ChatTurn.Role, content: String) {
         let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty else { return }
-        chatHistory.append(ChatTurn(role: role, content: value))
-        if chatHistory.count > 100 { chatHistory.removeFirst(chatHistory.count - 100) }
-        if let data = try? JSONEncoder().encode(chatHistory) {
-            UserDefaults.standard.set(data, forKey: "chat.history.v1")
+        guard !value.isEmpty,
+              let index = conversations.firstIndex(where: { $0.id == currentConversationID }) else { return }
+
+        var conversation = conversations[index]
+        conversation.turns.append(ChatTurn(role: role, content: value))
+        if conversation.turns.count > 100 {
+            conversation.turns.removeFirst(conversation.turns.count - 100)
         }
+        if conversation.title == "New conversation", role == .user {
+            conversation.title = String(value.prefix(40))
+        }
+        conversation.updatedAt = Date()
+        conversations[index] = conversation
+        chatHistory = conversation.turns
+        persistConversations()
+    }
+
+    func newConversation() {
+        let conversation = ChatConversation(title: "New conversation")
+        conversations.insert(conversation, at: 0)
+        currentConversationID = conversation.id
+        chatHistory = []
+        persistConversations()
+    }
+
+    func selectConversation(id: UUID) {
+        guard let conversation = conversations.first(where: { $0.id == id }) else { return }
+        currentConversationID = id
+        chatHistory = conversation.turns
+    }
+
+    func renameCurrentConversation(_ title: String) {
+        let value = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty,
+              let index = conversations.firstIndex(where: { $0.id == currentConversationID }) else { return }
+        conversations[index].title = String(value.prefix(60))
+        conversations[index].updatedAt = Date()
+        persistConversations()
+    }
+
+    func deleteConversation(id: UUID) {
+        conversations.removeAll { $0.id == id }
+        if conversations.isEmpty {
+            let conversation = ChatConversation(title: "New conversation")
+            conversations = [conversation]
+            currentConversationID = conversation.id
+            chatHistory = []
+        } else if !conversations.contains(where: { $0.id == currentConversationID }) {
+            currentConversationID = conversations[0].id
+            chatHistory = conversations[0].turns
+        }
+        persistConversations()
     }
 
     private func buildContextualInput(for statement: String) async throws -> String {
@@ -318,10 +369,26 @@ final class KernelSession: ObservableObject {
         return sections.joined(separator: "\n\n")
     }
 
-    private static func loadChatHistory() -> [ChatTurn] {
-        guard let data = UserDefaults.standard.data(forKey: "chat.history.v1"),
-              let history = try? JSONDecoder().decode([ChatTurn].self, from: data) else { return [] }
-        return history
+    private static func loadConversations() -> (conversations: [ChatConversation], currentID: UUID) {
+        if let data = UserDefaults.standard.data(forKey: "chat.conversations.v1"),
+           let stored = try? JSONDecoder().decode([ChatConversation].self, from: data),
+           !stored.isEmpty {
+            return (stored, stored[0].id)
+        }
+        if let data = UserDefaults.standard.data(forKey: "chat.history.v1"),
+           let history = try? JSONDecoder().decode([ChatTurn].self, from: data),
+           !history.isEmpty {
+            let migrated = ChatConversation(title: "Conversation", turns: history)
+            return ([migrated], migrated.id)
+        }
+        let conversation = ChatConversation(title: "New conversation")
+        return ([conversation], conversation.id)
+    }
+
+    private func persistConversations() {
+        guard let data = try? JSONEncoder().encode(conversations) else { return }
+        UserDefaults.standard.set(data, forKey: "chat.conversations.v1")
+        UserDefaults.standard.removeObject(forKey: "chat.history.v1")
     }
 
     private static func cleanSkillResult(_ raw: String) -> String {
@@ -400,6 +467,20 @@ private enum DevModelDownloadError: LocalizedError {
         case .checksumMismatch(let expected, let actual):
             return "Dev model SHA-256 mismatch. Expected \(expected), got \(actual)."
         }
+    }
+}
+
+struct ChatConversation: Codable, Equatable, Identifiable, Sendable {
+    let id: UUID
+    var title: String
+    var turns: [ChatTurn]
+    var updatedAt: Date
+
+    init(id: UUID = UUID(), title: String, turns: [ChatTurn] = [], updatedAt: Date = Date()) {
+        self.id = id
+        self.title = title
+        self.turns = turns
+        self.updatedAt = updatedAt
     }
 }
 
