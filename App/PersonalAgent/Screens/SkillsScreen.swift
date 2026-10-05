@@ -7,28 +7,45 @@ struct SkillsScreen: View {
         ScreenScaffold(title: "Skills", systemImage: "puzzlepiece") {
             GlassPanel {
                 HStack {
-                    Label("Registered capabilities", systemImage: "square.stack.3d.up")
+                    Label("Available Skills", systemImage: "sparkles")
                         .font(.headline)
                     Spacer()
-                    Text("\(session.moduleIDs.count)")
+                    Text("\(session.skillManifests.count)")
                         .font(.title3.bold())
                 }
-                if session.moduleIDs.isEmpty {
-                    Text("No skills are currently exposed to the Agent.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+
+                if session.skillManifests.isEmpty {
+                    ContentUnavailableView(
+                        "No Skills",
+                        systemImage: "puzzlepiece",
+                        description: Text("No Skill.md capability is currently available to the Agent.")
+                    )
                 } else {
-                    ForEach(session.moduleIDs, id: \.self) { id in
-                        HStack(spacing: 10) {
-                            Image(systemName: "sparkles").frame(width: 30, height: 30).background(.thinMaterial, in: Circle())
-                            StatusRow(title: "Skill", value: id)
+                    ForEach(session.skillManifests, id: \.id) { skill in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(skill.name)
+                                    .font(.headline)
+                                Spacer()
+                                Text("\(skill.version)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(skill.id.rawValue)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                            Text(skill.description)
+                                .font(.subheadline)
                         }
+                        .padding(.vertical, 4)
                     }
                 }
             }
 
             GlassPanel {
-                Text("Skills stay contextual to the living Agent.")
+                Label("Agent scope", systemImage: "person.crop.circle.badge.checkmark")
+                    .font(.headline)
+                Text("Agent.md controls which declared Skills may be selected. Execution remains policy-gated and independently verified.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
