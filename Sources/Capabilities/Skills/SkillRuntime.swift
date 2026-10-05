@@ -76,9 +76,20 @@ public struct KeywordSkillSelector: SkillSelecting, Sendable {
     public func select(goalStatement: String, available: [SkillManifest]) async throws -> SkillID? {
         let goalTokens = Set(goalStatement.lowercased().split(separator: " ").map(String.init))
         return available.map { manifest in
-            let words = Set((manifest.id.rawValue + " " + manifest.name + " " + manifest.description).lowercased().split(separator: " ").map(String.init))
-            return (manifest, goalTokens.intersection(words).count)
-        }.filter { $0.1 > 0 }.sorted { $0.1 > $1.1 }.first?.0.id
+            let normalizedGoal = goalStatement.lowercased()
+            let id = manifest.id.rawValue.lowercased()
+            let name = manifest.name.lowercased()
+            let words = Set((id + " " + name + " " + manifest.description).split(separator: " ").map(String.init))
+            let score = goalTokens.intersection(words).count
+            let exactMatch = normalizedGoal.contains(id) || normalizedGoal.contains(name)
+            return (manifest, score, exactMatch)
+        }
+        .filter { $0.1 >= 2 || $0.2 }
+        .sorted {
+            if $0.1 != $1.1 { return $0.1 > $1.1 }
+            return $0.0.id.rawValue < $1.0.id.rawValue
+        }
+        .first?.0.id
     }
 }
 

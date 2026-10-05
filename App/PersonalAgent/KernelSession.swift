@@ -141,6 +141,19 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
+                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: statement) {
+                    let result = Self.cleanSkillResult(skillResult.outputJSON)
+                    guard !result.isEmpty else {
+                        throw KernelError.invalidStateUpdate("Skill completed without a result")
+                    }
+                    self.executionResult = result
+                    self.presentedResult = result
+                    self.appendChatTurn(role: .assistant, content: result)
+                    self.executionProgress = nil
+                    await self.refresh()
+                    return
+                }
+
                 goalID = try await self.composition.session.submitInput(contextualInput)
                 await self.refresh()
                 guard let goalID else {
