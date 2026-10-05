@@ -55,6 +55,44 @@ struct SkillMarkdownPersistenceTests {
         #expect(manifest.metadata["executor"] == "text.normalize")
     }
 
+    @Test("parses Agent.md skill aggregation")
+    func parsesAgentMarkdown() throws {
+        let markdown = """
+        id: personal.default
+        name: Personal Default Agent
+        version: 1.0.0
+        description: Default personal agent.
+        ---
+        ## Skills
+        text.normalize
+        another.skill
+
+        ## Rule
+        Select only from declared skills.
+        """
+
+        let agent = try AgentMarkdownParser().parse(markdown)
+        #expect(agent.id == "personal.default")
+        #expect(agent.skillIDs.map(\\.rawValue) == ["text.normalize", "another.skill"])
+        #expect(agent.instructions == "Select only from declared skills.")
+    }
+
+    @Test("rejects duplicate Agent.md skills")
+    func rejectsDuplicateAgentSkills() throws {
+        let markdown = """
+        id: personal.default
+        name: Personal Default Agent
+        version: 1.0.0
+        ---
+        ## Skills
+        text.normalize
+        text.normalize
+        """
+        #expect(throws: AgentMarkdownError.duplicateSkill("text.normalize")) {
+            try AgentMarkdownParser().parse(markdown)
+        }
+    }
+
     @Test("file store discovers Skill.md files")
     func fileStoreDiscoversSkills() async throws {
         let directory = FileManager.default.temporaryDirectory
