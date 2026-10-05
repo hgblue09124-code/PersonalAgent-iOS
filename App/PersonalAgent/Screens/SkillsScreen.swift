@@ -22,7 +22,13 @@ struct SkillsScreen: View {
                     )
                 } else {
                     ForEach(session.skillManifests, id: \.id) { skill in
-                        VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: "puzzlepiece.extension.fill")
+                                .font(.title3)
+                                .foregroundStyle(.tint)
+                                .frame(width: 38, height: 38)
+                                .background(.tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                            VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Text(skill.name)
                                     .font(.headline)
@@ -36,6 +42,8 @@ struct SkillsScreen: View {
                                 .foregroundStyle(.secondary)
                             Text(skill.description)
                                 .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            }
                         }
                         .padding(.vertical, 4)
                     }

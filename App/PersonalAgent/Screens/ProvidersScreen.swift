@@ -14,6 +14,19 @@ struct ProvidersScreen: View {
             }
 
             GlassPanel {
+                Label("Credential boundary", systemImage: "key.fill")
+                    .font(.headline)
+                Text("Secret material belongs to the provider security boundary and is never rendered in the Agent surface.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                HStack {
+                    Image(systemName: "lock.shield.fill").foregroundStyle(.green)
+                    Text("Keychain-backed credential boundary").font(.caption.weight(.semibold))
+                    Spacer()
+                }
+            }
+
+            GlassPanel {
                 Label("Provider contract", systemImage: "link")
                     .font(.headline)
                 Text("Providers are adapters behind the Agent contract. This surface reports configuration without owning execution.")
