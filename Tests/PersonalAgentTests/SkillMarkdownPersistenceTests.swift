@@ -29,7 +29,7 @@ struct SkillMarkdownPersistenceTests {
         #expect(manifest.instructions == "Trim surrounding whitespace.")
         #expect(manifest.inputSchema.identifier == "skill.text.normalize.in")
         #expect(manifest.outputSchema.identifier == "skill.text.normalize.out")
-        #expect(manifest.metadata["executor"] == nil)
+        #expect(manifest.metadata["executor"] == "text.normalize")
     }
 
     @Test("parses explicit executor binding")
@@ -73,7 +73,7 @@ struct SkillMarkdownPersistenceTests {
 
         let agent = try AgentMarkdownParser().parse(markdown)
         #expect(agent.id == "personal.default")
-        #expect(agent.skillIDs.map(\\.rawValue) == ["text.normalize", "another.skill"])
+        #expect(agent.skillIDs.map { $0.rawValue } == ["text.normalize", "another.skill"])
         #expect(agent.instructions == "Select only from declared skills.")
     }
 
