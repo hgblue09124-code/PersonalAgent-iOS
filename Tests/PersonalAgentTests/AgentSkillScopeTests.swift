@@ -23,7 +23,7 @@ struct AgentSkillScopeTests {
             requiredCapabilities: [.read, .execute]
         )
         let store = InMemorySkillStore(manifests: [normalize, other])
-        let registry = SkillExecutorRegistry(executors: [normalize.id: TextNormalizeSkillExecutor()])
+        let registry = SkillExecutorRegistry(executors: [normalize.id.rawValue: TextNormalizeSkillExecutor()])
         let runtime = SkillRuntime(store: store, executors: registry)
         let orchestrator = SkillAgentOrchestrator(runtime: runtime)
         let agent = AgentManifest(
