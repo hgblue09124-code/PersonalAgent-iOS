@@ -19,11 +19,14 @@ public protocol SkillExecutor: Sendable {
 }
 
 public actor SkillExecutorRegistry {
-    private var executors: [SkillID: any SkillExecutor] = [:]
-    public init(executors: [SkillID: any SkillExecutor] = [:]) { self.executors = executors }
-    public func register(_ executor: any SkillExecutor, for id: SkillID) { executors[id] = executor }
-    public func resolve(_ id: SkillID) throws -> any SkillExecutor {
-        guard let executor = executors[id] else { throw SkillRuntimeError.unknownSkill(id) }
+    private var executors: [String: any SkillExecutor] = [:]
+    public init(executors: [String: any SkillExecutor] = [:]) { self.executors = executors }
+    public func register(_ executor: any SkillExecutor, for key: String) { executors[key] = executor }
+    public func resolve(_ manifest: SkillManifest) throws -> any SkillExecutor {
+        let key = manifest.metadata["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            ? manifest.metadata["executor"]!
+            : manifest.id.rawValue
+        guard let executor = executors[key] else { throw SkillRuntimeError.unknownSkill(manifest.id) }
         return executor
     }
 }
@@ -95,7 +98,7 @@ public actor SkillRuntime: SkillExecuting, SkillVerifying {
         self.store = store
         self.selector = selector
         self.executors = executors ?? SkillExecutorRegistry(
-            executors: [SkillRuntime.normalizationManifest.id: TextNormalizeSkillExecutor()]
+            executors: ["text.normalize": TextNormalizeSkillExecutor()]
         )
     }
     public func discover(query: String = "") async throws -> [SkillManifest] { try await store.discover(query: query) }
@@ -125,12 +128,12 @@ public actor SkillRuntime: SkillExecuting, SkillVerifying {
             if decision.requiresApproval { throw SkillRuntimeError.policyRequiresApproval(decision.reason) }
             throw SkillRuntimeError.policyDenied(decision.reason)
         }
-        let executor = try await executors.resolve(id)
+        let executor = try await executors.resolve(manifest)
         return try await executor.execute(manifest: manifest, inputJSON: inputJSON)
     }
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
         let manifest = try await store.load(id: id)
-        let executor = try await executors.resolve(id)
+        let executor = try await executors.resolve(manifest)
         return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
     }
     public static let normalizationManifest = SkillManifest(
