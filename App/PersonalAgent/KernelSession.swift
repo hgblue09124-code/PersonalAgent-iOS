@@ -4,6 +4,7 @@ import SwiftUI
 import PAKernel
 import PAComposition
 import PAProviders
+import PASkills
 import PARuntime
 
 @MainActor
@@ -15,6 +16,7 @@ final class KernelSession: ObservableObject {
     @Published var providerID: String
     @Published var providerLifecycle: String
     @Published var moduleIDs: [String]
+    @Published var skillManifests: [SkillManifest]
 
     @Published var installedModels: [LocalModelDescriptor]
     @Published var activeModelID: ModelID?
@@ -39,6 +41,7 @@ final class KernelSession: ObservableObject {
         self.providerID = composition.selectedProviderID
         self.providerLifecycle = "unknown"
         self.moduleIDs = []
+        self.skillManifests = []
         self.installedModels = []
         self.activeModelID = nil
         self.activeModelDescriptor = nil
@@ -60,6 +63,12 @@ final class KernelSession: ObservableObject {
         await refreshMemory()
         providerLifecycle = await composition.currentProviderLifecycle()
         moduleIDs = await composition.registeredModuleIDs()
+        do {
+            skillManifests = try await composition.discoverSkills()
+        } catch {
+            skillManifests = []
+            lastError = String(describing: error)
+        }
 
         let storage = composition.localModelStorage
         do {
