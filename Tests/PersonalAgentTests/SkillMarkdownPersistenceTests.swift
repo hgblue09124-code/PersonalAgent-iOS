@@ -29,6 +29,30 @@ struct SkillMarkdownPersistenceTests {
         #expect(manifest.instructions == "Trim surrounding whitespace.")
         #expect(manifest.inputSchema.identifier == "skill.text.normalize.in")
         #expect(manifest.outputSchema.identifier == "skill.text.normalize.out")
+        #expect(manifest.metadata["executor"] == nil)
+    }
+
+    @Test("parses explicit executor binding")
+    func parsesExplicitExecutorBinding() throws {
+        let markdown = """
+        id: text.normalize.custom
+        name: Text Normalize Custom
+        version: 1.0.0
+        description: Normalize text with the registered executor.
+        executor: text.normalize
+        ---
+        ## Input
+        in
+
+        ## Output
+        out
+
+        ## Rule
+        Trim surrounding whitespace.
+        """
+
+        let manifest = try SkillMarkdownParser().parse(markdown)
+        #expect(manifest.metadata["executor"] == "text.normalize")
     }
 
     @Test("file store discovers Skill.md files")
@@ -75,5 +99,6 @@ struct SkillMarkdownPersistenceTests {
         let found = try await store.discover(query: "text.normalize")
         #expect(found.count == 1)
         #expect(found.first?.metadata["source"] == "Skill.md")
+        #expect(found.first?.metadata["executor"] == "text.normalize")
     }
 }
