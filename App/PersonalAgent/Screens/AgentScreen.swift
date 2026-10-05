@@ -27,14 +27,27 @@ struct AgentScreen: View {
     }
 
     private var background: some View {
-        LinearGradient(
-            colors: [
-                Color(red: 0.106, green: 0.184, blue: 0.878),
-                Color(red: 0.075, green: 0.110, blue: 0.520)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.12, green: 0.20, blue: 0.78),
+                    Color(red: 0.055, green: 0.08, blue: 0.30),
+                    Color(red: 0.025, green: 0.035, blue: 0.12)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Circle()
+                .fill(Color.white.opacity(0.10))
+                .frame(width: 220)
+                .blur(radius: 60)
+                .offset(x: -110, y: -280)
+            Circle()
+                .fill(AgentDesign.accent.opacity(0.22))
+                .frame(width: 280)
+                .blur(radius: 80)
+                .offset(x: 130, y: 260)
+        }
         .ignoresSafeArea()
     }
 
@@ -46,11 +59,11 @@ struct AgentScreen: View {
         // visual geometry without changing the native fullscreen canvas.
         VStack(spacing: 0) {
             topBar
-            Color.clear.frame(height: 18)
-            quickActions
-            Color.clear.frame(height: 12)
-            hero
             Color.clear.frame(height: 22)
+            quickActions
+            Color.clear.frame(height: 18)
+            hero
+            Color.clear.frame(height: 28)
             composer
             status
         }
@@ -96,8 +109,9 @@ struct AgentScreen: View {
                 .foregroundStyle(.white.opacity(0.92))
                 .padding(.horizontal, 11)
                 .padding(.vertical, 8)
-                .background(.white.opacity(0.10), in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.14), lineWidth: 1))
+                 .background(.white.opacity(0.085), in: Capsule())
+                .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
+                .shadow(color: .black.opacity(0.10), radius: 10, y: 5)
         }
         .buttonStyle(.plain)
     }
@@ -107,8 +121,9 @@ struct AgentScreen: View {
             .font(.system(size: 13, weight: .bold))
             .foregroundStyle(.white)
             .frame(width: 38, height: 38)
-            .background(.white.opacity(0.10), in: Circle())
-            .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
+             .background(.white.opacity(0.085), in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1))
+            .shadow(color: .black.opacity(0.10), radius: 10, y: 5)
     }
 
     private var hero: some View {
@@ -122,15 +137,19 @@ struct AgentScreen: View {
             .buttonStyle(.plain)
 
             Text(LocalizedStringKey(greeting))
-                .font(.system(size: 36, weight: .black, design: .rounded))
-                .tracking(-1.1)
+                .font(.system(size: 38, weight: .black, design: .rounded))
+                .tracking(-1.3)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
 
-            Text(LocalizedStringKey(phaseSubtitle))
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.72))
-                .multilineTextAlignment(.center)
+            HStack(spacing: 7) {
+                Circle()
+                    .fill(session.executionProgress != nil ? .white : .white.opacity(0.72))
+                    .frame(width: 6, height: 6)
+                Text(LocalizedStringKey(phaseSubtitle))
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.72))
+            }
         }
         .frame(maxWidth: .infinity)
         .transition(.opacity.combined(with: .scale(scale: 0.96)))
@@ -162,9 +181,9 @@ struct AgentScreen: View {
         .padding(.leading, 17)
         .padding(.trailing, 7)
         .padding(.vertical, 7)
-        .background(.black.opacity(0.27), in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.17), lineWidth: 1))
-        .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
+         .background(.ultraThinMaterial, in: Capsule())
+        .overlay(Capsule().stroke(.white.opacity(0.20), lineWidth: 1))
+        .shadow(color: .black.opacity(0.24), radius: 24, y: 12)
     }
 
     @ViewBuilder
@@ -201,8 +220,13 @@ struct AgentScreen: View {
         .foregroundStyle(.primary)
         .padding(13)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .padding(.top, 12)
+         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(.primary.opacity(0.06), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
+        .padding(.top, 14)
     }
 
     private var lifecycleMenu: some View {

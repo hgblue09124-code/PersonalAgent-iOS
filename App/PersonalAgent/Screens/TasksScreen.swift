@@ -46,8 +46,8 @@ struct TasksScreen: View {
             GlassPanel {
                 StatusRow(title: "Agent", value: session.state.lifecycle.rawValue)
                 StatusRow(title: "Provider", value: session.providerID)
-                StatusRow(title: "Skills", value: "(session.skillManifests.count)")
-                StatusRow(title: "Memory", value: "(session.memoryRecords.count)")
+                StatusRow(title: "Skills", value: "\(session.skillManifests.count)")
+                StatusRow(title: "Memory", value: "\(session.memoryRecords.count)")
             }
         }
     }
