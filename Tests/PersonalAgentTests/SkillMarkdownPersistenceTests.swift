@@ -73,7 +73,7 @@ struct SkillMarkdownPersistenceTests {
 
         let agent = try AgentMarkdownParser().parse(markdown)
         #expect(agent.id == "personal.default")
-        #expect(agent.skillIDs.map(\\.rawValue) == ["text.normalize", "another.skill"])
+        #expect(agent.skillIDs.map(\.rawValue) == ["text.normalize", "another.skill"])
         #expect(agent.instructions == "Select only from declared skills.")
     }
 
