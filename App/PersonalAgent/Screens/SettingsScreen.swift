@@ -2,8 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
 import PAComposition
+import PASecurity
 import UIKit
-import Security
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
@@ -433,39 +433,21 @@ private extension SettingsScreen {
     var credentialAccount: String { "provider.api-key.\(remoteProvider)" }
 
     func loadCredentialState(for provider: String) -> CredentialState {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "PersonalAgent.Provider",
-            kSecAttrAccount as String: "provider.api-key.\(provider)",
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
-        ]
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        if status == errSecItemNotFound { return .missing }
-        guard status == errSecSuccess else { return .error("Keychain read failed.") }
-        return .saved
+        do {
+            return try KeychainSecretStore().load(account: "provider.api-key.\(provider)") == nil ? .missing : .saved
+        } catch {
+            return .error("Keychain read failed.")
+        }
     }
 
     func saveProviderCredential() {
         let value = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }
         do {
-            let data = Data(value.utf8)
-            let base: [String: Any] = [
-                kSecClass as String: kSecClassGenericPassword,
-                kSecAttrService as String: "PersonalAgent.Provider",
-                kSecAttrAccount as String: credentialAccount
-            ]
-            let status = SecItemUpdate(base as CFDictionary, [kSecValueData as String: data] as CFDictionary)
-            if status == errSecItemNotFound {
-                var item = base
-                item[kSecValueData as String] = data
-                let addStatus = SecItemAdd(item as CFDictionary, nil)
-                guard addStatus == errSecSuccess else { throw NSError(domain: "Keychain", code: Int(addStatus)) }
-            } else if status != errSecSuccess {
-                throw NSError(domain: "Keychain", code: Int(status))
-            }
+            try KeychainSecretStore().store(
+                account: credentialAccount,
+                secret: Data(value.utf8)
+            )
             apiKey = ""
             credentialState = .saved
             connectionState = .idle
@@ -477,20 +459,16 @@ private extension SettingsScreen {
     }
 
     func deleteProviderCredential() {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "PersonalAgent.Provider",
-            kSecAttrAccount as String: credentialAccount
-        ]
-        let status = SecItemDelete(query as CFDictionary)
-        if status == errSecSuccess || status == errSecItemNotFound {
+        do {
+            try KeychainSecretStore().delete(account: credentialAccount)
             credentialState = .missing
             connectionState = .idle
             apiKey = ""
             UserDefaults.standard.set(false, forKey: "provider.remote.enabled")
-        } else {
+        } catch {
             credentialState = .error("Could not delete API key.")
         }
+    }
     }
 
     func testProviderConnection() async {
