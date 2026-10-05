@@ -419,6 +419,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let moduleRuntime: ModuleRuntime
     public let skillRuntime: SkillRuntime
     public let skillAgentOrchestrator: SkillAgentOrchestrator
+    public let agentStore: FileAgentStore
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
     public let orchestrator: M6Orchestrator
@@ -538,6 +539,11 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         try await skillStore.ensureDefaultSkill()
         self.skillRuntime = SkillRuntime(store: skillStore)
         self.skillAgentOrchestrator = SkillAgentOrchestrator(runtime: self.skillRuntime)
+
+        let agentDirectoryURL = rootDirectoryURL.appendingPathComponent("Agents", isDirectory: true)
+        let agentStore = FileAgentStore(directoryURL: agentDirectoryURL)
+        try await agentStore.ensureDefaultAgent()
+        self.agentStore = agentStore
 
         let store: any MemoryStore
         if let memoryStore {
@@ -674,6 +680,27 @@ extension M8CompositionRoot {
             inputJSON: inputJSON,
             policy: policy ?? DefaultPolicyEvaluator()
         )
+    }
+
+    public func runChatSkillIfMatched(
+        goalStatement: String,
+        policy: (any PolicyEvaluating)? = nil
+    ) async throws -> SkillAgentResult? {
+        let agent = try await agentStore.load(id: "personal.default")
+        let inputData = try JSONSerialization.data(withJSONObject: ["text": goalStatement], options: [.sortedKeys])
+        guard let inputJSON = String(data: inputData, encoding: .utf8) else {
+            throw KernelError.invalidStateUpdate("Unable to encode chat Skill input")
+        }
+        do {
+            return try await skillAgentOrchestrator.run(
+                agent: agent,
+                goalStatement: goalStatement,
+                inputJSON: inputJSON,
+                policy: policy ?? DefaultPolicyEvaluator()
+            )
+        } catch SkillRuntimeError.noSelection {
+            return nil
+        }
     }
 
     public func memorySnapshot(limit: Int = 50) async throws -> [MemorySnapshotItem] {
