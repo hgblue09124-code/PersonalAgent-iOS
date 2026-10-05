@@ -703,6 +703,23 @@ extension M8CompositionRoot {
         }
     }
 
+    public func memoryContext(for queryText: String, limit: Int = 6) async throws -> [String] {
+        let value = queryText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return [] }
+        let result = try await memoryRuntime.query(
+            MemoryQuery(
+                scopes: [.agent, .session, .conversation],
+                kinds: [.semantic, .preference, .fact, .context, .instruction],
+                lifecycles: [.active, .updated],
+                textSearch: value,
+                minImportance: 0.4,
+                limit: max(1, limit),
+                sortOrder: .relevance
+            )
+        )
+        return result.records.map(.content)
+    }
+
     public func memorySnapshot(limit: Int = 50) async throws -> [MemorySnapshotItem] {
         let result = try await memoryRuntime.query(
             MemoryQuery(limit: max(1, limit), sortOrder: .createdAtDescending)
