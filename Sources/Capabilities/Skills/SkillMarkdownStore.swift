@@ -79,6 +79,13 @@ public actor FileSkillStore: SkillStore {
         self.parser = parser
     }
 
+    public func ensureDefaultSkill() throws {
+        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        let url = directoryURL.appendingPathComponent("text.normalize.Skill.md")
+        guard !FileManager.default.fileExists(atPath: url.path) else { return }
+        try Self.defaultSkillMarkdown.write(to: url, atomically: true, encoding: .utf8)
+    }
+
     public func discover(query: String) async throws -> [SkillManifest] {
         let values = try loadAll()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -105,4 +112,20 @@ public actor FileSkillStore: SkillStore {
         ).filter { $0.pathExtension.lowercased() == "md" }
         return try urls.map { try parser.parse(String(contentsOf: $0, encoding: .utf8)) }
     }
+
+    private static let defaultSkillMarkdown = """
+    id: text.normalize
+    name: Text Normalize
+    version: 1.0.0
+    description: Normalize user text by trimming surrounding whitespace.
+    ---
+    ## Input
+    skill.text.normalize.in
+
+    ## Output
+    skill.text.normalize.out
+
+    ## Rule
+    Trim surrounding whitespace.
+    """
 }
