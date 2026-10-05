@@ -165,7 +165,12 @@ let package = Package(
                 "PAObservability",
                 "PAEvents",
                 "PAProviders",
+                "PAProvidersRemote",
+                "PAProvidersGrok",
+                "PAProvidersOpenAI",
                 "PAProvidersLocal",
+                "PAProvidersGrok",
+                "PAProvidersOpenAI",
                 "PAStorageModels",
 
                 "PASecurity",
