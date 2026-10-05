@@ -650,6 +650,14 @@ public struct MemorySnapshotItem: Sendable, Equatable, Identifiable {
 }
 
 extension M8CompositionRoot {
+    public func discoverAgents(query: String = "") async throws -> [AgentManifest] {
+        try await agentStore.discover(query: query)
+    }
+
+    public func loadAgent(id: String) async throws -> AgentManifest {
+        try await agentStore.load(id: id)
+    }
+
     public func discoverSkills(query: String = "") async throws -> [SkillManifest] {
         try await skillRuntime.discover(query: query)
     }
