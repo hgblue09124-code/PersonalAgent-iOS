@@ -308,6 +308,15 @@ final class KernelSession: ObservableObject {
         return history
     }
 
+    private static func cleanSkillResult(_ raw: String) -> String {
+        guard let data = raw.data(using: .utf8),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let text = object["text"] as? String else {
+            return cleanModelResult(raw)
+        }
+        return cleanModelResult(text)
+    }
+
     private static func cleanModelResult(_ raw: String) -> String {
         var result = raw.trimmingCharacters(in: .whitespacesAndNewlines)
 
