@@ -110,7 +110,15 @@ final class KernelSession: ObservableObject {
         presentedResult = nil
         lastError = nil
         appendChatTurn(role: .user, content: statement)
-        let contextualInput = buildContextualInput(for: statement)
+        let contextualInput: String
+        do {
+            contextualInput = try await buildContextualInput(for: statement)
+        } catch {
+            lastError = String(describing: error)
+            await refresh()
+            return
+        }
+
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
             var goalID: GoalID?
@@ -295,11 +303,19 @@ final class KernelSession: ObservableObject {
         }
     }
 
-    private func buildContextualInput(for statement: String) -> String {
+    private func buildContextualInput(for statement: String) async throws -> String {
         let recent = chatHistory.suffix(12)
-        guard !recent.isEmpty else { return statement }
-        let transcript = recent.map { "\($0.role.rawValue): \($0.content)" }.joined(separator: "\n")
-        return "Conversation context:\n\(transcript)\n\nCurrent user request:\n\(statement)"
+        let memory = try await composition.memoryContext(for: statement)
+        var sections: [String] = []
+        if !recent.isEmpty {
+            let transcript = recent.map { "\($0.role.rawValue): \($0.content)" }.joined(separator: "\n")
+            sections.append("Conversation context:\n\(transcript)")
+        }
+        if !memory.isEmpty {
+            sections.append("Relevant memory:\n" + memory.joined(separator: "\n"))
+        }
+        sections.append("Current user request:\n\(statement)")
+        return sections.joined(separator: "\n\n")
     }
 
     private static func loadChatHistory() -> [ChatTurn] {
