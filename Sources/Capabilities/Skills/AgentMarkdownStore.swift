@@ -114,6 +114,13 @@ public actor FileAgentStore: Sendable {
         self.parser = parser
     }
 
+    public func ensureDefaultAgent() throws {
+        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        let url = directoryURL.appendingPathComponent("personal.default.Agent.md")
+        guard !FileManager.default.fileExists(atPath: url.path) else { return }
+        try Self.defaultAgentMarkdown.write(to: url, atomically: true, encoding: .utf8)
+    }
+
     public func discover(query: String = "") throws -> [AgentManifest] {
         let values = try loadAll()
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -132,6 +139,19 @@ public actor FileAgentStore: Sendable {
         return manifest
     }
 
+    private static let defaultAgentMarkdown = """
+    id: personal.default
+    name: Personal Default Agent
+    version: 1.0.0
+    description: Default personal agent.
+    ---
+    ## Skills
+    text.normalize
+
+    ## Rule
+    Select only from the declared skills.
+    """
+
     private func loadAll() throws -> [AgentManifest] {
         guard FileManager.default.fileExists(atPath: directoryURL.path) else { return [] }
         let urls = try FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
@@ -139,3 +159,4 @@ public actor FileAgentStore: Sendable {
         return try urls.map { try parser.parse(String(contentsOf: $0, encoding: .utf8)) }
     }
 }
+

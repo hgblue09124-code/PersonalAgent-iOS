@@ -42,4 +42,18 @@ struct AgentMarkdownAggregationTests {
             try AgentMarkdownParser().parse(markdown)
         }
     }
+
+    @Test("file agent store seeds the default Agent.md once")
+    func seedsDefaultAgent() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("agents-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = FileAgentStore(directoryURL: directory)
+        try await store.ensureDefaultAgent()
+        try await store.ensureDefaultAgent()
+        let found = try await store.discover(query: "personal.default")
+        #expect(found.count == 1)
+        #expect(found.first?.skillIDs.map(\.rawValue) == ["text.normalize"])
+    }
 }
