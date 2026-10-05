@@ -100,8 +100,21 @@ public actor SkillRuntime: SkillExecuting, SkillVerifying {
     }
     public func discover(query: String = "") async throws -> [SkillManifest] { try await store.discover(query: query) }
     public func select(goalStatement: String) async throws -> SkillID {
+        try await select(goalStatement: goalStatement, allowedSkillIDs: nil)
+    }
+
+    public func select(
+        goalStatement: String,
+        allowedSkillIDs: Set<SkillID>?
+    ) async throws -> SkillID {
         let available = try await store.discover(query: "")
-        guard let selected = try await selector.select(goalStatement: goalStatement, available: available) else { throw SkillRuntimeError.noSelection }
+        let scoped = allowedSkillIDs.map { ids in available.filter { ids.contains($0.id) } } ?? available
+        guard let selected = try await selector.select(goalStatement: goalStatement, available: scoped) else {
+            throw SkillRuntimeError.noSelection
+        }
+        guard allowedSkillIDs?.contains(selected) ?? true else {
+            throw SkillRuntimeError.noSelection
+        }
         return selected
     }
     public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
