@@ -166,6 +166,8 @@ let package = Package(
                 "PAEvents",
                 "PAProviders",
                 "PAProvidersLocal",
+                "PAProvidersGrok",
+                "PAProvidersOpenAI",
                 "PAStorageModels",
 
                 "PASecurity",
