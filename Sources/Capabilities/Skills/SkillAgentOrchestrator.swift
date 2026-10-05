@@ -16,12 +16,11 @@ public struct SkillAgentResult: Sendable, Equatable {
 
 public enum SkillAgentOrchestratorError: Error, Sendable, Equatable {
     case verificationFailed(SkillID)
+    case skillOutsideAgentScope(SkillID)
 }
 
 /// Owns the Agent-level Skill loop:
-/// goal -> select -> execute -> independently verify.
-/// The UI and chat session should call this boundary rather than reimplementing
-/// Skill selection/execution semantics.
+/// goal -> scoped select -> execute -> independently verify.
 public actor SkillAgentOrchestrator {
     private let runtime: SkillRuntime
 
@@ -34,23 +33,46 @@ public actor SkillAgentOrchestrator {
         inputJSON: String,
         policy: any PolicyEvaluating
     ) async throws -> SkillAgentResult {
-        let skillID = try await runtime.select(goalStatement: goalStatement)
-        let output = try await runtime.execute(
-            id: skillID,
+        try await run(
+            agent: nil,
+            goalStatement: goalStatement,
             inputJSON: inputJSON,
             policy: policy
         )
-        let verified = try await runtime.verify(
-            id: skillID,
-            outputJSON: output
+    }
+
+    public func run(
+        agent: AgentManifest,
+        goalStatement: String,
+        inputJSON: String,
+        policy: any PolicyEvaluating
+    ) async throws -> SkillAgentResult {
+        try await run(
+            agent: Optional(agent),
+            goalStatement: goalStatement,
+            inputJSON: inputJSON,
+            policy: policy
         )
+    }
+
+    private func run(
+        agent: AgentManifest?,
+        goalStatement: String,
+        inputJSON: String,
+        policy: any PolicyEvaluating
+    ) async throws -> SkillAgentResult {
+        let skillID = try await runtime.select(
+            goalStatement: goalStatement,
+            allowedSkillIDs: agent.map { Set($0.skillIDs) }
+        )
+        if let agent, !agent.skillIDs.contains(skillID) {
+            throw SkillAgentOrchestratorError.skillOutsideAgentScope(skillID)
+        }
+        let output = try await runtime.execute(id: skillID, inputJSON: inputJSON, policy: policy)
+        let verified = try await runtime.verify(id: skillID, outputJSON: output)
         guard verified else {
             throw SkillAgentOrchestratorError.verificationFailed(skillID)
         }
-        return SkillAgentResult(
-            skillID: skillID,
-            outputJSON: output,
-            verified: true
-        )
+        return SkillAgentResult(skillID: skillID, outputJSON: output, verified: true)
     }
 }
