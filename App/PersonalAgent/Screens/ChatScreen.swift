@@ -71,6 +71,45 @@ struct ChatScreen: View {
                 }
             }
 
+            if !session.agentManifests.isEmpty {
+                GlassPanel {
+                    Menu {
+                        ForEach(session.agentManifests, id: \.id) { agent in
+                            Button {
+                                session.selectAgent(id: agent.id)
+                            } label: {
+                                HStack {
+                                    Text(agent.name)
+                                    if agent.id == session.selectedAgentID {
+                                        Spacer()
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.crop.circle.badge.checkmark")
+                                .foregroundStyle(.tint)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Agent")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text(session.agentManifests.first(where: { $0.id == session.selectedAgentID })?.name ?? "Personal Default Agent")
+                                    .font(.subheadline.weight(.semibold))
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Select Agent")
+                }
+            }
+
             GlassPanel {
                 if session.chatHistory.isEmpty {
                     ContentUnavailableView(
