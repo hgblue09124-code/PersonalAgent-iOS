@@ -416,6 +416,10 @@ final class KernelSession: ObservableObject {
     }
 
     private static func loadConversations() -> (conversations: [ChatConversation], currentID: UUID) {
+        if !UserDefaults.standard.bool(forKey: "privacy.persistChat") {
+            let conversation = ChatConversation(title: "New conversation")
+            return ([conversation], conversation.id)
+        }
         if let data = UserDefaults.standard.data(forKey: "chat.conversations.v1"),
            let stored = try? JSONDecoder().decode([ChatConversation].self, from: data),
            !stored.isEmpty {
@@ -432,6 +436,11 @@ final class KernelSession: ObservableObject {
     }
 
     private func persistConversations() {
+        guard UserDefaults.standard.bool(forKey: "privacy.persistChat") else {
+            UserDefaults.standard.removeObject(forKey: "chat.conversations.v1")
+            UserDefaults.standard.removeObject(forKey: "chat.history.v1")
+            return
+        }
         guard let data = try? JSONEncoder().encode(conversations) else { return }
         UserDefaults.standard.set(data, forKey: "chat.conversations.v1")
         UserDefaults.standard.removeObject(forKey: "chat.history.v1")
