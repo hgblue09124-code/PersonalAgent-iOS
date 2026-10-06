@@ -372,6 +372,7 @@ final class KernelSession: ObservableObject {
         conversations.insert(conversation, at: 0)
         currentConversationID = conversation.id
         chatHistory = []
+        UserDefaults.standard.set(conversation.id.uuidString, forKey: "chat.currentConversation.v1")
         persistConversations()
     }
 
@@ -379,6 +380,7 @@ final class KernelSession: ObservableObject {
         guard let conversation = conversations.first(where: { $0.id == id }) else { return }
         currentConversationID = id
         chatHistory = conversation.turns
+        UserDefaults.standard.set(id.uuidString, forKey: "chat.currentConversation.v1")
     }
 
     func renameCurrentConversation(_ title: String) {
@@ -429,7 +431,12 @@ final class KernelSession: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "chat.conversations.v1"),
            let stored = try? JSONDecoder().decode([ChatConversation].self, from: data),
            !stored.isEmpty {
-            return (stored, stored[0].id)
+            let storedCurrentID = UserDefaults.standard.string(forKey: "chat.currentConversation.v1")
+                .flatMap(UUID.init(uuidString:))
+            let currentID = storedCurrentID.flatMap { id in
+                stored.contains(where: { $0.id == id }) ? id : nil
+            } ?? stored[0].id
+            return (stored, currentID)
         }
         if let data = UserDefaults.standard.data(forKey: "chat.history.v1"),
            let history = try? JSONDecoder().decode([ChatTurn].self, from: data),
