@@ -334,6 +334,8 @@ private struct RoadmapFeatureScreen: View {
     @State private var indexedFileName: String?
     @State private var selectedImage: PhotosPickerItem?
     @State private var visionText = ""
+    @State private var ragQuery = ""
+    @State private var ragResults: [String] = []
 
     var body: some View {
         ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
@@ -367,6 +369,26 @@ private struct RoadmapFeatureScreen: View {
                           let image = UIImage(data: data),
                           let cgImage = image.cgImage else { return }
                     visionText = await recognizeText(in: cgImage)
+                }
+            case .rag:
+                GlassPanel {
+                    Label("Memory-grounded retrieval", systemImage: "books.vertical")
+                        .font(.headline)
+                    TextField("Ask the knowledge memory…", text: $ragQuery)
+                        .textFieldStyle(.roundedBorder)
+                    Button("Retrieve") {
+                        let query = ragQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !query.isEmpty else { return }
+                        Task {
+                            ragResults = (try? await session.composition.memoryContext(for: query, limit: 8)) ?? []
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    ForEach(ragResults, id: \.self) { result in
+                        Text(result)
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
             case .files:
                 GlassPanel {
