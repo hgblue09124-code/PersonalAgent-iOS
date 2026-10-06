@@ -398,7 +398,7 @@ private struct RoadmapFeatureScreen: View {
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             guard let data = try? Data(contentsOf: url), !data.isEmpty else { return }
             indexedFileName = url.lastPathComponent
-            UserDefaults.standard.set(data.prefix(256_000), forKey: "roadmap.files.last.data")
+            UserDefaults.standard.set(Data(data.prefix(256_000)), forKey: "roadmap.files.last.data")
         }
     }
 
