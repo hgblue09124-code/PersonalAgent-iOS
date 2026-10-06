@@ -398,9 +398,11 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
             self.activeGenerationTask = task
         }
 
-        continuation.onTermination = { [weak self] _ in
+        continuation.onTermination = { _ in
+            // Cancellation requests the generation task to stop. The task's
+            // defer owns generationInFlight cleanup so a new request cannot
+            // race the still-running native generation.
             task.cancel()
-            self?.clearGenerationTask()
         }
 
         return stream
