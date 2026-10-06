@@ -405,24 +405,37 @@ private extension SettingsScreen {
             let releases = try JSONDecoder().decode([LatestRelease].self, from: data)
             let currentPreReleaseCode = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CODE") as? String
             let currentChannel = Bundle.main.object(forInfoDictionaryKey: "PA_PRE_RELEASE_CHANNEL") as? String
+            let isTaggedPrerelease = currentChannel?.range(of: #"^v\\d+\\.\\d+\\.\\d+-(alpha|beta|rc)(\\.\\d+)?$"#, options: .regularExpression) != nil
             let candidates = releases
                 .filter(\.prerelease)
                 .filter { release in
                     guard let channel = currentChannel, !channel.isEmpty else { return true }
+                    if isTaggedPrerelease {
+                        let pattern = #"^\\Q#(channel)\\E(?:\\.\\d+)?$"#
+                        let family = channel.replacingOccurrences(
+                            of: #"(\\.\\d+)$"#,
+                            with: "",
+                            options: .regularExpression
+                        )
+                        return release.tag_name == family || release.tag_name.hasPrefix("\(family).")
+                    }
                     return release.tag_name == channel
                 }
                 .compactMap { release -> (LatestRelease, String)? in
-                    guard let code = release.preReleaseCode else { return nil }
-                    return (release, code)
+                    let identity = release.preReleaseCode ?? release.tag_name
+                    return (release, identity)
                 }
                 .sorted(by: { $0.0.created_at > $1.0.created_at })
 
-            guard let (release, releasePreCode) = candidates.first else {
+            guard let (release, releaseIdentity) = candidates.first else {
                 updateState = .current
                 return
             }
 
-            guard currentPreReleaseCode != releasePreCode else {
+            let currentIdentity = isTaggedPrerelease
+                ? currentChannel
+                : currentPreReleaseCode
+            guard currentIdentity != releaseIdentity else {
                 updateState = .current
                 return
             }
@@ -430,7 +443,7 @@ private extension SettingsScreen {
             let downloadURL = release.assets.first(where: { $0.name == "PersonalAgent-unsigned.ipa" })?.browser_download_url
                 ?? release.html_url
             copiedUpdateLink = false
-            updateState = .available(releasePreCode, downloadURL)
+            updateState = .available(releaseIdentity, downloadURL)
         } catch {
             updateState = .failed
         }
