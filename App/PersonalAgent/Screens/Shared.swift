@@ -134,7 +134,7 @@ struct StatusBadge: View {
 }
 
 struct MilestoneBanner: View {
-    @Environment(.milestoneGate) private var gate
+    @Environment(\.milestoneGate) private var gate
 
     var body: some View {
         GlassPanel {
