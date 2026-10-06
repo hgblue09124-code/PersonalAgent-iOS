@@ -26,7 +26,7 @@ struct AgentScreen: View {
             CommandCenterSheet(
                 task: $task,
                 focused: $taskFocused,
-                onSubmit: submitTask
+                onSubmit: runTask
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
