@@ -133,11 +133,21 @@ private struct AgentWorkspaceSheet: View {
                     VStack(alignment: .leading, spacing: 14) {
                         HStack(alignment: .firstTextBaseline) {
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("Coming soon").font(.title3.weight(.bold))
-                                Text("The next layer of the Agent OS").font(.caption).foregroundStyle(.secondary)
+                                Text("Agent OS roadmap").font(.title3.weight(.bold))
+                                Text("Executable surfaces first; external adapters remain fail-closed.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Text("ROADMAP").font(.caption2.weight(.bold)).tracking(1.2).foregroundStyle(.secondary)
+                            Text("\(RoadmapFeature.readyCount)/\(RoadmapFeature.allCases.count) READY")
+                                .font(.caption2.weight(.bold))
+                                .tracking(1.0)
+                                .foregroundStyle(.green)
+                        }
+
+                        HStack(spacing: 8) {
+                            roadmapMetric("Ready", RoadmapFeature.readyCount, .green)
+                            roadmapMetric("Contract", RoadmapFeature.contractCount, .secondary)
                         }
                         roadmapGroup("Intelligence") {
                             roadmapCard(.voice)
@@ -223,6 +233,23 @@ private struct AgentWorkspaceSheet: View {
         }
     }
 
+    private func roadmapMetric(_ title: String, _ value: Int, _ tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("\(value)")
+                .font(.headline.weight(.bold))
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .stroke(tint.opacity(0.16), lineWidth: 1)
+        )
+    }
+
     private func roadmapCard(_ feature: RoadmapFeature) -> some View {
         Button { selectedRoadmapFeature = feature } label: {
             VStack(alignment: .leading, spacing: 9) {
@@ -234,10 +261,10 @@ private struct AgentWorkspaceSheet: View {
                     Spacer()
                     Text(feature.stateTitle)
                         .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .foregroundStyle(feature.isNative ? .green : .secondary)
+                        .foregroundStyle(feature.stateColor)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 4)
-                        .background(.secondary.opacity(0.08), in: Capsule())
+                        .background(feature.stateColor.opacity(0.10), in: Capsule())
                 }
                 Text(feature.title).font(.subheadline.weight(.semibold))
                 Text(feature.subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
@@ -302,6 +329,25 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
     case files, calendar, notifications, email, webActions, home
     case sync, privacyCenter, encryptedBackup, export, developerAPI, extensions
 
+    enum State {
+        case ready
+        case contract
+
+        var title: String {
+            switch self {
+            case .ready: return "Ready"
+            case .contract: return "Contract"
+            }
+        }
+
+        var color: Color {
+            switch self {
+            case .ready: return .green
+            case .contract: return .secondary
+            }
+        }
+    }
+
     var id: String { rawValue }
     var title: String { rawValue == "webResearch" ? "Web research" : rawValue == "localEmbeddings" ? "Local embeddings" : rawValue == "multiAgent" ? "Multi-agent" : rawValue == "agentPolicies" ? "Agent policies" : rawValue == "skillMarketplace" ? "Skill marketplace" : rawValue == "privacyCenter" ? "Privacy center" : rawValue == "encryptedBackup" ? "Encrypted backup" : rawValue == "developerAPI" ? "Developer API" : rawValue.capitalized }
     var subtitle: String {
@@ -329,8 +375,31 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
         case .extensions: "puzzlepiece.extension"
         }
     }
-    var isNative: Bool { [.tools, .files, .export, .privacyCenter].contains(self) }
-    var stateTitle: String { isNative ? "Native" : "Contract" }
+    var state: State {
+        switch self {
+        case .vision, .longContext, .rag, .localEmbeddings,
+             .automations, .tools, .multiAgent, .plans, .skillMarketplace,
+             .files, .encryptedBackup, .export, .privacyCenter, .developerAPI, .extensions:
+            return .ready
+        case .voice, .webResearch, .approvals, .agentPolicies,
+             .calendar, .notifications, .email, .webActions, .home, .sync:
+            return .contract
+        }
+    }
+
+    var stateTitle: String { state.title }
+    var stateColor: Color { state.color }
+    var detailText: String {
+        switch state {
+        case .ready:
+            return "This capability is wired to an existing native Agent surface and can be exercised now."
+        case .contract:
+            return "The product boundary is reserved, but the external adapter is not installed. Execution stays fail-closed."
+        }
+    }
+
+    static var readyCount: Int { allCases.filter { $0.state == .ready }.count }
+    static var contractCount: Int { allCases.filter { $0.state == .contract }.count }
 }
 private struct RoadmapFeatureScreen: View {
     let feature: RoadmapFeature
@@ -349,11 +418,22 @@ private struct RoadmapFeatureScreen: View {
     var body: some View {
         ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
             GlassPanel {
-                Label(feature.isNative ? "Native capability" : "Runtime contract", systemImage: feature.isNative ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
-                    .font(.headline)
+                HStack(spacing: 10) {
+                    Image(systemName: feature.state == .ready ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
+                        .foregroundStyle(feature.stateColor)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(feature.stateTitle)
+                            .font(.headline)
+                        Text(feature.state == .ready ? "Executable UI surface" : "Adapter boundary")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
                 Text(feature.subtitle).font(.subheadline).foregroundStyle(.secondary)
-                Text(feature.isNative ? "Connected to an existing product boundary." : "Declared in the Agent OS surface; execution remains fail-closed until its adapter is installed.")
-                    .font(.caption).foregroundStyle(.secondary)
+                Text(feature.detailText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             switch feature {
             case .tools, .skillMarketplace, .extensions:
