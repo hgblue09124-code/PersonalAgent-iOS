@@ -563,7 +563,16 @@ private struct RoadmapFeatureScreen: View {
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             guard let data = try? Data(contentsOf: url), !data.isEmpty else { return }
             indexedFileName = url.lastPathComponent
-            UserDefaults.standard.set(Data(data.prefix(256_000)), forKey: "roadmap.files.last.data")
+            let indexedData = Data(data.prefix(256_000))
+            UserDefaults.standard.set(indexedData, forKey: "roadmap.files.last.data")
+            if let text = String(data: indexedData, encoding: .utf8) {
+                Task {
+                    await session.remember(
+                        "Document \(url.lastPathComponent):\n\(text)",
+                        kind: "context"
+                    )
+                }
+            }
         }
     }
 
