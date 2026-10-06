@@ -1,5 +1,8 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import PhotosUI
+import Vision
+import UIKit
 import PAComposition
 
 struct RootView: View {
@@ -329,6 +332,8 @@ private struct RoadmapFeatureScreen: View {
     @State private var showExport = false
     @State private var showFileImporter = false
     @State private var indexedFileName: String?
+    @State private var selectedImage: PhotosPickerItem?
+    @State private var visionText = ""
 
     var body: some View {
         ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
@@ -342,6 +347,27 @@ private struct RoadmapFeatureScreen: View {
             switch feature {
             case .tools:
                 SkillsScreen(session: session)
+            case .vision:
+                GlassPanel {
+                    Label("On-device vision", systemImage: "eye")
+                        .font(.headline)
+                    PhotosPicker(selection: $selectedImage, matching: .images) {
+                        Label("Choose image", systemImage: "photo")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    if !visionText.isEmpty {
+                        Text(visionText)
+                            .font(.subheadline)
+                            .textSelection(.enabled)
+                    }
+                }
+                .task(id: selectedImage) {
+                    guard let selectedImage,
+                          let data = try? await selectedImage.loadTransferable(type: Data.self),
+                          let image = UIImage(data: data),
+                          let cgImage = image.cgImage else { return }
+                    visionText = await recognizeText(in: cgImage)
+                }
             case .files:
                 GlassPanel {
                     Label("Document boundary", systemImage: "doc.text")
@@ -399,6 +425,25 @@ private struct RoadmapFeatureScreen: View {
             guard let data = try? Data(contentsOf: url), !data.isEmpty else { return }
             indexedFileName = url.lastPathComponent
             UserDefaults.standard.set(Data(data.prefix(256_000)), forKey: "roadmap.files.last.data")
+        }
+    }
+
+    private func recognizeText(in image: CGImage) async -> String {
+        await withCheckedContinuation { continuation in
+            let request = VNRecognizeTextRequest { request, _ in
+                let observations = request.results as? [VNRecognizedTextObservation] ?? []
+                let text = observations.compactMap { $0.topCandidates(1).first?.string }.joined(separator: "\n")
+                continuation.resume(returning: text)
+            }
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = true
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    try VNImageRequestHandler(cgImage: image).perform([request])
+                } catch {
+                    continuation.resume(returning: "")
+                }
+            }
         }
     }
 
