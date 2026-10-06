@@ -335,7 +335,7 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
 private struct RoadmapFeatureScreen: View {
     let feature: RoadmapFeature
     @ObservedObject var session: KernelSession
-    @AppStorage("privacy.localOnly") private var localOnly = true
+    @AppStorage("privacy.localOnly") private var localOnly = false
     @AppStorage("privacy.persistChat") private var persistChat = true
     @State private var exportPayload = ""
     @State private var showExport = false
