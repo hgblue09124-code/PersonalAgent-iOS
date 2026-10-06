@@ -122,19 +122,42 @@ private struct AgentWorkspaceSheet: View {
                             Spacer()
                             Text("ROADMAP").font(.caption2.weight(.bold)).tracking(1.2).foregroundStyle(.secondary)
                         }
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                        roadmapGroup("Intelligence") {
                             roadmapCard("Voice", "Talk naturally", "waveform", "Soon")
                             roadmapCard("Vision", "Understand images", "eye", "Soon")
                             roadmapCard("Web research", "Search & synthesize", "globe", "Soon")
+                            roadmapCard("Long context", "Handle larger conversations", "text.alignleft", "Soon")
+                            roadmapCard("RAG", "Ground answers in knowledge", "books.vertical", "Soon")
+                            roadmapCard("Local embeddings", "Semantic retrieval on device", "square.stack.3d.up", "Soon")
+                        }
+
+                        roadmapGroup("Agent OS") {
                             roadmapCard("Automations", "Run recurring work", "arrow.triangle.2.circlepath", "Soon")
                             roadmapCard("Tools", "Connect capabilities", "wrench.and.screwdriver", "Soon")
                             roadmapCard("Multi-agent", "Delegate subtasks", "person.3", "Soon")
+                            roadmapCard("Agent profiles", "Different working modes", "person.crop.circle", "Soon")
+                            roadmapCard("Plans", "Break goals into steps", "list.number", "Soon")
+                            roadmapCard("Approvals", "Ask before sensitive actions", "checkmark.shield", "Soon")
+                            roadmapCard("Agent policies", "Control what agents can do", "slider.horizontal.3", "Soon")
+                            roadmapCard("Skill marketplace", "Discover and install skills", "square.grid.2x2", "Soon")
+                        }
+
+                        roadmapGroup("Connected workspace") {
                             roadmapCard("Files", "Work with documents", "doc.text", "Soon")
                             roadmapCard("Calendar", "Plan your time", "calendar", "Soon")
                             roadmapCard("Notifications", "Stay in the loop", "bell", "Soon")
-                            roadmapCard("Agent profiles", "Different working modes", "person.crop.circle", "Soon")
+                            roadmapCard("Email", "Read and act on mail", "envelope", "Soon")
+                            roadmapCard("Web actions", "Act across the web", "safari", "Soon")
+                            roadmapCard("Home", "Control connected devices", "house", "Soon")
+                        }
+
+                        roadmapGroup("Platform") {
                             roadmapCard("Sync", "Continue everywhere", "icloud", "Soon")
                             roadmapCard("Privacy center", "Control your data", "lock.shield", "Soon")
+                            roadmapCard("Encrypted backup", "Protect agent state", "externaldrive.badge.icloud", "Soon")
+                            roadmapCard("Export", "Take your data with you", "square.and.arrow.up", "Soon")
+                            roadmapCard("Developer API", "Build on the Agent runtime", "chevron.left.forwardslash.chevron.right", "Soon")
+                            roadmapCard("Extensions", "Add native capabilities", "puzzlepiece.extension", "Soon")
                         }
                     }
                     .padding(.vertical, 6)
@@ -166,6 +189,19 @@ private struct AgentWorkspaceSheet: View {
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+    }
+
+    @ViewBuilder
+    private func roadmapGroup<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text(title.uppercased())
+                .font(.caption2.weight(.bold))
+                .tracking(1.1)
+                .foregroundStyle(.secondary)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                content()
+            }
+        }
     }
 
     private func roadmapCard(_ title: String, _ subtitle: String, _ symbol: String, _ badge: String) -> some View {
