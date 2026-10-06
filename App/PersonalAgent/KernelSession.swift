@@ -400,7 +400,8 @@ final class KernelSession: ObservableObject {
     }
 
     private func buildContextualInput(for statement: String) async throws -> String {
-        let recent = chatHistory.suffix(12)
+        let contextTurns = max(1, min(128, UserDefaults.standard.integer(forKey: "chat.context.turns").nonZeroOr(12)))
+        let recent = chatHistory.suffix(contextTurns)
         let memory = try await composition.memoryContext(for: statement)
         var sections: [String] = []
         if !recent.isEmpty {
@@ -537,4 +538,7 @@ struct ChatTurn: Codable, Equatable, Identifiable, Sendable {
     init(id: UUID = UUID(), role: Role, content: String) {
         self.id = id; self.role = role; self.content = content
     }
+}
+private extension Int {
+    func nonZeroOr(_ fallback: Int) -> Int { self == 0 ? fallback : self }
 }
