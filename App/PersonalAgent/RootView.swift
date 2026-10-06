@@ -388,9 +388,15 @@ private struct RoadmapFeatureScreen: View {
         struct ExportEnvelope: Encodable {
             let exportedAt: Date
             let conversations: [ChatConversation]
-            let memory: [MemorySnapshotItem]
+            let memory: [ExportMemory]
         }
-        let envelope = ExportEnvelope(exportedAt: Date(), conversations: session.conversations, memory: session.memoryRecords)
+        struct ExportMemory: Encodable {
+            let id: String
+            let kind: String
+            let content: String
+        }
+        let memory = session.memoryRecords.map { ExportMemory(id: $0.id, kind: $0.kind, content: $0.content) }
+        let envelope = ExportEnvelope(exportedAt: Date(), conversations: session.conversations, memory: memory)
         guard let data = try? encoder.encode(envelope), let text = String(data: data, encoding: .utf8) else {
             return "{\"error\":\"export_failed\"}"
         }
