@@ -15,6 +15,8 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
     private let eventLog: (any EventLog)?
     private let logger: any AgentLogger
     private let sessionTrace: TraceID
+    private var activeStreamTask: Task<Void, Never>?
+    private var activeStreamExecutionID: UUID?
 
     public init(
         provider: any LLMProvider,
@@ -113,39 +115,59 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
     }
 
     public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
-        AsyncThrowingStream { continuation in
-            let work = Task {
-                do {
-                    try await self.prepareExecution()
-                    try await self.emitInvoked(model: request.model, mode: "stream")
-                    let bound = await self.currentProvider()
-                    for try await event in bound.stream(request) {
-                        try Task.checkCancellation()
-                        continuation.yield(event)
-                        if case .completed = event {
-                            await self.markCompleted()
-                        }
-                    }
-                    await self.markCompletedIfExecuting()
-                    continuation.finish()
-                } catch is CancellationError {
-                    await self.applyFailure(.cancelled)
-                    continuation.finish(throwing: ProviderRuntimeError.cancelled)
-                } catch let error as ProviderRuntimeError {
-                    await self.applyFailure(error)
-                    continuation.finish(throwing: error)
-                } catch {
-                    await self.applyFailure(.unknown)
-                    continuation.finish(throwing: error)
-                }
-            }
-            continuation.onTermination = { _ in work.cancel() }
+        let (stream, continuation) = AsyncThrowingStream<LLMStreamEvent, Error>.makeStream()
+        let executionID = UUID()
+
+        guard activeStreamTask == nil else {
+            continuation.finish(throwing: ProviderRuntimeError.invalidConfiguration)
+            return stream
         }
+
+        do {
+            try prepareExecution()
+        } catch {
+            continuation.finish(throwing: error)
+            return stream
+        }
+        activeStreamExecutionID = executionID
+
+        let work = Task {
+            defer {
+                Task { await self.finishStreamExecution(executionID) }
+            }
+            do {
+                try await self.emitInvoked(model: request.model, mode: "stream")
+                let bound = await self.currentProvider()
+                for try await event in bound.stream(request) {
+                    try Task.checkCancellation()
+                    continuation.yield(event)
+                    if case .completed = event {
+                        await self.markCompleted(executionID)
+                    }
+                }
+                await self.markCompletedIfExecuting(executionID)
+                continuation.finish()
+            } catch is CancellationError {
+                await self.applyFailure(.cancelled)
+                continuation.finish(throwing: ProviderRuntimeError.cancelled)
+            } catch let error as ProviderRuntimeError {
+                await self.applyFailure(error)
+                continuation.finish(throwing: error)
+            } catch {
+                await self.applyFailure(.unknown)
+                continuation.finish(throwing: error)
+            }
+        }
+
+        activeStreamTask = work
+        continuation.onTermination = { _ in work.cancel() }
+        return stream
     }
 
     public func cancel() {
         if lifecycle == .executing {
             lifecycle = .cancelled
+            activeStreamTask?.cancel()
             Task { try? await emit(kind: .providerCancelled, payload: ["providerID": provider.identity.id.rawValue]) }
         }
     }
@@ -160,17 +182,26 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         ])
     }
 
-    private func markCompleted() {
+    private func markCompleted(_ executionID: UUID) {
+        guard activeStreamExecutionID == executionID, lifecycle == .executing else { return }
         lifecycle = .completed
     }
 
-    private func markCompletedIfExecuting() {
-        if lifecycle == .executing {
-            lifecycle = .completed
-        }
+    private func markCompletedIfExecuting(_ executionID: UUID) {
+        guard activeStreamExecutionID == executionID, lifecycle == .executing else { return }
+        lifecycle = .completed
+    }
+
+    private func finishStreamExecution(_ executionID: UUID) {
+        guard activeStreamExecutionID == executionID else { return }
+        activeStreamTask = nil
+        activeStreamExecutionID = nil
     }
 
     private func prepareExecution() throws {
+        guard activeStreamTask == nil else {
+            throw ProviderRuntimeError.invalidConfiguration
+        }
         guard lifecycle == .ready || lifecycle == .completed || lifecycle == .failed || lifecycle == .cancelled else {
             throw ProviderRuntimeError.invalidConfiguration
         }
