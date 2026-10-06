@@ -536,9 +536,15 @@ private extension SettingsScreen {
                 "max_tokens": 8,
                 "temperature": 0
             ])
-            let (_, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 throw URLError(.badServerResponse)
+            }
+            let envelope = try JSONDecoder().decode(ChatResponseEnvelope.self, from: data)
+            guard let content = envelope.choices.first?.message.content?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+                  !content.isEmpty else {
+                throw URLError(.cannotParseResponse)
             }
             await MainActor.run { connectionState = .success }
         } catch {
