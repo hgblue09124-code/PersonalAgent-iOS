@@ -406,7 +406,8 @@ final class KernelSession: ObservableObject {
 
     private func buildContextualInput(for statement: String) async throws -> String {
         let contextTurns = max(1, min(128, UserDefaults.standard.integer(forKey: "chat.context.turns").nonZeroOr(12)))
-        let recent = chatHistory.suffix(contextTurns)
+        let recentTurns = chatHistory.suffix(contextTurns)
+        let recent = (recentTurns.last?.role == .user && recentTurns.last?.content == statement) ? recentTurns.dropLast() : recentTurns
         let memory = try await composition.memoryContext(for: statement)
         var sections: [String] = []
         if !recent.isEmpty {
