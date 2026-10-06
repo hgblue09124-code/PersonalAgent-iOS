@@ -22,7 +22,7 @@ enum AgentDesign {
 }
 
 struct ScreenScaffold<Content: View>: View {
-    let title: LocalizedStringKey
+    let title: String
     let systemImage: String
     @ViewBuilder var content: () -> Content
 
