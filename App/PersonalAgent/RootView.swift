@@ -356,6 +356,16 @@ private struct RoadmapFeatureScreen: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             switch feature {
+            case .tools, .skillMarketplace, .extensions:
+                SkillsScreen(session: session)
+            case .multiAgent:
+                AgentsScreen(session: session)
+            case .plans, .automations:
+                TasksScreen(session: session)
+            case .longContext:
+                ChatScreen(session: session)
+            case .localEmbeddings:
+                ModelsScreen(session: session)
             case .tools:
                 SkillsScreen(session: session)
             case .vision:
