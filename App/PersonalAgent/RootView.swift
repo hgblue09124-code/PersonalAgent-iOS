@@ -30,6 +30,12 @@ struct RootView: View {
         }
         .task { await session.refresh() }
         .onOpenURL { url in
+            if url.scheme == "personalagent", url.host == "chat",
+               let text = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                    .queryItems?.first(where: { $0.name == "text" })?.value {
+                Task { await session.submitGoal(text) }
+                return
+            }
             guard url.pathExtension.lowercased() == "gguf" else { return }
             Task {
                 let securityScoped = url.startAccessingSecurityScopedResource()
