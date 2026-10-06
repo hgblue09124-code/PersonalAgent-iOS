@@ -366,8 +366,6 @@ private struct RoadmapFeatureScreen: View {
                 ChatScreen(session: session)
             case .localEmbeddings:
                 ModelsScreen(session: session)
-            case .tools:
-                SkillsScreen(session: session)
             case .vision:
                 GlassPanel {
                     Label("On-device vision", systemImage: "eye")
