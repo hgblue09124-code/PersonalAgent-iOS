@@ -322,6 +322,11 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
 private struct RoadmapFeatureScreen: View {
     let feature: RoadmapFeature
     @ObservedObject var session: KernelSession
+    @AppStorage("privacy.localOnly") private var localOnly = true
+    @AppStorage("privacy.persistChat") private var persistChat = true
+    @State private var exportPayload = ""
+    @State private var showExport = false
+
     var body: some View {
         ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
             GlassPanel {
@@ -331,15 +336,43 @@ private struct RoadmapFeatureScreen: View {
                 Text(feature.isNative ? "Connected to an existing product boundary." : "Declared in the Agent OS surface; execution remains fail-closed until its adapter is installed.")
                     .font(.caption).foregroundStyle(.secondary)
             }
-            if feature == .tools {
+            switch feature {
+            case .tools:
                 SkillsScreen(session: session)
-            } else if feature == .files {
-                SettingsScreen(session: session)
-            } else if feature == .export {
-                MemoryScreen()
-            } else if feature == .privacyCenter {
-                SettingsScreen(session: session)
-            } else {
+            case .files:
+                GlassPanel {
+                    Label("Document boundary", systemImage: "doc.text")
+                        .font(.headline)
+                    Text("Use the existing system document importer for local data. Imported content stays under the app's storage boundary.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    StatusRow(title: "Storage", value: "APP SANDBOX")
+                }
+            case .export:
+                GlassPanel {
+                    Label("Export Agent state", systemImage: "square.and.arrow.up")
+                        .font(.headline)
+                    Text("Export the current conversations and memory snapshot as portable JSON.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    Button("Prepare export") {
+                        exportPayload = makeExportPayload()
+                        showExport = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    if !exportPayload.isEmpty {
+                        ShareLink(item: exportPayload, subject: Text("Personal Agent export"), message: Text("Agent conversations and memory"))
+                            .buttonStyle(.bordered)
+                    }
+                }
+            case .privacyCenter:
+                GlassPanel {
+                    Label("Privacy controls", systemImage: "lock.shield")
+                        .font(.headline)
+                    Toggle("Local-only execution", isOn: $localOnly)
+                    Toggle("Persist chat history", isOn: $persistChat)
+                    Text("These controls are persisted locally. Remote execution remains disabled until an explicit provider credential is configured.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            default:
                 GlassPanel {
                     StatusRow(title: "State", value: "CONTRACT")
                     StatusRow(title: "Boundary", value: "Agent OS")
@@ -347,5 +380,20 @@ private struct RoadmapFeatureScreen: View {
                 }
             }
         }
+    }
+
+    private func makeExportPayload() -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        struct ExportEnvelope: Encodable {
+            let exportedAt: Date
+            let conversations: [ChatConversation]
+            let memory: [MemorySnapshotItem]
+        }
+        let envelope = ExportEnvelope(exportedAt: Date(), conversations: session.conversations, memory: session.memoryRecords)
+        guard let data = try? encoder.encode(envelope), let text = String(data: data, encoding: .utf8) else {
+            return "{\"error\":\"export_failed\"}"
+        }
+        return text
     }
 }
