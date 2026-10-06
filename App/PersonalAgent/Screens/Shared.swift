@@ -22,7 +22,7 @@ enum AgentDesign {
 }
 
 struct ScreenScaffold<Content: View>: View {
-    let title: LocalizedStringKey
+    let title: String
     let systemImage: String
     @ViewBuilder var content: () -> Content
 
@@ -134,7 +134,7 @@ struct StatusBadge: View {
 }
 
 struct MilestoneBanner: View {
-    @Environment(.milestoneGate) private var gate
+    @Environment(\.milestoneGate) private var gate
 
     var body: some View {
         GlassPanel {
