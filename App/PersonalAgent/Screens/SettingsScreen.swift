@@ -273,6 +273,9 @@ struct SettingsScreen: View {
         }
         .environment(\.locale, Locale(identifier: appLanguage))
         .id(appLanguage)
+        .task {
+            credentialState = loadCredentialState(for: remoteProvider)
+        }
         .fileImporter(
             isPresented: $isImportingGGUF,
             allowedContentTypes: [
