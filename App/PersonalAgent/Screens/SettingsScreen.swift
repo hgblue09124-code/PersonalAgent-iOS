@@ -16,6 +16,7 @@ struct SettingsScreen: View {
     @State private var apiKey = ""
     @State private var credentialState: CredentialState = .unknown
     @State private var connectionState: ConnectionState = .idle
+    @AppStorage("chat.context.turns") private var contextTurns = 12
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -197,6 +198,15 @@ struct SettingsScreen: View {
                     ProgressView("Testing connection…")
                         .font(.caption)
                 }
+            }
+
+            GlassPanel {
+                Label("Conversation context", systemImage: "text.alignleft")
+                    .font(.headline)
+                Stepper("Context turns: \(contextTurns)", value: $contextTurns, in: 1...128)
+                Text("Controls how many recent turns are sent into the next model request.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             GlassPanel {
