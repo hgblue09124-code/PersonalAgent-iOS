@@ -474,8 +474,21 @@ private extension SettingsScreen {
     }
 
     func testProviderConnection() async {
-        let value = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty else { return }
+        let entered = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let value: String
+        if !entered.isEmpty {
+            value = entered
+        } else {
+            do {
+                guard let data = try KeychainSecretStore().load(account: credentialAccount),
+                      let saved = String(data: data, encoding: .utf8),
+                      !saved.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                value = saved
+            } catch {
+                connectionState = .failure("Could not read the saved API key.")
+                return
+            }
+        }
         connectionState = .testing
         let endpoint: String
         let model: String
