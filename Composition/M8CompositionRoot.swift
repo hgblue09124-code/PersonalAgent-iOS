@@ -649,9 +649,10 @@ extension M8CompositionRoot {
 
     public func runChatSkillIfMatched(
         goalStatement: String,
+        agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
-        let agent = try await agentStore.load(id: "personal.default")
+        let agent = try await agentStore.load(id: agentID)
         let inputData = try JSONSerialization.data(withJSONObject: ["text": goalStatement], options: [.sortedKeys])
         guard let inputJSON = String(data: inputData, encoding: .utf8) else {
             throw KernelError.invalidStateUpdate("Unable to encode chat Skill input")

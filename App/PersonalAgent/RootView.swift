@@ -101,6 +101,9 @@ private struct AgentWorkspaceSheet: View {
                     workspaceLink("Skills", "Declared Skill.md capabilities", "puzzlepiece") {
                         SkillsScreen(session: session)
                     }
+                    workspaceLink("Agents", "Agent.md profiles and scoped Skills", "person.crop.circle.badge.checkmark") {
+                        AgentsScreen(session: session)
+                    }
                     workspaceLink("Memory", "Persistent contextual memory", "brain") {
                         MemoryScreen()
                     }
@@ -135,7 +138,6 @@ private struct AgentWorkspaceSheet: View {
                             roadmapCard("Automations", "Run recurring work", "arrow.triangle.2.circlepath", "Soon")
                             roadmapCard("Tools", "Connect capabilities", "wrench.and.screwdriver", "Soon")
                             roadmapCard("Multi-agent", "Delegate subtasks", "person.3", "Soon")
-                            roadmapCard("Agent profiles", "Different working modes", "person.crop.circle", "Soon")
                             roadmapCard("Plans", "Break goals into steps", "list.number", "Soon")
                             roadmapCard("Approvals", "Ask before sensitive actions", "checkmark.shield", "Soon")
                             roadmapCard("Agent policies", "Control what agents can do", "slider.horizontal.3", "Soon")

@@ -17,6 +17,8 @@ final class KernelSession: ObservableObject {
     @Published var providerLifecycle: String
     @Published var moduleIDs: [String]
     @Published var skillManifests: [SkillManifest]
+    @Published private(set) var agentManifests: [AgentManifest]
+    @Published private(set) var selectedAgentID: String
 
     @Published var installedModels: [LocalModelDescriptor]
     @Published var activeModelID: ModelID?
@@ -42,6 +44,8 @@ final class KernelSession: ObservableObject {
         self.providerLifecycle = "unknown"
         self.moduleIDs = []
         self.skillManifests = []
+        self.agentManifests = []
+        self.selectedAgentID = UserDefaults.standard.string(forKey: "agent.selected.id") ?? "personal.default"
         self.installedModels = []
         self.activeModelID = nil
         self.activeModelDescriptor = nil
@@ -67,6 +71,18 @@ final class KernelSession: ObservableObject {
             skillManifests = try await composition.discoverSkills()
         } catch {
             skillManifests = []
+            lastError = String(describing: error)
+        }
+
+        do {
+            let discoveredAgents = try await composition.discoverAgents()
+            agentManifests = discoveredAgents
+            if !discoveredAgents.contains(where: { $0.id == selectedAgentID }) {
+                selectedAgentID = discoveredAgents.first?.id ?? "personal.default"
+                UserDefaults.standard.set(selectedAgentID, forKey: "agent.selected.id")
+            }
+        } catch {
+            agentManifests = []
             lastError = String(describing: error)
         }
 
@@ -141,7 +157,7 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: statement) {
+                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: statement, agentID: self.selectedAgentID) {
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
@@ -200,6 +216,12 @@ final class KernelSession: ObservableObject {
         executionTask = task
         await task.value
         executionTask = nil
+    }
+
+    func selectAgent(id: String) {
+        guard agentManifests.contains(where: { $0.id == id }) else { return }
+        selectedAgentID = id
+        UserDefaults.standard.set(id, forKey: "agent.selected.id")
     }
 
     func refreshMemory() async {
