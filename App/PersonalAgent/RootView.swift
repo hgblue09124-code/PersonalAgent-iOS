@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 import PAComposition
 
 struct RootView: View {
@@ -326,6 +327,8 @@ private struct RoadmapFeatureScreen: View {
     @AppStorage("privacy.persistChat") private var persistChat = true
     @State private var exportPayload = ""
     @State private var showExport = false
+    @State private var showFileImporter = false
+    @State private var indexedFileName: String?
 
     var body: some View {
         ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
@@ -346,6 +349,11 @@ private struct RoadmapFeatureScreen: View {
                     Text("Use the existing system document importer for local data. Imported content stays under the app's storage boundary.")
                         .font(.subheadline).foregroundStyle(.secondary)
                     StatusRow(title: "Storage", value: "APP SANDBOX")
+                    Button("Import document") { showFileImporter = true }
+                        .buttonStyle(.borderedProminent)
+                    if let indexedFileName {
+                        StatusRow(title: "Indexed", value: indexedFileName)
+                    }
                 }
             case .export:
                 GlassPanel {
@@ -379,6 +387,18 @@ private struct RoadmapFeatureScreen: View {
                     StatusRow(title: "Execution", value: "FAIL CLOSED")
                 }
             }
+        }
+        .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: [.plainText, .text, .data],
+            allowsMultipleSelection: false
+        ) { result in
+            guard case .success(let urls) = result, let url = urls.first else { return }
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            guard let data = try? Data(contentsOf: url), !data.isEmpty else { return }
+            indexedFileName = url.lastPathComponent
+            UserDefaults.standard.set(data.prefix(256_000), forKey: "roadmap.files.last.data")
         }
     }
 
