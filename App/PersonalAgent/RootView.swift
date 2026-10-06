@@ -111,6 +111,35 @@ private struct AgentWorkspaceSheet: View {
                         SettingsScreen(session: session)
                     }
                 }
+
+                Section {
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack(alignment: .firstTextBaseline) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Coming soon").font(.title3.weight(.bold))
+                                Text("The next layer of the Agent OS").font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("ROADMAP").font(.caption2.weight(.bold)).tracking(1.2).foregroundStyle(.secondary)
+                        }
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                            roadmapCard("Voice", "Talk naturally", "waveform", "Soon")
+                            roadmapCard("Vision", "Understand images", "eye", "Soon")
+                            roadmapCard("Web research", "Search & synthesize", "globe", "Soon")
+                            roadmapCard("Automations", "Run recurring work", "arrow.triangle.2.circlepath", "Soon")
+                            roadmapCard("Tools", "Connect capabilities", "wrench.and.screwdriver", "Soon")
+                            roadmapCard("Multi-agent", "Delegate subtasks", "person.3", "Soon")
+                            roadmapCard("Files", "Work with documents", "doc.text", "Soon")
+                            roadmapCard("Calendar", "Plan your time", "calendar", "Soon")
+                            roadmapCard("Notifications", "Stay in the loop", "bell", "Soon")
+                            roadmapCard("Agent profiles", "Different working modes", "person.crop.circle", "Soon")
+                            roadmapCard("Sync", "Continue everywhere", "icloud", "Soon")
+                            roadmapCard("Privacy center", "Control your data", "lock.shield", "Soon")
+                        }
+                    }
+                    .padding(.vertical, 6)
+                    .listRowBackground(Color.clear)
+                }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
@@ -137,6 +166,30 @@ private struct AgentWorkspaceSheet: View {
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+    }
+
+    private func roadmapCard(_ title: String, _ subtitle: String, _ symbol: String, _ badge: String) -> some View {
+        VStack(alignment: .leading, spacing: 9) {
+            HStack(alignment: .top) {
+                Image(systemName: symbol)
+                    .font(.subheadline.weight(.semibold))
+                    .frame(width: 32, height: 32)
+                    .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                Spacer()
+                Text(badge)
+                    .font(.system(size: 9, weight: .bold, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(.secondary.opacity(0.08), in: Capsule())
+            }
+            Text(title).font(.subheadline.weight(.semibold))
+            Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(.primary.opacity(0.06), lineWidth: 1))
     }
 
     private func workspaceLink<Destination: View>(
