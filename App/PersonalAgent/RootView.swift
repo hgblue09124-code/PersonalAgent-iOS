@@ -37,6 +37,7 @@ private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
     @State private var workspaceExpanded = false
     @State private var appeared = false
+    @State private var selectedRoadmapFeature: RoadmapFeature?
 
     var body: some View {
         NavigationStack {
@@ -126,40 +127,40 @@ private struct AgentWorkspaceSheet: View {
                             Text("ROADMAP").font(.caption2.weight(.bold)).tracking(1.2).foregroundStyle(.secondary)
                         }
                         roadmapGroup("Intelligence") {
-                            roadmapCard("Voice", "Talk naturally", "waveform", "Soon")
-                            roadmapCard("Vision", "Understand images", "eye", "Soon")
-                            roadmapCard("Web research", "Search & synthesize", "globe", "Soon")
-                            roadmapCard("Long context", "Handle larger conversations", "text.alignleft", "Soon")
-                            roadmapCard("RAG", "Ground answers in knowledge", "books.vertical", "Soon")
-                            roadmapCard("Local embeddings", "Semantic retrieval on device", "square.stack.3d.up", "Soon")
+                            roadmapCard(.voice)
+                            roadmapCard(.vision)
+                            roadmapCard(.webResearch)
+                            roadmapCard(.longContext)
+                            roadmapCard(.rag)
+                            roadmapCard(.localEmbeddings)
                         }
 
                         roadmapGroup("Agent OS") {
-                            roadmapCard("Automations", "Run recurring work", "arrow.triangle.2.circlepath", "Soon")
-                            roadmapCard("Tools", "Connect capabilities", "wrench.and.screwdriver", "Soon")
-                            roadmapCard("Multi-agent", "Delegate subtasks", "person.3", "Soon")
-                            roadmapCard("Plans", "Break goals into steps", "list.number", "Soon")
-                            roadmapCard("Approvals", "Ask before sensitive actions", "checkmark.shield", "Soon")
-                            roadmapCard("Agent policies", "Control what agents can do", "slider.horizontal.3", "Soon")
-                            roadmapCard("Skill marketplace", "Discover and install skills", "square.grid.2x2", "Soon")
+                            roadmapCard(.automations)
+                            roadmapCard(.tools)
+                            roadmapCard(.multiAgent)
+                            roadmapCard(.plans)
+                            roadmapCard(.approvals)
+                            roadmapCard(.agentPolicies)
+                            roadmapCard(.skillMarketplace)
                         }
 
                         roadmapGroup("Connected workspace") {
-                            roadmapCard("Files", "Work with documents", "doc.text", "Soon")
-                            roadmapCard("Calendar", "Plan your time", "calendar", "Soon")
-                            roadmapCard("Notifications", "Stay in the loop", "bell", "Soon")
-                            roadmapCard("Email", "Read and act on mail", "envelope", "Soon")
-                            roadmapCard("Web actions", "Act across the web", "safari", "Soon")
-                            roadmapCard("Home", "Control connected devices", "house", "Soon")
+                            roadmapCard(.files)
+                            roadmapCard(.calendar)
+                            roadmapCard(.notifications)
+                            roadmapCard(.email)
+                            roadmapCard(.webActions)
+                            roadmapCard(.home)
                         }
 
                         roadmapGroup("Platform") {
-                            roadmapCard("Sync", "Continue everywhere", "icloud", "Soon")
-                            roadmapCard("Privacy center", "Control your data", "lock.shield", "Soon")
-                            roadmapCard("Encrypted backup", "Protect agent state", "externaldrive.badge.icloud", "Soon")
-                            roadmapCard("Export", "Take your data with you", "square.and.arrow.up", "Soon")
-                            roadmapCard("Developer API", "Build on the Agent runtime", "chevron.left.forwardslash.chevron.right", "Soon")
-                            roadmapCard("Extensions", "Add native capabilities", "puzzlepiece.extension", "Soon")
+                            roadmapCard(.sync)
+                            roadmapCard(.privacyCenter)
+                            roadmapCard(.encryptedBackup)
+                            roadmapCard(.export)
+                            roadmapCard(.developerAPI)
+                            roadmapCard(.extensions)
                         }
                     }
                     .padding(.vertical, 6)
@@ -179,6 +180,9 @@ private struct AgentWorkspaceSheet: View {
         }
         .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
         .presentationDragIndicator(.visible)
+        .sheet(item: $selectedRoadmapFeature) { feature in
+            RoadmapFeatureScreen(feature: feature, session: session)
+        }
     }
 
     private func statusPill(_ title: String, _ value: String, _ symbol: String) -> some View {
@@ -206,28 +210,31 @@ private struct AgentWorkspaceSheet: View {
         }
     }
 
-    private func roadmapCard(_ title: String, _ subtitle: String, _ symbol: String, _ badge: String) -> some View {
-        VStack(alignment: .leading, spacing: 9) {
-            HStack(alignment: .top) {
-                Image(systemName: symbol)
-                    .font(.subheadline.weight(.semibold))
-                    .frame(width: 32, height: 32)
-                    .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                Spacer()
-                Text(badge)
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 4)
-                    .background(.secondary.opacity(0.08), in: Capsule())
+    private func roadmapCard(_ feature: RoadmapFeature) -> some View {
+        Button { selectedRoadmapFeature = feature } label: {
+            VStack(alignment: .leading, spacing: 9) {
+                HStack(alignment: .top) {
+                    Image(systemName: feature.symbol)
+                        .font(.subheadline.weight(.semibold))
+                        .frame(width: 32, height: 32)
+                        .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    Spacer()
+                    Text(feature.stateTitle)
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(feature.isNative ? .green : .secondary)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 4)
+                        .background(.secondary.opacity(0.08), in: Capsule())
+                }
+                Text(feature.title).font(.subheadline.weight(.semibold))
+                Text(feature.subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
             }
-            Text(title).font(.subheadline.weight(.semibold))
-            Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+            .padding(12)
+            .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(.primary.opacity(0.06), lineWidth: 1))
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(.primary.opacity(0.06), lineWidth: 1))
+        .buttonStyle(.plain)
     }
 
     private func workspaceLink<Destination: View>(
@@ -274,5 +281,71 @@ extension EnvironmentValues {
     var kernelSession: KernelSession? {
         get { self[KernelSessionEnvironmentKey.self] }
         set { self[KernelSessionEnvironmentKey.self] = newValue }
+    }
+}
+private enum RoadmapFeature: String, CaseIterable, Identifiable {
+    case voice, vision, webResearch, longContext, rag, localEmbeddings
+    case automations, tools, multiAgent, plans, approvals, agentPolicies, skillMarketplace
+    case files, calendar, notifications, email, webActions, home
+    case sync, privacyCenter, encryptedBackup, export, developerAPI, extensions
+
+    var id: String { rawValue }
+    var title: String { rawValue == "webResearch" ? "Web research" : rawValue == "localEmbeddings" ? "Local embeddings" : rawValue == "multiAgent" ? "Multi-agent" : rawValue == "agentPolicies" ? "Agent policies" : rawValue == "skillMarketplace" ? "Skill marketplace" : rawValue == "privacyCenter" ? "Privacy center" : rawValue == "encryptedBackup" ? "Encrypted backup" : rawValue == "developerAPI" ? "Developer API" : rawValue.capitalized }
+    var subtitle: String {
+        switch self {
+        case .voice: "Talk naturally"; case .vision: "Understand images"; case .webResearch: "Search and synthesize"
+        case .longContext: "Handle larger conversations"; case .rag: "Ground answers in knowledge"; case .localEmbeddings: "Semantic retrieval on device"
+        case .automations: "Run recurring work"; case .tools: "Connect capabilities"; case .multiAgent: "Delegate subtasks"
+        case .plans: "Break goals into steps"; case .approvals: "Ask before sensitive actions"; case .agentPolicies: "Control what agents can do"
+        case .skillMarketplace: "Discover and install skills"; case .files: "Work with documents"; case .calendar: "Plan your time"
+        case .notifications: "Stay in the loop"; case .email: "Read and act on mail"; case .webActions: "Act across the web"
+        case .home: "Control connected devices"; case .sync: "Continue everywhere"; case .privacyCenter: "Control your data"
+        case .encryptedBackup: "Protect agent state"; case .export: "Take your data with you"; case .developerAPI: "Build on the Agent runtime"
+        case .extensions: "Add native capabilities"
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .voice: "waveform"; case .vision: "eye"; case .webResearch: "globe"; case .longContext: "text.alignleft"
+        case .rag: "books.vertical"; case .localEmbeddings: "square.stack.3d.up"; case .automations: "arrow.triangle.2.circlepath"
+        case .tools: "wrench.and.screwdriver"; case .multiAgent: "person.3"; case .plans: "list.number"
+        case .approvals: "checkmark.shield"; case .agentPolicies: "slider.horizontal.3"; case .skillMarketplace: "square.grid.2x2"
+        case .files: "doc.text"; case .calendar: "calendar"; case .notifications: "bell"; case .email: "envelope"
+        case .webActions: "safari"; case .home: "house"; case .sync: "icloud"; case .privacyCenter: "lock.shield"
+        case .encryptedBackup: "externaldrive.badge.icloud"; case .export: "square.and.arrow.up"; case .developerAPI: "chevron.left.forwardslash.chevron.right"
+        case .extensions: "puzzlepiece.extension"
+        }
+    }
+    var isNative: Bool { [.tools, .files, .export, .privacyCenter].contains(self) }
+    var stateTitle: String { isNative ? "Native" : "Contract" }
+}
+private struct RoadmapFeatureScreen: View {
+    let feature: RoadmapFeature
+    @ObservedObject var session: KernelSession
+    var body: some View {
+        ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
+            GlassPanel {
+                Label(feature.isNative ? "Native capability" : "Runtime contract", systemImage: feature.isNative ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
+                    .font(.headline)
+                Text(feature.subtitle).font(.subheadline).foregroundStyle(.secondary)
+                Text(feature.isNative ? "Connected to an existing product boundary." : "Declared in the Agent OS surface; execution remains fail-closed until its adapter is installed.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            if feature == .tools {
+                SkillsScreen(session: session)
+            } else if feature == .files {
+                SettingsScreen(session: session)
+            } else if feature == .export {
+                MemoryScreen()
+            } else if feature == .privacyCenter {
+                SettingsScreen(session: session)
+            } else {
+                GlassPanel {
+                    StatusRow(title: "State", value: "CONTRACT")
+                    StatusRow(title: "Boundary", value: "Agent OS")
+                    StatusRow(title: "Execution", value: "FAIL CLOSED")
+                }
+            }
+        }
     }
 }
