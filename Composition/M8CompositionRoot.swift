@@ -300,6 +300,7 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
 
     private var enabled: Bool {
         UserDefaults.standard.bool(forKey: "provider.remote.enabled")
+            && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
     }
 
     private var selectedID: String {
