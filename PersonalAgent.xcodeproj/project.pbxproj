@@ -112,6 +112,7 @@
 				A20000000000000000000008 /* SkillsScreen.swift */,
 				A20000000000000000000009 /* ProvidersScreen.swift */,
 				A2000000000000000000000A /* SettingsScreen.swift */,
+				A2000000000000000000000B /* AgentsScreen.swift */,
 				A2000000000000000000000D /* ModelsScreen.swift */,
 			);
 			path = Screens;
@@ -214,6 +215,7 @@
 				A10000000000000000000008 /* SkillsScreen.swift in Sources */,
 				A10000000000000000000009 /* ProvidersScreen.swift in Sources */,
 				A1000000000000000000000A /* SettingsScreen.swift in Sources */,
+				A1000000000000000000000B /* AgentsScreen.swift in Sources */,
 				A1000000000000000000000D /* ModelsScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
