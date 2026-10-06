@@ -35,7 +35,7 @@ struct AgentsScreen: View {
                             HStack(alignment: .top, spacing: 12) {
                                 Image(systemName: agent.id == session.selectedAgentID ? "checkmark.circle.fill" : "person.crop.circle")
                                     .font(.title2)
-                                    .foregroundStyle(agent.id == session.selectedAgentID ? .tint : .secondary)
+                                    .foregroundStyle(agent.id == session.selectedAgentID ? Color.accentColor : Color.secondary)
                                     .frame(width: 40, height: 40)
                                 VStack(alignment: .leading, spacing: 5) {
                                     HStack {
