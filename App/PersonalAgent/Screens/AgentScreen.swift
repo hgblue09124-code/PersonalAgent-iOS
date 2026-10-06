@@ -22,7 +22,15 @@ struct AgentScreen: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
-        .sheet(isPresented: $showCommandCenter) { CommandCenterSheet(task: $task, focused: $taskFocused).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showCommandCenter) {
+            CommandCenterSheet(
+                task: $task,
+                focused: $taskFocused,
+                onSubmit: submitTask
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
     }
 
@@ -93,6 +101,7 @@ struct AgentScreen: View {
     private var quickActions: some View {
         HStack(spacing: 8) {
             quickAction("New task", "plus") { showCommandCenter = true }
+            quickAction("Chat", "bubble.left.and.bubble.right") { showWorkspace = true }
             quickAction("Activity", "waveform.path.ecg") { showActivity = true }
             quickAction("Agent", "sparkles") { showAgentPanel = true }
             Spacer()
@@ -275,6 +284,7 @@ struct AgentScreen: View {
 private struct CommandCenterSheet: View {
     @Binding var task: String
     @FocusState.Binding var focused: Bool
+    let onSubmit: () -> Void
     @Environment(\.dismiss) private var dismiss
 
     private let suggestions = [
@@ -303,7 +313,7 @@ private struct CommandCenterSheet: View {
                         .lineLimit(1...4)
                     Button {
                         focused = false
-                        dismiss()
+                        onSubmit()
                     } label: {
                         Image(systemName: "arrow.up")
                             .font(.headline.bold())
