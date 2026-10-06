@@ -381,12 +381,12 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
     }
     var state: State {
         switch self {
-        case .vision, .longContext, .rag, .localEmbeddings,
-             .automations, .tools, .multiAgent, .plans, .skillMarketplace,
-             .files, .encryptedBackup, .export, .privacyCenter, .developerAPI, .extensions:
+        case .vision, .longContext, .rag, .multiAgent,
+             .files, .encryptedBackup, .export, .privacyCenter:
             return .ready
-        case .voice, .webResearch, .approvals, .agentPolicies,
-             .calendar, .notifications, .email, .webActions, .home, .sync:
+        case .voice, .webResearch, .localEmbeddings, .automations, .tools, .plans,
+             .approvals, .agentPolicies, .skillMarketplace, .calendar, .notifications,
+             .email, .webActions, .home, .sync, .developerAPI, .extensions:
             return .contract
         }
     }
