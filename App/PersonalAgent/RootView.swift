@@ -1,4 +1,7 @@
 import SwiftUI
+import Foundation
+import CryptoKit
+import PASecurity
 import UniformTypeIdentifiers
 import PhotosUI
 import Vision
@@ -403,6 +406,22 @@ private struct RoadmapFeatureScreen: View {
                         StatusRow(title: "Indexed", value: indexedFileName)
                     }
                 }
+            case .encryptedBackup:
+                GlassPanel {
+                    Label("Encrypted backup", systemImage: "externaldrive.badge.icloud")
+                        .font(.headline)
+                    Text("Encrypt the current Agent export with a device-bound key before sharing.")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    Button("Create encrypted backup") {
+                        exportPayload = makeEncryptedBackup()
+                        showExport = !exportPayload.isEmpty
+                    }
+                    .buttonStyle(.borderedProminent)
+                    if !exportPayload.isEmpty {
+                        ShareLink(item: exportPayload, subject: Text("Personal Agent encrypted backup"))
+                            .buttonStyle(.bordered)
+                    }
+                }
             case .export:
                 GlassPanel {
                     Label("Export Agent state", systemImage: "square.and.arrow.up")
@@ -466,6 +485,29 @@ private struct RoadmapFeatureScreen: View {
                     continuation.resume(returning: "")
                 }
             }
+        }
+    }
+
+    private func makeEncryptedBackup() -> String {
+        let plain = makeExportPayload()
+        guard let data = plain.data(using: .utf8) else { return "" }
+        do {
+            let store = KeychainSecretStore()
+            let account = "agent.backup.key"
+            let keyData: Data
+            if let existing = try store.load(account: account) {
+                keyData = existing
+            } else {
+                let generated = SymmetricKey(size: .bits256)
+                keyData = generated.withUnsafeBytes { Data($0) }
+                try store.store(account: account, secret: keyData)
+            }
+            let key = SymmetricKey(data: keyData)
+            let sealed = try AES.GCM.seal(data, using: key)
+            guard let combined = sealed.combined else { return "" }
+            return combined.base64EncodedString()
+        } catch {
+            return ""
         }
     }
 
