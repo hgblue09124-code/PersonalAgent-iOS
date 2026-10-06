@@ -149,6 +149,7 @@ final class KernelSession: ObservableObject {
             return
         }
 
+        let agentID = selectedAgentID
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
             var goalID: GoalID?
@@ -157,7 +158,7 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: statement, agentID: self.selectedAgentID) {
+                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: statement, agentID: agentID) {
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
