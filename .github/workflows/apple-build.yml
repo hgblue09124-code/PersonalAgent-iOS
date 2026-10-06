@@ -71,7 +71,7 @@ jobs:
             -arch arm64 \
             -derivedDataPath DerivedData \
             MARKETING_VERSION="${APP_VERSION:-0.1.0}" \
-            PA_PRE_RELEASE_CHANNEL="${PA_PRE_RELEASE_CHANNEL:-${{ github.event_name == 'pull_request' && format('dev-pr-{0}', github.event.pull_request.number) || '' }}" \
+            PA_PRE_RELEASE_CHANNEL="${PA_PRE_RELEASE_CHANNEL:-}" \
             PA_PRE_RELEASE_CODE="${GITHUB_SHA::12}" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
