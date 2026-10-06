@@ -514,36 +514,21 @@ private extension SettingsScreen {
             }
         }
         connectionState = .testing
-        let endpoint: String
-        let model: String
-        switch remoteProvider {
-        case "grok":
-            endpoint = "https://api.x.ai/v1/chat/completions"
-            model = "grok-3"
-        default:
-            endpoint = "https://api.openai.com/v1/chat/completions"
-            model = "gpt-4o-mini"
-        }
+        let endpoint: String = remoteProvider == "grok"
+            ? "https://api.x.ai/v1/models"
+            : "https://api.openai.com/v1/models"
         do {
             guard let url = URL(string: endpoint) else { throw URLError(.badURL) }
             var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpMethod = "GET"
             request.setValue("Bearer \(value)", forHTTPHeaderField: "Authorization")
-            request.httpBody = try JSONSerialization.data(withJSONObject: [
-                "model": model,
-                "messages": [["role": "user", "content": "Reply with OK."]],
-                "max_tokens": 8,
-                "temperature": 0
-            ])
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
                 throw URLError(.badServerResponse)
             }
-            let envelope = try JSONDecoder().decode(ChatResponseEnvelope.self, from: data)
-            guard let content = envelope.choices.first?.message.content?
-                .trimmingCharacters(in: .whitespacesAndNewlines),
-                  !content.isEmpty else {
+            let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            let models = payload?["data"] as? [[String: Any]]
+            guard let models, !models.isEmpty else {
                 throw URLError(.cannotParseResponse)
             }
             await MainActor.run { connectionState = .success }
