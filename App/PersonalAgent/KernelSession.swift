@@ -403,6 +403,7 @@ final class KernelSession: ObservableObject {
             currentConversationID = conversations[0].id
             chatHistory = conversations[0].turns
         }
+        UserDefaults.standard.set(currentConversationID.uuidString, forKey: "chat.currentConversation.v1")
         persistConversations()
     }
 
