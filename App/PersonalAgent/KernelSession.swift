@@ -130,6 +130,11 @@ final class KernelSession: ObservableObject {
     }
 
     func submitGoal(_ statement: String) async {
+        let normalizedStatement = statement.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedStatement.isEmpty else {
+            lastError = "Enter a request before starting the Agent."
+            return
+        }
         guard executionTask == nil else {
             lastError = "Agent is still working. Wait for the current task to finish or stop it before starting another."
             await refresh()
@@ -139,10 +144,10 @@ final class KernelSession: ObservableObject {
         executionResult = nil
         presentedResult = nil
         lastError = nil
-        appendChatTurn(role: .user, content: statement)
+        appendChatTurn(role: .user, content: normalizedStatement)
         let contextualInput: String
         do {
-            contextualInput = try await buildContextualInput(for: statement)
+            contextualInput = try await buildContextualInput(for: normalizedStatement)
         } catch {
             lastError = String(describing: error)
             await refresh()
@@ -158,7 +163,7 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: statement, agentID: agentID) {
+                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, agentID: agentID) {
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
