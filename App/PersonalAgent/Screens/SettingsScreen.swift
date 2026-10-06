@@ -162,7 +162,10 @@ struct SettingsScreen: View {
                         Task { await testProviderConnection() }
                     }
                     .buttonStyle(.bordered)
-                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || connectionState == .testing)
+                    .disabled(
+                        connectionState == .testing ||
+                        (apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && credentialState != .saved)
+                    )
                     Button("Delete", role: .destructive) { deleteProviderCredential() }
                         .buttonStyle(.bordered)
                 }
