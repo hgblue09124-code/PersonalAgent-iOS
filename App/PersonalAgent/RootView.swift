@@ -49,7 +49,7 @@ private struct AgentWorkspaceSheet: View {
                             .background(.thinMaterial, in: Circle())
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Living workspace").font(.headline)
-                            Text("Tap a surface to expand it.").font(.caption).foregroundStyle(.secondary)
+                            Text("Every product capability has a native surface.").font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer()
                         Button {
@@ -61,11 +61,12 @@ private struct AgentWorkspaceSheet: View {
                         }.buttonStyle(.plain)
                     }.padding(.vertical, 4)
                 }
+
                 Section {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Agent workspace")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                        Text("Models, providers, skills, memory and settings appear here when you need them.")
+                        Text("Chat, execution, models, providers, skills, memory and settings are available without leaving the Agent.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -81,23 +82,32 @@ private struct AgentWorkspaceSheet: View {
                     .listRowBackground(Color.clear)
                 }
 
+                Section("Core") {
+                    workspaceLink("Chat", "Conversations and persistent chat history", "bubble.left.and.bubble.right") {
+                        ChatScreen(session: session)
+                    }
+                    workspaceLink("Tasks", "Live execution, results and errors", "checklist") {
+                        TasksScreen(session: session)
+                    }
+                }
+
                 Section("Capabilities") {
-                    workspaceLink("Models", "Local GGUF models", "cube.box") {
+                    workspaceLink("Models", "Local GGUF models and runtime lifecycle", "cube.box") {
                         ModelsScreen(session: session)
                     }
-                    workspaceLink("Providers", "Remote and local adapters", "server.rack") {
+                    workspaceLink("Providers", "Remote and local inference adapters", "server.rack") {
                         ProvidersScreen(session: session)
                     }
-                    workspaceLink("Skills", "Agent capabilities", "puzzlepiece") {
+                    workspaceLink("Skills", "Declared Skill.md capabilities", "puzzlepiece") {
                         SkillsScreen(session: session)
                     }
-                    workspaceLink("Memory", "Persistent context", "brain") {
+                    workspaceLink("Memory", "Persistent contextual memory", "brain") {
                         MemoryScreen()
                     }
                 }
 
                 Section("System") {
-                    workspaceLink("Settings", "Agent and device configuration", "gearshape") {
+                    workspaceLink("Settings", "Model, provider credentials, language and runtime", "gearshape") {
                         SettingsScreen(session: session)
                     }
                 }
