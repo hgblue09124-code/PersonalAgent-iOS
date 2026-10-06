@@ -416,7 +416,7 @@ final class KernelSession: ObservableObject {
     }
 
     private static func loadConversations() -> (conversations: [ChatConversation], currentID: UUID) {
-        if !UserDefaults.standard.bool(forKey: "privacy.persistChat") {
+        if UserDefaults.standard.object(forKey: "privacy.persistChat") as? Bool == false {
             let conversation = ChatConversation(title: "New conversation")
             return ([conversation], conversation.id)
         }
@@ -436,7 +436,7 @@ final class KernelSession: ObservableObject {
     }
 
     private func persistConversations() {
-        guard UserDefaults.standard.bool(forKey: "privacy.persistChat") else {
+        guard UserDefaults.standard.object(forKey: "privacy.persistChat") as? Bool != false else {
             UserDefaults.standard.removeObject(forKey: "chat.conversations.v1")
             UserDefaults.standard.removeObject(forKey: "chat.history.v1")
             return
