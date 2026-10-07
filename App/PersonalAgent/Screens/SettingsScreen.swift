@@ -503,7 +503,8 @@ private extension SettingsScreen {
 
     func saveProviderCredential() {
         let value = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty else { return }
+        let hasExistingCredential = credentialState == .saved
+        guard !value.isEmpty || hasExistingCredential else { return }
         if remoteProvider == "openai-compatible" {
             let endpoint = compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
             let model = compatibleModel.trimmingCharacters(in: .whitespacesAndNewlines)
