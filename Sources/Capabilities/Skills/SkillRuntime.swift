@@ -82,7 +82,13 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
 
 public actor InMemorySkillStore: SkillStore {
     private var manifests: [SkillID: SkillManifest] = [:]
-    public init(manifests: [SkillManifest] = []) { for manifest in manifests { self.manifests[manifest.id] = manifest } }
+    public init(manifests: [SkillManifest] = []) {
+        for manifest in manifests {
+            let id = SkillID(rawValue: manifest.id.rawValue.trimmingCharacters(in: .whitespacesAndNewlines))
+            guard !id.rawValue.isEmpty else { continue }
+            self.manifests[id] = manifest
+        }
+    }
     public func register(_ manifest: SkillManifest) {
         let normalizedID = SkillID(rawValue: manifest.id.rawValue.trimmingCharacters(in: .whitespacesAndNewlines))
         guard !normalizedID.rawValue.isEmpty else { return }
@@ -111,13 +117,13 @@ public struct KeywordSkillSelector: SkillSelecting, Sendable {
             let normalizedGoal = normalizedGoal.lowercased()
             let id = manifest.id.rawValue.lowercased()
             let name = manifest.name.lowercased()
-            let words = Set((id + " " + name + " " + manifest.description).split(separator: " ").map(String.init))
+            let words = Set(Self.tokens(id + " " + name + " " + manifest.description))
             let score = goalTokens.intersection(words).count
             let coverage = words.isEmpty ? 0.0 : Double(score) / Double(max(1, words.count))
             let exactMatch = Self.containsTokenSequence(normalizedGoal, id) || Self.containsTokenSequence(normalizedGoal, name)
             return (manifest, score, exactMatch, coverage)
         }
-        .filter { $0.1 >= 2 || $0.2 }
+        .filter { $0.2 || ($0.1 >= 2 && $0.3 >= 0.20) }
         .sorted {
             if $0.1 != $1.1 { return $0.1 > $1.1 }
             if $0.3 != $1.3 { return $0.3 > $1.3 }
@@ -154,7 +160,9 @@ public actor SkillRuntime: SkillExecuting, SkillVerifying {
         allowedSkillIDs: Set<SkillID>?
     ) async throws -> SkillID {
         let available = try await store.discover(query: "")
-        let scoped = allowedSkillIDs.map { ids in available.filter { ids.contains($0.id) } } ?? available
+        var seen = Set<SkillID>()
+        let unique = available.filter { seen.insert($0.id).inserted }
+        let scoped = allowedSkillIDs.map { ids in unique.filter { ids.contains($0.id) } } ?? unique
         guard let selected = try await selector.select(goalStatement: goalStatement, available: scoped) else {
             throw SkillRuntimeError.noSelection
         }
