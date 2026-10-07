@@ -779,7 +779,8 @@ extension M8CompositionRoot {
     }
 
     public func currentProviderLifecycle() async -> String {
-        let remote = UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
+        let remote = (UserDefaults.standard.string(forKey: "provider.execution.mode")
+            ?? (UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local")) == "remote"
             && UserDefaults.standard.bool(forKey: "provider.remote.enabled")
             && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
         if remote {
