@@ -77,8 +77,8 @@ jobs:
       - name: Package Unsigned Development IPA Artifact
         run: |
           mkdir -p Payload
-          APP_PATH=$(find DerivedData ~/Library/Developer/Xcode/DerivedData -name "PersonalAgent.app" -type d 2>/dev/null | head -n 1)
-          test -n "$APP_PATH" || (echo "Error: PersonalAgent.app not found" && false)
+          APP_PATH="DerivedData/Build/Products/Release-iphoneos/PersonalAgent.app"
+          test -d "$APP_PATH" || (echo "Error: expected PersonalAgent.app not found at $APP_PATH" && false)
           cp -R "$APP_PATH" Payload/
           zip -r -y PersonalAgent-unsigned.ipa Payload
           test -f PersonalAgent-unsigned.ipa
