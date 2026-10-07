@@ -515,7 +515,7 @@ struct ContractBoundaryRegressionTests {
         var index = MemoryIndex()
         let date = Date(timeIntervalSince1970: 6_000)
         ["z", "a", "m"].forEach {
-            index.index(MemoryRecord(id: MemoryRecordID(rawValue: $0), kind: .fact, content: "same", provenance: Provenance(source: "test"), createdAt: date, importance: 0.5)
+            index.index(MemoryRecord(id: MemoryRecordID(rawValue: $0), kind: .fact, content: "same", provenance: Provenance(source: "test"), createdAt: date, importance: 0.5))
         }
         let result = index.query(MemoryQuery(sortOrder: .relevance))
         #expect(result.records.map(\.id.rawValue) == ["a", "m", "z"])
@@ -569,7 +569,7 @@ struct ContractBoundaryRegressionTests {
         ["z", "a", "m", "b"].forEach {
             index.index(MemoryRecord(id: MemoryRecordID(rawValue: $0), kind: .fact, content: "limit token", provenance: Provenance(source: "test"), createdAt: date))
         }
-        let result = index.query(MemoryQuery(textSearch: "limit", sortOrder: .createdAtAscending, limit: 2))
+        let result = index.query(MemoryQuery(textSearch: "limit", limit: 2, sortOrder: .createdAtAscending))
         #expect(result.records.map(\.id.rawValue) == ["a", "b"])
     }
 
