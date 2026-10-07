@@ -29,14 +29,24 @@ struct MemoryScreen: View {
                     }
 
                     ForEach(Array(session.memoryRecords.prefix(12))) { record in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(record.kind.capitalized)
-                                .font(.caption.weight(.bold))
-                                .foregroundStyle(.secondary)
-                            Text(record.content)
-                                .font(.subheadline)
+                        HStack(alignment: .top, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(record.kind.capitalized)
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(.secondary)
+                                Text(record.content)
+                                    .font(.subheadline)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            Button(role: .destructive) {
+                                Task { await session.forgetMemory(id: record.id) }
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.caption.weight(.bold))
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel("Forget memory")
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, 4)
                     }
 
@@ -65,7 +75,7 @@ struct MemoryScreen: View {
                         Label(LocalizedStringKey(memoryTitle(kind)), systemImage: memoryIcon(kind))
                             .font(.subheadline.weight(.semibold))
                         Spacer()
-                        Text("contract")
+                        Text("supported")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
