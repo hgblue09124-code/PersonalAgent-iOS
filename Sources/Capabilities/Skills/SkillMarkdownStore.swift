@@ -15,7 +15,7 @@ public struct SkillMarkdownParser: Sendable {
     public func parse(_ markdown: String) throws -> SkillManifest {
         let normalized = markdown.replacingOccurrences(of: "\r\n", with: "\n")
         let parts = normalized.components(separatedBy: "\n---\n")
-        guard parts.count >= 2 else { throw SkillMarkdownError.missingField("front matter") }
+        guard parts.count == 2 else { throw SkillMarkdownError.invalidSchema("expected exactly one document delimiter") }
 
         let frontMatter = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
         let body = parts.dropFirst().joined(separator: "\n---\n")
@@ -26,6 +26,7 @@ public struct SkillMarkdownParser: Sendable {
             let key = pieces[0].trimmingCharacters(in: .whitespaces)
             let value = pieces[1].trimmingCharacters(in: .whitespaces)
             guard !key.isEmpty, !value.isEmpty else { throw SkillMarkdownError.missingField("malformed front matter") }
+            guard key.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" }) else { throw SkillMarkdownError.invalidSchema("invalid field name: \(key)") }
             guard fields[key] == nil else { throw SkillMarkdownError.missingField("duplicate field: \\(key)") }
             fields[key] = value
         }
@@ -38,9 +39,9 @@ public struct SkillMarkdownParser: Sendable {
         let description = fields["description"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
             ? fields["description"]!.trimmingCharacters(in: .whitespacesAndNewlines)
             : name
-        let input = try section(named: "Input", in: body) ?? "{}"
-        let output = try section(named: "Output", in: body) ?? "{}"
-        let rule = try section(named: "Rule", in: body) ?? ""
+        guard let input = try section(named: "Input", in: body) else { throw SkillMarkdownError.missingField("Input") }
+        guard let output = try section(named: "Output", in: body) else { throw SkillMarkdownError.missingField("Output") }
+        guard let rule = try section(named: "Rule", in: body) else { throw SkillMarkdownError.missingField("Rule") }
         guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw SkillMarkdownError.missingField("Input")
         }
@@ -52,7 +53,7 @@ public struct SkillMarkdownParser: Sendable {
         }
 
         return SkillManifest(
-            id: SkillID(rawValue: id),
+            id: SkillID(rawValue: id.trimmingCharacters(in: .whitespacesAndNewlines)),
             name: name,
             description: description,
             version: version,
@@ -62,7 +63,7 @@ public struct SkillMarkdownParser: Sendable {
             requiredCapabilities: [.read, .execute],
             metadata: [
                 "source": "Skill.md",
-                "executor": fields["executor"] ?? id
+                "executor": fields["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? fields["executor"]!.trimmingCharacters(in: .whitespacesAndNewlines) : id
             ]
         )
     }

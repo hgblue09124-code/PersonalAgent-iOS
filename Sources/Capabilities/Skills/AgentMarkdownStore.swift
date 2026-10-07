@@ -40,7 +40,7 @@ public struct AgentMarkdownParser: Sendable {
     public func parse(_ markdown: String) throws -> AgentManifest {
         let normalized = markdown.replacingOccurrences(of: "\r\n", with: "\n")
         let parts = normalized.components(separatedBy: "\n---\n")
-        guard parts.count >= 2 else { throw AgentMarkdownError.missingField("front matter") }
+        guard parts.count == 2 else { throw AgentMarkdownError.missingField("front matter") }
 
         var fields: [String: String] = [:]
         for line in parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
@@ -50,6 +50,7 @@ public struct AgentMarkdownParser: Sendable {
             let key = pieces[0].trimmingCharacters(in: .whitespaces)
             let value = pieces[1].trimmingCharacters(in: .whitespaces)
             guard !key.isEmpty, !value.isEmpty else { throw AgentMarkdownError.missingField("malformed front matter") }
+            guard key.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" }) else { throw AgentMarkdownError.missingField("malformed front matter") }
             guard fields[key] == nil else { throw AgentMarkdownError.missingField("duplicate field: \\(key)") }
             fields[key] = value
         }
@@ -69,8 +70,9 @@ public struct AgentMarkdownParser: Sendable {
             .split(whereSeparator: \.isNewline)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
-            .map { SkillID(rawValue: $0) }
+            .map { SkillID(rawValue: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
         guard !skillIDs.isEmpty else { throw AgentMarkdownError.missingSkills }
+        guard skillIDs.allSatisfy({ !$0.rawValue.isEmpty }) else { throw AgentMarkdownError.missingSkills }
 
         var seen = Set<SkillID>()
         for skillID in skillIDs {
@@ -85,7 +87,7 @@ public struct AgentMarkdownParser: Sendable {
         }
         let rule = ruleSection.trimmingCharacters(in: .whitespacesAndNewlines)
         return AgentManifest(
-            id: id,
+            id: id.trimmingCharacters(in: .whitespacesAndNewlines),
             name: name,
             description: fields["description"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
                 ? fields["description"]!.trimmingCharacters(in: .whitespacesAndNewlines)
