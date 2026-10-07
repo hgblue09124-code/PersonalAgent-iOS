@@ -197,7 +197,9 @@ struct SettingsScreen: View {
                     .buttonStyle(.bordered)
                     .disabled(
                         connectionState == .testing ||
-                        (apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && credentialState != .saved)
+                        (apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && credentialState != .saved) ||
+                        (remoteProvider == "openai-compatible" && compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ||
+                        (remoteProvider == "openai-compatible" && compatibleModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     )
                     Button("Delete", role: .destructive) { deleteProviderCredential() }
                         .buttonStyle(.bordered)
@@ -512,7 +514,13 @@ private extension SettingsScreen {
 
     func loadCredentialState(for provider: String) -> CredentialState {
         do {
-            return try KeychainSecretStore().load(account: "provider.api-key.\(provider)") == nil ? .missing : .saved
+            guard let data = try KeychainSecretStore().load(account: "provider.api-key.\(provider)"),
+                  let value = String(data: data, encoding: .utf8)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines),
+                  !value.isEmpty else {
+                return .missing
+            }
+            return .saved
         } catch {
             return .error("Keychain read failed.")
         }
