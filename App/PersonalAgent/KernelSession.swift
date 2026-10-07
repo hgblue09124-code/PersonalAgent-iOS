@@ -367,6 +367,24 @@ final class KernelSession: ObservableObject {
         persistConversations()
     }
 
+    func setChatPersistence(_ enabled: Bool) {
+        UserDefaults.standard.set(enabled, forKey: "privacy.persistChat")
+        guard !enabled else {
+            persistConversations()
+            return
+        }
+
+        let conversation = ChatConversation(title: "New conversation")
+        conversations = [conversation]
+        currentConversationID = conversation.id
+        chatHistory = []
+        executionResult = nil
+        presentedResult = nil
+        UserDefaults.standard.removeObject(forKey: "chat.conversations.v1")
+        UserDefaults.standard.removeObject(forKey: "chat.history.v1")
+        UserDefaults.standard.removeObject(forKey: "chat.currentConversation.v1")
+    }
+
     func newConversation() {
         let conversation = ChatConversation(title: "New conversation")
         conversations.insert(conversation, at: 0)
