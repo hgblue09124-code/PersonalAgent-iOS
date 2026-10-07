@@ -15,7 +15,7 @@ public struct SkillMarkdownParser: Sendable {
     public func parse(_ markdown: String) throws -> SkillManifest {
         let normalized = markdown.replacingOccurrences(of: "\r\n", with: "\n")
         let parts = normalized.components(separatedBy: "\n---\n")
-        guard parts.count == 2 else { throw SkillMarkdownError.invalidSchema("expected exactly one document delimiter") }
+        guard parts.count == 2, !normalized.hasPrefix("---\n") else { throw SkillMarkdownError.invalidSchema("expected exactly one document delimiter") }
 
         let frontMatter = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
         let body = parts.dropFirst().joined(separator: "\n---\n")
@@ -27,7 +27,7 @@ public struct SkillMarkdownParser: Sendable {
             let value = pieces[1].trimmingCharacters(in: .whitespaces)
             guard !key.isEmpty, !value.isEmpty else { throw SkillMarkdownError.missingField("malformed front matter") }
             guard key.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" }) else { throw SkillMarkdownError.invalidSchema("invalid field name: \(key)") }
-            guard fields[key] == nil else { throw SkillMarkdownError.missingField("duplicate field: \\(key)") }
+            guard fields[key] == nil else { throw SkillMarkdownError.missingField("duplicate field: \(key)") }
             fields[key] = value
         }
 

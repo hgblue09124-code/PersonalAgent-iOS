@@ -40,7 +40,7 @@ public struct AgentMarkdownParser: Sendable {
     public func parse(_ markdown: String) throws -> AgentManifest {
         let normalized = markdown.replacingOccurrences(of: "\r\n", with: "\n")
         let parts = normalized.components(separatedBy: "\n---\n")
-        guard parts.count == 2 else { throw AgentMarkdownError.missingField("front matter") }
+        guard parts.count == 2, !normalized.hasPrefix("---\n") else { throw AgentMarkdownError.missingField("front matter") }
 
         var fields: [String: String] = [:]
         for line in parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
@@ -51,7 +51,7 @@ public struct AgentMarkdownParser: Sendable {
             let value = pieces[1].trimmingCharacters(in: .whitespaces)
             guard !key.isEmpty, !value.isEmpty else { throw AgentMarkdownError.missingField("malformed front matter") }
             guard key.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" || $0 == "-" }) else { throw AgentMarkdownError.missingField("malformed front matter") }
-            guard fields[key] == nil else { throw AgentMarkdownError.missingField("duplicate field: \\(key)") }
+            guard fields[key] == nil else { throw AgentMarkdownError.missingField("duplicate field: \(key)") }
             fields[key] = value
         }
 
