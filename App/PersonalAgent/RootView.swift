@@ -542,6 +542,9 @@ private struct RoadmapFeatureScreen: View {
                         .font(.headline)
                     Toggle("Local-only execution", isOn: $localOnly)
                     Toggle("Persist chat history", isOn: $persistChat)
+                        .onChange(of: persistChat) { _, enabled in
+                            session.setChatPersistence(enabled)
+                        }
                     Text("These controls are persisted locally. Remote execution remains disabled until an explicit provider credential is configured.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
