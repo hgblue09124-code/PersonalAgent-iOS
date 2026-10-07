@@ -4,7 +4,6 @@ import SwiftUI
 import PAKernel
 import PAComposition
 import PAProviders
-import PAProvidersLocal
 import PASkills
 import PARuntime
 
@@ -199,8 +198,6 @@ final class KernelSession: ObservableObject {
                 self.appendChatTurn(role: .assistant, content: result)
                 self.executionProgress = nil
             } catch is CancellationError {
-                // Cancellation is not success. Clear the active goal so Stop cannot
-                // strand it and block the next Start/submit cycle.
                 if let goalID,
                    let status = await self.composition.runtime.goal(id: goalID)?.status,
                    status == .active || status == .proposed {
@@ -208,7 +205,6 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionProgress = nil
             } catch {
-                // Provider/model failure must not strand an active goal and block the next turn.
                 if let goalID,
                    let status = await self.composition.runtime.goal(id: goalID)?.status,
                    status == .active || status == .proposed {
@@ -321,9 +317,6 @@ final class KernelSession: ObservableObject {
                 }
             }
 
-            // Files/iCloud providers can invalidate the external URL after the
-            // picker/open-document callback returns. Copy while the security
-            // scope is alive, then let LocalModelStorage consume a stable local URL.
             let temporaryURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("import-\(UUID().uuidString)")
                 .appendingPathExtension("gguf")
@@ -519,10 +512,8 @@ final class KernelSession: ObservableObject {
     }
 
     private static func cleanModelResult(_ raw: String) -> String {
-        var result = LocalModelOutputValidator.sanitize(text: raw)
+        var result = sanitizeModelOutput(raw)
 
-        // Qwen and other chat templates may leak control tokens into the
-        // final UI result. They are transport markers, not user-facing text.
         for token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>", "<|eot_id|>", "<|assistant|>", "<|user|>"] {
             result = result.replacingOccurrences(of: token, with: "")
         }
@@ -534,6 +525,41 @@ final class KernelSession: ObservableObject {
         }
 
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func sanitizeModelOutput(_ raw: String) -> String {
+        let normalized = raw
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !normalized.isEmpty else { return "" }
+
+        let words = normalized.split { $0.isWhitespace }.map(String.init)
+        guard words.count >= 8 else { return normalized }
+
+        let maxBlockSize = min(24, words.count / 2)
+        if maxBlockSize >= 3 {
+            for blockSize in stride(from: maxBlockSize, through: 3, by: -1) {
+                let block = Array(words.suffix(blockSize))
+                var repeatCount = 1
+                var cursor = words.count - blockSize
+
+                while cursor >= blockSize {
+                    let candidate = Array(words[(cursor - blockSize)..<cursor])
+                    guard candidate == block else { break }
+                    repeatCount += 1
+                    cursor -= blockSize
+                }
+
+                if repeatCount >= 2 {
+                    let prefix = Array(words.prefix(cursor))
+                    return (prefix + block).joined(separator: " ")
+                }
+            }
+        }
+
+        return normalized
     }
 
     private static func sha256(of url: URL) throws -> String {
@@ -560,7 +586,6 @@ final class KernelSession: ObservableObject {
                 lastError = error.description
             }
         } catch is CancellationError {
-            // Stop intentionally cancels an active execution; lifecycle state is authoritative.
         } catch {
             lastError = String(describing: error)
         }
