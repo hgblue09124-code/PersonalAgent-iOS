@@ -795,7 +795,7 @@ private struct EmptyState: View {
 }
 
 private struct ExecutionCard: View {
-    let progress: ExecutionProgress
+    let progress: AgentExecutionProgress
 
     var body: some View {
         HubPanel {
@@ -913,6 +913,36 @@ private struct Safeguard: View {
                     .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
+        }
+    }
+}
+
+
+private struct LifecycleControls: View {
+    @ObservedObject var session: KernelSession
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("Runtime lifecycle", systemImage: "bolt.fill")
+                    .font(.headline)
+                Spacer()
+                Text(session.state.lifecycle.rawValue.capitalized)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack(spacing: 8) {
+                Button("Start") { Task { await session.start() } }
+                    .buttonStyle(.borderedProminent)
+                Button("Pause") { Task { await session.pause() } }
+                    .buttonStyle(.bordered)
+                Button("Resume") { Task { await session.resume() } }
+                    .buttonStyle(.bordered)
+                Button("Stop", role: .destructive) { Task { await session.stop() } }
+                    .buttonStyle(.bordered)
+            }
+            .controlSize(.small)
         }
     }
 }
