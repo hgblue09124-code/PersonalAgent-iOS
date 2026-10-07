@@ -239,23 +239,23 @@ private struct AgentOrb: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            .white.opacity(0.96),
-                            AgentDesign.accent.opacity(0.88),
-                            Color(red: 0.16, green: 0.25, blue: 0.91).opacity(0.98)
-                        ],
-                        center: UnitPoint(x: 0.34, y: 0.28),
-                        startRadius: 2,
-                        endRadius: 48
-                    )
+                .fill(AgentDesign.accent.opacity(0.18))
+                .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
+                .blur(radius: 7)
+
+            Image("AppIcon")
+                .resizable()
+                .scaledToFill()
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(.white.opacity(0.28), lineWidth: 1)
                 )
 
             Circle()
                 .stroke(
                     AngularGradient(
-                        colors: [.white.opacity(0.15), .white.opacity(0.82), AgentDesign.accent.opacity(0.2), .white.opacity(0.15)],
+                        colors: [.white.opacity(0.18), .white.opacity(0.9), AgentDesign.accent.opacity(0.35), .white.opacity(0.18)],
                         center: .center,
                         angle: .degrees(rotation)
                     ),
@@ -265,20 +265,13 @@ private struct AgentOrb: View {
 
             Circle()
                 .trim(from: 0.04, to: 0.31)
-                .stroke(.white.opacity(0.92), style: StrokeStyle(lineWidth: isThinking ? 3 : 2, lineCap: .round))
+                .stroke(.white.opacity(0.95), style: StrokeStyle(lineWidth: isThinking ? 3 : 2, lineCap: .round))
                 .rotationEffect(.degrees(rotation * 1.7))
-                .blur(radius: isThinking ? 0.2 : 0)
 
             Circle()
-                .stroke(AgentDesign.accent.opacity(0.28), lineWidth: 6)
+                .stroke(AgentDesign.accent.opacity(0.3), lineWidth: 5)
                 .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
-                .opacity(0.34 + 0.26 * energy)
-
-            Circle()
-                .fill(.white.opacity(0.18))
-                .frame(width: 22, height: 22)
-                .blur(radius: 8)
-                .offset(x: -12, y: -14)
+                .opacity(0.3 + 0.28 * energy)
         }
         .shadow(color: AgentDesign.accent.opacity(0.34 + 0.18 * energy), radius: isThinking ? 22 : 14, y: 6)
         .scaleEffect(pulse ? (isThinking ? 1.055 : isActive ? 1.025 : 1) : 1)
