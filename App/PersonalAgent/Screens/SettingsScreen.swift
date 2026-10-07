@@ -12,7 +12,7 @@ struct SettingsScreen: View {
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
     @State private var copiedUpdateLink = false
-    @AppStorage("provider.execution.mode") private var executionMode = "local"
+    @AppStorage("provider.execution.mode") private var executionMode = UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local"
     @State private var remoteProvider = UserDefaults.standard.string(forKey: "provider.remote.id") ?? "openai"
     @State private var compatibleEndpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? ""
     @State private var compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "compatible"

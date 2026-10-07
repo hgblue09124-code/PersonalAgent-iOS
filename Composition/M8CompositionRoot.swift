@@ -327,7 +327,7 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
 
     private var enabled: Bool {
         UserDefaults.standard.bool(forKey: "provider.remote.enabled")
-            && UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
+            && (UserDefaults.standard.string(forKey: "provider.execution.mode") ?? (UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local")) == "remote"
             && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
     }
 
@@ -755,7 +755,7 @@ extension M8CompositionRoot {
     }
 
     public func currentProviderIdentityID() async -> String {
-        let remote = UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
+        let remote = (UserDefaults.standard.string(forKey: "provider.execution.mode") ?? (UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local")) == "remote"
             && UserDefaults.standard.bool(forKey: "provider.remote.enabled")
             && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
         if !remote {
