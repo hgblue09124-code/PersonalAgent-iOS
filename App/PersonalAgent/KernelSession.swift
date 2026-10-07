@@ -250,12 +250,6 @@ final class KernelSession: ObservableObject {
         await refreshMemory()
     }
 
-    func remember(_ content: String, kind: String = "fact") async {
-        await run {
-            try await composition.remember(content, kind: kind)
-        }
-    }
-
     func clearMemory() async {
         await run {
             try await composition.clearMemory()
