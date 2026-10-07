@@ -453,6 +453,7 @@ final class KernelSession: ObservableObject {
         guard UserDefaults.standard.object(forKey: "privacy.persistChat") as? Bool != false else {
             UserDefaults.standard.removeObject(forKey: "chat.conversations.v1")
             UserDefaults.standard.removeObject(forKey: "chat.history.v1")
+            UserDefaults.standard.removeObject(forKey: "chat.currentConversation.v1")
             return
         }
         guard let data = try? JSONEncoder().encode(conversations) else { return }
