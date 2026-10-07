@@ -232,15 +232,63 @@ private struct AgentOrb: View {
     let isActive: Bool
     let isThinking: Bool
     @State private var pulse = false
+    @State private var rotation = 0.0
+
+    private var energy: Double { isThinking ? 1.0 : isActive ? 0.72 : 0.38 }
+
     var body: some View {
         ZStack {
-            Circle().fill(RadialGradient(colors: [.white.opacity(0.9), Color(red: 0.58, green: 0.66, blue: 1).opacity(0.76), Color(red: 0.16, green: 0.25, blue: 0.91).opacity(0.98)], center: UnitPoint(x: 0.34, y: 0.28), startRadius: 2, endRadius: 48))
-            Circle().stroke(.white.opacity(0.34), lineWidth: 1)
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            .white.opacity(0.96),
+                            AgentDesign.accent.opacity(0.88),
+                            Color(red: 0.16, green: 0.25, blue: 0.91).opacity(0.98)
+                        ],
+                        center: UnitPoint(x: 0.34, y: 0.28),
+                        startRadius: 2,
+                        endRadius: 48
+                    )
+                )
+
+            Circle()
+                .stroke(
+                    AngularGradient(
+                        colors: [.white.opacity(0.15), .white.opacity(0.82), AgentDesign.accent.opacity(0.2), .white.opacity(0.15)],
+                        center: .center,
+                        angle: .degrees(rotation)
+                    ),
+                    lineWidth: isThinking ? 2.5 : 1.5
+                )
+                .rotationEffect(.degrees(rotation))
+
+            Circle()
+                .trim(from: 0.04, to: 0.31)
+                .stroke(.white.opacity(0.92), style: StrokeStyle(lineWidth: isThinking ? 3 : 2, lineCap: .round))
+                .rotationEffect(.degrees(rotation * 1.7))
+                .blur(radius: isThinking ? 0.2 : 0)
+
+            Circle()
+                .stroke(AgentDesign.accent.opacity(0.28), lineWidth: 6)
+                .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
+                .opacity(0.34 + 0.26 * energy)
+
+            Circle()
+                .fill(.white.opacity(0.18))
+                .frame(width: 22, height: 22)
+                .blur(radius: 8)
+                .offset(x: -12, y: -14)
         }
-        .shadow(color: .black.opacity(0.28), radius: 16, y: 8)
-        .scaleEffect(pulse ? (isThinking ? 1.07 : isActive ? 1.035 : 1) : 1)
-        .animation(.easeInOut(duration: isThinking ? 0.58 : 1.8).repeatForever(autoreverses: true), value: pulse)
-        .onAppear { pulse = true }
+        .shadow(color: AgentDesign.accent.opacity(0.34 + 0.18 * energy), radius: isThinking ? 22 : 14, y: 6)
+        .scaleEffect(pulse ? (isThinking ? 1.055 : isActive ? 1.025 : 1) : 1)
+        .animation(.easeInOut(duration: isThinking ? 0.55 : 1.8).repeatForever(autoreverses: true), value: pulse)
+        .animation(.easeInOut(duration: 0.35), value: isThinking)
+        .onAppear {
+            pulse = true
+            rotation = 360
+        }
+        .animation(.linear(duration: isThinking ? 2.2 : 5.5).repeatForever(autoreverses: false), value: rotation)
         .accessibilityLabel(isThinking ? "Agent thinking" : isActive ? "Agent active" : "Agent idle")
     }
 }
