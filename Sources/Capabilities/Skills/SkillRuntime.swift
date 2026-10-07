@@ -21,7 +21,11 @@ public protocol SkillExecutor: Sendable {
 public actor SkillExecutorRegistry {
     private var executors: [String: any SkillExecutor] = [:]
     public init(executors: [String: any SkillExecutor] = [:]) { self.executors = executors }
-    public func register(_ executor: any SkillExecutor, for key: String) { executors[key] = executor }
+    public func register(_ executor: any SkillExecutor, for key: String) {
+        let normalizedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedKey.isEmpty else { return }
+        executors[normalizedKey] = executor
+    }
     public func resolve(_ manifest: SkillManifest) throws -> any SkillExecutor {
         let configuredKey = manifest.metadata["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines)
         let key: String
@@ -53,6 +57,21 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
         guard let fields = Self.object(from: outputJSON), let text = fields["text"] as? String else { return false }
         return !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+    private static func tokens(_ value: String) -> [String] {
+        value.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
+    }
+
+    private static func containsTokenSequence(_ value: String, _ phrase: String) -> Bool {
+        let haystack = tokens(value)
+        let needle = tokens(phrase)
+        guard !needle.isEmpty, needle.count <= haystack.count else { return false }
+        return haystack.indices.contains { index in
+            let end = index + needle.count
+            guard end <= haystack.count else { return false }
+            return Array(haystack[index..<end]) == needle
+        }
+    }
+
     private static func object(from json: String) -> [String: Any]? {
         guard let data = json.data(using: .utf8),
               let object = try? JSONSerialization.jsonObject(with: data),
@@ -81,14 +100,14 @@ public actor InMemorySkillStore: SkillStore {
 public struct KeywordSkillSelector: SkillSelecting, Sendable {
     public init() {}
     public func select(goalStatement: String, available: [SkillManifest]) async throws -> SkillID? {
-        let goalTokens = Set(goalStatement.lowercased().split(separator: " ").map(String.init))
+        let goalTokens = Set(Self.tokens(goalStatement))
         return available.map { manifest in
-            let normalizedGoal = goalStatement.lowercased()
+            let normalizedGoal = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             let id = manifest.id.rawValue.lowercased()
             let name = manifest.name.lowercased()
             let words = Set((id + " " + name + " " + manifest.description).split(separator: " ").map(String.init))
             let score = goalTokens.intersection(words).count
-            let exactMatch = normalizedGoal.contains(id) || normalizedGoal.contains(name)
+            let exactMatch = Self.containsTokenSequence(normalizedGoal, id) || Self.containsTokenSequence(normalizedGoal, name)
             return (manifest, score, exactMatch)
         }
         .filter { $0.1 >= 2 || $0.2 }

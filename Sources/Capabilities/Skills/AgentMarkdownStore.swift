@@ -64,7 +64,7 @@ public struct AgentMarkdownParser: Sendable {
         }
 
         let body = parts.dropFirst().joined(separator: "\n---\n")
-        let skillsText = section(named: "Skills", in: body) ?? ""
+        let skillsText = try section(named: "Skills", in: body) ?? ""
         let skillIDs = skillsText
             .split(whereSeparator: \.isNewline)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -79,7 +79,7 @@ public struct AgentMarkdownParser: Sendable {
             }
         }
 
-        guard let ruleSection = section(named: "Rule", in: body),
+        guard let ruleSection = try section(named: "Rule", in: body),
               !ruleSection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw AgentMarkdownError.missingField("Rule")
         }
@@ -87,7 +87,9 @@ public struct AgentMarkdownParser: Sendable {
         return AgentManifest(
             id: id,
             name: name,
-            description: fields["description"] ?? name,
+            description: fields["description"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+                ? fields["description"]!.trimmingCharacters(in: .whitespacesAndNewlines)
+                : name,
             version: version,
             skillIDs: skillIDs,
             instructions: rule
@@ -103,14 +105,21 @@ public struct AgentMarkdownParser: Sendable {
         return SemanticVersion(major: major, minor: minor, patch: patch)
     }
 
-    private func section(named name: String, in body: String) -> String? {
+    private func section(named name: String, in body: String) throws -> String? {
         let marker = "## " + name
-        guard let range = body.range(of: marker) else { return nil }
-        let remainder = body[range.upperBound...]
-        if let next = remainder.range(of: "\n## ") {
-            return String(remainder[..<next.lowerBound])
+        let lines = body.components(separatedBy: "\n")
+        let matches = lines.indices.filter {
+            lines[$0].trimmingCharacters(in: .whitespacesAndNewlines) == marker
         }
-        return String(remainder)
+        guard matches.count <= 1 else {
+            throw AgentMarkdownError.missingField("duplicate section: \(name)")
+        }
+        guard let index = matches.first else { return nil }
+        let start = index + 1
+        let end = lines[start...].firstIndex {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("## ")
+        } ?? lines.count
+        return lines[start..<end].joined(separator: "\n")
     }
 }
 
@@ -165,7 +174,19 @@ public actor FileAgentStore: Sendable {
         guard FileManager.default.fileExists(atPath: directoryURL.path) else { return [] }
         let urls = try FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension.lowercased() == "md" }
-        return try urls.map { try parser.parse(String(contentsOf: $0, encoding: .utf8)) }
+        var manifests: [AgentManifest] = []
+        var seen = Set<String>()
+        for url in urls.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+                throw AgentMarkdownError.missingField("invalid UTF-8: \(url.lastPathComponent)")
+            }
+            let manifest = try parser.parse(text)
+            guard seen.insert(manifest.id).inserted else {
+                throw AgentMarkdownError.missingField("duplicate agent id: \(manifest.id)")
+            }
+            manifests.append(manifest)
+        }
+        return manifests
     }
 }
 

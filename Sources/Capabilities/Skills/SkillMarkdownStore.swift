@@ -35,10 +35,18 @@ public struct SkillMarkdownParser: Sendable {
         guard let versionText = fields["version"]?.trimmingCharacters(in: .whitespacesAndNewlines), !versionText.isEmpty else { throw SkillMarkdownError.missingField("version") }
         guard let version = parseVersion(versionText) else { throw SkillMarkdownError.invalidVersion(versionText) }
 
-        let description = fields["description"] ?? name
-        let input = section(named: "Input", in: body) ?? "{}"
-        let output = section(named: "Output", in: body) ?? "{}"
-        let rule = section(named: "Rule", in: body) ?? ""
+        let description = fields["description"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+            ? fields["description"]!.trimmingCharacters(in: .whitespacesAndNewlines)
+            : name
+        let input = try section(named: "Input", in: body) ?? "{}"
+        let output = try section(named: "Output", in: body) ?? "{}"
+        let rule = try section(named: "Rule", in: body) ?? ""
+        guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw SkillMarkdownError.missingField("Input")
+        }
+        guard !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw SkillMarkdownError.missingField("Output")
+        }
         guard !rule.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw SkillMarkdownError.missingField("Rule")
         }
@@ -68,14 +76,21 @@ public struct SkillMarkdownParser: Sendable {
         return SemanticVersion(major: major, minor: minor, patch: patch)
     }
 
-    private func section(named name: String, in body: String) -> String? {
+    private func section(named name: String, in body: String) throws -> String? {
         let marker = "## " + name
-        guard let range = body.range(of: marker) else { return nil }
-        let remainder = body[range.upperBound...]
-        if let next = remainder.range(of: "\n## ") {
-            return String(remainder[..<next.lowerBound])
+        let lines = body.components(separatedBy: "\n")
+        let matches = lines.indices.filter {
+            lines[$0].trimmingCharacters(in: .whitespacesAndNewlines) == marker
         }
-        return String(remainder)
+        guard matches.count <= 1 else {
+            throw SkillMarkdownError.missingField("duplicate section: \(name)")
+        }
+        guard let index = matches.first else { return nil }
+        let start = index + 1
+        let end = lines[start...].firstIndex {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("## ")
+        } ?? lines.count
+        return lines[start..<end].joined(separator: "\n")
     }
 }
 
@@ -119,7 +134,19 @@ public actor FileSkillStore: SkillStore {
             at: directoryURL,
             includingPropertiesForKeys: nil
         ).filter { $0.pathExtension.lowercased() == "md" }
-        return try urls.map { try parser.parse(String(contentsOf: $0, encoding: .utf8)) }
+        var manifests: [SkillManifest] = []
+        var seen = Set<SkillID>()
+        for url in urls.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+                throw SkillMarkdownError.invalidSchema("invalid UTF-8: \(url.lastPathComponent)")
+            }
+            let manifest = try parser.parse(text)
+            guard seen.insert(manifest.id).inserted else {
+                throw SkillMarkdownError.missingField("duplicate skill id: \(manifest.id.rawValue)")
+            }
+            manifests.append(manifest)
+        }
+        return manifests
     }
 
     private static let defaultSkillMarkdown = """
