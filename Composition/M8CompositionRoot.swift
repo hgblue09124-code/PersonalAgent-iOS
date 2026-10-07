@@ -187,6 +187,14 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     }
 
     private func resolveActiveProvider() async throws -> ActiveResolution {
+        let executionMode = UserDefaults.standard.string(forKey: "provider.execution.mode")
+            ?? (UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local")
+        let remoteEnabled = UserDefaults.standard.bool(forKey: "provider.remote.enabled")
+            && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
+        if executionMode == "remote" && remoteEnabled {
+            return .noActiveModel
+        }
+
         guard let engine = try await coordinator.activeLocalModelEngine() else {
             return .noActiveModel
         }
