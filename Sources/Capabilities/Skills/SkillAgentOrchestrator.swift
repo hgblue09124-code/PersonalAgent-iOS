@@ -65,7 +65,9 @@ public actor SkillAgentOrchestrator {
         if let agent {
             let available = try await runtime.discover()
             let availableIDs = Set(available.map(\.id))
-            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }) {
+            let declaredAvailable = agent.skillIDs.filter { availableIDs.contains($0) }
+            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }),
+               !declaredAvailable.isEmpty {
                 throw SkillAgentOrchestratorError.agentDeclaresMissingSkill(missing)
             }
         }
