@@ -257,14 +257,6 @@ final class KernelSession: ObservableObject {
         memoryRecords = []
     }
 
-    func forgetMemory(id: String, reason: String = "user-requested") async {
-        guard let recordID = MemoryRecordID(rawValue: id) else { return }
-        await run {
-            try await composition.memoryRuntime.forget(id: recordID, reason: reason)
-        }
-        await refreshMemory()
-    }
-
     func downloadDevModel() async {
         guard !isDownloadingDevModel else { return }
         isDownloadingDevModel = true

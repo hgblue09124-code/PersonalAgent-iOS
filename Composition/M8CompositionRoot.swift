@@ -300,6 +300,7 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
 
     private var enabled: Bool {
         UserDefaults.standard.bool(forKey: "provider.remote.enabled")
+            && UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
             && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
     }
 
@@ -720,17 +721,31 @@ extension M8CompositionRoot {
     }
 
     public func currentProviderIdentityID() async -> String {
-        do {
-            if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
-                return "local-\(engine.identity.id.rawValue)"
+        let remote = UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
+            && UserDefaults.standard.bool(forKey: "provider.remote.enabled")
+            && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
+        if !remote {
+            do {
+                if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
+                    return "local-\(engine.identity.id.rawValue)"
+                }
+            } catch {
+                return "local-error"
             }
-        } catch {
-            return "local-error"
         }
         return catalog.identities.first?.id.rawValue ?? "none"
     }
 
     public func currentProviderLifecycle() async -> String {
+        let remote = UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
+            && UserDefaults.standard.bool(forKey: "provider.remote.enabled")
+            && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
+        if remote {
+            if let providerRuntime {
+                return await providerRuntime.lifecycle.rawValue
+            }
+            return "unconfigured"
+        }
         do {
             if let engine = try await localModelRuntimeCoordinator.activeLocalModelEngine() {
                 let state = await engine.lifecycleState
@@ -744,9 +759,6 @@ extension M8CompositionRoot {
             }
         } catch {
             return "error(\(error.localizedDescription))"
-        }
-        if let providerRuntime {
-            return await providerRuntime.lifecycle.rawValue
         }
         return "unconfigured"
     }

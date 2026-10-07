@@ -27,6 +27,7 @@ struct ProvidersScreen: View {
                 StatusRow(title: "Provider", value: session.providerID)
                 StatusRow(title: "Lifecycle", value: session.providerLifecycle)
                 StatusRow(title: "Connection", value: connectionState)
+                StatusRow(title: "Execution", value: UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote" ? "Remote" : "Local")
             }
 
             GlassPanel {

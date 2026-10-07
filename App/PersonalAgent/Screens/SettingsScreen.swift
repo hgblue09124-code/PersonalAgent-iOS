@@ -12,7 +12,10 @@ struct SettingsScreen: View {
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
     @State private var copiedUpdateLink = false
+    @AppStorage("provider.execution.mode") private var executionMode = "local"
     @State private var remoteProvider = UserDefaults.standard.string(forKey: "provider.remote.id") ?? "openai"
+    @State private var compatibleEndpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? ""
+    @State private var compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "compatible"
     @State private var apiKey = ""
     @State private var credentialState: CredentialState = .unknown
     @State private var connectionState: ConnectionState = .idle
@@ -137,19 +140,44 @@ struct SettingsScreen: View {
                 Label("Remote Provider", systemImage: "server.rack")
                     .font(.headline)
 
-                Picker("Provider", selection: $remoteProvider) {
-                    Text("OpenAI").tag("openai")
-                    Text("Grok").tag("grok")
+                Picker("Inference", selection: $executionMode) {
+                    Text("Local").tag("local")
+                    Text("Remote").tag("remote")
                 }
                 .pickerStyle(.segmented)
-                .onChange(of: remoteProvider) { _, newValue in
-                    UserDefaults.standard.set(newValue, forKey: "provider.remote.id")
-                    apiKey = ""
-                    credentialState = loadCredentialState(for: newValue)
-                    connectionState = .idle
+                .onChange(of: executionMode) { _, newValue in
+                    UserDefaults.standard.set(newValue, forKey: "provider.execution.mode")
+                    if newValue == "remote" {
+                        UserDefaults.standard.set(true, forKey: "provider.remote.enabled")
+                    }
+                    Task { await session.refresh() }
                 }
 
-                SecureField("API Key", text: $apiKey)
+                if executionMode == "remote" {
+                    Picker("Provider", selection: $remoteProvider) {
+                        Text("OpenAI").tag("openai")
+                        Text("Grok").tag("grok")
+                        Text("OpenAI Compatible").tag("openai-compatible")
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: remoteProvider) { _, newValue in
+                        UserDefaults.standard.set(newValue, forKey: "provider.remote.id")
+                        apiKey = ""
+                        credentialState = loadCredentialState(for: newValue)
+                        connectionState = .idle
+                    }
+
+                    if remoteProvider == "openai-compatible" {
+                        TextField("Chat completions endpoint", text: $compatibleEndpoint)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .keyboardType(.URL)
+                        TextField("Model ID", text: $compatibleModel)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+
+                    SecureField("API Key", text: $apiKey)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .textContentType(.password)
@@ -157,7 +185,11 @@ struct SettingsScreen: View {
                 HStack(spacing: 8) {
                     Button("Save") { saveProviderCredential() }
                         .buttonStyle(.borderedProminent)
-                        .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(
+                            (apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && credentialState != .saved)
+                            || (remoteProvider == "openai-compatible" && compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            || (remoteProvider == "openai-compatible" && compatibleModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        )
                     Button("Test connection") {
                         Task { await testProviderConnection() }
                     }
@@ -288,6 +320,8 @@ struct SettingsScreen: View {
         .id(appLanguage)
         .task {
             credentialState = loadCredentialState(for: remoteProvider)
+            compatibleEndpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? compatibleEndpoint
+            compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? compatibleModel
         }
         .fileImporter(
             isPresented: $isImportingGGUF,
@@ -470,16 +504,29 @@ private extension SettingsScreen {
     func saveProviderCredential() {
         let value = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }
+        if remoteProvider == "openai-compatible" {
+            let endpoint = compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+            let model = compatibleModel.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !endpoint.isEmpty, !model.isEmpty else {
+                credentialState = .error("Endpoint and model are required.")
+                return
+            }
+            UserDefaults.standard.set(endpoint, forKey: "provider.compatible.endpoint")
+            UserDefaults.standard.set(model, forKey: "provider.compatible.model")
+        }
         do {
-            try KeychainSecretStore().store(
-                account: credentialAccount,
-                secret: Data(value.utf8)
-            )
+            if !value.isEmpty {
+                try KeychainSecretStore().store(
+                    account: credentialAccount,
+                    secret: Data(value.utf8)
+                )
+            }
             apiKey = ""
             credentialState = .saved
             connectionState = .idle
             UserDefaults.standard.set(remoteProvider, forKey: "provider.remote.id")
             UserDefaults.standard.set(true, forKey: "provider.remote.enabled")
+            UserDefaults.standard.set("remote", forKey: "provider.execution.mode")
         } catch {
             credentialState = .error("Could not save API key securely.")
         }
@@ -492,6 +539,7 @@ private extension SettingsScreen {
             connectionState = .idle
             apiKey = ""
             UserDefaults.standard.set(false, forKey: "provider.remote.enabled")
+            UserDefaults.standard.set("local", forKey: "provider.execution.mode")
         } catch {
             credentialState = .error("Could not delete API key.")
         }
@@ -514,9 +562,25 @@ private extension SettingsScreen {
             }
         }
         connectionState = .testing
-        let endpoint: String = remoteProvider == "grok"
-            ? "https://api.x.ai/v1/models"
-            : "https://api.openai.com/v1/models"
+        let endpoint: String
+        if remoteProvider == "grok" {
+            endpoint = "https://api.x.ai/v1/models"
+        } else if remoteProvider == "openai-compatible" {
+            let configured = compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+            if configured.isEmpty {
+                await MainActor.run { connectionState = .failure("Configure the compatible endpoint first.") }
+                return
+            }
+            if configured.hasSuffix("/chat/completions") {
+                endpoint = String(configured.dropLast("/chat/completions".count)) + "/models"
+            } else if configured.hasSuffix("/v1") {
+                endpoint = configured + "/models"
+            } else {
+                endpoint = configured.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/models"
+            }
+        } else {
+            endpoint = "https://api.openai.com/v1/models"
+        }
         do {
             guard let url = URL(string: endpoint) else { throw URLError(.badURL) }
             var request = URLRequest(url: url)
