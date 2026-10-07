@@ -23,9 +23,13 @@ public actor SkillExecutorRegistry {
     public init(executors: [String: any SkillExecutor] = [:]) { self.executors = executors }
     public func register(_ executor: any SkillExecutor, for key: String) { executors[key] = executor }
     public func resolve(_ manifest: SkillManifest) throws -> any SkillExecutor {
-        let key = manifest.metadata["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
-            ? manifest.metadata["executor"]!
-            : manifest.id.rawValue
+        let configuredKey = manifest.metadata["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let key: String
+        if let configuredKey, !configuredKey.isEmpty {
+            key = configuredKey
+        } else {
+            key = manifest.id.rawValue
+        }
         guard let executor = executors[key] else { throw SkillRuntimeError.unknownSkill(manifest.id) }
         return executor
     }

@@ -46,14 +46,17 @@ public struct AgentMarkdownParser: Sendable {
         for line in parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
             .split(separator: "\n", omittingEmptySubsequences: true) {
             let pieces = line.split(separator: ":", maxSplits: 1).map(String.init)
-            guard pieces.count == 2 else { continue }
-            fields[pieces[0].trimmingCharacters(in: .whitespaces)] =
-                pieces[1].trimmingCharacters(in: .whitespaces)
+            guard pieces.count == 2 else { throw AgentMarkdownError.missingField("malformed front matter") }
+            let key = pieces[0].trimmingCharacters(in: .whitespaces)
+            let value = pieces[1].trimmingCharacters(in: .whitespaces)
+            guard !key.isEmpty, !value.isEmpty else { throw AgentMarkdownError.missingField("malformed front matter") }
+            guard fields[key] == nil else { throw AgentMarkdownError.missingField("duplicate field: \\(key)") }
+            fields[key] = value
         }
 
-        guard let id = fields["id"], !id.isEmpty else { throw AgentMarkdownError.missingField("id") }
-        guard let name = fields["name"], !name.isEmpty else { throw AgentMarkdownError.missingField("name") }
-        guard let versionText = fields["version"], !versionText.isEmpty else {
+        guard let id = fields["id"]?.trimmingCharacters(in: .whitespacesAndNewlines), !id.isEmpty else { throw AgentMarkdownError.missingField("id") }
+        guard let name = fields["name"]?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else { throw AgentMarkdownError.missingField("name") }
+        guard let versionText = fields["version"]?.trimmingCharacters(in: .whitespacesAndNewlines), !versionText.isEmpty else {
             throw AgentMarkdownError.missingField("version")
         }
         guard let version = parseVersion(versionText) else {
@@ -76,8 +79,11 @@ public struct AgentMarkdownParser: Sendable {
             }
         }
 
-        let rule = section(named: "Rule", in: body)?
-            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard let ruleSection = section(named: "Rule", in: body),
+              !ruleSection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw AgentMarkdownError.missingField("Rule")
+        }
+        let rule = ruleSection.trimmingCharacters(in: .whitespacesAndNewlines)
         return AgentManifest(
             id: id,
             name: name,
@@ -89,9 +95,12 @@ public struct AgentMarkdownParser: Sendable {
     }
 
     private func parseVersion(_ value: String) -> SemanticVersion? {
-        let parts = value.split(separator: ".").compactMap { Int($0) }
-        guard parts.count == 3 else { return nil }
-        return SemanticVersion(major: parts[0], minor: parts[1], patch: parts[2])
+        let parts = value.split(separator: ".", omittingEmptySubsequences: false)
+        guard parts.count == 3,
+              parts.allSatisfy({ !$0.isEmpty && $0.allSatisfy(\.isNumber) }),
+              let major = Int(parts[0]), let minor = Int(parts[1]), let patch = Int(parts[2]),
+              major >= 0, minor >= 0, patch >= 0 else { return nil }
+        return SemanticVersion(major: major, minor: minor, patch: patch)
     }
 
     private func section(named name: String, in body: String) -> String? {
