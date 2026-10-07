@@ -156,7 +156,6 @@ public struct HTTPChatProvider: LLMProvider {
             }
             guard let data = try await credentials.secretData(for: ref),
                   let token = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
-                  let token,
                   !token.isEmpty
             else {
                 throw ProviderRuntimeError.authenticationFailure
