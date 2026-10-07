@@ -71,7 +71,7 @@ jobs:
           fi
       - name: Kernel does not import concrete providers
         run: |
-          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Sources/Core/Agent; then
+          if grep -R "import PAProvidersGrok\|import PAProvidersOpenAI\|import URLSession" Kernel; then
             echo "Kernel isolation violated"
             exit 1
           fi
