@@ -153,7 +153,7 @@ struct ChatScreen: View {
                         Image(systemName: "arrow.up")
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(session.isSubmitting || message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }

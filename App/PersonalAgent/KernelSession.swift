@@ -29,6 +29,7 @@ final class KernelSession: ObservableObject {
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionResult: String?
     @Published var presentedResult: String?
+    @Published private(set) var isSubmitting = false
     @Published private(set) var chatHistory: [ChatTurn]
     @Published private(set) var conversations: [ChatConversation]
     @Published private(set) var currentConversationID: UUID
@@ -155,7 +156,9 @@ final class KernelSession: ObservableObject {
         }
 
         let agentID = selectedAgentID
+        isSubmitting = true
         let task = Task { @MainActor [weak self] in
+            defer { self?.isSubmitting = false }
             guard let self else { return }
             var goalID: GoalID?
             do {
