@@ -19,6 +19,14 @@ struct ProvidersScreen: View {
         return "Local / fallback"
     }
 
+    private var providerDisplayName: String {
+        switch remoteProvider {
+        case "grok": return "Grok"
+        case "openai-compatible": return "OpenAI Compatible"
+        default: return "OpenAI"
+        }
+    }
+
     var body: some View {
         ScreenScaffold(title: "Providers", systemImage: "server.rack") {
             GlassPanel {
@@ -35,7 +43,7 @@ struct ProvidersScreen: View {
                     .font(.headline)
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(remoteProvider == "grok" ? "Grok" : "OpenAI")
+                        Text(providerDisplayName)
                             .font(.headline)
                         Text(credentialSaved ? "API key stored in Keychain" : "No API key stored")
                             .font(.caption)
