@@ -6,480 +6,192 @@ struct AgentScreen: View {
     @ObservedObject var session: KernelSession
     @Binding var showWorkspace: Bool
     @State private var task = ""
-    @State private var showAgentPanel = false
-    @State private var appeared = false
     @State private var showActivity = false
-    @State private var showCommandCenter = false
-    @State private var showFeatureHub = false
-    @FocusState private var taskFocused: Bool
+    @State private var showAgentPanel = false
+    @FocusState private var focused: Bool
+
+    private var working: Bool { session.executionProgress != nil }
+    private var running: Bool { session.state.lifecycle.rawValue.lowercased() == "running" }
 
     var body: some View {
         ZStack {
-            background
-            content
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 12)
+            LinearGradient(colors: [Color(red: 0.07, green: 0.11, blue: 0.34), Color(red: 0.025, green: 0.035, blue: 0.12)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea()
+            Circle().fill(AgentDesign.accent.opacity(0.22)).frame(width: 300).blur(radius: 90).offset(x: 130, y: -250)
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
+                    hero
+                    composer
+                    liveState
+                    openBeta
+                }
+                .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 28)
+            }.scrollIndicators(.hidden)
         }
         .toolbar(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
-        .sheet(isPresented: $showFeatureHub) { AgentFeatureHub(session: session).presentationDetents([.large]).presentationDragIndicator(.visible) }
-        .sheet(isPresented: $showCommandCenter) {
-            CommandCenterSheet(
-                task: $task,
-                focused: $taskFocused,
-                onSubmit: runTask
-            )
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.visible)
-        }
-        .onAppear { withAnimation(.easeOut(duration: 0.7)) { appeared = true } }
+        .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
     }
 
-    private var background: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.12, green: 0.20, blue: 0.78),
-                    Color(red: 0.055, green: 0.08, blue: 0.30),
-                    Color(red: 0.025, green: 0.035, blue: 0.12)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            Circle()
-                .fill(Color.white.opacity(0.10))
-                .frame(width: 220)
-                .blur(radius: 60)
-                .offset(x: -110, y: -280)
-            Circle()
-                .fill(AgentDesign.accent.opacity(0.22))
-                .frame(width: 280)
-                .blur(radius: 80)
-                .offset(x: 130, y: 260)
-        }
-        .ignoresSafeArea()
-    }
-
-    private var content: some View {
-        // Keep the Agent surface on its compact design rhythm. In a true
-        // fullscreen window, unconstrained Spacers expand with the viewport
-        // and destroy the proportions that were correct on the original
-        // compact canvas. Fixed rhythm + centered composition preserves that
-        // visual geometry without changing the native fullscreen canvas.
-        VStack(spacing: 0) {
-            topBar
-            Color.clear.frame(height: 22)
-            quickActions
-            Color.clear.frame(height: 18)
-            hero
-            Color.clear.frame(height: 28)
-            composer
-            status
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 18)
-        .frame(maxWidth: .infinity)
-    }
-
-    private var topBar: some View {
-        HStack {
-            Text("PERSONAL AGENT")
-                .font(.system(size: 13, weight: .bold, design: .rounded))
-                .tracking(1.6)
-                .foregroundStyle(.white.opacity(0.82))
-
+    private var header: some View {
+        HStack(spacing: 9) {
+            Button { showAgentPanel = true } label: {
+                HStack(spacing: 8) {
+                    AgentOrb(isActive: running, isThinking: working).frame(width: 30, height: 30)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("PERSONAL AGENT").font(.system(size: 11, weight: .bold, design: .rounded)).tracking(1.1)
+                        Text(working ? "Working now" : "Ready").font(.caption2.weight(.semibold)).foregroundStyle(.white.opacity(0.55))
+                    }
+                }.foregroundStyle(.white)
+            }.buttonStyle(.plain)
             Spacer()
-
-            HStack(spacing: 8) {
-                Button { showFeatureHub = true } label: { topButton("circle.hexagongrid.fill") }
-                Button { showActivity = true } label: { topButton("waveform.path.ecg") }
-                lifecycleMenu
-            }
+            Button { showActivity = true } label: { headerButton("waveform.path.ecg") }
+            Button { showWorkspace = true } label: { headerButton("circle.hexagongrid.fill") }
+            Menu {
+                Button("Start") { Task { await session.start() } }
+                Button("Pause") { Task { await session.pause() } }
+                Button("Resume") { Task { await session.resume() } }
+                Button("Stop", role: .destructive) { Task { await session.stop() } }
+            } label: { headerButton("ellipsis") }
         }
     }
 
-    private var quickActions: some View {
-        HStack(spacing: 8) {
-            quickAction("New task", "plus") { showCommandCenter = true }
-            quickAction("Chat", "bubble.left.and.bubble.right") { showFeatureHub = true }
-            quickAction("Activity", "waveform.path.ecg") { showActivity = true }
-            quickAction("Agent", "sparkles") { showAgentPanel = true }
-            Spacer()
-        }
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : 8)
-        .animation(.spring(response: 0.55, dampingFraction: 0.82).delay(0.08), value: appeared)
-    }
-
-    private func quickAction(_ title: String, _ symbol: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Label(LocalizedStringKey(title), systemImage: symbol)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.92))
-                .padding(.horizontal, 11)
-                .padding(.vertical, 8)
-                 .background(.white.opacity(0.085), in: Capsule())
-                .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
-                .shadow(color: .black.opacity(0.10), radius: 10, y: 5)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func topButton(_ symbol: String) -> some View {
-        Image(systemName: symbol)
-            .font(.system(size: 13, weight: .bold))
-            .foregroundStyle(.white)
-            .frame(width: 38, height: 38)
-             .background(.white.opacity(0.085), in: Circle())
-            .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1))
-            .shadow(color: .black.opacity(0.10), radius: 10, y: 5)
+    private func headerButton(_ symbol: String) -> some View {
+        Image(systemName: symbol).font(.system(size: 13, weight: .bold)).foregroundStyle(.white)
+            .frame(width: 36, height: 36).background(.white.opacity(0.09), in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 1))
     }
 
     private var hero: some View {
-        VStack(spacing: 16) {
-            Button { showAgentPanel = true } label: {
-                AgentOrb(
-                    isActive: session.state.lifecycle.rawValue.lowercased() == "running",
-                    isThinking: session.executionProgress != nil
-                )
-            }
-            .buttonStyle(.plain)
-
-            Text(LocalizedStringKey(greeting))
-                .font(.system(size: 38, weight: .black, design: .rounded))
-                .tracking(-1.3)
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-
+        VStack(spacing: 14) {
+            Spacer().frame(height: 34)
+            Button { showAgentPanel = true } label: { AgentOrb(isActive: running, isThinking: working).frame(width: 92, height: 92) }.buttonStyle(.plain)
+            Text(greeting).font(.system(size: 38, weight: .black, design: .rounded)).tracking(-1.4).foregroundStyle(.white).multilineTextAlignment(.center)
             HStack(spacing: 7) {
-                Circle()
-                    .fill(session.executionProgress != nil ? .white : .white.opacity(0.72))
-                    .frame(width: 6, height: 6)
-                Text(LocalizedStringKey(phaseSubtitle))
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.72))
+                Circle().fill(working ? .white : .white.opacity(0.68)).frame(width: 6, height: 6)
+                Text(subtitle).font(.subheadline.weight(.semibold)).foregroundStyle(.white.opacity(0.68))
             }
-        }
-        .frame(maxWidth: .infinity)
-        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            Spacer().frame(height: 20)
+        }.frame(maxWidth: .infinity)
     }
 
     private var composer: some View {
-        HStack(spacing: 12) {
-            TextField("Ask Agent…", text: $task, axis: .vertical)
-                .textFieldStyle(.plain)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.white)
-                .tint(.white)
-                .lineLimit(1...4)
-                .focused($taskFocused)
-                .submitLabel(.send)
-                .onSubmit { runTask() }
-
-            Button(action: runTask) {
-                Image(systemName: "arrow.up")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.black)
-                    .frame(width: 42, height: 42)
-                    .background(.white, in: Circle())
-            }
-            .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .opacity(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.42 : 1)
-            .accessibilityLabel("Run Agent")
+        HStack(spacing: 9) {
+            Image(systemName: "sparkles").foregroundStyle(.white.opacity(0.45))
+            TextField("Ask your Agent…", text: $task, axis: .vertical).textFieldStyle(.plain).foregroundStyle(.white).tint(.white).lineLimit(1...4).focused($focused).submitLabel(.send).onSubmit(run)
+            Button(action: run) {
+                Image(systemName: "arrow.up").font(.system(size: 14, weight: .bold)).foregroundStyle(.black).frame(width: 40, height: 40).background(.white, in: Circle())
+            }.disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || session.isSubmitting)
         }
-        .padding(.leading, 17)
-        .padding(.trailing, 7)
-        .padding(.vertical, 7)
-         .background(.ultraThinMaterial, in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.20), lineWidth: 1))
-        .shadow(color: .black.opacity(0.24), radius: 24, y: 12)
+        .padding(7).padding(.leading, 10).background(.ultraThinMaterial, in: Capsule()).overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
+        .shadow(color: .black.opacity(0.28), radius: 24, y: 12)
     }
 
-    @ViewBuilder
-    private var status: some View {
-        if let result = session.executionResult {
-            statusCard(title: "Done", detail: result, symbol: "checkmark.circle.fill")
-                .transition(.scale(scale: 0.96).combined(with: .opacity))
-        } else if let progress = session.executionProgress {
-            statusCard(title: progress.title, detail: progress.detail, symbol: "sparkles")
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        } else if let error = session.lastError {
-            statusCard(title: "Something went wrong", detail: error, symbol: "exclamationmark.triangle.fill")
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
+    @ViewBuilder private var liveState: some View {
+        if let p = session.executionProgress { state("WORKING", p.title, p.detail, "sparkles") }
+        else if let r = session.executionResult { state("COMPLETED", "Latest result", r, "checkmark.circle.fill") }
+        else if let e = session.lastError { state("NEEDS ATTENTION", "The Agent could not complete the request", e, "exclamationmark.triangle.fill") }
     }
 
-    private func statusCard(title: String, detail: String, symbol: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: symbol)
-                .font(.headline)
+    private func state(_ eyebrow: String, _ title: String, _ detail: String, _ symbol: String) -> some View {
+        HStack(alignment: .top, spacing: 11) {
+            Image(systemName: symbol).foregroundStyle(.white).frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 3) {
-                Text(LocalizedStringKey(title)).font(.subheadline.bold())
-                ScrollView(.vertical, showsIndicators: true) {
-                    Text(detail)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(maxHeight: 116)
-                .scrollDismissesKeyboard(.interactively)
+                Text(eyebrow).font(.caption2.weight(.bold)).tracking(0.8).foregroundStyle(.white.opacity(0.5))
+                Text(title).font(.subheadline.weight(.bold)).foregroundStyle(.white)
+                Text(detail).font(.caption).foregroundStyle(.white.opacity(0.66)).lineLimit(5)
             }
-            Spacer(minLength: 0)
+            Spacer()
         }
-        .foregroundStyle(.primary)
-        .padding(13)
-        .frame(maxWidth: .infinity, alignment: .leading)
-         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(.primary.opacity(0.06), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
-        .padding(.top, 14)
+        .padding(14).background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.white.opacity(0.1), lineWidth: 1)).padding(.top, 14)
     }
 
-    private var lifecycleMenu: some View {
-        Menu {
-            Button("Start") { Task { await session.start() } }
-            Button("Pause") { Task { await session.pause() } }
-            Button("Resume") { Task { await session.resume() } }
-            Button("Stop", role: .destructive) { Task { await session.stop() } }
-        } label: {
-            Image(systemName: "ellipsis")
-                .font(.headline.bold())
-                .foregroundStyle(.white)
-                .frame(width: 38, height: 38)
-                .background(.white.opacity(0.11), in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.16), lineWidth: 1))
-        }
-        .accessibilityLabel("Agent runtime controls")
+    private var openBeta: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("OPEN BETA").font(.caption2.weight(.bold)).tracking(1.1).foregroundStyle(.white.opacity(0.45))
+                Spacer()
+                Button("Workspace") { showWorkspace = true }.font(.caption.weight(.semibold)).foregroundStyle(.white.opacity(0.8))
+            }
+            HStack(spacing: 8) {
+                tile("Chat", "bubble.left.and.bubble.right")
+                tile("Models", "cube.box")
+                tile("Memory", "brain")
+                tile("Skills", "puzzlepiece")
+            }
+        }.padding(.top, 24)
     }
 
-    private var phaseSubtitle: String {
-        if session.executionProgress != nil { return "I’m thinking through it now." }
-        if session.executionResult != nil { return "That task is complete. What’s next?" }
-        if session.lastError != nil { return "Let’s adjust the request and try again." }
-        return "Tell me what you want to get done."
+    private func tile(_ title: String, _ symbol: String) -> some View {
+        VStack(alignment: .leading, spacing: 7) { Image(systemName: symbol).font(.subheadline.bold()); Text(title).font(.caption.weight(.semibold)) }
+            .foregroundStyle(.white.opacity(0.82)).padding(10).frame(maxWidth: .infinity, alignment: .leading)
+            .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
     }
 
     private var greeting: String {
         switch session.state.lifecycle.rawValue.lowercased() {
-        case "running": return "I’m working."
+        case "running": return working ? "I’m on it." : "Ready to work."
         case "paused": return "I’m paused."
-        case "stopped": return "Ready when you are."
-        default: return "What can I do for you?"
+        default: return "What can I do?"
         }
     }
 
-    private func runTask() {
-        let statement = task.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !statement.isEmpty else { return }
-        taskFocused = false
-        task = ""
-        Task { await session.submitGoal(statement) }
+    private var subtitle: String {
+        if working { return "Working through your request." }
+        if session.executionResult != nil { return "Done. What’s next?" }
+        return "One thought in. One useful action out."
     }
-}
 
-
-private struct CommandCenterSheet: View {
-    @Binding var task: String
-    @FocusState.Binding var focused: Bool
-    let onSubmit: () -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    private let suggestions = [
-        ("Plan my next step", "sparkles"),
-        ("Summarize what changed", "text.alignleft"),
-        ("Check my local setup", "checkmark.shield"),
-        ("Help me get started", "arrow.right.circle")
-    ]
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("What should we do?")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                    Text("Start with a thought. The Agent will turn it into an action.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack(spacing: 10) {
-                    TextField("Tell Agent…", text: $task, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .font(.body)
-                        .focused($focused)
-                        .lineLimit(1...4)
-                    Button {
-                        focused = false
-                        onSubmit()
-                    } label: {
-                        Image(systemName: "arrow.up")
-                            .font(.headline.bold())
-                            .foregroundStyle(.black)
-                            .frame(width: 42, height: 42)
-                            .background(.primary.opacity(0.92), in: Circle())
-                    }
-                    .disabled(task.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                .padding(9)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(.primary.opacity(0.08), lineWidth: 1))
-
-                Text("TRY ONE")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary)
-
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                    ForEach(suggestions, id: \.0) { suggestion in
-                        Button {
-                            task = suggestion.0
-                            focused = false
-                            dismiss()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: suggestion.1)
-                                Text(LocalizedStringKey(suggestion.0))
-                                    .font(.subheadline.weight(.semibold))
-                                    .multilineTextAlignment(.leading)
-                                Spacer(minLength: 0)
-                            }
-                            .padding(13)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                Spacer()
-            }
-            .padding(20)
-            .navigationTitle("New task")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear { focused = true }
-        }
+    private func run() {
+        let value = task.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty, !session.isSubmitting else { return }
+        task = ""; focused = false
+        Task { await session.submitGoal(value) }
     }
 }
 
 private struct AgentContextSheet: View {
     @ObservedObject var session: KernelSession
-
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(spacing: 14) {
-                    AgentOrb(isActive: session.state.lifecycle.rawValue.lowercased() == "running", isThinking: session.executionProgress != nil)
-                        .frame(width: 58, height: 58)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Agent").font(.title2.bold())
-                        Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
-                    }
+            List {
+                Section {
+                    HStack(spacing: 14) {
+                        AgentOrb(isActive: session.state.lifecycle.rawValue.lowercased() == "running", isThinking: session.executionProgress != nil).frame(width: 58, height: 58)
+                        VStack(alignment: .leading, spacing: 3) { Text("Personal Agent").font(.title2.bold()); Text(session.executionProgress == nil ? "Ready for your next instruction." : "Working on the current request.").font(.subheadline).foregroundStyle(.secondary) }
+                    }.padding(.vertical, 6)
                 }
-                VStack(spacing: 10) {
-                    row("Lifecycle", session.state.lifecycle.rawValue.capitalized, "bolt.fill")
-                    row("Mode", session.executionProgress == nil ? "Idle" : "Working", "waveform")
-                    row("Surface", "Living Agent", "sparkles")
+                Section("Live") {
+                    StatusRow(title: "Lifecycle", value: session.state.lifecycle.rawValue.capitalized)
+                    StatusRow(title: "Provider", value: session.providerLifecycle)
+                    StatusRow(title: "Models", value: "\(session.installedModels.count)")
+                    StatusRow(title: "Memory", value: "\(session.memoryRecords.count) records")
                 }
-                .padding(16)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                Spacer()
-            }
-            .padding(20)
-            .navigationTitle("Agent")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-
-    private var subtitle: String {
-        session.executionProgress != nil ? "Thinking through the current task." : "Quiet, ready and waiting."
-    }
-
-    private func row(_ title: String, _ value: String, _ symbol: String) -> some View {
-        HStack {
-            Image(systemName: symbol)
-                .frame(width: 28, height: 28)
-                .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            Text(LocalizedStringKey(title)).foregroundStyle(.secondary)
-            Spacer()
-            Text(value).fontWeight(.semibold)
+            }.navigationTitle("Agent").navigationBarTitleDisplayMode(.inline)
         }
     }
 }
 
 private struct ActivitySheet: View {
     @ObservedObject var session: KernelSession
-
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    HStack(spacing: 14) {
-                        AgentOrb(isActive: session.state.lifecycle.rawValue.lowercased() == "running", isThinking: session.executionProgress != nil)
-                            .frame(width: 52, height: 52)
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Agent activity").font(.title2.bold())
-                            Text(session.state.lifecycle.rawValue.capitalized).font(.subheadline).foregroundStyle(.secondary)
-                        }
-                    }
-                    if let progress = session.executionProgress {
-                        card("WORKING NOW", progress.title, progress.detail, "sparkles")
-                    } else if let result = session.executionResult {
-                        card("COMPLETED", "Latest result", result, "checkmark.circle.fill")
-                    } else if let error = session.lastError {
-                        card("NEEDS ATTENTION", "Latest error", error, "exclamationmark.triangle.fill")
-                    } else {
-                        card("QUIET", "No active task", "The Agent is ready for your next instruction.", "moon.stars.fill")
-                    }
+                    HStack { VStack(alignment: .leading, spacing: 3) { Text("Activity").font(.largeTitle.bold()); Text("A live view of what the Agent is doing.").font(.subheadline).foregroundStyle(.secondary) }; Spacer(); StatusBadge(title: session.executionProgress == nil ? "Idle" : "Working", tint: session.executionProgress == nil ? .secondary : AgentDesign.accent) }
+                    if let p = session.executionProgress { GlassPanel { Label(p.title, systemImage: "sparkles").font(.headline); Text(p.detail).foregroundStyle(.secondary) } }
+                    else if let r = session.executionResult { GlassPanel { Label("Latest result", systemImage: "checkmark.circle.fill").font(.headline); Text(r).foregroundStyle(.secondary).textSelection(.enabled) } }
+                    else { GlassPanel { Label("Quiet", systemImage: "moon.stars.fill").font(.headline); Text("The Agent is ready for your next instruction.").foregroundStyle(.secondary) } }
                     if !session.chatHistory.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("CHAT HISTORY").font(.caption2.weight(.bold)).foregroundStyle(.secondary)
-                                Spacer()
-                                Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
-                            }
-                            ForEach(session.chatHistory.suffix(12)) { turn in
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(turn.role == .user ? "You" : "Agent")
-                                        .font(.caption.weight(.bold))
-                                        .foregroundStyle(.secondary)
-                                    Text(turn.content)
-                                        .font(.subheadline)
-                                        .foregroundStyle(.primary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                                .padding(12)
-                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                            }
+                        GlassPanel {
+                            HStack { Text("Recent conversation").font(.headline); Spacer(); Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary) }
+                            ForEach(session.chatHistory.suffix(8)) { turn in VStack(alignment: .leading, spacing: 3) { Text(turn.role == .user ? "You" : "Agent").font(.caption.weight(.bold)).foregroundStyle(.secondary); Text(turn.content).font(.subheadline) }.padding(.vertical, 4) }
                         }
                     }
-                    card("WORKSPACE", "Contextual surfaces", "Models, providers, skills, memory and settings stay one tap away.", "circle.hexagongrid.fill")
-                }
-                .padding(20)
-            }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Activity")
-            .navigationBarTitleDisplayMode(.inline)
+                }.padding(18)
+            }.background(Color(.systemGroupedBackground)).navigationTitle("Activity").navigationBarTitleDisplayMode(.inline)
         }
-    }
-
-    private func card(_ eyebrow: String, _ title: String, _ detail: String, _ symbol: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: symbol)
-                .font(.headline)
-                .frame(width: 36, height: 36)
-                .background(.thinMaterial, in: Circle())
-            VStack(alignment: .leading, spacing: 4) {
-                Text(eyebrow).font(.caption2.weight(.bold)).foregroundStyle(.secondary)
-                Text(title).font(.headline)
-                Text(detail).font(.subheadline).foregroundStyle(.secondary)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(16)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }
 
@@ -487,48 +199,15 @@ private struct AgentOrb: View {
     let isActive: Bool
     let isThinking: Bool
     @State private var pulse = false
-
-    private var accessibilityLabel: String {
-        if isThinking { return "Agent thinking" }
-        if isActive { return "Agent working" }
-        return "Agent idle"
-    }
-
     var body: some View {
         ZStack {
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            .white.opacity(0.78),
-                            Color(red: 0.58, green: 0.66, blue: 1).opacity(0.76),
-                            Color(red: 0.16, green: 0.25, blue: 0.91).opacity(0.98)
-                        ],
-                        center: UnitPoint(x: 0.34, y: 0.28),
-                        startRadius: 2,
-                        endRadius: 42
-                    )
-                )
-            Circle()
-                .stroke(.white.opacity(0.35), lineWidth: 1)
-            Circle()
-                .fill(.white.opacity(0.46))
-                .frame(width: 9, height: 6)
-                .blur(radius: 2.5)
-                .offset(x: -10, y: -15)
+            Circle().fill(RadialGradient(colors: [.white.opacity(0.9), Color(red: 0.58, green: 0.66, blue: 1).opacity(0.76), Color(red: 0.16, green: 0.25, blue: 0.91).opacity(0.98)], center: UnitPoint(x: 0.34, y: 0.28), startRadius: 2, endRadius: 48))
+            Circle().stroke(.white.opacity(0.34), lineWidth: 1)
         }
-        .frame(width: 74, height: 74)
-        .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
-        .scaleEffect(pulse ? (isThinking ? 1.075 : 1.045) : 1)
-        .rotationEffect(.degrees(isThinking ? (pulse ? 2 : -2) : 0))
-        .brightness(isThinking && pulse ? 0.035 : 0)
-        .animation(
-            .easeInOut(duration: isThinking ? 0.62 : (isActive ? 1.8 : 2.4))
-                .repeatForever(autoreverses: true),
-            value: pulse
-        )
+        .shadow(color: .black.opacity(0.28), radius: 16, y: 8)
+        .scaleEffect(pulse ? (isThinking ? 1.07 : isActive ? 1.035 : 1) : 1)
+        .animation(.easeInOut(duration: isThinking ? 0.58 : 1.8).repeatForever(autoreverses: true), value: pulse)
         .onAppear { pulse = true }
-        .opacity(isActive || isThinking ? 1 : 0.94)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(isThinking ? "Agent thinking" : isActive ? "Agent active" : "Agent idle")
     }
 }
