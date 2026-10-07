@@ -85,32 +85,18 @@ public struct LLMReasoner: Reasoning {
         Do not claim an action was executed.
         """
 
-        let request = LLMRequest(
-            model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
-            messages: [
-                ProviderMessage(role: .system, content: systemPrompt),
-                ProviderMessage(role: .user, content: context.perception.rawInput),
-            ],
-            parameters: GenerationParameters(maxOutputTokens: 128)
+        let response = try await provider.complete(
+            LLMRequest(
+                model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
+                messages: [
+                    ProviderMessage(role: .system, content: systemPrompt),
+                    ProviderMessage(role: .user, content: context.perception.rawInput),
+                ],
+                parameters: GenerationParameters(maxOutputTokens: 128)
+            )
         )
 
-        var streamedText = ""
-        var completedResponse: LLMResponse?
-        for try await event in provider.stream(request) {
-            try Task.checkCancellation()
-            switch event {
-            case .delta(let delta):
-                streamedText += delta
-            case .completed(let response):
-                completedResponse = response
-            case .toolCall:
-                // Tool execution is owned by the Agent execution boundary, not reasoning.
-                continue
-            }
-        }
-
-        let text = (completedResponse?.text ?? streamedText)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = response.text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
             throw KernelError.invalidStateUpdate("LLM reasoning returned empty output")
         }
@@ -118,7 +104,7 @@ public struct LLMReasoner: Reasoning {
         return ReasoningResult(
             summary: text,
             providerID: provider.identity.id,
-            modelID: completedResponse?.model
+            modelID: response.model
         )
     }
 }
