@@ -20,6 +20,7 @@ struct SettingsScreen: View {
     @State private var credentialState: CredentialState = .unknown
     @State private var connectionState: ConnectionState = .idle
     @AppStorage("chat.context.turns") private var contextTurns = 12
+    @AppStorage("privacy.persistChat") private var persistChat = true
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -240,6 +241,20 @@ struct SettingsScreen: View {
                     .font(.headline)
                 Stepper("Context turns: \(contextTurns)", value: $contextTurns, in: 1...128)
                 Text("Controls how many recent turns are sent into the next model request.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            GlassPanel {
+                Label("Privacy", systemImage: "lock.shield")
+                    .font(.headline)
+                Toggle("Persist chat history", isOn: $persistChat)
+                    .onChange(of: persistChat) { _, enabled in
+                        session.setChatPersistence(enabled)
+                    }
+                Text(persistChat
+                     ? "Conversations are stored locally on this device."
+                     : "Chat history is kept only for the current session and local history is cleared.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
