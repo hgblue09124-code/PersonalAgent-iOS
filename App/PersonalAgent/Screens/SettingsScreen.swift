@@ -351,6 +351,8 @@ struct SettingsScreen: View {
     }
 }
 
+}
+
 private struct LifecycleStateBadge: View {
     let state: LocalModelLifecycleState
 
