@@ -1,7 +1,23 @@
 import SwiftUI
+import PASecurity
 
 struct ProvidersScreen: View {
     @ObservedObject var session: KernelSession
+    @AppStorage("provider.remote.id") private var remoteProvider = "openai"
+
+    private var credentialSaved: Bool {
+        (try? KeychainSecretStore().load(account: "provider.api-key.\(remoteProvider)")) != nil
+    }
+
+    private var connectionState: String {
+        if session.providerLifecycle.lowercased().contains("error") {
+            return "Attention"
+        }
+        if UserDefaults.standard.bool(forKey: "provider.remote.enabled") {
+            return credentialSaved ? "Configured" : "Missing API key"
+        }
+        return "Local / fallback"
+    }
 
     var body: some View {
         ScreenScaffold(title: "Providers", systemImage: "server.rack") {
@@ -10,20 +26,37 @@ struct ProvidersScreen: View {
                     .font(.headline)
                 StatusRow(title: "Provider", value: session.providerID)
                 StatusRow(title: "Lifecycle", value: session.providerLifecycle)
-                StatusRow(title: "Connection", value: session.providerLifecycle.lowercased().contains("error") ? "Attention" : "Available")
+                StatusRow(title: "Connection", value: connectionState)
             }
 
             GlassPanel {
-                Label("Credential boundary", systemImage: "key.fill")
+                Label("Remote configuration", systemImage: "key.fill")
                     .font(.headline)
-                Text("Secret material belongs to the provider security boundary and is never rendered in the Agent surface.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
                 HStack {
-                    Image(systemName: "lock.shield.fill").foregroundStyle(.green)
-                    Text("Keychain-backed credential boundary").font(.caption.weight(.semibold))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(remoteProvider == "grok" ? "Grok" : "OpenAI")
+                            .font(.headline)
+                        Text(credentialSaved ? "API key stored in Keychain" : "No API key stored")
+                            .font(.caption)
+                            .foregroundStyle(credentialSaved ? .green : .secondary)
+                    }
                     Spacer()
+                    Image(systemName: credentialSaved ? "checkmark.shield.fill" : "exclamationmark.shield.fill")
+                        .foregroundStyle(credentialSaved ? .green : .orange)
+                        .accessibilityLabel(credentialSaved ? "API key configured" : "API key missing")
                 }
+
+                NavigationLink {
+                    SettingsScreen(session: session)
+                } label: {
+                    Label("Configure provider", systemImage: "gearshape")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+
+                Text("Secret material stays inside the Keychain boundary and is never rendered in the Agent surface.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             GlassPanel {
