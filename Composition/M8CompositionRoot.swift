@@ -5,6 +5,7 @@ import PAProvidersLocal
 import PAProvidersRemote
 import PAProvidersGrok
 import PAProvidersOpenAI
+import PAProvidersOpenAICompatible
 import PAStorageModels
 import PAMemory
 import PAStorageMemory
@@ -262,6 +263,8 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
     private let fallback: any LLMProvider
     private let openAI: any LLMProvider
     private let grok: any LLMProvider
+    private let network: any ProviderTransport
+    private let credentials: any CredentialResolving
 
     init(fallback: any LLMProvider, credentials: any CredentialResolving) {
         let openAIConfig = ProviderConfiguration(
@@ -285,6 +288,8 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
             maxRetryAttempts: 1
         )
         let network = SecurityNetworkTransport(network: URLSessionNetworkAccess())
+        self.network = network
+        self.credentials = credentials
         self.openAI = OpenAIProvider(
             transport: network,
             credentials: credentials,
@@ -298,6 +303,28 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
         self.fallback = fallback
     }
 
+    private var compatible: any LLMProvider {
+        let endpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint")?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let model = UserDefaults.standard.string(forKey: "provider.compatible.model")?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let configuration = ProviderConfiguration(
+            providerID: OpenAICompatibleProviderBoundary.providerID,
+            endpointURL: endpoint?.isEmpty == false ? endpoint : nil,
+            defaultModel: ModelID(rawValue: model?.isEmpty == false ? model! : "compatible"),
+            credential: ProviderCredentialRef(
+                providerID: OpenAICompatibleProviderBoundary.providerID,
+                account: "provider.api-key.openai-compatible"
+            ),
+            maxRetryAttempts: 1
+        )
+        return OpenAICompatibleProvider(
+            transport: network,
+            credentials: credentials,
+            configuration: configuration
+        )
+    }
+
     private var enabled: Bool {
         UserDefaults.standard.bool(forKey: "provider.remote.enabled")
             && UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote"
@@ -309,7 +336,14 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
     }
 
     private var selectedProvider: any LLMProvider {
-        selectedID == GrokProviderBoundary.providerID.rawValue ? grok : openAI
+        switch selectedID {
+        case GrokProviderBoundary.providerID.rawValue:
+            return grok
+        case OpenAICompatibleProviderBoundary.providerID.rawValue:
+            return compatible
+        default:
+            return openAI
+        }
     }
 
     var identity: ProviderIdentity {
