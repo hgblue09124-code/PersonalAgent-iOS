@@ -84,7 +84,7 @@ struct ContractBoundaryRegressionTests {
     }
 
     @Test("skill rejects missing rule section") func skillMissingRule() throws {
-        let source = skillBase.replacingOccurrences(of: "## Rule\nTrim surrounding whitespace.\n", with: "")
+        let source = skillBase.components(separatedBy: "\n## Rule\n").first.map { $0 + "\n---\n" } ?? skillBase
         #expect(throws: SkillMarkdownError.missingField("Rule")) {
             try SkillMarkdownParser().parse(source)
         }
@@ -304,7 +304,7 @@ struct ContractBoundaryRegressionTests {
     }
 
     @Test("agent rejects missing rule") func agentMissingRule() throws {
-        let source = agentBase.replacingOccurrences(of: "## Rule\nSelect only from the declared skills.\n", with: "")
+        let source = agentBase.components(separatedBy: "\n## Rule\n").first.map { $0 + "\n---\n" } ?? agentBase
         #expect(throws: AgentMarkdownError.missingField("Rule")) {
             try AgentMarkdownParser().parse(source)
         }
