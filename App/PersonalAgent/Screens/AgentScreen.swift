@@ -272,6 +272,27 @@ private struct AgentOrb: View {
                 .stroke(AgentDesign.accent.opacity(0.3), lineWidth: 5)
                 .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
                 .opacity(0.3 + 0.28 * energy)
+
+            ForEach(0..<3, id: \.self) { index in
+                Circle()
+                    .fill(.white.opacity(isThinking ? 0.95 : 0.55))
+                    .frame(width: isThinking ? 4 : 3, height: isThinking ? 4 : 3)
+                    .shadow(color: AgentDesign.accent.opacity(0.8), radius: 5)
+                    .offset(y: -50)
+                    .rotationEffect(.degrees(rotation + Double(index) * 120))
+            }
+
+            Circle()
+                .stroke(
+                    AngularGradient(
+                        colors: [.clear, .white.opacity(0.32), .clear],
+                        center: .center,
+                        angle: .degrees(-rotation * 0.7)
+                    ),
+                    lineWidth: 8
+                )
+                .blur(radius: 2)
+                .opacity(0.35 + 0.35 * energy)
         }
         .shadow(color: AgentDesign.accent.opacity(0.34 + 0.18 * energy), radius: isThinking ? 22 : 14, y: 6)
         .scaleEffect(pulse ? (isThinking ? 1.055 : isActive ? 1.025 : 1) : 1)
