@@ -357,6 +357,10 @@ final class KernelSession: ObservableObject {
 
     func deleteModel(id: ModelID) async {
         await run {
+            if activeModelID == id,
+               case .loaded = activeEngineState {
+                try await composition.unloadActiveLocalModel()
+            }
             try await composition.deleteLocalModel(id: id)
         }
     }
