@@ -17,6 +17,7 @@ public struct SkillAgentResult: Sendable, Equatable {
 public enum SkillAgentOrchestratorError: Error, Sendable, Equatable {
     case verificationFailed(SkillID)
     case skillOutsideAgentScope(SkillID)
+    case agentDeclaresMissingSkill(SkillID)
 }
 
 /// Owns the Agent-level Skill loop:
@@ -61,6 +62,14 @@ public actor SkillAgentOrchestrator {
         inputJSON: String,
         policy: any PolicyEvaluating
     ) async throws -> SkillAgentResult {
+        if let agent {
+            let available = try await runtime.discover()
+            let availableIDs = Set(available.map(\.id))
+            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }) {
+                throw SkillAgentOrchestratorError.agentDeclaresMissingSkill(missing)
+            }
+        }
+
         let skillID = try await runtime.select(
             goalStatement: goalStatement,
             allowedSkillIDs: agent.map { Set($0.skillIDs) }
