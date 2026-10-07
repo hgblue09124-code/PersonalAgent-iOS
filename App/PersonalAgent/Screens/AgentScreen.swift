@@ -10,6 +10,7 @@ struct AgentScreen: View {
     @State private var appeared = false
     @State private var showActivity = false
     @State private var showCommandCenter = false
+    @State private var showFeatureHub = false
     @FocusState private var taskFocused: Bool
 
     var body: some View {
@@ -22,6 +23,7 @@ struct AgentScreen: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showFeatureHub) { AgentFeatureHub(session: session).presentationDetents([.large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showCommandCenter) {
             CommandCenterSheet(
                 task: $task,
@@ -91,7 +93,7 @@ struct AgentScreen: View {
             Spacer()
 
             HStack(spacing: 8) {
-                Button { showWorkspace = true } label: { topButton("circle.grid.2x2.fill") }
+                Button { showFeatureHub = true } label: { topButton("circle.hexagongrid.fill") }
                 Button { showActivity = true } label: { topButton("waveform.path.ecg") }
                 lifecycleMenu
             }
@@ -101,7 +103,7 @@ struct AgentScreen: View {
     private var quickActions: some View {
         HStack(spacing: 8) {
             quickAction("New task", "plus") { showCommandCenter = true }
-            quickAction("Chat", "bubble.left.and.bubble.right") { showWorkspace = true }
+            quickAction("Chat", "bubble.left.and.bubble.right") { showFeatureHub = true }
             quickAction("Activity", "waveform.path.ecg") { showActivity = true }
             quickAction("Agent", "sparkles") { showAgentPanel = true }
             Spacer()
