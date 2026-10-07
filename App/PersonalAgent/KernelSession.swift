@@ -326,7 +326,7 @@ final class KernelSession: ObservableObject {
             let temporaryURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("import-\(UUID().uuidString)")
                 .appendingPathExtension("gguf")
-            try FileManager.default.copyItem(at: url, to: temporaryURL)
+            try Self.copyExternalFile(from: url, to: temporaryURL)
             defer { try? FileManager.default.removeItem(at: temporaryURL) }
 
             _ = try await composition.localModelStorage.importModel(
@@ -334,6 +334,18 @@ final class KernelSession: ObservableObject {
                 name: name
             )
             await refresh()
+        }
+    }
+
+    private static func copyExternalFile(from sourceURL: URL, to destinationURL: URL) throws {
+        let source = try FileHandle(forReadingFrom: sourceURL)
+        defer { try? source.close() }
+        FileManager.default.createFile(atPath: destinationURL.path, contents: nil)
+        let destination = try FileHandle(forWritingTo: destinationURL)
+        defer { try? destination.close() }
+
+        while let chunk = try source.read(upToCount: 8 * 1024 * 1024), !chunk.isEmpty {
+            try destination.write(contentsOf: chunk)
         }
     }
 
@@ -506,7 +518,7 @@ final class KernelSession: ObservableObject {
     }
 
     private static func cleanModelResult(_ raw: String) -> String {
-        var result = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        var result = LocalModelOutputValidator.sanitize(text: raw)
 
         // Qwen and other chat templates may leak control tokens into the
         // final UI result. They are transport markers, not user-facing text.

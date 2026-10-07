@@ -144,5 +144,5 @@ struct ModelsScreen: View {
 }
 
 private extension UTType {
-    static let gguf = UTType(importedAs: "org.ggml.gguf", conformingTo: .data)
+    static let gguf = UTType(filenameExtension: "gguf", conformingTo: .data) ?? .data
 }

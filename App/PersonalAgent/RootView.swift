@@ -14,14 +14,7 @@ struct RootView: View {
     @AppStorage("app.language") private var appLanguage = "vi"
 
     var body: some View {
-        GeometryReader { proxy in
-            AgentScreen(session: session, showWorkspace: $showWorkspace)
-                .padding(.top, proxy.safeAreaInsets.top)
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
-        .ignoresSafeArea(.keyboard, edges: .bottom)
+        AgentScreen(session: session, showWorkspace: $showWorkspace)
         .environment(\.locale, Locale(identifier: appLanguage))
         .environment(\.kernelSession, session)
         .id(appLanguage)
