@@ -3,21 +3,43 @@ import PAComposition
 import PAKernel
 
 enum AgentDesign {
-    static let corner: CGFloat = 24
-    static let horizontalPadding: CGFloat = 20
-    static let accent = Color(red: 0.30, green: 0.46, blue: 1.0)
+    static let corner: CGFloat = 22
+    static let smallCorner: CGFloat = 14
+    static let horizontalPadding: CGFloat = 18
+    static let accent = Color(red: 0.31, green: 0.45, blue: 1.0)
     static let accentDeep = Color(red: 0.12, green: 0.18, blue: 0.52)
 
     static var background: some View {
         ZStack {
             Color(.systemGroupedBackground)
             LinearGradient(
-                colors: [accent.opacity(0.10), Color.clear, accentDeep.opacity(0.06)],
+                colors: [
+                    accent.opacity(0.11),
+                    Color.clear,
+                    accentDeep.opacity(0.055)
+                ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            Circle()
+                .fill(accent.opacity(0.055))
+                .frame(width: 280, height: 280)
+                .blur(radius: 70)
+                .offset(x: 150, y: -260)
         }
         .ignoresSafeArea()
+    }
+
+    static var sectionLabel: Font {
+        .system(size: 12, weight: .bold, design: .rounded)
+    }
+
+    static var title: Font {
+        .system(size: 30, weight: .bold, design: .rounded)
+    }
+
+    static var body: Font {
+        .system(size: 15, weight: .regular, design: .rounded)
     }
 }
 
@@ -29,15 +51,16 @@ struct ScreenScaffold<Content: View>: View {
     var body: some View {
         ZStack {
             AgentDesign.background
+
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 16) {
                     screenHeader
                     content()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, AgentDesign.horizontalPadding)
-                .padding(.top, 12)
-                .padding(.bottom, 28)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
             }
             .scrollIndicators(.hidden)
         }
@@ -46,27 +69,21 @@ struct ScreenScaffold<Content: View>: View {
     }
 
     private var screenHeader: some View {
-        HStack(spacing: 13) {
-            Image(systemName: systemImage)
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(AgentDesign.accent)
-                .frame(width: 42, height: 42)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(AgentDesign.accent.opacity(0.14), lineWidth: 1)
-                )
+        HStack(spacing: 12) {
+            PremiumIconTile(systemImage: systemImage)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .tracking(-0.5)
+                    .font(AgentDesign.title)
+                    .tracking(-0.7)
                 Text("Personal Agent")
-                    .font(.caption.weight(.medium))
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
+
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 5)
     }
 }
 
@@ -93,14 +110,14 @@ struct GlassPanel<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12, content: content)
-            .padding(17)
+            .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: AgentDesign.corner, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: AgentDesign.corner, style: .continuous)
                     .stroke(.primary.opacity(0.065), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.055), radius: 22, y: 10)
+            .shadow(color: .black.opacity(0.045), radius: 20, y: 8)
     }
 }
 
@@ -112,8 +129,12 @@ struct PremiumIconTile: View {
         Image(systemName: systemImage)
             .font(.system(size: 15, weight: .bold))
             .foregroundStyle(tint)
-            .frame(width: 38, height: 38)
-            .background(tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .frame(width: 40, height: 40)
+            .background(tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                    .stroke(tint.opacity(0.10), lineWidth: 1)
+            )
     }
 }
 
@@ -123,13 +144,18 @@ struct StatusBadge: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Circle().fill(tint).frame(width: 6, height: 6)
-            Text(title).font(.caption.weight(.bold))
+            Circle()
+                .fill(tint)
+                .frame(width: 6, height: 6)
+            Text(title)
+                .font(.caption.weight(.bold))
+                .lineLimit(1)
         }
         .foregroundStyle(tint)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(tint.opacity(0.10), in: Capsule())
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -138,12 +164,15 @@ struct MilestoneBanner: View {
 
     var body: some View {
         GlassPanel {
-            Text("Runtime").font(.headline)
-            Text(bannerCopy(gate)).font(.subheadline).foregroundStyle(.secondary)
             HStack {
-                PhaseChip(phase: .idle)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Runtime").font(.headline)
+                    Text(bannerCopy(gate))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
-                Text("Connected surface").font(.caption).foregroundStyle(.secondary)
+                PhaseChip(phase: .idle)
             }
         }
     }
