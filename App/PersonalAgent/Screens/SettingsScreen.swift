@@ -1,6 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import PAProviders
+import PAProvidersRemote
 import PAComposition
 import PASecurity
 import UIKit
@@ -608,15 +609,18 @@ private extension SettingsScreen {
             endpoint = "https://api.openai.com/v1/models"
         }
         do {
-            guard let url = URL(string: endpoint) else { throw URLError(.badURL) }
-            var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue("Bearer \(value)", forHTTPHeaderField: "Authorization")
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            let transport = SecurityNetworkTransport(network: URLSessionNetworkAccess())
+            let response = try await transport.send(
+                ProviderTransportRequest(
+                    url: endpoint,
+                    method: "GET",
+                    headers: ["Authorization": "Bearer \(value)"]
+                )
+            )
+            guard (200..<300).contains(response.statusCode) else {
                 throw URLError(.badServerResponse)
             }
-            let payload = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            let payload = try JSONSerialization.jsonObject(with: response.body) as? [String: Any]
             let models = payload?["data"] as? [[String: Any]]
             guard let models, !models.isEmpty else {
                 throw URLError(.cannotParseResponse)
