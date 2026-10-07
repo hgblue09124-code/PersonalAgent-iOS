@@ -1,5 +1,6 @@
 import SwiftUI
 import PAComposition
+import PASkills
 
 struct AgentsScreen: View {
     @ObservedObject var session: KernelSession
