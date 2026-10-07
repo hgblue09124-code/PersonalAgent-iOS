@@ -83,7 +83,11 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
 public actor InMemorySkillStore: SkillStore {
     private var manifests: [SkillID: SkillManifest] = [:]
     public init(manifests: [SkillManifest] = []) { for manifest in manifests { self.manifests[manifest.id] = manifest } }
-    public func register(_ manifest: SkillManifest) { manifests[manifest.id] = manifest }
+    public func register(_ manifest: SkillManifest) {
+        let normalizedID = SkillID(rawValue: manifest.id.rawValue.trimmingCharacters(in: .whitespacesAndNewlines))
+        guard !normalizedID.rawValue.isEmpty else { return }
+        manifests[normalizedID] = manifest
+    }
     public func discover(query: String) async throws -> [SkillManifest] {
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !needle.isEmpty else { return Array(manifests.values).sorted { $0.id.rawValue < $1.id.rawValue } }
@@ -100,19 +104,24 @@ public actor InMemorySkillStore: SkillStore {
 public struct KeywordSkillSelector: SkillSelecting, Sendable {
     public init() {}
     public func select(goalStatement: String, available: [SkillManifest]) async throws -> SkillID? {
-        let goalTokens = Set(Self.tokens(goalStatement))
+        let normalizedGoal = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedGoal.isEmpty else { return nil }
+        let goalTokens = Set(Self.tokens(normalizedGoal))
         return available.map { manifest in
-            let normalizedGoal = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let normalizedGoal = normalizedGoal.lowercased()
             let id = manifest.id.rawValue.lowercased()
             let name = manifest.name.lowercased()
             let words = Set((id + " " + name + " " + manifest.description).split(separator: " ").map(String.init))
             let score = goalTokens.intersection(words).count
+            let coverage = words.isEmpty ? 0.0 : Double(score) / Double(max(1, words.count))
             let exactMatch = Self.containsTokenSequence(normalizedGoal, id) || Self.containsTokenSequence(normalizedGoal, name)
-            return (manifest, score, exactMatch)
+            return (manifest, score, exactMatch, coverage)
         }
         .filter { $0.1 >= 2 || $0.2 }
         .sorted {
             if $0.1 != $1.1 { return $0.1 > $1.1 }
+            if $0.3 != $1.3 { return $0.3 > $1.3 }
+            if $0.2 != $1.2 { return $0.2 && !$1.2 }
             return $0.0.id.rawValue < $1.0.id.rawValue
         }
         .first?.0.id
@@ -156,19 +165,22 @@ public actor SkillRuntime: SkillExecuting, SkillVerifying {
     }
     public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
         let manifest = try await store.load(id: id)
-        guard !inputJSON.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw SkillRuntimeError.invalidInput(id) }
+        let normalizedInput = inputJSON.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedInput.isEmpty else { throw SkillRuntimeError.invalidInput(id) }
         let decision = await policy.evaluate(ActionIntent(capabilities: manifest.requiredCapabilities, summary: "Execute skill \(manifest.id.rawValue): \(manifest.description)"))
         guard decision.allowed else {
             if decision.requiresApproval { throw SkillRuntimeError.policyRequiresApproval(decision.reason) }
             throw SkillRuntimeError.policyDenied(decision.reason)
         }
         let executor = try await executors.resolve(manifest)
-        return try await executor.execute(manifest: manifest, inputJSON: inputJSON)
+        return try await executor.execute(manifest: manifest, inputJSON: normalizedInput)
     }
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
         let manifest = try await store.load(id: id)
+        let normalizedOutput = outputJSON.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedOutput.isEmpty else { return false }
         let executor = try await executors.resolve(manifest)
-        return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+        return try await executor.verify(manifest: manifest, outputJSON: normalizedOutput)
     }
     public static let normalizationManifest = SkillManifest(
         id: SkillID(rawValue: "text.normalize"),
