@@ -16,24 +16,14 @@ public struct MemoryIndex: Sendable {
 
     public mutating func index(_ record: MemoryRecord) {
         let id = record.id
-
-        // Remove old entry if updating
         if idMap[id] != nil {
             removeIndexes(for: id)
         }
-
         idMap[id] = record
-
-        // Scope index
         scopeIndex[record.scope, default: []].insert(id)
-
-        // Kind index
         kindIndex[record.kind, default: []].insert(id)
-
-        // Lifecycle index
         lifecycleIndex[record.lifecycle, default: []].insert(id)
 
-        // Metadata index
         for (key, val) in record.metadata.storage {
             var valMap = metadataIndex[key, default: [:]]
             var idSet = valMap[val, default: []]
@@ -42,9 +32,7 @@ public struct MemoryIndex: Sendable {
             metadataIndex[key] = valMap
         }
 
-        // Inverted word index for text matching
-        let tokens = tokenize(record.content)
-        for token in tokens {
+        for token in tokenize(record.content) {
             invertedWordIndex[token, default: []].insert(id)
         }
     }
@@ -68,7 +56,9 @@ public struct MemoryIndex: Sendable {
     }
 
     public func allRecords() -> [MemoryRecord] {
-        Array(idMap.values)
+        idMap.values.sorted { lhs, rhs in
+            lhs.id.rawValue < rhs.id.rawValue
+        }
     }
 
     public func count(scope: MemoryScope?) -> Int {
@@ -81,7 +71,6 @@ public struct MemoryIndex: Sendable {
     public func query(_ query: MemoryQuery) -> MemoryQueryResult {
         let startTime = DispatchTime.now().uptimeNanoseconds
 
-        // If specific IDs are requested, perform direct O(1) lookups
         if let requestedIDs = query.ids {
             var matched: [MemoryRecord] = []
             for id in requestedIDs {
@@ -98,10 +87,8 @@ public struct MemoryIndex: Sendable {
             )
         }
 
-        // Use index set intersection where possible
         var candidateIDs: Set<MemoryRecordID>?
 
-        // Scope filter candidate set
         if let scopes = query.scopes, !scopes.isEmpty {
             var scopeSet = Set<MemoryRecordID>()
             for s in scopes {
@@ -112,7 +99,6 @@ public struct MemoryIndex: Sendable {
             candidateIDs = scopeSet
         }
 
-        // Kind filter candidate set
         if let kinds = query.kinds, !kinds.isEmpty {
             var kindSet = Set<MemoryRecordID>()
             for k in kinds {
@@ -127,7 +113,6 @@ public struct MemoryIndex: Sendable {
             }
         }
 
-        // Lifecycle filter candidate set
         if let lifecycles = query.lifecycles, !lifecycles.isEmpty {
             var lcSet = Set<MemoryRecordID>()
             for lc in lifecycles {
@@ -142,7 +127,6 @@ public struct MemoryIndex: Sendable {
             }
         }
 
-        // Text search candidate set (OR union across tokens using direct O(1) posting set lookup)
         if let textSearch = query.textSearch, !textSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let tokens = tokenize(textSearch)
             if !tokens.isEmpty {
@@ -160,7 +144,6 @@ public struct MemoryIndex: Sendable {
             }
         }
 
-        // Metadata filters candidate set
         if let metaFilters = query.metadataFilters, !metaFilters.isEmpty {
             for (key, val) in metaFilters {
                 let metaSet = metadataIndex[key]?[val] ?? []
@@ -172,7 +155,6 @@ public struct MemoryIndex: Sendable {
             }
         }
 
-        // Collect records for candidates or all records if no set filter was active
         let finalCandidateRecords: [MemoryRecord]
         if let candidateIDs {
             finalCandidateRecords = candidateIDs.compactMap { idMap[$0] }
@@ -180,7 +162,6 @@ public struct MemoryIndex: Sendable {
             finalCandidateRecords = Array(idMap.values)
         }
 
-        // Apply remaining scalar/range predicate filtering
         let matchedRecords = finalCandidateRecords.filter { matchesFilters($0, query: query) }
         let sortedRecords = sortAndLimit(matchedRecords, query: query)
 
@@ -193,44 +174,24 @@ public struct MemoryIndex: Sendable {
     }
 
     private func matchesFilters(_ record: MemoryRecord, query: MemoryQuery) -> Bool {
-        if let scopes = query.scopes, !scopes.contains(record.scope) {
-            return false
-        }
-        if let kinds = query.kinds, !kinds.contains(record.kind) {
-            return false
-        }
-        if let lifecycles = query.lifecycles, !lifecycles.contains(record.lifecycle) {
-            return false
-        }
-        if let startDate = query.startDate, record.createdAt < startDate {
-            return false
-        }
-        if let endDate = query.endDate, record.createdAt > endDate {
-            return false
-        }
-        if let minImportance = query.minImportance, record.importance < minImportance {
-            return false
-        }
+        if let scopes = query.scopes, !scopes.contains(record.scope) { return false }
+        if let kinds = query.kinds, !kinds.contains(record.kind) { return false }
+        if let lifecycles = query.lifecycles, !lifecycles.contains(record.lifecycle) { return false }
+        if let startDate = query.startDate, record.createdAt < startDate { return false }
+        if let endDate = query.endDate, record.createdAt > endDate { return false }
+        if let minImportance = query.minImportance, record.importance < minImportance { return false }
+
         if let metaFilters = query.metadataFilters {
-            for (k, v) in metaFilters {
-                if record.metadata[k] != v {
-                    return false
-                }
+            for (k, v) in metaFilters where record.metadata[k] != v {
+                return false
             }
         }
+
         if let textSearch = query.textSearch, !textSearch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let recordTokens = Set(tokenize(record.content))
             let searchTokens = tokenize(textSearch)
-            var hasMatch = false
-            for st in searchTokens {
-                if recordTokens.contains(st) {
-                    hasMatch = true
-                    break
-                }
-            }
-            if !hasMatch {
-                return false
-            }
+            guard !searchTokens.isEmpty else { return true }
+            guard searchTokens.contains(where: recordTokens.contains) else { return false }
         }
         return true
     }
@@ -239,15 +200,20 @@ public struct MemoryIndex: Sendable {
         let sorted: [MemoryRecord]
         switch query.sortOrder {
         case .createdAtDescending:
-            sorted = records.sorted { $0.createdAt > $1.createdAt }
+            sorted = records.sorted {
+                if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                return $0.id.rawValue < $1.id.rawValue
+            }
         case .createdAtAscending:
-            sorted = records.sorted { $0.createdAt < $1.createdAt }
+            sorted = records.sorted {
+                if $0.createdAt != $1.createdAt { return $0.createdAt < $1.createdAt }
+                return $0.id.rawValue < $1.id.rawValue
+            }
         case .importanceDescending:
             sorted = records.sorted {
-                if $0.importance != $1.importance {
-                    return $0.importance > $1.importance
-                }
-                return $0.createdAt > $1.createdAt
+                if $0.importance != $1.importance { return $0.importance > $1.importance }
+                if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                return $0.id.rawValue < $1.id.rawValue
             }
         case .relevance:
             if let textSearch = query.textSearch, !textSearch.isEmpty {
@@ -255,17 +221,15 @@ public struct MemoryIndex: Sendable {
                 sorted = records.sorted { r1, r2 in
                     let score1 = computeRelevance(r1, tokens: searchTokens)
                     let score2 = computeRelevance(r2, tokens: searchTokens)
-                    if score1 != score2 {
-                        return score1 > score2
-                    }
-                    return r1.createdAt > r2.createdAt
+                    if score1 != score2 { return score1 > score2 }
+                    if r1.createdAt != r2.createdAt { return r1.createdAt > r2.createdAt }
+                    return r1.id.rawValue < r2.id.rawValue
                 }
             } else {
                 sorted = records.sorted {
-                    if $0.importance != $1.importance {
-                        return $0.importance > $1.importance
-                    }
-                    return $0.createdAt > $1.createdAt
+                    if $0.importance != $1.importance { return $0.importance > $1.importance }
+                    if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                    return $0.id.rawValue < $1.id.rawValue
                 }
             }
         }
@@ -279,10 +243,8 @@ public struct MemoryIndex: Sendable {
     private func computeRelevance(_ record: MemoryRecord, tokens: [String]) -> Double {
         let recordTokens = Set(tokenize(record.content))
         var matchCount = 0.0
-        for token in tokens {
-            if recordTokens.contains(token) {
-                matchCount += 1.0
-            }
+        for token in tokens where recordTokens.contains(token) {
+            matchCount += 1.0
         }
         return matchCount + (record.importance * 0.5)
     }
@@ -298,8 +260,7 @@ public struct MemoryIndex: Sendable {
             metadataIndex[key]?[val]?.remove(id)
         }
 
-        let tokens = tokenize(old.content)
-        for token in tokens {
+        for token in tokenize(old.content) {
             invertedWordIndex[token]?.remove(id)
         }
     }
