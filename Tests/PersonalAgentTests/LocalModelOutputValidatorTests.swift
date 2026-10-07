@@ -10,7 +10,7 @@ struct LocalModelOutputValidatorTests {
 
     @Test func tripleRepeatedTailIsCollapsedToOne() {
         let block = "The Agent is ready to help with your request."
-        let input = "(block) (block) (block)"
+        let input = "\(block) \(block) \(block)"
         #expect(LocalModelOutputValidator.sanitize(text: input) == block)
     }
 

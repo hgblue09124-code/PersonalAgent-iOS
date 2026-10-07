@@ -4,6 +4,7 @@ import SwiftUI
 import PAKernel
 import PAComposition
 import PAProviders
+import PAProvidersLocal
 import PASkills
 import PARuntime
 
