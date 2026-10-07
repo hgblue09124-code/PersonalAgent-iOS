@@ -71,6 +71,31 @@ struct M9RealProviderSliceTests {
         #expect(erased.capabilities == provider.capabilities)
     }
 
+    @Test func p2_whitespaceOnlyCredentialFailsClosed() async throws {
+        let transport = ScriptedTransport(scripts: [])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "whitespace.test")
+        await vault.store(Data("   \n\t".utf8), for: ref)
+
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref
+            )
+        )
+
+        await #expect(throws: ProviderRuntimeError.authenticationFailure) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "reject blank credential")
+            )
+        }
+        #expect((await transport.recordedRequests()).isEmpty)
+    }
+
     // MARK: - P2: Valid request reaches provider boundary
     @Test func p2_validRequestReachesProviderBoundary() async throws {
         let responseBody = Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"verified-response"},"finish_reason":"stop"}]}"#.utf8)
