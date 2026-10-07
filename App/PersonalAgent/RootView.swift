@@ -567,7 +567,6 @@ private struct RoadmapFeatureScreen: View {
             guard let data = try? Data(contentsOf: url), !data.isEmpty else { return }
             indexedFileName = url.lastPathComponent
             let indexedData = Data(data.prefix(256_000))
-            UserDefaults.standard.set(indexedData, forKey: "roadmap.files.last.data")
             if let text = String(data: indexedData, encoding: .utf8) {
                 Task {
                     await session.remember(
