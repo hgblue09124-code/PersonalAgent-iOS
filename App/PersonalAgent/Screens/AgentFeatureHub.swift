@@ -946,3 +946,57 @@ private struct LifecycleControls: View {
         }
     }
 }
+
+
+enum AgentExecutionProgress: Equatable {
+    case executing
+
+    var title: String {
+        switch self {
+        case .executing: return "Agent is executing"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .executing: return "The runtime is processing the current request."
+        }
+    }
+}
+
+private struct AgentOrb: View {
+    let isActive: Bool
+    let isThinking: Bool
+    @State private var pulse = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [.white.opacity(0.78), AgentDesign.accent.opacity(0.76), AgentDesign.accentDeep.opacity(0.98)],
+                        center: UnitPoint(x: 0.34, y: 0.28),
+                        startRadius: 2,
+                        endRadius: 42
+                    )
+                )
+            Circle().stroke(.white.opacity(0.35), lineWidth: 1)
+            Circle()
+                .fill(.white.opacity(0.46))
+                .frame(width: 9, height: 6)
+                .blur(radius: 2.5)
+                .offset(x: -10, y: -15)
+        }
+        .frame(width: 74, height: 74)
+        .shadow(color: .black.opacity(0.25), radius: 15, y: 8)
+        .scaleEffect(pulse ? (isThinking ? 1.075 : 1.045) : 1)
+        .animation(
+            .easeInOut(duration: isThinking ? 0.62 : (isActive ? 1.8 : 2.4))
+                .repeatForever(autoreverses: true),
+            value: pulse
+        )
+        .onAppear { pulse = true }
+        .opacity(isActive || isThinking ? 1 : 0.94)
+        .accessibilityLabel(isThinking ? "Agent thinking" : (isActive ? "Agent working" : "Agent idle"))
+    }
+}
