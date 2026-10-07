@@ -8,6 +8,7 @@ struct AgentScreen: View {
     @State private var task = ""
     @State private var showActivity = false
     @State private var showAgentPanel = false
+    @State private var quickSurface: QuickSurface?
     @FocusState private var focused: Bool
 
     private var working: Bool { session.executionProgress != nil }
@@ -31,6 +32,11 @@ struct AgentScreen: View {
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
         .sheet(isPresented: $showAgentPanel) { AgentContextSheet(session: session).presentationDetents([.fraction(0.42), .large]).presentationDragIndicator(.visible) }
+        .sheet(item: $quickSurface) { surface in
+            quickSurfaceView(surface)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     private var header: some View {
@@ -114,19 +120,41 @@ struct AgentScreen: View {
                 Spacer()
                 Button("Workspace") { showWorkspace = true }.font(.caption.weight(.semibold)).foregroundStyle(.white.opacity(0.8))
             }
-            HStack(spacing: 8) {
-                tile("Chat", "bubble.left.and.bubble.right")
-                tile("Models", "cube.box")
-                tile("Memory", "brain")
-                tile("Skills", "puzzlepiece")
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)], spacing: 8) {
+                tile("Chat", "bubble.left.and.bubble.right", .chat)
+                tile("Models", "cube.box", .models)
+                tile("Memory", "brain", .memory)
+                tile("Skills", "puzzlepiece", .skills)
             }
         }.padding(.top, 24)
     }
 
-    private func tile(_ title: String, _ symbol: String) -> some View {
-        VStack(alignment: .leading, spacing: 7) { Image(systemName: symbol).font(.subheadline.bold()); Text(title).font(.caption.weight(.semibold)) }
-            .foregroundStyle(.white.opacity(0.82)).padding(10).frame(maxWidth: .infinity, alignment: .leading)
+    private func tile(_ title: String, _ symbol: String, _ surface: QuickSurface) -> some View {
+        Button { quickSurface = surface } label: {
+            HStack(spacing: 8) {
+                Image(systemName: symbol).font(.subheadline.bold())
+                Text(title).font(.caption.weight(.semibold))
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right").font(.caption2.weight(.bold)).opacity(0.45)
+            }
+            .foregroundStyle(.white.opacity(0.84))
+            .padding(11)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(.white.opacity(0.08), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens the \(title) surface")
+    }
+
+    @ViewBuilder
+    private func quickSurfaceView(_ surface: QuickSurface) -> some View {
+        switch surface {
+        case .chat: ChatScreen(session: session)
+        case .models: ModelsScreen(session: session)
+        case .memory: MemoryScreen().environment(\.kernelSession, session)
+        case .skills: SkillsScreen(session: session)
+        }
     }
 
     private var greeting: String {
@@ -149,6 +177,11 @@ struct AgentScreen: View {
         task = ""; focused = false
         Task { await session.submitGoal(value) }
     }
+}
+
+private enum QuickSurface: String, Identifiable {
+    case chat, models, memory, skills
+    var id: String { rawValue }
 }
 
 private struct AgentContextSheet: View {
