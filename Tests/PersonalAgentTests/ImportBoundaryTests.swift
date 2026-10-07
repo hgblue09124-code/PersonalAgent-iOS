@@ -31,8 +31,8 @@ struct ImportBoundaryTests {
         #expect(violations.isEmpty)
     }
 
-    @Test func kernelAndCoreDoNotImportConcreteStorageCloudOrUI() throws {
-        let coreDir = repositoryRoot().appendingPathComponent("Sources").appendingPathComponent("Core")
+    @Test func kernelDoesNotImportConcreteStorageCloudOrUI() throws {
+        let kernelDir = repositoryRoot().appendingPathComponent("Kernel")
         let forbiddenImports: Set<String> = [
             "PAProvidersGrok",
             "PAProvidersOpenAI",
@@ -47,12 +47,12 @@ struct ImportBoundaryTests {
             "Firebase"
         ]
 
-        let swiftFiles = try files(under: coreDir, suffix: ".swift")
+        let swiftFiles = try files(under: kernelDir, suffix: ".swift")
         for file in swiftFiles {
             let contents = try String(contentsOf: file, encoding: .utf8)
             let imports = Set(importedModules(in: contents))
             let intersection = imports.intersection(forbiddenImports)
-            #expect(intersection.isEmpty, "Core file \(file.lastPathComponent) contains forbidden imports: \(intersection)")
+            #expect(intersection.isEmpty, "Kernel file \(file.lastPathComponent) contains forbidden imports: \(intersection)")
         }
     }
 
@@ -67,10 +67,7 @@ struct ImportBoundaryTests {
     }
 
     @Test func kernelSourcesDoNotMentionConcreteProviders() throws {
-        let kernelDir = repositoryRoot()
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("Core")
-            .appendingPathComponent("Agent")
+        let kernelDir = repositoryRoot().appendingPathComponent("Kernel")
         let files = try files(under: kernelDir, suffix: ".swift")
         for file in files {
             let text = try String(contentsOf: file, encoding: .utf8)
