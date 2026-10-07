@@ -566,8 +566,7 @@ private struct RoadmapFeatureScreen: View {
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             guard let data = try? Data(contentsOf: url), !data.isEmpty else { return }
             indexedFileName = url.lastPathComponent
-            let indexedData = Data(data.prefix(256_000))
-            if let text = String(data: indexedData, encoding: .utf8) {
+            if let text = String(data: data, encoding: .utf8).map({ String($0.prefix(256_000)) }) {
                 Task {
                     await session.remember(
                         "Document \(url.lastPathComponent):\n\(text)",
