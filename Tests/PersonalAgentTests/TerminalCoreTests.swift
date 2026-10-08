@@ -66,14 +66,17 @@ final class TerminalCoreTests: XCTestCase {
 
         _ = try await session.execute("cd workspace/project", registry: registry)
         _ = try await session.execute("cd ..", registry: registry)
-        XCTAssertEqual(await session.workingDirectory(), "workspace")
+        let workingDirectory = await session.workingDirectory()
+        XCTAssertEqual(workingDirectory, "workspace")
 
         _ = try await session.execute("cd project", registry: registry)
         try await workspace.writeFile("x", to: "workspace/project/source.txt")
         _ = try await session.execute("cp source.txt ../backup.txt", registry: registry)
 
-        XCTAssertTrue(try await workspace.exists(at: "workspace/backup.txt"))
-        XCTAssertFalse(try await workspace.exists(at: "backup.txt"))
+        let backupExists = try await workspace.exists(at: "workspace/backup.txt")
+        let rootBackupExists = try await workspace.exists(at: "backup.txt")
+        XCTAssertTrue(backupExists)
+        XCTAssertFalse(rootBackupExists)
     }
 
     func testSessionCdRejectsFileTarget() async throws {
