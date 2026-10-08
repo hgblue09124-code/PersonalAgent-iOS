@@ -27,7 +27,7 @@ public enum SkillDefinitionError: Error, Sendable, Equatable {
     case missingField(String)
 }
 
-public enum SkillMarkdownParser {
+public enum LegacySkillDefinitionParser {
     public static func parse(_ markdown: String) throws -> SkillDefinition {
         var fields: [String: String] = [:]
         for raw in markdown.components(separatedBy: .newlines) {
@@ -42,7 +42,7 @@ public enum SkillMarkdownParser {
             return value
         }
         func list(_ key: String) throws -> [String] {
-            try required(key).split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.map(String.init)
+            try required(key).split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.map { String($0) }
         }
         return SkillDefinition(
             identity: try required("identity"),
