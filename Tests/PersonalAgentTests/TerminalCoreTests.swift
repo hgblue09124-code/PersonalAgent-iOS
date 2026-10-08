@@ -46,6 +46,7 @@ final class TerminalCoreTests: XCTestCase {
         let session = TerminalSession(context: CommandContext(workspace: workspace))
         _ = try await session.execute("cd workspace/project", registry: BuiltinCommandRegistry.make())
         XCTAssertEqual(await session.workingDirectory(), "workspace/project")
+        XCTAssertTrue((await session.history.all()).contains(AgentCommand(name: "cd", arguments: ["workspace/project"])))
         _ = try await session.execute("touch file.txt", registry: BuiltinCommandRegistry.make())
         XCTAssertTrue(try await workspace.exists(at: "workspace/project/file.txt"))
     }
