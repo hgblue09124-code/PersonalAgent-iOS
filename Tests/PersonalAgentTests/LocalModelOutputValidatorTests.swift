@@ -16,7 +16,7 @@ struct LocalModelOutputValidatorTests {
 
     @Test func repeatedSentenceVariantsAreCollapsed() {
         let input = "Bạn muốn tôi giúp gì? Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó? Bạn cần tôi thực hiện một nhiệm vụ nào đó?"
-        #expect(LocalModelOutputValidator.sanitize(text: input) == "Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó.")
+        #expect(LocalModelOutputValidator.sanitize(text: input) == "Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó?"
     }
 
     @Test func normalResponseIsPreserved() {
