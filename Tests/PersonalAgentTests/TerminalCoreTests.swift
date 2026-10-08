@@ -66,14 +66,17 @@ final class TerminalCoreTests: XCTestCase {
 
         _ = try await session.execute("cd workspace/project", registry: registry)
         _ = try await session.execute("cd ..", registry: registry)
-        XCTAssertEqual(await session.workingDirectory(), "workspace")
+        let workingDirectory = await session.workingDirectory()
+        XCTAssertEqual(workingDirectory, "workspace")
 
         _ = try await session.execute("cd project", registry: registry)
         try await workspace.writeFile("x", to: "workspace/project/source.txt")
         _ = try await session.execute("cp source.txt ../backup.txt", registry: registry)
 
-        XCTAssertTrue(try await workspace.exists(at: "workspace/backup.txt"))
-        XCTAssertFalse(try await workspace.exists(at: "backup.txt"))
+        let backupExists = try await workspace.exists(at: "workspace/backup.txt")
+        let escapedBackupExists = try await workspace.exists(at: "backup.txt")
+        XCTAssertTrue(backupExists)
+        XCTAssertFalse(escapedBackupExists)
     }
 
     func testSessionCdRejectsFileTarget() async throws {
@@ -85,7 +88,8 @@ final class TerminalCoreTests: XCTestCase {
     }
 
     func testPwdUsesSessionWorkingDirectory() async throws {
-        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: rootURL)
         try await workspace.prepare()
         try await workspace.createDirectory(at: "workspace/project")
         let session = TerminalSession(context: CommandContext(workspace: workspace))
@@ -93,7 +97,7 @@ final class TerminalCoreTests: XCTestCase {
         _ = try await session.execute("cd workspace/project", registry: registry)
         _ = try await session.execute("pwd", registry: registry)
         let outputs = await session.outputs()
-        XCTAssertEqual(outputs.last?.text, workspace.rootURL.appendingPathComponent("workspace/project").path + "\n")
+        XCTAssertEqual(outputs.last?.text, rootURL.appendingPathComponent("workspace/project").path + "\n")
     }
 
     func testBuiltinSurfaceIsRegistered() {
