@@ -42,7 +42,7 @@ public actor TerminalSession {
     public let history: TerminalHistory
     private var executions: [UUID: TerminalCommandExecution] = [:]
     private var output: [TerminalOutput] = []
-    private var currentDirectory = "."
+    private var currentDirectory = ""
 
     public init(id: UUID = UUID(), context: CommandContext, history: TerminalHistory = TerminalHistory()) {
         self.id = id; self.context = context; self.history = history
@@ -67,8 +67,13 @@ public actor TerminalSession {
         let execution = TerminalCommandExecution(command: command)
         executions[execution.id] = execution
         do {
-            let executionContext = CommandContext(workspace: context.workspace, workingDirectory: currentDirectory)
-            let result = try await registry.execute(command, context: executionContext)
+            let result: CommandResult
+            if command.name == "cd" {
+                result = CommandResult()
+            } else {
+                let executionContext = CommandContext(workspace: context.workspace, workingDirectory: currentDirectory)
+                result = try await registry.execute(command, context: executionContext)
+            }
             if !result.stdout.isEmpty { output.append(TerminalOutput(stream: .stdout, text: result.stdout)) }
             if !result.stderr.isEmpty { output.append(TerminalOutput(stream: .stderr, text: result.stderr)) }
             let state: TerminalExitState = result.success ? .succeeded : .failed
