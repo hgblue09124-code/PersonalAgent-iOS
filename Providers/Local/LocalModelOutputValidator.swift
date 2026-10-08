@@ -73,7 +73,18 @@ public enum LocalModelOutputValidator {
         }
 
         if collapsed {
-            return kept.map { $0 + "." }.joined(separator: " ")
+            return kept.map { sentence in
+                if let question = sentences.first(where: { $0 == sentence }) {
+                    let original = normalized.range(of: question)
+                    if let original {
+                        let end = normalized[original.upperBound...].first
+                        if end == "?" || end == "!" {
+                            return sentence + String(end!)
+                        }
+                    }
+                }
+                return sentence + "."
+            }.joined(separator: " ")
         }
 
         return normalized
