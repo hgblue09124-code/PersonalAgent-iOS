@@ -131,6 +131,12 @@ public struct SkillRuntime: Sendable {
         self.disabled = disabled
         self.store = store
         self.executors = executors
+        if store == nil {
+            // Built-in skills must be executable out of the box.
+            Task {
+                await executors.register(TextNormalizeSkillExecutor(), for: Self.normalizationManifest.id.rawValue)
+            }
+        }
     }
 
     public func run(_ request: SkillExecutionRequest) async throws -> String {
