@@ -1,5 +1,6 @@
 import Foundation
 import PAWorkspace
+import PASkills
 
 public struct AgentCommand: Sendable, Equatable {
     public let name: String
