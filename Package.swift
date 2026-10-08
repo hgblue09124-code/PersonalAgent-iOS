@@ -97,7 +97,7 @@ let package = Package(
         ),
         .target(
             name: "PATerminal",
-            dependencies: ["PAWorkspace"],
+            dependencies: ["PAWorkspace", "PASkills"],
             path: "Sources/Terminal"
         ),
         .target(
