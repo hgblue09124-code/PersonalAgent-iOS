@@ -124,7 +124,7 @@ public actor FileSkillStore: SkillStore {
 
     public func load(id: SkillID) async throws -> SkillManifest {
         guard let manifest = try loadAll().first(where: { $0.id == id }) else {
-            throw SkillRuntimeError.unknownSkill(id)
+            throw SkillExecutionError.missingSkill(id.rawValue)
         }
         return manifest
     }
