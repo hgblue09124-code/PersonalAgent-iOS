@@ -172,16 +172,21 @@ public actor ModuleRuntime: ModuleExecuting {
 
 private final class RunRace: @unchecked Sendable {
     private let lock = NSLock()
-    private var continuation: CheckedContinuation<RunOutcome, Error>?
-    private var result: Result<RunOutcome, Error>?
+    private var continuation: CheckedContinuation<RunOutcome, any Error>?
+    private var result: Result<RunOutcome, any Error>?
     private var worker: Task<Void, Never>?
     private var timer: Task<Void, Never>?
 
-    func install(_ continuation: CheckedContinuation<RunOutcome, Error>) {
+    func install(_ continuation: CheckedContinuation<RunOutcome, any Error>) {
         lock.lock()
         if let result {
             lock.unlock()
-            continuation.resume(with: result)
+            switch result {
+            case .success(let outcome):
+                continuation.resume(returning: outcome)
+            case .failure(let error):
+                continuation.resume(throwing: error)
+            }
             return
         }
         self.continuation = continuation
@@ -201,7 +206,7 @@ private final class RunRace: @unchecked Sendable {
         lock.unlock()
     }
 
-    func resolve(_ result: Result<RunOutcome, Error>) {
+    func resolve(_ result: Result<RunOutcome, any Error>) {
         lock.lock()
         if self.result != nil {
             lock.unlock()
