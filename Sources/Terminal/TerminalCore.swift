@@ -95,8 +95,7 @@ public struct BuiltinCommandRegistry {
         registry = registry.registering("ls") { command, context in
             guard command.arguments.count <= 1 else { throw CommandError.invalidArguments("ls [path]") }
             let path = command.arguments.first ?? ""
-            let scopedPath = path.isEmpty || path.hasPrefix("/") || context.workingDirectory.isEmpty ? path : context.workingDirectory + "/" + path
-            let entries = try await context.workspace.listDirectory(at: scopedPath)
+            let entries = try await context.workspace.listDirectory(at: path)
             return CommandResult(stdout: entries.map { $0.relativePath }.joined(separator: "\n") + (entries.isEmpty ? "" : "\n"))
         }
         registry = registry.registering("cat") { command, context in
