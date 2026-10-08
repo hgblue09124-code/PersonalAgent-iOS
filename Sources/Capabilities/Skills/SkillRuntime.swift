@@ -45,7 +45,7 @@ public struct SkillRuntime: Sendable {
             .map { SkillID(rawValue: $0) }
     }
 
-    public func select(goalStatement: String, allowedSkillIDs: Set<SkillID>? = nil) throws -> SkillID {
+    public func select(goalStatement: String, allowedSkillIDs: Set<SkillID>? = nil) async throws -> SkillID {
         let candidates = discover().filter { allowedSkillIDs?.contains($0) ?? true }
         guard !candidates.isEmpty else {
             throw SkillExecutionError.missingSkill(goalStatement)
