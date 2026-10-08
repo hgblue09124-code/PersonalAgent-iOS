@@ -512,9 +512,7 @@ final class KernelSession: ObservableObject {
     }
 
     private static func cleanModelResult(_ raw: String) -> String {
-        var result = raw
-          .replacingOccurrences(of: "\\r\\n", with: "\\n")
-          .trimmingCharacters(in: .whitespacesAndNewlines)
+        var result = sanitizeModelOutput(raw)
 
         for token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>", "<|eot_id|>", "<|assistant|>", "<|user|>"] {
             result = result.replacingOccurrences(of: token, with: "")
@@ -529,6 +527,7 @@ final class KernelSession: ObservableObject {
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+()=>body
     private static func sha256(of url: URL) throws -> String {
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
