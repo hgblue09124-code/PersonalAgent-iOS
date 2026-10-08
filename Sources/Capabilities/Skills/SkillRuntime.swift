@@ -17,18 +17,28 @@ public enum SkillExecutionError: Error, Sendable, Equatable {
     case disabledSkill(String)
     case malformedSkill
     case scopeMismatch
+    case noSelection
 }
+
+public typealias SkillRuntimeError = SkillExecutionError
 
 public struct SkillRuntime: Sendable {
     public typealias ModuleHandler = @Sendable (String) async throws -> String
     private let skills: [String: SkillDefinition]
     private let modules: [String: ModuleHandler]
     private let disabled: Set<String>
+    private let store: (any SkillStore)?
 
-    public init(skills: [SkillDefinition] = [], modules: [String: ModuleHandler] = [:], disabled: Set<String> = []) {
+    public init(
+        skills: [SkillDefinition] = [],
+        modules: [String: ModuleHandler] = [:],
+        disabled: Set<String> = [],
+        store: (any SkillStore)? = nil
+    ) {
         self.skills = Dictionary(uniqueKeysWithValues: skills.map { ($0.identity, $0) })
         self.modules = modules
         self.disabled = disabled
+        self.store = store
     }
 
     public func run(_ request: SkillExecutionRequest) async throws -> String {
@@ -46,16 +56,38 @@ public struct SkillRuntime: Sendable {
             .map { SkillID(rawValue: $0) }
     }
 
+    public func discover(query: String = "") async throws -> [SkillManifest] {
+        if let store {
+            return try await store.discover(query: query)
+        }
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return skills.values
+            .filter { needle.isEmpty || $0.identity.lowercased().contains(needle) }
+            .sorted { $0.identity < $1.identity }
+            .map {
+                SkillManifest(
+                    id: SkillID(rawValue: $0.identity),
+                    name: $0.identity,
+                    description: $0.scope,
+                    version: SemanticVersion(major: 0, minor: 0, patch: 0),
+                    instructions: $0.rule,
+                    inputSchema: SchemaDocument(identifier: $0.input),
+                    outputSchema: SchemaDocument(identifier: $0.output),
+                    requiredCapabilities: [.read, .execute]
+                )
+            }
+    }
+
     public func select(goalStatement: String, allowedSkillIDs: Set<SkillID>? = nil) async throws -> SkillID {
-        let candidates = discover().filter { allowedSkillIDs?.contains($0) ?? true }
+        let candidates = try await discover(query: "").map(.id).filter { allowedSkillIDs?.contains($0) ?? true }
         guard !candidates.isEmpty else {
-            throw SkillExecutionError.missingSkill(goalStatement)
+            throw SkillExecutionError.noSelection
         }
         let normalizedGoal = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if let exact = candidates.first(where: { $0.rawValue.lowercased() == normalizedGoal }) {
-            return exact
+        guard let exact = candidates.first(where: { $0.rawValue.lowercased() == normalizedGoal }) else {
+            throw SkillExecutionError.noSelection
         }
-        return candidates[0]
+        return exact
     }
 
     public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
