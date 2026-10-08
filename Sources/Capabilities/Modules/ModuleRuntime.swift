@@ -119,28 +119,38 @@ public actor ModuleRuntime: ModuleExecuting {
         input: ModulePayload,
         timeout: UInt64
     ) async throws -> ModulePayload {
-        try await withThrowingTaskGroup(of: RunOutcome.self) { group in
-            group.addTask {
-                try Task.checkCancellation()
-                let payload = try await module.execute(input)
-                return .finished(payload)
-            }
-            if timeout > 0 {
-                group.addTask {
-                    try await Task.sleep(nanoseconds: timeout)
-                    return .timedOut
+        let race = RunRace()
+
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                race.install(continuation)
+
+                Task {
+                    do {
+                        try Task.checkCancellation()
+                        let payload = try await module.execute(input)
+                        race.resolve(.success(.finished(payload)))
+                    } catch {
+                        race.resolve(.failure(error))
+                    }
+                }
+
+                guard timeout > 0 else {
+                    race.resolve(.success(.timedOut))
+                    return
+                }
+
+                Task {
+                    do {
+                        try await Task.sleep(nanoseconds: timeout)
+                        race.resolve(.success(.timedOut))
+                    } catch {
+                        race.resolve(.failure(error))
+                    }
                 }
             }
-            guard let first = try await group.next() else {
-                throw ModuleRuntimeError.executionFailed("empty")
-            }
-            group.cancelAll()
-            switch first {
-            case .finished(let payload):
-                return payload
-            case .timedOut:
-                throw ModuleRuntimeError.timeout
-            }
+        } onCancel: {
+            race.resolve(.failure(ModuleRuntimeError.cancelled))
         }
     }
 
@@ -156,6 +166,40 @@ public actor ModuleRuntime: ModuleExecuting {
         guard let eventLog else { return }
         let event = ExecutionEvent(traceID: sessionTrace, kind: kind, payload: payload)
         try? await eventLog.append(event)
+    }
+}
+
+private final class RunRace: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<RunOutcome, Error>?
+    private var result: Result<RunOutcome, Error>?
+
+    func install(_ continuation: CheckedContinuation<RunOutcome, Error>) {
+        lock.lock()
+        if let result {
+            lock.unlock()
+            continuation.resume(with: result)
+            return
+        }
+        self.continuation = continuation
+        lock.unlock()
+    }
+
+    func resolve(_ result: Result<RunOutcome, Error>) {
+        lock.lock()
+        if self.result != nil {
+            lock.unlock()
+            return
+        }
+        if let continuation = self.continuation {
+            self.continuation = nil
+            self.result = result
+            lock.unlock()
+            continuation.resume(with: result)
+            return
+        }
+        self.result = result
+        lock.unlock()
     }
 }
 
