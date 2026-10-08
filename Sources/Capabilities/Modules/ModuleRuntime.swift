@@ -125,7 +125,7 @@ public actor ModuleRuntime: ModuleExecuting {
             try await withCheckedThrowingContinuation { continuation in
                 race.install(continuation)
 
-                Task {
+                let worker = Task {
                     do {
                         try Task.checkCancellation()
                         let payload = try await module.execute(input)
@@ -135,18 +135,19 @@ public actor ModuleRuntime: ModuleExecuting {
                     }
                 }
 
-                guard timeout > 0 else {
-                    race.resolve(.success(.timedOut))
-                    return
-                }
-
-                Task {
+                let timer: Task<Void, Never>? = timeout > 0 ? Task {
                     do {
                         try await Task.sleep(nanoseconds: timeout)
                         race.resolve(.success(.timedOut))
                     } catch {
                         race.resolve(.failure(error))
                     }
+                } : nil
+
+                race.attach(worker: worker, timer: timer)
+
+                if timeout == 0 {
+                    race.resolve(.success(.timedOut))
                 }
             }
         } onCancel: {
@@ -173,6 +174,8 @@ private final class RunRace: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<RunOutcome, Error>?
     private var result: Result<RunOutcome, Error>?
+    private var worker: Task<Void, Never>?
+    private var timer: Task<Void, Never>?
 
     func install(_ continuation: CheckedContinuation<RunOutcome, Error>) {
         lock.lock()
@@ -185,21 +188,35 @@ private final class RunRace: @unchecked Sendable {
         lock.unlock()
     }
 
+    func attach(worker: Task<Void, Never>, timer: Task<Void, Never>?) {
+        lock.lock()
+        if result != nil {
+            lock.unlock()
+            worker.cancel()
+            timer?.cancel()
+            return
+        }
+        self.worker = worker
+        self.timer = timer
+        lock.unlock()
+    }
+
     func resolve(_ result: Result<RunOutcome, Error>) {
         lock.lock()
         if self.result != nil {
             lock.unlock()
             return
         }
-        if let continuation = self.continuation {
-            self.continuation = nil
-            self.result = result
-            lock.unlock()
-            continuation.resume(with: result)
-            return
-        }
         self.result = result
+        let continuation = self.continuation
+        self.continuation = nil
+        let worker = self.worker
+        let timer = self.timer
         lock.unlock()
+
+        worker?.cancel()
+        timer?.cancel()
+        continuation?.resume(with: result)
     }
 }
 
