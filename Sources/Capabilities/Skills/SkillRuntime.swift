@@ -175,15 +175,39 @@ public struct SkillRuntime: Sendable {
     }
 
     public func select(goalStatement: String, allowedSkillIDs: Set<SkillID>? = nil) async throws -> SkillID {
-        let candidates = try await discover(query: "").map { $0.id }.filter { allowedSkillIDs?.contains($0) ?? true }
-        guard !candidates.isEmpty else {
+        let manifests = try await discover(query: "")
+            .filter { allowedSkillIDs?.contains($0.id) ?? true }
+        guard !manifests.isEmpty else {
             throw SkillExecutionError.noSelection
         }
+
         let normalizedGoal = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard let exact = candidates.first(where: { $0.rawValue.lowercased() == normalizedGoal || normalizedGoal.contains($0.rawValue.lowercased()) }) else {
-            throw SkillExecutionError.noSelection
+        if let exact = manifests.first(where: {
+            $0.id.rawValue.lowercased() == normalizedGoal
+                || $0.name.lowercased() == normalizedGoal
+        }) {
+            return exact.id
         }
-        return exact
+
+        let goalTokens = Set(
+            normalizedGoal
+                .split { !$0.isLetter && !$0.isNumber }
+                .map(String.init)
+                .filter { $0.count > 2 }
+        )
+        if let matched = manifests.first(where: { manifest in
+            let nameTokens = Set(
+                manifest.name.lowercased()
+                    .split { !$0.isLetter && !$0.isNumber }
+                    .map(String.init)
+                    .filter { $0.count > 2 }
+            )
+            return !nameTokens.isEmpty && nameTokens.isSubset(of: goalTokens)
+        }) {
+            return matched.id
+        }
+
+        throw SkillExecutionError.noSelection
     }
 
     public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {

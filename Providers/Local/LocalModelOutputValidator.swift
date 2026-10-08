@@ -2,8 +2,8 @@ import Foundation
 
 /// Pure production output boundary for local model generation.
 public enum LocalModelOutputValidator {
-    /// Removes transport artifacts and collapses an accidental repeated block at the end
-    /// of a response before the text reaches the product UI.
+    /// Removes transport artifacts and collapses accidental repeated blocks or near-duplicate
+    /// sentences before the text reaches the product UI.
     public static func sanitize(text: String) -> String {
         let normalized = text
             .replacingOccurrences(of: "\r\n", with: "\n")
@@ -34,6 +34,43 @@ public enum LocalModelOutputValidator {
                     return (prefix + block).joined(separator: " ")
                 }
             }
+        }
+
+        let sentences = normalized.split(
+            whereSeparator: { $0 == "." || $0 == "?" || $0 == "!" }
+        ).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+        guard sentences.count >= 2 else { return normalized }
+
+        var kept: [String] = []
+        for sentence in sentences {
+            guard let previous = kept.last else {
+                kept.append(sentence)
+                continue
+            }
+
+            let previousTokens = Set(previous.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init))
+            let currentTokens = Set(sentence.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init))
+            guard !previousTokens.isEmpty, !currentTokens.isEmpty else {
+                kept.append(sentence)
+                continue
+            }
+
+            let intersection = previousTokens.intersection(currentTokens).count
+            let union = previousTokens.union(currentTokens).count
+            let similarity = Double(intersection) / Double(union)
+
+            if similarity >= 0.7 {
+                if currentTokens.count > previousTokens.count {
+                    kept[kept.count - 1] = sentence
+                }
+            } else {
+                kept.append(sentence)
+            }
+        }
+
+        if kept.count < sentences.count {
+            return kept.map { $0 + (normalized.contains($0 + "?") ? "?" : ".") }.joined(separator: " ")
         }
 
         return normalized

@@ -46,6 +46,7 @@ public enum ArchitectureManifest: Sendable {
     /// Target -> allowed imported PA* modules.
     public static let allowedImports: [String: Set<String>] = [
         "PAObservability": ["PAKernel"],
+        "PAWorkspace": [],
         "PAEvents": ["PAObservability", "PAKernel"],
         "PASecurity": ["PAKernel"],
         "PAStorage": ["PAEvents", "PAObservability", "PAStorageModels"],
@@ -61,6 +62,7 @@ public enum ArchitectureManifest: Sendable {
         "PATools": ["PARuntime", "PAObservability", "PAKernel"],
         "PAModules": ["PAObservability", "PAEvents", "PAKernel"],
         "PASkills": ["PAModules", "PATools", "PARuntime", "PAKernel"],
+        "PATerminal": ["PAWorkspace", "PASkills"],
         "PARuntime": [
             "PAKernel",
             "PAObservability",
