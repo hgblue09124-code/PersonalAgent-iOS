@@ -6,10 +6,13 @@ final class GitBackedWorkspaceTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let fake = FakeRepository()
         let git = GitBackedWorkspace(workspace: workspace, repository: fake)
-        XCTAssertEqual(try await git.status().branch, "main")
-        XCTAssertEqual(try await git.log().first?.message, "initial")
+        let status = try await git.status()
+        let history = try await git.log()
         try await git.checkout(branch: "agent")
-        XCTAssertEqual(await fake.lastCheckout, "agent")
+        let checkout = await fake.lastCheckout
+        XCTAssertEqual(status.branch, "main")
+        XCTAssertEqual(history.first?.message, "initial")
+        XCTAssertEqual(checkout, "agent")
     }
 }
 
