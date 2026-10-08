@@ -143,7 +143,7 @@ public struct BuiltinCommandRegistry {
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
             return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep clear help agent skill module memory model provider workspace sync\n")
         }
-        for name in ["cd", "find", "grep", "agent", "module", "memory", "model", "provider", "workspace", "sync"] {
+        for name in ["cd", "find", "grep", "agent", "skill", "module", "memory", "model", "provider", "workspace", "sync"] {
             registry = registry.registering(name) { command, _ in
                 CommandResult(stderr: "command '\(command.name)' is registered but not implemented", exitCode: 127)
             }
