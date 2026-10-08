@@ -5,7 +5,7 @@ public struct WorkspacePath: Sendable, Hashable, Equatable {
 
     public init(_ value: String) throws {
         let normalized = value.replacingOccurrences(of: "\\\\", with: "/").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !normalized.isEmpty, !normalized.hasPrefix("/"), !normalized.split(separator: "/").contains { $0 == ".." }, !normalized.split(separator: "/").contains { $0 == "." } else {
+        guard !normalized.isEmpty, !normalized.hasPrefix("/"), !normalized.split(separator: "/").contains(where: { $0 == ".." }), !normalized.split(separator: "/").contains(where: { $0 == "." }) else {
             throw AgentWorkspaceError.invalidPath(value)
         }
         self.value = normalized
