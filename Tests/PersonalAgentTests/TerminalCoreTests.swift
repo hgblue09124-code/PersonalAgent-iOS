@@ -59,6 +59,18 @@ final class TerminalCoreTests: XCTestCase {
         do { _ = try await session.execute("cd workspace/file.txt", registry: BuiltinCommandRegistry.make()); XCTFail("cd to file must fail") } catch { }
     }
 
+    func testPwdUsesSessionWorkingDirectory() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        try await workspace.createDirectory(at: "workspace/project")
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+        let registry = BuiltinCommandRegistry.make()
+        _ = try await session.execute("cd workspace/project", registry: registry)
+        _ = try await session.execute("pwd", registry: registry)
+        let outputs = await session.outputs()
+        XCTAssertEqual(outputs.last?.text, workspace.rootURL.path + "\n")
+    }
+
     func testBuiltinSurfaceIsRegistered() {
         let registry = BuiltinCommandRegistry.make()
         XCTAssertTrue(registry.contains("pwd")); XCTAssertTrue(registry.contains("skill")); XCTAssertTrue(registry.contains("sync"))
