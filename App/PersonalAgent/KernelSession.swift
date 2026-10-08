@@ -511,6 +511,12 @@ final class KernelSession: ObservableObject {
         return cleanModelResult(text)
     }
 
+    private static func sanitizeModelOutput(_ raw: String) -> String {
+        raw.replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private static func cleanModelResult(_ raw: String) -> String {
         var result = sanitizeModelOutput(raw)
 
