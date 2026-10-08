@@ -1,4 +1,5 @@
 import Foundation
+import PAKernel
 
 public struct SkillExecutionRequest: Sendable, Equatable {
     public let skillID: String
