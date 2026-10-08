@@ -27,7 +27,7 @@ public enum SkillDefinitionError: Error, Sendable, Equatable {
     case missingField(String)
 }
 
-public enum SkillMarkdownParser {
+public enum LegacySkillDefinitionParser {
     public static func parse(_ markdown: String) throws -> SkillDefinition {
         var fields: [String: String] = [:]
         for raw in markdown.components(separatedBy: .newlines) {
