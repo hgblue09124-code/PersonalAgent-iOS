@@ -1,5 +1,6 @@
 import Foundation
 import PAWorkspace
+import PASkills
 
 public struct AgentCommand: Sendable, Equatable {
     public let name: String
@@ -25,7 +26,8 @@ public struct CommandResult: Sendable, Equatable {
 
 public struct CommandContext: Sendable {
     public let workspace: AgentWorkspace
-    public init(workspace: AgentWorkspace) { self.workspace = workspace }
+    public let workingDirectory: String
+    public init(workspace: AgentWorkspace, workingDirectory: String = "") { self.workspace = workspace; self.workingDirectory = workingDirectory }
 }
 
 public typealias CommandHandler = @Sendable (AgentCommand, CommandContext) async throws -> CommandResult
@@ -71,11 +73,77 @@ public enum CommandParser {
     }
 }
 
+private func parsePositiveCount(_ value: String) throws -> Int {
+    guard let count = Int(value), count > 0 else { throw CommandError.invalidArguments("line count must be a positive integer") }
+    return count
+}
+
+private func limitedLines(path: String, count: Int, fromStart: Bool, workspace: AgentWorkspace) async throws -> String {
+    let text = try await workspace.readFile(at: path)
+    let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+    let selected = fromStart ? Array(lines.prefix(count)) : Array(lines.suffix(count))
+    return selected.joined(separator: "\n") + (selected.isEmpty || text.hasSuffix("\n") ? "" : "\n")
+}
+
 public struct BuiltinCommandRegistry {
     public static func make() -> CommandRegistry {
-        let names = ["pwd", "ls", "cd", "cat", "head", "tail", "mkdir", "touch", "cp", "mv", "rm", "find", "grep", "clear", "help", "agent", "skill", "module", "memory", "model", "provider", "workspace", "sync"]
         var registry = CommandRegistry()
-        for name in names {
+        registry = registry.registering("pwd") { command, context in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("pwd") }
+            return CommandResult(stdout: (context.workingDirectory.isEmpty ? context.workspace.rootURL.path : context.workspace.rootURL.appendingPathComponent(context.workingDirectory).path) + "\n")
+        }
+        registry = registry.registering("ls") { command, context in
+            guard command.arguments.count <= 1 else { throw CommandError.invalidArguments("ls [path]") }
+            let path = command.arguments.first ?? ""
+            let entries = try await context.workspace.listDirectory(at: path)
+            return CommandResult(stdout: entries.map { $0.relativePath }.joined(separator: "\n") + (entries.isEmpty ? "" : "\n"))
+        }
+        registry = registry.registering("cat") { command, context in
+            guard command.arguments.count == 1 else { throw CommandError.invalidArguments("cat <path>") }
+            return CommandResult(stdout: try await context.workspace.readFile(at: command.arguments[0]))
+        }
+        registry = registry.registering("head") { command, context in
+            guard command.arguments.count <= 2 && !command.arguments.isEmpty else { throw CommandError.invalidArguments("head <path> [lines]") }
+            let count = command.arguments.count == 2 ? try parsePositiveCount(command.arguments[1]) : 10
+            return CommandResult(stdout: try await limitedLines(path: command.arguments[0], count: count, fromStart: true, workspace: context.workspace))
+        }
+        registry = registry.registering("tail") { command, context in
+            guard command.arguments.count <= 2 && !command.arguments.isEmpty else { throw CommandError.invalidArguments("tail <path> [lines]") }
+            let count = command.arguments.count == 2 ? try parsePositiveCount(command.arguments[1]) : 10
+            return CommandResult(stdout: try await limitedLines(path: command.arguments[0], count: count, fromStart: false, workspace: context.workspace))
+        }
+        registry = registry.registering("mkdir") { command, context in
+            guard command.arguments.count == 1 else { throw CommandError.invalidArguments("mkdir <path>") }
+            try await context.workspace.createDirectory(at: command.arguments[0]); return CommandResult()
+        }
+        registry = registry.registering("touch") { command, context in
+            guard command.arguments.count == 1 else { throw CommandError.invalidArguments("touch <path>") }
+            if !(try await context.workspace.exists(at: command.arguments[0])) {
+                try await context.workspace.writeFile("", to: command.arguments[0])
+            }
+            return CommandResult()
+        }
+        registry = registry.registering("rm") { command, context in
+            guard command.arguments.count == 1 else { throw CommandError.invalidArguments("rm <path>") }
+            try await context.workspace.remove(at: command.arguments[0]); return CommandResult()
+        }
+        registry = registry.registering("cp") { command, context in
+            guard command.arguments.count == 2 else { throw CommandError.invalidArguments("cp <source> <destination>") }
+            try await context.workspace.copy(from: command.arguments[0], to: command.arguments[1]); return CommandResult()
+        }
+        registry = registry.registering("mv") { command, context in
+            guard command.arguments.count == 2 else { throw CommandError.invalidArguments("mv <source> <destination>") }
+            try await context.workspace.move(from: command.arguments[0], to: command.arguments[1]); return CommandResult()
+        }
+        registry = registry.registering("clear") { command, _ in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("clear") }
+            return CommandResult(stdout: "\u{001B}[2J\u{001B}[H")
+        }
+        registry = registry.registering("help") { command, _ in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep clear help agent skill module memory model provider workspace sync\n")
+        }
+        for name in ["cd", "find", "grep", "agent", "skill", "module", "memory", "model", "provider", "workspace", "sync"] {
             registry = registry.registering(name) { command, _ in
                 CommandResult(stderr: "command '\(command.name)' is registered but not implemented", exitCode: 127)
             }
