@@ -26,6 +26,7 @@ let package = Package(
         .library(name: "PAMemory", targets: ["PAMemory"]),
         .library(name: "PAStorageMemory", targets: ["PAStorageMemory"]),
         .library(name: "PAWorkspace", targets: ["PAWorkspace"]),
+        .library(name: "PATerminal", targets: ["PATerminal"]),
         .library(name: "PAProviders", targets: ["PAProviders"]),
         .library(name: "PATools", targets: ["PATools"]),
         .library(name: "PAModules", targets: ["PAModules"]),
@@ -93,6 +94,11 @@ let package = Package(
             name: "PAWorkspace",
             dependencies: [],
             path: "Sources/Workspace"
+        ),
+        .target(
+            name: "PATerminal",
+            dependencies: ["PAWorkspace"],
+            path: "Sources/Terminal"
         ),
         .target(
             name: "PAProviders",
@@ -209,6 +215,7 @@ let package = Package(
                 "PARuntime",
                 "PAComposition",
                 "PAWorkspace",
+                "PATerminal",
             ],
             path: "Tests/PersonalAgentTests"
         ),
