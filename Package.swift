@@ -25,6 +25,7 @@ let package = Package(
         .library(name: "PAStorageModels", targets: ["PAStorageModels"]),
         .library(name: "PAMemory", targets: ["PAMemory"]),
         .library(name: "PAStorageMemory", targets: ["PAStorageMemory"]),
+        .library(name: "PAWorkspace", targets: ["PAWorkspace"]),
         .library(name: "PAProviders", targets: ["PAProviders"]),
         .library(name: "PATools", targets: ["PATools"]),
         .library(name: "PAModules", targets: ["PAModules"]),
@@ -87,6 +88,11 @@ let package = Package(
             name: "PAStorageMemory",
             dependencies: ["PAMemory", "PAStorage", "PAStorageModels", "PAEvents"],
             path: "Storage/Memory"
+        ),
+        .target(
+            name: "PAWorkspace",
+            dependencies: [],
+            path: "Sources/Workspace"
         ),
         .target(
             name: "PAProviders",
@@ -202,6 +208,7 @@ let package = Package(
                 "PASkills",
                 "PARuntime",
                 "PAComposition",
+                "PAWorkspace",
             ],
             path: "Tests/PersonalAgentTests"
         ),

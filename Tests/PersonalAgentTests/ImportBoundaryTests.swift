@@ -167,6 +167,7 @@ func moduleName(for file: URL, repositoryRoot: URL) -> String {
     if relative.hasPrefix("Sources/Events/") { return "PAEvents" }
     if relative.hasPrefix("Sources/Security/") { return "PASecurity" }
     if relative.hasPrefix("Sources/Memory/") { return "PAMemory" }
+    if relative.hasPrefix("Sources/Workspace/") { return "PAWorkspace" }
 
     if relative.hasPrefix("Sources/Capabilities/Tools/") { return "PATools" }
     if relative.hasPrefix("Sources/Capabilities/Modules/") { return "PAModules" }
