@@ -131,12 +131,6 @@ public struct SkillRuntime: Sendable {
         self.disabled = disabled
         self.store = store
         self.executors = executors
-        if store == nil {
-            // Built-in skills must be executable out of the box.
-            Task {
-                await executors.register(TextNormalizeSkillExecutor(), for: Self.normalizationManifest.id.rawValue)
-            }
-        }
     }
 
     public func run(_ request: SkillExecutionRequest) async throws -> String {
@@ -223,7 +217,12 @@ public struct SkillRuntime: Sendable {
             throw SkillExecutionError.policyDenied(decision.reason)
         }
 
-        guard let executor = await executors.executor(for: id.rawValue) else {
+        let executor: any SkillExecutor
+        if let registered = await executors.executor(for: id.rawValue) {
+            executor = registered
+        } else if id == Self.normalizationManifest.id {
+            executor = TextNormalizeSkillExecutor()
+        } else {
             throw SkillExecutionError.unknownSkill(id)
         }
         return try await executor.execute(manifest: manifest, inputJSON: inputJSON)
