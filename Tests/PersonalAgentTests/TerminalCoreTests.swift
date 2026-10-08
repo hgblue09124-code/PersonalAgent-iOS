@@ -39,6 +39,25 @@ final class TerminalCoreTests: XCTestCase {
         do { _ = try await registry.execute(AgentCommand(name: "tail", arguments: ["workspace/lines.txt", "-1"]), context: context); XCTFail("negative count must fail") } catch { }
     }
 
+    func testSessionCdPersistsWorkingDirectory() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        try await workspace.createDirectory(at: "workspace/project")
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+        _ = try await session.execute("cd workspace/project", registry: BuiltinCommandRegistry.make())
+        XCTAssertEqual(await session.workingDirectory(), "workspace/project")
+        _ = try await session.execute("touch file.txt", registry: BuiltinCommandRegistry.make())
+        XCTAssertTrue(try await workspace.exists(at: "workspace/project/file.txt"))
+    }
+
+    func testSessionCdRejectsFileTarget() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        try await workspace.writeFile("x", to: "workspace/file.txt")
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+        do { _ = try await session.execute("cd workspace/file.txt", registry: BuiltinCommandRegistry.make()); XCTFail("cd to file must fail") } catch { }
+    }
+
     func testBuiltinSurfaceIsRegistered() {
         let registry = BuiltinCommandRegistry.make()
         XCTAssertTrue(registry.contains("pwd")); XCTAssertTrue(registry.contains("skill")); XCTAssertTrue(registry.contains("sync"))

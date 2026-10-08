@@ -52,12 +52,23 @@ public actor TerminalSession {
     public func setWorkingDirectory(_ path: String) { currentDirectory = path }
 
     public func execute(_ input: String, registry: CommandRegistry) async throws -> TerminalCommandExecution {
-        let command = try CommandParser.parse(input)
+        let parsed = try CommandParser.parse(input)
+        let command: AgentCommand
+        if parsed.name == "cd" {
+            guard parsed.arguments.count <= 1 else { throw CommandError.invalidArguments("cd [path]") }
+            let target = parsed.arguments.first ?? ""
+            let next = try await resolveWorkingDirectory(target)
+            currentDirectory = next
+            command = parsed
+        } else {
+            command = try await commandInWorkingDirectory(parsed)
+        }
         await history.append(command)
         let execution = TerminalCommandExecution(command: command)
         executions[execution.id] = execution
         do {
-            let result = try await registry.execute(command, context: context)
+            let executionContext = CommandContext(workspace: context.workspace, workingDirectory: currentDirectory)
+            let result = try await registry.execute(command, context: executionContext)
             if !result.stdout.isEmpty { output.append(TerminalOutput(stream: .stdout, text: result.stdout)) }
             if !result.stderr.isEmpty { output.append(TerminalOutput(stream: .stderr, text: result.stderr)) }
             let state: TerminalExitState = result.success ? .succeeded : .failed
@@ -69,6 +80,26 @@ public actor TerminalSession {
             executions[execution.id] = finished
             throw CancellationError()
         }
+    }
+
+    private func resolveWorkingDirectory(_ path: String) async throws -> String {
+        let candidate = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        if candidate.isEmpty { return "" }
+        if candidate == "." { return currentDirectory }
+        let combined = currentDirectory.isEmpty ? candidate : currentDirectory + "/" + candidate
+        guard try await context.workspace.metadata(at: combined).isDirectory else { throw AgentWorkspaceError.notDirectory(candidate) }
+        return combined
+    }
+
+    private func commandInWorkingDirectory(_ command: AgentCommand) async throws -> AgentCommand {
+        guard !currentDirectory.isEmpty else { return command }
+        let pathCommands: Set<String> = ["ls", "cat", "head", "tail", "mkdir", "touch", "rm", "cp", "mv", "find", "grep"]
+        guard pathCommands.contains(command.name) else { return command }
+        let args = command.arguments.map { arg in
+            if arg.hasPrefix("/") || arg.isEmpty || arg.contains(":" ) { return arg }
+            return currentDirectory + "/" + arg
+        }
+        return AgentCommand(name: command.name, arguments: args)
     }
 
     public func outputs() -> [TerminalOutput] { output }

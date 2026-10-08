@@ -25,7 +25,8 @@ public struct CommandResult: Sendable, Equatable {
 
 public struct CommandContext: Sendable {
     public let workspace: AgentWorkspace
-    public init(workspace: AgentWorkspace) { self.workspace = workspace }
+    public let workingDirectory: String
+    public init(workspace: AgentWorkspace, workingDirectory: String = "") { self.workspace = workspace; self.workingDirectory = workingDirectory }
 }
 
 public typealias CommandHandler = @Sendable (AgentCommand, CommandContext) async throws -> CommandResult
