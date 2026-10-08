@@ -64,10 +64,9 @@ public enum LocalModelOutputValidator {
 
             if similarity >= 0.7 {
                 collapsed = true
-                if kept.count >= 2 {
-                    kept.remove(at: kept.count - 2)
+                if currentTokens.count > previousTokens.count {
+                    kept[kept.count - 1] = sentence
                 }
-                kept[kept.count - 1] = sentence
             } else {
                 kept.append(sentence)
             }
