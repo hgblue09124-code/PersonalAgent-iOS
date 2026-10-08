@@ -27,7 +27,9 @@ struct AgentScreen: View {
                     openBeta
                 }
                 .padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 28)
-            }.scrollIndicators(.hidden)
+            }
+            .safeAreaPadding(.top, 8)
+            .scrollIndicators(.hidden)
         }
         .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showActivity) { ActivitySheet(session: session).presentationDetents([.medium, .large]).presentationDragIndicator(.visible) }
