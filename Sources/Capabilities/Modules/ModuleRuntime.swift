@@ -130,8 +130,12 @@ public actor ModuleRuntime: ModuleExecuting {
                         try Task.checkCancellation()
                         let payload = try await module.execute(input)
                         race.resolve(.success(.finished(payload)))
-                    } catch {
+                    } catch let error as ModuleRuntimeError {
                         race.resolve(.failure(error))
+                    } catch is CancellationError {
+                        race.resolve(.failure(.cancelled))
+                    } catch {
+                        race.resolve(.failure(.executionFailed("module")))
                     }
                 }
 
@@ -172,21 +176,16 @@ public actor ModuleRuntime: ModuleExecuting {
 
 private final class RunRace: @unchecked Sendable {
     private let lock = NSLock()
-    private var continuation: CheckedContinuation<RunOutcome, any Error>?
-    private var result: Result<RunOutcome, any Error>?
+    private var continuation: CheckedContinuation<RunOutcome, ModuleRuntimeError>?
+    private var result: Result<RunOutcome, ModuleRuntimeError>?
     private var worker: Task<Void, Never>?
     private var timer: Task<Void, Never>?
 
-    func install(_ continuation: CheckedContinuation<RunOutcome, any Error>) {
+    func install(_ continuation: CheckedContinuation<RunOutcome, ModuleRuntimeError>) {
         lock.lock()
         if let result {
             lock.unlock()
-            switch result {
-            case .success(let outcome):
-                continuation.resume(returning: outcome)
-            case .failure(let error):
-                continuation.resume(throwing: error)
-            }
+            continuation.resume(with: result)
             return
         }
         self.continuation = continuation
@@ -206,7 +205,7 @@ private final class RunRace: @unchecked Sendable {
         lock.unlock()
     }
 
-    func resolve(_ result: Result<RunOutcome, any Error>) {
+    func resolve(_ result: Result<RunOutcome, ModuleRuntimeError>) {
         lock.lock()
         if self.result != nil {
             lock.unlock()
