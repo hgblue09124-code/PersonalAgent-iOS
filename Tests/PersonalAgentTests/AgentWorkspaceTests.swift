@@ -10,7 +10,19 @@ final class AgentWorkspaceTests: XCTestCase {
         do { _ = try await workspace.readFile(at: "/private/escape") ; XCTFail("absolute path must fail") } catch { }
     }
 
-    func testRejectsDotPathsAndProtectsWorkspaceRoot() async throws {\n        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)\n        let workspace = LocalAgentWorkspace(rootURL: root)\n        try await workspace.prepare()\n        try await workspace.writeFile("safe", to: "workspace/safe.txt")\n        for path in [".", "./workspace/safe.txt", "workspace/./safe.txt"] {\n            do { try await workspace.remove(at: path); XCTFail("dot path must fail: " + path) } catch { }\n        }\n        XCTAssertTrue(try await workspace.exists(at: "workspace/safe.txt"))\n        do { _ = try await workspace.exists(at: "."); XCTFail("dot root path must fail") } catch { }\n    }\n\n    func testUnicodeWriteReadExistsMetadata() async throws {
+    func testRejectsDotPathsAndProtectsWorkspaceRoot() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        try await workspace.writeFile("safe", to: "workspace/safe.txt")
+        for path in [".", "./workspace/safe.txt", "workspace/./safe.txt"] {
+            do { try await workspace.remove(at: path); XCTFail("dot path must fail: " + path) } catch { }
+        }
+        XCTAssertTrue(try await workspace.exists(at: "workspace/safe.txt"))
+        do { _ = try await workspace.exists(at: "."); XCTFail("dot root path must fail") } catch { }
+    }
+
+    func testUnicodeWriteReadExistsMetadata() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
