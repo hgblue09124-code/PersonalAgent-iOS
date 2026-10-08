@@ -1,4 +1,5 @@
 import Foundation
+import PAWorkspace
 
 public enum TerminalExitState: Sendable, Equatable {
     case running
