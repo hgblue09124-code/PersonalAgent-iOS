@@ -64,9 +64,7 @@ public actor SkillAgentOrchestrator {
     ) async throws -> SkillAgentResult {
         if let agent {
             let availableIDs = Set(try await runtime.discover(query: "").map(\.id))
-            let declaredAvailable = agent.skillIDs.filter { availableIDs.contains($0) }
-            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }),
-               !declaredAvailable.isEmpty {
+            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }) {
                 throw SkillAgentOrchestratorError.agentDeclaresMissingSkill(missing)
             }
         }
