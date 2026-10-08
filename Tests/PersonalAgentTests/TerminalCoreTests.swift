@@ -68,7 +68,7 @@ final class TerminalCoreTests: XCTestCase {
         _ = try await session.execute("cd workspace/project", registry: registry)
         _ = try await session.execute("pwd", registry: registry)
         let outputs = await session.outputs()
-        XCTAssertEqual(outputs.last?.text, workspace.rootURL.path + "\n")
+        XCTAssertEqual(outputs.last?.text, workspace.rootURL.appendingPathComponent("workspace/project").path + "\n")
     }
 
     func testBuiltinSurfaceIsRegistered() {
