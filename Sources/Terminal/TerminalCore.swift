@@ -82,4 +82,23 @@ public struct BuiltinCommandRegistry {
         }
         return registry
     }
+
+    public static func make(skillRuntime: SkillRuntime) -> CommandRegistry {
+        var registry = make()
+        registry = registry.registering("skill") { command, _ in
+            guard command.arguments.count >= 3, command.arguments[0] == "run" else {
+                throw CommandError.invalidArguments("skill run <skill> <input>")
+            }
+            let input = command.arguments.dropFirst(2).joined(separator: " ")
+            let result = try await skillRuntime.run(
+                SkillExecutionRequest(
+                    skillID: String(command.arguments[1]),
+                    moduleID: String(command.arguments[1]),
+                    input: input
+                )
+            )
+            return CommandResult(stdout: result)
+        }
+        return registry
+    }
 }
