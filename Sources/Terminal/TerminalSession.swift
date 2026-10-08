@@ -91,21 +91,51 @@ public actor TerminalSession {
     private func resolveWorkingDirectory(_ path: String) async throws -> String {
         let candidate = path.trimmingCharacters(in: .whitespacesAndNewlines)
         if candidate.isEmpty { return "" }
-        if candidate == "." { return currentDirectory }
-        let combined = currentDirectory.isEmpty ? candidate : currentDirectory + "/" + candidate
-        guard try await context.workspace.metadata(at: combined).isDirectory else { throw AgentWorkspaceError.notDirectory(candidate) }
-        return combined
+
+        let resolved = try resolveTerminalPath(candidate)
+        guard try await context.workspace.metadata(at: resolved).isDirectory else {
+            throw AgentWorkspaceError.notDirectory(candidate)
+        }
+        return resolved
     }
 
-    private func commandInWorkingDirectory(_ command: AgentCommand) async throws -> AgentCommand {
+    private func commandInWorkingDirectory(_ command: AgentCommand) throws -> AgentCommand {
         guard !currentDirectory.isEmpty else { return command }
         let pathCommands: Set<String> = ["ls", "cat", "head", "tail", "mkdir", "touch", "rm", "cp", "mv", "find", "grep"]
         guard pathCommands.contains(command.name) else { return command }
-        let args = command.arguments.map { arg in
-            if arg.hasPrefix("/") || arg.isEmpty || arg.contains(":" ) { return arg }
-            return currentDirectory + "/" + arg
+
+        let args = try command.arguments.map { arg in
+            if arg.hasPrefix("/") || arg.isEmpty || arg.contains(":") {
+                return arg
+            }
+            return try resolveTerminalPath(arg)
         }
         return AgentCommand(name: command.name, arguments: args)
+    }
+
+    private func resolveTerminalPath(_ path: String) throws -> String {
+        let normalized = path
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "\\", with: "/")
+        guard !normalized.hasPrefix("/") else {
+            throw AgentWorkspaceError.invalidPath(path)
+        }
+
+        var components = currentDirectory.split(separator: "/").map(String.init)
+        for component in normalized.split(separator: "/", omittingEmptySubsequences: true) {
+            switch component {
+            case ".":
+                continue
+            case "..":
+                guard !components.isEmpty else {
+                    throw AgentWorkspaceError.escapesSandbox
+                }
+                components.removeLast()
+            default:
+                components.append(String(component))
+            }
+        }
+        return components.joined(separator: "/")
     }
 
     public func outputs() -> [TerminalOutput] { output }

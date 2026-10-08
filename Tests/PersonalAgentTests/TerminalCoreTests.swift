@@ -57,6 +57,25 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertTrue(fileExists)
     }
 
+    func testSessionCdResolvesParentWithoutEscapingSandbox() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        try await workspace.createDirectory(at: "workspace/project")
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+        let registry = BuiltinCommandRegistry.make()
+
+        _ = try await session.execute("cd workspace/project", registry: registry)
+        _ = try await session.execute("cd ..", registry: registry)
+        XCTAssertEqual(await session.workingDirectory(), "workspace")
+
+        _ = try await session.execute("cd project", registry: registry)
+        try await workspace.writeFile("x", to: "workspace/project/source.txt")
+        _ = try await session.execute("cp source.txt ../backup.txt", registry: registry)
+
+        XCTAssertTrue(try await workspace.exists(at: "workspace/backup.txt"))
+        XCTAssertFalse(try await workspace.exists(at: "backup.txt"))
+    }
+
     func testSessionCdRejectsFileTarget() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
