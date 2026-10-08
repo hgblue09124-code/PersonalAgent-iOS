@@ -79,7 +79,7 @@ public struct SkillRuntime: Sendable {
     }
 
     public func select(goalStatement: String, allowedSkillIDs: Set<SkillID>? = nil) async throws -> SkillID {
-        let candidates = try await discover(query: "").map(.id).filter { allowedSkillIDs?.contains($0) ?? true }
+        let candidates = try await discover(query: "").map { $0.id }.filter { allowedSkillIDs?.contains($0) ?? true }
         guard !candidates.isEmpty else {
             throw SkillExecutionError.noSelection
         }
