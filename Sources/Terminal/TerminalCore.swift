@@ -96,7 +96,12 @@ public struct BuiltinCommandRegistry {
             guard command.arguments.count <= 1 else { throw CommandError.invalidArguments("ls [path]") }
             let path = command.arguments.first ?? ""
             let entries = try await context.workspace.listDirectory(at: path)
-            return CommandResult(stdout: entries.map { $0.relativePath }.joined(separator: "\n") + (entries.isEmpty ? "" : "\n"))
+            let base = path.isEmpty ? "" : path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            let names = entries.map { entry in
+                guard !base.isEmpty, entry.relativePath.hasPrefix(base + "/") else { return entry.relativePath }
+                return String(entry.relativePath.dropFirst(base.count + 1))
+            }
+            return CommandResult(stdout: names.joined(separator: "\n") + (names.isEmpty ? "" : "\n"))
         }
         registry = registry.registering("cat") { command, context in
             guard command.arguments.count == 1 else { throw CommandError.invalidArguments("cat <path>") }
@@ -143,7 +148,7 @@ public struct BuiltinCommandRegistry {
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
             return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep clear help agent skill module memory model provider workspace sync\n")
         }
-        for name in ["cd", "find", "grep", "agent", "skill", "module", "memory", "model", "provider", "workspace", "sync"] {
+        for name in ["find", "grep", "agent", "skill", "module", "memory", "model", "provider", "workspace", "sync"] {
             registry = registry.registering(name) { command, _ in
                 CommandResult(stderr: "command '\(command.name)' is registered but not implemented", exitCode: 127)
             }
