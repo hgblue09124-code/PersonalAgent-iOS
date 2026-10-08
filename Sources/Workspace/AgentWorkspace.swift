@@ -1,5 +1,29 @@
 import Foundation
 
+public struct WorkspacePath: Sendable, Hashable, Equatable {
+    public let value: String
+
+    public init(_ value: String) throws {
+        let normalized = value.replacingOccurrences(of: "\\\\", with: "/").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty, !normalized.hasPrefix("/"), !normalized.split(separator: "/").contains("..") else {
+            throw AgentWorkspaceError.invalidPath(value)
+        }
+        self.value = normalized
+    }
+}
+
+public struct AgentWorkspaceMetadata: Sendable, Equatable {
+    public let relativePath: String
+    public let isDirectory: Bool
+    public let byteCount: Int
+
+    public init(relativePath: String, isDirectory: Bool, byteCount: Int) {
+        self.relativePath = relativePath
+        self.isDirectory = isDirectory
+        self.byteCount = byteCount
+    }
+}
+
 public struct AgentWorkspaceEntry: Sendable, Equatable {
     public let relativePath: String
     public let isDirectory: Bool
@@ -27,6 +51,8 @@ public protocol AgentWorkspace: Sendable {
     func writeFile(_ contents: String, to relativePath: String) async throws
     func appendFile(_ contents: String, to relativePath: String) async throws
     func listDirectory(at relativePath: String) async throws -> [AgentWorkspaceEntry]
+    func exists(at relativePath: String) async throws -> Bool
+    func metadata(at relativePath: String) async throws -> AgentWorkspaceMetadata
     func createDirectory(at relativePath: String) async throws
     func remove(at relativePath: String) async throws
     func copy(from sourcePath: String, to destinationPath: String) async throws
@@ -110,6 +136,24 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         } catch {
             throw AgentWorkspaceError.ioFailure(error.localizedDescription)
         }
+    }
+
+    public func exists(at relativePath: String) async throws -> Bool {
+        let url = try resolve(relativePath, allowingRoot: true)
+        return FileManager.default.fileExists(atPath: url.path)
+    }
+
+    public func metadata(at relativePath: String) async throws -> AgentWorkspaceMetadata {
+        let url = try resolve(relativePath, allowingRoot: true)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw AgentWorkspaceError.missing(relativePath)
+        }
+        let values = try url.resourceValues(forKeys: [.isDirectoryKey, .fileSizeKey])
+        return AgentWorkspaceMetadata(
+            relativePath: relativePath,
+            isDirectory: values.isDirectory == true,
+            byteCount: values.fileSize ?? 0
+        )
     }
 
     public func listDirectory(at relativePath: String) async throws -> [AgentWorkspaceEntry] {
