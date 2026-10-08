@@ -14,6 +14,11 @@ struct LocalModelOutputValidatorTests {
         #expect(LocalModelOutputValidator.sanitize(text: input) == block)
     }
 
+    @Test func repeatedSentenceVariantsAreCollapsed() {
+        let input = "Bạn muốn tôi giúp gì? Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó? Bạn cần tôi thực hiện một nhiệm vụ nào đó?"
+        #expect(LocalModelOutputValidator.sanitize(text: input) == "Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó.")
+    }
+
     @Test func normalResponseIsPreserved() {
         let input = "I found the model and imported it successfully."
         #expect(LocalModelOutputValidator.sanitize(text: input) == input)
