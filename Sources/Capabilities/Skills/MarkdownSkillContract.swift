@@ -42,7 +42,7 @@ public enum SkillMarkdownParser {
             return value
         }
         func list(_ key: String) throws -> [String] {
-            try required(key).split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            try required(key).split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.map(String.init)
         }
         return SkillDefinition(
             identity: try required("identity"),
