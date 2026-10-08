@@ -10,6 +10,31 @@ final class AgentWorkspaceTests: XCTestCase {
         do { _ = try await workspace.readFile(at: "/private/escape") ; XCTFail("absolute path must fail") } catch { }
     }
 
+    func testRejectsDotPathsAndProtectsWorkspaceRoot() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+
+        for path in [".", "./file", "a/./file", "..", "a/../file"] {
+            do {
+                _ = try await workspace.exists(at: path)
+                XCTFail("unsafe path must fail: \(path)")
+            } catch {
+                // Expected.
+            }
+        }
+
+        do {
+            try await workspace.remove(at: ".")
+            XCTFail("workspace root must never be removable")
+        } catch {
+            // Expected.
+        }
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.path))
+        XCTAssertTrue(try await workspace.exists(at: "workspace"))
+    }
+
     func testUnicodeWriteReadExistsMetadata() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: root)
