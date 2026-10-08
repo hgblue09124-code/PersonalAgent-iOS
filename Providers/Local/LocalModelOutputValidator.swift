@@ -36,13 +36,15 @@ public enum LocalModelOutputValidator {
             }
         }
 
-        let sentences = normalized.split(
+        let sentenceParts = normalized.split(
             whereSeparator: { $0 == "." || $0 == "?" || $0 == "!" }
-        ).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        )
+        guard sentenceParts.count >= 2 else { return normalized }
 
-        guard sentences.count >= 2 else { return normalized }
-
+        let sentences = sentenceParts.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         var kept: [String] = []
+        var collapsed = false
+
         for sentence in sentences {
             guard let previous = kept.last else {
                 kept.append(sentence)
@@ -61,6 +63,7 @@ public enum LocalModelOutputValidator {
             let similarity = Double(intersection) / Double(union)
 
             if similarity >= 0.7 {
+                collapsed = true
                 if currentTokens.count > previousTokens.count {
                     kept[kept.count - 1] = sentence
                 }
@@ -69,8 +72,8 @@ public enum LocalModelOutputValidator {
             }
         }
 
-        if kept.count < sentences.count {
-            return kept.map { $0 + (normalized.contains($0 + "?") ? "?" : ".") }.joined(separator: " ")
+        if collapsed {
+            return kept.map { $0 + "." }.joined(separator: " ")
         }
 
         return normalized
