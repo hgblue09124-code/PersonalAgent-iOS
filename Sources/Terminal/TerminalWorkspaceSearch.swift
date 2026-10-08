@@ -36,7 +36,7 @@ public struct TerminalWorkspaceSearch: Sendable {
                     results.append(entry)
                 }
 
-                if entry.isDirectory {
+                if entry.isDirectory && !isSymbolicLink(path, workspace: workspace) {
                     pending.append(path)
                 }
             }
@@ -45,6 +45,12 @@ public struct TerminalWorkspaceSearch: Sendable {
         return results.sorted {
             $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
         }
+    }
+
+    
+    private func isSymbolicLink(_ relativePath: String, workspace: AgentWorkspace) -> Bool {
+        let url = workspace.rootURL.appendingPathComponent(relativePath)
+        return (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true
     }
 
     public func grep(
