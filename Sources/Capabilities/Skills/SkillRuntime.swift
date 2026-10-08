@@ -211,12 +211,19 @@ public struct SkillRuntime: Sendable {
     }
 
     public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
+        if disabled.contains(id.rawValue) {
+            throw SkillExecutionError.disabledSkill(id.rawValue)
+        }
+
         let manifest: SkillManifest
         if let store {
             manifest = try await store.load(id: id)
         } else if id == Self.normalizationManifest.id {
             manifest = Self.normalizationManifest
         } else if let definition = skills[id.rawValue] {
+            guard !disabled.contains(definition.identity) else {
+                throw SkillExecutionError.disabledSkill(definition.identity)
+            }
             manifest = SkillManifest(
                 id: id,
                 name: definition.identity,
@@ -253,10 +260,19 @@ public struct SkillRuntime: Sendable {
     }
 
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
-        guard let executor = await executors.executor(for: id.rawValue) else {
-            return !outputJSON.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        if let executor = await executors.executor(for: id.rawValue) {
+            let manifest = try await discover(query: "").first(where: { $0.id == id })
+                ?? Self.normalizationManifest
+            return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
         }
-        let manifest = try await discover(query: "").first(where: { $0.id == id }) ?? Self.normalizationManifest
-        return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+
+        if id == Self.normalizationManifest.id {
+            return try await TextNormalizeSkillExecutor().verify(
+                manifest: Self.normalizationManifest,
+                outputJSON: outputJSON
+            )
+        }
+
+        return false
     }
 }
