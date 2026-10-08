@@ -512,7 +512,9 @@ final class KernelSession: ObservableObject {
     }
 
     private static func cleanModelResult(_ raw: String) -> String {
-        var result = sanitizeModelOutput(raw)
+        var result = raw
+          .replacingOccurrences(of: "\\r\\n", with: "\\n")
+          .trimmingCharacters(in: .whitespacesAndNewlines)
 
         for token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>", "<|eot_id|>", "<|assistant|>", "<|user|>"] {
             result = result.replacingOccurrences(of: token, with: "")

@@ -18,7 +18,7 @@ final class AgentWorkspaceTests: XCTestCase {
         for path in [".", "./workspace/safe.txt", "workspace/./safe.txt"] {
             do { try await workspace.remove(at: path); XCTFail("dot path must fail: " + path) } catch { }
         }
-        XCTAssertTrue(try await workspace.exists(at: "workspace/safe.txt"))
+        let safeExists = try await workspace.exists(at: "workspace/safe.txt")\n        XCTAssertTrue(safeExists)
         do { _ = try await workspace.exists(at: "."); XCTFail("dot root path must fail") } catch { }
     }
 
@@ -29,9 +29,9 @@ final class AgentWorkspaceTests: XCTestCase {
         let path = "workspace/tiếng Việt-😀.md"
         let value = "AgentOS ✓"
         try await workspace.writeFile(value, to: path)
-        XCTAssertTrue(try await workspace.exists(at: path))
-        XCTAssertEqual(try await workspace.readFile(at: path), value)
-        XCTAssertEqual(try await workspace.metadata(at: path).byteCount, value.utf8.count)
+        let exists = try await workspace.exists(at: path)\n        XCTAssertTrue(exists)
+        let read = try await workspace.readFile(at: path)\n        XCTAssertEqual(read, value)
+        let metadata = try await workspace.metadata(at: path)\n        XCTAssertEqual(metadata.byteCount, value.utf8.count)
     }
 
     func testPreparedDirectoriesExist() async throws {
@@ -39,7 +39,7 @@ final class AgentWorkspaceTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
         for directory in ["agents", "skills", "modules", "tools", "workspace", "memory", "config", "logs", "cache"] {
-            XCTAssertTrue(try await workspace.exists(at: directory))
+            let exists = try await workspace.exists(at: directory)\n            XCTAssertTrue(exists)
         }
     }
 }

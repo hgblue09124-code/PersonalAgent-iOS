@@ -12,6 +12,10 @@ public enum SkillMarkdownError: Error, Sendable, Equatable {
 public struct SkillMarkdownParser: Sendable {
     public init() {}
 
+    public static func parse(_ markdown: String) throws -> SkillDefinition {
+        try LegacySkillDefinitionParser.parse(markdown)
+    }
+
     public func parse(_ markdown: String) throws -> SkillManifest {
         let normalized = markdown.replacingOccurrences(of: "\r\n", with: "\n")
         let parts = normalized.components(separatedBy: "\n---\n")
