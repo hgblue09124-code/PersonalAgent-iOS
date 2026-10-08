@@ -89,7 +89,7 @@ public struct BuiltinCommandRegistry {
         var registry = CommandRegistry()
         registry = registry.registering("pwd") { command, context in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("pwd") }
-            return CommandResult(stdout: context.workspace.rootURL.path + "\n")
+            return CommandResult(stdout: (context.workingDirectory.isEmpty ? context.workspace.rootURL.path : context.workspace.rootURL.appendingPathComponent(context.workingDirectory).path) + "\n")
         }
         registry = registry.registering("ls") { command, context in
             guard command.arguments.count <= 1 else { throw CommandError.invalidArguments("ls [path]") }
