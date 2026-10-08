@@ -1,4 +1,5 @@
 import XCTest
+import PAWorkspace
 @testable import PATerminal
 
 final class TerminalCoreTests: XCTestCase {
