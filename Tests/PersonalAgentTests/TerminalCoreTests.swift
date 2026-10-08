@@ -24,9 +24,11 @@ final class TerminalCoreTests: XCTestCase {
         _ = try await registry.execute(AgentCommand(name: "touch", arguments: ["workspace/test/a.txt"]), context: context)
         _ = try await registry.execute(AgentCommand(name: "cp", arguments: ["workspace/test/a.txt", "workspace/test/b.txt"]), context: context)
         _ = try await registry.execute(AgentCommand(name: "mv", arguments: ["workspace/test/b.txt", "workspace/test/c.txt"]), context: context)
-        XCTAssertTrue(try await workspace.exists(at: "workspace/test/c.txt"))
+        let copiedExists = try await workspace.exists(at: "workspace/test/c.txt")
+        XCTAssertTrue(copiedExists)
         _ = try await registry.execute(AgentCommand(name: "rm", arguments: ["workspace/test/c.txt"]), context: context)
-        XCTAssertFalse(try await workspace.exists(at: "workspace/test/c.txt"))
+        let removedExists = try await workspace.exists(at: "workspace/test/c.txt")
+        XCTAssertFalse(removedExists)
     }
 
     func testHeadAndTailRejectInvalidCounts() async throws {
@@ -45,10 +47,13 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.createDirectory(at: "workspace/project")
         let session = TerminalSession(context: CommandContext(workspace: workspace))
         _ = try await session.execute("cd workspace/project", registry: BuiltinCommandRegistry.make())
-        XCTAssertEqual(await session.workingDirectory(), "workspace/project")
-        XCTAssertTrue((await session.history.all()).contains(AgentCommand(name: "cd", arguments: ["workspace/project"])))
+        let workingDirectory = await session.workingDirectory()
+        XCTAssertEqual(workingDirectory, "workspace/project")
+        let history = await session.history.all()
+        XCTAssertTrue(history.contains(AgentCommand(name: "cd", arguments: ["workspace/project"])))
         _ = try await session.execute("touch file.txt", registry: BuiltinCommandRegistry.make())
-        XCTAssertTrue(try await workspace.exists(at: "workspace/project/file.txt"))
+        let fileExists = try await workspace.exists(at: "workspace/project/file.txt")
+        XCTAssertTrue(fileExists)
     }
 
     func testSessionCdRejectsFileTarget() async throws {
