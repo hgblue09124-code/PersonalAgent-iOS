@@ -26,11 +26,15 @@ public struct KeychainSecretStore: SecretStore, Sendable {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account
         ]
-        let attributes: [String: Any] = [kSecValueData as String: secret]
+        let attributes: [String: Any] = [
+            kSecValueData as String: secret,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        ]
         let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
         if status == errSecItemNotFound {
             var item = query
             item[kSecValueData as String] = secret
+            item[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             let addStatus = SecItemAdd(item as CFDictionary, nil)
             guard addStatus == errSecSuccess else { throw KeychainSecretStoreError.status(addStatus) }
         } else if status != errSecSuccess {

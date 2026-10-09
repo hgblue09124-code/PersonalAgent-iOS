@@ -75,6 +75,11 @@ jobs:
             echo "Kernel isolation violated"
             exit 1
           fi
+      - name: Keychain credentials use device-only protection
+        run: |
+          grep -q "kSecAttrAccessibleWhenUnlockedThisDeviceOnly" Sources/Security/SecretStore.swift
+          grep -q "kSecAttrAccessible as String" Sources/Security/SecretStore.swift
+
       - name: No committed secrets
         run: |
           if grep -R -E "sk-[A-Za-z0-9]{10,}|xai-[A-Za-z0-9]{10,}" --include='*.swift' --include='*.md' --include='*.yml' . | grep -v "sk-live-secret-DO-NOT-EMIT" | grep -v "sk-secret"; then
