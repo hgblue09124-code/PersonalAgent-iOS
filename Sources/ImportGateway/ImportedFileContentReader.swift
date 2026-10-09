@@ -192,7 +192,7 @@ public struct ImportedFileContentReader: Sendable {
                 pages.append(text)
                 extractedBytes += text.utf8.count
             } else {
-                #if canImport(Vision) && canImport(CoreGraphics)
+                #if canImport(Vision) && canImport(ImageIO) && canImport(CoreGraphics)
                 guard index < 50 else {
                     throw ImportedFileReaderError.extractionLimitExceeded
                 }
