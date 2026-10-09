@@ -14,6 +14,7 @@ struct TerminalScreen: View {
     @State private var terminal: TerminalSession?
     @State private var registry = BuiltinCommandRegistry.make()
     @State private var command = ""
+    @State private var isExecuting = false
     @State private var transcript: [TerminalLine] = []
     @State private var status = "Preparing sandbox…"
     @FocusState private var commandFocused: Bool
@@ -78,7 +79,7 @@ struct TerminalScreen: View {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.title2)
                 }
-                .disabled(terminal == nil || command.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(terminal == nil || isExecuting || command.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .accessibilityLabel("Run terminal command")
             }
             .padding()
@@ -116,9 +117,11 @@ struct TerminalScreen: View {
 
     @MainActor
     private func executeCommand() async {
-        guard let terminal else { return }
+        guard let terminal, !isExecuting else { return }
         let input = command.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return }
+        isExecuting = true
+        defer { isExecuting = false }
         command = ""
         let priorOutputCount = await terminal.outputs().count
         transcript.append(TerminalLine(text: "$ " + input, kind: .command))
