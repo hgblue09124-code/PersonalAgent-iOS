@@ -51,16 +51,8 @@ struct PersonalAgentTheoryExecutionProofTests {
         Select only a declared skill for the requested goal.
         """
 
-        try skillMarkdown.write(
-            to: skillsDirectory.appendingPathComponent("text.normalize.Skill.md"),
-            atomically: true,
-            encoding: .utf8
-        )
-        try agentMarkdown.write(
-            to: agentsDirectory.appendingPathComponent("personal.default.Agent.md"),
-            atomically: true,
-            encoding: .utf8
-        )
+        try skillMarkdown.write(to: skillsDirectory.appendingPathComponent("text.normalize.Skill.md"), atomically: true, encoding: .utf8)
+        try agentMarkdown.write(to: agentsDirectory.appendingPathComponent("personal.default.Agent.md"), atomically: true, encoding: .utf8)
 
         let skillStore = FileSkillStore(directoryURL: skillsDirectory)
         let agentStore = FileAgentStore(directoryURL: agentsDirectory)
@@ -75,12 +67,12 @@ struct PersonalAgentTheoryExecutionProofTests {
         let result = try await orchestrator.run(
             agent: agent,
             goalStatement: "normalize text",
-            inputJSON: #"{\"text\":\"  theory works  \"}"#,
+            inputJSON: "{\"text\":\"  theory works  \"}",
             policy: AllowPolicy()
         )
 
         #expect(result.skillID == SkillID(rawValue: "text.normalize"))
-        #expect(result.outputJSON == #"{\"text\":\"theory works\"}"#)
+        #expect(result.outputJSON == "{\"text\":\"theory works\"}")
         #expect(result.verified)
     }
 }
