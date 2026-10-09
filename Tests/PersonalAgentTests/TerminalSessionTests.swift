@@ -18,6 +18,29 @@ final class TerminalSessionTests: XCTestCase {
         XCTAssertEqual(history.count, 1)
     }
 
+    func testThrownCommandMarksExecutionFailedInsteadOfLeavingItRunning() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+        let registry = CommandRegistry().registering("explode") { _, _ in
+            throw CommandError.invalidArguments("simulated failure")
+        }
+
+        do {
+            _ = try await session.execute("explode", registry: registry)
+            XCTFail("command error must propagate")
+        } catch let error as CommandError {
+            XCTAssertEqual(error, .invalidArguments("simulated failure"))
+        }
+
+        let history = await session.history.all()
+        let executions = await session.executionHistory()
+        XCTAssertEqual(history.count, 1)
+        XCTAssertEqual(executions.last?.state, .failed)
+        XCTAssertEqual(executions.last?.exitCode, 1)
+        XCTAssertNotNil(executions.last?.finishedAt)
+    }
+
     func testUnknownCommandFailsClosed() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let session = TerminalSession(context: CommandContext(workspace: workspace))
