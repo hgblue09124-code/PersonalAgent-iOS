@@ -151,7 +151,7 @@ public struct ImportedFileContentReader: Sendable {
             } else if character == delimiter {
                 row.append(field)
                 field = ""
-            } else if character == "\n" || character == "\r" {
+            } else if character == "\n" || character == "\r" || character == "\r\n" {
                 if character == "\r" {
                     let next = text.index(after: index)
                     if next < text.endIndex && text[next] == "\n" { index = next }
@@ -166,7 +166,8 @@ public struct ImportedFileContentReader: Sendable {
             index = text.index(after: index)
         }
         guard !quoted else { throw ImportedFileReaderError.malformedCSV }
-        if !field.isEmpty || !row.isEmpty || text.isEmpty || (!text.isEmpty && text.last != "\n" && text.last != "\r") {
+        let endsWithLineBreak = text.last.map { $0 == "\n" || $0 == "\r" || $0 == "\r\n" } ?? false
+        if !field.isEmpty || !row.isEmpty || text.isEmpty || !endsWithLineBreak {
             row.append(field)
             rows.append(row)
         }
