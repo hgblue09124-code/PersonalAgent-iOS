@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(PDFKit)
+import PDFKit
+#endif
 
 public enum ImportedContentFormat: String, Codable, Sendable, Equatable {
     case plainText
@@ -7,6 +10,7 @@ public enum ImportedContentFormat: String, Codable, Sendable, Equatable {
     case csv
     case yaml
     case log
+    case pdf
 }
 
 public struct ImportedFileContent: Sendable, Equatable {
@@ -32,6 +36,8 @@ public enum ImportedFileReaderError: Error, Sendable, Equatable {
     case binaryContent
     case malformedJSON
     case malformedCSV
+    case malformedDocument
+    case extractionLimitExceeded
 }
 
 /// Bounded, non-executing readers for common text formats. Extensions select a
@@ -66,6 +72,15 @@ public struct ImportedFileContentReader: Sendable {
             throw ImportedFileReaderError.fileTooLarge(limitBytes: maximumReadableBytes)
         }
 
+        let ext = importedFile.fileExtension.lowercased()
+        if ext == "pdf" {
+            #if canImport(PDFKit)
+            return try readPDF(importedFile, url: url)
+            #else
+            throw ImportedFileReaderError.unsupportedFormat(ext)
+            #endif
+        }
+
         let data: Data
         do {
             data = try Data(contentsOf: url, options: [.mappedIfSafe])
@@ -83,7 +98,7 @@ public struct ImportedFileContentReader: Sendable {
         }
 
         let format: ImportedContentFormat
-        switch importedFile.fileExtension.lowercased() {
+        switch ext {
         case "txt", "text":
             format = .plainText
         case "md", "markdown", "mdown":
@@ -99,6 +114,8 @@ public struct ImportedFileContentReader: Sendable {
             format = .yaml
         case "log":
             format = .log
+        case "pdf":
+            throw ImportedFileReaderError.unsupportedFormat(ext)
         default:
             throw ImportedFileReaderError.unsupportedFormat(importedFile.fileExtension)
         }
@@ -111,6 +128,38 @@ public struct ImportedFileContentReader: Sendable {
         }
         return ImportedFileContent(fileID: importedFile.id, format: format, text: text, csvRows: rows)
     }
+
+    #if canImport(PDFKit)
+    private func readPDF(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
+        guard let document = PDFDocument(url: url), !document.isLocked else {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        guard document.pageCount <= 500 else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        var pages: [String] = []
+        var extractedBytes = 0
+        for index in 0..<document.pageCount {
+            guard let page = document.page(at: index) else {
+                throw ImportedFileReaderError.malformedDocument
+            }
+            let text = page.string ?? ""
+            extractedBytes += text.utf8.count
+            guard extractedBytes <= 4 * 1024 * 1024 else {
+                throw ImportedFileReaderError.extractionLimitExceeded
+            }
+            if !text.isEmpty { pages.append(text) }
+        }
+        guard !pages.isEmpty else {
+            throw ImportedFileReaderError.unsupportedFormat("scanned PDF requires OCR")
+        }
+        return ImportedFileContent(
+            fileID: importedFile.id,
+            format: .pdf,
+            text: pages.joined(separator: "\n\n")
+        )
+    }
+    #endif
 
     private static func isValidJSON(_ text: String, extension ext: String) -> Bool {
         if ext == "jsonl" || ext == "ndjson" {
