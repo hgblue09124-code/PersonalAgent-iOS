@@ -178,11 +178,14 @@ public struct ImportedFileContentReader: Sendable {
     #if canImport(Vision) && canImport(ImageIO)
     private func readImageOCR(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = (properties[kCGImagePropertyPixelWidth] as? NSNumber)?.int64Value,
+              let height = (properties[kCGImagePropertyPixelHeight] as? NSNumber)?.int64Value else {
             throw ImportedFileReaderError.malformedDocument
         }
-        let pixels = Int64(image.width) * Int64(image.height)
-        guard image.width > 0, image.height > 0, pixels <= 100_000_000 else {
+        let (pixels, overflow) = width.multipliedReportingOverflow(by: height)
+        guard width > 0, height > 0, !overflow, pixels <= 100_000_000,
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
             throw ImportedFileReaderError.extractionLimitExceeded
         }
         let request = VNRecognizeTextRequest()

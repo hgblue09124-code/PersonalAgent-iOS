@@ -45,6 +45,26 @@ final class ImportedFileContentReaderTests: XCTestCase {
         }
     }
 
+    func testImageOCRCapabilityIsExplicit() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let input = base.appendingPathComponent("image.png")
+        try Data([0x89, 0x50, 0x4E, 0x47, 0x00]).write(to: input)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let record = try await store.importFile(from: input)
+        do {
+            _ = try await ImportedFileContentReader().read(record, from: store)
+            XCTFail("Invalid image bytes must not produce successful OCR")
+        } catch let error as ImportedFileReaderError {
+            #if canImport(Vision) && canImport(ImageIO)
+            XCTAssertEqual(error, .malformedDocument)
+            #else
+            XCTAssertEqual(error, .unsupportedFormat("png"))
+            #endif
+        }
+    }
+
     func testEnforcesReadSizeLimitAndRejectsBinaryText() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
