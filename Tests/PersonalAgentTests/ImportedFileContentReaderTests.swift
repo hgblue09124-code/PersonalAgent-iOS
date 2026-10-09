@@ -52,7 +52,6 @@ final class ImportedFileContentReaderTests: XCTestCase {
         let input = base.appendingPathComponent("settings.plist")
         try """
         <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
         <plist version="1.0"><dict><key>theme</key><string>dark</string></dict></plist>
         """.write(to: input, atomically: true, encoding: .utf8)
         let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
