@@ -119,28 +119,54 @@ public actor ModuleRuntime: ModuleExecuting {
         input: ModulePayload,
         timeout: UInt64
     ) async throws -> ModulePayload {
-        try await withThrowingTaskGroup(of: RunOutcome.self) { group in
-            group.addTask {
-                try Task.checkCancellation()
-                let payload = try await module.execute(input)
-                return .finished(payload)
-            }
-            if timeout > 0 {
-                group.addTask {
-                    try await Task.sleep(nanoseconds: timeout)
-                    return .timedOut
+        let race = RunRace()
+
+        let outcome: RunOutcome = try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<RunOutcome, any Error>) in
+                race.install(continuation)
+
+                let worker = Task.detached {
+                    do {
+                        try Task.checkCancellation()
+                        let payload = try await module.execute(input)
+                        race.resolve(.success(.finished(payload)))
+                    } catch let error as ModuleRuntimeError {
+                        race.resolve(.failure(error))
+                    } catch is CancellationError {
+                        race.resolve(.failure(ModuleRuntimeError.cancelled))
+                    } catch {
+                        race.resolve(.failure(ModuleRuntimeError.executionFailed("module")))
+                    }
+                }
+
+                // Detached so a module that monopolizes the runtime actor cannot
+                // prevent the timeout from firing.
+                let timer: DispatchWorkItem? = timeout > 0 ? DispatchWorkItem {
+                    race.resolve(.success(.timedOut))
+                } : nil
+
+                if let timer {
+                    let boundedTimeout = min(timeout, UInt64(Int.max))
+                    DispatchQueue.global(qos: .userInitiated).asyncAfter(
+                        deadline: .now() + .nanoseconds(Int(boundedTimeout)),
+                        execute: timer
+                    )
+                }
+                race.attach(worker: worker, timer: timer)
+
+                if timeout == 0 {
+                    race.resolve(.success(.timedOut))
                 }
             }
-            guard let first = try await group.next() else {
-                throw ModuleRuntimeError.executionFailed("empty")
-            }
-            group.cancelAll()
-            switch first {
-            case .finished(let payload):
-                return payload
-            case .timedOut:
-                throw ModuleRuntimeError.timeout
-            }
+        } onCancel: {
+            race.resolve(.failure(ModuleRuntimeError.cancelled))
+        }
+
+        switch outcome {
+        case .finished(let payload):
+            return payload
+        case .timedOut:
+            throw ModuleRuntimeError.timeout
         }
     }
 
@@ -156,6 +182,56 @@ public actor ModuleRuntime: ModuleExecuting {
         guard let eventLog else { return }
         let event = ExecutionEvent(traceID: sessionTrace, kind: kind, payload: payload)
         try? await eventLog.append(event)
+    }
+}
+
+private final class RunRace: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<RunOutcome, any Error>?
+    private var result: Result<RunOutcome, any Error>?
+    private var worker: Task<Void, Never>?
+    private var timer: DispatchWorkItem?
+
+    func install(_ continuation: CheckedContinuation<RunOutcome, any Error>) {
+        lock.lock()
+        if let result {
+            lock.unlock()
+            continuation.resume(with: result)
+            return
+        }
+        self.continuation = continuation
+        lock.unlock()
+    }
+
+    func attach(worker: Task<Void, Never>, timer: DispatchWorkItem?) {
+        lock.lock()
+        if result != nil {
+            lock.unlock()
+            worker.cancel()
+            timer?.cancel()
+            return
+        }
+        self.worker = worker
+        self.timer = timer
+        lock.unlock()
+    }
+
+    func resolve(_ result: Result<RunOutcome, any Error>) {
+        lock.lock()
+        if self.result != nil {
+            lock.unlock()
+            return
+        }
+        self.result = result
+        let continuation = self.continuation
+        self.continuation = nil
+        let worker = self.worker
+        let timer = self.timer
+        lock.unlock()
+
+        worker?.cancel()
+        timer?.cancel()
+        continuation?.resume(with: result)
     }
 }
 
