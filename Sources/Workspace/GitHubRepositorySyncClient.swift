@@ -32,6 +32,7 @@ public enum GitHubRepositorySyncError: Error, Sendable, Equatable {
     case unsupportedFile(String)
     case fileTooLarge(String)
     case hashMismatch(String)
+    case potentialSecret(String)
     case corruptState
 }
 
@@ -316,13 +317,23 @@ public actor GitHubRepositorySyncClient {
         let allowedExtensions: Set<String> = ["md", "markdown", "agent", "skill", "module", "tool", "rules", "prompt", "mdc", "txt", "json", "jsonl", "ndjson", "yaml", "yml", "toml", "swift", "py", "sh", "ts", "tsx", "js", "jsx", "html", "css", "xml", "csv", "tsv", "plist", "strings", "pbxproj", "conf", "ini", "sql", "rb", "go", "rs", "c", "h", "m", "mm", "gradle", "properties", "gitignore", "gitmodules"]
         let ext = (name as NSString).pathExtension.lowercased()
         if allowedExtensions.contains(ext) { return true }
-        return ["license", "makefile", "dockerfile", "procfile", "readme"].contains(name)
+        return [".gitignore", ".gitattributes", ".editorconfig", "license", "makefile", "dockerfile", "procfile", "readme"].contains(name)
     }
 
     static func shouldDescendDirectory(_ path: String) -> Bool {
         guard isSafePath(path) else { return false }
         let excluded: Set<String> = [".git", ".build", "deriveddata", "node_modules", "pods", "cache", "logs", "memory", "models", "files"]
         return !path.split(separator: "/").map(String.init).contains(where: { excluded.contains($0.lowercased()) })
+    }
+
+    private static func containsPotentialSecret(_ text: String) -> Bool {
+        let patterns = [
+            #"\\b(?:sk-[A-Za-z0-9_-]{16,}|xai-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,})\\b"#,
+            #"(?i)(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|private[_-]?key)\\s*[:=]\\s*[\"']?[A-Za-z0-9/+=._-]{16,}"#
+        ]
+        return patterns.contains { pattern in
+            text.range(of: pattern, options: .regularExpression) != nil
+        }
     }
 
     private static func scanLocalFiles(_ root: URL) throws -> [String: GitHubLocalFile] {
@@ -346,8 +357,12 @@ public actor GitHubRepositorySyncClient {
                     let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
                     guard size <= maximumFileBytes else { throw GitHubRepositorySyncError.fileTooLarge(path) }
                     let data = try Data(contentsOf: child, options: [.mappedIfSafe])
-                    guard String(data: data, encoding: .utf8) != nil,
-                          !data.contains(0) else { throw GitHubRepositorySyncError.unsupportedFile(path) }
+                    guard let text = String(data: data, encoding: .utf8), !data.contains(0) else {
+                        throw GitHubRepositorySyncError.unsupportedFile(path)
+                    }
+                    guard !Self.containsPotentialSecret(text) else {
+                        throw GitHubRepositorySyncError.potentialSecret(path)
+                    }
                     let permissions = (attributes[.posixPermissions] as? NSNumber)?.intValue ?? 0o644
                     result[path] = GitHubLocalFile(url: child, data: data, sha: GitBlobSHA1.hash(data), mode: permissions & 0o111 == 0 ? "100644" : "100755")
                 } else {
@@ -391,6 +406,15 @@ public actor GitHubRepositorySyncClient {
         let encoded = blob.content.filter { !$0.isWhitespace }
         guard let data = Data(base64Encoded: encoded), GitBlobSHA1.hash(data) == sha else {
             throw GitHubRepositorySyncError.hashMismatch(path)
+        }
+        guard Int64(data.count) <= Self.maximumFileBytes else {
+            throw GitHubRepositorySyncError.fileTooLarge(path)
+        }
+        guard let text = String(data: data, encoding: .utf8), !data.contains(0) else {
+            throw GitHubRepositorySyncError.unsupportedFile(path)
+        }
+        guard !Self.containsPotentialSecret(text) else {
+            throw GitHubRepositorySyncError.potentialSecret(path)
         }
         return data
     }
