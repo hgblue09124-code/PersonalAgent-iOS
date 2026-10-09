@@ -695,7 +695,11 @@ private extension SettingsScreen {
                 appropriateFor: nil,
                 create: true
             )
-            let stateName = "\(location.owner)-\(location.repository)-\(location.branch)"
+            // Encode the full repository identity so branches such as "feature/a_b"
+            // and "feature_a/b" cannot collide in the persisted three-way-sync baseline.
+            let stateIdentity = "\(location.owner)/\(location.repository)@\(location.branch)"
+            let stateName = Data(stateIdentity.utf8).base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
                 .replacingOccurrences(of: "/", with: "_")
             let stateURL = appSupport
                 .appendingPathComponent("PersonalAgent/GitHubSync", isDirectory: true)
