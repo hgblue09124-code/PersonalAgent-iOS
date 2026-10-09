@@ -105,11 +105,20 @@ public actor TerminalSession {
 
     private func commandInWorkingDirectory(_ command: AgentCommand) throws -> AgentCommand {
         guard !currentDirectory.isEmpty else { return command }
-        let pathCommands: Set<String> = ["ls", "cat", "head", "tail", "mkdir", "touch", "rm", "cp", "mv", "find", "grep"]
-        guard pathCommands.contains(command.name) else { return command }
+        let pathArgumentIndices: Set<Int>
+        switch command.name {
+        case "ls", "cat", "head", "tail", "mkdir", "touch", "rm", "find":
+            pathArgumentIndices = [0]
+        case "grep":
+            pathArgumentIndices = [1]
+        case "cp", "mv":
+            pathArgumentIndices = [0, 1]
+        default:
+            return command
+        }
 
-        let args = try command.arguments.map { arg in
-            if arg.hasPrefix("/") || arg.isEmpty || arg.contains(":") {
+        let args = try command.arguments.enumerated().map { index, arg in
+            guard pathArgumentIndices.contains(index), !arg.hasPrefix("/"), !arg.isEmpty, !arg.contains(":") else {
                 return arg
             }
             return try resolveTerminalPath(arg)
