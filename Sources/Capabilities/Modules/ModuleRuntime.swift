@@ -183,12 +183,12 @@ public actor ModuleRuntime: ModuleExecuting {
 
 private final class RunRace: @unchecked Sendable {
     private let lock = NSLock()
-    private var continuation: CheckedContinuation<RunOutcome, any Error>?
+    private var continuation: CheckedContinuation<RunOutcome, ModuleRuntimeError>?
     private var result: Result<RunOutcome, ModuleRuntimeError>?
     private var worker: Task<Void, Never>?
     private var timer: Task<Void, Never>?
 
-    func install(_ continuation: CheckedContinuation<RunOutcome, any Error>) {
+    func install(_ continuation: CheckedContinuation<RunOutcome, ModuleRuntimeError>) {
         lock.lock()
         if let result {
             lock.unlock()
@@ -212,7 +212,7 @@ private final class RunRace: @unchecked Sendable {
         lock.unlock()
     }
 
-    func resolve(_ result: Result<RunOutcome, any Error>) {
+    func resolve(_ result: Result<RunOutcome, ModuleRuntimeError>) {
         lock.lock()
         if self.result != nil {
             lock.unlock()
