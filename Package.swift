@@ -23,6 +23,7 @@ let package = Package(
         .library(name: "PASecurity", targets: ["PASecurity"]),
         .library(name: "PAStorage", targets: ["PAStorage"]),
         .library(name: "PAStorageModels", targets: ["PAStorageModels"]),
+        .library(name: "PAImportGateway", targets: ["PAImportGateway"]),
         .library(name: "PAMemory", targets: ["PAMemory"]),
         .library(name: "PAStorageMemory", targets: ["PAStorageMemory"]),
         .library(name: "PAWorkspace", targets: ["PAWorkspace"]),
@@ -74,6 +75,11 @@ let package = Package(
             dependencies: ["PAKernel", "PAEvents", "PAObservability", "PAStorageModels"],
             path: "Storage",
             exclude: ["Models", "Memory"]
+        ),
+        .target(
+            name: "PAImportGateway",
+            dependencies: [],
+            path: "Sources/ImportGateway"
         ),
         .target(
             name: "PAStorageModels",
@@ -202,6 +208,7 @@ let package = Package(
                 "PASecurity",
                 "PAStorage",
                 "PAStorageModels",
+                "PAImportGateway",
                 "PAMemory",
                 "PAStorageMemory",
                 "PAProviders",
