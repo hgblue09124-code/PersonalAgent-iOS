@@ -100,6 +100,9 @@ private struct AgentWorkspaceSheet: View {
                     workspaceLink("Tasks", "Live execution, results and errors", "checklist") {
                         TasksScreen(session: session)
                     }
+                    workspaceLink("Terminal", "Sandboxed commands and workspace file operations", "terminal") {
+                        TerminalScreen()
+                    }
                 }
 
                 Section("Capabilities") {
