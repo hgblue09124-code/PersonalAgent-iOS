@@ -216,6 +216,8 @@ public struct ImportedFileContentReader: Sendable {
             text: pages.joined(separator: "\n\n")
         )
     }
+    #endif
+
     #if canImport(PDFKit) && canImport(Vision) && canImport(CoreGraphics)
     /// Rasterizes one scanned page within a strict pixel budget before OCR.
     private func recognizePDFPage(_ page: PDFPage) throws -> String {
