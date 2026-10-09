@@ -139,7 +139,9 @@ public actor ModuleRuntime: ModuleExecuting {
                     }
                 }
 
-                let timer: Task<Void, Never>? = timeout > 0 ? Task {
+                // Detached so a module that monopolizes the runtime actor cannot
+                // prevent the timeout from firing.
+                let timer: Task<Void, Never>? = timeout > 0 ? Task.detached {
                     do {
                         try await Task.sleep(nanoseconds: timeout)
                         race.resolve(.success(.timedOut))
