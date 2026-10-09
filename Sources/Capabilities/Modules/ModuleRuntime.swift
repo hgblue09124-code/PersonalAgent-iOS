@@ -141,15 +141,17 @@ public actor ModuleRuntime: ModuleExecuting {
 
                 // Detached so a module that monopolizes the runtime actor cannot
                 // prevent the timeout from firing.
-                let timer: Task<Void, Never>? = timeout > 0 ? Task.detached {
-                    do {
-                        try await Task.sleep(nanoseconds: timeout)
-                        race.resolve(.success(.timedOut))
-                    } catch {
-                        race.resolve(.failure(ModuleRuntimeError.cancelled))
-                    }
+                let timer: DispatchWorkItem? = timeout > 0 ? DispatchWorkItem {
+                    race.resolve(.success(.timedOut))
                 } : nil
 
+                if let timer {
+                    let boundedTimeout = min(timeout, UInt64(Int.max))
+                    DispatchQueue.global(qos: .userInitiated).asyncAfter(
+                        deadline: .now() + .nanoseconds(Int(boundedTimeout)),
+                        execute: timer
+                    )
+                }
                 race.attach(worker: worker, timer: timer)
 
                 if timeout == 0 {
@@ -188,7 +190,7 @@ private final class RunRace: @unchecked Sendable {
     private var continuation: CheckedContinuation<RunOutcome, any Error>?
     private var result: Result<RunOutcome, any Error>?
     private var worker: Task<Void, Never>?
-    private var timer: Task<Void, Never>?
+    private var timer: DispatchWorkItem?
 
     func install(_ continuation: CheckedContinuation<RunOutcome, any Error>) {
         lock.lock()
@@ -201,7 +203,7 @@ private final class RunRace: @unchecked Sendable {
         lock.unlock()
     }
 
-    func attach(worker: Task<Void, Never>, timer: Task<Void, Never>?) {
+    func attach(worker: Task<Void, Never>, timer: DispatchWorkItem?) {
         lock.lock()
         if result != nil {
             lock.unlock()
