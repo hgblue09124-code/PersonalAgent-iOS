@@ -554,6 +554,7 @@ private extension SettingsScreen {
             UserDefaults.standard.set(remoteProvider, forKey: "provider.remote.id")
             UserDefaults.standard.set(true, forKey: "provider.remote.enabled")
             UserDefaults.standard.set("remote", forKey: "provider.execution.mode")
+            Task { await session.refresh() }
         } catch {
             credentialState = .error("Could not save API key securely.")
         }
@@ -567,6 +568,7 @@ private extension SettingsScreen {
             apiKey = ""
             UserDefaults.standard.set(false, forKey: "provider.remote.enabled")
             UserDefaults.standard.set("local", forKey: "provider.execution.mode")
+            Task { await session.refresh() }
         } catch {
             credentialState = .error("Could not delete API key.")
         }
@@ -574,6 +576,12 @@ private extension SettingsScreen {
 
     func testProviderConnection() async {
         let entered = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Test the configuration the runtime will actually use, not an unsaved draft.
+        saveProviderCredential()
+        if case .error = credentialState {
+            connectionState = .failure("Save the provider configuration before testing.")
+            return
+        }
         let value: String
         if !entered.isEmpty {
             value = entered
