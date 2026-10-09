@@ -122,7 +122,7 @@ public actor ModuleRuntime: ModuleExecuting {
         let race = RunRace()
 
         let outcome: RunOutcome = try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<RunOutcome, any Error>) in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<RunOutcome, ModuleRuntimeError>) in
                 race.install(continuation)
 
                 let worker = Task {
@@ -184,7 +184,7 @@ public actor ModuleRuntime: ModuleExecuting {
 private final class RunRace: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<RunOutcome, any Error>?
-    private var result: Result<RunOutcome, any Error>?
+    private var result: Result<RunOutcome, ModuleRuntimeError>?
     private var worker: Task<Void, Never>?
     private var timer: Task<Void, Never>?
 
