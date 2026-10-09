@@ -59,6 +59,27 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertEqual(result.stdout, "2:Needle here\n3:last needle\n")
     }
 
+    func testWorkspaceCommandsReadWriteListAndRemoveFiles() async throws {
+        let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: rootURL)
+        try await workspace.prepare()
+        let registry = BuiltinCommandRegistry.make()
+        let context = CommandContext(workspace: workspace)
+
+        let status = try await registry.execute(AgentCommand(name: "workspace", arguments: ["status"]), context: context)
+        XCTAssertEqual(status.stdout, rootURL.path + "\n")
+
+        _ = try await registry.execute(AgentCommand(name: "workspace", arguments: ["write", "workspace/note.md", "hello", "AgentOS"]), context: context)
+        let read = try await registry.execute(AgentCommand(name: "workspace", arguments: ["read", "workspace/note.md"]), context: context)
+        XCTAssertEqual(read.stdout, "hello AgentOS")
+
+        let list = try await registry.execute(AgentCommand(name: "workspace", arguments: ["list", "workspace"]), context: context)
+        XCTAssertTrue(list.stdout.contains("workspace/note.md"))
+        _ = try await registry.execute(AgentCommand(name: "workspace", arguments: ["remove", "workspace/note.md"]), context: context)
+        let exists = try await workspace.exists(at: "workspace/note.md")
+        XCTAssertFalse(exists)
+    }
+
     func testHeadAndTailRejectInvalidCounts() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()

@@ -174,7 +174,7 @@ public struct BuiltinCommandRegistry {
         }
         registry = registry.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep clear help agent skill module memory model provider workspace sync\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace clear help\n")
         }
         for name in ["find", "grep", "agent", "skill", "module", "memory", "model", "provider", "workspace", "sync"] {
             registry = registry.registering(name) { command, _ in
@@ -191,6 +191,40 @@ public struct BuiltinCommandRegistry {
         registry = registry.registering("grep") { command, context in
             guard command.arguments.count == 2 else { throw CommandError.invalidArguments("grep <pattern> <file>") }
             return CommandResult(stdout: try await grepMatches(pattern: command.arguments[0], path: command.arguments[1], workspace: context.workspace))
+        }
+        registry = registry.registering("workspace") { command, context in
+            guard let operation = command.arguments.first else {
+                throw CommandError.invalidArguments("workspace status|list [path]|read <path>|write <path> <text>|mkdir <path>|remove <path>")
+            }
+            let args = Array(command.arguments.dropFirst())
+            switch operation {
+            case "status":
+                guard args.isEmpty else { throw CommandError.invalidArguments("workspace status") }
+                return CommandResult(stdout: context.workspace.rootURL.path + "\n")
+            case "list":
+                guard args.count <= 1 else { throw CommandError.invalidArguments("workspace list [path]") }
+                let entries = try await context.workspace.listDirectory(at: args.first ?? "")
+                let paths = entries.map { ($0.isDirectory ? "d " : "f ") + $0.relativePath }
+                return CommandResult(stdout: paths.isEmpty ? "" : paths.joined(separator: "\n") + "\n")
+            case "read":
+                guard args.count == 1 else { throw CommandError.invalidArguments("workspace read <path>") }
+                return CommandResult(stdout: try await context.workspace.readFile(at: args[0]))
+            case "write":
+                guard args.count >= 2 else { throw CommandError.invalidArguments("workspace write <path> <text>") }
+                let contents = args.dropFirst().joined(separator: " ")
+                try await context.workspace.writeFile(contents, to: args[0])
+                return CommandResult(stdout: "wrote \(contents.utf8.count) bytes\n")
+            case "mkdir":
+                guard args.count == 1 else { throw CommandError.invalidArguments("workspace mkdir <path>") }
+                try await context.workspace.createDirectory(at: args[0])
+                return CommandResult()
+            case "remove":
+                guard args.count == 1 else { throw CommandError.invalidArguments("workspace remove <path>") }
+                try await context.workspace.remove(at: args[0])
+                return CommandResult()
+            default:
+                throw CommandError.invalidArguments("workspace status|list [path]|read <path>|write <path> <text>|mkdir <path>|remove <path>")
+            }
         }
         return registry
     }
