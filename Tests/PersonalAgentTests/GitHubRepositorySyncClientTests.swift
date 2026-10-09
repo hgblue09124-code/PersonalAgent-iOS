@@ -13,6 +13,8 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertFalse(GitHubRepositorySyncClient.isSafePath(".git/config"))
         XCTAssertFalse(GitHubRepositorySyncClient.isSyncablePath("config/api_keys.json"))
         XCTAssertFalse(GitHubRepositorySyncClient.isSyncablePath("models/model.gguf"))
+        XCTAssertFalse(GitHubRepositorySyncClient.isSyncablePath("assets/screenshot.png"))
+        XCTAssertTrue(GitHubRepositorySyncClient.isSyncablePath("skills/Memory.md"))
     }
 
     func testGitBlobSHA1MatchesGitKnownVector() {
