@@ -32,6 +32,33 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertFalse(removedExists)
     }
 
+    func testFindRecursesAndFiltersByName() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        try await workspace.createDirectory(at: "workspace/project/nested")
+        try await workspace.writeFile("needle\n", to: "workspace/project/nested/notes.md")
+        try await workspace.writeFile("other\n", to: "workspace/project/readme.txt")
+
+        let registry = BuiltinCommandRegistry.make()
+        let result = try await registry.execute(
+            AgentCommand(name: "find", arguments: ["workspace/project", ".md"]),
+            context: CommandContext(workspace: workspace)
+        )
+        XCTAssertEqual(result.stdout, "workspace/project/nested/notes.md\n")
+    }
+
+    func testGrepReturnsMatchingLinesAndLineNumbers() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        try await workspace.writeFile("first\nNeedle here\nlast needle\n", to: "workspace/log.txt")
+
+        let result = try await BuiltinCommandRegistry.make().execute(
+            AgentCommand(name: "grep", arguments: ["needle", "workspace/log.txt"]),
+            context: CommandContext(workspace: workspace)
+        )
+        XCTAssertEqual(result.stdout, "2:Needle here\n3:last needle\n")
+    }
+
     func testHeadAndTailRejectInvalidCounts() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
