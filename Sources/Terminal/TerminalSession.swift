@@ -111,6 +111,11 @@ public actor TerminalSession {
             pathArgumentIndices = [0]
         case "grep":
             pathArgumentIndices = [1]
+        case "workspace":
+            switch command.arguments.first {
+            case "list", "read", "write", "mkdir", "remove": pathArgumentIndices = [1]
+            default: return command
+            }
         case "cp", "mv":
             pathArgumentIndices = [0, 1]
         default:
