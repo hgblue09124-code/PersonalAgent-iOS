@@ -17,6 +17,7 @@ public enum ImportedContentFormat: String, Codable, Sendable, Equatable {
     case log
     case pdf
     case imageOCR
+    case propertyList
 }
 
 public struct ImportedFileContent: Sendable, Equatable {
@@ -80,6 +81,9 @@ public struct ImportedFileContentReader: Sendable {
         }
 
         let ext = importedFile.fileExtension.lowercased()
+        if ext == "plist" || ext == "strings" {
+            return try readPropertyList(importedFile, url: url)
+        }
         if ext == "pdf" {
             #if canImport(PDFKit)
             return try readPDF(importedFile, url: url)
@@ -141,6 +145,32 @@ public struct ImportedFileContentReader: Sendable {
             rows = nil
         }
         return ImportedFileContent(fileID: importedFile.id, format: format, text: text, csvRows: rows)
+    }
+
+    private func readPropertyList(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
+        let data: Data
+        do { data = try Data(contentsOf: url, options: [.mappedIfSafe]) }
+        catch { throw ImportedFileReaderError.missingFile }
+        var sourceFormat = PropertyListSerialization.PropertyListFormat.xml
+        let object: Any
+        do {
+            object = try PropertyListSerialization.propertyList(from: data, options: [], format: &sourceFormat)
+        } catch {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        let xml: Data
+        do {
+            xml = try PropertyListSerialization.data(fromPropertyList: object, format: .xml, options: 0)
+        } catch {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        guard let text = String(data: xml, encoding: .utf8) else {
+            throw ImportedFileReaderError.invalidUTF8
+        }
+        guard text.utf8.count <= 4 * 1024 * 1024 else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        return ImportedFileContent(fileID: importedFile.id, format: .propertyList, text: text)
     }
 
     #if canImport(PDFKit)
