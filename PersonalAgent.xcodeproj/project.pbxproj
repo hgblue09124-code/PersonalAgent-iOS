@@ -28,6 +28,7 @@
 		A10000000000000000000017 /* PAWorkspace in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000006 /* PAWorkspace */; };
 		A10000000000000000000018 /* PATerminal in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000007 /* PATerminal */; };
 		A10000000000000000000019 /* TerminalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* TerminalScreen.swift */; };
+		A1000000000000000000001A /* PAImportGateway in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000008 /* PAImportGateway */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 				A10000000000000000000015 /* PAKernel in Frameworks */,
 				A10000000000000000000017 /* PAWorkspace in Frameworks */,
 				A10000000000000000000018 /* PATerminal in Frameworks */,
+				A1000000000000000000001A /* PAImportGateway in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,6 +159,7 @@
                 A30000000000000000000005 /* PAKernel */,
                 A30000000000000000000006 /* PAWorkspace */,
                 A30000000000000000000007 /* PATerminal */,
+                A30000000000000000000008 /* PAImportGateway */,
 			);
 			productName = PersonalAgent;
 			productReference = A200000000000000000000FF /* PersonalAgent.app */;
@@ -391,6 +394,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
 			productName = PATerminal;
+		};
+		A30000000000000000000008 /* PAImportGateway */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
+			productName = PAImportGateway;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
