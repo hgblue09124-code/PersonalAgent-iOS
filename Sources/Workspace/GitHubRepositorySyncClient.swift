@@ -70,6 +70,7 @@ public struct GitHubRepositorySyncResult: Sendable, Equatable {
 }
 
 private struct GitHubSyncState: Codable {
+    var repositoryKey: String
     var commitSHA: String
     var files: [String: String]
 }
@@ -163,16 +164,18 @@ public actor GitHubRepositorySyncClient {
 
         var remoteFiles: [String: GitHubTreeEntry] = [:]
         for entry in tree.tree {
-            guard Self.isSyncablePath(entry.path) else { continue }
             guard Self.isSafePath(entry.path) else {
                 throw GitHubRepositorySyncError.unsafePath(entry.path)
             }
+            if entry.type == "tree" { continue }
+            guard Self.isSyncablePath(entry.path) else { continue }
             guard entry.type == "blob", entry.mode == "100644" || entry.mode == "100755" else {
                 throw GitHubRepositorySyncError.unsupportedFile(entry.path)
             }
             if let size = entry.size, size > Self.maximumFileBytes {
                 throw GitHubRepositorySyncError.fileTooLarge(entry.path)
             }
+            guard remoteFiles[entry.path] == nil else { throw GitHubRepositorySyncError.invalidResponse }
             remoteFiles[entry.path] = entry
         }
 
@@ -274,6 +277,7 @@ public actor GitHubRepositorySyncClient {
         }
 
         let finalState = GitHubSyncState(
+            repositoryKey: repositoryKey,
             commitSHA: finalCommitSHA,
             files: finalRemoteFiles.mapValues(\.sha)
         )
@@ -345,10 +349,15 @@ public actor GitHubRepositorySyncClient {
         return result
     }
 
+    private var repositoryKey: String { "\(location.owner)/\(location.repository)@\(location.branch)" }
+
     private func loadState() throws -> GitHubSyncState? {
         guard FileManager.default.fileExists(atPath: stateURL.path) else { return nil }
-        do { return try JSONDecoder().decode(GitHubSyncState.self, from: Data(contentsOf: stateURL)) }
-        catch { throw GitHubRepositorySyncError.corruptState }
+        do {
+            let state = try JSONDecoder().decode(GitHubSyncState.self, from: Data(contentsOf: stateURL))
+            guard state.repositoryKey == repositoryKey else { throw GitHubRepositorySyncError.corruptState }
+            return state
+        } catch { throw GitHubRepositorySyncError.corruptState }
     }
 
     private func persistState(_ state: GitHubSyncState) throws {
