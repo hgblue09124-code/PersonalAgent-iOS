@@ -85,6 +85,34 @@ private func limitedLines(path: String, count: Int, fromStart: Bool, workspace: 
     return selected.joined(separator: "\n") + (selected.isEmpty || text.hasSuffix("\n") ? "" : "\n")
 }
 
+private func findPaths(
+    under path: String,
+    matching name: String?,
+    workspace: AgentWorkspace
+) async throws -> [String] {
+    let entries = try await workspace.listDirectory(at: path)
+    var matches: [String] = []
+    for entry in entries {
+        let leaf = entry.relativePath.split(separator: "/").last.map(String.init) ?? entry.relativePath
+        if name == nil || leaf.localizedCaseInsensitiveContains(name!) {
+            matches.append(entry.relativePath)
+        }
+        if entry.isDirectory {
+            matches += try await findPaths(under: entry.relativePath, matching: name, workspace: workspace)
+        }
+    }
+    return matches.sorted()
+}
+
+private func grepMatches(pattern: String, path: String, workspace: AgentWorkspace) async throws -> String {
+    guard !pattern.isEmpty else { throw CommandError.invalidArguments("grep <pattern> <file>") }
+    let contents = try await workspace.readFile(at: path)
+    let matches = contents.components(separatedBy: "\n").enumerated().compactMap { index, line in
+        line.localizedCaseInsensitiveContains(pattern) ? "\(index + 1):\(line)" : nil
+    }
+    return matches.isEmpty ? "" : matches.joined(separator: "\n") + "\n"
+}
+
 public struct BuiltinCommandRegistry {
     public static func make() -> CommandRegistry {
         var registry = CommandRegistry()
@@ -152,6 +180,17 @@ public struct BuiltinCommandRegistry {
             registry = registry.registering(name) { command, _ in
                 CommandResult(stderr: "command '\(command.name)' is registered but not implemented", exitCode: 127)
             }
+        }
+        registry = registry.registering("find") { command, context in
+            guard command.arguments.count <= 2 else { throw CommandError.invalidArguments("find [path] [name-substring]") }
+            let path = command.arguments.first ?? ""
+            let name = command.arguments.count == 2 ? command.arguments[1] : nil
+            let matches = try await findPaths(under: path, matching: name, workspace: context.workspace)
+            return CommandResult(stdout: matches.isEmpty ? "" : matches.joined(separator: "\n") + "\n")
+        }
+        registry = registry.registering("grep") { command, context in
+            guard command.arguments.count == 2 else { throw CommandError.invalidArguments("grep <pattern> <file>") }
+            return CommandResult(stdout: try await grepMatches(pattern: command.arguments[0], path: command.arguments[1], workspace: context.workspace))
         }
         return registry
     }
