@@ -5,6 +5,7 @@ import PAProvidersRemote
 import PAComposition
 import PASecurity
 import PAImportGateway
+import PAWorkspace
 import UIKit
 
 struct SettingsScreen: View {
@@ -13,6 +14,12 @@ struct SettingsScreen: View {
     @State private var isImportingFiles = false
     @State private var importedFiles: [ImportedFile] = []
     @State private var importPreview: ImportedFilePreview?
+    @State private var githubTokenDraft = ""
+    @State private var isGitHubSyncing = false
+    @State private var githubSyncStatus = "Not configured"
+    @AppStorage("github.sync.owner") private var githubSyncOwner = ""
+    @AppStorage("github.sync.repository") private var githubSyncRepository = ""
+    @AppStorage("github.sync.branch") private var githubSyncBranch = "main"
     @State private var lastImportError: String?
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
@@ -141,6 +148,48 @@ struct SettingsScreen: View {
             }
 
 
+
+            GlassPanel {
+                Label("GitHub repository sync", systemImage: "arrow.triangle.2.circlepath")
+                    .font(.headline)
+                Text("Syncs text/source files with a GitHub branch. Divergent edits stop as conflicts. Memory, logs, cache, credentials and model binaries are excluded.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                TextField("Repository owner", text: $githubSyncOwner)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                TextField("Repository name", text: $githubSyncRepository)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                TextField("Branch", text: $githubSyncBranch)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                SecureField("GitHub token (stored in Keychain)", text: $githubTokenDraft)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                HStack {
+                    Button("Save token securely") { saveGitHubSyncToken() }
+                        .buttonStyle(.bordered)
+                        .disabled(githubTokenDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("Delete token", role: .destructive) { deleteGitHubSyncToken() }
+                        .buttonStyle(.bordered)
+                }
+                Button {
+                    Task { await syncGitHubRepository() }
+                } label: {
+                    if isGitHubSyncing {
+                        ProgressView()
+                    } else {
+                        Label("Sync now", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isGitHubSyncing)
+                Text(githubSyncStatus)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
 
             GlassPanel {
                 HStack {
@@ -593,6 +642,82 @@ private extension SettingsScreen {
     var importedFilesDirectoryURL: URL {
         URL.applicationSupportDirectory
             .appending(path: "PersonalAgent/ImportedFiles", directoryHint: .isDirectory)
+    }
+
+    func saveGitHubSyncToken() {
+        let token = githubTokenDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty else { return }
+        do {
+            try KeychainSecretStore().store(account: "github.repository.token", secret: Data(token.utf8))
+            githubTokenDraft = ""
+            githubSyncStatus = "GitHub token saved in Keychain."
+        } catch {
+            githubSyncStatus = "Could not save the GitHub token securely."
+        }
+    }
+
+    func deleteGitHubSyncToken() {
+        do {
+            try KeychainSecretStore().delete(account: "github.repository.token")
+            githubTokenDraft = ""
+            githubSyncStatus = "GitHub token removed."
+        } catch {
+            githubSyncStatus = "Could not remove the GitHub token."
+        }
+    }
+
+    func syncGitHubRepository() async {
+        guard !githubSyncOwner.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !githubSyncRepository.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !githubSyncBranch.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            githubSyncStatus = "Enter repository owner, repository name and branch."
+            return
+        }
+        isGitHubSyncing = true
+        defer { isGitHubSyncing = false }
+        do {
+            guard let tokenData = try KeychainSecretStore().load(account: "github.repository.token"),
+                  let token = String(data: tokenData, encoding: .utf8),
+                  !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                githubSyncStatus = "Save a GitHub token with repository Contents read/write permission first."
+                return
+            }
+            let location = try GitHubRepositoryLocation(
+                owner: githubSyncOwner.trimmingCharacters(in: .whitespacesAndNewlines),
+                repository: githubSyncRepository.trimmingCharacters(in: .whitespacesAndNewlines),
+                branch: githubSyncBranch.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
+            let workspace = try LocalAgentWorkspace.applicationSupport()
+            try await workspace.prepare()
+            let appSupport = try FileManager.default.url(
+                for: .applicationSupportDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true
+            )
+            // Encode the full repository identity so branches such as "feature/a_b"
+            // and "feature_a/b" cannot collide in the persisted three-way-sync baseline.
+            let stateIdentity = "\(location.owner)/\(location.repository)@\(location.branch)"
+            let stateName = Data(stateIdentity.utf8).base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+            let stateURL = appSupport
+                .appendingPathComponent("PersonalAgent/GitHubSync", isDirectory: true)
+                .appendingPathComponent(stateName + ".json", isDirectory: false)
+            let client = try GitHubRepositorySyncClient(
+                location: location,
+                stateURL: stateURL,
+                tokenProvider: { token }
+            )
+            let result = try await client.synchronize(workspaceURL: workspace.rootURL)
+            githubSyncStatus = "Sync complete · \(result.commitSHA.prefix(7)) · ↑\(result.uploadedPaths.count) ↓\(result.downloadedPaths.count) −\(result.deletedPaths.count)"
+        } catch GitHubRepositorySyncError.remoteConflict {
+            githubSyncStatus = "Sync conflict: local and remote changed the same file. Resolve it, then sync again."
+        } catch GitHubRepositorySyncError.authenticationRequired {
+            githubSyncStatus = "GitHub authentication required. Save a valid repository token."
+        } catch {
+            githubSyncStatus = "Sync failed safely: \(error.localizedDescription)"
+        }
     }
 
     func previewImportedFile(_ file: ImportedFile) async {
