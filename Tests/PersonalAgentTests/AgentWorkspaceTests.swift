@@ -23,6 +23,14 @@ final class AgentWorkspaceTests: XCTestCase {
         do { _ = try await workspace.exists(at: "."); XCTFail("dot root path must fail") } catch { }
     }
 
+    func testWorkspacePathNormalizesWindowsSeparatorsBeforeTraversalValidation() throws {
+        let normalized = try WorkspacePath("workspace\\notes.md")
+        XCTAssertEqual(normalized.value, "workspace/notes.md")
+
+        XCTAssertThrowsError(try WorkspacePath("workspace\\..\\outside.txt"))
+        XCTAssertThrowsError(try WorkspacePath("workspace\\.\\notes.md"))
+    }
+
     func testUnicodeWriteReadExistsMetadata() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: root)
