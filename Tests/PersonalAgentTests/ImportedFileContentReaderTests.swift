@@ -38,7 +38,12 @@ final class ImportedFileContentReaderTests: XCTestCase {
             XCTFail("PDF must stay explicitly unsupported until a PDF reader exists")
         } catch let error as ImportedFileReaderError {
             #if canImport(PDFKit)
-            XCTAssertEqual(error, .malformedDocument)
+            // PDFKit may reject this truncated header or parse it as an empty
+            // document depending on OS version. Both must fail closed.
+            XCTAssertTrue(
+                error == .malformedDocument
+                    || error == .unsupportedFormat("scanned PDF requires OCR")
+            )
             #else
             XCTAssertEqual(error, .unsupportedFormat("pdf"))
             #endif
