@@ -2,6 +2,11 @@ import Foundation
 #if canImport(PDFKit)
 import PDFKit
 #endif
+#if canImport(Vision) && canImport(ImageIO)
+import Vision
+import ImageIO
+import CoreGraphics
+#endif
 
 public enum ImportedContentFormat: String, Codable, Sendable, Equatable {
     case plainText
@@ -11,6 +16,7 @@ public enum ImportedContentFormat: String, Codable, Sendable, Equatable {
     case yaml
     case log
     case pdf
+    case imageOCR
 }
 
 public struct ImportedFileContent: Sendable, Equatable {
@@ -38,6 +44,7 @@ public enum ImportedFileReaderError: Error, Sendable, Equatable {
     case malformedCSV
     case malformedDocument
     case extractionLimitExceeded
+    case emptyExtraction
 }
 
 /// Bounded, non-executing readers for common text formats. Extensions select a
@@ -76,6 +83,13 @@ public struct ImportedFileContentReader: Sendable {
         if ext == "pdf" {
             #if canImport(PDFKit)
             return try readPDF(importedFile, url: url)
+            #else
+            throw ImportedFileReaderError.unsupportedFormat(ext)
+            #endif
+        }
+        if ["png", "jpg", "jpeg", "heic", "tif", "tiff", "bmp", "gif", "webp"].contains(ext) {
+            #if canImport(Vision) && canImport(ImageIO)
+            return try readImageOCR(importedFile, url: url)
             #else
             throw ImportedFileReaderError.unsupportedFormat(ext)
             #endif
@@ -158,6 +172,36 @@ public struct ImportedFileContentReader: Sendable {
             format: .pdf,
             text: pages.joined(separator: "\n\n")
         )
+    }
+    #endif
+
+    #if canImport(Vision) && canImport(ImageIO)
+    private func readImageOCR(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        let pixels = Int64(image.width) * Int64(image.height)
+        guard image.width > 0, image.height > 0, pixels <= 100_000_000 else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        do {
+            try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+        } catch {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        let lines = (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
+        let extracted = lines.joined(separator: "\n")
+        guard !extracted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ImportedFileReaderError.emptyExtraction
+        }
+        guard extracted.utf8.count <= 4 * 1024 * 1024 else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        return ImportedFileContent(fileID: importedFile.id, format: .imageOCR, text: extracted)
     }
     #endif
 
