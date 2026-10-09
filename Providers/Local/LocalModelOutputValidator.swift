@@ -36,12 +36,24 @@ public enum LocalModelOutputValidator {
             }
         }
 
-        let sentenceParts = normalized.split(
-            whereSeparator: { $0 == "." || $0 == "?" || $0 == "!" }
-        )
-        guard sentenceParts.count >= 2 else { return normalized }
+        // Keep terminators attached to each sentence: the de-duplication rules below
+        // need punctuation to distinguish a generic question from a normal statement.
+        var sentences: [String] = []
+        var sentenceStart = normalized.startIndex
+        for index in normalized.indices where ".?!".contains(normalized[index]) {
+            let end = normalized.index(after: index)
+            let sentence = normalized[sentenceStart..<end]
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !sentence.isEmpty { sentences.append(sentence) }
+            sentenceStart = end
+        }
+        if sentenceStart < normalized.endIndex {
+            let tail = normalized[sentenceStart...]
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            if !tail.isEmpty { sentences.append(tail) }
+        }
+        guard sentences.count >= 2 else { return normalized }
 
-        let sentences = sentenceParts.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
         var kept: [String] = []
         var collapsed = false
 
@@ -61,13 +73,14 @@ public enum LocalModelOutputValidator {
             let intersection = previousTokens.intersection(currentTokens).count
             let union = previousTokens.union(currentTokens).count
             let similarity = Double(intersection) / Double(union)
-            let previousIsGenericHelpQuestion = [
-                    "bạn muốn tôi giúp",
-                    "bạn muốn tôi hỗ trợ",
-                    "how can i help",
-                    "what can i help"
-                ].contains(where: { previous.lowercased().hasPrefix($0) })
-            let currentIsMoreSpecificQuestion = currentTokens.count >= previousTokens.count + 3
+            let previousIsGenericHelpQuestion = previous.hasSuffix("?") && [
+                "bạn muốn tôi giúp",
+                "bạn muốn tôi hỗ trợ",
+                "how can i help",
+                "what can i help"
+            ].contains(where: { previous.lowercased().hasPrefix($0) })
+            let currentIsMoreSpecificQuestion = sentence.hasSuffix("?")
+                && currentTokens.count >= previousTokens.count + 3
 
             if similarity >= 0.7
                 || (previousIsGenericHelpQuestion && currentIsMoreSpecificQuestion) {
@@ -84,16 +97,11 @@ public enum LocalModelOutputValidator {
 
         if collapsed {
             return kept.map { sentence in
-                if let question = sentences.first(where: { $0 == sentence }) {
-                    let original = normalized.range(of: question)
-                    if let original {
-                        let end = normalized[original.upperBound...].first
-                        if end == "?" || end == "!" {
-                            return sentence + String(end!)
-                        }
-                    }
+                let trimmed = sentence.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard let last = trimmed.last, ".?!".contains(last) else {
+                    return trimmed + "."
                 }
-                return sentence + "."
+                return trimmed
             }.joined(separator: " ")
         }
 

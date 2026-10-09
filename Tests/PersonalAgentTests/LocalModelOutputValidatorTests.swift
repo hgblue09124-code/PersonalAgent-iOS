@@ -16,8 +16,17 @@ struct LocalModelOutputValidatorTests {
 
     @Test func repeatedSentenceVariantsAreCollapsed() {
         let input = "Bạn muốn tôi giúp gì? Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó? Bạn cần tôi thực hiện một nhiệm vụ nào đó?"
-        #expect(LocalModelOutputValidator.sanitize(text: input) == "Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó?"
-        )
+        #expect(LocalModelOutputValidator.sanitize(text: input) == "Bạn cần tôi thực hiện một nhiệm vụ cụ thể nào đó?")
+    }
+
+    @Test func genericHelpQuestionDoesNotConsumeStatement() {
+        let input = "How can I help? I can help you debug the Swift package and find the failing test."
+        #expect(LocalModelOutputValidator.sanitize(text: input) == input)
+    }
+
+    @Test func genericHelpQuestionCollapsesToSpecificQuestion() {
+        let input = "How can I help? Can you share the Swift test output so I can identify the failing module?"
+        #expect(LocalModelOutputValidator.sanitize(text: input) == "Can you share the Swift test output so I can identify the failing module?")
     }
 
     @Test func normalResponseIsPreserved() {
