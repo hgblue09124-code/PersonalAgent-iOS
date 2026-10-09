@@ -117,6 +117,48 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertEqual(try String(contentsOf: file, encoding: .utf8), "local edit\n")
     }
 
+    func testDownloadsRemoteOnlyTextFileAndPersistsBaseline() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = base.appendingPathComponent("workspace")
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+
+        let remoteBytes = Data("remote skill content\\n".utf8)
+        let blobSHA = GitBlobSHA1.hash(remoteBytes)
+        let remoteCommit = String(repeating: "b", count: 40)
+        let treeSHA = String(repeating: "c", count: 40)
+        let stateURL = base.appendingPathComponent("state/state.json")
+        let transport = ScriptedGitHubTransport(responses: [
+            Self.response(["object": ["sha": remoteCommit]]),
+            Self.response(["tree": ["sha": treeSHA]]),
+            Self.response(["sha": treeSHA, "truncated": false, "tree": [[
+                "path": "skills/remote.md", "mode": "100644", "type": "blob",
+                "sha": blobSHA, "size": remoteBytes.count
+            ]]]),
+            Self.response(["sha": blobSHA, "encoding": "base64", "content": remoteBytes.base64EncodedString()])
+        ])
+        let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+        let client = try GitHubRepositorySyncClient(
+            location: location,
+            stateURL: stateURL,
+            transport: transport,
+            tokenProvider: { "test-token" }
+        )
+
+        let result = try await client.synchronize(workspaceURL: workspace)
+        XCTAssertEqual(result.commitSHA, remoteCommit)
+        XCTAssertEqual(result.downloadedPaths, ["skills/remote.md"])
+        XCTAssertTrue(result.uploadedPaths.isEmpty)
+        XCTAssertEqual(try Data(contentsOf: workspace.appendingPathComponent("skills/remote.md")), remoteBytes)
+
+        let requests = await transport.requests
+        XCTAssertEqual(requests.map { $0.httpMethod ?? "" }, ["GET", "GET", "GET", "GET"])
+        let persisted = try Data(contentsOf: stateURL)
+        let state = try XCTUnwrap(JSONSerialization.jsonObject(with: persisted) as? [String: Any])
+        let files = try XCTUnwrap(state["files"] as? [String: String])
+        XCTAssertEqual(files["skills/remote.md"], blobSHA)
+    }
+
     private static func response(_ object: [String: Any]) -> GitHubSyncHTTPResponse {
         GitHubSyncHTTPResponse(
             statusCode: 200,
