@@ -109,7 +109,7 @@ public actor ImportedFileStore {
 
         let id = UUID()
         let ext = sourceURL.pathExtension.lowercased()
-        let safeExtension = ext.range(of: #"^[a-z0-9]{1,16}$"#, options: .regularExpression) != nil ? ext : ""
+        let safeExtension = ext.range(of: #"^[a-z0-9_-]{1,32}$"#, options: .regularExpression) != nil ? ext : ""
         let storedFilename = id.uuidString.lowercased() + (safeExtension.isEmpty ? "" : ".\(safeExtension)")
         let destination = filesDirectory.appendingPathComponent(storedFilename, isDirectory: false)
         let temporary = filesDirectory.appendingPathComponent(".\(id.uuidString).partial", isDirectory: false)
