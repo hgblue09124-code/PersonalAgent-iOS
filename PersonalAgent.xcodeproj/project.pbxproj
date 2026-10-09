@@ -25,6 +25,9 @@
 		A10000000000000000000016 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* Localizable.strings */; };
 		A10000000000000000000011 /* PAComposition in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000001 /* PAComposition */; };
 		A10000000000000000000015 /* PAKernel in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000005 /* PAKernel */; };
+		A10000000000000000000017 /* PAWorkspace in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000006 /* PAWorkspace */; };
+		A10000000000000000000018 /* PATerminal in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000007 /* PATerminal */; };
+		A10000000000000000000019 /* TerminalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* TerminalScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +45,7 @@
 		A2000000000000000000000E /* AgentsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentsScreen.swift; sourceTree = "<group>"; };
 		A2000000000000000000000F /* AgentFeatureHub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentFeatureHub.swift; sourceTree = "<group>"; };
 		A2000000000000000000000D /* ModelsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelsScreen.swift; sourceTree = "<group>"; };
+		A20000000000000000000019 /* TerminalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalScreen.swift; sourceTree = "<group>"; };
 		A2000000000000000000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A200000000000000000000FF /* PersonalAgent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PersonalAgent.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000017 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -55,6 +59,8 @@
 			files = (
 				A10000000000000000000011 /* PAComposition in Frameworks */,
 				A10000000000000000000015 /* PAKernel in Frameworks */,
+				A10000000000000000000017 /* PAWorkspace in Frameworks */,
+				A10000000000000000000018 /* PATerminal in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,6 +123,7 @@
 				A2000000000000000000000E /* AgentsScreen.swift */,
 				A2000000000000000000000F /* AgentFeatureHub.swift */,
 				A2000000000000000000000D /* ModelsScreen.swift */,
+				A20000000000000000000019 /* TerminalScreen.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -148,6 +155,8 @@
 			packageProductDependencies = (
 				A30000000000000000000001 /* PAComposition */,
                 A30000000000000000000005 /* PAKernel */,
+                A30000000000000000000006 /* PAWorkspace */,
+                A30000000000000000000007 /* PATerminal */,
 			);
 			productName = PersonalAgent;
 			productReference = A200000000000000000000FF /* PersonalAgent.app */;
@@ -221,6 +230,7 @@
 				A1000000000000000000000E /* AgentsScreen.swift in Sources */,
 			A1000000000000000000000F /* AgentFeatureHub.swift in Sources */,
 				A1000000000000000000000D /* ModelsScreen.swift in Sources */,
+				A10000000000000000000019 /* TerminalScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +381,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
 			productName = PAKernel;
+		};
+		A30000000000000000000006 /* PAWorkspace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
+			productName = PAWorkspace;
+		};
+		A30000000000000000000007 /* PATerminal */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90000000000000000000001 /* XCLocalSwiftPackageReference "." */;
+			productName = PATerminal;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
