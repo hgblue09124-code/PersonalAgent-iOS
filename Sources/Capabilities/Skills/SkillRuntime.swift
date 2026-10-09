@@ -126,7 +126,12 @@ public struct SkillRuntime: Sendable {
         store: (any SkillStore)? = nil,
         executors: SkillExecutorRegistry = SkillExecutorRegistry()
     ) {
-        self.skills = Dictionary(uniqueKeysWithValues: skills.map { ($0.identity, $0) })
+        self.skills = skills.reduce(into: [:]) { result, skill in
+            // Duplicate identities must not trap runtime initialization; first definition wins.
+            if result[skill.identity] == nil {
+                result[skill.identity] = skill
+            }
+        }
         self.modules = modules
         self.disabled = disabled
         self.store = store
