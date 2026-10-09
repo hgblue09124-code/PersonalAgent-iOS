@@ -133,9 +133,9 @@ public actor ModuleRuntime: ModuleExecuting {
                     } catch let error as ModuleRuntimeError {
                         race.resolve(.failure(error))
                     } catch is CancellationError {
-                        race.resolve(.failure(.cancelled))
+                        race.resolve(.failure(ModuleRuntimeError.cancelled))
                     } catch {
-                        race.resolve(.failure(.executionFailed("module")))
+                        race.resolve(.failure(ModuleRuntimeError.executionFailed("module")))
                     }
                 }
 
@@ -144,7 +144,7 @@ public actor ModuleRuntime: ModuleExecuting {
                         try await Task.sleep(nanoseconds: timeout)
                         race.resolve(.success(.timedOut))
                     } catch {
-                        race.resolve(.failure(.cancelled))
+                        race.resolve(.failure(ModuleRuntimeError.cancelled))
                     }
                 } : nil
 
@@ -155,7 +155,7 @@ public actor ModuleRuntime: ModuleExecuting {
                 }
             }
         } onCancel: {
-            race.resolve(.failure(.cancelled))
+            race.resolve(.failure(ModuleRuntimeError.cancelled))
         }
 
         switch outcome {
