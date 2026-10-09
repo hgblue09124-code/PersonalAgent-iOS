@@ -172,13 +172,16 @@ private struct DefaultCompositionProvider: LLMProvider {
 public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     private let fallbackProvider: any LLMProvider
     private let coordinator: LocalModelRuntimeCoordinator
+    private let settings: UserDefaults
 
     public init(
         fallbackProvider: any LLMProvider,
-        coordinator: LocalModelRuntimeCoordinator
+        coordinator: LocalModelRuntimeCoordinator,
+        settings: UserDefaults = .standard
     ) {
         self.fallbackProvider = fallbackProvider
         self.coordinator = coordinator
+        self.settings = settings
     }
 
     private enum ActiveResolution {
@@ -187,10 +190,10 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     }
 
     private func resolveActiveProvider() async throws -> ActiveResolution {
-        let executionMode = UserDefaults.standard.string(forKey: "provider.execution.mode")
-            ?? (UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local")
-        let remoteEnabled = UserDefaults.standard.bool(forKey: "provider.remote.enabled")
-            && !UserDefaults.standard.bool(forKey: "privacy.localOnly")
+        let executionMode = settings.string(forKey: "provider.execution.mode")
+            ?? (settings.bool(forKey: "provider.remote.enabled") ? "remote" : "local")
+        let remoteEnabled = settings.bool(forKey: "provider.remote.enabled")
+            && !settings.bool(forKey: "privacy.localOnly")
         if executionMode == "remote" && remoteEnabled {
             return .noActiveModel
         }
@@ -235,24 +238,21 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     }
 
     public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
-        let fallback = fallbackProvider
-        let coord = coordinator
-        return AsyncThrowingStream { continuation in
+        AsyncThrowingStream { continuation in
             let task = Task {
                 do {
-                    guard let engine = try await coord.activeLocalModelEngine() else {
-                        for try await event in fallback.stream(request) {
+                    // Keep streaming on the same provider-selection path as complete().
+                    switch try await self.resolveActiveProvider() {
+                    case .noActiveModel:
+                        for try await event in self.fallbackProvider.stream(request) {
                             try Task.checkCancellation()
                             continuation.yield(event)
                         }
-                        continuation.finish()
-                        return
-                    }
-                    let loadedEngine = try await coord.loadActiveModel()
-                    let adapter = LocalModelProviderAdapter(engine: loadedEngine)
-                    for try await event in adapter.stream(request) {
-                        try Task.checkCancellation()
-                        continuation.yield(event)
+                    case .activeModel(let provider):
+                        for try await event in provider.stream(request) {
+                            try Task.checkCancellation()
+                            continuation.yield(event)
+                        }
                     }
                     continuation.finish()
                 } catch is CancellationError {
