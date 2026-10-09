@@ -85,10 +85,12 @@ public actor ImportedFileStore {
         from sourceURL: URL,
         contentTypeIdentifier: String? = nil
     ) async throws -> ImportedFile {
+        #if canImport(Darwin)
         let scopedAccess = sourceURL.startAccessingSecurityScopedResource()
         defer {
             if scopedAccess { sourceURL.stopAccessingSecurityScopedResource() }
         }
+        #endif
 
         let attributes: [FileAttributeKey: Any]
         do {
