@@ -727,6 +727,14 @@ private extension SettingsScreen {
             endpoint = "https://api.openai.com/v1/models"
         }
         do {
+            _ = try ChatCompletionsCodec.validateEndpointURL(endpoint)
+        } catch {
+            await MainActor.run {
+                connectionState = .failure("Use HTTPS for remote endpoints; HTTP is allowed only for localhost.")
+            }
+            return
+        }
+        do {
             let transport = SecurityNetworkTransport(network: URLSessionNetworkAccess())
             let response = try await transport.send(
                 ProviderTransportRequest(
