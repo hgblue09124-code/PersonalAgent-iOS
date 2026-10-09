@@ -1,4 +1,7 @@
 import XCTest
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 @testable import PAWorkspace
 
 final class GitHubRepositorySyncClientTests: XCTestCase {
@@ -19,7 +22,8 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
     func testMissingCredentialFailsBeforeNetworkAccess() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
-        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let workspace = base.appendingPathComponent("workspace")
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
         let transport = RecordingGitHubTransport()
         let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
         let client = try GitHubRepositorySyncClient(
@@ -29,7 +33,7 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
             tokenProvider: { nil }
         )
         do {
-            _ = try await client.synchronize(workspaceURL: base)
+            _ = try await client.synchronize(workspaceURL: workspace)
             XCTFail("Sync must fail closed without a token")
         } catch let error as GitHubRepositorySyncError {
             XCTAssertEqual(error, .authenticationRequired)

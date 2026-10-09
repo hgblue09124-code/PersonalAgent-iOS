@@ -103,6 +103,11 @@ private struct GitHubLocalFile {
     let mode: String
 }
 
+private enum GitHubLocalChange {
+    case upsert(GitHubLocalFile)
+    case delete
+}
+
 /// Three-way, path-level sync against the GitHub Git Database API.
 /// The last successful file-hash baseline is persisted outside the workspace.
 /// Conflicting edits fail closed; branch updates are non-forced and parented to the
@@ -173,7 +178,7 @@ public actor GitHubRepositorySyncClient {
 
         let allPaths = Set(localFiles.keys).union(remoteFiles.keys).union(oldState?.files.keys ?? Dictionary<String, String>().keys)
         var conflicts: [String] = []
-        var localChanges: [String: GitHubLocalFile?] = [:]
+        var localChanges: [String: GitHubLocalChange] = [:]
         for path in allPaths.sorted() {
             let localSHA = localFiles[path]?.sha
             let remoteSHA = remoteFiles[path]?.sha
@@ -185,7 +190,11 @@ public actor GitHubRepositorySyncClient {
                 continue
             }
             if localChanged && !remoteChanged {
-                localChanges[path] = localFiles[path]
+                if let file = localFiles[path] {
+                    localChanges[path] = .upsert(file)
+                } else {
+                    localChanges[path] = .delete
+                }
             }
         }
         guard conflicts.isEmpty else { throw GitHubRepositorySyncError.remoteConflict }
@@ -196,8 +205,9 @@ public actor GitHubRepositorySyncClient {
         var deletedPaths: [String] = []
 
         for path in localChanges.keys.sorted() {
-            guard let maybeFile = localChanges[path] else { continue }
-            if let file = maybeFile {
+            guard let change = localChanges[path] else { continue }
+            switch change {
+            case .upsert(let file):
                 let created: GitHubSHAResponse = try await post(
                     "repos/\(location.owner)/\(location.repository)/git/blobs",
                     token: token,
@@ -207,7 +217,7 @@ public actor GitHubRepositorySyncClient {
                 treeChanges.append(["path": path, "mode": file.mode, "type": "blob", "sha": created.sha])
                 finalRemoteFiles[path] = GitHubTreeEntry(path: path, mode: file.mode, type: "blob", sha: created.sha, size: Int64(file.data.count))
                 uploadedPaths.append(path)
-            } else {
+            case .delete:
                 treeChanges.append(["path": path, "mode": remoteFiles[path]?.mode ?? "100644", "type": "blob", "sha": NSNull()])
                 finalRemoteFiles[path] = nil
                 deletedPaths.append(path)
@@ -289,7 +299,7 @@ public actor GitHubRepositorySyncClient {
             && !path.split(separator: "/").contains(where: { $0.lowercased() == ".git" })
     }
 
-    private static func isSyncablePath(_ path: String) -> Bool {
+    static func isSyncablePath(_ path: String) -> Bool {
         guard isSafePath(path) else { return false }
         let components = path.split(separator: "/").map(String.init)
         let blockedDirectories: Set<String> = [".git", ".build", "deriveddata", "node_modules", "pods", "cache", "logs", "memory", "models", "files"]
@@ -402,7 +412,7 @@ public actor GitHubRepositorySyncClient {
     }
 }
 
-private enum GitBlobSHA1 {
+enum GitBlobSHA1 {
     static func hash(_ data: Data) -> String {
         var object = Data("blob \(data.count)\0".utf8)
         object.append(data)
