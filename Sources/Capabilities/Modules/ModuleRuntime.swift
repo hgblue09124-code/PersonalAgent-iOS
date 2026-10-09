@@ -121,8 +121,8 @@ public actor ModuleRuntime: ModuleExecuting {
     ) async throws -> ModulePayload {
         let race = RunRace()
 
-        return try await withTaskCancellationHandler {
-            try await withCheckedThrowingContinuation { continuation in
+        let outcome: RunOutcome = try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<RunOutcome, any Error>) in
                 race.install(continuation)
 
                 let worker = Task {
@@ -144,7 +144,7 @@ public actor ModuleRuntime: ModuleExecuting {
                         try await Task.sleep(nanoseconds: timeout)
                         race.resolve(.success(.timedOut))
                     } catch {
-                        race.resolve(.failure(error))
+                        race.resolve(.failure(.cancelled))
                     }
                 } : nil
 
@@ -155,7 +155,14 @@ public actor ModuleRuntime: ModuleExecuting {
                 }
             }
         } onCancel: {
-            race.resolve(.failure(ModuleRuntimeError.cancelled))
+            race.resolve(.failure(.cancelled))
+        }
+
+        switch outcome {
+        case .finished(let payload):
+            return payload
+        case .timedOut:
+            throw ModuleRuntimeError.timeout
         }
     }
 
