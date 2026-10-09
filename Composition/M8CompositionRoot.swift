@@ -22,6 +22,7 @@ public actor LocalModelRuntimeCoordinator: Sendable {
     private let storage: any LocalModelStorage
     private let deviceCapabilityProvider: any DeviceCapabilityProviding
     private var cachedEngine: (any LocalModelEngine)?
+    private var activeLoadTask: Task<any LocalModelEngine, Error>?
 
     private let engineFactory: (@Sendable (LocalModelIdentity, any DeviceCapabilityProviding) -> any LocalModelEngine)?
 
@@ -93,18 +94,41 @@ public actor LocalModelRuntimeCoordinator: Sendable {
             throw LlamaCPPEngineError.modelNotLoaded
         }
 
+        // Actor methods are reentrant across awaits. Keep one shared load task so
+        // simultaneous chat requests cannot both observe .unloaded and load twice.
+        if let activeLoadTask {
+            let loaded = try await activeLoadTask.value
+            return loaded
+        }
+
         let opts = options ?? LocalModelLoadingOptions()
+        let task = Task { try await Self.ensureLoaded(engine, options: opts) }
+        activeLoadTask = task
+        do {
+            let loaded = try await task.value
+            activeLoadTask = nil
+            return loaded
+        } catch {
+            activeLoadTask = nil
+            throw error
+        }
+    }
+
+    private nonisolated static func ensureLoaded(
+        _ engine: any LocalModelEngine,
+        options: LocalModelLoadingOptions
+    ) async throws -> any LocalModelEngine {
         while true {
             switch await engine.lifecycleState {
             case .loaded:
                 return engine
             case .loading:
-                try await Task.sleep(for: .milliseconds(50))
+                try await Task.sleep(for: .milliseconds(20))
             case .unloaded, .failed:
-                try await engine.load(options: opts)
+                try await engine.load(options: options)
                 return engine
             case .unloading:
-                try await Task.sleep(for: .milliseconds(50))
+                try await Task.sleep(for: .milliseconds(20))
             }
         }
     }
