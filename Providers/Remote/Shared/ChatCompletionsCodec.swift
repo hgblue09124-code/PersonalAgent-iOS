@@ -6,15 +6,33 @@ import PAProviders
 /// Used by Grok, OpenAI, OpenAI-compatible, and local HTTP adapters.
 /// This type is an adapter helper. It is not a Kernel type.
 public enum ChatCompletionsCodec: Sendable {
+    /// Require TLS for network endpoints. Cleartext HTTP is permitted only for loopback
+    /// development servers so provider credentials and prompts cannot cross a LAN in plaintext.
+    public static func validateEndpointURL(_ endpointURL: String) throws -> URL {
+        guard let components = URLComponents(string: endpointURL),
+              let scheme = components.scheme?.lowercased(),
+              let rawHost = components.host?.lowercased(),
+              components.user == nil,
+              components.password == nil,
+              let url = components.url else {
+            throw ProviderRuntimeError.invalidConfiguration
+        }
+
+        let host = rawHost.trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+        let isLoopback = host == "localhost" || host == "127.0.0.1" || host == "::1"
+        guard scheme == "https" || (scheme == "http" && isLoopback) else {
+            throw ProviderRuntimeError.invalidConfiguration
+        }
+        return url
+    }
+
     public static func encodeRequest(
         _ request: LLMRequest,
         endpointURL: String,
         authorizationHeader: String?,
         stream: Bool
     ) throws -> ProviderTransportRequest {
-        guard let url = URL(string: endpointURL), url.scheme != nil else {
-            throw ProviderRuntimeError.invalidConfiguration
-        }
+        let url = try validateEndpointURL(endpointURL)
         var body: [String: Any] = [
             "model": request.model.rawValue,
             "messages": request.messages.map { ["role": $0.role.rawValue, "content": $0.content] },

@@ -96,6 +96,42 @@ struct M2AdapterFixtureTests {
         }
     }
 
+    @Test func rejectsCleartextRemoteEndpointBeforeEncoding() throws {
+        #expect(throws: ProviderRuntimeError.invalidConfiguration) {
+            _ = try ChatCompletionsCodec.encodeRequest(
+                LLMRequest(model: ModelID(rawValue: "compatible"), prompt: "secret prompt"),
+                endpointURL: "http://api.example.com/v1/chat/completions",
+                authorizationHeader: "Bearer secret-token",
+                stream: false
+            )
+        }
+    }
+
+    @Test func allowsHTTPSAndLoopbackHTTPEndpoints() throws {
+        for endpoint in [
+            "https://api.example.com/v1/chat/completions",
+            "http://127.0.0.1:11434/v1/chat/completions",
+            "http://localhost:1234/v1/chat/completions",
+            "http://[::1]:1234/v1/chat/completions",
+        ] {
+            let request = try ChatCompletionsCodec.encodeRequest(
+                LLMRequest(model: ModelID(rawValue: "compatible"), prompt: "hi"),
+                endpointURL: endpoint,
+                authorizationHeader: nil,
+                stream: false
+            )
+            #expect(request.url == endpoint)
+        }
+    }
+
+    @Test func rejectsCredentialsEmbeddedInEndpointURL() {
+        #expect(throws: ProviderRuntimeError.invalidConfiguration) {
+            _ = try ChatCompletionsCodec.validateEndpointURL(
+                "https://user:password@example.com/v1/chat/completions"
+            )
+        }
+    }
+
     @Test func truncatedStreamFailsClosed() async {
         let sse = """
         data: {"model":"local","choices":[{"delta":{"content":"partial"}}]}
