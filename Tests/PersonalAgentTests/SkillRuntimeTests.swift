@@ -19,4 +19,24 @@ final class SkillRuntimeTests: XCTestCase {
             XCTAssertEqual(error as? SkillExecutionError, .missingModule("missing"))
         }
     }
+    func testDuplicateSkillIdentityKeepsFirstDefinitionWithoutTrapping() async throws {
+        let first = SkillDefinition(identity: "duplicate", scope: "first scope", input: "input", rule: "first rule", output: "output", permissions: [], dependencies: [], version: "1")
+        let second = SkillDefinition(identity: "duplicate", scope: "second scope", input: "input", rule: "second rule", output: "output", permissions: [], dependencies: [], version: "2")
+
+        let runtime = SkillRuntime(skills: [first, second])
+        let discovered = try await runtime.discover(query: "")
+
+        XCTAssertEqual(discovered.filter { $0.id.rawValue == "duplicate" }.count, 1)
+        XCTAssertEqual(discovered.first(where: { $0.id.rawValue == "duplicate" })?.description, "first scope")
+    }
+
+    func testDuplicateManifestIdentityDoesNotTrapStoreInitialization() async throws {
+        let manifest = SkillRuntime.normalizationManifest
+        let store = InMemorySkillStore(manifests: [manifest, manifest])
+
+        let discovered = try await store.discover(query: "")
+
+        XCTAssertEqual(discovered.filter { $0.id == manifest.id }.count, 1)
+    }
+
 }
