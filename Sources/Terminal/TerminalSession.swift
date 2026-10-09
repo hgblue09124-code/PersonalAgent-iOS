@@ -85,6 +85,10 @@ public actor TerminalSession {
             let finished = TerminalCommandExecution(id: execution.id, command: command, startedAt: execution.startedAt, finishedAt: Date(), exitCode: nil, state: .cancelled)
             executions[execution.id] = finished
             throw CancellationError()
+        } catch {
+            let finished = TerminalCommandExecution(id: execution.id, command: command, startedAt: execution.startedAt, finishedAt: Date(), exitCode: 1, state: .failed)
+            executions[execution.id] = finished
+            throw error
         }
     }
 
@@ -140,4 +144,7 @@ public actor TerminalSession {
 
     public func outputs() -> [TerminalOutput] { output }
     public func execution(_ id: UUID) -> TerminalCommandExecution? { executions[id] }
+    public func executionHistory() -> [TerminalCommandExecution] {
+        executions.values.sorted { $0.startedAt < $1.startedAt }
+    }
 }
