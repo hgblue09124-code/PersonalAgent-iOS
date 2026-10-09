@@ -61,8 +61,16 @@ public enum LocalModelOutputValidator {
             let intersection = previousTokens.intersection(currentTokens).count
             let union = previousTokens.union(currentTokens).count
             let similarity = Double(intersection) / Double(union)
+            let previousIsGenericHelpQuestion = [
+                    "bạn muốn tôi giúp",
+                    "bạn muốn tôi hỗ trợ",
+                    "how can i help",
+                    "what can i help"
+                ].contains(where: { previous.lowercased().hasPrefix($0) })
+            let currentIsMoreSpecificQuestion = currentTokens.count >= previousTokens.count + 3
 
-            if similarity >= 0.7 {
+            if similarity >= 0.7
+                || (previousIsGenericHelpQuestion && currentIsMoreSpecificQuestion) {
                 collapsed = true
                 // Keep the more informative variant instead of letting a shorter
                 // trailing paraphrase overwrite the intended response.
