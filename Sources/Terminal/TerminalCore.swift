@@ -88,8 +88,12 @@ private func limitedLines(path: String, count: Int, fromStart: Bool, workspace: 
 private func findPaths(
     under path: String,
     matching name: String?,
-    workspace: AgentWorkspace
+    workspace: AgentWorkspace,
+    depth: Int = 0
 ) async throws -> [String] {
+    guard depth < 64 else {
+        throw CommandError.invalidArguments("find exceeded maximum directory depth (64)")
+    }
     let entries = try await workspace.listDirectory(at: path)
     var matches: [String] = []
     for entry in entries {
@@ -98,7 +102,7 @@ private func findPaths(
             matches.append(entry.relativePath)
         }
         if entry.isDirectory {
-            matches += try await findPaths(under: entry.relativePath, matching: name, workspace: workspace)
+            matches += try await findPaths(under: entry.relativePath, matching: name, workspace: workspace, depth: depth + 1)
         }
     }
     return matches.sorted()

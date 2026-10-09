@@ -47,6 +47,29 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertEqual(result.stdout, "workspace/project/nested/notes.md\n")
     }
 
+    func testFindFailsClosedOnDirectorySymlinkCycles() async throws {
+        let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: rootURL)
+        try await workspace.prepare()
+        try await workspace.createDirectory(at: "workspace/tree")
+        let link = rootURL.appendingPathComponent("workspace/tree/loop")
+        try FileManager.default.createSymbolicLink(
+            atPath: link.path,
+            withDestinationPath: rootURL.appendingPathComponent("workspace/tree").path
+        )
+        defer { try? FileManager.default.removeItem(at: rootURL) }
+
+        do {
+            let result = try await BuiltinCommandRegistry.make().execute(
+                AgentCommand(name: "find", arguments: ["workspace/tree"]),
+                context: CommandContext(workspace: workspace)
+            )
+            XCTAssertEqual(result.stdout, "workspace/tree/loop\n")
+        } catch let error as CommandError {
+            XCTAssertEqual(error, .invalidArguments("find exceeded maximum directory depth (64)"))
+        }
+    }
+
     func testGrepReturnsMatchingLinesAndLineNumbers() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
