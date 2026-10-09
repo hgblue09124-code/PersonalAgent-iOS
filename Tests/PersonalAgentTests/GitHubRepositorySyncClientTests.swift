@@ -15,6 +15,9 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertFalse(GitHubRepositorySyncClient.isSyncablePath("models/model.gguf"))
         XCTAssertFalse(GitHubRepositorySyncClient.isSyncablePath("assets/screenshot.png"))
         XCTAssertTrue(GitHubRepositorySyncClient.isSyncablePath("skills/Memory.md"))
+        XCTAssertTrue(GitHubRepositorySyncClient.shouldDescendDirectory("agents"))
+        XCTAssertTrue(GitHubRepositorySyncClient.shouldDescendDirectory("skills"))
+        XCTAssertFalse(GitHubRepositorySyncClient.shouldDescendDirectory("memory"))
     }
 
     func testGitBlobSHA1MatchesGitKnownVector() {

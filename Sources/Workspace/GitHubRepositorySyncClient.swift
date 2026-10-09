@@ -313,10 +313,16 @@ public actor GitHubRepositorySyncClient {
         if blockedNames.contains(name) || name.contains("credential") || name.contains("secret") || name.contains("token") || name.contains("apikey") || name.hasSuffix(".gguf") || name.hasSuffix(".pem") || name.hasSuffix(".p12") || name.hasSuffix(".key") || name.hasSuffix(".mobileprovision") || name.hasSuffix(".sqlite") || name.hasSuffix(".db") {
             return false
         }
-        let allowedExtensions: Set<String> = ["md", "markdown", "txt", "json", "jsonl", "ndjson", "yaml", "yml", "toml", "swift", "py", "sh", "ts", "tsx", "js", "jsx", "html", "css", "xml", "csv", "tsv", "plist", "strings", "pbxproj", "conf", "ini", "sql", "rb", "go", "rs", "c", "h", "m", "mm", "gradle", "properties", "gitignore", "gitmodules"]
+        let allowedExtensions: Set<String> = ["md", "markdown", "agent", "skill", "module", "tool", "rules", "prompt", "mdc", "txt", "json", "jsonl", "ndjson", "yaml", "yml", "toml", "swift", "py", "sh", "ts", "tsx", "js", "jsx", "html", "css", "xml", "csv", "tsv", "plist", "strings", "pbxproj", "conf", "ini", "sql", "rb", "go", "rs", "c", "h", "m", "mm", "gradle", "properties", "gitignore", "gitmodules"]
         let ext = (name as NSString).pathExtension.lowercased()
         if allowedExtensions.contains(ext) { return true }
         return ["license", "makefile", "dockerfile", "procfile", "readme"].contains(name)
+    }
+
+    static func shouldDescendDirectory(_ path: String) -> Bool {
+        guard isSafePath(path) else { return false }
+        let excluded: Set<String> = [".git", ".build", "deriveddata", "node_modules", "pods", "cache", "logs", "memory", "models", "files"]
+        return !path.split(separator: "/").map(String.init).contains(where: { excluded.contains($0.lowercased()) })
     }
 
     private static func scanLocalFiles(_ root: URL) throws -> [String: GitHubLocalFile] {
@@ -326,16 +332,17 @@ public actor GitHubRepositorySyncClient {
             for child in children {
                 let path = relative.isEmpty ? child.lastPathComponent : relative + "/" + child.lastPathComponent
                 guard isSafePath(path) else { throw GitHubRepositorySyncError.unsafePath(path) }
-                if !isSyncablePath(path) { continue }
                 let attributes: [FileAttributeKey: Any]
                 do { attributes = try FileManager.default.attributesOfItem(atPath: child.path) }
                 catch { throw GitHubRepositorySyncError.invalidResponse }
                 guard let type = attributes[.type] as? FileAttributeType else { throw GitHubRepositorySyncError.unsupportedFile(path) }
                 if type == .typeDirectory {
+                    guard shouldDescendDirectory(path) else { continue }
                     try walk(child, relative: path)
                 } else if type == .typeSymbolicLink {
-                    throw GitHubRepositorySyncError.unsafePath(path)
+                    if isSyncablePath(path) { throw GitHubRepositorySyncError.unsafePath(path) }
                 } else if type == .typeRegular {
+                    guard isSyncablePath(path) else { continue }
                     let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
                     guard size <= maximumFileBytes else { throw GitHubRepositorySyncError.fileTooLarge(path) }
                     let data = try Data(contentsOf: child, options: [.mappedIfSafe])
