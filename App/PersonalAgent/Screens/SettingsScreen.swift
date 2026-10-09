@@ -4,11 +4,14 @@ import PAProviders
 import PAProvidersRemote
 import PAComposition
 import PASecurity
+import PAImportGateway
 import UIKit
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImportingGGUF = false
+    @State private var isImportingFiles = false
+    @State private var importedFiles: [ImportedFile] = []
     @State private var lastImportError: String?
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
@@ -137,6 +140,67 @@ struct SettingsScreen: View {
             }
 
 
+
+            GlassPanel {
+                HStack {
+                    Label("Imported files", systemImage: "doc.on.doc")
+                        .font(.headline)
+                    Spacer()
+                    Button {
+                        isImportingFiles = true
+                    } label: {
+                        Label("Import files", systemImage: "plus")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+
+                Text("Files are stored locally. Content is processed only when a matching format reader is available.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if importedFiles.isEmpty {
+                    Text("No imported files yet.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(importedFiles) { file in
+                        HStack(alignment: .top, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(file.originalName)
+                                    .font(.subheadline.weight(.medium))
+                                    .lineLimit(2)
+                                Text(ByteCountFormatter.string(fromByteCount: file.sizeBytes, countStyle: .file))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text("Stored · not yet parsed")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 4)
+                            Button(role: .destructive) {
+                                Task { await removeImportedFile(file.id) }
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .accessibilityLabel("Delete \(file.originalName)")
+                        }
+                        .padding(.vertical, 3)
+                    }
+                }
+            }
+            .task { await refreshImportedFiles() }
+            .fileImporter(
+                isPresented: $isImportingFiles,
+                allowedContentTypes: [.item],
+                allowsMultipleSelection: true
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    Task { await importFiles(urls) }
+                case .failure(let error):
+                    lastImportError = error.localizedDescription
+                }
+            }
 
             GlassPanel {
                 Label("Remote Provider", systemImage: "server.rack")
@@ -496,6 +560,54 @@ private extension SettingsScreen {
             updateState = .available(releaseIdentity, downloadURL)
         } catch {
             updateState = .failed
+        }
+    }
+}
+
+private extension SettingsScreen {
+    var importedFilesDirectoryURL: URL {
+        URL.applicationSupportDirectory
+            .appending(path: "PersonalAgent/ImportedFiles", directoryHint: .isDirectory)
+    }
+
+    func refreshImportedFiles() async {
+        do {
+            let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
+            importedFiles = await store.listImports()
+        } catch {
+            lastImportError = "Could not open imported-file library: \(error)"
+        }
+    }
+
+    func importFiles(_ urls: [URL]) async {
+        guard !urls.isEmpty else { return }
+        do {
+            let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
+            var failures: [String] = []
+            for url in urls {
+                do {
+                    _ = try await store.importFile(from: url)
+                } catch {
+                    failures.append("\(url.lastPathComponent): \(error)")
+                }
+            }
+            importedFiles = await store.listImports()
+            lastImportError = failures.isEmpty
+                ? nil
+                : "Some files could not be imported: " + failures.joined(separator: "; ")
+        } catch {
+            lastImportError = "Could not open imported-file library: \(error)"
+        }
+    }
+
+    func removeImportedFile(_ id: UUID) async {
+        do {
+            let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
+            try await store.removeImport(id: id)
+            importedFiles = await store.listImports()
+            lastImportError = nil
+        } catch {
+            lastImportError = "Could not delete imported file: \(error)"
         }
     }
 }
