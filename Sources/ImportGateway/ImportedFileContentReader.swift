@@ -188,20 +188,80 @@ public struct ImportedFileContentReader: Sendable {
                 throw ImportedFileReaderError.malformedDocument
             }
             let text = page.string ?? ""
-            extractedBytes += text.utf8.count
+            if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                pages.append(text)
+                extractedBytes += text.utf8.count
+            } else {
+                #if canImport(Vision) && canImport(CoreGraphics)
+                guard index < 50 else {
+                    throw ImportedFileReaderError.extractionLimitExceeded
+                }
+                let scannedText = try recognizePDFPage(page)
+                if !scannedText.isEmpty {
+                    pages.append(scannedText)
+                    extractedBytes += scannedText.utf8.count
+                }
+                #endif
+            }
             guard extractedBytes <= 4 * 1024 * 1024 else {
                 throw ImportedFileReaderError.extractionLimitExceeded
             }
-            if !text.isEmpty { pages.append(text) }
         }
         guard !pages.isEmpty else {
-            throw ImportedFileReaderError.unsupportedFormat("scanned PDF requires OCR")
+            throw ImportedFileReaderError.emptyExtraction
         }
         return ImportedFileContent(
             fileID: importedFile.id,
             format: .pdf,
             text: pages.joined(separator: "\n\n")
         )
+    }
+    #if canImport(PDFKit) && canImport(Vision) && canImport(CoreGraphics)
+    /// Rasterizes one scanned page within a strict pixel budget before OCR.
+    private func recognizePDFPage(_ page: PDFPage) throws -> String {
+        let bounds = page.bounds(for: .mediaBox)
+        guard bounds.width.isFinite, bounds.height.isFinite,
+              bounds.width > 0, bounds.height > 0 else {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        let scale = min(2.0, 2_000.0 / max(bounds.width, bounds.height))
+        let width = max(1, Int((bounds.width * scale).rounded(.up)))
+        let height = max(1, Int((bounds.height * scale).rounded(.up)))
+        let (pixels, overflow) = width.multipliedReportingOverflow(by: height)
+        guard !overflow, pixels <= 4_000_000,
+              let colorSpace = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(
+                data: nil,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: 0,
+                space: colorSpace,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+              ),
+              let image = renderPDFPage(page, in: context, width: width, height: height) else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        do {
+            try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+        } catch {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        return (request.results ?? []).compactMap { $0.topCandidates(1).first?.string }
+            .joined(separator: "\n")
+    }
+
+    private func renderPDFPage(_ page: PDFPage, in context: CGContext, width: Int, height: Int) -> CGImage? {
+        context.saveGState()
+        context.translateBy(x: 0, y: CGFloat(height))
+        context.scaleBy(x: CGFloat(width) / page.bounds(for: .mediaBox).width,
+                        y: -CGFloat(height) / page.bounds(for: .mediaBox).height)
+        page.draw(with: .mediaBox, to: context)
+        context.restoreGState()
+        return context.makeImage()
     }
     #endif
 
