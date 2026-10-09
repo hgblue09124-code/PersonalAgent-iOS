@@ -29,7 +29,8 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         let workspace = base.appendingPathComponent("workspace")
         defer { try? FileManager.default.removeItem(at: base) }
         try FileManager.default.createDirectory(at: workspace.appendingPathComponent("config"), withIntermediateDirectories: true)
-        try #"{"api_key":"sk-12345678901234567890"}"#.write(
+        let fakeToken = "sk-" + String(repeating: "A", count: 20)
+        try "{\"api_key\":\"\(fakeToken)\"}".write(
             to: workspace.appendingPathComponent("config/settings.json"),
             atomically: true,
             encoding: .utf8
