@@ -12,6 +12,7 @@ struct SettingsScreen: View {
     @State private var isImportingGGUF = false
     @State private var isImportingFiles = false
     @State private var importedFiles: [ImportedFile] = []
+    @State private var importPreview: ImportedFilePreview?
     @State private var lastImportError: String?
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
@@ -172,11 +173,17 @@ struct SettingsScreen: View {
                                 Text(ByteCountFormatter.string(fromByteCount: file.sizeBytes, countStyle: .file))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                Text("Stored · not yet parsed")
+                                Text("Stored · readable formats can be previewed")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
                             Spacer(minLength: 4)
+                            Button {
+                                Task { await previewImportedFile(file) }
+                            } label: {
+                                Label("Read", systemImage: "doc.text.magnifyingglass")
+                            }
+                            .buttonStyle(.bordered)
                             Button(role: .destructive) {
                                 Task { await removeImportedFile(file.id) }
                             } label: {
@@ -189,6 +196,24 @@ struct SettingsScreen: View {
                 }
             }
             .task { await refreshImportedFiles() }
+            .sheet(item: $importPreview) { preview in
+                NavigationStack {
+                    ScrollView {
+                        Text(preview.text)
+                            .font(.system(.body, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding()
+                    }
+                    .navigationTitle(preview.title)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { importPreview = nil }
+                        }
+                    }
+                }
+            }
             .fileImporter(
                 isPresented: $isImportingFiles,
                 allowedContentTypes: [.item],
@@ -570,6 +595,23 @@ private extension SettingsScreen {
             .appending(path: "PersonalAgent/ImportedFiles", directoryHint: .isDirectory)
     }
 
+    func previewImportedFile(_ file: ImportedFile) async {
+        do {
+            let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
+            let content = try await ImportedFileContentReader().read(file, from: store)
+            let previewText: String
+            if let rows = content.csvRows {
+                previewText = "CSV/TSV · \(rows.count) rows\n\n" + content.text
+            } else {
+                previewText = content.text
+            }
+            importPreview = ImportedFilePreview(id: file.id, title: file.originalName, text: previewText)
+            lastImportError = nil
+        } catch {
+            lastImportError = "Could not read \(file.originalName): \(error)"
+        }
+    }
+
     func refreshImportedFiles() async {
         do {
             let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
@@ -610,6 +652,12 @@ private extension SettingsScreen {
             lastImportError = "Could not delete imported file: \(error)"
         }
     }
+}
+
+private struct ImportedFilePreview: Identifiable {
+    let id: UUID
+    let title: String
+    let text: String
 }
 
 private enum CredentialState: Equatable {
