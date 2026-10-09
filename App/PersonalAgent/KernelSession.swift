@@ -310,36 +310,13 @@ final class KernelSession: ObservableObject {
                 throw KernelError.invalidStateUpdate("Only GGUF model files can be imported.")
             }
 
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer {
-                if scoped {
-                    url.stopAccessingSecurityScopedResource()
-                }
-            }
-
-            let temporaryURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent("import-\(UUID().uuidString)")
-                .appendingPathExtension("gguf")
-            try Self.copyExternalFile(from: url, to: temporaryURL)
-            defer { try? FileManager.default.removeItem(at: temporaryURL) }
-
+            // Storage owns security-scoped access and copies directly into its managed directory.
+            // Avoid a second full-size temporary copy, which can exhaust device storage.
             _ = try await composition.localModelStorage.importModel(
-                from: temporaryURL,
+                from: url,
                 name: name
             )
             await refresh()
-        }
-    }
-
-    private static func copyExternalFile(from sourceURL: URL, to destinationURL: URL) throws {
-        let source = try FileHandle(forReadingFrom: sourceURL)
-        defer { try? source.close() }
-        FileManager.default.createFile(atPath: destinationURL.path, contents: nil)
-        let destination = try FileHandle(forWritingTo: destinationURL)
-        defer { try? destination.close() }
-
-        while let chunk = try source.read(upToCount: 8 * 1024 * 1024), !chunk.isEmpty {
-            try destination.write(contentsOf: chunk)
         }
     }
 

@@ -357,8 +357,6 @@ struct SettingsScreen: View {
                 }
                 Task {
                     lastImportError = nil
-                    let scoped = selectedURL.startAccessingSecurityScopedResource()
-                    defer { if scoped { selectedURL.stopAccessingSecurityScopedResource() } }
                     await session.importModel(from: selectedURL)
                     lastImportError = session.lastError
                 }
