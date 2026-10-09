@@ -50,6 +50,7 @@ public enum ArchitectureManifest: Sendable {
         "PAEvents": ["PAObservability", "PAKernel"],
         "PASecurity": ["PAKernel"],
         "PAStorage": ["PAEvents", "PAObservability", "PAStorageModels"],
+        "PAImportGateway": [],
         "PAStorageModels": ["PAProviders", "PAProvidersLocal"],
         "PAMemory": ["PAStorage", "PAStorageModels", "PAEvents", "PAKernel"],
         "PAProviders": ["PAObservability", "PASecurity", "PAEvents", "PAKernel"],
