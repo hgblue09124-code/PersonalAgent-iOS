@@ -125,7 +125,7 @@ public actor ModuleRuntime: ModuleExecuting {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<RunOutcome, any Error>) in
                 race.install(continuation)
 
-                let worker = Task {
+                let worker = Task.detached {
                     do {
                         try Task.checkCancellation()
                         let payload = try await module.execute(input)
