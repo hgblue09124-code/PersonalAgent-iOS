@@ -356,7 +356,7 @@ public actor GitHubRepositorySyncClient {
                     guard isSyncablePath(path) else { continue }
                     let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
                     guard size <= maximumFileBytes else { throw GitHubRepositorySyncError.fileTooLarge(path) }
-                    let data = try Data(contentsOf: child, options: [.mappedIfSafe])
+                    let data = try readBoundedFile(at: child, path: path)
                     guard let text = String(data: data, encoding: .utf8), !data.contains(0) else {
                         throw GitHubRepositorySyncError.unsupportedFile(path)
                     }
@@ -372,6 +372,23 @@ public actor GitHubRepositorySyncClient {
         }
         try walk(root, relative: "")
         return result
+    }
+
+    /// Read in bounded chunks so a file that grows after metadata preflight cannot
+    /// cause an unbounded allocation during repository sync.
+    private static func readBoundedFile(at url: URL, path: String) throws -> Data {
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var data = Data()
+        while true {
+            let chunk = try handle.read(upToCount: 64 * 1024) ?? Data()
+            if chunk.isEmpty { break }
+            guard Int64(data.count) + Int64(chunk.count) <= maximumFileBytes else {
+                throw GitHubRepositorySyncError.fileTooLarge(path)
+            }
+            data.append(chunk)
+        }
+        return data
     }
 
     private var repositoryKey: String { "\(location.owner)/\(location.repository)@\(location.branch)" }
