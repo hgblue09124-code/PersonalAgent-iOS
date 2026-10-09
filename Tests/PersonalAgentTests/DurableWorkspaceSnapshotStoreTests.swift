@@ -17,7 +17,8 @@ final class DurableWorkspaceSnapshotStoreTests: XCTestCase {
         try "after".write(to: workspace.appendingPathComponent("agent.md"), atomically: true, encoding: .utf8)
         try FileManager.default.removeItem(at: workspace.appendingPathComponent("skills"))
         let reopened = try DurableWorkspaceSnapshotStore(directoryURL: snapshots)
-        XCTAssertEqual(try await reopened.listSnapshots().map(\.id), [snapshot.id])
+        let persistedSnapshots = try await reopened.listSnapshots()
+        XCTAssertEqual(persistedSnapshots.map(\.id), [snapshot.id])
 
         try await reopened.restore(snapshotID: snapshot.id, to: workspace)
         XCTAssertEqual(try String(contentsOf: workspace.appendingPathComponent("agent.md"), encoding: .utf8), "before")
