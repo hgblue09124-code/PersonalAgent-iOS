@@ -63,6 +63,10 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     }
 
     public func importModel(from sourceURL: URL, name: String? = nil) async throws -> LocalModelDescriptor {
+        guard sourceURL.pathExtension.lowercased() == "gguf" else {
+            throw LocalModelStorageError.invalidGGUFHeader("Only .gguf model files can be imported.")
+        }
+
         let isAccessing = startSecurityScopedAccess(for: sourceURL)
         defer {
             if isAccessing {
@@ -72,6 +76,17 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
 
         guard fileManager.fileExists(atPath: sourceURL.path) else {
             throw LocalModelStorageError.fileNotFound(sourceURL)
+        }
+
+        let sourceAttributes: [FileAttributeKey: Any]
+        do {
+            sourceAttributes = try fileManager.attributesOfItem(atPath: sourceURL.path)
+        } catch {
+            throw LocalModelStorageError.fileNotFound(sourceURL)
+        }
+        guard let sourceSize = sourceAttributes[.size] as? NSNumber,
+              sourceSize.int64Value >= 24 else {
+            throw LocalModelStorageError.invalidGGUFHeader("GGUF file is empty or smaller than the minimum header size.")
         }
 
         let summary: GGUFMetadataSummary
@@ -99,20 +114,21 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         let destinationFilename = "\(modelIDRaw).\(fileExtension)"
         let destinationURL = modelsDirectoryURL.appendingPathComponent(destinationFilename)
 
-        var fileSizeBytes: Int64 = 0
-        if let attrs = try? fileManager.attributesOfItem(atPath: sourceURL.path),
-           let size = attrs[.size] as? Int64 {
-            fileSizeBytes = size
-        }
+        let fileSizeBytes = sourceSize.int64Value
 
         do {
-            if fileManager.fileExists(atPath: destinationURL.path) {
-                try fileManager.removeItem(at: destinationURL)
-            }
             try fileManager.copyItem(at: sourceURL, to: destinationURL)
+            let copiedAttributes = try fileManager.attributesOfItem(atPath: destinationURL.path)
+            guard let copiedSize = copiedAttributes[.size] as? NSNumber,
+                  copiedSize.int64Value == fileSizeBytes else {
+                throw LocalModelStorageError.copyFailed("Imported GGUF file size does not match the source.")
+            }
         } catch {
             if fileManager.fileExists(atPath: destinationURL.path) {
                 try? fileManager.removeItem(at: destinationURL)
+            }
+            if let storageError = error as? LocalModelStorageError {
+                throw storageError
             }
             throw LocalModelStorageError.copyFailed("Failed to copy GGUF model file to app storage: \(error.localizedDescription)")
         }

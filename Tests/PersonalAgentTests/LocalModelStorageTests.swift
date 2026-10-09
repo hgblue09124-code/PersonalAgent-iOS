@@ -38,6 +38,31 @@ struct LocalModelStorageTests {
         return fileURL
     }
 
+    @Test func testImportRejectsNonGGUFExtensionBeforeCopying() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = root.appendingPathComponent("not-a-model.txt")
+        try Data(repeating: 0, count: 64).write(to: source)
+        let storageDir = root.appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        do {
+            _ = try await storage.importModel(from: source, name: nil)
+            #expect(Bool(false), "Storage must reject non-GGUF extensions")
+        } catch let error as LocalModelStorageError {
+            if case .invalidGGUFHeader = error {
+                #expect(Bool(true))
+            } else {
+                #expect(Bool(false), "Unexpected error: \(error)")
+            }
+        }
+
+        #expect(try await storage.listModels().isEmpty)
+        let files = try FileManager.default.contentsOfDirectory(atPath: storageDir.path)
+        #expect(files.filter { $0.hasSuffix(".gguf") }.isEmpty)
+    }
+
     @Test func testImportValidGGUFModelCopiesFileAndPersistsMetadata() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
