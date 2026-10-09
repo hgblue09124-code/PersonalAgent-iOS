@@ -328,8 +328,8 @@ public actor GitHubRepositorySyncClient {
 
     private static func containsPotentialSecret(_ text: String) -> Bool {
         let patterns = [
-            #"\\b(?:sk-[A-Za-z0-9_-]{16,}|xai-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,})\\b"#,
-            #"(?i)(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|private[_-]?key)\\s*[:=]\\s*[\"']?[A-Za-z0-9/+=._-]{16,}"#
+            #"(?:sk-[A-Za-z0-9_-]{16,}|xai-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,})"#,
+            #"(?i)(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|private[_-]?key)[[:space:]]*[:=][[:space:]]*["']?[A-Za-z0-9/+=._-]{16,}"#
         ]
         return patterns.contains { pattern in
             text.range(of: pattern, options: .regularExpression) != nil
