@@ -1,5 +1,10 @@
 name: Apple Native Build & Unsigned IPA
 
+# Keep only the newest run for each PR/ref to avoid wasting runner minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [main, ui/agent-orb-real-glass, ui/native-agent-surface]
