@@ -41,6 +41,30 @@ final class TerminalSessionTests: XCTestCase {
         XCTAssertNotNil(executions.last?.finishedAt)
     }
 
+    func testOutputAndExecutionHistoryRemainBounded() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        let session = TerminalSession(
+            context: CommandContext(workspace: workspace),
+            executionLimit: 2,
+            outputLimit: 2
+        )
+        let registry = CommandRegistry().registering("echo") { command, _ in
+            CommandResult(stdout: command.arguments.joined(separator: " "))
+        }
+
+        for value in ["one", "two", "three"] {
+            _ = try await session.execute("echo " + value, registry: registry)
+        }
+
+        let outputs = await session.outputs()
+        let executions = await session.executionHistory()
+        XCTAssertEqual(outputs.map(\.text), ["two", "three"])
+        XCTAssertEqual(executions.count, 2)
+        XCTAssertEqual(executions.map { $0.command.arguments.first ?? "" }, ["two", "three"])
+        XCTAssertTrue(executions.allSatisfy { $0.state == .succeeded })
+    }
+
     func testUnknownCommandFailsClosed() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let session = TerminalSession(context: CommandContext(workspace: workspace))

@@ -42,11 +42,24 @@ public actor TerminalSession {
     public let context: CommandContext
     public let history: TerminalHistory
     private var executions: [UUID: TerminalCommandExecution] = [:]
+    private var executionOrder: [UUID] = []
     private var output: [TerminalOutput] = []
+    private let executionLimit: Int
+    private let outputLimit: Int
     private var currentDirectory = ""
 
-    public init(id: UUID = UUID(), context: CommandContext, history: TerminalHistory = TerminalHistory()) {
-        self.id = id; self.context = context; self.history = history
+    public init(
+        id: UUID = UUID(),
+        context: CommandContext,
+        history: TerminalHistory = TerminalHistory(),
+        executionLimit: Int = 200,
+        outputLimit: Int = 1_000
+    ) {
+        self.id = id
+        self.context = context
+        self.history = history
+        self.executionLimit = max(1, executionLimit)
+        self.outputLimit = max(1, outputLimit)
     }
 
     public func workingDirectory() -> String { currentDirectory }
@@ -67,6 +80,8 @@ public actor TerminalSession {
         await history.append(command)
         let execution = TerminalCommandExecution(command: command)
         executions[execution.id] = execution
+        executionOrder.append(execution.id)
+        pruneExecutions()
         do {
             let result: CommandResult
             if command.name == "cd" {
@@ -75,8 +90,8 @@ public actor TerminalSession {
                 let executionContext = CommandContext(workspace: context.workspace, workingDirectory: currentDirectory)
                 result = try await registry.execute(command, context: executionContext)
             }
-            if !result.stdout.isEmpty { output.append(TerminalOutput(stream: .stdout, text: result.stdout)) }
-            if !result.stderr.isEmpty { output.append(TerminalOutput(stream: .stderr, text: result.stderr)) }
+            if !result.stdout.isEmpty { appendOutput(TerminalOutput(stream: .stdout, text: result.stdout)) }
+            if !result.stderr.isEmpty { appendOutput(TerminalOutput(stream: .stderr, text: result.stderr)) }
             let state: TerminalExitState = result.success ? .succeeded : .failed
             let finished = TerminalCommandExecution(id: execution.id, command: command, startedAt: execution.startedAt, finishedAt: Date(), exitCode: result.exitCode, state: state)
             executions[execution.id] = finished
@@ -159,6 +174,20 @@ public actor TerminalSession {
     public func outputs() -> [TerminalOutput] { output }
     public func execution(_ id: UUID) -> TerminalCommandExecution? { executions[id] }
     public func executionHistory() -> [TerminalCommandExecution] {
-        executions.values.sorted { $0.startedAt < $1.startedAt }
+        executionOrder.compactMap { executions[$0] }
+    }
+
+    private func appendOutput(_ item: TerminalOutput) {
+        output.append(item)
+        if output.count > outputLimit {
+            output.removeFirst(output.count - outputLimit)
+        }
+    }
+
+    private func pruneExecutions() {
+        while executionOrder.count > executionLimit {
+            let expired = executionOrder.removeFirst()
+            executions.removeValue(forKey: expired)
+        }
     }
 }
