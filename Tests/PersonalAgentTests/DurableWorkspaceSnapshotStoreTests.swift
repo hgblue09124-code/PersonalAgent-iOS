@@ -35,7 +35,7 @@ final class DurableWorkspaceSnapshotStoreTests: XCTestCase {
         let store = try DurableWorkspaceSnapshotStore(directoryURL: snapshots)
         let snapshot = try await store.createSnapshot(of: workspace)
         let payload = snapshots.appendingPathComponent(snapshot.id).appendingPathComponent("data/state.txt")
-        try "bad-size".write(to: payload, atomically: true, encoding: .utf8)
+        try "evil".write(to: payload, atomically: true, encoding: .utf8)
 
         do {
             try await store.restore(snapshotID: snapshot.id, to: workspace)
@@ -44,6 +44,13 @@ final class DurableWorkspaceSnapshotStoreTests: XCTestCase {
             XCTAssertEqual(error, .verificationFailed("state.txt"))
         }
         XCTAssertEqual(try String(contentsOf: workspace.appendingPathComponent("state.txt"), encoding: .utf8), "good")
+    }
+
+    func testSHA256MatchesKnownVector() {
+        XCTAssertEqual(
+            WorkspaceSHA256.digest(Data("abc".utf8)),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        )
     }
 
     func testSnapshotRejectsSymbolicLinks() async throws {
