@@ -210,6 +210,11 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         let files = try XCTUnwrap(state["files"] as? [String: String])
         XCTAssertEqual(files["skills/remote.md"], blobSHA)
     }
+
+    private static func response(_ object: Any) -> GitHubSyncHTTPResponse {
+        let data = (try? JSONSerialization.data(withJSONObject: object)) ?? Data()
+        return GitHubSyncHTTPResponse(statusCode: 200, data: data)
+    }
 }
 
 private actor RecordingGitHubTransport: GitHubSyncHTTPTransport {
