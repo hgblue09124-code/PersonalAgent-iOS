@@ -37,7 +37,11 @@ final class ImportedFileContentReaderTests: XCTestCase {
             _ = try await ImportedFileContentReader().read(pdfRecord, from: store)
             XCTFail("PDF must stay explicitly unsupported until a PDF reader exists")
         } catch let error as ImportedFileReaderError {
+            #if canImport(PDFKit)
+            XCTAssertEqual(error, .malformedDocument)
+            #else
             XCTAssertEqual(error, .unsupportedFormat("pdf"))
+            #endif
         }
     }
 
