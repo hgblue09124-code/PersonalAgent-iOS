@@ -37,7 +37,48 @@ final class ImportedFileContentReaderTests: XCTestCase {
             _ = try await ImportedFileContentReader().read(pdfRecord, from: store)
             XCTFail("PDF must stay explicitly unsupported until a PDF reader exists")
         } catch let error as ImportedFileReaderError {
+            #if canImport(PDFKit)
+            XCTAssertTrue(error == .malformedDocument || error == .emptyExtraction || error == .unsupportedFormat("scanned PDF requires OCR"))
+            #else
             XCTAssertEqual(error, .unsupportedFormat("pdf"))
+            #endif
+        }
+    }
+
+    func testReadsXMLPropertyListAsValidatedText() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let input = base.appendingPathComponent("settings.plist")
+        try """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <plist version="1.0"><dict><key>theme</key><string>dark</string></dict></plist>
+        """.write(to: input, atomically: true, encoding: .utf8)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let record = try await store.importFile(from: input)
+        let result = try await ImportedFileContentReader().read(record, from: store)
+        XCTAssertEqual(result.format, .propertyList)
+        XCTAssertTrue(result.text.contains("<key>theme</key>"))
+        XCTAssertTrue(result.text.contains("<string>dark</string>"))
+    }
+
+    func testImageOCRCapabilityIsExplicit() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let input = base.appendingPathComponent("image.png")
+        try Data([0x89, 0x50, 0x4E, 0x47, 0x00]).write(to: input)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let record = try await store.importFile(from: input)
+        do {
+            _ = try await ImportedFileContentReader().read(record, from: store)
+            XCTFail("Invalid image bytes must not produce successful OCR")
+        } catch let error as ImportedFileReaderError {
+            #if canImport(Vision) && canImport(ImageIO)
+            XCTAssertEqual(error, .malformedDocument)
+            #else
+            XCTAssertEqual(error, .unsupportedFormat("png"))
+            #endif
         }
     }
 
