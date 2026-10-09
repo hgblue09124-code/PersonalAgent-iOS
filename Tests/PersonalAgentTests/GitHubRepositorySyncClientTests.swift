@@ -24,6 +24,35 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertEqual(GitBlobSHA1.hash(Data("hello\n".utf8)), "ce013625030ba8dba906f756967f9e9ca394464a")
     }
 
+    func testPotentialSecretsBlockSyncBeforeAnyNetworkRequest() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = base.appendingPathComponent("workspace")
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: workspace.appendingPathComponent("config"), withIntermediateDirectories: true)
+        let fakeToken = "sk-" + String(repeating: "A", count: 20)
+        try "{\"api_key\":\"\(fakeToken)\"}".write(
+            to: workspace.appendingPathComponent("config/settings.json"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let transport = RecordingGitHubTransport()
+        let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+        let client = try GitHubRepositorySyncClient(
+            location: location,
+            stateURL: base.appendingPathComponent("state/state.json"),
+            transport: transport,
+            tokenProvider: { "test-token" }
+        )
+        do {
+            _ = try await client.synchronize(workspaceURL: workspace)
+            XCTFail("Secret-like content must fail closed before network access")
+        } catch let error as GitHubRepositorySyncError {
+            XCTAssertEqual(error, .potentialSecret("config/settings.json"))
+        }
+        let requests = await transport.requests
+        XCTAssertTrue(requests.isEmpty)
+    }
+
     func testMissingCredentialFailsBeforeNetworkAccess() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
