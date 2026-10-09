@@ -2,37 +2,58 @@ import XCTest
 @testable import PAWorkspace
 
 final class WorkspaceTransactionTests: XCTestCase {
-    func testOrderedActivationRetainsPreviousSnapshot() async throws {
-        let transaction = WorkspaceTransaction()
-        let snapshot = WorkspaceSnapshot(identifier: "workspace-1", revision: "r2")
+    func testActivationRetainsPriorRevisionAndPublishesCandidate() async throws {
+        let original = WorkspaceSnapshot(identifier: "workspace-1", revision: "r1")
+        let next = WorkspaceSnapshot(identifier: "workspace-1", revision: "r2")
+        let transaction = WorkspaceTransaction(initialSnapshot: original)
 
-        try await transaction.stage(snapshot)
+        try await transaction.stage(next)
         try await transaction.validate()
         try await transaction.snapshot()
         try await transaction.activate()
 
         let state = await transaction.state
+        let active = await transaction.active
         let previous = await transaction.previous
         XCTAssertEqual(state, .activated)
-        XCTAssertEqual(previous, snapshot)
+        XCTAssertEqual(active, next)
+        XCTAssertEqual(previous, original)
     }
 
-    func testRollbackAllowsASecondTransaction() async throws {
-        let transaction = WorkspaceTransaction()
-        let original = WorkspaceSnapshot(identifier: "workspace-1", revision: "r2")
-        let next = WorkspaceSnapshot(identifier: "workspace-1", revision: "r3")
+    func testRollbackRestoresPreviouslyActiveRevision() async throws {
+        let original = WorkspaceSnapshot(identifier: "workspace-1", revision: "r1")
+        let next = WorkspaceSnapshot(identifier: "workspace-1", revision: "r2")
+        let transaction = WorkspaceTransaction(initialSnapshot: original)
 
-        try await transaction.stage(original)
+        try await transaction.stage(next)
         try await transaction.validate()
         try await transaction.snapshot()
         try await transaction.activate()
         try await transaction.rollback()
-        try await transaction.stage(next)
 
         let state = await transaction.state
-        let previous = await transaction.previous
+        let active = await transaction.active
+        XCTAssertEqual(state, .rolledBack)
+        XCTAssertEqual(active, original)
+    }
+
+    func testRollbackAllowsASecondTransaction() async throws {
+        let original = WorkspaceSnapshot(identifier: "workspace-1", revision: "r1")
+        let next = WorkspaceSnapshot(identifier: "workspace-1", revision: "r2")
+        let final = WorkspaceSnapshot(identifier: "workspace-1", revision: "r3")
+        let transaction = WorkspaceTransaction(initialSnapshot: original)
+
+        try await transaction.stage(next)
+        try await transaction.validate()
+        try await transaction.snapshot()
+        try await transaction.activate()
+        try await transaction.rollback()
+        try await transaction.stage(final)
+
+        let state = await transaction.state
+        let active = await transaction.active
         XCTAssertEqual(state, .staged)
-        XCTAssertEqual(previous, next)
+        XCTAssertEqual(active, original)
     }
 
     func testInvalidTransitionFailsClosed() async {
