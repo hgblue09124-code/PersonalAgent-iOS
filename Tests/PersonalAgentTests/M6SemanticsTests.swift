@@ -369,7 +369,7 @@ struct M6SemanticsTests {
         #expect(request?.messages.first?.role == .system)
         #expect(request?.messages.last?.role == .user)
         #expect(request?.messages.last?.content == "I am a user")
-        #expect(request?.parameters.maxOutputTokens == 128)
+        #expect(request?.parameters.maxOutputTokens == 768)
         #expect(request?.messages.first?.content.contains("Do not repeat the user's task") == true)
     }
 
