@@ -150,7 +150,7 @@ struct TerminalScreen: View {
 
         commands = commands.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status sync status|now clear help\\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status sync status|now clear help" + "\n")
         }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
