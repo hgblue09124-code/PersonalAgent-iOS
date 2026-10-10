@@ -210,12 +210,14 @@ final class KernelSession: ObservableObject {
                     goalID: goalID,
                     rawInput: contextualInput,
                     onGenerationStarted: {
-                        Task { @MainActor [weak self] in
+                        DispatchQueue.main.async { [weak self] in
                             self?.generationStartedAt = Date()
                         }
                     },
                     onReasoningDelta: { delta in
-                        Task { @MainActor [weak self] in
+                        // The main queue is serial: preserve provider delta order when
+                        // hopping from the streaming executor to SwiftUI state.
+                        DispatchQueue.main.async { [weak self] in
                             guard let self else { return }
                             if self.firstResponseDeltaAt == nil {
                                 self.firstResponseDeltaAt = Date()
