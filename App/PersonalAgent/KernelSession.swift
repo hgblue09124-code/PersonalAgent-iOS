@@ -136,7 +136,7 @@ final class KernelSession: ObservableObject {
             lastError = "Enter a request before starting the Agent."
             return
         }
-        guard executionTask == nil else {
+        guard !isSubmitting, executionTask == nil else {
             lastError = "Agent is still working. Wait for the current task to finish or stop it before starting another."
             await refresh()
             return
