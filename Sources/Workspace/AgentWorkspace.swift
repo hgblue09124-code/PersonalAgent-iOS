@@ -41,6 +41,7 @@ public enum AgentWorkspaceError: Error, Sendable, Equatable {
     case notDirectory(String)
     case notFile(String)
     case ioFailure(String)
+    case protectedContent
 }
 
 public protocol AgentWorkspace: Sendable {
@@ -107,13 +108,20 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         }
 
         do {
-            return try String(contentsOf: url, encoding: .utf8)
+            let contents = try String(contentsOf: url, encoding: .utf8)
+            guard !WorkspaceContentSafety.containsPotentialSecret(contents) else {
+                throw AgentWorkspaceError.protectedContent
+            }
+            return contents
+        } catch let error as AgentWorkspaceError {
+            throw error
         } catch {
             throw AgentWorkspaceError.ioFailure(error.localizedDescription)
         }
     }
 
     public func writeFile(_ contents: String, to relativePath: String) async throws {
+        try validateContent(contents)
         let url = try resolve(relativePath)
         try createParentDirectory(for: url)
 
@@ -125,6 +133,7 @@ public actor LocalAgentWorkspace: AgentWorkspace {
     }
 
     public func appendFile(_ contents: String, to relativePath: String) async throws {
+        try validateContent(contents)
         let url = try resolve(relativePath)
         try createParentDirectory(for: url)
 
@@ -255,6 +264,12 @@ public actor LocalAgentWorkspace: AgentWorkspace {
             try FileManager.default.moveItem(at: source, to: destination)
         } catch {
             throw AgentWorkspaceError.ioFailure(error.localizedDescription)
+        }
+    }
+
+    private func validateContent(_ contents: String) throws {
+        guard !WorkspaceContentSafety.containsPotentialSecret(contents) else {
+            throw AgentWorkspaceError.protectedContent
         }
     }
 
