@@ -1,6 +1,5 @@
 import Foundation
 import PAKernel
-import PARuntime
 import PAObservability
 
 /// A Tool is an executable capability with typed input/output.
