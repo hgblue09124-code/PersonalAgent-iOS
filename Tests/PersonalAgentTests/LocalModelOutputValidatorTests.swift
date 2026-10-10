@@ -1,4 +1,7 @@
+import Foundation
 import Testing
+import PAKernel
+import PAProviders
 @testable import PAProvidersLocal
 
 @Suite("Local Model Output Quality")
@@ -38,4 +41,63 @@ struct LocalModelOutputValidatorTests {
         let input = "very very good"
         #expect(LocalModelOutputValidator.sanitize(text: input) == input)
     }
+}
+
+
+@Suite("Local Model Adapter Output Boundary")
+struct LocalModelAdapterOutputBoundaryTests {
+    private let repeated = "I am your personal agent and I can help you. I am your personal agent and I can help you."
+    private let expected = "I am your personal agent and I can help you."
+
+    @Test func completionReturnsSanitizedText() async throws {
+        let adapter = LocalModelProviderAdapter(engine: RepeatingOutputEngine(text: repeated))
+        let response = try await adapter.complete(
+            LLMRequest(model: ModelID(rawValue: "test-model"), prompt: "hello")
+        )
+        #expect(response.text == expected)
+    }
+
+    @Test func streamDoesNotEmitUnsanitizedTokens() async throws {
+        let adapter = LocalModelProviderAdapter(engine: RepeatingOutputEngine(text: repeated))
+        var deltas: [String] = []
+        var completedText: String?
+        for try await event in adapter.stream(
+            LLMRequest(model: ModelID(rawValue: "test-model"), prompt: "hello")
+        ) {
+            switch event {
+            case .delta(let text):
+                deltas.append(text)
+            case .toolCall:
+                Issue.record("Local model adapter must not emit tool calls for text-only generation.")
+            case .completed(let response):
+                completedText = response.text
+            }
+        }
+        #expect(deltas.joined() == expected)
+        #expect(completedText == expected)
+    }
+}
+
+private struct RepeatingOutputEngine: LocalModelEngine {
+    let text: String
+    var identity: LocalModelIdentity {
+        LocalModelIdentity(id: ModelID(rawValue: "test-model"), name: "Test model")
+    }
+    var availability: LocalModelAvailability { get async { .ready } }
+    var lifecycleState: LocalModelLifecycleState { get async { .loaded } }
+
+    func load(options: LocalModelLoadingOptions) async throws {}
+    func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
+        LocalModelResponse(text: text)
+    }
+    func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
+        AsyncThrowingStream { continuation in
+            let midpoint = text.index(text.startIndex, offsetBy: text.count / 2)
+            continuation.yield(LocalModelStreamChunk(textDelta: String(text[..<midpoint])))
+            continuation.yield(LocalModelStreamChunk(textDelta: String(text[midpoint...])))
+            continuation.finish()
+        }
+    }
+    func cancel() async {}
+    func unload() async throws {}
 }

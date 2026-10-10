@@ -45,9 +45,10 @@ public final class LocalModelProviderAdapter: LLMProvider, @unchecked Sendable {
     public func complete(_ request: LLMRequest) async throws -> LLMResponse {
         let genRequest = mapRequest(request)
         let response = try await engine.generate(request: genRequest)
-        try LocalModelOutputValidator.validate(text: response.text)
+        let sanitizedText = LocalModelOutputValidator.sanitize(text: response.text)
+        try LocalModelOutputValidator.validate(text: sanitizedText)
         return LLMResponse(
-            text: response.text,
+            text: sanitizedText,
             finishReason: response.finishReason,
             model: request.model
         )
@@ -64,11 +65,14 @@ public final class LocalModelProviderAdapter: LLMProvider, @unchecked Sendable {
                     for try await chunk in engineStream {
                         try Task.checkCancellation()
                         accumulated += chunk.textDelta
-                        continuation.yield(.delta(chunk.textDelta))
                     }
-                    try LocalModelOutputValidator.validate(text: accumulated)
+                    let sanitizedText = LocalModelOutputValidator.sanitize(text: accumulated)
+                    try LocalModelOutputValidator.validate(text: sanitizedText)
+                    // Do not leak repeated/raw tokens before the final quality gate.
+                    // Emit the verified local result only after sanitization.
+                    continuation.yield(.delta(sanitizedText))
                     let finalResponse = LLMResponse(
-                        text: accumulated,
+                        text: sanitizedText,
                         finishReason: "stop",
                         model: request.model
                     )
