@@ -15,6 +15,28 @@ final class ImportedFileContentReaderTests: XCTestCase {
         XCTAssertEqual(result.csvRows, [["name", "description"], ["agent", "reads, safely"]])
     }
 
+    func testReadsCommonSourceAndConfigurationFormatsAsPlainText() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let fixtures: [(String, String)] = [
+            ("Agent.swift", "struct Agent { let ready = true }"),
+            ("settings.toml", "mode = \"local\""),
+            ("script.sh", "printf 'safe\\n'"),
+            ("index.html", "<script>not executed</script><p>content</p>"),
+            ("query.sql", "SELECT 1;")
+        ]
+        for (name, contents) in fixtures {
+            let input = base.appendingPathComponent(name)
+            try contents.write(to: input, atomically: true, encoding: .utf8)
+            let record = try await store.importFile(from: input)
+            let result = try await ImportedFileContentReader().read(record, from: store)
+            XCTAssertEqual(result.format, .plainText, name)
+            XCTAssertEqual(result.text, contents, name)
+        }
+    }
+
     func testRejectsMalformedJSONAndUnsupportedBinaryFormat() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
