@@ -79,6 +79,37 @@ final class SkillIntentSelectionTests: XCTestCase {
         }
     }
 
+    
+    func testDuplicateExactSkillNamesFailClosed() async throws {
+        let first = SkillManifest(
+            id: SkillID(rawValue: "summary.first"),
+            name: "Text Summary",
+            description: "Summarize text content.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Summarize supplied text.",
+            inputSchema: SchemaDocument(identifier: "summary.first.in"),
+            outputSchema: SchemaDocument(identifier: "summary.first.out"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let second = SkillManifest(
+            id: SkillID(rawValue: "summary.second"),
+            name: "Text Summary",
+            description: "Summarize text content.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Summarize supplied text.",
+            inputSchema: SchemaDocument(identifier: "summary.second.in"),
+            outputSchema: SchemaDocument(identifier: "summary.second.out"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [first, second]))
+        do {
+            _ = try await runtime.select(goalStatement: "Text Summary")
+            XCTFail("duplicate exact skill names must not choose the first manifest")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .noSelection)
+        }
+    }
+
     func testDisabledStoredSkillIsExcludedFromSelection() async throws {
         let disabled = SkillManifest(
             id: SkillID(rawValue: "math.quick"),
