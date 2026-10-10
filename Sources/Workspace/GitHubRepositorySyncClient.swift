@@ -326,9 +326,26 @@ public actor GitHubRepositorySyncClient {
     }
 
     public static func isSafeBranch(_ branch: String) -> Bool {
-        !branch.isEmpty && !branch.hasPrefix("/") && !branch.contains("..")
-            && branch.range(of: #"^[A-Za-z0-9._/-]+$"#, options: .regularExpression) != nil
-            && !branch.split(separator: "/").contains(where: { $0 == "." || $0 == ".." })
+        guard !branch.isEmpty,
+              branch != "@",
+              branch.utf8.count <= 255,
+              !branch.hasPrefix("/"),
+              !branch.hasSuffix("/"),
+              !branch.hasSuffix("."),
+              !branch.contains(".."),
+              !branch.contains("@{"),
+              branch.range(of: #"^[A-Za-z0-9._/-]+$"#, options: .regularExpression) != nil else {
+            return false
+        }
+
+        let components = branch.split(separator: "/", omittingEmptySubsequences: false)
+        return components.allSatisfy { component in
+            !component.isEmpty
+                && !component.hasPrefix(".")
+                && !component.hasSuffix(".lock")
+                && component != "."
+                && component != ".."
+        }
     }
 
     public static func isSafePath(_ path: String) -> Bool {
