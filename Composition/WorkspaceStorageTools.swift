@@ -78,7 +78,8 @@ public struct WorkspaceReadTool: Tool {
                 let current = pending.removeFirst()
                 guard WorkspaceToolSafety.isAllowedPath(current.path) else { continue }
                 let children = try await workspace.listDirectory(at: current.path)
-                for entry in children where WorkspaceToolSafety.isAllowedPath(entry.relativePath) {
+                for entry in children where WorkspaceToolSafety.isAllowedPath(entry.relativePath)
+                    && !WorkspaceToolSafety.isProtectedFilename(entry.relativePath) {
                     visited += 1
                     if entry.isDirectory {
                         if current.depth < 5 { pending.append((entry.relativePath, current.depth + 1)) }
