@@ -22,7 +22,7 @@ public struct GitHubRepositoryLocation: Sendable, Equatable {
     }
 }
 
-public enum GitHubRepositorySyncError: Error, Sendable, Equatable {
+public enum GitHubRepositorySyncError: Error, Sendable, Equatable, LocalizedError {
     case invalidRepository
     case authenticationRequired
     case invalidResponse
@@ -34,6 +34,39 @@ public enum GitHubRepositorySyncError: Error, Sendable, Equatable {
     case hashMismatch(String)
     case potentialSecret(String)
     case corruptState
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidRepository:
+            return "GitHub repository, branch, or API URL is invalid."
+        case .authenticationRequired:
+            return "A non-empty GitHub token is required."
+        case .invalidResponse:
+            return "GitHub returned an unexpected or incomplete API response."
+        case .httpStatus(let status):
+            switch status {
+            case 401: return "GitHub rejected the token (HTTP 401). Check that it is valid."
+            case 403: return "GitHub denied access (HTTP 403). Check repository access and token permissions or rate limits."
+            case 404: return "GitHub repository or branch was not found (HTTP 404), or the token cannot access it."
+            case 409, 422: return "GitHub rejected the update (HTTP \(status)); the branch may have changed or the token may lack permission."
+            default: return "GitHub API request failed with HTTP status \(status)."
+            }
+        case .remoteConflict:
+            return "Local and remote changes conflict. No automatic overwrite was performed."
+        case .unsafePath(let path):
+            return "Sync blocked an unsafe workspace path: \(path)"
+        case .unsupportedFile(let path):
+            return "Sync encountered an unsupported or non-text file: \(path)"
+        case .fileTooLarge(let path):
+            return "Sync blocked a file larger than 10 MiB: \(path)"
+        case .hashMismatch(let path):
+            return "File integrity verification failed: \(path)"
+        case .potentialSecret(let path):
+            return "Sync blocked a file that may contain a secret: \(path)"
+        case .corruptState:
+            return "Saved sync baseline is invalid or unreadable. It was not used."
+        }
+    }
 }
 
 public struct GitHubSyncHTTPResponse: Sendable {
