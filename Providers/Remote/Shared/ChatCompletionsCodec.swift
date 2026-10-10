@@ -98,46 +98,80 @@ public enum ChatCompletionsCodec: Sendable {
     }
 
     public static func decodeStreamEvents(_ body: Data) throws -> [LLMStreamEvent] {
-        let raw = String(data: body, encoding: .utf8) ?? ""
-        var deltas: [String] = []
-        var finish = "stop"
-        var model: ModelID?
-        var sawTerminalMarker = false
-        for line in raw.split(whereSeparator: \.isNewline) {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            guard trimmed.hasPrefix("data:") else { continue }
-            let payload = trimmed.dropFirst(5).trimmingCharacters(in: .whitespaces)
-            if payload == "[DONE]" {
-                sawTerminalMarker = true
-                continue
-            }
-            guard let data = payload.data(using: .utf8),
-                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-            else {
-                throw ProviderRuntimeError.decodingFailure
-            }
-            if let modelName = object["model"] as? String {
-                model = ModelID(rawValue: modelName)
-            }
-            guard let choices = object["choices"] as? [[String: Any]], let first = choices.first else {
-                continue
-            }
-            if let reason = first["finish_reason"] as? String {
-                finish = reason
-            }
-            if let delta = first["delta"] as? [String: Any], let content = delta["content"] as? String {
-                deltas.append(content)
-            }
+        var decoder = ChatCompletionsStreamDecoder()
+        let deltas = try decoder.append(body)
+        return deltas + (try decoder.finish())
+    }
+}
+
+/// Incremental Server-Sent Events decoder. Buffers incomplete lines, not the full response.
+public struct ChatCompletionsStreamDecoder: Sendable {
+    private var pending = Data()
+    private var fullText = ""
+    private var finishReason = "stop"
+    private var model: ModelID?
+    private var sawTerminalMarker = false
+
+    public init() {}
+
+    public mutating func append(_ chunk: Data) throws -> [LLMStreamEvent] {
+        pending.append(chunk)
+        var events: [LLMStreamEvent] = []
+        let newline = Data([0x0A])
+        while let range = pending.range(of: newline) {
+            let line = Data(pending[..<range.lowerBound])
+            pending.removeSubrange(pending.startIndex..<range.upperBound)
+            try consume(line, into: &events)
         }
-        let fullText = deltas.joined()
-        guard sawTerminalMarker else {
-            throw ProviderRuntimeError.decodingFailure
-        }
-        guard !fullText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            throw ProviderRuntimeError.decodingFailure
-        }
-        var events: [LLMStreamEvent] = deltas.map { .delta($0) }
-        events.append(.completed(LLMResponse(text: fullText, finishReason: finish, model: model)))
         return events
+    }
+
+    public mutating func finish() throws -> [LLMStreamEvent] {
+        var events: [LLMStreamEvent] = []
+        if !pending.isEmpty {
+            try consume(pending, into: &events)
+            pending.removeAll(keepingCapacity: false)
+        }
+        guard sawTerminalMarker,
+              !fullText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ProviderRuntimeError.decodingFailure
+        }
+        events.append(.completed(LLMResponse(text: fullText, finishReason: finishReason, model: model)))
+        return events
+    }
+
+    private mutating func consume(_ rawLine: Data, into events: inout [LLMStreamEvent]) throws {
+        var lineData = rawLine
+        if lineData.last == 0x0D { lineData.removeLast() }
+        guard let line = String(data: lineData, encoding: .utf8) else {
+            throw ProviderRuntimeError.decodingFailure
+        }
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard trimmed.hasPrefix("data:") else { return }
+        let payload = trimmed.dropFirst(5).trimmingCharacters(in: .whitespaces)
+        guard !payload.isEmpty else { return }
+        if payload == "[DONE]" {
+            sawTerminalMarker = true
+            return
+        }
+        guard !sawTerminalMarker else { return }
+        guard let data = payload.data(using: .utf8),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw ProviderRuntimeError.decodingFailure
+        }
+        if let modelName = object["model"] as? String {
+            model = ModelID(rawValue: modelName)
+        }
+        guard let choices = object["choices"] as? [[String: Any]], let first = choices.first else {
+            return
+        }
+        if let reason = first["finish_reason"] as? String {
+            finishReason = reason
+        }
+        guard let delta = first["delta"] as? [String: Any],
+              let content = delta["content"] as? String,
+              !content.isEmpty else { return }
+        fullText += content
+        events.append(.delta(content))
     }
 }

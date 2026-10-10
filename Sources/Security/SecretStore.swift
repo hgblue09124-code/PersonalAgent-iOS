@@ -150,8 +150,33 @@ public struct NetworkResponse: Sendable, Equatable {
     }
 }
 
+public struct NetworkStreamResponse: Sendable {
+    public let statusCode: Int
+    public let chunks: AsyncThrowingStream<Data, Error>
+
+    public init(statusCode: Int, chunks: AsyncThrowingStream<Data, Error>) {
+        self.statusCode = statusCode
+        self.chunks = chunks
+    }
+}
+
 public protocol NetworkAccess: Sendable {
     func data(for request: NetworkRequest) async throws -> NetworkResponse
+    func stream(for request: NetworkRequest) async throws -> NetworkStreamResponse
+}
+
+public extension NetworkAccess {
+    /// Compatibility fallback for test doubles and transports without incremental I/O.
+    func stream(for request: NetworkRequest) async throws -> NetworkStreamResponse {
+        let response = try await data(for: request)
+        return NetworkStreamResponse(
+            statusCode: response.statusCode,
+            chunks: AsyncThrowingStream { continuation in
+                continuation.yield(response.body)
+                continuation.finish()
+            }
+        )
+    }
 }
 
 public enum NetworkAccessError: Error, Sendable, Equatable {
@@ -187,5 +212,58 @@ public struct URLSessionNetworkAccess: NetworkAccess, Sendable {
             throw NetworkAccessError.invalidResponse
         }
         return NetworkResponse(statusCode: httpResponse.statusCode, body: data)
+    }
+
+    public func stream(for request: NetworkRequest) async throws -> NetworkStreamResponse {
+        guard let url = URL(string: request.url) else {
+            throw NetworkAccessError.invalidURL
+        }
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = request.method
+        for (key, value) in request.headers {
+            urlRequest.setValue(value, forHTTPHeaderField: key)
+        }
+        urlRequest.httpBody = request.body
+
+        #if canImport(Darwin)
+        let (bytes, response) = try await session.bytes(for: urlRequest)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NetworkAccessError.invalidResponse
+        }
+        let chunks = AsyncThrowingStream<Data, Error> { continuation in
+            let task = Task {
+                do {
+                    var buffer = Data()
+                    for try await byte in bytes {
+                        try Task.checkCancellation()
+                        buffer.append(byte)
+                        // Flush each complete SSE line so token deltas are not held
+                        // until an arbitrary 4 KB threshold is reached.
+                        if byte == 0x0A {
+                            continuation.yield(buffer)
+                            buffer.removeAll(keepingCapacity: true)
+                        }
+                    }
+                    if !buffer.isEmpty {
+                        continuation.yield(buffer)
+                    }
+                    continuation.finish()
+                } catch {
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+        return NetworkStreamResponse(statusCode: httpResponse.statusCode, chunks: chunks)
+        #else
+        let response = try await data(for: request)
+        return NetworkStreamResponse(
+            statusCode: response.statusCode,
+            chunks: AsyncThrowingStream { continuation in
+                continuation.yield(response.body)
+                continuation.finish()
+            }
+        )
+        #endif
     }
 }
