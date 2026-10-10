@@ -571,7 +571,7 @@ struct M9RealProviderSliceTests {
         let transport = ScriptedTransport(scripts: [
             .response(ProviderTransportResponse(
                 statusCode: 200,
-                body: Data(#"{"model":"openrouter/free","choices":[{"message":{"role":"assistant","content":"openrouter-e2e-ok"},"finish_reason":"stop"}]}#.utf8)
+                body: Data(#"{"model":"openrouter/free","choices":[{"message":{"role":"assistant","content":"openrouter-e2e-ok"},"finish_reason":"stop"}]}"#.utf8)
             ))
         ])
         let vault = InMemoryCredentialVault()
