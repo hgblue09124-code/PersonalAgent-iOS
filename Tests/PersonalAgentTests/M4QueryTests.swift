@@ -304,7 +304,7 @@ struct M4QueryTests {
         try await store.forget(id: record.id, reason: "user-requested")
 
         #expect((try await store.query(MemoryQuery())).records.isEmpty)
-        #expect((try await store.query(MemoryQuery(ids: [record.id])).records.isEmpty)
+        #expect((try await store.query(MemoryQuery(ids: [record.id])).records.isEmpty))
 
         let auditResult = try await store.query(
             MemoryQuery(ids: [record.id], lifecycles: [.deleted])
