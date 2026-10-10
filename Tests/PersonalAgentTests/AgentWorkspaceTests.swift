@@ -31,6 +31,33 @@ final class AgentWorkspaceTests: XCTestCase {
         XCTAssertThrowsError(try WorkspacePath("workspace\\.\\notes.md"))
     }
 
+    func testDirectWorkspaceAccessBlocksProtectedPathsAndHidesNames() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let secretURL = root.appendingPathComponent("config/api_key.json")
+        try Data("protected fixture".utf8).write(to: secretURL)
+        try await workspace.writeFile("safe settings", to: "config/settings.md")
+
+        do {
+            _ = try await workspace.readFile(at: "config/api_key.json")
+            XCTFail("direct reads of protected paths must fail")
+        } catch { }
+        do {
+            try await workspace.writeFile("replacement", to: "config/api_key.json")
+            XCTFail("direct writes to protected paths must fail")
+        } catch { }
+        do {
+            try await workspace.remove(at: "config/api_key.json")
+            XCTFail("direct deletes of protected paths must fail")
+        } catch { }
+
+        let entries = try await workspace.listDirectory(at: "config")
+        XCTAssertFalse(entries.contains { $0.relativePath == "config/api_key.json" })
+        let safeRead = try await workspace.readFile(at: "config/settings.md")
+        XCTAssertEqual(safeRead, "safe settings")
+    }
+
     func testUnicodeWriteReadExistsMetadata() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: root)

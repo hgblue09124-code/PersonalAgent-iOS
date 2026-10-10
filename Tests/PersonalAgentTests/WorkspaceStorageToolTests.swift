@@ -42,7 +42,13 @@ final class WorkspaceStorageToolTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: root) }
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
-        try await workspace.writeFile("private", to: "workspace/secrets/note.md")
+        let secretDirectory = root.appendingPathComponent("workspace/secrets", isDirectory: true)
+        try FileManager.default.createDirectory(at: secretDirectory, withIntermediateDirectories: true)
+        try "private".write(
+            to: secretDirectory.appendingPathComponent("note.md"),
+            atomically: true,
+            encoding: .utf8
+        )
         let reader = WorkspaceReadTool(workspace: workspace)
 
         do {
