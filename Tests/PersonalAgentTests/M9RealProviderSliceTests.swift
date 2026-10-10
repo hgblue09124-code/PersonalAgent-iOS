@@ -626,9 +626,9 @@ struct M9RealProviderSliceTests {
             providerID: OpenAICompatibleProviderBoundary.providerID,
             endpointURL: "https://openrouter.ai/api/v1/chat/completions",
             defaultModel: model,
+            credential: credential,
             timeoutNanoseconds: 45_000_000_000,
-            maxRetryAttempts: 0,
-            credential: credential
+            maxRetryAttempts: 0
         )
         let provider = OpenAICompatibleProvider(
             transport: SecurityNetworkTransport(network: URLSessionNetworkAccess()),
@@ -638,7 +638,7 @@ struct M9RealProviderSliceTests {
         let response = try await provider.complete(
             LLMRequest(model: model, prompt: "Reply with the single word: OPENROUTER_VERIFIED")
         )
-        #expect(!response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(!response.text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty)
         print("OPENROUTER LIVE API: PASS")
     }
 
