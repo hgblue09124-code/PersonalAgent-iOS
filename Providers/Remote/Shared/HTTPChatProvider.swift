@@ -58,15 +58,19 @@ public struct HTTPChatProvider: LLMProvider {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
-                    try Task.checkCancellation()
-                    let wire = try await encode(request, stream: true)
-                    let response = try await sendWithRetry(wire, request: request)
-                    if response.statusCode != 200 {
-                        throw ProviderRuntimeError.from(statusCode: response.statusCode)
-                    }
-                    for event in try ChatCompletionsCodec.decodeStreamEvents(response.body) {
-                        try Task.checkCancellation()
-                        continuation.yield(event)
+                    let timeout = request.timeoutNanoseconds ?? configuration.timeoutNanoseconds
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        group.addTask {
+                            try await self.consumeStream(request, into: continuation)
+                        }
+                        group.addTask {
+                            try await Task.sleep(nanoseconds: timeout)
+                            throw ProviderRuntimeError.timeout
+                        }
+                        defer { group.cancelAll() }
+                        guard try await group.next() != nil else {
+                            throw ProviderRuntimeError.timeout
+                        }
                     }
                     continuation.finish()
                 } catch is CancellationError {
@@ -77,9 +81,60 @@ public struct HTTPChatProvider: LLMProvider {
                     continuation.finish(throwing: ProviderRuntimeError.networkFailure)
                 }
             }
-            continuation.onTermination = { _ in
-                task.cancel()
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    private func consumeStream(
+        _ request: LLMRequest,
+        into continuation: AsyncThrowingStream<LLMStreamEvent, Error>.Continuation
+    ) async throws {
+        try Task.checkCancellation()
+        let wire = try await encode(request, stream: true)
+        let response = try await sendStreamWithRetry(wire)
+        guard response.statusCode == 200 else {
+            throw ProviderRuntimeError.from(statusCode: response.statusCode)
+        }
+
+        var decoder = ChatCompletionsStreamDecoder()
+        for try await chunk in response.chunks {
+            try Task.checkCancellation()
+            for event in try decoder.append(chunk) {
+                continuation.yield(event)
             }
+        }
+        try Task.checkCancellation()
+        for event in try decoder.finish() {
+            continuation.yield(event)
+        }
+    }
+
+    private func sendStreamWithRetry(
+        _ request: ProviderTransportRequest
+    ) async throws -> ProviderTransportStreamResponse {
+        var attempt = 0
+        while true {
+            try Task.checkCancellation()
+            do {
+                let response = try await transport.stream(request)
+                if response.statusCode == 200 || attempt >= configuration.maxRetryAttempts {
+                    return response
+                }
+                let error = ProviderRuntimeError.from(statusCode: response.statusCode)
+                guard error.retryClassification == .retryableTransient else { return response }
+            } catch let error as ProviderRuntimeError {
+                guard error.retryClassification == .retryableTransient,
+                      attempt < configuration.maxRetryAttempts else {
+                    throw error
+                }
+            } catch is CancellationError {
+                throw ProviderRuntimeError.cancelled
+            } catch {
+                guard attempt < configuration.maxRetryAttempts else {
+                    throw ProviderRuntimeError.networkFailure
+                }
+            }
+            attempt += 1
         }
     }
 
