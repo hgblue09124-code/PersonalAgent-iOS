@@ -103,11 +103,14 @@ struct ModelsScreen: View {
                 }
             }
 
-            if let errorMessage {
+            if let visibleError = errorMessage ?? session.lastError {
                 GlassPanel {
-                    Text(errorMessage)
-                        .font(.footnote)
+                    Label("Model operation failed", systemImage: "exclamationmark.triangle.fill")
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.red)
+                    Text(visibleError)
+                        .font(.footnote)
+                        .textSelection(.enabled)
                 }
             }
         }
