@@ -150,6 +150,17 @@ struct SettingsScreen: View {
 
 
             GlassPanel {
+                Label("Local AgentOS storage", systemImage: "folder")
+                    .font(.headline)
+                Text("AgentOS data is stored in the app's Documents/AgentOS folder. Open Files → On My iPhone → Personal Agent → AgentOS to view and manage local files.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("Agents, Skills, memory and runtime state stay on this iPhone. API keys remain in Keychain; local model binaries remain in managed model storage.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            GlassPanel {
                 Label("GitHub repository sync", systemImage: "arrow.triangle.2.circlepath")
                     .font(.headline)
                 Text("Syncs text/source files with a GitHub branch. Divergent edits stop as conflicts. Memory, logs, cache, credentials and model binaries are excluded.")
