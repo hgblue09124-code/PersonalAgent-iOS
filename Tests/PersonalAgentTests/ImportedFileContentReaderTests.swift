@@ -182,7 +182,7 @@ final class ImportedFileContentReaderTests: XCTestCase {
         try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
 
         let input = base.appendingPathComponent("report.csv")
-        let expectedText = "name,description\\nagent,\\"persistent content\\"\\n"
+        let expectedText = "name,description\nagent,\"persistent content\"\n"
         try expectedText.write(to: input, atomically: true, encoding: .utf8)
 
         let storeURL = base.appendingPathComponent("store")
