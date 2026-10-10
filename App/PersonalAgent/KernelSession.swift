@@ -248,10 +248,14 @@ final class KernelSession: ObservableObject {
     }
 
     func clearMemory() async {
-        await run {
+        let cleared = await run {
             try await composition.clearMemory()
         }
-        memoryRecords = []
+        // run(_:) refreshes the snapshot even on failure. Never hide persisted
+        // records unless the underlying delete operation actually succeeded.
+        if cleared {
+            memoryRecords = []
+        }
     }
 
     func forgetMemory(id: String, reason: String = "user-requested") async {
@@ -522,10 +526,13 @@ final class KernelSession: ObservableObject {
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
-    private func run(_ operation: () async throws -> Void) async {
+    @discardableResult
+    private func run(_ operation: () async throws -> Void) async -> Bool {
         do {
             try await operation()
             lastError = nil
+            await refresh()
+            return true
         } catch let error as KernelError {
             switch error {
             case .runtimeNotExecutable(.stopped):
@@ -534,10 +541,12 @@ final class KernelSession: ObservableObject {
                 lastError = error.description
             }
         } catch is CancellationError {
+            // Cancellation is not success; keep the refreshed persisted state.
         } catch {
             lastError = String(describing: error)
         }
         await refresh()
+        return false
     }
 }
 
