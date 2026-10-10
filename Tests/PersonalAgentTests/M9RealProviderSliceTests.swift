@@ -608,6 +608,40 @@ struct M9RealProviderSliceTests {
         #expect((json["messages"] as? [[String: Any]])?.first?["role"] as? String == "user")
     }
 
+    @Test func testLiveOpenRouterFreeRouterWhenKeyProvided() async throws {
+        guard let key = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"],
+              !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("OPENROUTER LIVE API: SKIPPED (OPENROUTER_API_KEY not configured)")
+            return
+        }
+
+        let model = ModelID(rawValue: "openrouter/free")
+        let credential = ProviderCredentialRef(
+            providerID: OpenAICompatibleProviderBoundary.providerID,
+            account: "openrouter.live"
+        )
+        let vault = InMemoryCredentialVault()
+        await vault.store(Data(key.utf8), for: credential)
+        let configuration = ProviderConfiguration(
+            providerID: OpenAICompatibleProviderBoundary.providerID,
+            endpointURL: "https://openrouter.ai/api/v1/chat/completions",
+            defaultModel: model,
+            credential: credential,
+            timeoutNanoseconds: 45_000_000_000,
+            maxRetryAttempts: 0
+        )
+        let provider = OpenAICompatibleProvider(
+            transport: SecurityNetworkTransport(network: URLSessionNetworkAccess()),
+            credentials: vault,
+            configuration: configuration
+        )
+        let response = try await provider.complete(
+            LLMRequest(model: model, prompt: "Reply with the single word: OPENROUTER_VERIFIED")
+        )
+        #expect(!response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        print("OPENROUTER LIVE API: PASS")
+    }
+
     @Test func compatibleProviderIdentityUsesConfiguredModelForRuntimeRouting() {
         let configuredModel = ModelID(rawValue: "openrouter/anthropic/claude-3.5-sonnet")
         let provider = OpenAICompatibleProvider(
