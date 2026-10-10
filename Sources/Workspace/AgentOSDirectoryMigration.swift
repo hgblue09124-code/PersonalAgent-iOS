@@ -6,6 +6,7 @@ public enum AgentOSDirectoryMigration {
     public static func mergeMissingItems(
         from sourceRoot: URL,
         to destinationRoot: URL,
+        excludingRelativePaths: Set<String> = [],
         fileManager: FileManager = .default
     ) throws {
         guard sourceRoot.standardizedFileURL != destinationRoot.standardizedFileURL,
@@ -19,12 +20,14 @@ public enum AgentOSDirectoryMigration {
         }
 
         try fileManager.createDirectory(at: destinationRoot, withIntermediateDirectories: true)
-        try mergeDirectoryContents(from: sourceRoot, to: destinationRoot, fileManager: fileManager)
+        try mergeDirectoryContents(from: sourceRoot, to: destinationRoot, relativePath: "", excludingRelativePaths: excludingRelativePaths, fileManager: fileManager)
     }
 
     private static func mergeDirectoryContents(
         from source: URL,
         to destination: URL,
+        relativePath: String,
+        excludingRelativePaths: Set<String>,
         fileManager: FileManager
     ) throws {
         let children = try fileManager.contentsOfDirectory(
@@ -35,6 +38,10 @@ public enum AgentOSDirectoryMigration {
 
         for child in children {
             try Task.checkCancellation()
+            let childRelativePath = relativePath.isEmpty ? child.lastPathComponent : relativePath + "/" + child.lastPathComponent
+            guard !excludingRelativePaths.contains(where: { excluded in
+                childRelativePath == excluded || childRelativePath.hasPrefix(excluded + "/")
+            }) else { continue }
             let attributes = try fileManager.attributesOfItem(atPath: child.path)
             let type = attributes[.type] as? FileAttributeType
             // Never follow or copy symlinks while migrating app state.
@@ -45,7 +52,7 @@ public enum AgentOSDirectoryMigration {
                 let targetAttributes = try fileManager.attributesOfItem(atPath: target.path)
                 let targetType = targetAttributes[.type] as? FileAttributeType
                 if type == .typeDirectory && targetType == .typeDirectory {
-                    try mergeDirectoryContents(from: child, to: target, fileManager: fileManager)
+                    try mergeDirectoryContents(from: child, to: target, relativePath: childRelativePath, excludingRelativePaths: excludingRelativePaths, fileManager: fileManager)
                 }
                 // A destination file wins conflicts; do not replace user-visible data.
                 continue
@@ -53,7 +60,7 @@ public enum AgentOSDirectoryMigration {
 
             if type == .typeDirectory {
                 try fileManager.createDirectory(at: target, withIntermediateDirectories: true)
-                try mergeDirectoryContents(from: child, to: target, fileManager: fileManager)
+                try mergeDirectoryContents(from: child, to: target, relativePath: childRelativePath, excludingRelativePaths: excludingRelativePaths, fileManager: fileManager)
             } else if type == .typeRegular {
                 let temporary = destination.appendingPathComponent(
                     ".agentos-migration-\(UUID().uuidString).tmp"
@@ -81,28 +88,40 @@ public enum AgentOSStorageLocation {
         guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             throw AgentWorkspaceError.ioFailure("The app Documents directory is unavailable.")
         }
-        let legacyRoots: [URL]
+        var legacyRoots: [URL] = []
+        var excludedPaths: [String: Set<String>] = [:]
         if let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            legacyRoots = [
-                appSupport.appendingPathComponent("AgentOS", isDirectory: true),
-                appSupport.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
-            ]
-        } else {
-            legacyRoots = []
+            let terminalRoot = appSupport.appendingPathComponent("AgentOS", isDirectory: true)
+            let runtimeRoot = appSupport.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
+            legacyRoots = [terminalRoot, runtimeRoot]
+            // Keep potentially multi-gigabyte GGUF binaries in managed Application Support.
+            // The model store continues using its legacy directory, so no binary copy is needed.
+            excludedPaths[runtimeRoot.standardizedFileURL.path] = ["ModelMetadata/Models"]
         }
-        return try prepareVisibleRoot(documentsDirectory: documents, legacyRoots: legacyRoots, fileManager: fileManager)
+        return try prepareVisibleRoot(
+            documentsDirectory: documents,
+            legacyRoots: legacyRoots,
+            excludedRelativePathsByRoot: excludedPaths,
+            fileManager: fileManager
+        )
     }
 
     /// Testable migration entry point; each legacy root is merged without overwriting destination data.
     public static func prepareVisibleRoot(
         documentsDirectory: URL,
         legacyRoots: [URL],
+        excludedRelativePathsByRoot: [String: Set<String>] = [:],
         fileManager: FileManager = .default
     ) throws -> URL {
         let visibleRoot = documentsDirectory.appendingPathComponent("AgentOS", isDirectory: true)
         try fileManager.createDirectory(at: visibleRoot, withIntermediateDirectories: true)
         for legacyRoot in legacyRoots {
-            try AgentOSDirectoryMigration.mergeMissingItems(from: legacyRoot, to: visibleRoot, fileManager: fileManager)
+            try AgentOSDirectoryMigration.mergeMissingItems(
+                from: legacyRoot,
+                to: visibleRoot,
+                excludingRelativePaths: excludedRelativePathsByRoot[legacyRoot.standardizedFileURL.path] ?? [],
+                fileManager: fileManager
+            )
         }
         return visibleRoot
     }
