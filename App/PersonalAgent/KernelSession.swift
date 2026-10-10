@@ -136,6 +136,13 @@ final class KernelSession: ObservableObject {
         executionTask = nil
     }
 
+    /// Cancels the active request. The lifecycle manager observes task cancellation
+    /// while consuming provider deltas and aborts the active goal when safe.
+    func cancelCurrentGeneration() {
+        guard isSubmitting else { return }
+        executionTask?.cancel()
+    }
+
     func submitGoal(_ statement: String) async {
         let normalizedStatement = statement.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedStatement.isEmpty else {

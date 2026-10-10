@@ -106,8 +106,26 @@ struct ChatScreen: View {
         GlassPanel {
             HStack(alignment: .bottom, spacing: 9) {
                 TextField("Message your Agent…", text: $message, axis: .vertical).focused($focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(send)
-                Button(action: send) { Image(systemName: session.isSubmitting ? "hourglass" : "arrow.up").font(.system(size: 14, weight: .bold)).frame(width: 40, height: 40) }
-                    .buttonStyle(.borderedProminent).disabled(session.isSubmitting || message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                if session.isSubmitting {
+                    Button(action: session.cancelCurrentGeneration) {
+                        Image(systemName: "stop.fill")
+                            .font(.system(size: 13, weight: .bold))
+                            .frame(width: 40, height: 40)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.red)
+                    .accessibilityLabel("Stop response generation")
+                    .accessibilityHint("Cancels the current Agent request")
+                } else {
+                    Button(action: send) {
+                        Image(systemName: "arrow.up")
+                            .font(.system(size: 14, weight: .bold))
+                            .frame(width: 40, height: 40)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .accessibilityLabel("Send message")
+                }
             }
             if session.isSubmitting {
                 HStack(spacing: 7) {
