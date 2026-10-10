@@ -150,7 +150,7 @@ struct TerminalScreen: View {
 
         commands = commands.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status clear help\\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status sync status|now clear help\\n")
         }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
@@ -178,6 +178,15 @@ struct TerminalScreen: View {
         commands = commands.registering("memory") { command, _ in
             guard command.arguments == ["status"] else { throw CommandError.invalidArguments("memory status") }
             return CommandResult(stdout: await session.terminalMemoryStatus())
+        }
+        commands = commands.registering("sync") { command, _ in
+            guard command.arguments == ["status"] || command.arguments == ["now"] else {
+                throw CommandError.invalidArguments("sync status|now")
+            }
+            if command.arguments[0] == "now" {
+                return CommandResult(stdout: await session.syncGitHubWorkspace())
+            }
+            return CommandResult(stdout: await session.terminalSyncStatus())
         }
         return commands
     }
