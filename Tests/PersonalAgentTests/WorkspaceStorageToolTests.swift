@@ -61,9 +61,15 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let writer = WorkspaceWriteTool(workspace: workspace)
 
         do {
-            _ = try await writer.run(
-                argumentsJSON: #"{"operation":"write","path":"workspace/notes.md","content":"api_key = \"sk-12345678901234567890\""}"#
-            )
+            let fakeSecret = "api_key = \"sk-" + String(repeating: "A", count: 24) + "\""
+            let payload: [String: String] = [
+                "operation": "write",
+                "path": "workspace/notes.md",
+                "content": fakeSecret,
+            ]
+            let data = try JSONSerialization.data(withJSONObject: payload)
+            let arguments = try XCTUnwrap(String(data: data, encoding: .utf8))
+            _ = try await writer.run(argumentsJSON: arguments)
             XCTFail("Secret-like content must be rejected")
         } catch {
             // Fail-closed is the expected contract.
