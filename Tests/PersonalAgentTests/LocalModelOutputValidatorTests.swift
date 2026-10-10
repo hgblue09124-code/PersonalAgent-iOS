@@ -67,6 +67,8 @@ struct LocalModelAdapterOutputBoundaryTests {
             switch event {
             case .delta(let text):
                 deltas.append(text)
+            case .toolCall:
+                Issue.record("Local model adapter must not emit tool calls for text-only generation.")
             case .completed(let response):
                 completedText = response.text
             }
