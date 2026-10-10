@@ -356,6 +356,7 @@ public struct ImportedFileContentReader: Sendable {
         var row: [String] = []
         var field = ""
         var quoted = false
+        var afterClosingQuote = false
         var index = text.startIndex
 
         while index < text.endIndex {
@@ -368,27 +369,42 @@ public struct ImportedFileContentReader: Sendable {
                         index = next
                     } else {
                         quoted = false
+                        afterClosingQuote = true
                     }
                 } else {
                     field.append(character)
                 }
-            } else if character == "\"" {
-                guard field.isEmpty else { throw ImportedFileReaderError.malformedCSV }
-                quoted = true
-            } else if character == delimiter {
-                row.append(field)
-                field = ""
-            } else if character == "\n" || character == "\r" || character == "\r\n" {
-                if character == "\r" {
-                    let next = text.index(after: index)
-                    if next < text.endIndex && text[next] == "\n" { index = next }
-                }
-                row.append(field)
-                rows.append(row)
-                row = []
-                field = ""
             } else {
-                field.append(character)
+                if afterClosingQuote,
+                   character != delimiter,
+                   character != "\n",
+                   character != "\r",
+                   character != "\r\n" {
+                    throw ImportedFileReaderError.malformedCSV
+                }
+
+                if character == "\"" {
+                    guard field.isEmpty, !afterClosingQuote else {
+                        throw ImportedFileReaderError.malformedCSV
+                    }
+                    quoted = true
+                } else if character == delimiter {
+                    row.append(field)
+                    field = ""
+                    afterClosingQuote = false
+                } else if character == "\n" || character == "\r" || character == "\r\n" {
+                    if character == "\r" {
+                        let next = text.index(after: index)
+                        if next < text.endIndex && text[next] == "\n" { index = next }
+                    }
+                    row.append(field)
+                    rows.append(row)
+                    row = []
+                    field = ""
+                    afterClosingQuote = false
+                } else {
+                    field.append(character)
+                }
             }
             index = text.index(after: index)
         }
