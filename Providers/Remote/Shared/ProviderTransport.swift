@@ -122,6 +122,7 @@ public actor ScriptedTransport: ProviderTransport {
     public enum Script: Sendable {
         case response(ProviderTransportResponse)
         case fail(ProviderRuntimeError)
+        case urlSessionCancelled
         case hang
     }
 
@@ -147,6 +148,8 @@ public actor ScriptedTransport: ProviderTransport {
             return response
         case .fail(let error):
             throw error
+        case .urlSessionCancelled:
+            throw URLError(.cancelled)
         case .hang:
             try await Task.sleep(nanoseconds: 60_000_000_000)
             throw ProviderRuntimeError.timeout

@@ -46,6 +46,8 @@ public struct HTTPChatProvider: LLMProvider {
             response = try await sendWithRetry(wire, request: request)
         } catch let error as ProviderRuntimeError {
             throw error
+        } catch let error as URLError where error.code == .cancelled {
+            throw ProviderRuntimeError.cancelled
         } catch is CancellationError {
             throw ProviderRuntimeError.cancelled
         } catch {
@@ -74,6 +76,8 @@ public struct HTTPChatProvider: LLMProvider {
                     }
                     continuation.finish()
                 } catch is CancellationError {
+                    continuation.finish(throwing: ProviderRuntimeError.cancelled)
+                } catch let error as URLError where error.code == .cancelled {
                     continuation.finish(throwing: ProviderRuntimeError.cancelled)
                 } catch let error as ProviderRuntimeError {
                     continuation.finish(throwing: error)
@@ -128,6 +132,8 @@ public struct HTTPChatProvider: LLMProvider {
                     throw error
                 }
             } catch is CancellationError {
+                throw ProviderRuntimeError.cancelled
+            } catch let error as URLError where error.code == .cancelled {
                 throw ProviderRuntimeError.cancelled
             } catch {
                 guard attempt < configuration.maxRetryAttempts else {
