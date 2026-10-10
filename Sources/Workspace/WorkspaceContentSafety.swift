@@ -1,0 +1,26 @@
+import Foundation
+
+/// Shared fail-closed content policy for workspace surfaces and Agent tools.
+public enum WorkspaceContentSafety {
+    private static let blockedNames: Set<String> = [
+        ".env", ".env.local", "credentials.json", "secrets.json", "api_keys.json",
+        "id_rsa", "id_ed25519"
+    ]
+    private static let protectedMarkers = ["credential", "secret", "token", "apikey"]
+    private static let secretPatterns = [
+        #"(?i)(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|private[_-]?key)[[:space:]]*[:=][[:space:]]*["']?[A-Za-z0-9/+=._-]{16,}"#,
+        #"\b(?:sk-[A-Za-z0-9]{16,}|xai-[A-Za-z0-9-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b"#,
+        #"-----BEGIN [A-Z ]*PRIVATE KEY-----"#,
+        #"(?i)\bBearer[[:space:]]+[A-Za-z0-9._-]{16,}"#
+    ]
+
+    public static func isProtectedPath(_ path: String) -> Bool {
+        path.split(separator: "/").map { String($0).lowercased() }.contains { component in
+            blockedNames.contains(component) || protectedMarkers.contains { component.contains($0) }
+        }
+    }
+
+    public static func containsPotentialSecret(_ text: String) -> Bool {
+        secretPatterns.contains { text.range(of: $0, options: .regularExpression) != nil }
+    }
+}

@@ -254,12 +254,7 @@ private enum WorkspaceToolSafety {
     }
 
     static func isProtectedFilename(_ path: String) -> Bool {
-        let components = path.split(separator: "/").map { String($0).lowercased() }
-        let blocked = [".env", ".env.local", "credentials.json", "secrets.json", "api_keys.json", "id_rsa", "id_ed25519"]
-        return components.contains { name in
-            blocked.contains(name)
-                || ["credential", "secret", "token", "apikey"].contains { marker in name.contains(marker) }
-        }
+        WorkspaceContentSafety.isProtectedPath(path)
     }
 
     static func validateFilename(_ path: String) throws {
@@ -269,15 +264,7 @@ private enum WorkspaceToolSafety {
     }
 
     static func containsPotentialSecret(_ text: String) -> Bool {
-        let patterns = [
-            #"(?i)(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|password|private[_-]?key)[[:space:]]*[:=][[:space:]]*["']?[A-Za-z0-9/+=._-]{16,}"#,
-            #"\b(?:sk-[A-Za-z0-9]{16,}|xai-[A-Za-z0-9-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b"#,
-            #"-----BEGIN [A-Z ]*PRIVATE KEY-----"#,
-            #"(?i)\bBearer[[:space:]]+[A-Za-z0-9._-]{16,}"#,
-        ]
-        return patterns.contains { pattern in
-            text.range(of: pattern, options: .regularExpression) != nil
-        }
+        WorkspaceContentSafety.containsPotentialSecret(text)
     }
 }
 

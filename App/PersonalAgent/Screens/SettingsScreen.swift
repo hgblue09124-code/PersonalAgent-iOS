@@ -1220,7 +1220,7 @@ private struct AgentOSStorageBrowserScreen: View {
             let store = try await ensureWorkspace()
             guard isAllowed(currentPath) else { throw AgentWorkspaceError.invalidPath(currentPath) }
             entries = try await store.listDirectory(at: currentPath)
-                .filter { isAllowed($0.relativePath) }
+                .filter { isAllowed($0.relativePath) && !WorkspaceContentSafety.isProtectedPath($0.relativePath) }
             status = "\(entries.count) entries · local workspace"
         } catch {
             entries = []
@@ -1234,6 +1234,7 @@ private struct AgentOSStorageBrowserScreen: View {
         defer { isBusy = false }
         do {
             guard isAllowed(path),
+                  !WorkspaceContentSafety.isProtectedPath(path),
                   readableExtensions.contains(URL(fileURLWithPath: path).pathExtension.lowercased()) else {
                 throw AgentWorkspaceError.invalidPath(path)
             }
@@ -1243,6 +1244,9 @@ private struct AgentOSStorageBrowserScreen: View {
                 throw AgentWorkspaceError.ioFailure("File is too large to preview (limit 512 KiB).")
             }
             let text = try await store.readFile(at: path)
+            guard !WorkspaceContentSafety.containsPotentialSecret(text) else {
+                throw AgentWorkspaceError.ioFailure("Sensitive content is not available in Storage Browser.")
+            }
             selectedFile = path
             editorText = text
             status = "Read \(metadata.byteCount) bytes; ready to edit."
@@ -1261,6 +1265,10 @@ private struct AgentOSStorageBrowserScreen: View {
         }
         guard editorText.utf8.count <= 512 * 1024 else {
             status = "Save rejected: text exceeds 512 KiB."
+            return
+        }
+        guard !WorkspaceContentSafety.containsPotentialSecret(editorText) else {
+            status = "Save rejected: sensitive content is not allowed in Storage Browser."
             return
         }
         isBusy = true
@@ -1286,6 +1294,7 @@ private struct AgentOSStorageBrowserScreen: View {
         newFileName = ""
         guard !name.isEmpty, !name.contains("/"), !name.contains("\\"),
               URL(fileURLWithPath: name).pathExtension.lowercased() == "md",
+              !WorkspaceContentSafety.isProtectedPath(name),
               isAllowed(currentPath) else {
             status = "Use a simple filename ending in .md."
             return
@@ -1326,7 +1335,8 @@ private struct AgentOSStorageBrowserScreen: View {
                 let (directory, depth) = queue.removeFirst()
                 guard isAllowed(directory) else { continue }
                 let children = try await store.listDirectory(at: directory)
-                for child in children where isAllowed(child.relativePath) {
+                for child in children where isAllowed(child.relativePath)
+                    && !WorkspaceContentSafety.isProtectedPath(child.relativePath) {
                     visited += 1
                     if child.isDirectory {
                         if depth < 5 { queue.append((child.relativePath, depth + 1)) }
@@ -1334,6 +1344,7 @@ private struct AgentOSStorageBrowserScreen: View {
                         let metadata = try await store.metadata(at: child.relativePath)
                         guard metadata.byteCount <= 256 * 1024 else { continue }
                         let text = try await store.readFile(at: child.relativePath)
+                        guard !WorkspaceContentSafety.containsPotentialSecret(text) else { continue }
                         if text.localizedCaseInsensitiveContains(needle) {
                             matches.append(child.relativePath)
                             if matches.count >= 50 { break }
