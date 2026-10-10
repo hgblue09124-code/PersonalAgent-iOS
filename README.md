@@ -53,6 +53,32 @@ Danh sách trên mô tả phạm vi sản phẩm; việc một khu vực có gia
 
 Các mục đã đánh dấu hoàn thành nói về thành phần nền trong mã nguồn, không phải chứng nhận rằng toàn bộ sản phẩm đã đạt chuẩn phát hành. Trạng thái CI và nghiệm thu có thể thay đổi theo từng commit.
 
+## Backlog tập trung — nguồn trạng thái duy nhất
+
+Từ ngày 10/10/2026, dùng checklist này làm nơi theo dõi công việc còn lại; không cần duy trì nhiều issue/PR cũ làm bảng tiến độ song song. **Đóng issue/PR cũ chỉ là dọn cách theo dõi, không có nghĩa các mục chưa tick đã hoàn thành.** Chỉ đánh dấu `[x]` khi có bằng chứng code/test/CI phù hợp; nghiệm thu thiết bị phải có kết quả thực tế.
+
+### Ưu tiên P0 — ổn định sản phẩm
+- [ ] **Provider → Chat end-to-end:** cấu hình credential an toàn; kiểm tra kết nối; gửi yêu cầu, stream delta, cancel, xử lý lỗi và phục hồi; xác minh OpenRouter `openrouter/free` bằng request thật.
+- [ ] **History, Memory, Skills và Agent Runtime:** kiểm tra luồng sử dụng thật xuyên suốt; xác minh dữ liệu được lưu/đọc lại, skill được gọi đúng và kết quả thực thi được kiểm chứng.
+- [ ] **GGUF trên iPhone 12 Pro Max:** import file thật, kiểm tra header/metadata, load → generate → stream → cancel → unload, phục hồi sau lỗi và đo tốc độ/nhiệt độ. Không coi fixture hoặc CI là nghiệm thu thiết bị.
+- [ ] **Bảo mật dữ liệu:** giữ credential trong Keychain; không log secret; chặn đường dẫn/nội dung nhạy cảm nhất quán ở UI, runtime, storage và sync.
+
+### Ưu tiên P1 — AgentOS workspace
+- [ ] **Storage:** duyệt, tìm kiếm, đọc, sửa và xác minh dữ liệu persistent qua API có ranh giới rõ; từ chối path traversal, secret và thao tác ngoài workspace.
+- [ ] **Terminal Sandbox + GitHub Sync:** quyền tối thiểu, preview thay đổi, đồng bộ hai chiều, xử lý conflict, rollback và báo cáo kết quả có bằng chứng.
+- [ ] **Kiến trúc GGUF:** tách parser định dạng dùng chung khỏi provider/storage; giữ dependency direction một chiều và có test architecture/import-boundary.
+
+### Ưu tiên P2 — chất lượng phát hành
+- [ ] Giữ M3, architecture/import-boundary, package tests và Apple Native Build & Unsigned IPA xanh trên commit cuối cùng.
+- [ ] Chạy regression test cho từng sửa lỗi; một tác vụ logic = một commit logic.
+- [ ] Hoàn tất smoke test trên thiết bị thật và ghi lại model, thiết bị/iOS, bước thử, kết quả, lỗi còn lại trước khi tuyên bố beta/production-ready.
+
+### Quy tắc cập nhật trạng thái
+1. Đây là backlog sản phẩm tập trung; các mục chưa tick vẫn là việc cần làm dù issue/PR cũ đã đóng.
+2. Mỗi mục chỉ được tick khi có link commit/PR, test và CI tương ứng; mục thiết bị cần bằng chứng kiểm thử thực tế.
+3. Khi bắt đầu việc mới, chọn một mục chưa tick, thực hiện thay đổi tối thiểu có kiểm thử, cập nhật README sau commit và xác minh gate.
+4. Không tạo lại issue/PR chỉ để sao chép checklist; chỉ mở lại khi cần thảo luận hoặc review code cụ thể.
+
 ## Nền tảng và phát triển
 
 - **Nền tảng:** iOS, Swift, SwiftUI.
