@@ -54,7 +54,7 @@ struct PersonalAgentApp: App {
     private func initialize() async {
         initializationError = nil
         do {
-            let root = try await M8CompositionRoot()
+            let root = try await M8CompositionRoot(workspaceToolsEnabled: true)
             let state = await root.session.currentState()
             let newSession = KernelSession(composition: root, state: state)
             session = newSession

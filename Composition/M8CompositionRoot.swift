@@ -494,7 +494,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         attemptStore: (any ExecutionAttemptStore)? = nil,
         checkpointStore: (any RunCheckpointStore)? = nil,
         journalStore: (any StateJournalStore)? = nil,
-        mutationEvidenceStore: (any MutationEvidenceStore)? = nil
+        mutationEvidenceStore: (any MutationEvidenceStore)? = nil,
+        workspaceToolsEnabled: Bool = false
     ) async throws {
         let rootDirectoryURL: URL
         if let storeDirectoryURL {
@@ -578,7 +579,14 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         for mod in modules {
             try await moduleCatalog.register(mod)
         }
-        for tool in tools {
+        var registeredTools = tools
+        if workspaceToolsEnabled {
+            let workspace = LocalAgentWorkspace(rootURL: rootDirectoryURL)
+            try await workspace.prepare()
+            registeredTools.append(WorkspaceReadTool(workspace: workspace))
+            registeredTools.append(WorkspaceWriteTool(workspace: workspace))
+        }
+        for tool in registeredTools {
             try await moduleCatalog.register(ToolModule(tool: tool))
         }
 
