@@ -8,6 +8,13 @@ import PAImportGateway
 import PAWorkspace
 import UIKit
 
+private struct OpenRouterModelOption: Identifiable {
+    let id: String
+    let name: String
+
+    var title: String { name == id ? id : "\(name) · \(id)" }
+}
+
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImportingGGUF = false
@@ -27,7 +34,10 @@ struct SettingsScreen: View {
     @AppStorage("provider.execution.mode") private var executionMode = UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local"
     @State private var remoteProvider = UserDefaults.standard.string(forKey: "provider.remote.id") ?? "openai"
     @State private var compatibleEndpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? ""
-    @State private var compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "compatible"
+    @State private var compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "openrouter/free"
+    @State private var openRouterModels: [OpenRouterModelOption] = []
+    @State private var isRefreshingOpenRouterModels = false
+    @State private var openRouterModelsMessage: String?
     @State private var apiKey = ""
     @State private var credentialState: CredentialState = .unknown
     @State private var connectionState: ConnectionState = .idle
@@ -334,13 +344,51 @@ struct SettingsScreen: View {
                     }
 
                     if remoteProvider == "openai-compatible" {
+                        HStack {
+                            Button("Use OpenRouter") {
+                                compatibleEndpoint = "https://openrouter.ai/api/v1/chat/completions"
+                                compatibleModel = "openrouter/free"
+                                UserDefaults.standard.set(compatibleEndpoint, forKey: "provider.compatible.endpoint")
+                                UserDefaults.standard.set(compatibleModel, forKey: "provider.compatible.model")
+                                openRouterModelsMessage = nil
+                            }
+                            .buttonStyle(.bordered)
+                            Spacer()
+                            Button {
+                                Task { await refreshOpenRouterModels() }
+                            } label: {
+                                if isRefreshingOpenRouterModels { ProgressView() }
+                                else { Label("Refresh models", systemImage: "arrow.clockwise") }
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(isRefreshingOpenRouterModels || (apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && credentialState != .saved))
+                        }
                         TextField("Chat completions endpoint", text: $compatibleEndpoint)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .keyboardType(.URL)
-                        TextField("Model ID", text: $compatibleModel)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
+                        if compatibleEndpoint.localizedCaseInsensitiveContains("openrouter.ai") && !openRouterModels.isEmpty {
+                            Picker("Model", selection: $compatibleModel) {
+                                ForEach(openRouterModels) { model in
+                                    Text(model.title).tag(model.id)
+                                }
+                            }
+                            .onChange(of: compatibleModel) { _, value in
+                                UserDefaults.standard.set(value, forKey: "provider.compatible.model")
+                            }
+                            Text("Selected model ID: \(compatibleModel)")
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                        } else {
+                            TextField("Model ID", text: $compatibleModel)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                        }
+                        if let openRouterModelsMessage {
+                            Text(openRouterModelsMessage)
+                                .font(.caption)
+                                .foregroundStyle(openRouterModelsMessage.hasPrefix("Loaded") ? .green : .secondary)
+                        }
                     }
 
                     SecureField("API Key", text: $apiKey)
@@ -833,6 +881,76 @@ private extension SettingsScreen {
             Task { await session.refresh() }
         } catch {
             credentialState = .error("Could not delete API key.")
+        }
+    }
+
+    @MainActor
+    func refreshOpenRouterModels() async {
+        let endpoint = compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard endpoint.localizedCaseInsensitiveContains("openrouter.ai") else {
+            openRouterModelsMessage = "Set the endpoint to OpenRouter before refreshing its model catalog."
+            return
+        }
+        let entered = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let token: String
+        if !entered.isEmpty {
+            token = entered
+        } else {
+            do {
+                guard let data = try KeychainSecretStore().load(account: credentialAccount),
+                      let saved = String(data: data, encoding: .utf8), !saved.isEmpty else {
+                    openRouterModelsMessage = "Save an OpenRouter API key first."
+                    return
+                }
+                token = saved
+            } catch {
+                openRouterModelsMessage = "Could not read the saved API key from Keychain."
+                return
+            }
+        }
+        isRefreshingOpenRouterModels = true
+        openRouterModelsMessage = nil
+        defer { isRefreshingOpenRouterModels = false }
+        do {
+            let response = try await SecurityNetworkTransport(network: URLSessionNetworkAccess()).send(
+                ProviderTransportRequest(
+                    url: "https://openrouter.ai/api/v1/models",
+                    method: "GET",
+                    headers: ["Authorization": "Bearer \(token)", "Accept": "application/json"]
+                )
+            )
+            guard (200..<300).contains(response.statusCode),
+                  let payload = try JSONSerialization.jsonObject(with: response.body) as? [String: Any],
+                  let rows = payload["data"] as? [[String: Any]] else {
+                openRouterModelsMessage = "OpenRouter model catalog request failed (HTTP \(response.statusCode))."
+                return
+            }
+            let catalogModels = rows.compactMap { row -> OpenRouterModelOption? in
+                guard let id = row["id"] as? String, !id.isEmpty else { return nil }
+                let name = (row["name"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                return OpenRouterModelOption(id: id, name: (name?.isEmpty == false ? name! : id))
+            }
+            // The free router is a first-class model alias and may not be returned
+            // by the concrete-model catalog endpoint, so always expose it explicitly.
+            let freeRouter = OpenRouterModelOption(id: "openrouter/free", name: "Free Models Router")
+            let uniqueCatalog = catalogModels.filter { $0.id != freeRouter.id }
+            openRouterModels = [freeRouter] + Array(
+                uniqueCatalog
+                    .sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
+                    .prefix(499)
+            )
+            guard !openRouterModels.isEmpty else {
+                openRouterModelsMessage = "OpenRouter returned no usable model IDs."
+                return
+            }
+            if !openRouterModels.contains(where: { $0.id == compatibleModel }) {
+                compatibleModel = openRouterModels.first?.id ?? compatibleModel
+            }
+            UserDefaults.standard.set(compatibleEndpoint, forKey: "provider.compatible.endpoint")
+            UserDefaults.standard.set(compatibleModel, forKey: "provider.compatible.model")
+            openRouterModelsMessage = "Loaded \(openRouterModels.count) models. Save configuration to apply it to chat."
+        } catch {
+            openRouterModelsMessage = "Could not refresh OpenRouter models. Check network and API key."
         }
     }
 
