@@ -6,6 +6,8 @@ import PAComposition
 import PAProviders
 import PASkills
 import PARuntime
+import PASecurity
+import PAWorkspace
 
 @MainActor
 final class KernelSession: ObservableObject {
@@ -268,6 +270,72 @@ final class KernelSession: ObservableObject {
 
     func terminalMemoryStatus() -> String {
         "Memory records loaded: \(memoryRecords.count)\n"
+    }
+
+    func terminalSyncStatus() -> String {
+        let defaults = UserDefaults.standard
+        let owner = defaults.string(forKey: "github.sync.owner")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let repository = defaults.string(forKey: "github.sync.repository")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let branch = defaults.string(forKey: "github.sync.branch")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !owner.isEmpty, !repository.isEmpty, !branch.isEmpty else {
+            return "GitHub sync is not configured. Open Settings → GitHub repository sync.\n"
+        }
+        do {
+            guard try KeychainSecretStore().load(account: "github.repository.token") != nil else {
+                return "GitHub repository is configured, but its Keychain token is missing.\n"
+            }
+            return "GitHub sync configured: \(owner)/\(repository) @ \(branch). Token is stored in Keychain.\n"
+        } catch {
+            return "GitHub credential status unavailable; check Keychain access.\n"
+        }
+    }
+
+    /// Shared sync entry point for Settings and Terminal. Always sync the same visible
+    /// AgentOS workspace; never print or persist the GitHub token.
+    func syncGitHubWorkspace() async -> String {
+        let defaults = UserDefaults.standard
+        let owner = defaults.string(forKey: "github.sync.owner")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let repository = defaults.string(forKey: "github.sync.repository")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let branch = defaults.string(forKey: "github.sync.branch")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !owner.isEmpty, !repository.isEmpty, !branch.isEmpty else {
+            return "Enter repository owner, repository name and branch in Settings.\n"
+        }
+        do {
+            guard let tokenData = try KeychainSecretStore().load(account: "github.repository.token"),
+                  let token = String(data: tokenData, encoding: .utf8),
+                  !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                return "Save a GitHub token with repository Contents read/write permission first.\n"
+            }
+            let location = try GitHubRepositoryLocation(owner: owner, repository: repository, branch: branch)
+            let workspace = try LocalAgentWorkspace.documents()
+            try await workspace.prepare()
+            let appSupport = try FileManager.default.url(
+                for: .applicationSupportDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true
+            )
+            let stateIdentity = "\(location.owner)/\(location.repository)@\(location.branch)"
+            let stateName = Data(stateIdentity.utf8).base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+            let stateURL = appSupport
+                .appendingPathComponent("PersonalAgent/GitHubSync", isDirectory: true)
+                .appendingPathComponent(stateName + ".json", isDirectory: false)
+            let client = try GitHubRepositorySyncClient(
+                location: location,
+                stateURL: stateURL,
+                tokenProvider: { token }
+            )
+            let result = try await client.synchronize(workspaceURL: workspace.rootURL)
+            return "Sync complete · \(result.commitSHA.prefix(7)) · ↑\(result.uploadedPaths.count) ↓\(result.downloadedPaths.count) −\(result.deletedPaths.count)\n"
+        } catch GitHubRepositorySyncError.remoteConflict {
+            return "Sync conflict: local and remote changed the same file. Resolve it, then sync again.\n"
+        } catch GitHubRepositorySyncError.authenticationRequired {
+            return "GitHub authentication required. Save a valid repository token.\n"
+        } catch {
+            return "Sync failed safely: \(error.localizedDescription)\n"
+        }
     }
 
     func runFromTerminal(_ statement: String) async -> String {
