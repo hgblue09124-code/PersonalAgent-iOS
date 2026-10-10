@@ -626,9 +626,9 @@ struct M9RealProviderSliceTests {
             providerID: OpenAICompatibleProviderBoundary.providerID,
             endpointURL: "https://openrouter.ai/api/v1/chat/completions",
             defaultModel: model,
-            credential: credential,
             timeoutNanoseconds: 45_000_000_000,
-            maxRetryAttempts: 0
+            maxRetryAttempts: 0,
+            credential: credential
         )
         let provider = OpenAICompatibleProvider(
             transport: SecurityNetworkTransport(network: URLSessionNetworkAccess()),
