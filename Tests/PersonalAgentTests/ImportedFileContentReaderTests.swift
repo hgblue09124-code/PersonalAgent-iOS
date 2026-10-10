@@ -15,6 +15,29 @@ final class ImportedFileContentReaderTests: XCTestCase {
         XCTAssertEqual(result.csvRows, [["name", "description"], ["agent", "reads, safely"]])
     }
 
+    func testCSVRejectsCharactersAfterClosingQuoteAndAcceptsEscapedQuotes() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+
+        let valid = base.appendingPathComponent("valid.csv")
+        try "name,description\nagent,\"reads \"\"safely\"\"\"\n".write(to: valid, atomically: true, encoding: .utf8)
+        let validRecord = try await store.importFile(from: valid)
+        let parsed = try await ImportedFileContentReader().read(validRecord, from: store)
+        XCTAssertEqual(parsed.csvRows, [["name", "description"], ["agent", "reads \"safely\""]])
+
+        let malformed = base.appendingPathComponent("malformed.csv")
+        try "name,description\nagent,\"closed\"suffix\n".write(to: malformed, atomically: true, encoding: .utf8)
+        let malformedRecord = try await store.importFile(from: malformed)
+        do {
+            _ = try await ImportedFileContentReader().read(malformedRecord, from: store)
+            XCTFail("Characters after a closing quote must be rejected")
+        } catch let error as ImportedFileReaderError {
+            XCTAssertEqual(error, .malformedCSV)
+        }
+    }
+
     func testReadsCommonSourceAndConfigurationFormatsAsPlainText() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
