@@ -69,9 +69,8 @@ public struct CommandRegistry: Sendable {
     }
 
     private static func bounded(_ value: String) -> String {
-        let bytes = Array(value.utf8)
-        guard bytes.count > maximumOutputBytes else { return value }
-        let prefix = String(decoding: bytes.prefix(maximumOutputBytes), as: UTF8.self)
+        guard value.utf8.count > maximumOutputBytes else { return value }
+        let prefix = String(decoding: value.utf8.prefix(maximumOutputBytes), as: UTF8.self)
         return prefix + "\n[output truncated at 64 KiB]\n"
     }
 }
