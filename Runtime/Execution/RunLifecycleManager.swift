@@ -140,6 +140,26 @@ public actor RunLifecycleManager {
         }
 
         let cycleIndex = record.currentCycle + 1
+        guard cycleIndex <= maxCycles else {
+            let reason = "Maximum run cycles (\(maxCycles)) exceeded"
+            let evaluation = Evaluation(goalID: goalID, disposition: .abort, reason: reason)
+            try await commitStateUpdate(
+                runID: runID,
+                goalID: goalID,
+                traceID: traceID,
+                targetStatus: .aborted,
+                disposition: .abort,
+                reason: reason,
+                evidence: [
+                    "maxCycles": String(maxCycles),
+                    "currentCycle": String(record.currentCycle)
+                ]
+            )
+            record.status = .failed
+            record.updatedAt = Date()
+            try await runStore.save(record)
+            return evaluation
+        }
         record.currentCycle = cycleIndex
         record.status = .running
         try await runStore.save(record)

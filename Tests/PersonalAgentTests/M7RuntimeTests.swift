@@ -260,4 +260,39 @@ struct M7RuntimeTests {
         #expect(runRecord != nil)
         #expect(runtimeGoal?.status.rawValue == runRecord?.status.rawValue || runRecord?.status == .completed || runRecord?.status == .failed)
     }
+
+    @Test("Run lifecycle aborts when maximum cycle count is exceeded")
+    func testMaximumCycleCountIsEnforced() async throws {
+        struct ContinueEvaluator: Evaluating {
+            func evaluate(goalID: GoalID, observations: [Observation]) async throws -> Evaluation {
+                Evaluation(goalID: goalID, disposition: .continue, reason: "Continue for next cycle")
+            }
+        }
+
+        let composition = try await M7CompositionRoot()
+        let goal = Goal(statement: "Bounded cycle test")
+        try await composition.runtime.submit(goal: goal)
+        let manager = RunLifecycleManager(
+            runtime: composition.runtime,
+            runStore: composition.runStore,
+            checkpointStore: composition.checkpointStore,
+            journalStore: composition.journalStore,
+            executionBoundary: composition.executionBoundary,
+            eventLog: composition.eventLog,
+            logger: composition.logger,
+            evaluator: ContinueEvaluator(),
+            maxCycles: 1
+        )
+        let record = try await manager.createRun(goalID: goal.id)
+        let lease = CapabilityLease(runID: record.runID, maxStepCount: 10)
+
+        let first = try await manager.runCycle(runID: record.runID, lease: lease)
+        #expect(first.disposition == .continue)
+        let second = try await manager.runCycle(runID: record.runID, lease: lease)
+        #expect(second.disposition == .abort)
+        #expect(second.reason.contains("Maximum run cycles"))
+        let stored = try await composition.runStore.record(for: record.runID)
+        #expect(stored?.status == .failed)
+        #expect(stored?.currentCycle == 1)
+    }
 }
