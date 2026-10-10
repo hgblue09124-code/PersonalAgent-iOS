@@ -202,3 +202,26 @@ final class ImportedFileContentReaderTests: XCTestCase {
         XCTAssertEqual(extracted.csvRows, [["name", "description"], ["agent", "persistent content"]])
     }
 }
+
+
+extension ImportedFileContentReaderTests {
+    func testOCRThumbnailDimensionIsBounded() throws {
+        XCTAssertEqual(
+            try ImportedFileContentReader.boundedOCRPixelDimension(width: 12_000, height: 8_000),
+            2_048
+        )
+        XCTAssertEqual(
+            try ImportedFileContentReader.boundedOCRPixelDimension(width: 1_000, height: 800),
+            1_000
+        )
+    }
+
+    func testOCRRejectsOverflowingOrExcessiveSourceDimensions() {
+        XCTAssertThrowsError(
+            try ImportedFileContentReader.boundedOCRPixelDimension(width: Int64.max, height: 2)
+        )
+        XCTAssertThrowsError(
+            try ImportedFileContentReader.boundedOCRPixelDimension(width: 200_000_000, height: 1)
+        )
+    }
+}
