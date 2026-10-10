@@ -15,7 +15,9 @@ public enum WorkspaceContentSafety {
     ]
 
     public static func isProtectedPath(_ path: String) -> Bool {
-        path.split(separator: "/").map { String($0).lowercased() }.contains { component in
+        // Normalize cross-platform separators before applying policy.
+        let normalized = path.replacingOccurrences(of: "\\", with: "/")
+        return normalized.split(separator: "/").map { String($0).lowercased() }.contains { component in
             blockedNames.contains(component) || protectedMarkers.contains { component.contains($0) }
         }
     }
