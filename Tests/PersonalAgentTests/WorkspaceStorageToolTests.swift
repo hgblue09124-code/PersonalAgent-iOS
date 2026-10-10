@@ -53,6 +53,30 @@ final class WorkspaceStorageToolTests: XCTestCase {
         }
     }
 
+    func testSearchSkipsProtectedSymlinkDirectories() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let external = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: root)
+            try? FileManager.default.removeItem(at: external)
+        }
+
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        try FileManager.default.createDirectory(at: external, withIntermediateDirectories: true)
+        try "needle".write(to: external.appendingPathComponent("private.md"), atomically: true, encoding: .utf8)
+        try FileManager.default.createSymbolicLink(
+            at: root.appendingPathComponent("workspace/secrets", isDirectory: true),
+            withDestinationURL: external
+        )
+
+        let reader = WorkspaceReadTool(workspace: workspace)
+        let result = try await reader.run(argumentsJSON: #"{"operation":"search","query":"needle"}"#)
+        let data = try XCTUnwrap(result.data(using: .utf8))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(object["matches"] as? [String], [])
+    }
+
     func testWriteToolRejectsSecretLikeContent() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
