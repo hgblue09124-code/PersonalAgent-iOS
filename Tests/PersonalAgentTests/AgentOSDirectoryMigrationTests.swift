@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-import PAComposition
+import PAWorkspace
 
 @Suite("AgentOS directory migration")
 struct AgentOSDirectoryMigrationTests {
@@ -21,6 +21,29 @@ struct AgentOSDirectoryMigrationTests {
         #expect(try String(contentsOf: destination.appendingPathComponent("memory/old.md"), encoding: .utf8) == "old-only")
         #expect(try String(contentsOf: destination.appendingPathComponent("memory/conflict.md"), encoding: .utf8) == "user-value")
         #expect(try String(contentsOf: source.appendingPathComponent("memory/conflict.md"), encoding: .utf8) == "legacy-value")
+    }
+
+    @Test func visibleRootMergesBothLegacyLocationsWithoutReplacingUserFiles() throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: base) }
+        let documents = base.appendingPathComponent("Documents", isDirectory: true)
+        let oldTerminal = base.appendingPathComponent("Support/AgentOS", isDirectory: true)
+        let oldRuntime = base.appendingPathComponent("Support/PersonalAgent/M8Product", isDirectory: true)
+        try FileManager.default.createDirectory(at: oldTerminal, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: oldRuntime, withIntermediateDirectories: true)
+        try "terminal-state".write(to: oldTerminal.appendingPathComponent("terminal.md"), atomically: true, encoding: .utf8)
+        try "runtime-state".write(to: oldRuntime.appendingPathComponent("runtime.md"), atomically: true, encoding: .utf8)
+
+        let root = try AgentOSStorageLocation.prepareVisibleRoot(
+            documentsDirectory: documents,
+            legacyRoots: [oldTerminal, oldRuntime]
+        )
+
+        #expect(root.lastPathComponent == "AgentOS")
+        #expect(try String(contentsOf: root.appendingPathComponent("terminal.md"), encoding: .utf8) == "terminal-state")
+        #expect(try String(contentsOf: root.appendingPathComponent("runtime.md"), encoding: .utf8) == "runtime-state")
+        #expect(FileManager.default.fileExists(atPath: oldTerminal.appendingPathComponent("terminal.md").path))
+        #expect(FileManager.default.fileExists(atPath: oldRuntime.appendingPathComponent("runtime.md").path))
     }
 
     @Test func skipsSymbolicLinksAndLeavesSourceIntact() throws {

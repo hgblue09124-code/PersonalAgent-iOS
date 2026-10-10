@@ -102,13 +102,13 @@ struct TerminalScreen: View {
     private func prepareSandbox() async {
         guard terminal == nil else { return }
         do {
-            let workspace = try LocalAgentWorkspace.applicationSupport()
+            let workspace = try LocalAgentWorkspace.documents()
             try await workspace.prepare()
             self.workspace = workspace
             terminal = TerminalSession(context: CommandContext(workspace: workspace))
             let rootName = await workspace.rootURL.lastPathComponent
             status = "Sandbox ready · \(rootName)"
-            transcript.append(TerminalLine(text: "Workspace isolated under Application Support. Type help to list commands.", kind: .output))
+            transcript.append(TerminalLine(text: "Workspace shared with the visible AgentOS folder. Type help to list commands.", kind: .output))
         } catch {
             status = "Sandbox unavailable"
             transcript.append(TerminalLine(text: error.localizedDescription, kind: .error))

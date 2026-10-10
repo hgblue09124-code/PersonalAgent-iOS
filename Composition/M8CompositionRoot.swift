@@ -7,6 +7,7 @@ import PAProvidersGrok
 import PAProvidersOpenAI
 import PAProvidersOpenAICompatible
 import PAStorageModels
+import PAWorkspace
 import PAMemory
 import PAStorageMemory
 import PAModules
@@ -498,19 +499,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let rootDirectoryURL: URL
         if let storeDirectoryURL {
             rootDirectoryURL = storeDirectoryURL
-        } else if let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            // Keep the user's AgentOS state in the app's visible Documents container.
-            // iOS exposes this directory in Files when file sharing is enabled in Info.plist.
-            let visibleRoot = documents.appendingPathComponent("AgentOS", isDirectory: true)
-            if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-                let legacyRoot = appSupport.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
-                try AgentOSDirectoryMigration.mergeMissingItems(from: legacyRoot, to: visibleRoot)
-            }
-            rootDirectoryURL = visibleRoot
-        } else if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            rootDirectoryURL = appSupport.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
         } else {
-            rootDirectoryURL = FileManager.default.temporaryDirectory.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
+            rootDirectoryURL = try AgentOSStorageLocation.visibleRootURL()
         }
 
         let persistenceContainer = try ProductPersistenceContainer(baseDirectoryURL: rootDirectoryURL)
