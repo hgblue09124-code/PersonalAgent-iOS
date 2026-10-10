@@ -1,6 +1,5 @@
 import Foundation
 import PAKernel
-import PARuntime
 
 public protocol SkillExecutor: Sendable {
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String
