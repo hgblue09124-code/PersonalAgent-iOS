@@ -8,12 +8,27 @@ public struct AgentCommand: Sendable, Equatable {
     public init(name: String, arguments: [String] = []) { self.name = name; self.arguments = arguments }
 }
 
-public enum CommandError: Error, Sendable, Equatable {
+public enum CommandError: Error, Sendable, Equatable, LocalizedError {
     case emptyCommand
     case unterminatedQuote
     case invalidEscape
     case unknownCommand(String)
     case invalidArguments(String)
+
+    public var errorDescription: String? {
+        switch self {
+        case .emptyCommand:
+            return "Enter a command."
+        case .unterminatedQuote:
+            return "Unterminated quote. Close the quote and try again."
+        case .invalidEscape:
+            return "The command ends with an incomplete escape. Add the escaped character or remove the trailing backslash."
+        case .unknownCommand(let name):
+            return "Unknown command: \(name). Type 'help' to list available commands."
+        case .invalidArguments(let usage):
+            return "Invalid arguments. Usage: \(usage)"
+        }
+    }
 }
 
 public struct CommandResult: Sendable, Equatable {
