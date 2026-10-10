@@ -252,20 +252,13 @@ public actor RunLifecycleManager {
         try await waitUntilRunnable()
 
         // 8. Evaluation & Reflection
-        var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
-        // Answer-only runs have no external execution target. Their authoritative
-        // user-visible result is the reasoning artifact, not the generic executor summary.
-        if proposals.allSatisfy({ $0.toolID == nil }) {
-            let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !answer.isEmpty else {
-                throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output")
-            }
-            evaluation = Evaluation(
-                goalID: evaluation.goalID,
-                disposition: evaluation.disposition,
-                reason: answer
-            )
-        }
+        let evaluated = try await evaluator.evaluate(goalID: goalID, observations: observations)
+        let evaluation = try RunResultPresentation.makeUserVisible(
+            evaluation: evaluated,
+            reasoningSummary: reasoningResult.summary,
+            proposals: proposals,
+            observations: observations
+        )
         let reflection = try await reflector.reflect(goalID: goalID, observations: observations, evaluation: evaluation)
 
         try Task.checkCancellation()
@@ -391,5 +384,63 @@ public actor RunLifecycleManager {
         journalEntry.status = .finalized
         journalEntry.updatedAt = Date()
         try await journalStore.saveEntry(journalEntry)
+    }
+}
+
+
+/// Chooses a user-facing result only from the artifact appropriate to the run.
+/// Failed/aborted runs must never surface a model answer or tool output as success.
+enum RunResultPresentation {
+    static func makeUserVisible(
+        evaluation: Evaluation,
+        reasoningSummary: String,
+        proposals: [ActionProposal],
+        observations: [Observation]
+    ) throws -> Evaluation {
+        if proposals.allSatisfy({ $0.toolID == nil }) {
+            guard evaluation.disposition == .complete else {
+                return evaluation
+            }
+            let answer = reasoningSummary.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !answer.isEmpty else {
+                throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output")
+            }
+            return Evaluation(
+                goalID: evaluation.goalID,
+                disposition: evaluation.disposition,
+                reason: answer
+            )
+        }
+
+        guard evaluation.disposition == .complete else {
+            let failures = observations
+                .filter { !$0.succeeded }
+                .map { $0.summary.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+            guard !failures.isEmpty else { return evaluation }
+            return Evaluation(
+                goalID: evaluation.goalID,
+                disposition: evaluation.disposition,
+                reason: failures.joined(separator: "\n")
+            )
+        }
+
+        let toolActionIDs = Set(proposals.filter { $0.toolID != nil }.map(\.actionID))
+        let toolObservations = observations.filter { toolActionIDs.contains($0.actionID) }
+        guard !toolActionIDs.isEmpty,
+              toolObservations.count == toolActionIDs.count,
+              toolObservations.allSatisfy(\.succeeded) else {
+            throw KernelError.invalidStateUpdate("Agent marked tool execution complete without verified results")
+        }
+        let results = toolObservations
+            .map { $0.summary.trimmingCharacters(in: .whitespacesAndNewlines) }
+        guard results.allSatisfy({ !$0.isEmpty }) else {
+            throw KernelError.invalidStateUpdate("Verified tool execution returned an empty result")
+        }
+        return Evaluation(
+            goalID: evaluation.goalID,
+            disposition: evaluation.disposition,
+            reason: results.joined(separator: "\n")
+        )
     }
 }
