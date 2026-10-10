@@ -252,8 +252,8 @@ private actor ScriptedGitHubTransport: GitHubSyncHTTPTransport {
         try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
         try FileManager.default.createSymbolicLink(
-            at: workspace.appendingPathComponent("skills"),
-            withDestinationURL: outside
+            atPath: workspace.appendingPathComponent("skills").path,
+            withDestinationPath: outside.path
         )
 
         let transport = RecordingGitHubTransport()
