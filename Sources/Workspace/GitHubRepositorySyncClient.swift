@@ -401,7 +401,10 @@ public actor GitHubRepositorySyncClient {
                     guard shouldDescendDirectory(path) else { continue }
                     try walk(child, relative: path)
                 } else if type == .typeSymbolicLink {
-                    if isSyncablePath(path) { throw GitHubRepositorySyncError.unsafePath(path) }
+                    // A non-syncable symlink directory can still redirect a later remote
+                    // download (for example skills/file.md) outside the workspace.
+                    // Fail closed on every symlink before any network or filesystem writes.
+                    throw GitHubRepositorySyncError.unsafePath(path)
                 } else if type == .typeRegular {
                     guard isSyncablePath(path) else { continue }
                     let size = (attributes[.size] as? NSNumber)?.int64Value ?? 0
