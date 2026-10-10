@@ -24,6 +24,7 @@ let package = Package(
         .library(name: "PAStorage", targets: ["PAStorage"]),
         .library(name: "PAStorageModels", targets: ["PAStorageModels"]),
         .library(name: "PAImportGateway", targets: ["PAImportGateway"]),
+        .library(name: "PAGGUF", targets: ["PAGGUF"]),
         .library(name: "PAMemory", targets: ["PAMemory"]),
         .library(name: "PAStorageMemory", targets: ["PAStorageMemory"]),
         .library(name: "PAWorkspace", targets: ["PAWorkspace"]),
@@ -82,8 +83,13 @@ let package = Package(
             path: "Sources/ImportGateway"
         ),
         .target(
+            name: "PAGGUF",
+            dependencies: [],
+            path: "Sources/ModelFormats/GGUF"
+        ),
+        .target(
             name: "PAStorageModels",
-            dependencies: ["PAKernel", "PAProviders", "PAProvidersLocal"],
+            dependencies: ["PAKernel", "PAProviders", "PAGGUF"],
             path: "Storage/Models"
         ),
         .target(
@@ -137,6 +143,7 @@ let package = Package(
                 "PAProvidersRemote",
                 "PAProviders",
                 "PAKernel",
+                "PAGGUF",
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
             path: "Providers/Local",
@@ -217,6 +224,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
+                "PAGGUF",
                 "PATools",
                 "PAModules",
                 "PASkills",

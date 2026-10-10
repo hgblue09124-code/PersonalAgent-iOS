@@ -41,6 +41,12 @@ struct ArchitectureManifestTests {
         #expect(fromEnum == ArchitectureManifest.agencyLoop)
     }
 
+    @Test func storageUsesSharedGGUFFormatInsteadOfConcreteProvider() {
+        #expect(ArchitectureManifest.allowedImports["PAStorageModels"]?.contains("PAGGUF") == true)
+        #expect(ArchitectureManifest.allowedImports["PAStorageModels"]?.contains("PAProvidersLocal") != true)
+        #expect(ArchitectureManifest.allowedImports["PAProvidersLocal"]?.contains("PAGGUF") == true)
+    }
+
     @Test func runtimeBoundaryIsExplicit() {
         #expect(ArchitectureManifest.allowedImports["PARuntime"]?.contains("PAKernel") == true)
         #expect(ArchitectureManifest.allowedImports["PAComposition"]?.contains("PARuntime") == true)

@@ -1,7 +1,7 @@
 import Foundation
 import PAKernel
 import PAProviders
-import PAProvidersLocal
+import PAGGUF
 
 /// Internal persistent index state for local model metadata and active selection.
 private struct LocalModelIndex: Codable, Sendable {
