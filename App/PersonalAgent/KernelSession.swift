@@ -298,11 +298,18 @@ final class KernelSession: ObservableObject {
                 throw DevModelDownloadError.checksumMismatch(expected: expectedSHA256, actual: digest)
             }
 
+            // URLSession download URLs are temporary implementation files and may not end in .gguf.
+            // Stage the verified bytes under a .gguf filename before passing them through strict storage validation.
+            let stagedModelURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("download-\(UUID().uuidString)")
+                .appendingPathExtension("gguf")
+            try FileManager.default.moveItem(at: temporaryURL, to: stagedModelURL)
+            defer { try? FileManager.default.removeItem(at: stagedModelURL) }
+
             _ = try await composition.localModelStorage.importModel(
-                from: temporaryURL,
+                from: stagedModelURL,
                 name: "Qwen2.5-0.5B-Instruct Q4_K_M (Dev)"
             )
-            try? FileManager.default.removeItem(at: temporaryURL)
             devModelDownloadProgress = 1
             await refresh()
         } catch {
