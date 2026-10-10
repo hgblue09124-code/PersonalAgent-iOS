@@ -67,7 +67,7 @@ struct TerminalScreen: View {
 
             HStack(alignment: .bottom, spacing: 8) {
                 Text("›").font(.system(.title2, design: .monospaced, weight: .bold)).foregroundStyle(.green)
-                TextField("help, ls, cat, find, grep…", text: $command, axis: .vertical)
+                TextField("help, status, agent run…, skills list…", text: $command, axis: .vertical)
                     .font(.system(.body, design: .monospaced))
                     .lineLimit(1...4)
                     .focused($commandFocused)
@@ -110,7 +110,7 @@ struct TerminalScreen: View {
             registry = makeRuntimeRegistry(session: kernelSession)
             let rootName = await workspace.rootURL.lastPathComponent
             status = "Sandbox ready · \(rootName)"
-            transcript.append(TerminalLine(text: "Workspace shared with the visible AgentOS folder. Type help to list commands.", kind: .output))
+            transcript.append(TerminalLine(text: "Workspace and Agent Runtime connected. Type help to list commands.", kind: .output))
         } catch {
             status = "Sandbox unavailable"
             transcript.append(TerminalLine(text: error.localizedDescription, kind: .error))
@@ -146,6 +146,10 @@ struct TerminalScreen: View {
         var commands = BuiltinCommandRegistry.make()
         guard let session else { return commands }
 
+        commands = commands.registering("help") { command, _ in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status clear help\\n")
+        }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
             return CommandResult(stdout: await session.terminalStatus())
