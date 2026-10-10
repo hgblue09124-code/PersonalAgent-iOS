@@ -91,3 +91,12 @@ jobs:
             echo "Possible secret committed"
             exit 1
           fi
+
+      - name: Verify import end-to-end tests are registered
+        run: |
+          swift test --list-tests | tee /tmp/personalagent-test-list.txt
+          grep -q 'ImportedFileStoreTests' /tmp/personalagent-test-list.txt
+          grep -q 'ImportedFileContentReaderTests' /tmp/personalagent-test-list.txt
+
+      - name: Run focused import-to-storage-and-readback regression gate
+        run: swift test --disable-sandbox --filter 'ImportedFile'
