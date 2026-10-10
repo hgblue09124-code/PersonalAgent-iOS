@@ -244,4 +244,36 @@ private actor ScriptedGitHubTransport: GitHubSyncHTTPTransport {
         }
         return responses.removeFirst()
     }
+    func testSymlinkDirectoryFailsClosedBeforeRemoteDownload() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        let workspace = base.appendingPathComponent("workspace")
+        let outside = base.appendingPathComponent("outside")
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(
+            atPath: workspace.appendingPathComponent("skills").path,
+            withDestinationPath: outside.path
+        )
+
+        let transport = RecordingGitHubTransport()
+        let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+        let client = try GitHubRepositorySyncClient(
+            location: location,
+            stateURL: base.appendingPathComponent("state/state.json"),
+            transport: transport,
+            tokenProvider: { "test-token" }
+        )
+        do {
+            _ = try await client.synchronize(workspaceURL: workspace)
+            XCTFail("Symlink directories must not redirect remote writes outside the workspace")
+        } catch let error as GitHubRepositorySyncError {
+            XCTAssertEqual(error, .unsafePath("skills"))
+        }
+
+        let requests = await transport.requests
+        XCTAssertTrue(requests.isEmpty, "Unsafe local symlinks must be rejected before network access")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: outside.appendingPathComponent("remote.md").path))
+    }
+
 }
