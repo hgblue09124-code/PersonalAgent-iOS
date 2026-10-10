@@ -144,7 +144,7 @@ let package = Package(
         ),
         .target(
             name: "PATools",
-            dependencies: ["PAKernel", "PAObservability", "PARuntime"],
+            dependencies: ["PAKernel", "PAObservability"],
             path: "Sources/Capabilities/Tools"
         ),
         .target(
@@ -154,7 +154,7 @@ let package = Package(
         ),
         .target(
             name: "PASkills",
-            dependencies: ["PAKernel", "PAModules", "PATools", "PARuntime"],
+            dependencies: ["PAKernel", "PAModules", "PATools"],
             path: "Sources/Capabilities/Skills"
         ),
         .target(
