@@ -245,6 +245,16 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionProgress = nil
                 self.streamingResponse = ""
+            } catch let error as URLError where error.code == .cancelled {
+                // URLSession commonly reports task cancellation as URLError.cancelled,
+                // not CancellationError. Treat both as an intentional Stop action.
+                if let goalID,
+                   let status = await self.composition.runtime.goal(id: goalID)?.status,
+                   status == .active || status == .proposed {
+                    try? await self.composition.runtime.abort(goalID: goalID)
+                }
+                self.executionProgress = nil
+                self.streamingResponse = ""
             } catch {
                 if let goalID,
                    let status = await self.composition.runtime.goal(id: goalID)?.status,
