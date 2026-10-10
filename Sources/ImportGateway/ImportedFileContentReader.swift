@@ -1,4 +1,9 @@
 import Foundation
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 #if canImport(PDFKit)
 import PDFKit
 #endif
@@ -18,6 +23,7 @@ public enum ImportedContentFormat: String, Codable, Sendable, Equatable {
     case pdf
     case imageOCR
     case propertyList
+    case richText
 }
 
 public struct ImportedFileContent: Sendable, Equatable {
@@ -83,6 +89,13 @@ public struct ImportedFileContentReader: Sendable {
         let ext = importedFile.fileExtension.lowercased()
         if ext == "plist" || ext == "strings" {
             return try readPropertyList(importedFile, url: url)
+        }
+        if ext == "rtf" {
+            #if canImport(UIKit) || canImport(AppKit)
+            return try readRichText(importedFile, url: url)
+            #else
+            throw ImportedFileReaderError.unsupportedFormat(ext)
+            #endif
         }
         if ext == "pdf" {
             #if canImport(PDFKit)
@@ -152,6 +165,31 @@ public struct ImportedFileContentReader: Sendable {
         }
         return ImportedFileContent(fileID: importedFile.id, format: format, text: text, csvRows: rows)
     }
+
+
+    #if canImport(UIKit) || canImport(AppKit)
+    private func readRichText(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
+        let data: Data
+        do { data = try Data(contentsOf: url, options: [.mappedIfSafe]) }
+        catch { throw ImportedFileReaderError.missingFile }
+        let document: NSAttributedString
+        do {
+            document = try NSAttributedString(
+                data: data,
+                options: [.documentType: NSAttributedString.DocumentType.rtf],
+                documentAttributes: nil
+            )
+        } catch {
+            throw ImportedFileReaderError.malformedDocument
+        }
+        let text = document.string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { throw ImportedFileReaderError.emptyExtraction }
+        guard text.utf8.count <= 4 * 1024 * 1024 else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        return ImportedFileContent(fileID: importedFile.id, format: .richText, text: text)
+    }
+    #endif
 
     private func readPropertyList(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
         let data: Data
