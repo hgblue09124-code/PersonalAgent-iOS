@@ -53,6 +53,7 @@ public enum ArchitectureManifest: Sendable {
         "PAImportGateway": [],
         "PAStorageModels": ["PAKernel", "PAProviders", "PAProvidersLocal"],
         "PAMemory": ["PAStorage", "PAStorageModels", "PAEvents", "PAKernel"],
+        "PAStorageMemory": ["PAMemory", "PAStorage", "PAStorageModels", "PAEvents"],
         "PAProviders": ["PAObservability", "PASecurity", "PAEvents", "PAKernel"],
         "PAProvidersGrok": ["PAKernel", "PAProviders", "PAProvidersRemote"],
         "PAProvidersOpenAI": ["PAKernel", "PAProviders", "PAProvidersRemote"],
