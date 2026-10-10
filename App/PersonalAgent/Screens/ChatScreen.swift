@@ -47,6 +47,7 @@ struct ChatScreen: View {
                     Divider()
                     Button(role: .destructive) { session.deleteConversation(id: session.currentConversationID) } label: { Label("Delete conversation", systemImage: "trash") }
                 } label: { Image(systemName: "ellipsis.circle").font(.title3) }
+                .disabled(session.isSubmitting)
             }
         }
     }

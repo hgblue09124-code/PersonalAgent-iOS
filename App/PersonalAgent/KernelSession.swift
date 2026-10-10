@@ -141,22 +141,24 @@ final class KernelSession: ObservableObject {
             await refresh()
             return
         }
+        let conversationID = currentConversationID
+        isSubmitting = true
         executionProgress = nil
         executionResult = nil
         presentedResult = nil
         lastError = nil
-        appendChatTurn(role: .user, content: normalizedStatement)
+        appendChatTurn(role: .user, content: normalizedStatement, conversationID: conversationID)
         let contextualInput: String
         do {
-            contextualInput = try await buildContextualInput(for: normalizedStatement)
+            contextualInput = try await buildContextualInput(for: normalizedStatement, conversationID: conversationID)
         } catch {
             lastError = String(describing: error)
+            isSubmitting = false
             await refresh()
             return
         }
 
         let agentID = selectedAgentID
-        isSubmitting = true
         let task = Task { @MainActor [weak self] in
             defer { self?.isSubmitting = false }
             guard let self else { return }
@@ -173,7 +175,7 @@ final class KernelSession: ObservableObject {
                     }
                     self.executionResult = result
                     self.presentedResult = result
-                    self.appendChatTurn(role: .assistant, content: result)
+                    self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                     self.executionProgress = nil
                     await self.refresh()
                     return
@@ -195,7 +197,7 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionResult = result
                 self.presentedResult = result
-                self.appendChatTurn(role: .assistant, content: result)
+                self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                 self.executionProgress = nil
             } catch is CancellationError {
                 if let goalID,
@@ -225,7 +227,7 @@ final class KernelSession: ObservableObject {
     }
 
     func selectAgent(id: String) {
-        guard agentManifests.contains(where: { $0.id == id }) else { return }
+        guard !isSubmitting, agentManifests.contains(where: { $0.id == id }) else { return }
         selectedAgentID = id
         UserDefaults.standard.set(id, forKey: "agent.selected.id")
     }
@@ -352,10 +354,11 @@ final class KernelSession: ObservableObject {
         }
     }
 
-    private func appendChatTurn(role: ChatTurn.Role, content: String) {
+    private func appendChatTurn(role: ChatTurn.Role, content: String, conversationID: UUID? = nil) {
         let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        let targetID = conversationID ?? currentConversationID
         guard !value.isEmpty,
-              let index = conversations.firstIndex(where: { $0.id == currentConversationID }) else { return }
+              let index = conversations.firstIndex(where: { $0.id == targetID }) else { return }
 
         var conversation = conversations[index]
         conversation.turns.append(ChatTurn(role: role, content: value))
@@ -367,7 +370,9 @@ final class KernelSession: ObservableObject {
         }
         conversation.updatedAt = Date()
         conversations[index] = conversation
-        chatHistory = conversation.turns
+        if targetID == currentConversationID {
+            chatHistory = conversation.turns
+        }
         persistConversations()
     }
 
@@ -390,6 +395,7 @@ final class KernelSession: ObservableObject {
     }
 
     func newConversation() {
+        guard !isSubmitting else { return }
         let conversation = ChatConversation(title: "New conversation")
         conversations.insert(conversation, at: 0)
         currentConversationID = conversation.id
@@ -399,13 +405,14 @@ final class KernelSession: ObservableObject {
     }
 
     func selectConversation(id: UUID) {
-        guard let conversation = conversations.first(where: { $0.id == id }) else { return }
+        guard !isSubmitting, let conversation = conversations.first(where: { $0.id == id }) else { return }
         currentConversationID = id
         chatHistory = conversation.turns
         UserDefaults.standard.set(id.uuidString, forKey: "chat.currentConversation.v1")
     }
 
     func renameCurrentConversation(_ title: String) {
+        guard !isSubmitting else { return }
         let value = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty,
               let index = conversations.firstIndex(where: { $0.id == currentConversationID }) else { return }
@@ -415,6 +422,7 @@ final class KernelSession: ObservableObject {
     }
 
     func deleteConversation(id: UUID) {
+        guard !isSubmitting else { return }
         conversations.removeAll { $0.id == id }
         if conversations.isEmpty {
             let conversation = ChatConversation(title: "New conversation")
@@ -429,9 +437,10 @@ final class KernelSession: ObservableObject {
         persistConversations()
     }
 
-    private func buildContextualInput(for statement: String) async throws -> String {
+    private func buildContextualInput(for statement: String, conversationID: UUID) async throws -> String {
         let contextTurns = max(1, min(128, UserDefaults.standard.integer(forKey: "chat.context.turns").nonZeroOr(12)))
-        let recentTurns = chatHistory.suffix(contextTurns)
+        let conversationTurns = conversations.first(where: { $0.id == conversationID })?.turns ?? []
+        let recentTurns = conversationTurns.suffix(contextTurns)
         let recent = (recentTurns.last?.role == .user && recentTurns.last?.content == statement) ? recentTurns.dropLast() : recentTurns
         let memory = try await composition.memoryContext(for: statement)
         var sections: [String] = []
