@@ -96,7 +96,7 @@ struct SkillMarkdownPersistenceTests {
     @Test("file store discovers Skill.md files")
     func fileStoreDiscoversSkills() async throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("skills-(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("skills-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
@@ -127,7 +127,7 @@ struct SkillMarkdownPersistenceTests {
     @Test("file store seeds the canonical default Skill.md once")
     func seedsDefaultSkill() async throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("skills-seed-(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("skills-seed-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
         let store = FileSkillStore(directoryURL: directory)

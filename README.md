@@ -68,7 +68,7 @@ Từ ngày 10/10/2026, dùng checklist này làm nơi theo dõi công việc cò
 
 ### Ưu tiên P2 — chất lượng phát hành
 - [ ] Giữ M3, architecture/import-boundary, package tests và Apple Native Build & Unsigned IPA xanh trên commit cuối cùng.
-- [ ] Chạy regression test cho từng sửa lỗi; một tác vụ logic = một commit logic.
+- [ ] Chạy regression test cho từng sửa lỗi; một tác vụ logic = một commit logic. Fixture kiểm thử dùng thư mục tạm có UUID thực để tránh va chạm khi chạy song song.
 - [ ] Hoàn tất smoke test trên thiết bị thật và ghi lại model, thiết bị/iOS, bước thử, kết quả, lỗi còn lại trước khi tuyên bố beta/production-ready.
 
 ### Quy tắc cập nhật trạng thái
