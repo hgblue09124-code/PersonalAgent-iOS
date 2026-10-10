@@ -72,6 +72,13 @@ final class WorkspaceContentSafetyTests: XCTestCase {
         XCTAssertFalse(WorkspaceContentSafety.isProtectedPath("workspace\\notes.md"))
     }
 
+    func testSharedSecretPolicyRecognizesCommonProviderAndCloudTokens() {
+        XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("OPENROUTER_API_KEY = \"or-v1-1234567890abcdefghijklmnop\""))
+        XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("xoxb-12345678901234567890"))
+        XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("AKIA1234567890ABCDEF"))
+        XCTAssertFalse(WorkspaceContentSafety.containsPotentialSecret("A note explaining why API keys should be stored safely."))
+    }
+
     func testSecretLikeContentIsRejectedWithoutEchoingTheSecret() {
         let sample = "api_key = \"sk-" + "1234567890abcdefghijklmnop\""
         XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret(sample))

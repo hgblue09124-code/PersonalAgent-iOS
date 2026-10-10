@@ -56,6 +56,7 @@ Từ ngày 10/10/2026, dùng checklist này làm nơi theo dõi công việc cò
 - [ ] **History, Memory, Skills và Agent Runtime:** kiểm tra luồng sử dụng thật xuyên suốt; xác minh dữ liệu được lưu/đọc lại, skill được gọi đúng và kết quả thực thi được kiểm chứng.
 - [ ] **GGUF trên iPhone 12 Pro Max:** import file thật, kiểm tra header/metadata, load → generate → stream → cancel → unload, phục hồi sau lỗi và đo tốc độ/nhiệt độ. Không coi fixture hoặc CI là nghiệm thu thiết bị.
 - [ ] **Bảo mật dữ liệu:** giữ credential trong Keychain; không log secret; chặn đường dẫn/nội dung nhạy cảm nhất quán ở UI, runtime, storage và sync.
+  - Workspace và GitHub Sync dùng chung bộ phát hiện secret; regression test bổ sung token kiểu OpenRouter, Slack và AWS. Mục tổng thể vẫn mở cho tới khi audit UI/runtime và xác minh thiết bị.
   - Regression test mới bao phủ đường dẫn Windows-style để policy không bị vượt qua chỉ vì dấu gạch chéo ngược; mục tổng thể vẫn mở cho tới khi audit toàn luồng và xác minh thiết bị.
 
 ### Ưu tiên P1 — AgentOS workspace
