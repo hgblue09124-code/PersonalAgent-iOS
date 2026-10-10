@@ -608,6 +608,59 @@ struct M9RealProviderSliceTests {
         #expect((json["messages"] as? [[String: Any]])?.first?["role"] as? String == "user")
     }
 
+    @Test func openRouterFreeRouterStreamsDeltasThroughCompatibleProvider() async throws {
+        let body = Data("""
+        data: {"model":"openrouter/free","choices":[{"delta":{"content":"stream-"},"finish_reason":null}]}
+        data: {"model":"openrouter/free","choices":[{"delta":{"content":"ok"},"finish_reason":null}]}
+        data: [DONE]
+
+        """.utf8)
+        let transport = ScriptedTransport(scripts: [
+            .response(ProviderTransportResponse(statusCode: 200, body: body))
+        ])
+        let credential = ProviderCredentialRef(
+            providerID: OpenAICompatibleProviderBoundary.providerID,
+            account: "openrouter.stream.test"
+        )
+        let vault = InMemoryCredentialVault()
+        await vault.store(Data("test-openrouter-key".utf8), for: credential)
+        let model = ModelID(rawValue: "openrouter/free")
+        let endpoint = "https://openrouter.ai/api/v1/chat/completions"
+        let configuration = ProviderConfiguration(
+            providerID: OpenAICompatibleProviderBoundary.providerID,
+            endpointURL: endpoint,
+            defaultModel: model,
+            credential: credential
+        )
+        let provider = OpenAICompatibleProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: configuration
+        )
+
+        var streamedText = ""
+        var receivedCompletion = false
+        for try await event in provider.stream(LLMRequest(model: model, prompt: "Stream a short acknowledgement.")) {
+            switch event {
+            case .delta(let text):
+                streamedText += text
+            case .completed(let response):
+                receivedCompletion = response.text == "stream-ok"
+            default:
+                break
+            }
+        }
+
+        #expect(streamedText == "stream-ok")
+        #expect(receivedCompletion)
+        let requests = await transport.recordedRequests()
+        #expect(requests.count == 1)
+        let bodyData = try #require(requests.first?.body)
+        let json = try #require(JSONSerialization.jsonObject(with: bodyData) as? [String: Any])
+        #expect(json["stream"] as? Bool == true)
+        #expect(requests.first?.redactedHeaders["Authorization"] == "<redacted>")
+    }
+
     @Test func testLiveOpenRouterFreeRouterWhenKeyProvided() async throws {
         guard let key = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"],
               !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
