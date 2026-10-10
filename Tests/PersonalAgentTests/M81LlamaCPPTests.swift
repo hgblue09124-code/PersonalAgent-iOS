@@ -3,6 +3,7 @@ import PAKernel
 import Testing
 @testable import PAProviders
 @testable import PAProvidersLocal
+import PAGGUF
 @testable import PAComposition
 
 @Suite("M8.1 Real Native Llama.cpp Local Inference Tests")
