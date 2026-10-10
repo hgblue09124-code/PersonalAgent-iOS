@@ -150,6 +150,21 @@ struct SettingsScreen: View {
 
 
             GlassPanel {
+                Label("AgentOS Storage", systemImage: "externaldrive")
+                    .font(.headline)
+                Text("Browse and search the safe, human-readable workspace; edit Markdown/text with read-back verification.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                NavigationLink {
+                    AgentOSStorageBrowserScreen()
+                } label: {
+                    Label("Open Storage Browser", systemImage: "folder.badge.gearshape")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+
+            GlassPanel {
                 Label("Local AgentOS storage", systemImage: "folder")
                     .font(.headline)
                 Text("AgentOS data is stored in the app's Documents/AgentOS folder. Open Files → On My iPhone → Personal Agent → AgentOS to view and manage local files.")
@@ -939,5 +954,331 @@ private extension SettingsScreen {
         } catch {
             await MainActor.run { connectionState = .failure("Connection failed. Check the key and provider access.") }
         }
+    }
+}
+
+
+// MARK: - AgentOS Storage Browser
+
+/// Exposes only the user-editable text workspace. Credentials, model binaries, logs and cache
+/// are deliberately outside the browsable roots.
+private struct AgentOSStorageBrowserScreen: View {
+    private let roots = ["agents", "skills", "modules", "tools", "workspace"]
+    private let readableExtensions: Set<String> = ["md", "txt", "json", "yaml", "yml", "swift"]
+    @State private var workspace: LocalAgentWorkspace?
+    @State private var root = "workspace"
+    @State private var currentPath = "workspace"
+    @State private var entries: [AgentWorkspaceEntry] = []
+    @State private var query = ""
+    @State private var searchResults: [String] = []
+    @State private var selectedFile: String?
+    @State private var editorText = ""
+    @State private var isEditing = false
+    @State private var newFileName = ""
+    @State private var showCreateFile = false
+    @State private var status: String?
+    @State private var isBusy = false
+
+    private var visibleEntries: [AgentWorkspaceEntry] {
+        let filtered = query.isEmpty ? entries : entries.filter {
+            $0.relativePath.localizedCaseInsensitiveContains(query)
+        }
+        return filtered.sorted {
+            if $0.isDirectory != $1.isDirectory { return $0.isDirectory }
+            return $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
+        }
+    }
+
+    var body: some View {
+        ScreenScaffold(title: "AgentOS Storage", systemImage: "externaldrive") {
+            GlassPanel {
+                Text("Allowed workspace roots")
+                    .font(.headline)
+                Picker("Root", selection: $root) {
+                    ForEach(roots, id: \.self) { item in
+                        Text(item.capitalized).tag(item)
+                    }
+                }
+                .pickerStyle(.menu)
+                .onChange(of: root) { _, value in
+                    currentPath = value
+                    query = ""
+                    searchResults = []
+                    Task { await loadDirectory() }
+                }
+                HStack {
+                    Text(currentPath)
+                        .font(.caption.monospaced())
+                        .lineLimit(2)
+                    Spacer()
+                    Button {
+                        showCreateFile = true
+                    } label: {
+                        Label("New Markdown", systemImage: "plus")
+                    }
+                    .buttonStyle(.bordered)
+                }
+                TextField("Filter current directory", text: $query)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Button {
+                    Task { await searchContent() }
+                } label: {
+                    Label("Search file content", systemImage: "doc.text.magnifyingglass")
+                }
+                .buttonStyle(.bordered)
+                .disabled(query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isBusy)
+            }
+
+            if let status {
+                Text(status)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
+
+            GlassPanel {
+                if isBusy { ProgressView() }
+                if !searchResults.isEmpty {
+                    ForEach(searchResults, id: \.self) { path in
+                        Button {
+                            Task { await openFile(path) }
+                        } label: {
+                            Label(path, systemImage: "doc.text")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Button("Clear search") { searchResults = [] }
+                        .buttonStyle(.bordered)
+                } else if visibleEntries.isEmpty {
+                    Text("No files or folders here.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(visibleEntries, id: \.relativePath) { entry in
+                        Button {
+                            if entry.isDirectory {
+                                currentPath = entry.relativePath
+                                query = ""
+                                Task { await loadDirectory() }
+                            } else {
+                                Task { await openFile(entry.relativePath) }
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: entry.isDirectory ? "folder" : "doc.text")
+                                Text(URL(fileURLWithPath: entry.relativePath).lastPathComponent)
+                                    .lineLimit(2)
+                                Spacer()
+                                if entry.isDirectory {
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                if currentPath != root {
+                    Button {
+                        let parent = (currentPath as NSString).deletingLastPathComponent
+                        currentPath = parent.isEmpty ? root : parent
+                        query = ""
+                        Task { await loadDirectory() }
+                    } label: {
+                        Label("Parent folder", systemImage: "arrow.up.left")
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+        }
+        .task { await loadDirectory() }
+        .sheet(isPresented: $isEditing) {
+            NavigationStack {
+                VStack(spacing: 12) {
+                    if let selectedFile {
+                        Text(selectedFile)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
+                    TextEditor(text: $editorText)
+                        .font(.system(.body, design: .monospaced))
+                        .padding(8)
+                }
+                .navigationTitle("Edit text file")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { isEditing = false }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") { Task { await saveFile() } }
+                            .disabled(isBusy)
+                    }
+                }
+            }
+        }
+        .alert("Create Markdown file", isPresented: $showCreateFile) {
+            TextField("filename.md", text: $newFileName)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            Button("Cancel", role: .cancel) { newFileName = "" }
+            Button("Create") { Task { await createFile() } }
+        } message: {
+            Text("Creates a new .md file in the current allowed folder.")
+        }
+    }
+
+    @MainActor
+    private func ensureWorkspace() async throws -> LocalAgentWorkspace {
+        if let workspace { return workspace }
+        let created = try LocalAgentWorkspace.documents()
+        try await created.prepare()
+        workspace = created
+        return created
+    }
+
+    @MainActor
+    private func loadDirectory() async {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let store = try await ensureWorkspace()
+            guard isAllowed(currentPath) else { throw AgentWorkspaceError.invalidPath(currentPath) }
+            entries = try await store.listDirectory(at: currentPath)
+                .filter { isAllowed($0.relativePath) }
+            status = "\(entries.count) entries · local workspace"
+        } catch {
+            entries = []
+            status = "Could not read workspace: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func openFile(_ path: String) async {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            guard isAllowed(path),
+                  readableExtensions.contains(URL(fileURLWithPath: path).pathExtension.lowercased()) else {
+                throw AgentWorkspaceError.invalidPath(path)
+            }
+            let store = try await ensureWorkspace()
+            let metadata = try await store.metadata(at: path)
+            guard !metadata.isDirectory, metadata.byteCount <= 512 * 1024 else {
+                throw AgentWorkspaceError.ioFailure("File is too large to preview (limit 512 KiB).")
+            }
+            let text = try await store.readFile(at: path)
+            selectedFile = path
+            editorText = text
+            status = "Read \(metadata.byteCount) bytes; ready to edit."
+            isEditing = true
+        } catch {
+            status = "Read failed: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func saveFile() async {
+        guard let selectedFile, isAllowed(selectedFile),
+              readableExtensions.contains(URL(fileURLWithPath: selectedFile).pathExtension.lowercased()) else {
+            status = "Save rejected: unsupported path or file type."
+            return
+        }
+        guard editorText.utf8.count <= 512 * 1024 else {
+            status = "Save rejected: text exceeds 512 KiB."
+            return
+        }
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let store = try await ensureWorkspace()
+            try await store.writeFile(editorText, to: selectedFile)
+            let persisted = try await store.readFile(at: selectedFile)
+            guard persisted == editorText else {
+                throw AgentWorkspaceError.ioFailure("Read-back verification did not match the saved content.")
+            }
+            status = "Saved and verified: \(selectedFile)"
+            isEditing = false
+            await loadDirectory()
+        } catch {
+            status = "Save failed: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func createFile() async {
+        let name = newFileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        newFileName = ""
+        guard !name.isEmpty, !name.contains("/"), !name.contains("\\"),
+              URL(fileURLWithPath: name).pathExtension.lowercased() == "md",
+              isAllowed(currentPath) else {
+            status = "Use a simple filename ending in .md."
+            return
+        }
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let store = try await ensureWorkspace()
+            let path = currentPath + "/" + name
+            guard try await !store.exists(at: path) else {
+                status = "File already exists: \(path)"
+                return
+            }
+            try await store.writeFile("", to: path)
+            guard try await store.readFile(at: path).isEmpty else {
+                throw AgentWorkspaceError.ioFailure("New file read-back verification failed.")
+            }
+            status = "Created and verified: \(path)"
+            await loadDirectory()
+        } catch {
+            status = "Create failed: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func searchContent() async {
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !needle.isEmpty else { return }
+        isBusy = true
+        defer { isBusy = false }
+        searchResults = []
+        do {
+            let store = try await ensureWorkspace()
+            var queue: [(String, Int)] = roots.map { ($0, 0) }
+            var visited = 0
+            var matches: [String] = []
+            while !queue.isEmpty && visited < 500 && matches.count < 50 {
+                let (directory, depth) = queue.removeFirst()
+                guard isAllowed(directory) else { continue }
+                let children = try await store.listDirectory(at: directory)
+                for child in children where isAllowed(child.relativePath) {
+                    visited += 1
+                    if child.isDirectory {
+                        if depth < 5 { queue.append((child.relativePath, depth + 1)) }
+                    } else if readableExtensions.contains(URL(fileURLWithPath: child.relativePath).pathExtension.lowercased()) {
+                        let metadata = try await store.metadata(at: child.relativePath)
+                        guard metadata.byteCount <= 256 * 1024 else { continue }
+                        let text = try await store.readFile(at: child.relativePath)
+                        if text.localizedCaseInsensitiveContains(needle) {
+                            matches.append(child.relativePath)
+                            if matches.count >= 50 { break }
+                        }
+                    }
+                    if visited >= 500 { break }
+                }
+            }
+            searchResults = matches
+            status = "Search checked up to \(visited) entries; found \(matches.count) matches."
+        } catch {
+            status = "Search failed: \(error.localizedDescription)"
+        }
+    }
+
+    private func isAllowed(_ path: String) -> Bool {
+        roots.contains { path == $0 || path.hasPrefix($0 + "/") }
     }
 }
