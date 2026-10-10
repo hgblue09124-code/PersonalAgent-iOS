@@ -32,7 +32,7 @@ public struct WorkspaceReadTool: Tool {
             let path = try WorkspaceToolCodec.optionalString("path", in: input) ?? "workspace"
             try WorkspaceToolSafety.validatePath(path)
             let entries = try await workspace.listDirectory(at: path)
-                .filter { WorkspaceToolSafety.isAllowedPath($0.relativePath) }
+                .filter { WorkspaceToolSafety.isAllowedPath($0.relativePath) && !WorkspaceToolSafety.isProtectedFilename($0.relativePath) }
                 .prefix(200)
             return try WorkspaceToolCodec.encode([
                 "operation": operation,
@@ -50,6 +50,9 @@ public struct WorkspaceReadTool: Tool {
                 throw WorkspaceStorageToolError.fileTooLarge
             }
             let content = try await workspace.readFile(at: path)
+            guard !WorkspaceToolSafety.containsPotentialSecret(content) else {
+                throw WorkspaceStorageToolError.secretLikeContent
+            }
             return try WorkspaceToolCodec.encode([
                 "operation": operation,
                 "path": path,
@@ -75,10 +78,12 @@ public struct WorkspaceReadTool: Tool {
                     visited += 1
                     if entry.isDirectory {
                         if current.depth < 5 { pending.append((entry.relativePath, current.depth + 1)) }
-                    } else if WorkspaceToolSafety.isReadableTextPath(entry.relativePath) {
+                    } else if WorkspaceToolSafety.isReadableTextPath(entry.relativePath)
+                                && !WorkspaceToolSafety.isProtectedFilename(entry.relativePath) {
                         let metadata = try await workspace.metadata(at: entry.relativePath)
                         guard metadata.byteCount <= WorkspaceToolSafety.maximumFileBytes else { continue }
                         let text = try await workspace.readFile(at: entry.relativePath)
+                        guard !WorkspaceToolSafety.containsPotentialSecret(text) else { continue }
                         if text.localizedCaseInsensitiveContains(query) {
                             matches.append(entry.relativePath)
                             if matches.count >= 50 { break }
@@ -235,11 +240,15 @@ private enum WorkspaceToolSafety {
         readableExtensions.contains(URL(fileURLWithPath: path).pathExtension.lowercased())
     }
 
-    static func validateFilename(_ path: String) throws {
+    static func isProtectedFilename(_ path: String) -> Bool {
         let name = URL(fileURLWithPath: path).lastPathComponent.lowercased()
         let blocked = [".env", ".env.local", "credentials.json", "secrets.json", "api_keys.json", "id_rsa", "id_ed25519"]
-        guard !blocked.contains(name),
-              !["credential", "secret", "token", "apikey"].contains(where: name.contains) else {
+        return blocked.contains(name)
+            || ["credential", "secret", "token", "apikey"].contains { marker in name.contains(marker) }
+    }
+
+    static func validateFilename(_ path: String) throws {
+        guard !isProtectedFilename(path) else {
             throw WorkspaceStorageToolError.forbiddenPath
         }
     }
