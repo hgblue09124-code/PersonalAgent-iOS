@@ -63,6 +63,8 @@ final class WorkspaceContentSafetyTests: XCTestCase {
         XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("workspace/secrets.md"))
         XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("skills/Private-Token.md"))
         XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("workspace/.ENV"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("workspace/.env.production"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("config/.env.staging.local"))
         XCTAssertFalse(WorkspaceContentSafety.isProtectedPath("workspace/notes.md"))
     }
 
@@ -78,6 +80,7 @@ final class WorkspaceContentSafetyTests: XCTestCase {
 
     func testSharedSecretPolicyRecognizesCommonProviderAndCloudTokens() {
         XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("OPENROUTER_API_KEY = \"or-v1-1234567890abcdefghijklmnop\""))
+        XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("or-v1-1234567890abcdefghijklmnop"))
         XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("xoxb-12345678901234567890"))
         XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("AKIA1234567890ABCDEF"))
         XCTAssertFalse(WorkspaceContentSafety.containsPotentialSecret("A note explaining why API keys should be stored safely."))
