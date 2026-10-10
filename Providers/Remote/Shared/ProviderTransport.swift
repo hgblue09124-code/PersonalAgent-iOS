@@ -47,8 +47,33 @@ public struct ProviderTransportResponse: Sendable, Equatable {
     }
 }
 
+public struct ProviderTransportStreamResponse: Sendable {
+    public let statusCode: Int
+    public let chunks: AsyncThrowingStream<Data, Error>
+
+    public init(statusCode: Int, chunks: AsyncThrowingStream<Data, Error>) {
+        self.statusCode = statusCode
+        self.chunks = chunks
+    }
+}
+
 public protocol ProviderTransport: Sendable {
     func send(_ request: ProviderTransportRequest) async throws -> ProviderTransportResponse
+    func stream(_ request: ProviderTransportRequest) async throws -> ProviderTransportStreamResponse
+}
+
+public extension ProviderTransport {
+    /// Compatibility fallback for scripted transports; production URLSession transport streams incrementally.
+    func stream(_ request: ProviderTransportRequest) async throws -> ProviderTransportStreamResponse {
+        let response = try await send(request)
+        return ProviderTransportStreamResponse(
+            statusCode: response.statusCode,
+            chunks: AsyncThrowingStream { continuation in
+                continuation.yield(response.body)
+                continuation.finish()
+            }
+        )
+    }
 }
 
 /// Bridges the existing PASecurity network port without leaking URLSession.
@@ -69,6 +94,18 @@ public struct SecurityNetworkTransport: ProviderTransport {
             )
         )
         return ProviderTransportResponse(statusCode: response.statusCode, body: response.body)
+    }
+
+    public func stream(_ request: ProviderTransportRequest) async throws -> ProviderTransportStreamResponse {
+        let response = try await network.stream(
+            for: NetworkRequest(
+                url: request.url,
+                method: request.method,
+                headers: request.headers,
+                body: request.body
+            )
+        )
+        return ProviderTransportStreamResponse(statusCode: response.statusCode, chunks: response.chunks)
     }
 }
 
