@@ -240,6 +240,44 @@ final class KernelSession: ObservableObject {
         }
     }
 
+    // Read-only Terminal bridges expose real runtime state without exposing secrets or
+    // giving shell commands direct access to provider credentials.
+    func terminalStatus() -> String {
+        [
+            "Agent: \(state.lifecycle.rawValue)",
+            "Provider: \(providerID) [\(providerLifecycle)]",
+            "Local model: \(activeModelID?.rawValue ?? "none")",
+            "Installed models: \(installedModels.count)",
+            "Skills: \(skillManifests.count)",
+            "Memory records: \(memoryRecords.count)"
+        ].joined(separator: "\n") + "\n"
+    }
+
+    func terminalProviderStatus() -> String {
+        "Provider: \(providerID)\nLifecycle: \(providerLifecycle)\n"
+    }
+
+    func terminalModelStatus() -> String {
+        "Active model: \(activeModelID?.rawValue ?? "none")\nInstalled models: \(installedModels.count)\n"
+    }
+
+    func terminalSkillsList() -> String {
+        let ids = skillManifests.map { String(describing: $0.id) }.sorted()
+        return ids.isEmpty ? "No skills discovered.\n" : ids.joined(separator: "\n") + "\n"
+    }
+
+    func terminalMemoryStatus() -> String {
+        "Memory records loaded: \(memoryRecords.count)\n"
+    }
+
+    func runFromTerminal(_ statement: String) async -> String {
+        guard !isSubmitting else { return "Agent is busy; wait for the current task to finish.\n" }
+        await submitGoal(statement)
+        if let result = presentedResult, !result.isEmpty { return result + "\n" }
+        if let error = lastError, !error.isEmpty { return "Agent error: \(error)\n" }
+        return "Agent finished without a response.\n"
+    }
+
     func remember(_ content: String, kind: String = "fact") async {
         let value = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }
