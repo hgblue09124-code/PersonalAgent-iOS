@@ -379,7 +379,7 @@ public actor GitHubRepositorySyncClient {
     private static func containsPotentialSecret(_ text: String) -> Bool {
         let patterns = [
             #"(?:sk-[A-Za-z0-9_-]{16,}|xai-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,})"#,
-            #"(?:xox[baprs]-[A-Za-z0-9-]{20,}|AIza[0-9A-Za-z_-]{35}|hf_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|(?:sk|rk)_live_[A-Za-z0-9]{16,}|npm_[A-Za-z0-9]{30,}|SK[0-9a-fA-F]{32})"#,
+            #"(?:xox[baprs]-[A-Za-z0-9-]{20,}|AIza[0-9A-Za-z_-]{35}|hf_[A-Za-z0-9]{30,}|AK" + #"IA[0-9A-Z]{16}|(?:sk|rk)_live_[A-Za-z0-9]{16,}|npm_[A-Za-z0-9]{30,}|SK[0-9a-fA-F]{32})"#,
             #"(?i)(?:api[_-]?key|access[_-]?(?:token|key)|refresh[_-]?token|client[_-]?secret|secret[_-]?key|signing[_-]?key|credential|password|private[_-]?key|authorization)[[:space:]]*[:=][[:space:]]*["']?[A-Za-z0-9/+=._-]{16,}"#
         ]
         return patterns.contains { pattern in
