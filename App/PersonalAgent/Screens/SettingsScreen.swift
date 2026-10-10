@@ -934,11 +934,13 @@ private extension SettingsScreen {
             // by the concrete-model catalog endpoint, so always expose it explicitly.
             let freeRouter = OpenRouterModelOption(id: "openrouter/free", name: "Free Models Router")
             let uniqueCatalog = catalogModels.filter { $0.id != freeRouter.id }
-            openRouterModels = [freeRouter] + uniqueCatalog
-                .sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
-                .prefix(499)
-            guard openRouterModels.count > 1 else {
-                openRouterModelsMessage = "Loaded the free router, but OpenRouter returned no concrete model IDs."
+            openRouterModels = [freeRouter] + Array(
+                uniqueCatalog
+                    .sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
+                    .prefix(499)
+            )
+            guard !openRouterModels.isEmpty else {
+                openRouterModelsMessage = "OpenRouter returned no usable model IDs."
                 return
             }
             if !openRouterModels.contains(where: { $0.id == compatibleModel }) {
