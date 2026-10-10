@@ -175,4 +175,30 @@ final class ImportedFileContentReaderTests: XCTestCase {
             XCTAssertEqual(error, .binaryContent)
         }
     }
+
+    func testImportPersistsReopensAndExtractsExpectedContentEndToEnd() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+
+        let input = base.appendingPathComponent("report.csv")
+        let expectedText = "name,description\\nagent,\\"persistent content\\"\\n"
+        try expectedText.write(to: input, atomically: true, encoding: .utf8)
+
+        let storeURL = base.appendingPathComponent("store")
+        let initialStore = try ImportedFileStore(directoryURL: storeURL)
+        let imported = try await initialStore.importFile(from: input)
+
+        // Recreate the store to prove both metadata and payload survive reopening.
+        let reopenedStore = try ImportedFileStore(directoryURL: storeURL)
+        let persistedRecords = await reopenedStore.listImports()
+        guard let persistedRecord = persistedRecords.first(where: { $0.id == imported.id }) else {
+            XCTFail("Imported record must survive store recreation")
+            return
+        }
+
+        let extracted = try await ImportedFileContentReader().read(persistedRecord, from: reopenedStore)
+        XCTAssertEqual(extracted.format, .csv)
+        XCTAssertEqual(extracted.csvRows, [["name", "description"], ["agent", "persistent content"]])
+    }
 }
