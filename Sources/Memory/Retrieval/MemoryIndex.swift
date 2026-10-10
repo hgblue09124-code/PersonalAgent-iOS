@@ -176,7 +176,12 @@ public struct MemoryIndex: Sendable {
     private func matchesFilters(_ record: MemoryRecord, query: MemoryQuery) -> Bool {
         if let scopes = query.scopes, !scopes.contains(record.scope) { return false }
         if let kinds = query.kinds, !kinds.contains(record.kind) { return false }
-        if let lifecycles = query.lifecycles, !lifecycles.contains(record.lifecycle) { return false }
+        if let lifecycles = query.lifecycles {
+            if !lifecycles.contains(record.lifecycle) { return false }
+        } else if record.lifecycle == .deleted {
+            // A forgotten record is a tombstone for revision/audit purposes, not retrievable memory.
+            return false
+        }
         if let startDate = query.startDate, record.createdAt < startDate { return false }
         if let endDate = query.endDate, record.createdAt > endDate { return false }
         if let minImportance = query.minImportance, record.importance < minImportance { return false }
