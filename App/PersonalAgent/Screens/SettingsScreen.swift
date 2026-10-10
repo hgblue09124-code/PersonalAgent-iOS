@@ -34,7 +34,7 @@ struct SettingsScreen: View {
     @AppStorage("provider.execution.mode") private var executionMode = UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local"
     @State private var remoteProvider = UserDefaults.standard.string(forKey: "provider.remote.id") ?? "openai"
     @State private var compatibleEndpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? ""
-    @State private var compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "openai/gpt-4o-mini"
+    @State private var compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "openrouter/free"
     @State private var openRouterModels: [OpenRouterModelOption] = []
     @State private var isRefreshingOpenRouterModels = false
     @State private var openRouterModelsMessage: String?
@@ -347,7 +347,7 @@ struct SettingsScreen: View {
                         HStack {
                             Button("Use OpenRouter") {
                                 compatibleEndpoint = "https://openrouter.ai/api/v1/chat/completions"
-                                compatibleModel = "openai/gpt-4o-mini"
+                                compatibleModel = "openrouter/free"
                                 UserDefaults.standard.set(compatibleEndpoint, forKey: "provider.compatible.endpoint")
                                 UserDefaults.standard.set(compatibleModel, forKey: "provider.compatible.model")
                                 openRouterModelsMessage = nil
@@ -925,16 +925,22 @@ private extension SettingsScreen {
                 openRouterModelsMessage = "OpenRouter model catalog request failed (HTTP \(response.statusCode))."
                 return
             }
-            let models = rows.compactMap { row -> OpenRouterModelOption? in
+            let catalogModels = rows.compactMap { row -> OpenRouterModelOption? in
                 guard let id = row["id"] as? String, !id.isEmpty else { return nil }
                 let name = (row["name"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
                 return OpenRouterModelOption(id: id, name: (name?.isEmpty == false ? name! : id))
-            }.sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
-            guard !models.isEmpty else {
-                openRouterModelsMessage = "OpenRouter returned no usable model IDs."
+            }
+            // The free router is a first-class model alias and may not be returned
+            // by the concrete-model catalog endpoint, so always expose it explicitly.
+            let freeRouter = OpenRouterModelOption(id: "openrouter/free", name: "Free Models Router")
+            let uniqueCatalog = catalogModels.filter { $0.id != freeRouter.id }
+            openRouterModels = [freeRouter] + uniqueCatalog
+                .sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
+                .prefix(499)
+            guard openRouterModels.count > 1 else {
+                openRouterModelsMessage = "Loaded the free router, but OpenRouter returned no concrete model IDs."
                 return
             }
-            openRouterModels = Array(models.prefix(500))
             if !openRouterModels.contains(where: { $0.id == compatibleModel }) {
                 compatibleModel = openRouterModels.first?.id ?? compatibleModel
             }
