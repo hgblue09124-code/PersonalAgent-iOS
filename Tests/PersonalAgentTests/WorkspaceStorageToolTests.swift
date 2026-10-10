@@ -37,6 +37,22 @@ final class WorkspaceStorageToolTests: XCTestCase {
         }
     }
 
+    func testReadToolRejectsProtectedParentDirectory() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        try await workspace.writeFile("private", to: "workspace/secrets/note.md")
+        let reader = WorkspaceReadTool(workspace: workspace)
+
+        do {
+            _ = try await reader.run(argumentsJSON: #"{"operation":"read","path":"workspace/secrets/note.md"}"#)
+            XCTFail("Protected parent directories must be rejected")
+        } catch {
+            // Fail-closed is the expected contract.
+        }
+    }
+
     func testWriteToolRejectsSecretLikeContent() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
