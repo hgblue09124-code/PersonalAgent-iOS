@@ -1224,7 +1224,7 @@ private struct AgentOSStorageBrowserScreen: View {
         do {
             let store = try await ensureWorkspace()
             let path = currentPath + "/" + name
-            guard try await !store.exists(at: path) else {
+            guard try await store.exists(at: path) == false else {
                 status = "File already exists: \(path)"
                 return
             }
