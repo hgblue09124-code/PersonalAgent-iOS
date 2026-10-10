@@ -78,6 +78,11 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         )
     }
 
+    /// Opens the canonical user-visible AgentOS workspace and safely imports legacy state.
+    public static func documents() throws -> LocalAgentWorkspace {
+        LocalAgentWorkspace(rootURL: try AgentOSStorageLocation.visibleRootURL())
+    }
+
     public func prepare() async throws {
         try FileManager.default.createDirectory(
             at: rootURL,
