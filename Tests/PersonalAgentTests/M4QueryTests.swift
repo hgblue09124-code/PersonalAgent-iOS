@@ -292,4 +292,25 @@ struct M4QueryTests {
         #expect(exactFilterResult.records.count == 1)
         #expect(exactFilterResult.records.first?.id.rawValue == "rec-foobar")
     }
+    @Test func forgottenMemoryIsExcludedUnlessDeletedLifecycleIsExplicitlyRequested() async throws {
+        let store = InMemoryMemoryStore()
+        let record = MemoryRecord(
+            id: MemoryRecordID(rawValue: "forgotten-memory"),
+            kind: .fact,
+            content: "private preference phrase",
+            provenance: Provenance(source: "user")
+        )
+        try await store.capture(record)
+        try await store.forget(id: record.id, reason: "user-requested")
+
+        #expect((try await store.query(MemoryQuery())).records.isEmpty)
+        #expect((try await store.query(MemoryQuery(ids: [record.id])).records.isEmpty)
+
+        let auditResult = try await store.query(
+            MemoryQuery(ids: [record.id], lifecycles: [.deleted])
+        )
+        #expect(auditResult.records.count == 1)
+        #expect(auditResult.records.first?.lifecycle == .deleted)
+    }
+
 }
