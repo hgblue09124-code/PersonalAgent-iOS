@@ -199,4 +199,18 @@ final class TerminalCoreTests: XCTestCase {
         let registry = BuiltinCommandRegistry.make()
         XCTAssertTrue(registry.contains("pwd")); XCTAssertTrue(registry.contains("skill")); XCTAssertTrue(registry.contains("sync"))
     }
+    func testRegistryBoundsLargeCommandOutput() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        let registry = CommandRegistry().registering("large") { _, _ in
+            CommandResult(stdout: String(repeating: "x", count: CommandRegistry.maximumOutputBytes + 1))
+        }
+        let result = try await registry.execute(AgentCommand(name: "large"), context: CommandContext(workspace: workspace))
+        XCTAssertLessThan(result.stdout.utf8.count, CommandRegistry.maximumOutputBytes + 64)
+        XCTAssertTrue(result.stdout.hasSuffix("[output truncated at 64 KiB]\n"))
+    }
+
+    func testParserRejectsOversizedCommandInput() {
+        XCTAssertThrowsError(try CommandParser.parse(String(repeating: "x", count: CommandParser.maximumInputBytes + 1)))
+    }
+
 }
