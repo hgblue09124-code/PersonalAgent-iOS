@@ -67,6 +67,29 @@ final class ImportedFileContentReaderTests: XCTestCase {
         }
     }
 
+    func testRTFReaderIsNativeAndFailClosedWhenUnavailable() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let input = base.appendingPathComponent("note.rtf")
+        try #"{\rtf1\ansi Hello \b Agent\b0}"#.write(to: input, atomically: true, encoding: .utf8)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let record = try await store.importFile(from: input)
+        #if canImport(Darwin)
+        let result = try await ImportedFileContentReader().read(record, from: store)
+        XCTAssertEqual(result.format, .richText)
+        XCTAssertTrue(result.text.contains("Hello"))
+        XCTAssertTrue(result.text.contains("Agent"))
+        #else
+        do {
+            _ = try await ImportedFileContentReader().read(record, from: store)
+            XCTFail("RTF must not claim extraction when the native reader is unavailable")
+        } catch let error as ImportedFileReaderError {
+            XCTAssertEqual(error, .unsupportedFormat("rtf"))
+        }
+        #endif
+    }
+
     func testReadsXMLPropertyListAsValidatedText() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
