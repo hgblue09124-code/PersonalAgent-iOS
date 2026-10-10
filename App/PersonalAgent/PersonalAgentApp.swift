@@ -39,7 +39,6 @@ struct PersonalAgentApp: App {
         }
         .dynamicTypeSize(.xSmall ... .accessibility3)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
         .environment(\.locale, Locale(identifier: appLanguage))
         .id(appLanguage)
         .onAppear {
