@@ -8,6 +8,30 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertEqual(command.name, "skill")
         XCTAssertEqual(command.arguments, ["run", "calculator", "187 * 43"])
     }
+    func testCommandErrorsHaveActionableLocalizedDescriptions() {
+        XCTAssertEqual(CommandError.emptyCommand.localizedDescription, "Enter a command.")
+        XCTAssertEqual(
+            CommandError.unterminatedQuote.localizedDescription,
+            "Unterminated quote. Close the quote and try again."
+        )
+        XCTAssertEqual(
+            CommandError.invalidEscape.localizedDescription,
+            "The command ends with an incomplete escape. Add the escaped character or remove the trailing backslash."
+        )
+        XCTAssertEqual(
+            CommandError.unknownCommand("missing").localizedDescription,
+            "Unknown command: missing. Type 'help' to list available commands."
+        )
+        XCTAssertEqual(
+            CommandError.invalidArguments("cat <path>").localizedDescription,
+            "Invalid arguments. Usage: cat <path>"
+        )
+    }
+
+    func testParserRejectsTrailingEscape() {
+        XCTAssertThrowsError(try CommandParser.parse("cat file\\"))
+    }
+
     func testParserRejectsUnterminatedQuote() {
         XCTAssertThrowsError(try CommandParser.parse("cat \"broken"))
     }
