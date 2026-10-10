@@ -510,7 +510,17 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         if let localModelStorage {
             resolvedStorage = localModelStorage
         } else {
-            let modelsDir = persistenceContainer.modelMetadataDirectoryURL.appendingPathComponent("Models")
+            let modelsDir: URL
+            if storeDirectoryURL == nil,
+               let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+                // Keep large local models in managed storage; workspace migration must not duplicate GGUF binaries.
+                modelsDir = appSupport.appendingPathComponent(
+                    "PersonalAgent/M8Product/ModelMetadata/Models",
+                    isDirectory: true
+                )
+            } else {
+                modelsDir = persistenceContainer.modelMetadataDirectoryURL.appendingPathComponent("Models", isDirectory: true)
+            }
             resolvedStorage = try FileBackedLocalModelStorage(modelsDirectoryURL: modelsDir)
         }
         self.localModelStorage = resolvedStorage

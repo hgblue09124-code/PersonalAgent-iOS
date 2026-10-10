@@ -30,18 +30,25 @@ struct AgentOSDirectoryMigrationTests {
         let oldTerminal = base.appendingPathComponent("Support/AgentOS", isDirectory: true)
         let oldRuntime = base.appendingPathComponent("Support/PersonalAgent/M8Product", isDirectory: true)
         try FileManager.default.createDirectory(at: oldTerminal, withIntermediateDirectories: true)
+        let legacyModels = oldRuntime.appendingPathComponent("ModelMetadata/Models", isDirectory: true)
+        try FileManager.default.createDirectory(at: oldTerminal, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: oldRuntime, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: legacyModels, withIntermediateDirectories: true)
         try "terminal-state".write(to: oldTerminal.appendingPathComponent("terminal.md"), atomically: true, encoding: .utf8)
         try "runtime-state".write(to: oldRuntime.appendingPathComponent("runtime.md"), atomically: true, encoding: .utf8)
+        try "large-model-binary".write(to: legacyModels.appendingPathComponent("model.gguf"), atomically: true, encoding: .utf8)
 
         let root = try AgentOSStorageLocation.prepareVisibleRoot(
             documentsDirectory: documents,
-            legacyRoots: [oldTerminal, oldRuntime]
+            legacyRoots: [oldTerminal, oldRuntime],
+            excludedRelativePathsByRoot: [oldRuntime.standardizedFileURL.path: ["ModelMetadata/Models"]]
         )
 
         #expect(root.lastPathComponent == "AgentOS")
         #expect(try String(contentsOf: root.appendingPathComponent("terminal.md"), encoding: .utf8) == "terminal-state")
         #expect(try String(contentsOf: root.appendingPathComponent("runtime.md"), encoding: .utf8) == "runtime-state")
+        #expect(!FileManager.default.fileExists(atPath: root.appendingPathComponent("ModelMetadata/Models/model.gguf").path))
+        #expect(try String(contentsOf: legacyModels.appendingPathComponent("model.gguf"), encoding: .utf8) == "large-model-binary")
         #expect(FileManager.default.fileExists(atPath: oldTerminal.appendingPathComponent("terminal.md").path))
         #expect(FileManager.default.fileExists(atPath: oldRuntime.appendingPathComponent("runtime.md").path))
     }
