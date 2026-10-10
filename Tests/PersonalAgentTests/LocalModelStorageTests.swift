@@ -3,6 +3,7 @@ import PAKernel
 import Testing
 import PAProviders
 import PAProvidersLocal
+import PAGGUF
 import PAStorageModels
 import PAComposition
 
