@@ -192,11 +192,24 @@ public struct SkillRuntime: Sendable {
         }
 
         let normalizedGoal = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        if let exact = manifests.first(where: {
+        let exactIDMatches = manifests.filter {
             $0.id.rawValue.lowercased() == normalizedGoal
-                || $0.name.lowercased() == normalizedGoal
-        }) {
-            return exact.id
+        }
+        if exactIDMatches.count == 1 {
+            return exactIDMatches[0].id
+        }
+        if exactIDMatches.count > 1 {
+            throw SkillExecutionError.noSelection
+        }
+
+        let exactNameMatches = manifests.filter {
+            $0.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == normalizedGoal
+        }
+        if exactNameMatches.count == 1 {
+            return exactNameMatches[0].id
+        }
+        if exactNameMatches.count > 1 {
+            throw SkillExecutionError.noSelection
         }
 
         let goalTokens = Self.intentTokens(normalizedGoal)
