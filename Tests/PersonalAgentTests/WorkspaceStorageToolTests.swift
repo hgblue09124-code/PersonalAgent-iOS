@@ -13,12 +13,12 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let writer = WorkspaceWriteTool(workspace: workspace)
         let reader = WorkspaceReadTool(workspace: workspace)
         _ = try await writer.run(argumentsJSON: #"{"operation":"mkdir","path":"workspace/notes"}"#)
-        _ = try await writer.run(argumentsJSON: #"{"operation":"write","path":"workspace/notes/plan.md","content":"# Verified plan"}"#)
+        _ = try await writer.run(argumentsJSON: #"{"operation":"write","path":"workspace/notes/plan.md","content":"Verified plan"}"#)
 
         let result = try await reader.run(argumentsJSON: #"{"operation":"read","path":"workspace/notes/plan.md"}"#)
         let data = try XCTUnwrap(result.data(using: .utf8))
         let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        XCTAssertEqual(object["content"] as? String, "# Verified plan")
+        XCTAssertEqual(object["content"] as? String, "Verified plan")
         XCTAssertEqual(object["verified"] as? Bool, true)
     }
 
