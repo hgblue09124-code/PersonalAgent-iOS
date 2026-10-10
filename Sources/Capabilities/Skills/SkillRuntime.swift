@@ -160,6 +160,7 @@ public struct SkillRuntime: Sendable {
     public func discover(query: String = "") async throws -> [SkillManifest] {
         if let store {
             return try await store.discover(query: query)
+                .filter { !disabled.contains($0.id.rawValue) }
         }
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         var manifests = skills.values
@@ -198,25 +199,64 @@ public struct SkillRuntime: Sendable {
             return exact.id
         }
 
-        let goalTokens = Set(
-            normalizedGoal
-                .split { !$0.isLetter && !$0.isNumber }
-                .map(String.init)
-                .filter { $0.count > 2 }
-        )
-        if let matched = manifests.first(where: { manifest in
-            let nameTokens = Set(
-                manifest.name.lowercased()
-                    .split { !$0.isLetter && !$0.isNumber }
-                    .map(String.init)
-                    .filter { $0.count > 2 }
-            )
-            return !nameTokens.isEmpty && nameTokens.isSubset(of: goalTokens)
-        }) {
-            return matched.id
+        let goalTokens = Self.intentTokens(normalizedGoal)
+        let nameMatches = manifests.compactMap { manifest -> (id: SkillID, tokenCount: Int)? in
+            let nameTokens = Self.intentTokens(manifest.name)
+            guard !nameTokens.isEmpty, nameTokens.isSubset(of: goalTokens) else { return nil }
+            return (id: manifest.id, tokenCount: nameTokens.count)
+        }.sorted {
+            if $0.tokenCount != $1.tokenCount { return $0.tokenCount > $1.tokenCount }
+            return $0.id.rawValue < $1.id.rawValue
+        }
+        if let best = nameMatches.first {
+            if nameMatches.count > 1, best.tokenCount == nameMatches[1].tokenCount {
+                throw SkillExecutionError.noSelection
+            }
+            return best.id
         }
 
-        throw SkillExecutionError.noSelection
+        // Description matching broadens discovery without making uncertain choices:
+        // require at least two meaningful overlaps and a unique best score.
+        let ranked = manifests.map { manifest -> (id: SkillID, score: Int, overlapCount: Int) in
+            let nameTokens = Self.intentTokens(manifest.name)
+            let descriptionTokens = Self.intentTokens(manifest.description)
+            let nameMatches = goalTokens.intersection(nameTokens).count
+            let descriptionMatches = goalTokens.intersection(descriptionTokens).count
+            return (
+                id: manifest.id,
+                score: nameMatches * 3 + descriptionMatches,
+                overlapCount: goalTokens.intersection(nameTokens.union(descriptionTokens)).count
+            )
+        }
+        .filter { $0.overlapCount >= 2 && $0.score >= 2 }
+        .sorted {
+            if $0.score != $1.score { return $0.score > $1.score }
+            return $0.id.rawValue < $1.id.rawValue
+        }
+
+        guard let best = ranked.first else {
+            throw SkillExecutionError.noSelection
+        }
+        if ranked.count > 1, best.score == ranked[1].score {
+            throw SkillExecutionError.noSelection
+        }
+        return best.id
+    }
+
+    private static func intentTokens(_ value: String) -> Set<String> {
+        let stopWords: Set<String> = [
+            "please", "could", "would", "should", "help", "want", "need",
+            "make", "using", "use", "with", "from", "into", "about",
+            "this", "that", "these", "those", "your", "you", "the",
+            "and", "for", "are", "was", "were", "have", "has", "had",
+            "can", "how", "what", "when", "where", "why", "who"
+        ]
+        return Set(
+            value.lowercased()
+                .split { !$0.isLetter && !$0.isNumber }
+                .map(String.init)
+                .filter { $0.count > 2 && !stopWords.contains($0) }
+        )
     }
 
     public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
