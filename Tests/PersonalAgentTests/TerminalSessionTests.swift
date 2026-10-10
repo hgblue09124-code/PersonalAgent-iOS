@@ -75,4 +75,25 @@ final class TerminalSessionTests: XCTestCase {
             XCTAssertEqual(error, .unknownCommand("missing"))
         }
     }
+    func testOutputHistoryIsBoundedByBytesAsWellAsEntryCount() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        let session = TerminalSession(
+            context: CommandContext(workspace: workspace),
+            outputLimit: 20,
+            outputByteLimit: 64
+        )
+        let registry = CommandRegistry().registering("echo") { command, _ in
+            CommandResult(stdout: command.arguments.joined(separator: " "))
+        }
+
+        _ = try await session.execute("echo " + String(repeating: "a", count: 40), registry: registry)
+        _ = try await session.execute("echo " + String(repeating: "b", count: 40), registry: registry)
+
+        let outputs = await session.outputs()
+        XCTAssertEqual(outputs.count, 1)
+        XCTAssertTrue(outputs[0].text.allSatisfy { $0 == "b" })
+        XCTAssertLessThanOrEqual(outputs.reduce(0) { $0 + $1.text.utf8.count }, 64)
+    }
+
 }

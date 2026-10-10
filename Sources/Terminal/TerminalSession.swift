@@ -46,6 +46,8 @@ public actor TerminalSession {
     private var output: [TerminalOutput] = []
     private let executionLimit: Int
     private let outputLimit: Int
+    private let outputByteLimit: Int
+    private var retainedOutputBytes = 0
     private var currentDirectory = ""
 
     public init(
@@ -53,13 +55,15 @@ public actor TerminalSession {
         context: CommandContext,
         history: TerminalHistory = TerminalHistory(),
         executionLimit: Int = 200,
-        outputLimit: Int = 1_000
+        outputLimit: Int = 1_000,
+        outputByteLimit: Int = 256 * 1024
     ) {
         self.id = id
         self.context = context
         self.history = history
         self.executionLimit = max(1, executionLimit)
         self.outputLimit = max(1, outputLimit)
+        self.outputByteLimit = max(1, outputByteLimit)
     }
 
     public func workingDirectory() -> String { currentDirectory }
@@ -179,8 +183,10 @@ public actor TerminalSession {
 
     private func appendOutput(_ item: TerminalOutput) {
         output.append(item)
-        if output.count > outputLimit {
-            output.removeFirst(output.count - outputLimit)
+        retainedOutputBytes += item.text.utf8.count
+        while output.count > outputLimit || retainedOutputBytes > outputByteLimit {
+            let removed = output.removeFirst()
+            retainedOutputBytes -= removed.text.utf8.count
         }
     }
 

@@ -17,6 +17,8 @@ struct TerminalScreen: View {
     @State private var command = ""
     @State private var isExecuting = false
     @State private var transcript: [TerminalLine] = []
+    private let maximumTranscriptLines = 500
+    private let maximumTranscriptBytes = 256 * 1024
     @State private var status = "Preparing sandbox…"
     @FocusState private var commandFocused: Bool
 
@@ -110,10 +112,10 @@ struct TerminalScreen: View {
             registry = makeRuntimeRegistry(session: kernelSession)
             let rootName = await workspace.rootURL.lastPathComponent
             status = "Sandbox ready · \(rootName)"
-            transcript.append(TerminalLine(text: "Workspace and Agent Runtime connected. Type help to list commands.", kind: .output))
+            appendTranscript(TerminalLine(text: "Workspace and Agent Runtime connected. Type help to list commands.", kind: .output))
         } catch {
             status = "Sandbox unavailable"
-            transcript.append(TerminalLine(text: error.localizedDescription, kind: .error))
+            appendTranscript(TerminalLine(text: error.localizedDescription, kind: .error))
         }
     }
 
@@ -126,7 +128,7 @@ struct TerminalScreen: View {
         defer { isExecuting = false }
         command = ""
         let priorOutputCount = await terminal.outputs().count
-        transcript.append(TerminalLine(text: "$ " + input, kind: .command))
+        appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
         do {
             _ = try await terminal.execute(input, registry: registry)
             let outputs = await terminal.outputs()
@@ -135,11 +137,11 @@ struct TerminalScreen: View {
             } else {
                 for item in outputs.dropFirst(priorOutputCount) {
                     let kind: TerminalLine.Kind = item.stream == .stderr ? .error : .output
-                    transcript.append(TerminalLine(text: item.text, kind: kind))
+                    appendTranscript(TerminalLine(text: item.text, kind: kind))
                 }
             }
         } catch {
-            transcript.append(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
+            appendTranscript(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
         }
     }
     private func makeRuntimeRegistry(session: KernelSession?) -> CommandRegistry {
@@ -178,6 +180,15 @@ struct TerminalScreen: View {
             return CommandResult(stdout: await session.terminalMemoryStatus())
         }
         return commands
+    }
+
+    private func appendTranscript(_ line: TerminalLine) {
+        transcript.append(line)
+        var retainedBytes = transcript.reduce(0) { $0 + $1.text.utf8.count }
+        while transcript.count > maximumTranscriptLines || retainedBytes > maximumTranscriptBytes {
+            let removed = transcript.removeFirst()
+            retainedBytes -= removed.text.utf8.count
+        }
     }
 
 }
