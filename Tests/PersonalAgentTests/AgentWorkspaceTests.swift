@@ -58,6 +58,27 @@ final class AgentWorkspaceTests: XCTestCase {
         XCTAssertEqual(safeRead, "safe settings")
     }
 
+    func testSymlinkAliasesCannotReachProtectedWorkspacePaths() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+
+        let protectedFile = root.appendingPathComponent("config/api_key.json")
+        try Data("protected fixture".utf8).write(to: protectedFile)
+        let alias = root.appendingPathComponent("workspace/api-settings.md")
+        try FileManager.default.createSymbolicLink(at: alias, withDestinationURL: protectedFile)
+
+        do {
+            _ = try await workspace.readFile(at: "workspace/api-settings.md")
+            XCTFail("a safe-looking symlink must not alias a protected path")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .invalidPath("workspace/api-settings.md"))
+        }
+
+        let entries = try await workspace.listDirectory(at: "workspace")
+        XCTAssertFalse(entries.contains { $0.relativePath == "workspace/api-settings.md" })
+    }
+
     func testDirectWorkspaceAccessBlocksSecretLikeContent() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: root)
