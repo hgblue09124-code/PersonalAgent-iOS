@@ -43,15 +43,9 @@ Danh sách trên mô tả phạm vi sản phẩm; việc một khu vực có gia
 
 ## Trạng thái phát triển
 
-- [x] Nền tảng hợp đồng và ranh giới module trong Swift package.
-- [x] Khung ứng dụng SwiftUI và các boundary cho session, Kernel, Provider, local model, persistence và device capability.
-- [x] Thành phần nền cho Memory, Skill/Tool/Module và vòng đời thực thi có lưu trạng thái.
-- [ ] Hoàn thiện và xác minh end-to-end các luồng Provider, Chat, lịch sử, Memory và Skill.
-- [ ] Xác minh import, nạp và chạy GGUF ổn định trên iPhone mục tiêu.
-- [ ] Hoàn thiện Workspace/Terminal Sandbox, GitHub sync hai chiều, xung đột và rollback.
-- [ ] Hoàn tất các cổng CI/build phát hành và nghiệm thu trên thiết bị thật.
+Nền tảng hợp đồng, SwiftUI, Kernel/Runtime, Provider, local model, persistence và các capability Memory/Skill/Tool/Module đã có trong mã nguồn. Trạng thái **công việc còn lại** được quản lý duy nhất trong mục [Backlog tập trung](#backlog-tập-trung--nguồn-trạng-thái-duy-nhất) bên dưới; phần này không duy trì checklist trùng lặp.
 
-Các mục đã đánh dấu hoàn thành nói về thành phần nền trong mã nguồn, không phải chứng nhận rằng toàn bộ sản phẩm đã đạt chuẩn phát hành. Trạng thái CI và nghiệm thu có thể thay đổi theo từng commit.
+Thành phần nền có trong source không đồng nghĩa luồng sản phẩm đã được nghiệm thu. CI và nghiệm thu thiết bị được đánh giá theo commit cụ thể; chỉ đánh dấu hoàn thành khi có bằng chứng tương ứng.
 
 ## Backlog tập trung — nguồn trạng thái duy nhất
 
@@ -66,7 +60,7 @@ Từ ngày 10/10/2026, dùng checklist này làm nơi theo dõi công việc cò
 ### Ưu tiên P1 — AgentOS workspace
 - [ ] **Storage:** duyệt, tìm kiếm, đọc, sửa và xác minh dữ liệu persistent qua API có ranh giới rõ; từ chối path traversal, secret và thao tác ngoài workspace.
 - [ ] **Terminal Sandbox + GitHub Sync:** quyền tối thiểu, preview thay đổi, đồng bộ hai chiều, xử lý conflict, rollback và báo cáo kết quả có bằng chứng.
-- [ ] **Kiến trúc GGUF:** tách parser định dạng dùng chung khỏi provider/storage; giữ dependency direction một chiều và có test architecture/import-boundary.
+- [x] **Kiến trúc GGUF:** tách parser định dạng dùng chung khỏi provider/storage; giữ dependency direction một chiều và có test architecture/import-boundary. Bằng chứng: [commit `7eeb7c7`](https://github.com/hgblue09124-code/PersonalAgent-iOS/commit/7eeb7c71650b193b1ca42d935f81f7ac23b8ab51), [M3 PASS](https://github.com/hgblue09124-code/PersonalAgent-iOS/actions/runs/38052535715), [Apple Native Build & Unsigned IPA PASS](https://github.com/hgblue09124-code/PersonalAgent-iOS/actions/runs/38052535719).
 
 ### Ưu tiên P2 — chất lượng phát hành
 - [ ] Giữ M3, architecture/import-boundary, package tests và Apple Native Build & Unsigned IPA xanh trên commit cuối cùng.
