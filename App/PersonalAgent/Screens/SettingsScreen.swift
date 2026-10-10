@@ -1279,6 +1279,13 @@ private struct AgentOSStorageBrowserScreen: View {
     }
 
     private func isAllowed(_ path: String) -> Bool {
-        roots.contains { path == $0 || path.hasPrefix($0 + "/") }
+        // FileBackedSkillStore/AgentStore historically use title-cased directory names,
+        // while LocalAgentWorkspace prepares lowercase aliases. Filesystem casing varies
+        // by platform, so compare roots case-insensitively and preserve the actual path.
+        let normalized = path.lowercased()
+        return roots.contains {
+            normalized == $0.lowercased()
+                || normalized.hasPrefix($0.lowercased() + "/")
+        }
     }
 }
