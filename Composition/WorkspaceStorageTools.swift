@@ -31,14 +31,14 @@ public struct WorkspaceReadTool: Tool {
             try WorkspaceToolCodec.requireKeys(input, allowed: ["operation", "path"])
             let path = try WorkspaceToolCodec.optionalString("path", in: input) ?? "workspace"
             try WorkspaceToolSafety.validatePath(path)
-            let entries = try await workspace.listDirectory(at: path)
+            let allEntries = try await workspace.listDirectory(at: path)
                 .filter { WorkspaceToolSafety.isAllowedPath($0.relativePath) && !WorkspaceToolSafety.isProtectedFilename($0.relativePath) }
-                .prefix(200)
+            let entries = Array(allEntries.prefix(200))
             return try WorkspaceToolCodec.encode([
                 "operation": operation,
                 "path": path,
                 "entries": entries.map { ["path": $0.relativePath, "isDirectory": $0.isDirectory] },
-                "truncated": entries.count == 200,
+                "truncated": allEntries.count > entries.count,
             ])
         case "read":
             try WorkspaceToolCodec.requireKeys(input, allowed: ["operation", "path"])
@@ -129,10 +129,10 @@ public struct WorkspaceWriteTool: Tool {
         let input = try WorkspaceToolCodec.decode(argumentsJSON)
         let operation = try WorkspaceToolCodec.requiredString("operation", in: input)
         let path = try WorkspaceToolCodec.requiredString("path", in: input)
-        try WorkspaceToolSafety.validateWritablePath(path)
 
         switch operation {
         case "write", "append":
+            try WorkspaceToolSafety.validateWritablePath(path)
             try WorkspaceToolCodec.requireKeys(input, allowed: ["operation", "path", "content"])
             let content = try WorkspaceToolCodec.requiredString("content", in: input)
             guard content.utf8.count <= WorkspaceToolSafety.maximumFileBytes else {
@@ -190,6 +190,7 @@ public struct WorkspaceWriteTool: Tool {
                 "verified": true,
             ])
         case "mkdir":
+            try WorkspaceToolSafety.validateDirectoryPath(path)
             try WorkspaceToolCodec.requireKeys(input, allowed: ["operation", "path"])
             try await workspace.createDirectory(at: path)
             let metadata = try await workspace.metadata(at: path)
@@ -234,6 +235,12 @@ private enum WorkspaceToolSafety {
 
     static func validateWritablePath(_ path: String) throws {
         try validateReadablePath(path)
+    }
+
+    static func validateDirectoryPath(_ path: String) throws {
+        _ = try WorkspacePath(path)
+        guard isAllowedPath(path) else { throw WorkspaceStorageToolError.forbiddenPath }
+        try validateFilename(path)
     }
 
     static func isReadableTextPath(_ path: String) -> Bool {
