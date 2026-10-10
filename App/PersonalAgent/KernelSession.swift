@@ -315,7 +315,9 @@ final class KernelSession: ObservableObject {
                 appropriateFor: nil,
                 create: true
             )
-            let stateIdentity = "\(location.owner)/\(location.repository)@\(location.branch)"
+            // Include the workspace identity so baselines from the legacy
+            // Application Support root are never reused for the visible Documents root.
+            let stateIdentity = "\(location.owner)/\(location.repository)@\(location.branch)#visible-documents"
             let stateName = Data(stateIdentity.utf8).base64EncodedString()
                 .replacingOccurrences(of: "+", with: "-")
                 .replacingOccurrences(of: "/", with: "_")
