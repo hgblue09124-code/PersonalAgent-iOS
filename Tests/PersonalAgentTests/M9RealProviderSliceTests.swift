@@ -719,6 +719,24 @@ struct M9RealProviderSliceTests {
         )
         #expect(!response.text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty)
         print("OPENROUTER LIVE API: PASS")
+
+        var streamedText = ""
+        var receivedCompletion = false
+        for try await event in provider.stream(
+            LLMRequest(model: model, prompt: "Reply with the single word: OPENROUTER_STREAM_VERIFIED")
+        ) {
+            switch event {
+            case .delta(let delta):
+                streamedText += delta
+            case .completed(let streamedResponse):
+                receivedCompletion = streamedResponse.text == streamedText
+            default:
+                break
+            }
+        }
+        #expect(!streamedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(receivedCompletion)
+        print("OPENROUTER LIVE STREAM: PASS")
     }
 
     @Test func compatibleProviderIdentityUsesConfiguredModelForRuntimeRouting() {
