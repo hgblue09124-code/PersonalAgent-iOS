@@ -52,8 +52,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         } catch {
             // Fail-closed is the expected contract.
         }
-        #expectNoSecretFile: do {
-            XCTAssertFalse(try await workspace.exists(at: "workspace/notes.md"))
-        }
+        let exists = try await workspace.exists(at: "workspace/notes.md")
+        XCTAssertFalse(exists)
     }
 }
