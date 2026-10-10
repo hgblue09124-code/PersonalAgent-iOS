@@ -6,11 +6,33 @@ import PAEvents
 import PAProviders
 import PAProvidersLocal
 import PAMemory
-import PAComposition
+@testable import PAComposition
 import PASecurity
 
 @Suite("M8 Product Architecture Tests")
 struct M8ArchitectureTests {
+    @Test func unconfiguredCompositionProviderFailsClosed() async {
+        let provider = DefaultCompositionProvider()
+        #expect(await provider.health == .unavailable)
+
+        await #expect(throws: ProviderRuntimeError.unavailable) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "default-text"), prompt: "hello")
+            )
+        }
+
+        do {
+            for try await _ in provider.stream(
+                LLMRequest(model: ModelID(rawValue: "default-text"), prompt: "hello")
+            ) {}
+            Issue.record("unconfigured provider must not emit a successful stream")
+        } catch let error as ProviderRuntimeError {
+            #expect(error == .unavailable)
+        } catch {
+            Issue.record("unexpected error: \\(error)")
+        }
+    }
+
 
     struct MockLocalEngine: LocalModelEngine {
         let identity: LocalModelIdentity

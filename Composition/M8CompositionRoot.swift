@@ -163,30 +163,28 @@ public actor LocalModelRuntimeCoordinator: Sendable {
     }
 }
 
-/// Production-safe fallback used when Composition is created without an injected provider.
-/// It preserves the existing deterministic default behavior without depending on test targets.
-private struct DefaultCompositionProvider: LLMProvider {
+/// Explicit fail-closed provider used when no production provider is configured.
+/// It must never manufacture a successful assistant response that could be mistaken for model output.
+struct DefaultCompositionProvider: LLMProvider {
     let identity = ProviderIdentity(
         id: ProviderID(rawValue: "default"),
-        displayName: "Default Composition Provider",
-        models: [ModelIdentity(id: ModelID(rawValue: "default-text"), displayName: "Default Text", contextTokenLimit: 8192)]
+        displayName: "Unconfigured Provider",
+        models: [ModelIdentity(id: ModelID(rawValue: "default-text"), displayName: "Unconfigured", contextTokenLimit: 8192)]
     )
     let capabilities: ProviderCapabilities = [.textGeneration, .streaming]
 
     var health: ProviderHealth {
-        get async { .healthy }
+        get async { .unavailable }
     }
 
     func complete(_ request: LLMRequest) async throws -> LLMResponse {
         try Task.checkCancellation()
-        return LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))
+        throw ProviderRuntimeError.unavailable
     }
 
     func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         AsyncThrowingStream { continuation in
-            continuation.yield(.delta("ok"))
-            continuation.yield(.completed(LLMResponse(text: "ok", finishReason: "stop", model: ModelID(rawValue: "default-text"))))
-            continuation.finish()
+            continuation.finish(throwing: ProviderRuntimeError.unavailable)
         }
     }
 }
