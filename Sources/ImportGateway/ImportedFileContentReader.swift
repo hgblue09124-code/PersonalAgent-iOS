@@ -1,9 +1,4 @@
 import Foundation
-#if canImport(UIKit)
-import UIKit
-#elseif canImport(AppKit)
-import AppKit
-#endif
 #if canImport(PDFKit)
 import PDFKit
 #endif
@@ -91,7 +86,7 @@ public struct ImportedFileContentReader: Sendable {
             return try readPropertyList(importedFile, url: url)
         }
         if ext == "rtf" {
-            #if canImport(UIKit) || canImport(AppKit)
+            #if canImport(Darwin)
             return try readRichText(importedFile, url: url)
             #else
             throw ImportedFileReaderError.unsupportedFormat(ext)
@@ -167,7 +162,7 @@ public struct ImportedFileContentReader: Sendable {
     }
 
 
-    #if canImport(UIKit) || canImport(AppKit)
+    #if canImport(Darwin)
     private func readRichText(_ importedFile: ImportedFile, url: URL) throws -> ImportedFileContent {
         let data: Data
         do { data = try Data(contentsOf: url, options: [.mappedIfSafe]) }

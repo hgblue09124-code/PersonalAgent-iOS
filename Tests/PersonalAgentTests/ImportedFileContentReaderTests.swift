@@ -75,7 +75,7 @@ final class ImportedFileContentReaderTests: XCTestCase {
         try #"{\rtf1\ansi Hello \b Agent\b0}"#.write(to: input, atomically: true, encoding: .utf8)
         let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
         let record = try await store.importFile(from: input)
-        #if canImport(UIKit) || canImport(AppKit)
+        #if canImport(Darwin)
         let result = try await ImportedFileContentReader().read(record, from: store)
         XCTAssertEqual(result.format, .richText)
         XCTAssertTrue(result.text.contains("Hello"))
