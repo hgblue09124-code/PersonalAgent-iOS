@@ -5,7 +5,15 @@ import Testing
 struct ImportBoundaryTests {
     @Test func sourceImportsStayWithinAllowList() throws {
         let root = repositoryRoot()
-        let sources = try files(under: root.appendingPathComponent("Sources"), suffix: ".swift")
+        // Scan every production source root declared by Package.swift, not only
+        // Sources/. The latter misses Kernel, providers, storage and composition.
+        let sourceRoots = [
+            "Kernel", "Runtime", "Composition", "Providers", "Storage", "Sources"
+        ].map { root.appendingPathComponent($0) }
+        var sources: [URL] = []
+        for sourceRoot in sourceRoots where FileManager.default.fileExists(atPath: sourceRoot.path) {
+            sources.append(contentsOf: try files(under: sourceRoot, suffix: ".swift"))
+        }
         #expect(!sources.isEmpty)
 
         var violations: [String] = []
@@ -144,6 +152,7 @@ func moduleName(for file: URL, repositoryRoot: URL) -> String {
 
     let relative = String(path.dropFirst(rootPath.count))
 
+    if relative.hasPrefix("Kernel/Events/") { return "PAEvents" }
     if relative.hasPrefix("Kernel/Ports/Providers/") { return "PAProviders" }
     if relative.hasPrefix("Kernel/") { return "PAKernel" }
 
