@@ -73,3 +73,37 @@ public enum AgentOSDirectoryMigration {
         }
     }
 }
+
+
+/// Resolves the canonical local AgentOS root shared by composition and Terminal.
+public enum AgentOSStorageLocation {
+    public static func visibleRootURL(fileManager: FileManager = .default) throws -> URL {
+        guard let documents = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw AgentWorkspaceError.ioFailure("The app Documents directory is unavailable.")
+        }
+        let legacyRoots: [URL]
+        if let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            legacyRoots = [
+                appSupport.appendingPathComponent("AgentOS", isDirectory: true),
+                appSupport.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
+            ]
+        } else {
+            legacyRoots = []
+        }
+        return try prepareVisibleRoot(documentsDirectory: documents, legacyRoots: legacyRoots, fileManager: fileManager)
+    }
+
+    /// Testable migration entry point; each legacy root is merged without overwriting destination data.
+    public static func prepareVisibleRoot(
+        documentsDirectory: URL,
+        legacyRoots: [URL],
+        fileManager: FileManager = .default
+    ) throws -> URL {
+        let visibleRoot = documentsDirectory.appendingPathComponent("AgentOS", isDirectory: true)
+        try fileManager.createDirectory(at: visibleRoot, withIntermediateDirectories: true)
+        for legacyRoot in legacyRoots {
+            try AgentOSDirectoryMigration.mergeMissingItems(from: legacyRoot, to: visibleRoot, fileManager: fileManager)
+        }
+        return visibleRoot
+    }
+}

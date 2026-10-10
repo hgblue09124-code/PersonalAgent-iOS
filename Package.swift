@@ -196,6 +196,7 @@ let package = Package(
                 "PATools",
                 "PAMemory",
                 "PAStorageMemory",
+                "PAWorkspace",
             ],
             path: "Composition"
         ),
