@@ -46,6 +46,16 @@ public protocol Reasoning: Sendable {
     func reason(context: ContextBundle) async throws -> ReasoningResult
 }
 
+/// Optional streaming capability. Runtime callers can observe generated text without
+/// coupling the core Reasoning contract to a particular provider transport.
+public protocol StreamingReasoning: Reasoning {
+    func reason(
+        context: ContextBundle,
+        onGenerationStarted: @Sendable () -> Void,
+        onDelta: @Sendable (String) -> Void
+    ) async throws -> ReasoningResult
+}
+
 public protocol Planning: Sendable {
     func plan(goalID: GoalID, context: ContextBundle, reasoning: ReasoningResult) async throws -> Plan
 }

@@ -36,6 +36,10 @@ final class KernelSession: ObservableObject {
     @Published private(set) var conversations: [ChatConversation]
     @Published private(set) var currentConversationID: UUID
     @Published private(set) var memoryRecords: [MemorySnapshotItem]
+    @Published private(set) var streamingResponse = ""
+    @Published private(set) var responseMetrics: ChatResponseMetrics?
+    private var generationStartedAt: Date?
+    private var firstResponseDeltaAt: Date?
     private var executionTask: Task<Void, Never>?
 
     init(composition: M8CompositionRoot, state: AgentState) {
@@ -148,6 +152,10 @@ final class KernelSession: ObservableObject {
         executionProgress = nil
         executionResult = nil
         presentedResult = nil
+        streamingResponse = ""
+        responseMetrics = nil
+        generationStartedAt = nil
+        firstResponseDeltaAt = nil
         lastError = nil
         appendChatTurn(role: .user, content: normalizedStatement, conversationID: conversationID)
         let contextualInput: String
@@ -177,6 +185,8 @@ final class KernelSession: ObservableObject {
                     }
                     self.executionResult = result
                     self.presentedResult = result
+                    self.streamingResponse = ""
+                    self.responseMetrics = nil
                     self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                     self.executionProgress = nil
                     await self.refresh()
@@ -191,7 +201,22 @@ final class KernelSession: ObservableObject {
                 self.executionProgress = .executing
                 let evaluation = try await self.composition.lifecycleManager.run(
                     goalID: goalID,
-                    rawInput: contextualInput
+                    rawInput: contextualInput,
+                    onGenerationStarted: {
+                        Task { @MainActor [weak self] in
+                            self?.generationStartedAt = Date()
+                        }
+                    },
+                    onReasoningDelta: { delta in
+                        Task { @MainActor [weak self] in
+                            guard let self else { return }
+                            if self.firstResponseDeltaAt == nil {
+                                self.firstResponseDeltaAt = Date()
+                            }
+                            self.streamingResponse += delta
+                            self.refreshResponseMetrics()
+                        }
+                    }
                 )
                 let result = Self.cleanModelResult(evaluation.reason)
                 guard !result.isEmpty else {
@@ -199,6 +224,8 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionResult = result
                 self.presentedResult = result
+                self.refreshResponseMetrics()
+                self.streamingResponse = ""
                 self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                 self.executionProgress = nil
             } catch is CancellationError {
@@ -208,6 +235,7 @@ final class KernelSession: ObservableObject {
                     try? await self.composition.runtime.abort(goalID: goalID)
                 }
                 self.executionProgress = nil
+                self.streamingResponse = ""
             } catch {
                 if let goalID,
                    let status = await self.composition.runtime.goal(id: goalID)?.status,
@@ -215,6 +243,7 @@ final class KernelSession: ObservableObject {
                     try? await self.composition.runtime.abort(goalID: goalID)
                 }
                 self.executionProgress = nil
+                self.streamingResponse = ""
                 if let kernelError = error as? KernelError {
                     self.lastError = kernelError.description
                 } else {
@@ -226,6 +255,19 @@ final class KernelSession: ObservableObject {
         executionTask = task
         await task.value
         executionTask = nil
+    }
+
+    private func refreshResponseMetrics() {
+        guard let generationStartedAt, !streamingResponse.isEmpty else { return }
+        let elapsed = max(Date().timeIntervalSince(generationStartedAt), 0.001)
+        let estimatedTokens = max(1, (streamingResponse.count + 3) / 4)
+        let timeToFirstToken = firstResponseDeltaAt.map { max(0, $0.timeIntervalSince(generationStartedAt)) }
+        responseMetrics = ChatResponseMetrics(
+            timeToFirstToken: timeToFirstToken,
+            elapsed: elapsed,
+            estimatedOutputTokens: estimatedTokens,
+            estimatedTokensPerSecond: Double(estimatedTokens) / elapsed
+        )
     }
 
     func selectAgent(id: String) {
@@ -717,6 +759,14 @@ struct ChatTurn: Codable, Equatable, Identifiable, Sendable {
         self.id = id; self.role = role; self.content = content
     }
 }
+
+struct ChatResponseMetrics: Equatable, Sendable {
+    let timeToFirstToken: TimeInterval?
+    let elapsed: TimeInterval
+    let estimatedOutputTokens: Int
+    let estimatedTokensPerSecond: Double
+}
+
 private extension Int {
     func nonZeroOr(_ fallback: Int) -> Int { self == 0 ? fallback : self }
 }

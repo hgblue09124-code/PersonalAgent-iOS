@@ -101,17 +101,27 @@ public actor RunLifecycleManager {
     public func run(
         goalID: GoalID,
         sessionID: SessionID = SessionID(),
-        rawInput: String? = nil
+        rawInput: String? = nil,
+        onGenerationStarted: (@Sendable () -> Void)? = nil,
+        onReasoningDelta: (@Sendable (String) -> Void)? = nil
     ) async throws -> Evaluation {
         let record = try await createRun(goalID: goalID, sessionID: sessionID)
         let lease = CapabilityLease(runID: record.runID)
-        return try await runCycle(runID: record.runID, lease: lease, rawInput: rawInput)
+        return try await runCycle(
+            runID: record.runID,
+            lease: lease,
+            rawInput: rawInput,
+            onGenerationStarted: onGenerationStarted,
+            onReasoningDelta: onReasoningDelta
+        )
     }
 
     public func runCycle(
         runID: RunID,
         lease: CapabilityLease,
-        rawInput: String? = nil
+        rawInput: String? = nil,
+        onGenerationStarted: (@Sendable () -> Void)? = nil,
+        onReasoningDelta: (@Sendable (String) -> Void)? = nil
     ) async throws -> Evaluation {
         guard var record = try await runStore.record(for: runID) else {
             throw KernelError.goalNotFound(GoalID(rawValue: "unknown"))
@@ -175,7 +185,17 @@ public actor RunLifecycleManager {
         try Task.checkCancellation()
 
         // 2. Reasoning & Planning
-        let reasoningResult = try await reasoner.reason(context: context)
+        let reasoningResult: ReasoningResult
+        if let streamingReasoner = reasoner as? any StreamingReasoning {
+            reasoningResult = try await streamingReasoner.reason(
+                context: context,
+                onGenerationStarted: { onGenerationStarted?() },
+                onDelta: { delta in onReasoningDelta?(delta) }
+            )
+        } else {
+            onGenerationStarted?()
+            reasoningResult = try await reasoner.reason(context: context)
+        }
         let plan = try await planner.plan(goalID: goalID, context: context, reasoning: reasoningResult)
 
         try Task.checkCancellation()

@@ -84,10 +84,18 @@ struct ChatScreen: View {
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 14) { ForEach(session.chatHistory) { turn in ChatBubble(turn: turn).id(turn.id) } }.padding(.vertical, 4)
+                        LazyVStack(alignment: .leading, spacing: 14) {
+                            ForEach(session.chatHistory) { turn in ChatBubble(turn: turn).id(turn.id) }
+                            if !session.streamingResponse.isEmpty {
+                                StreamingChatBubble(content: session.streamingResponse).id("streaming-response")
+                            }
+                        }.padding(.vertical, 4)
                     }
                     .frame(minHeight: 260, maxHeight: 500)
                     .onChange(of: session.chatHistory.count) { _, _ in if let id = session.chatHistory.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
+                    .onChange(of: session.streamingResponse) { _, value in
+                        if !value.isEmpty { withAnimation(.easeOut(duration: 0.12)) { proxy.scrollTo("streaming-response", anchor: .bottom) } }
+                    }
                     .onAppear { if let id = session.chatHistory.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
                 }
             }
@@ -101,7 +109,26 @@ struct ChatScreen: View {
                 Button(action: send) { Image(systemName: session.isSubmitting ? "hourglass" : "arrow.up").font(.system(size: 14, weight: .bold)).frame(width: 40, height: 40) }
                     .buttonStyle(.borderedProminent).disabled(session.isSubmitting || message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            if session.isSubmitting { HStack(spacing: 7) { ProgressView().controlSize(.small); Text("Agent is thinking…").font(.caption).foregroundStyle(.secondary) } }
+            if session.isSubmitting {
+                HStack(spacing: 7) {
+                    ProgressView().controlSize(.small)
+                    Text(session.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Spacer(minLength: 4)
+                    if let metrics = session.responseMetrics {
+                        Text("~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
+                            .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                    }
+                }
+            } else if let metrics = session.responseMetrics {
+                HStack(spacing: 6) {
+                    Image(systemName: "speedometer").foregroundStyle(.secondary)
+                    Text("Last response · ~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
+                    if let ttft = metrics.timeToFirstToken {
+                        Text("· first token \(ttft, specifier: "%.2f")s")
+                    }
+                }.font(.caption2).foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -110,6 +137,21 @@ struct ChatScreen: View {
         guard !value.isEmpty, !session.isSubmitting else { return }
         message = ""; focused = false
         Task { await session.submitGoal(value) }
+    }
+}
+
+private struct StreamingChatBubble: View {
+    let content: String
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            PremiumIconTile(systemImage: "sparkles")
+            Text(content + "▍")
+                .font(.body).textSelection(.enabled).frame(maxWidth: 310, alignment: .leading)
+                .padding(.horizontal, 14).padding(.vertical, 11)
+                .background(AnyShapeStyle(.thinMaterial), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
+            Spacer(minLength: 18)
+        }
     }
 }
 

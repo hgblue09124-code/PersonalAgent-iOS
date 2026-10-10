@@ -70,7 +70,7 @@ public struct DefaultContextAssembler: ContextAssembling {
     }
 }
 
-public struct LLMReasoner: Reasoning {
+public struct LLMReasoner: StreamingReasoning {
     private let provider: any LLMProvider
 
     public init(provider: any LLMProvider) {
@@ -105,6 +105,56 @@ public struct LLMReasoner: Reasoning {
             summary: text,
             providerID: provider.identity.id,
             modelID: response.model
+        )
+    }
+
+    public func reason(
+        context: ContextBundle,
+        onGenerationStarted: @Sendable () -> Void,
+        onDelta: @Sendable (String) -> Void
+    ) async throws -> ReasoningResult {
+        let request = LLMRequest(
+            model: provider.identity.models.first?.id ?? ModelID(rawValue: "local"),
+            messages: [
+                ProviderMessage(role: .system, content: """
+                You are the reasoning component of a personal agent.
+                Answer the user's task directly and concisely.
+                Do not repeat the user's task, prompt labels, or instructions.
+                Do not claim an action was executed.
+                """),
+                ProviderMessage(role: .user, content: context.perception.rawInput),
+            ],
+            parameters: GenerationParameters(maxOutputTokens: 128)
+        )
+        var generated = ""
+        var resolvedModel: ModelID?
+        onGenerationStarted()
+        for try await event in provider.stream(request) {
+            try Task.checkCancellation()
+            switch event {
+            case .delta(let delta):
+                guard !delta.isEmpty else { continue }
+                generated += delta
+                onDelta(delta)
+            case .toolCall:
+                // Tool calls are disabled for reasoning requests; execution belongs to Runtime.
+                continue
+            case .completed(let response):
+                resolvedModel = response.model
+                if generated.isEmpty, !response.text.isEmpty {
+                    generated = response.text
+                    onDelta(response.text)
+                }
+            }
+        }
+        let text = generated.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            throw KernelError.invalidStateUpdate("LLM reasoning stream returned empty output")
+        }
+        return ReasoningResult(
+            summary: text,
+            providerID: provider.identity.id,
+            modelID: resolvedModel ?? provider.identity.models.first?.id
         )
     }
 }
