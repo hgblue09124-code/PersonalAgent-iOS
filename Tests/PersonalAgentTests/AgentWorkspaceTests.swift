@@ -69,6 +69,10 @@ final class WorkspaceContentSafetyTests: XCTestCase {
     func testProtectedPathPolicyNormalizesWindowsSeparators() {
         XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("workspace\\secrets.md"))
         XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("config\\private-token.json"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("config/api_key.json"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("config/private_key.json"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("config/access-key.json"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("config/passwords.txt"))
         XCTAssertFalse(WorkspaceContentSafety.isProtectedPath("workspace\\notes.md"))
     }
 

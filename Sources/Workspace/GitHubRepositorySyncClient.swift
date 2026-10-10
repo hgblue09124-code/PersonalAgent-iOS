@@ -361,7 +361,7 @@ public actor GitHubRepositorySyncClient {
         if components.dropLast().contains(where: { blockedDirectories.contains($0.lowercased()) }) { return false }
         let name = components.last?.lowercased() ?? ""
         let blockedNames = [".env", ".env.local", ".ds_store", "credentials.json", "secrets.json", "api_keys.json", "id_rsa", "id_ed25519"]
-        if blockedNames.contains(name) || name.contains("credential") || name.contains("secret") || name.contains("token") || name.contains("apikey") || name.hasSuffix(".gguf") || name.hasSuffix(".pem") || name.hasSuffix(".p12") || name.hasSuffix(".key") || name.hasSuffix(".mobileprovision") || name.hasSuffix(".sqlite") || name.hasSuffix(".db") {
+        if blockedNames.contains(name) || WorkspaceContentSafety.isProtectedPath(path) || name.hasSuffix(".gguf") || name.hasSuffix(".pem") || name.hasSuffix(".p12") || name.hasSuffix(".key") || name.hasSuffix(".mobileprovision") || name.hasSuffix(".sqlite") || name.hasSuffix(".db") {
             return false
         }
         let allowedExtensions: Set<String> = ["md", "markdown", "agent", "skill", "module", "tool", "rules", "prompt", "mdc", "txt", "json", "jsonl", "ndjson", "yaml", "yml", "toml", "swift", "py", "sh", "ts", "tsx", "js", "jsx", "html", "css", "xml", "csv", "tsv", "plist", "strings", "pbxproj", "conf", "ini", "sql", "rb", "go", "rs", "c", "h", "m", "mm", "gradle", "properties", "gitignore", "gitmodules"]
