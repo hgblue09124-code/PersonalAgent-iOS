@@ -565,4 +565,21 @@ struct M9RealProviderSliceTests {
         #expect(!response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         print("REAL API CONNECTION: PASS (Received valid response from \(providerID.rawValue): \(response.text))")
     }
+    @Test func compatibleProviderIdentityUsesConfiguredModelForRuntimeRouting() {
+        let configuredModel = ModelID(rawValue: "openrouter/anthropic/claude-3.5-sonnet")
+        let provider = OpenAICompatibleProvider(
+            transport: ScriptedTransport(scripts: []),
+            credentials: InMemoryCredentialVault(),
+            configuration: ProviderConfiguration(
+                providerID: OpenAICompatibleProviderBoundary.providerID,
+                endpointURL: "https://openrouter.ai/api/v1/chat/completions",
+                defaultModel: configuredModel
+            )
+        )
+
+        #expect(provider.identity.id == OpenAICompatibleProviderBoundary.providerID)
+        #expect(provider.identity.models.map(\.id) == [configuredModel])
+        #expect(provider.identity.models.first?.displayName == configuredModel.rawValue)
+    }
+
 }
