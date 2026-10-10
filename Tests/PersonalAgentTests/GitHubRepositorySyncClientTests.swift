@@ -7,7 +7,11 @@ import FoundationNetworking
 final class GitHubRepositorySyncClientTests: XCTestCase {
     func testRepositoryAndBranchValidationRejectTraversal() {
         XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "repo", branch: "../main"))
-        XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "../repo"))
+        XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "repo", branch: ".hidden"))
+        XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "repo", branch: "feature//nested"))
+        XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "repo", branch: "feature.lock"))
+        XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "repo", branch: "feature."))
+        XCTAssertThrowsError(try GitHubRepositoryLocation(owner: "owner", repository: "repo", branch: "../repo"))
         XCTAssertTrue(GitHubRepositorySyncClient.isSafePath("skills/Memory.md"))
         XCTAssertFalse(GitHubRepositorySyncClient.isSafePath("../outside.md"))
         XCTAssertFalse(GitHubRepositorySyncClient.isSafePath(".git/config"))
