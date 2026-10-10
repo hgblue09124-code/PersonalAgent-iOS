@@ -13,6 +13,7 @@ struct TerminalScreen: View {
     @State private var workspace: LocalAgentWorkspace?
     @State private var terminal: TerminalSession?
     @State private var registry = BuiltinCommandRegistry.make()
+    @Environment(\.kernelSession) private var kernelSession
     @State private var command = ""
     @State private var isExecuting = false
     @State private var transcript: [TerminalLine] = []
@@ -66,7 +67,7 @@ struct TerminalScreen: View {
 
             HStack(alignment: .bottom, spacing: 8) {
                 Text("›").font(.system(.title2, design: .monospaced, weight: .bold)).foregroundStyle(.green)
-                TextField("help, ls, cat, find, grep…", text: $command, axis: .vertical)
+                TextField("help, status, agent run…, skills list…", text: $command, axis: .vertical)
                     .font(.system(.body, design: .monospaced))
                     .lineLimit(1...4)
                     .focused($commandFocused)
@@ -106,9 +107,10 @@ struct TerminalScreen: View {
             try await workspace.prepare()
             self.workspace = workspace
             terminal = TerminalSession(context: CommandContext(workspace: workspace))
+            registry = makeRuntimeRegistry(session: kernelSession)
             let rootName = await workspace.rootURL.lastPathComponent
             status = "Sandbox ready · \(rootName)"
-            transcript.append(TerminalLine(text: "Workspace shared with the visible AgentOS folder. Type help to list commands.", kind: .output))
+            transcript.append(TerminalLine(text: "Workspace and Agent Runtime connected. Type help to list commands.", kind: .output))
         } catch {
             status = "Sandbox unavailable"
             transcript.append(TerminalLine(text: error.localizedDescription, kind: .error))
@@ -140,4 +142,42 @@ struct TerminalScreen: View {
             transcript.append(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
         }
     }
+    private func makeRuntimeRegistry(session: KernelSession?) -> CommandRegistry {
+        var commands = BuiltinCommandRegistry.make()
+        guard let session else { return commands }
+
+        commands = commands.registering("help") { command, _ in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status clear help\\n")
+        }
+        commands = commands.registering("status") { command, _ in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
+            return CommandResult(stdout: await session.terminalStatus())
+        }
+        commands = commands.registering("agent") { command, _ in
+            guard command.arguments.first == "run", command.arguments.count >= 2 else {
+                throw CommandError.invalidArguments("agent run <request>")
+            }
+            let request = command.arguments.dropFirst().joined(separator: " ")
+            return CommandResult(stdout: await session.runFromTerminal(request))
+        }
+        commands = commands.registering("skills") { command, _ in
+            guard command.arguments == ["list"] else { throw CommandError.invalidArguments("skills list") }
+            return CommandResult(stdout: await session.terminalSkillsList())
+        }
+        commands = commands.registering("model") { command, _ in
+            guard command.arguments == ["status"] else { throw CommandError.invalidArguments("model status") }
+            return CommandResult(stdout: await session.terminalModelStatus())
+        }
+        commands = commands.registering("provider") { command, _ in
+            guard command.arguments == ["status"] else { throw CommandError.invalidArguments("provider status") }
+            return CommandResult(stdout: await session.terminalProviderStatus())
+        }
+        commands = commands.registering("memory") { command, _ in
+            guard command.arguments == ["status"] else { throw CommandError.invalidArguments("memory status") }
+            return CommandResult(stdout: await session.terminalMemoryStatus())
+        }
+        return commands
+    }
+
 }
