@@ -383,6 +383,32 @@ struct M9RealProviderSliceTests {
         }
     }
 
+
+    @Test func p3_urlSessionCancellationDuringStreamingIsNotRetriedAsNetworkFailure() async throws {
+        let transport = ScriptedTransport(scripts: [.urlSessionCancelled])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "stream-cancel.test")
+        await vault.store(Data("cancel-key".utf8), for: ref)
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref,
+                maxRetryAttempts: 3
+            )
+        )
+
+        await #expect(throws: ProviderRuntimeError.cancelled) {
+            for try await _ in provider.stream(
+                LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "cancel stream")
+            ) {}
+        }
+        #expect((await transport.recordedRequests()).count == 1)
+    }
+
     @Test func p3_retryExecutionRecoversTransientFailure() async throws {
         let responseBody = Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"recovered"},"finish_reason":"stop"}]}"#.utf8)
         let transport = ScriptedTransport(scripts: [
