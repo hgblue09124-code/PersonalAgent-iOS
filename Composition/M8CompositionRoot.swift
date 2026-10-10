@@ -504,17 +504,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             let visibleRoot = documents.appendingPathComponent("AgentOS", isDirectory: true)
             if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
                 let legacyRoot = appSupport.appendingPathComponent("PersonalAgent/M8Product", isDirectory: true)
-                if FileManager.default.fileExists(atPath: legacyRoot.path) {
-                    try FileManager.default.createDirectory(at: visibleRoot, withIntermediateDirectories: true)
-                    let existing = Set((try? FileManager.default.contentsOfDirectory(atPath: visibleRoot.path)) ?? [])
-                    for name in (try FileManager.default.contentsOfDirectory(atPath: legacyRoot.path)) where !existing.contains(name) {
-                        // Copy, never move or delete, so an interrupted migration is recoverable.
-                        try FileManager.default.copyItem(
-                            at: legacyRoot.appendingPathComponent(name),
-                            to: visibleRoot.appendingPathComponent(name)
-                        )
-                    }
-                }
+                try AgentOSDirectoryMigration.mergeMissingItems(from: legacyRoot, to: visibleRoot)
             }
             rootDirectoryURL = visibleRoot
         } else if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
