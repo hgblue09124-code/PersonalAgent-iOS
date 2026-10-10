@@ -24,8 +24,19 @@ public struct OpenAICompatibleProvider: LLMProvider {
         credentials: any CredentialResolving,
         configuration: ProviderConfiguration
     ) {
+        let declared = OpenAICompatibleProviderBoundary.declaredIdentity
+        let configuredModel = ModelIdentity(
+            id: configuration.defaultModel,
+            displayName: configuration.defaultModel.rawValue,
+            contextTokenLimit: declared.models.first?.contextTokenLimit ?? 32_768
+        )
+        let identity = ProviderIdentity(
+            id: declared.id,
+            displayName: declared.displayName,
+            models: [configuredModel]
+        )
         self.inner = HTTPChatProvider(
-            identity: OpenAICompatibleProviderBoundary.declaredIdentity,
+            identity: identity,
             configuration: configuration,
             transport: transport,
             credentials: credentials,
