@@ -117,7 +117,13 @@ public struct ImportedFileContentReader: Sendable {
 
         let format: ImportedContentFormat
         switch ext {
-        case "txt", "text":
+        case "txt", "text", "swift", "py", "js", "mjs", "cjs", "ts", "tsx", "jsx",
+             "html", "htm", "xml", "xhtml", "toml", "ini", "cfg", "conf", "env.example",
+             "sh", "bash", "zsh", "fish", "sql", "c", "h", "cc", "cpp", "hpp", "rs",
+             "go", "java", "kt", "kts", "m", "mm", "rb", "php", "pl", "lua", "r",
+             "dart", "ex", "exs", "erl", "hrl", "hs", "lhs", "scala", "sc", "clj",
+             "cljs", "cljc", "edn", "gradle", "properties", "makefile", "dockerfile",
+             "graphql", "gql", "proto", "tf", "hcl", "diff", "patch":
             format = .plainText
         case "md", "markdown", "mdown":
             format = .markdown
