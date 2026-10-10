@@ -695,7 +695,8 @@ private extension SettingsScreen {
     func syncGitHubRepository() async {
         isGitHubSyncing = true
         defer { isGitHubSyncing = false }
-        githubSyncStatus = await session.syncGitHubWorkspace().trimmingCharacters(in: .whitespacesAndNewlines)
+        let result = await session.syncGitHubWorkspace()
+        githubSyncStatus = result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     func previewImportedFile(_ file: ImportedFile) async {
