@@ -393,14 +393,36 @@ private struct ConfiguredRemoteProvider: LLMProvider, Sendable {
         }
     }
 
+    /// The outer ProviderRuntime captures the fallback identity at startup. Route its
+    /// generic model ID to the selected adapter's configured model before sending the
+    /// request, otherwise a valid saved key can still produce "model not found" errors.
+    private func requestForSelectedProvider(_ request: LLMRequest) -> LLMRequest {
+        let identity = selectedProvider.identity
+        let availableModels = identity.models.map(\.id)
+        guard !availableModels.contains(request.model),
+              let configuredModel = availableModels.first else {
+            return request
+        }
+        return LLMRequest(
+            model: configuredModel,
+            messages: request.messages,
+            parameters: request.parameters,
+            toolsAllowed: request.toolsAllowed,
+            metadata: request.metadata,
+            timeoutNanoseconds: request.timeoutNanoseconds
+        )
+    }
+
     func complete(_ request: LLMRequest) async throws -> LLMResponse {
         guard enabled else { return try await fallback.complete(request) }
-        return try await selectedProvider.complete(request)
+        let provider = selectedProvider
+        return try await provider.complete(requestForSelectedProvider(request))
     }
 
     func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         guard enabled else { return fallback.stream(request) }
-        return selectedProvider.stream(request)
+        let provider = selectedProvider
+        return provider.stream(requestForSelectedProvider(request))
     }
 }
 
