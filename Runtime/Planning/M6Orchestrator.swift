@@ -140,7 +140,22 @@ public struct DefaultProposer: Executing {
 public struct DefaultVerifier: Verifying {
     public init() {}
     public func verify(plan: Plan, proposals: [ActionProposal]) async throws -> VerificationResult {
-        VerificationResult(accepted: true, notes: "Verified default plan")
+        guard !plan.steps.isEmpty else {
+            return VerificationResult(accepted: false, notes: "Rejected empty plan")
+        }
+        guard !proposals.isEmpty else {
+            return VerificationResult(accepted: false, notes: "Rejected plan without proposals")
+        }
+        guard proposals.allSatisfy({ $0.planID == plan.id }) else {
+            return VerificationResult(accepted: false, notes: "Rejected proposal referencing a different plan")
+        }
+        guard Set(proposals.map(\.actionID)).count == proposals.count else {
+            return VerificationResult(accepted: false, notes: "Rejected duplicate action identifiers")
+        }
+        guard proposals.allSatisfy({ !$0.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) else {
+            return VerificationResult(accepted: false, notes: "Rejected empty action description")
+        }
+        return VerificationResult(accepted: true, notes: "Plan and action proposals passed structural verification")
     }
 }
 
