@@ -187,6 +187,8 @@ public actor LocalAgentWorkspace: AgentWorkspace {
                     isDirectory: values?.isDirectory == true
                 )
             }
+            // Directory listing is a read surface too: do not disclose protected names.
+            .filter { !WorkspaceContentSafety.isProtectedPath($0.relativePath) }
             .sorted {
                 if $0.isDirectory != $1.isDirectory {
                     return $0.isDirectory && !$1.isDirectory
@@ -264,6 +266,11 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         }
 
         let path = trimmed.replacingOccurrences(of: "\\", with: "/")
+        // Enforce the shared secret-path policy at the filesystem boundary so
+        // terminal commands and other direct AgentWorkspace consumers cannot bypass it.
+        guard !WorkspaceContentSafety.isProtectedPath(path) else {
+            throw AgentWorkspaceError.invalidPath(relativePath)
+        }
         guard !path.hasPrefix("/") else {
             throw AgentWorkspaceError.invalidPath(relativePath)
         }
