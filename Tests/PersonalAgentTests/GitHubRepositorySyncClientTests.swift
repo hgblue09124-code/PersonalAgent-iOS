@@ -276,4 +276,39 @@ private actor ScriptedGitHubTransport: GitHubSyncHTTPTransport {
         XCTAssertFalse(FileManager.default.fileExists(atPath: outside.appendingPathComponent("remote.md").path))
     }
 
+    func testBareProviderSpecificTokensBlockSyncBeforeNetworkAccess() async throws {
+        let fakeTokens = [
+            "xoxb-" + String(repeating: "A", count: 24),
+            "AIza" + String(repeating: "A", count: 35),
+            "hf_" + String(repeating: "A", count: 32),
+            "AKIA" + String(repeating: "A", count: 16)
+        ]
+
+        for (index, token) in fakeTokens.enumerated() {
+            let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: base) }
+            let workspace = base.appendingPathComponent("workspace")
+            let skillDirectory = workspace.appendingPathComponent("skills")
+            try FileManager.default.createDirectory(at: skillDirectory, withIntermediateDirectories: true)
+            try token.write(to: skillDirectory.appendingPathComponent("token\(index).md"), atomically: true, encoding: .utf8)
+
+            let transport = RecordingGitHubTransport()
+            let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+            let client = try GitHubRepositorySyncClient(
+                location: location,
+                stateURL: base.appendingPathComponent("state/state.json"),
+                transport: transport,
+                tokenProvider: { "test-token" }
+            )
+            do {
+                _ = try await client.synchronize(workspaceURL: workspace)
+                XCTFail("Bare provider-specific token patterns must fail closed")
+            } catch let error as GitHubRepositorySyncError {
+                XCTAssertEqual(error, .potentialSecret("skills/token\(index).md"))
+            }
+            let requests = await transport.requests
+            XCTAssertTrue(requests.isEmpty)
+        }
+    }
+
 }
