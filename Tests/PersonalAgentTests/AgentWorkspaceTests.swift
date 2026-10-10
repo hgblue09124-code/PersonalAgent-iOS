@@ -56,3 +56,19 @@ final class AgentWorkspaceTests: XCTestCase {
         }
     }
 }
+
+
+final class WorkspaceContentSafetyTests: XCTestCase {
+    func testProtectedPathPolicyIsCaseInsensitiveAndChecksEveryComponent() {
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("workspace/secrets.md"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("skills/Private-Token.md"))
+        XCTAssertTrue(WorkspaceContentSafety.isProtectedPath("workspace/.ENV"))
+        XCTAssertFalse(WorkspaceContentSafety.isProtectedPath("workspace/notes.md"))
+    }
+
+    func testSecretLikeContentIsRejectedWithoutEchoingTheSecret() {
+        XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("api_key = \"sk-1234567890abcdefghijklmnop\""))
+        XCTAssertTrue(WorkspaceContentSafety.containsPotentialSecret("Authorization: Bearer abcdefghijklmnopqrstuvwxyz012345"))
+        XCTAssertFalse(WorkspaceContentSafety.containsPotentialSecret("This is an ordinary note about API design."))
+    }
+}
