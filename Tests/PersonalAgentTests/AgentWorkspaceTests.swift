@@ -58,6 +58,39 @@ final class AgentWorkspaceTests: XCTestCase {
         XCTAssertEqual(safeRead, "safe settings")
     }
 
+    func testDirectWorkspaceAccessBlocksSecretLikeContent() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let sample = "api_key = \"sk-" + String(repeating: "A", count: 24) + "\""
+
+        do {
+            try await workspace.writeFile(sample, to: "workspace/new-note.md")
+            XCTFail("secret-like content must not be written")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
+
+        let externalFile = root.appendingPathComponent("workspace/external-note.md")
+        try sample.write(to: externalFile, atomically: true, encoding: .utf8)
+        do {
+            _ = try await workspace.readFile(at: "workspace/external-note.md")
+            XCTFail("secret-like content must not be read through the workspace")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
+
+        try await workspace.writeFile("safe", to: "workspace/append-note.md")
+        do {
+            try await workspace.appendFile(sample, to: "workspace/append-note.md")
+            XCTFail("secret-like content must not be appended")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
+        let safeValue = try await workspace.readFile(at: "workspace/append-note.md")
+        XCTAssertEqual(safeValue, "safe")
+    }
+
     func testUnicodeWriteReadExistsMetadata() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: root)
