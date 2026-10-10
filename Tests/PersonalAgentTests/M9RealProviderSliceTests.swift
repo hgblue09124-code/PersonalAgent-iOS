@@ -562,7 +562,7 @@ struct M9RealProviderSliceTests {
         let request = LLMRequest(model: model, prompt: "Respond with the single word: LIVE_VERIFIED")
         let response = try await runtime.complete(request)
 
-        #expect(!response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        #expect(!response.text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty)
         print("REAL API CONNECTION: PASS (Received valid response from \(providerID.rawValue): \(response.text))")
     }
     @Test func openRouterFreeRouterCompletesThroughCompatibleProviderWireContract() async throws {
@@ -626,9 +626,9 @@ struct M9RealProviderSliceTests {
             providerID: OpenAICompatibleProviderBoundary.providerID,
             endpointURL: "https://openrouter.ai/api/v1/chat/completions",
             defaultModel: model,
-            credential: credential,
             timeoutNanoseconds: 45_000_000_000,
-            maxRetryAttempts: 0
+            maxRetryAttempts: 0,
+            credential: credential
         )
         let provider = OpenAICompatibleProvider(
             transport: SecurityNetworkTransport(network: URLSessionNetworkAccess()),
