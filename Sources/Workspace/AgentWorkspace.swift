@@ -197,7 +197,7 @@ public actor LocalAgentWorkspace: AgentWorkspace {
                 )
             }
             // Directory listing is a read surface too: do not disclose protected names.
-            .filter { !WorkspaceContentSafety.isProtectedPath($0.relativePath) }
+            .filter { !isProtectedEntry($0.relativePath) }
             .sorted {
                 if $0.isDirectory != $1.isDirectory {
                     return $0.isDirectory && !$1.isDirectory
@@ -267,6 +267,25 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         }
     }
 
+    private func isProtectedEntry(_ relativePath: String) -> Bool {
+        if WorkspaceContentSafety.isProtectedPath(relativePath) {
+            return true
+        }
+        let candidate = rootURL
+            .appendingPathComponent(relativePath)
+            .resolvingSymlinksInPath()
+            .standardizedFileURL
+        let resolvedRoot = rootURL.resolvingSymlinksInPath().standardizedFileURL
+        guard candidate.path == resolvedRoot.path
+                || candidate.path.hasPrefix(resolvedRoot.path + "/") else {
+            return true
+        }
+        let targetRelativePath = candidate.path == resolvedRoot.path
+            ? ""
+            : String(candidate.path.dropFirst(resolvedRoot.path.count + 1))
+        return WorkspaceContentSafety.isProtectedPath(targetRelativePath)
+    }
+
     private func validateContent(_ contents: String) throws {
         guard !WorkspaceContentSafety.containsPotentialSecret(contents) else {
             throw AgentWorkspaceError.protectedContent
@@ -308,6 +327,13 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         guard resolvedCandidate.path == resolvedRoot.path
                 || resolvedCandidate.path.hasPrefix(resolvedRoot.path + "/") else {
             throw AgentWorkspaceError.escapesSandbox
+        }
+
+        let resolvedRelativePath = resolvedCandidate.path == resolvedRoot.path
+            ? ""
+            : String(resolvedCandidate.path.dropFirst(resolvedRoot.path.count + 1))
+        guard !WorkspaceContentSafety.isProtectedPath(resolvedRelativePath) else {
+            throw AgentWorkspaceError.invalidPath(relativePath)
         }
 
         return candidate
