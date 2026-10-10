@@ -227,6 +227,7 @@ private enum WorkspaceToolSafety {
     static func validatePath(_ path: String) throws {
         _ = try WorkspacePath(path)
         guard isAllowedPath(path) else { throw WorkspaceStorageToolError.forbiddenPath }
+        try validateFilename(path)
     }
 
     static func validateReadablePath(_ path: String) throws {
@@ -252,10 +253,12 @@ private enum WorkspaceToolSafety {
     }
 
     static func isProtectedFilename(_ path: String) -> Bool {
-        let name = URL(fileURLWithPath: path).lastPathComponent.lowercased()
+        let components = path.split(separator: "/").map { String($0).lowercased() }
         let blocked = [".env", ".env.local", "credentials.json", "secrets.json", "api_keys.json", "id_rsa", "id_ed25519"]
-        return blocked.contains(name)
-            || ["credential", "secret", "token", "apikey"].contains { marker in name.contains(marker) }
+        return components.contains { name in
+            blocked.contains(name)
+                || ["credential", "secret", "token", "apikey"].contains { marker in name.contains(marker) }
+        }
     }
 
     static func validateFilename(_ path: String) throws {
