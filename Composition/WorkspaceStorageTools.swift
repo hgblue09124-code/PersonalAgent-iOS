@@ -32,7 +32,11 @@ public struct WorkspaceReadTool: Tool {
             let path = try WorkspaceToolCodec.optionalString("path", in: input) ?? "workspace"
             try WorkspaceToolSafety.validatePath(path)
             let allEntries = try await workspace.listDirectory(at: path)
-                .filter { WorkspaceToolSafety.isAllowedPath($0.relativePath) && !WorkspaceToolSafety.isProtectedFilename($0.relativePath) }
+                .filter {
+                    WorkspaceToolSafety.isAllowedPath($0.relativePath)
+                        && !WorkspaceToolSafety.isProtectedFilename($0.relativePath)
+                        && ($0.isDirectory || WorkspaceToolSafety.isReadableTextPath($0.relativePath))
+                }
             let entries = Array(allEntries.prefix(200))
             return try WorkspaceToolCodec.encode([
                 "operation": operation,
