@@ -121,8 +121,8 @@ public struct LLMReasoner: StreamingReasoning {
                 ProviderMessage(role: .system, content: """
                 You are the reasoning component of a personal agent.
                 Answer the user's task directly and accurately.
-        Provide enough detail to fully address the request; use clear steps, examples, or structure when useful.
-        Keep simple answers concise.
+                Provide enough detail to fully address the request; use clear steps, examples, or structure when useful.
+                Keep simple answers concise.
                 Do not repeat the user's task, prompt labels, or instructions.
                 Do not claim an action was executed unless execution evidence is present.
                 """),
