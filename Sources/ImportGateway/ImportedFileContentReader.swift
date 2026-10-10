@@ -60,6 +60,19 @@ public struct ImportedFileContentReader: Sendable {
         self.maximumReadableBytes = max(0, maximumReadableBytes)
     }
 
+    /// Maximum side length used for OCR thumbnails to bound decoded image memory.
+    static let maximumOCRPixelDimension = 2048
+
+    /// Validates source dimensions and returns the thumbnail dimension without
+    /// allocating the original full-resolution pixel buffer.
+    static func boundedOCRPixelDimension(width: Int64, height: Int64) throws -> Int {
+        let (pixels, overflow) = width.multipliedReportingOverflow(by: height)
+        guard width > 0, height > 0, !overflow, pixels <= 100_000_000 else {
+            throw ImportedFileReaderError.extractionLimitExceeded
+        }
+        return Int(min(max(width, height), Int64(maximumOCRPixelDimension)))
+    }
+
     public func read(_ importedFile: ImportedFile, from store: ImportedFileStore) async throws -> ImportedFileContent {
         guard let url = await store.fileURL(for: importedFile.id) else {
             throw ImportedFileReaderError.missingFile
@@ -314,10 +327,15 @@ public struct ImportedFileContentReader: Sendable {
               let height = (properties[kCGImagePropertyPixelHeight] as? NSNumber)?.int64Value else {
             throw ImportedFileReaderError.malformedDocument
         }
-        let (pixels, overflow) = width.multipliedReportingOverflow(by: height)
-        guard width > 0, height > 0, !overflow, pixels <= 100_000_000,
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-            throw ImportedFileReaderError.extractionLimitExceeded
+        let maximumPixelDimension = try Self.boundedOCRPixelDimension(width: width, height: height)
+        let thumbnailOptions: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: maximumPixelDimension,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+        ]
+        // Decode directly to a bounded thumbnail; never allocate the original full-size CGImage.
+        guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, thumbnailOptions as CFDictionary) else {
+            throw ImportedFileReaderError.malformedDocument
         }
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate
