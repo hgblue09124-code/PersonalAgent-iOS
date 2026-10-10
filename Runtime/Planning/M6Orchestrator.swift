@@ -80,9 +80,11 @@ public struct LLMReasoner: StreamingReasoning {
     public func reason(context: ContextBundle) async throws -> ReasoningResult {
         let systemPrompt = """
         You are the reasoning component of a personal agent.
-        Answer the user's task directly and concisely.
+        Answer the user's task directly and accurately.
+        Provide enough detail to fully address the request; use clear steps, examples, or structure when useful.
+        Keep simple answers concise.
         Do not repeat the user's task, prompt labels, or instructions.
-        Do not claim an action was executed.
+        Do not claim an action was executed unless execution evidence is present.
         """
 
         let response = try await provider.complete(
@@ -92,7 +94,7 @@ public struct LLMReasoner: StreamingReasoning {
                     ProviderMessage(role: .system, content: systemPrompt),
                     ProviderMessage(role: .user, content: context.perception.rawInput),
                 ],
-                parameters: GenerationParameters(maxOutputTokens: 128)
+                parameters: GenerationParameters(maxOutputTokens: 768)
             )
         )
 
@@ -118,13 +120,15 @@ public struct LLMReasoner: StreamingReasoning {
             messages: [
                 ProviderMessage(role: .system, content: """
                 You are the reasoning component of a personal agent.
-                Answer the user's task directly and concisely.
+                Answer the user's task directly and accurately.
+        Provide enough detail to fully address the request; use clear steps, examples, or structure when useful.
+        Keep simple answers concise.
                 Do not repeat the user's task, prompt labels, or instructions.
-                Do not claim an action was executed.
+                Do not claim an action was executed unless execution evidence is present.
                 """),
                 ProviderMessage(role: .user, content: context.perception.rawInput),
             ],
-            parameters: GenerationParameters(maxOutputTokens: 128)
+            parameters: GenerationParameters(maxOutputTokens: 768)
         )
         var generated = ""
         var resolvedModel: ModelID?
