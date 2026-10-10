@@ -53,7 +53,7 @@ Từ ngày 10/10/2026, dùng checklist này làm nơi theo dõi công việc cò
 
 ### Ưu tiên P0 — ổn định sản phẩm
 - [ ] **Provider → Chat end-to-end:** cấu hình credential an toàn; kiểm tra kết nối; gửi yêu cầu, stream delta, cancel, xử lý lỗi và phục hồi; xác minh OpenRouter `openrouter/free` bằng request thật.
-  - Đã nối stream delta của `LLMReasoner` qua `RunLifecycleManager` tới Chat UI và hiển thị tốc độ token ước lượng/độ trễ token đầu tiên; vẫn cần CI xanh và nghiệm thu request thật trên iPhone. Tốc độ là ước lượng theo ký tự, không phải usage/tokenizer chính thức của provider.
+  - Đã nối stream delta của `LLMReasoner` qua `RunLifecycleManager` tới Chat UI và hiển thị tốc độ token ước lượng/độ trễ token đầu tiên; vẫn cần CI xanh và nghiệm thu request thật trên iPhone. Tốc độ là ước lượng theo ký tự, không phải usage/tokenizer chính thức của provider. Regression tests xác nhận `LLMReasoner` chuyển tiếp delta và từ chối stream rỗng.
 - [ ] **History, Memory, Skills và Agent Runtime:** kiểm tra luồng sử dụng thật xuyên suốt; xác minh dữ liệu được lưu/đọc lại, skill được gọi đúng và kết quả thực thi được kiểm chứng.
 - [ ] **GGUF trên iPhone 12 Pro Max:** import file thật, kiểm tra header/metadata, load → generate → stream → cancel → unload, phục hồi sau lỗi và đo tốc độ/nhiệt độ. Không coi fixture hoặc CI là nghiệm thu thiết bị.
 - [ ] **Bảo mật dữ liệu:** giữ credential trong Keychain; không log secret; chặn đường dẫn/nội dung nhạy cảm nhất quán ở UI, runtime, storage và sync.
