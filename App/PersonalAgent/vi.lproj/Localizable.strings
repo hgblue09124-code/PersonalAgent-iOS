@@ -404,3 +404,14 @@
 "help, status, agent run…, skills list…" = "help, status, agent run…, skills list…";
 "Run terminal command" = "Chạy lệnh terminal";
 "Terminal" = "Terminal";
+
+/* Complete Vietnamese labels for the main workspace navigation */
+"Conversations and persistent chat history" = "Hội thoại và lịch sử trò chuyện được lưu";
+"Live execution, results and errors" = "Thực thi trực tiếp, kết quả và lỗi";
+"Sandboxed commands and workspace file operations" = "Lệnh trong môi trường cách ly và thao tác tệp workspace";
+"Local GGUF models and runtime lifecycle" = "Mô hình GGUF cục bộ và vòng đời runtime";
+"Remote and local inference adapters" = "Bộ kết nối suy luận từ xa và cục bộ";
+"Declared Skill.md capabilities" = "Các năng lực được khai báo trong Skill.md";
+"Agent.md profiles and scoped Skills" = "Hồ sơ Agent.md và các Skill theo phạm vi";
+"Persistent contextual memory" = "Bộ nhớ ngữ cảnh lâu dài";
+"Model, provider credentials, language and runtime" = "Mô hình, thông tin xác thực, ngôn ngữ và runtime";
