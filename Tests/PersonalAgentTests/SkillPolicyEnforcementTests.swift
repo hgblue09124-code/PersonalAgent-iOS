@@ -17,6 +17,23 @@ struct SkillPolicyEnforcementTests {
         }
     }
 
+    @Test("default policy denies execution without an explicit grant")
+    func defaultPolicyDeniesExecutionWithoutGrant() async {
+        let decision = await DefaultPolicyEvaluator().evaluate(
+            ActionIntent(capabilities: [.read, .execute], summary: "run Skill")
+        )
+        #expect(!decision.allowed)
+        #expect(!decision.requiresApproval)
+    }
+
+    @Test("default policy permits read-only actions")
+    func defaultPolicyPermitsReadOnlyActions() async {
+        let decision = await DefaultPolicyEvaluator().evaluate(
+            ActionIntent(capabilities: .read, summary: "read manifest")
+        )
+        #expect(decision.allowed)
+    }
+
     @Test("denied policy fails closed")
     func deniedPolicyFailsClosed() async {
         let runtime = SkillRuntime()

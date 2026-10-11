@@ -472,6 +472,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let executionBoundary: ExecutionBoundary
     public let lifecycleManager: RunLifecycleManager
     public let recoveryEngine: RunRecoveryEngine
+    private let skillPolicy: any PolicyEvaluating
 
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal M8 Agent"),
@@ -496,6 +497,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         mutationEvidenceStore: (any MutationEvidenceStore)? = nil,
         workspaceToolsEnabled: Bool = false
     ) async throws {
+        let resolvedPolicy: any PolicyEvaluating = policy ?? DefaultPolicyEvaluator()
+        self.skillPolicy = resolvedPolicy
         let rootDirectoryURL: URL
         if let storeDirectoryURL {
             rootDirectoryURL = storeDirectoryURL
@@ -653,7 +656,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             eventLog: idempotentLog,
             logger: logger,
             reasoner: LLMReasoner(provider: providerRuntime),
-            policy: policy,
+            policy: resolvedPolicy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime
         )
@@ -670,7 +673,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
         let boundary = ExecutionBoundary(
             attemptStore: aStore,
-            policy: policy ?? DefaultPolicyEvaluator(),
+            policy: resolvedPolicy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime,
             evidenceResolver: evidenceResolver,
@@ -740,7 +743,7 @@ extension M8CompositionRoot {
         try await skillRuntime.execute(
             id: id,
             inputJSON: inputJSON,
-            policy: policy ?? DefaultPolicyEvaluator()
+            policy: policy ?? skillPolicy
         )
     }
 
@@ -752,7 +755,7 @@ extension M8CompositionRoot {
         try await skillAgentOrchestrator.run(
             goalStatement: goalStatement,
             inputJSON: inputJSON,
-            policy: policy ?? DefaultPolicyEvaluator()
+            policy: policy ?? skillPolicy
         )
     }
 
@@ -771,7 +774,7 @@ extension M8CompositionRoot {
                 agent: agent,
                 goalStatement: goalStatement,
                 inputJSON: inputJSON,
-                policy: policy ?? DefaultPolicyEvaluator()
+                policy: policy ?? skillPolicy
             )
         } catch SkillRuntimeError.noSelection {
             return nil
@@ -798,7 +801,7 @@ extension M8CompositionRoot {
                 agents: agents,
                 goalStatement: goalStatement,
                 inputJSON: inputJSON,
-                policy: policy ?? DefaultPolicyEvaluator()
+                policy: policy ?? skillPolicy
             )
         } catch AgentTeamOrchestratorError.noAgents {
             return nil

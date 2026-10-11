@@ -11,6 +11,10 @@ import PASecurity
 
 @Suite("M8 Product Architecture Tests")
 struct M8ArchitectureTests {
+    private struct ExplicitAllowPolicy: PolicyEvaluating {
+        func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
+    }
+
     @Test func unconfiguredCompositionProviderFailsClosed() async {
         let provider = DefaultCompositionProvider()
         #expect(await provider.health == .unavailable)
@@ -118,7 +122,7 @@ struct M8ArchitectureTests {
             .appendingPathComponent("M8ChatSkillE2E_\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
 
-        let root = try await M8CompositionRoot(storeDirectoryURL: tempDir)
+        let root = try await M8CompositionRoot(storeDirectoryURL: tempDir, policy: ExplicitAllowPolicy())
         guard let result = try await root.runChatSkillIfMatched(
             goalStatement: "  normalize this text  ",
             agentID: "personal.default"
@@ -130,7 +134,7 @@ struct M8ArchitectureTests {
         #expect(result.skillID.rawValue == "text.normalize")
         #expect(result.verified)
 
-        guard let data = result.outputJSON.data(using: .utf8),
+        guard let data = result.outputJSON.data(using: String.Encoding.utf8),
               let object = try? JSONSerialization.jsonObject(with: data) as? [String: String] else {
             Issue.record("The verified Skill result must contain a JSON text field")
             return
