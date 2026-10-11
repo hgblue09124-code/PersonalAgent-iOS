@@ -12,7 +12,6 @@ public actor SkillExecutorRegistry: Sendable {
 
     public init(executors: [String: any SkillExecutor] = [:]) {
         self.executors = executors
-        self.moduleRuntime = moduleRuntime
     }
 
     /// First registration wins so a later/untrusted module cannot silently replace
@@ -117,6 +116,7 @@ public struct SkillRuntime: Sendable {
     private let store: (any SkillStore)?
     private let executors: SkillExecutorRegistry
     private let moduleRuntime: ModuleRuntime?
+    private let moduleRuntime: ModuleRuntime?
 
     public static func chatInputText(from goalStatement: String) -> String {
         // An explicit ": " separates the instruction from its payload.
@@ -157,6 +157,7 @@ public struct SkillRuntime: Sendable {
         self.disabled = disabled
         self.store = store
         self.executors = executors
+        self.moduleRuntime = moduleRuntime
     }
 
     /// Legacy entry point retained for source compatibility, but execution without
