@@ -1,7 +1,9 @@
 import SwiftUI
+import UIKit
 
 struct TasksScreen: View {
     @ObservedObject var session: KernelSession
+    @State private var copiedContentLabel: String? = nil
 
     private var activeAgentName: String {
         session.agentManifests.first(where: { $0.id == session.selectedAgentID })?.name ?? session.selectedAgentID
@@ -56,6 +58,13 @@ struct TasksScreen: View {
                 GlassPanel {
                     Label("Latest result", systemImage: "doc.text.magnifyingglass").font(.headline)
                     Text(result).textSelection(.enabled)
+                    Button {
+                        UIPasteboard.general.string = result
+                        copiedContentLabel = "Copied"
+                    } label: {
+                        Label(copiedContentLabel ?? "Copy result", systemImage: "doc.on.doc")
+                    }
+                    .buttonStyle(.bordered)
                     Text("Đầu ra hiển thị không tự chứng minh mọi tác động phụ đã hoàn tất. Kiểm tra tệp, trạng thái và bằng chứng liên quan trước khi dùng kết quả.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
@@ -64,6 +73,13 @@ struct TasksScreen: View {
                     Label("Execution needs attention", systemImage: "exclamationmark.triangle.fill")
                         .font(.headline).foregroundStyle(.orange)
                     Text(error).foregroundStyle(.secondary).textSelection(.enabled)
+                    Button {
+                        UIPasteboard.general.string = error
+                        copiedContentLabel = "Copied"
+                    } label: {
+                        Label(copiedContentLabel ?? "Copy error", systemImage: "doc.on.doc")
+                    }
+                    .buttonStyle(.bordered)
                     Text("Hãy giữ lại lỗi gốc và bước tái hiện. Tránh chạy lặp lại một thao tác có tác dụng phụ trước khi xác định trạng thái hiện tại.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
