@@ -125,6 +125,31 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: #"{"text":"hello"}"#) == false)
     }
 
+    @Test("direct verified execution rejects executor output that fails verification")
+    func directExecutionRejectsUnverifiedOutput() async throws {
+        let id = SkillID(rawValue: "custom.unverified")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Unverified Output",
+            description: "Executor output must pass its verifier.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return a result that the verifier rejects.",
+            inputSchema: SchemaDocument(identifier: "in"),
+            outputSchema: SchemaDocument(identifier: "out"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(RejectingVerifierExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+        await #expect(throws: SkillRuntimeError.verificationFailed(id)) {
+            _ = try await runtime.executeVerified(
+                id: id,
+                inputJSON: #"{"value":"request"}"#,
+                policy: AllowPolicy()
+            )
+        }
+    }
+
     @Test("late executor output is rejected after cancellation")
     func lateExecutorOutputFailsAfterCancellation() async throws {
         let id = SkillID(rawValue: "custom.deferred")
@@ -226,4 +251,12 @@ private struct DeferredExecutor: SkillExecutor {
         await gate.waitForOutput()
     }
     func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool { true }
+}
+
+
+private struct RejectingVerifierExecutor: SkillExecutor {
+    func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+        #"{"value":"untrusted"}"#
+    }
+    func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool { false }
 }
