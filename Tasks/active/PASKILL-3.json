@@ -1,0 +1,33 @@
+{
+  "id": "PASKILL-3",
+  "title": "Reject late Skill results after cancellation",
+  "status": "in_progress",
+  "goal": "Ensure a Skill executor result cannot be returned as success if cancellation arrives while executor code is suspended.",
+  "context": "SkillRuntime.execute checks cancellation immediately before invoking an executor but directly returns the awaited executor result. A registered executor that does not cooperate with cancellation can finish later and have its output returned after the caller cancelled.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-3.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not claim cancellation can undo side effects already performed by an executor.",
+    "Do not change policy, executor selection, schema, or UI behavior beyond cancellation completion semantics.",
+    "Do not report late executor output as verified success."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime checks cancellation after awaiting executor execution and before returning output.",
+    "A regression test uses a non-cooperative executor to prove late output is rejected after cancellation.",
+    "Existing registered and module-backed executor behavior remains covered."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-3.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-3.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #354"
+  ],
+  "recovery": "Revert the single task commit if cancellation behavior regresses normal Skill execution; keep executor side-effect rollback as a separate concern."
+}
