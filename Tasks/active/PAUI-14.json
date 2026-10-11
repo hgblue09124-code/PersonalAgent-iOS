@@ -1,0 +1,30 @@
+{
+  "id": "PAUI-14",
+  "title": "Localize capability permission settings",
+  "status": "ready",
+  "context": "The capability permission panel in Settings is written in Vietnamese but lacks localization catalog entries, so the English app language still shows Vietnamese-only labels and guidance.",
+  "goal": "Add English and Vietnamese localization entries for the Agent capability permission panel without changing permission semantics.",
+  "allowed_paths": [
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-14.json"
+  ],
+  "forbidden_changes": [
+    "Do not change permission defaults or runtime enforcement.",
+    "Do not alter credential storage or destructive-action approval behavior.",
+    "Do not change any existing Vietnamese display wording."
+  ],
+  "acceptance_criteria": [
+    "The panel title, explanatory text, four toggles and destructive-action warning have entries in both catalogs.",
+    "English values are natural English; Vietnamese values preserve the current wording.",
+    "No duplicate localization keys are introduced."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static duplicate-key scan for both localization catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if localization or the Apple build regresses."
+}
