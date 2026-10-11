@@ -1,0 +1,29 @@
+{
+  "id": "PAUI-10",
+  "title": "Remove duplicate Vietnamese localization keys",
+  "status": "ready",
+  "context": "A static audit of the Vietnamese Localizable.strings catalog found seven duplicate keys with identical values, which can create ambiguous localization lookup and compiler warnings.",
+  "goal": "Keep exactly one definition per localization key in the Vietnamese strings catalog while preserving the first existing translation for each key.",
+  "allowed_paths": [
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-10.json"
+  ],
+  "forbidden_changes": [
+    "Do not change translation values or English localization.",
+    "Do not remove any unique localization key.",
+    "Do not change SwiftUI behavior or runtime code."
+  ],
+  "acceptance_criteria": [
+    "The seven identified duplicate keys each appear exactly once.",
+    "All existing Vietnamese translation values remain unchanged.",
+    "The catalog contains no duplicate keys after the edit."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Run a duplicate-key scan against the Vietnamese strings file"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if any unique localization entry is lost or the Apple build fails."
+}

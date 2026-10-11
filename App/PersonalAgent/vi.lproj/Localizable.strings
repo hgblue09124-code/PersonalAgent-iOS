@@ -23,7 +23,6 @@
 "Summarize what changed" = "Tóm tắt thay đổi";
 "Check my local setup" = "Kiểm tra thiết lập cục bộ";
 "Help me get started" = "Giúp tôi bắt đầu";
-"New task" = "Tác vụ mới";
 "Thinking through the current task." = "Đang xử lý tác vụ hiện tại.";
 "Quiet, ready and waiting." = "Đang chờ lệnh.";
 "Lifecycle" = "Vòng đời";
@@ -90,12 +89,8 @@
 "Attention" = "Lưu ý";
 "No model selected" = "Chưa chọn model";
 "Import a GGUF model or download the small development model." = "Nhập model GGUF hoặc tải model phát triển nhỏ.";
-"Unload" = "Gỡ khỏi bộ nhớ";
-"Load" = "Nạp";
 "Deselect" = "Bỏ chọn";
 "No local models installed." = "Chưa có model cục bộ.";
-"Use" = "Dùng";
-"Delete" = "Xóa";
 "Runtime" = "Runtime";
 "Provider state" = "Trạng thái nhà cung cấp";
 "Provider" = "Nhà cung cấp";
@@ -104,7 +99,6 @@
 "Secrets" = "Bí mật";
 "Keychain contract" = "Keychain";
 "App update" = "Cập nhật ứng dụng";
-"Settings" = "Cài đặt";
 "Language" = "Ngôn ngữ";
 "English" = "English";
 "Tiếng Việt" = "Tiếng Việt";
@@ -134,7 +128,6 @@
 "Preference" = "Tuỳ thích";
 "Procedural" = "Quy trình";
 "contract" = "hợp đồng";
-"Model library" = "Thư viện model";
 "Phase" = "Giai đoạn";
 "Configuration remains contextual; execution stays in the Agent runtime." = "Cấu hình chỉ mang tính ngữ cảnh; thực thi vẫn thuộc runtime của Agent.";
 "Native SwiftUI" = "SwiftUI gốc";
