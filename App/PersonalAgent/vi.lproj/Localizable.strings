@@ -540,3 +540,10 @@
 
 "Copy result" = "Sao chép kết quả";
 "Copy error" = "Sao chép lỗi";
+
+"Not tested" = "Chưa kiểm tra kết nối";
+"Provider error" = "Lỗi Provider";
+"Local mode" = "Chế độ cục bộ";
+"Selected model" = "Model đã chọn";
+"Endpoint" = "Địa chỉ endpoint";
+"Configure & test provider" = "Cấu hình và kiểm tra Provider";

@@ -11,12 +11,12 @@ struct ProvidersScreen: View {
 
     private var connectionState: String {
         if session.providerLifecycle.lowercased().contains("error") {
-            return "Attention"
+            return "Provider error"
         }
         if UserDefaults.standard.bool(forKey: "provider.remote.enabled") {
-            return credentialSaved ? "Configured" : "Missing API key"
+            return credentialSaved ? "Not tested" : "Missing API key"
         }
-        return "Local / fallback"
+        return "Local mode"
     }
 
     private var providerDisplayName: String {
@@ -36,6 +36,10 @@ struct ProvidersScreen: View {
                 StatusRow(title: "Lifecycle", value: session.providerLifecycle)
                 StatusRow(title: "Connection", value: connectionState)
                 StatusRow(title: "Execution", value: UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote" ? "Remote" : "Local")
+                if remoteProvider == "openai-compatible" {
+                    StatusRow(title: "Selected model", value: UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "openrouter/free")
+                    StatusRow(title: "Endpoint", value: UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? "Not configured")
+                }
             }
 
             GlassPanel {
@@ -58,7 +62,7 @@ struct ProvidersScreen: View {
                 NavigationLink {
                     SettingsScreen(session: session)
                 } label: {
-                    Label("Configure provider", systemImage: "gearshape")
+                    Label("Configure & test provider", systemImage: "gearshape")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
