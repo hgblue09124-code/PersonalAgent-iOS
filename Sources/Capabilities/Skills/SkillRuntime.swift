@@ -364,7 +364,11 @@ public struct SkillRuntime: Sendable {
         // Cancellation may arrive while policy or executor lookup is suspended.
         // Re-check at the last boundary before invoking capability code.
         try Task.checkCancellation()
-        return try await executor.execute(manifest: manifest, inputJSON: inputJSON)
+        let output = try await executor.execute(manifest: manifest, inputJSON: inputJSON)
+        // Executors may suspend without cooperating with cancellation. Never return
+        // a late result as success after the caller has cancelled the Skill run.
+        try Task.checkCancellation()
+        return output
     }
 
     private func manifestForVerification(id: SkillID) async throws -> SkillManifest {

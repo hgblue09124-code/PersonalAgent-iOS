@@ -125,6 +125,35 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: #"{"text":"hello"}"#) == false)
     }
 
+    @Test("late executor output is rejected after cancellation")
+    func lateExecutorOutputFailsAfterCancellation() async throws {
+        let id = SkillID(rawValue: "custom.deferred")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Deferred Executor",
+            description: "A test executor that does not cooperate with cancellation.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return a deferred result.",
+            inputSchema: SchemaDocument(identifier: "deferred.in"),
+            outputSchema: SchemaDocument(identifier: "deferred.out"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let gate = DeferredSkillOutput()
+        let registry = SkillExecutorRegistry()
+        await registry.register(DeferredExecutor(gate: gate), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+        let task = Task {
+            try await runtime.execute(id: id, inputJSON: #"{"text":"request"}"#, policy: AllowPolicy())
+        }
+
+        await gate.waitUntilStarted()
+        task.cancel()
+        await gate.resume(#"{"text":"late"}"#)
+        await #expect(throws: CancellationError.self) {
+            _ = try await task.value
+        }
+    }
+
     @Test("missing executor fails closed")
     func missingExecutorFailsClosed() async {
         let id = SkillID(rawValue: "custom.missing")
@@ -161,4 +190,40 @@ struct SkillExecutorRegistryTests {
         ))
     }
 
+}
+
+
+private actor DeferredSkillOutput {
+    private var started = false
+    private var startWaiter: CheckedContinuation<Void, Never>?
+    private var outputWaiter: CheckedContinuation<String, Never>?
+
+    func waitForOutput() async -> String {
+        await withCheckedContinuation { continuation in
+            outputWaiter = continuation
+            started = true
+            startWaiter?.resume()
+            startWaiter = nil
+        }
+    }
+
+    func waitUntilStarted() async {
+        guard !started else { return }
+        await withCheckedContinuation { continuation in
+            startWaiter = continuation
+        }
+    }
+
+    func resume(_ output: String) {
+        outputWaiter?.resume(returning: output)
+        outputWaiter = nil
+    }
+}
+
+private struct DeferredExecutor: SkillExecutor {
+    let gate: DeferredSkillOutput
+    func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+        await gate.waitForOutput()
+    }
+    func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool { true }
 }
