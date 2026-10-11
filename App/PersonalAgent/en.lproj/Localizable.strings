@@ -448,3 +448,10 @@
 "Không đọc/ghi ngoài phạm vi; không tiết lộ credential." = "Do not read/write outside scope or expose credentials.";
 "Có đường phục hồi" = "Recovery path";
 "Biết điều gì đã thay đổi và cách rollback khi cần." = "Know what changed and how to roll it back if needed.";
+"Quyền thực thi của Agent" = "Agent execution permissions";
+"Các quyền này được kiểm tra lại trong Runtime mỗi lần chạy Skill; tắt quyền sẽ chặn lần thực thi tiếp theo." = "These permissions are checked by the runtime every time a Skill runs; disabling a permission blocks the next execution.";
+"Đọc dữ liệu" = "Read data";
+"Ghi dữ liệu" = "Write data";
+"Chạy Skills / Modules" = "Run Skills / Modules";
+"Truy cập mạng" = "Network access";
+"Thao tác phá huỷ luôn cần bước phê duyệt riêng." = "Destructive actions always require a separate approval step.";
