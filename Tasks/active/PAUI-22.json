@@ -1,0 +1,31 @@
+{
+  "id": "PAUI-22",
+  "title": "Require task contracts for code-changing pull requests",
+  "status": "ready",
+  "context": "The Agent Task Contract workflow currently runs only when task/config paths change and treats a code-changing PR without a task contract as passing. PR #391 exposed this gap: app source changed without a contract and the contract gate did not run.",
+  "goal": "Run the contract workflow on every pull request and fail code, test, configuration, or workflow changes that do not include exactly one validated and scope-checked active task contract.",
+  "allowed_paths": [
+    ".github/workflows/agent-task-contract.yml",
+    "Tasks/active/PAUI-22.json"
+  ],
+  "forbidden_changes": [
+    "Do not change application/runtime behavior or grant new capabilities.",
+    "Do not weaken task schema validation or diff scope checks.",
+    "Allow narrowly defined documentation-only PRs without a task contract."
+  ],
+  "acceptance_criteria": [
+    "Agent Task Contract workflow triggers for every pull request regardless of changed paths.",
+    "Non-documentation changes without a task contract fail the workflow.",
+    "A pull request changing multiple active task contracts fails with a clear diagnostic.",
+    "Exactly one task contract is validated and checked against the PR diff.",
+    "Documentation-only PRs remain eligible to pass without a task contract."
+  ],
+  "verification": [
+    "Agent Task Contract workflow on this PR",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Review the no-contract and multiple-contract shell branches"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if legitimate code PRs are blocked or the workflow stops validating task scope."
+}
