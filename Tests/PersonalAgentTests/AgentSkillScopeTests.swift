@@ -58,7 +58,33 @@ struct AgentSkillScopeTests {
         let runtime = SkillRuntime()
         let orchestrator = SkillAgentOrchestrator(runtime: runtime)
 
-        await #expect(throws: SkillRuntimeError.noSelection) {
+        await #expect(throws: SkillAgentOrchestratorError.agentDeclaresMissingSkill(SkillID(rawValue: "text.other"))) {
+            try await orchestrator.run(
+                agent: agent,
+                goalStatement: "normalize this text",
+                inputJSON: "{\"text\":\" hello \"}",
+                policy: AllowPolicy()
+            )
+        }
+    }
+
+    @Test("agent scope rejects a missing Skill even when another declared Skill exists")
+    func rejectsPartiallyStaleAgentScope() async {
+        let agent = AgentManifest(
+            id: "partially-stale",
+            name: "Partially Stale Agent",
+            description: "Declares one available and one missing Skill.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            skillIDs: [
+                SkillRuntime.normalizationManifest.id,
+                SkillID(rawValue: "skill.does-not-exist")
+            ],
+            instructions: "All declared Skills must exist."
+        )
+        let runtime = SkillRuntime()
+        let orchestrator = SkillAgentOrchestrator(runtime: runtime)
+
+        await #expect(throws: SkillAgentOrchestratorError.agentDeclaresMissingSkill(SkillID(rawValue: "skill.does-not-exist"))) {
             try await orchestrator.run(
                 agent: agent,
                 goalStatement: "normalize this text",
