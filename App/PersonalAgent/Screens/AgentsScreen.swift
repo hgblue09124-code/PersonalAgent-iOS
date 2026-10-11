@@ -16,6 +16,7 @@ struct AgentsScreen: View {
                 agentDetail(selectedAgent)
             }
             agentProfiles
+            roleLibrary
         }
     }
 
@@ -193,6 +194,46 @@ struct AgentsScreen: View {
         .accessibilityLabel(selected ? "\(agent.name), active Agent" : "\(agent.name), select Agent")
     }
 
+
+    private var roleLibrary: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Agent role library").font(.title3.bold())
+                Text("8 role blueprints · ideas only, not installed profiles").font(.caption).foregroundStyle(.secondary)
+            }
+            GlassPanel {
+                Label("Agent is fixed; LLM is replaceable", systemImage: "arrow.left.arrow.right")
+                    .font(.headline)
+                Text("Agent.md owns identity, goal, allowed Skills, permissions and verification policy. The LLM is an interchangeable reasoning engine behind a stable contract; changing models must not grant new permissions.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    scopeBadge("Identity", symbol: "person.crop.circle", tint: .accentColor)
+                    scopeBadge("Policy", symbol: "checkmark.shield", tint: .secondary)
+                    scopeBadge("Skills", symbol: "puzzlepiece", tint: .secondary)
+                }
+            }
+            GlassPanel {
+                ForEach(AgentRoleIdea.catalog) { role in
+                    HStack(alignment: .top, spacing: 11) {
+                        Image(systemName: role.symbol)
+                            .font(.title3).foregroundStyle(.tint)
+                            .frame(width: 36, height: 36)
+                            .background(.tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 11))
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack {
+                                Text(role.title).font(.subheadline.weight(.semibold))
+                                Spacer()
+                                Text(role.focus).font(.caption2).foregroundStyle(.secondary)
+                            }
+                            Text(role.detail).font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 5)
+                }
+            }
+        }
+    }
+
     private func scopeBadge(_ title: String, symbol: String, tint: Color) -> some View {
         Label(title, systemImage: symbol)
             .font(.caption2.weight(.semibold))
@@ -201,4 +242,24 @@ struct AgentsScreen: View {
             .padding(.vertical, 6)
             .background(tint.opacity(0.08), in: Capsule())
     }
+}
+
+
+private struct AgentRoleIdea: Identifiable {
+    let id: String
+    let title: String
+    let focus: String
+    let symbol: String
+    let detail: String
+
+    static let catalog: [AgentRoleIdea] = [
+        .init(id: "planner", title: "Planner", focus: "Kế hoạch", symbol: "list.number", detail: "Làm rõ mục tiêu, chia việc, quản lý phụ thuộc và định nghĩa tiêu chí hoàn thành."),
+        .init(id: "researcher", title: "Researcher", focus: "Tri thức", symbol: "books.vertical", detail: "Tổng hợp nguồn, phân biệt dữ kiện với giả định và ghi rõ điều chưa được xác minh."),
+        .init(id: "builder", title: "Builder", focus: "Thực thi", symbol: "hammer", detail: "Thực hiện thay đổi nhỏ qua Skills được cấp quyền, kèm test và bằng chứng."),
+        .init(id: "auditor", title: "Auditor", focus: "Đối kháng", symbol: "checkmark.shield", detail: "Tìm phản ví dụ, đường tấn công, lỗi biên và tuyên bố không có bằng chứng."),
+        .init(id: "librarian", title: "Librarian", focus: "Memory", symbol: "books.vertical.fill", detail: "Tổ chức tri thức, nguồn gốc, phiên bản, trùng lặp và quy tắc lưu/xóa."),
+        .init(id: "operator", title: "Operator", focus: "Workspace", symbol: "terminal", detail: "Điều phối terminal và tệp trong sandbox; kiểm tra trạng thái trước và sau thao tác."),
+        .init(id: "analyst", title: "Analyst", focus: "Đánh giá", symbol: "chart.bar.xaxis", detail: "So sánh lựa chọn theo tiêu chí, nêu độ bất định và tránh suy diễn quá dữ liệu."),
+        .init(id: "coordinator", title: "Coordinator", focus: "Multi-Agent", symbol: "person.3", detail: "Phân công các Agent, quản lý phụ thuộc, hợp nhất đầu ra và xử lý bất đồng.")
+    ]
 }
