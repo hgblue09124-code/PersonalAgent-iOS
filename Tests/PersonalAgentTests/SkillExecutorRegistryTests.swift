@@ -60,10 +60,10 @@ struct SkillExecutorRegistryTests {
         )
         let output = try await runtime.execute(
             id: id,
-            inputJSON: #"{\"text\":\"hello\"}"#,
+            inputJSON: "{\"text\":\"hello\"}",
             policy: AllowPolicy()
         )
-        #expect(output == #"{\"text\":\"hello\"}"#)
+        #expect(output == "{\"text\":\"hello\"}")
         #expect(try await runtime.verify(id: id, outputJSON: output))
     }
 
