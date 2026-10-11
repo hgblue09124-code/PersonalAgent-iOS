@@ -13,7 +13,10 @@ public actor SkillExecutorRegistry: Sendable {
         self.executors = executors
     }
 
+    /// First registration wins so a later/untrusted module cannot silently replace
+    /// the implementation authorized for an existing Skill ID.
     public func register(_ executor: any SkillExecutor, for skillID: String) {
+        guard executors[skillID] == nil else { return }
         executors[skillID] = executor
     }
 
@@ -321,10 +324,34 @@ public struct SkillRuntime: Sendable {
         return try await executor.execute(manifest: manifest, inputJSON: inputJSON)
     }
 
+    private func manifestForVerification(id: SkillID) async throws -> SkillManifest {
+        if let store {
+            return try await store.load(id: id)
+        }
+        if id == Self.normalizationManifest.id {
+            return Self.normalizationManifest
+        }
+        if let definition = skills[id.rawValue] {
+            return SkillManifest(
+                id: id,
+                name: definition.identity,
+                description: definition.scope,
+                version: SemanticVersion(major: 0, minor: 0, patch: 0),
+                instructions: definition.rule,
+                inputSchema: SchemaDocument(identifier: definition.input),
+                outputSchema: SchemaDocument(identifier: definition.output),
+                requiredCapabilities: [.read, .execute]
+            )
+        }
+        throw SkillExecutionError.unknownSkill(id)
+    }
+
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
+        guard !disabled.contains(id.rawValue) else { return false }
+
         if let executor = await executors.executor(for: id.rawValue) {
-            let manifest = try await discover(query: "").first(where: { $0.id == id })
-                ?? Self.normalizationManifest
+            // Never substitute another Skill's manifest during verification.
+            let manifest = try await manifestForVerification(id: id)
             return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
         }
 
