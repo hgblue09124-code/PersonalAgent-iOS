@@ -1,0 +1,34 @@
+{
+  "id": "PASEC-2",
+  "title": "Forward composition policy into direct ModuleRuntime calls",
+  "status": "in_progress",
+  "goal": "Ensure policies injected into M6 and M7 composition roots also guard direct calls to their exposed ModuleRuntime.",
+  "context": "M6CompositionRoot and M7CompositionRoot accept PolicyEvaluating for orchestration but omit it when constructing ModuleRuntime. This means direct module calls can bypass the supplied policy. M8 already passes its resolved policy.",
+  "allowed_paths": [
+    "Tasks/active/PASEC-2.json",
+    "Composition/M6CompositionRoot.swift",
+    "Composition/M7CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift",
+    "Tests/PersonalAgentTests/M7RuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change policy semantics or introduce default permissions.",
+    "Do not alter UI, provider, storage, or Xcode project files.",
+    "Do not claim fail-closed behavior when no policy is supplied."
+  ],
+  "acceptance_criteria": [
+    "M6 ModuleRuntime receives the policy passed to M6CompositionRoot.",
+    "M7 ModuleRuntime receives the policy passed to M7CompositionRoot.",
+    "Regression tests prove a supplied denying policy rejects direct module execution through both roots.",
+    "Existing M6 and M7 behavior remains covered by their test suites."
+  ],
+  "verification": [
+    "Validate this task contract with Scripts/agent_task_guard.py.",
+    "Run swift test --disable-sandbox.",
+    "Check M3 and Apple Native Build & Unsigned IPA CI separately; physical-device verification remains separate."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert the single task commit if regression tests or required CI fail; keep the policy-bypass finding open until verified."
+}

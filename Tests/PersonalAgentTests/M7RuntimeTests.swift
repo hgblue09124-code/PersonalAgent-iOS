@@ -10,6 +10,24 @@ import PAComposition
 @Suite("M7 Runtime Tests")
 struct M7RuntimeTests {
 
+    @Test("Supplied policy guards direct module execution")
+    func testSuppliedPolicyGuardsDirectModuleExecution() async throws {
+        struct DenyExecutionPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                .deny("direct module execution denied")
+            }
+        }
+        let composition = try await M7CompositionRoot(policy: DenyExecutionPolicy(), modules: [EchoModule()])
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await composition.moduleRuntime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "must-deny"])
+                )
+            )
+        }
+    }
+
     @Test("Run creation and persistence in RunStore")
     func testRunCreationAndPersistence() async throws {
         let composition = try await M7CompositionRoot()

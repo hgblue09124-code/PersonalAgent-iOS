@@ -17,6 +17,23 @@ struct M6SemanticsTests {
     }
 
 
+    @Test func suppliedPolicyAlsoGuardsDirectModuleExecution() async throws {
+        struct DenyExecutionPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                .deny("direct module execution denied")
+            }
+        }
+        let root = try await M6CompositionRoot(policy: DenyExecutionPolicy(), modules: [EchoModule()])
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await root.moduleRuntime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "must-deny"])
+                )
+            )
+        }
+    }
+
     // 1. Explicit toolID end-to-end without inference
     @Test func test1_ExplicitToolIDEndToEndWithoutInference() async throws {
         let root = try await M6CompositionRoot(modules: [EchoModule()])
