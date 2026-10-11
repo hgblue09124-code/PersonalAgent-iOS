@@ -55,6 +55,28 @@ struct M3RuntimeTests {
         }
     }
 
+    @Test func liveSettingsPolicyDeniesDirectModuleExecution() async throws {
+        struct DenyExecutionPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                intent.capabilities.contains(.execute) ? .deny("execution disabled in Settings") : .allow("read permitted")
+            }
+        }
+        let catalog = try ModuleCatalog(modules: [EchoModule()])
+        let runtime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            policy: DenyExecutionPolicy()
+        )
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await runtime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "blocked"])
+                )
+            )
+        }
+    }
+
     @Test func capabilityDenied() async throws {
         let runtime = try await armed()
         await #expect(throws: ModuleRuntimeError.capabilityDenied(.destructive)) {
