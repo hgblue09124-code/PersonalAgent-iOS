@@ -20,6 +20,28 @@ private func hasConfiguredEnvironmentValue(_ keys: [String]) -> Bool {
     }
 }
 
+
+private actor CancellationIgnoringProviderTransport: ProviderTransport {
+    private let response: ProviderTransportResponse
+    private var started = false
+
+    init(response: ProviderTransportResponse) {
+        self.response = response
+    }
+
+    func hasStarted() -> Bool { started }
+
+    func send(_ request: ProviderTransportRequest) async throws -> ProviderTransportResponse {
+        started = true
+        do {
+            try await Task.sleep(nanoseconds: 60_000_000_000)
+        } catch {
+            // Deliberately emulate a non-cooperative transport that returns late success.
+        }
+        return response
+    }
+}
+
 @Suite("M9 Parallel Track — Real Provider Vertical Slice Tests")
 struct M9RealProviderSliceTests {
     @Test func productProviderBaselineKeepsRetryFailClosedByDefault() {
@@ -390,6 +412,41 @@ struct M9RealProviderSliceTests {
         }
     }
 
+
+
+    @Test func p3_lateSuccessfulResponseIsRejectedAfterCancellation() async throws {
+        let body = Data(#"{"model":"grok-3","choices":[{"message":{"role":"assistant","content":"late-success"},"finish_reason":"stop"}]}"#.utf8)
+        let transport = CancellationIgnoringProviderTransport(
+            response: ProviderTransportResponse(statusCode: 200, body: body)
+        )
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "late-cancel.test")
+        await vault.store(Data("test-key".utf8), for: ref)
+        let provider = GrokProvider(
+            transport: transport,
+            credentials: vault,
+            configuration: ProviderConfiguration(
+                providerID: GrokProviderBoundary.providerID,
+                endpointURL: GrokProviderBoundary.defaultEndpoint,
+                defaultModel: ModelID(rawValue: "grok-3"),
+                credential: ref
+            )
+        )
+
+        let task = Task {
+            try await provider.complete(LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "cancel before late response"))
+        }
+        for _ in 0..<1_000 {
+            if await transport.hasStarted() { break }
+            await Task.yield()
+        }
+        #expect(await transport.hasStarted())
+        task.cancel()
+
+        await #expect(throws: ProviderRuntimeError.cancelled) {
+            _ = try await task.value
+        }
+    }
 
     @Test func p3_runtimeCanStartNextStreamImmediatelyAfterCompletion() async throws {
         let firstBody = Data("""
