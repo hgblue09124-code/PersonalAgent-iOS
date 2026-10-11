@@ -1,0 +1,30 @@
+{
+  "id": "PAUI-11",
+  "title": "Localize Skill lifecycle labels in Vietnamese",
+  "status": "ready",
+  "context": "SkillsScreen renders the Discover, Scope, Validate, Execute and Verify headings through LocalizedStringKey, but the English and Vietnamese localization catalogs have no entries for these labels.",
+  "goal": "Make all five Skill lifecycle headings resolve through the selected app language, with natural Vietnamese translations and unchanged runtime behavior.",
+  "allowed_paths": [
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-11.json"
+  ],
+  "forbidden_changes": [
+    "Do not change Skill discovery, selection, authorization or execution behavior.",
+    "Do not rename the localization keys used by SkillsScreen.",
+    "Do not translate product identifiers or manifest IDs."
+  ],
+  "acceptance_criteria": [
+    "Both localization catalogs define Discover, Scope, Validate, Execute and Verify.",
+    "Vietnamese translations are Khám phá, Phạm vi, Kiểm tra điều kiện, Thực thi and Xác minh.",
+    "No unrelated localization values change."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Check all five keys exist in both localization catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if localization lookup or Apple build regresses."
+}

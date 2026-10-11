@@ -360,6 +360,11 @@
 "Tìm Skill theo tên, ID hoặc mô tả…" = "Search Skills by name, ID, or description…";
 "Xóa tìm kiếm" = "Clear search";
 "Skill execution contract" = "Skill execution contract";
+"Discover" = "Discover";
+"Scope" = "Scope";
+"Validate" = "Validate";
+"Execute" = "Execute";
+"Verify" = "Verify";
 "Nếu thiếu Skill, input mơ hồ hoặc xác minh thất bại, kết quả phải được báo là chưa hoàn tất — không tự suy diễn thành thành công." = "If a Skill is missing, input is ambiguous, or verification fails, report the result as incomplete—never infer success.";
 "Skill idea library" = "Skill idea library";
 "8 mẫu năng lực để phát triển tiếp" = "8 capability blueprints to develop further";

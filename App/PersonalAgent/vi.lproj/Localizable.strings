@@ -379,6 +379,11 @@
 "Tìm Skill theo tên, ID hoặc mô tả…" = "Tìm Skill theo tên, ID hoặc mô tả…";
 "Xóa tìm kiếm" = "Xóa nội dung tìm kiếm";
 "Skill execution contract" = "Hợp đồng thực thi Skill";
+"Discover" = "Khám phá";
+"Scope" = "Phạm vi";
+"Validate" = "Kiểm tra điều kiện";
+"Execute" = "Thực thi";
+"Verify" = "Xác minh";
 "Nếu thiếu Skill, input mơ hồ hoặc xác minh thất bại, kết quả phải được báo là chưa hoàn tất — không tự suy diễn thành thành công." = "Nếu thiếu Skill, đầu vào mơ hồ hoặc xác minh thất bại, kết quả phải được báo là chưa hoàn tất — không tự suy diễn thành công.";
 "Skill idea library" = "Thư viện ý tưởng Skill";
 "8 mẫu năng lực để phát triển tiếp" = "8 mẫu năng lực để phát triển tiếp";
