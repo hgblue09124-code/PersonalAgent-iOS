@@ -379,3 +379,4 @@
 "help, status, agent run…, skills list…" = "help, status, agent run…, skills list…";
 "Run terminal command" = "Run terminal command";
 "Terminal" = "Terminal";
+"Copy terminal output" = "Copy terminal output";

@@ -404,6 +404,7 @@
 "help, status, agent run…, skills list…" = "help, status, agent run…, skills list…";
 "Run terminal command" = "Chạy lệnh terminal";
 "Terminal" = "Terminal";
+"Copy terminal output" = "Sao chép đầu ra Terminal";
 
 /* Complete Vietnamese labels for the main workspace navigation */
 "Conversations and persistent chat history" = "Hội thoại và lịch sử trò chuyện được lưu";
