@@ -400,7 +400,11 @@ public struct SkillRuntime: Sendable {
         if let registered = await executors.executor(for: manifest.id.rawValue) {
             return registered
         }
-        if manifest.id == Self.normalizationManifest.id {
+        // Skill.md's executor field is declarative, not executable code. Resolve
+        // only the built-in executor here; arbitrary names must never instantiate
+        // or authorize an implementation by themselves.
+        if manifest.metadata["executor"] == "text.normalize"
+            || manifest.id == Self.normalizationManifest.id {
             return TextNormalizeSkillExecutor()
         }
         if let moduleID = manifest.metadata["moduleID"],
