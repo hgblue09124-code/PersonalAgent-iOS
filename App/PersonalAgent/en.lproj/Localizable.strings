@@ -379,3 +379,15 @@
 "help, status, agent run…, skills list…" = "help, status, agent run…, skills list…";
 "Run terminal command" = "Run terminal command";
 "Terminal" = "Terminal";
+
+/* Provider workflow clarity */
+"Not tested" = "Not tested";
+"Missing API key" = "Missing API key";
+"Provider error" = "Provider error";
+"Local mode" = "Local mode";
+"Selected model" = "Selected model";
+"Endpoint" = "Endpoint";
+"Configure & test provider" = "Configure & test provider";
+"API key stored in Keychain" = "API key stored in Keychain";
+"No API key stored" = "No API key stored";
+"Not configured" = "Not configured";
