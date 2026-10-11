@@ -6,7 +6,7 @@ final class SkillRuntimeTests: XCTestCase {
     func testSkillRunsThroughNamedModule() async throws {
         let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: ["MODEL_ACCESS"], dependencies: ["calculator"], version: "1")
         let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { input in input == "187 * 43" ? "8041" : "0" }])
-        let result = try await runtime.run(SkillExecutionRequest(skillID: "calculator", moduleID: "calculator", input: "187 * 43"))
+        let result = try await runtime.run(SkillExecutionRequest(skillID: "calculator", moduleID: "calculator", input: "187 * 43"), policy: AllowSkillExecutionPolicy())
         XCTAssertEqual(result, "8041")
     }
 
@@ -14,7 +14,7 @@ final class SkillRuntimeTests: XCTestCase {
         let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: ["MODEL_ACCESS"], dependencies: ["calculator"], version: "1")
         let runtime = SkillRuntime(skills: [skill])
         do {
-            _ = try await runtime.run(SkillExecutionRequest(skillID: "calculator", moduleID: "missing", input: "1 + 1"))
+            _ = try await runtime.run(SkillExecutionRequest(skillID: "calculator", moduleID: "missing", input: "1 + 1"), policy: AllowSkillExecutionPolicy())
             XCTFail("missing module must fail")
         } catch {
             XCTAssertEqual(error as? SkillExecutionError, .missingModule("missing"))
@@ -73,6 +73,40 @@ extension SkillRuntimeTests {
             XCTFail("Unknown Skill must not be verified using a different manifest")
         } catch {
             XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(SkillID(rawValue: "unlisted.skill")))
+        }
+    }
+}
+
+
+private struct AllowSkillExecutionPolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("test-only explicit grant") }
+}
+private struct DenySkillExecutionPolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .deny("test denial") }
+}
+extension SkillRuntimeTests {
+    func testLegacySkillRunFailsClosedWithoutExplicitPolicy() async throws {
+        let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: [], dependencies: [], version: "1")
+        let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { _ in "should not run" }])
+        do {
+            _ = try await runtime.run(SkillExecutionRequest(skillID: "calculator", moduleID: "calculator", input: "1 + 1"))
+            XCTFail("Execution without an explicit policy must fail closed")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .policyDenied("explicit policy required"))
+        }
+    }
+
+    func testSkillRunRespectsDeniedPolicy() async throws {
+        let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: [], dependencies: [], version: "1")
+        let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { _ in "should not run" }])
+        do {
+            _ = try await runtime.run(
+                SkillExecutionRequest(skillID: "calculator", moduleID: "calculator", input: "1 + 1"),
+                policy: DenySkillExecutionPolicy()
+            )
+            XCTFail("Denied policy must prevent execution")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .policyDenied("test denial"))
         }
     }
 }
