@@ -1,0 +1,37 @@
+{
+  "id": "PASEC-14",
+  "title": "Route Chat text into the authorized workspace-search Skill",
+  "status": "in_progress",
+  "goal": "Enable an installed module-backed workspace search Skill to accept Chat text and return a verified result through the production M8 route.",
+  "context": "M8 chat routing serializes input as {text: ...}, while ToolModule-backed workspace search requires an arguments JSON object. This shape mismatch makes a correctly registered workspace-search Skill fail from Chat even though direct executeSkill works.",
+  "allowed_paths": [
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M8ArchitectureTests.swift",
+    "Tasks/active/PASEC-14.json"
+  ],
+  "forbidden_changes": [
+    "Do not execute arbitrary code or operation names from Skill.md metadata.",
+    "Do not permit adapters other than the explicit workspace.search adapter for module tool.workspace.read.",
+    "Do not bypass ModuleRuntime policy/capability checks or Skill output verification.",
+    "Do not modify App/ or Xcode project files."
+  ],
+  "acceptance_criteria": [
+    "SkillMarkdownParser preserves an explicit chatInputAdapter metadata field.",
+    "Only chatInputAdapter=workspace.search with moduleID=tool.workspace.read can translate {text} into the fixed read-only search operation.",
+    "A production M8 test creates a Skill.md and Agent scope, routes Chat intent, searches a workspace file through ModuleRuntime, and asserts the verified result includes the expected path.",
+    "Malformed or unsupported adapter metadata fails closed.",
+    "All required CI gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-14.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-14.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #354"
+  ],
+  "recovery": "Revert the adapter and integration test if the supported Skill contract or fail-closed behavior regresses."
+}
