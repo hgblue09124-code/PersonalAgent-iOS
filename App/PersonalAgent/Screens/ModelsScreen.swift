@@ -108,6 +108,29 @@ struct ModelsScreen: View {
                 }
             }
 
+            GlassPanel {
+                Label("Chọn model theo công việc", systemImage: "slider.horizontal.3")
+                    .font(.headline)
+                modelGuide("Model local nhỏ", "Phù hợp thử nghiệm, tác vụ ngắn và chế độ ngoại tuyến; chất lượng phụ thuộc model, lượng tử hóa và context.", symbol: "iphone")
+                modelGuide("Model local lớn hơn", "Có thể xử lý tốt hơn nhưng tăng RAM, thời gian nạp, nhiệt và nguy cơ hệ thống kết thúc tiến trình.", symbol: "memorychip")
+                modelGuide("Model qua provider", "Có thể mạnh hơn với tác vụ khó nhưng cần mạng, credential và kiểm soát dữ liệu gửi ra ngoài.", symbol: "cloud")
+                modelGuide("Code Engine", "Ưu tiên cho phép tính, validation, parsing và quy tắc cần kết quả xác định.", symbol: "curlybraces")
+                Text("Không chọn model chỉ theo số tham số. Đo chất lượng trên tác vụ thật cùng độ trễ, tốc độ token, mức tiêu thụ năng lượng và độ ổn định.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
+            GlassPanel {
+                Label("Vòng đời model local", systemImage: "arrow.trianglehead.2.clockwise")
+                    .font(.headline)
+                modelStep("01", "Import", "Chọn GGUF từ Files; không đưa model lớn hoặc bí mật vào Git.")
+                modelStep("02", "Validate", "Kiểm tra định dạng và metadata trước khi tin tệp.")
+                modelStep("03", "Load", "Nạp engine và quan sát trạng thái; model có thể chưa phù hợp giới hạn thiết bị.")
+                modelStep("04", "Generate", "Thử prompt ngắn, streaming và cancellation trước tác vụ dài.")
+                modelStep("05", "Unload", "Giải phóng model khi không cần và theo dõi bộ nhớ/nhiệt.")
+                Text("Trạng thái LOADED chỉ xác nhận engine đã nạp; không chứng minh model trả lời chính xác hay chạy ổn định trong thời gian dài.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+
             if let visibleError = errorMessage ?? session.lastError {
                 GlassPanel {
                     Label("Model operation failed", systemImage: "exclamationmark.triangle.fill")
@@ -136,6 +159,28 @@ struct ModelsScreen: View {
                 }
             case .failure(let error):
                 errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+
+    private func modelGuide(_ title: String, _ detail: String, symbol: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: symbol).foregroundStyle(.tint).frame(width: 24).padding(.top, 2)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.subheadline.weight(.semibold))
+                Text(detail).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func modelStep(_ number: String, _ title: String, _ detail: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text(number).font(.caption.monospaced().bold()).foregroundStyle(.tint).frame(width: 26, alignment: .leading)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.weight(.semibold))
+                Text(detail).font(.caption).foregroundStyle(.secondary)
             }
         }
     }
