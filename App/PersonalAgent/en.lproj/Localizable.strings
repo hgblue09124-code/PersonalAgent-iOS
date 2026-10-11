@@ -394,3 +394,6 @@
 "API key stored in Keychain" = "API key stored in Keychain";
 "No API key stored" = "No API key stored";
 "Not configured" = "Not configured";
+
+"Agent could not complete the request" = "Agent could not complete the request";
+"Check provider and model settings" = "Check provider and model settings";

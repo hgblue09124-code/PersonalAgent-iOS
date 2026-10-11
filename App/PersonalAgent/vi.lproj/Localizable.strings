@@ -547,3 +547,6 @@
 "Selected model" = "Model đã chọn";
 "Endpoint" = "Địa chỉ endpoint";
 "Configure & test provider" = "Cấu hình và kiểm tra Provider";
+
+"Agent could not complete the request" = "Agent chưa thể hoàn thành yêu cầu";
+"Check provider and model settings" = "Kiểm tra cài đặt Provider và model";
