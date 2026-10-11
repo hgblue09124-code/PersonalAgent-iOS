@@ -9,6 +9,14 @@ import PARuntime
 import PASecurity
 import PAWorkspace
 
+/// Isolates high-frequency stream presentation from app-wide session observers.
+/// Settings and other screens must not redraw for every streamed token batch.
+@MainActor
+final class ChatStreamPresentation: ObservableObject {
+    @Published fileprivate(set) var streamingResponse = ""
+    @Published fileprivate(set) var responseMetrics: ChatResponseMetrics?
+}
+
 @MainActor
 final class KernelSession: ObservableObject {
     let composition: M8CompositionRoot
@@ -36,8 +44,7 @@ final class KernelSession: ObservableObject {
     @Published private(set) var conversations: [ChatConversation]
     @Published private(set) var currentConversationID: UUID
     @Published private(set) var memoryRecords: [MemorySnapshotItem]
-    @Published private(set) var streamingResponse = ""
-    @Published private(set) var responseMetrics: ChatResponseMetrics?
+    let chatStreamPresentation: ChatStreamPresentation
     private var generationStartedAt: Date?
     private var firstResponseDeltaAt: Date?
     private var executionTask: Task<Void, Never>?
@@ -60,7 +67,7 @@ final class KernelSession: ObservableObject {
             guard let self, self.streamingFlushGeneration == generation else { return }
             self.streamingFlushScheduled = false
             guard !self.pendingStreamingDelta.isEmpty else { return }
-            self.streamingResponse += self.pendingStreamingDelta
+            self.chatStreamPresentation.streamingResponse += self.pendingStreamingDelta
             self.pendingStreamingDelta = ""
             self.refreshResponseMetrics()
         }
@@ -74,6 +81,7 @@ final class KernelSession: ObservableObject {
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
+        self.chatStreamPresentation = ChatStreamPresentation()
         self.state = state
         self.goals = []
         self.lastError = nil
@@ -190,9 +198,9 @@ final class KernelSession: ObservableObject {
         executionProgress = nil
         executionResult = nil
         presentedResult = nil
-        streamingResponse = ""
+        chatStreamPresentation.streamingResponse = ""
         discardPendingStreamingDelta()
-        responseMetrics = nil
+        chatStreamPresentation.responseMetrics = nil
         generationStartedAt = nil
         firstResponseDeltaAt = nil
         lastError = nil
@@ -229,9 +237,9 @@ final class KernelSession: ObservableObject {
                         }
                         self.executionResult = result
                         self.presentedResult = result
-                        self.streamingResponse = ""
+                        self.chatStreamPresentation.streamingResponse = ""
                         self.discardPendingStreamingDelta()
-                        self.responseMetrics = nil
+                        self.chatStreamPresentation.responseMetrics = nil
                         self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                         self.executionProgress = nil
                         await self.refresh()
@@ -244,9 +252,9 @@ final class KernelSession: ObservableObject {
                     }
                     self.executionResult = result
                     self.presentedResult = result
-                    self.streamingResponse = ""
+                    self.chatStreamPresentation.streamingResponse = ""
                     self.discardPendingStreamingDelta()
-                    self.responseMetrics = nil
+                    self.chatStreamPresentation.responseMetrics = nil
                     self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                     self.executionProgress = nil
                     await self.refresh()
@@ -284,7 +292,7 @@ final class KernelSession: ObservableObject {
                 self.executionResult = result
                 self.presentedResult = result
                 self.refreshResponseMetrics()
-                self.streamingResponse = ""
+                self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
                 self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                 self.executionProgress = nil
@@ -295,7 +303,7 @@ final class KernelSession: ObservableObject {
                     try? await self.composition.runtime.abort(goalID: goalID)
                 }
                 self.executionProgress = nil
-                self.streamingResponse = ""
+                self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
             } catch let error as URLError where error.code == .cancelled {
                 // URLSession commonly reports task cancellation as URLError.cancelled,
@@ -306,7 +314,7 @@ final class KernelSession: ObservableObject {
                     try? await self.composition.runtime.abort(goalID: goalID)
                 }
                 self.executionProgress = nil
-                self.streamingResponse = ""
+                self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
             } catch {
                 if let goalID,
@@ -315,7 +323,7 @@ final class KernelSession: ObservableObject {
                     try? await self.composition.runtime.abort(goalID: goalID)
                 }
                 self.executionProgress = nil
-                self.streamingResponse = ""
+                self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
                 if let kernelError = error as? KernelError {
                     self.lastError = kernelError.description
@@ -331,11 +339,11 @@ final class KernelSession: ObservableObject {
     }
 
     private func refreshResponseMetrics() {
-        guard let generationStartedAt, !streamingResponse.isEmpty else { return }
+        guard let generationStartedAt, !chatStreamPresentation.streamingResponse.isEmpty else { return }
         let elapsed = max(Date().timeIntervalSince(generationStartedAt), 0.001)
-        let estimatedTokens = max(1, (streamingResponse.count + 3) / 4)
+        let estimatedTokens = max(1, (chatStreamPresentation.streamingResponse.count + 3) / 4)
         let timeToFirstToken = firstResponseDeltaAt.map { max(0, $0.timeIntervalSince(generationStartedAt)) }
-        responseMetrics = ChatResponseMetrics(
+        chatStreamPresentation.responseMetrics = ChatResponseMetrics(
             timeToFirstToken: timeToFirstToken,
             elapsed: elapsed,
             estimatedOutputTokens: estimatedTokens,
