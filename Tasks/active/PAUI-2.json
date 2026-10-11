@@ -1,0 +1,34 @@
+{
+  "id": "PAUI-2",
+  "title": "Surface chat failures with a direct recovery path",
+  "status": "in_progress",
+  "goal": "Show runtime submission errors inside Chat and give users a direct route to provider/model settings without hiding the underlying error.",
+  "context": "Issue #367 prioritizes completing the Chat workflow. KernelSession publishes lastError on failed submissions, but ChatScreen currently does not render that error inline.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-2.json",
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "App/PersonalAgent/en.lproj/Localizable.strings"
+  ],
+  "forbidden_changes": [
+    "Do not retry by resubmitting and duplicating user turns.",
+    "Do not suppress or rewrite the original error detail.",
+    "Do not change Kernel/runtime execution behavior."
+  ],
+  "acceptance_criteria": [
+    "A non-empty session.lastError is visible in the Chat screen next to the composer.",
+    "The underlying error text can be selected/copied.",
+    "A direct navigation action opens Settings for provider/model recovery.",
+    "New UI labels are localized in Vietnamese and English."
+  ],
+  "verification": [
+    "Review the ChatScreen diff and localization entries.",
+    "Run validate-contract, M3, and Apple Native Build & Unsigned IPA.",
+    "Confirm the error banner disappears when a new submission clears lastError; verify on device separately."
+  ],
+  "dependencies": [
+    "Issue #367"
+  ],
+  "recovery": "Revert the single task commit if the banner causes navigation or SwiftUI build regressions."
+}
+

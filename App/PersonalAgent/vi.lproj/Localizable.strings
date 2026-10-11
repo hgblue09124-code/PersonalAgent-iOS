@@ -535,4 +535,4 @@
 "Agent.md chỉ được gọi những Skill đã khai báo và tồn tại." = "Agent.md chỉ được gọi các kỹ năng đã khai báo và đang tồn tại.";
 "Kiểm tra input, quyền và điều kiện trước khi chạy." = "Kiểm tra đầu vào, quyền và điều kiện trước khi chạy.";
 "Runtime chạy capability; UI không tự giả lập kết quả." = "Runtime thực thi năng lực; giao diện không tự giả lập kết quả.";
-"Đối chiếu output với điều kiện hoàn thành trước khi báo PASS." = "Đối chiếu đầu ra với điều kiện hoàn thành trước khi báo ĐẠT.";
+"Đối chiếu output với điều kiện hoàn thành trước khi báo PASS." = "Đối chiếu đầu ra với điều kiện hoàn thành trước khi báo ĐẠT.";\n\n/* Chat error recovery */\n"Agent could not complete the request" = "Agent chưa thể hoàn thành yêu cầu";\n"Check provider and model settings" = "Kiểm tra cài đặt Provider và model";\n
