@@ -113,6 +113,31 @@ struct M8ArchitectureTests {
         #expect(snapshot.contains { $0.kind == "preference" && $0.content == expectedMemory })
     }
 
+    @Test func chatSkillRouteExecutesAndVerifiesDefaultSkill() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8ChatSkillE2E_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let root = try await M8CompositionRoot(storeDirectoryURL: tempDir)
+        guard let result = try await root.runChatSkillIfMatched(
+            goalStatement: "  normalize this text  ",
+            agentID: "personal.default"
+        ) else {
+            Issue.record("The chat route should select the declared Text Normalize skill")
+            return
+        }
+
+        #expect(result.skillID.rawValue == "text.normalize")
+        #expect(result.verified)
+
+        guard let data = result.outputJSON.data(using: .utf8),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: String] else {
+            Issue.record("The verified Skill result must contain a JSON text field")
+            return
+        }
+        #expect(object["text"] == "normalize this text")
+    }
+
     @Test func testLocalModelProviderAdapter() async throws {
         let mockEngine = MockLocalEngine()
         let adapter = LocalModelProviderAdapter(engine: mockEngine)
