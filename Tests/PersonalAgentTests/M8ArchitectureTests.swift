@@ -6,6 +6,7 @@ import PAEvents
 import PAProviders
 import PAProvidersLocal
 import PAMemory
+import PAStorageModels
 import PASkills
 @testable import PAComposition
 import PASecurity
@@ -73,6 +74,53 @@ struct M8ArchitectureTests {
         func unload() async throws {}
     }
 
+
+
+    private actor DelayedLoadingLocalModelEngine: LocalModelEngine {
+        let identity: LocalModelIdentity
+        private var state: LocalModelLifecycleState = .unloaded
+        private var started = false
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        init(identity: LocalModelIdentity) {
+            self.identity = identity
+        }
+
+        var availability: LocalModelAvailability { get async { .ready } }
+        var lifecycleState: LocalModelLifecycleState { get async { state } }
+
+        func hasStartedLoading() -> Bool { started }
+
+        func load(options: LocalModelLoadingOptions) async throws {
+            started = true
+            await withCheckedContinuation { continuation in
+                self.continuation = continuation
+            }
+            state = .loaded
+        }
+
+        func releaseLoad() {
+            continuation?.resume()
+            continuation = nil
+        }
+
+        func generate(request: LocalModelGenerationRequest) async throws -> LocalModelResponse {
+            LocalModelResponse(text: "delayed local response")
+        }
+
+        func generateStream(request: LocalModelGenerationRequest) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
+            AsyncThrowingStream { continuation in
+                continuation.yield(LocalModelStreamChunk(textDelta: "delayed local response", finishReason: "stop"))
+                continuation.finish()
+            }
+        }
+
+        func cancel() async {}
+
+        func unload() async throws {
+            state = .unloaded
+        }
+    }
 
     private struct RegisteredProductionSkillExecutor: SkillExecutor {
         func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
@@ -174,6 +222,59 @@ struct M8ArchitectureTests {
     }
 
 
+
+
+    @Test func cancelledLocalModelLoadCallerRejectsLateEngineSuccess() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8LocalLoadCancel_\\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+
+        let sourceURL = tempDir.appendingPathComponent("delayed.gguf")
+        var data = Data([0x47, 0x47, 0x55, 0x46])
+        var version: UInt32 = 3
+        var tensorCount: UInt64 = 0
+        var metadataCount: UInt64 = 0
+        data.append(Data(bytes: &version, count: MemoryLayout<UInt32>.size))
+        data.append(Data(bytes: &tensorCount, count: MemoryLayout<UInt64>.size))
+        data.append(Data(bytes: &metadataCount, count: MemoryLayout<UInt64>.size))
+        try data.write(to: sourceURL)
+
+        let storage = try FileBackedLocalModelStorage(
+            modelsDirectoryURL: tempDir.appendingPathComponent("Models", isDirectory: true)
+        )
+        let descriptor = try await storage.importModel(from: sourceURL, name: "Delayed model")
+        try await storage.setActiveModel(id: descriptor.id)
+        let fileURL = try #require(await storage.modelFileURL(for: descriptor.id))
+        let identity = LocalModelIdentity(
+            id: descriptor.id,
+            name: descriptor.name,
+            parameterCount: descriptor.parameterCount,
+            quantization: descriptor.quantization,
+            contextTokenLimit: descriptor.contextWindow ?? 8192,
+            fileSizeBytes: descriptor.fileSizeBytes,
+            localURL: fileURL
+        )
+        let engine = DelayedLoadingLocalModelEngine(identity: identity)
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: storage,
+            deviceCapabilityProvider: DefaultDeviceCapabilityProvider(),
+            engineFactory: { _, _ in engine }
+        )
+
+        let task = Task { try await coordinator.loadActiveModel() }
+        for _ in 0..<1_000 {
+            if await engine.hasStartedLoading() { break }
+            await Task.yield()
+        }
+        #expect(await engine.hasStartedLoading())
+        task.cancel()
+        await engine.releaseLoad()
+
+        await #expect(throws: LlamaCPPEngineError.cancelled) {
+            _ = try await task.value
+        }
+    }
 
     @Test func productionChatRoutesWorkspaceSearchSkillThroughModule() async throws {
         let tempDir = FileManager.default.temporaryDirectory
