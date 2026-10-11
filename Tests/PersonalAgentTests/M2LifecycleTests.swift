@@ -81,6 +81,30 @@ struct M2LifecycleTests {
         }
     }
 
+    @Test func streamCanBeCalledFromDetachedExecutor() async throws {
+        let runtime = ProviderRuntime(
+            provider: DeterministicFakeProvider(
+                script: .success(LLMResponse(text: "streamed", finishReason: "stop"))
+            )
+        )
+        try await arm(runtime)
+        let request = LLMRequest(model: ModelID(rawValue: "fake-text"), prompt: "stream")
+
+        let events = try await Task.detached { () throws -> [LLMStreamEvent] in
+            var received: [LLMStreamEvent] = []
+            for try await event in runtime.stream(request) {
+                received.append(event)
+            }
+            return received
+        }.value
+
+        #expect(events == [
+            .delta("streamed"),
+            .completed(LLMResponse(text: "streamed", finishReason: "stop")),
+        ])
+        #expect(await runtime.lifecycle == .completed)
+    }
+
     private func arm(_ runtime: ProviderRuntime) async throws {
         try await runtime.configure(
             ProviderConfiguration(providerID: ProviderID(rawValue: "fake"), defaultModel: ModelID(rawValue: "fake-text"))
