@@ -174,6 +174,89 @@ struct M8ArchitectureTests {
     }
 
 
+
+    @Test func productionChatRoutesWorkspaceSearchSkillThroughModule() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8ChatWorkspaceSkill_\\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let workspaceURL = tempDir.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspaceURL, withIntermediateDirectories: true)
+        try "needle content".write(
+            to: workspaceURL.appendingPathComponent("needle.txt"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let skillDirectory = tempDir.appendingPathComponent("Skills", isDirectory: true)
+        try FileManager.default.createDirectory(at: skillDirectory, withIntermediateDirectories: true)
+        let skillMarkdown = """
+        id: workspace.search.test
+        name: Workspace Search
+        version: 1.0.0
+        description: Search workspace files for a text query.
+        moduleID: tool.workspace.read
+        chatInputAdapter: workspace.search
+        ---
+        ## Input
+        tool.workspace.read.input
+
+        ## Output
+        tool.workspace.read.output
+
+        ## Rule
+        Search workspace text for the supplied query.
+        """
+        try skillMarkdown.write(
+            to: skillDirectory.appendingPathComponent("workspace.search.test.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let agentDirectory = tempDir.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: agentDirectory, withIntermediateDirectories: true)
+        let agentMarkdown = """
+        id: personal.default
+        name: Workspace Search Agent
+        version: 1.0.0
+        description: Search workspace content.
+        ---
+        ## Skills
+        workspace.search.test
+
+        ## Rule
+        Select only the declared workspace search Skill.
+        """
+        try agentMarkdown.write(
+            to: agentDirectory.appendingPathComponent("personal.default.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let root = try await M8CompositionRoot(
+            storeDirectoryURL: tempDir,
+            policy: ExplicitAllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Workspace Search: needle",
+            agentID: "personal.default"
+        )
+        let verified = try #require(result)
+        #expect(verified.skillID == SkillID(rawValue: "workspace.search.test"))
+        #expect(verified.verified)
+
+        let wrapper = try #require(
+            try JSONSerialization.jsonObject(with: Data(verified.outputJSON.utf8)) as? [String: String]
+        )
+        let toolOutput = try #require(wrapper["output"])
+        let output = try #require(
+            try JSONSerialization.jsonObject(with: Data(toolOutput.utf8)) as? [String: Any]
+        )
+        let matches = try #require(output["matches"] as? [String])
+        #expect(matches.contains("workspace/needle.txt"))
+    }
+
     @Test func productionRootExecutesInstalledModuleBackedSkill() async throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M8ModuleSkillE2E_\(UUID().uuidString)")

@@ -76,6 +76,10 @@ public struct SkillMarkdownParser: Sendable {
                    !moduleID.isEmpty {
                     metadata["moduleID"] = moduleID
                 }
+                if let adapter = fields["chatInputAdapter"]?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !adapter.isEmpty {
+                    metadata["chatInputAdapter"] = adapter
+                }
                 return metadata
             }()
         )
