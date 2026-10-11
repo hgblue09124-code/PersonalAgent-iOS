@@ -45,6 +45,7 @@ struct RootView: View {
 
 private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
+    @AppStorage("app.language") private var appLanguage = "vi"
     @State private var workspaceExpanded = false
     @State private var selectedRoadmapFeature: RoadmapFeature?
 
