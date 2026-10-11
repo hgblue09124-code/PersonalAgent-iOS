@@ -268,7 +268,7 @@ public struct BuiltinCommandRegistry {
         return registry
     }
 
-    public static func make(skillRuntime: SkillRuntime) -> CommandRegistry {
+    public static func make(skillRuntime: SkillRuntime, executeSkill: (@Sendable (SkillExecutionRequest) async throws -> String)? = nil) -> CommandRegistry {
         var registry = make()
         registry = registry.registering("skill") { command, _ in
             guard let operation = command.arguments.first else {
@@ -290,7 +290,13 @@ public struct BuiltinCommandRegistry {
                     throw CommandError.invalidArguments("skill run <skill> <input>")
                 }
                 let input = args.dropFirst().joined(separator: " ")
-                let result = try await skillRuntime.run(
+                guard let executeSkill else {
+                    return CommandResult(
+                        stderr: "Skill execution blocked: explicit policy is required.",
+                        exitCode: 126
+                    )
+                }
+                let result = try await executeSkill(
                     SkillExecutionRequest(
                         skillID: String(args[0]),
                         moduleID: String(args[0]),

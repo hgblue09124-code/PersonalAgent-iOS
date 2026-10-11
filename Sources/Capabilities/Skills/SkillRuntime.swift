@@ -145,11 +145,42 @@ public struct SkillRuntime: Sendable {
         self.executors = executors
     }
 
+    /// Legacy entry point retained for source compatibility, but execution without
+    /// an explicit policy is denied. A module handler is executable code, not a grant.
     public func run(_ request: SkillExecutionRequest) async throws -> String {
-        guard let skill = skills[request.skillID] else { throw SkillExecutionError.missingSkill(request.skillID) }
-        guard !disabled.contains(skill.identity) else { throw SkillExecutionError.disabledSkill(skill.identity) }
-        guard skill.identity == request.skillID else { throw SkillExecutionError.scopeMismatch }
-        guard let module = modules[request.moduleID] else { throw SkillExecutionError.missingModule(request.moduleID) }
+        throw SkillExecutionError.policyDenied("explicit policy required")
+    }
+
+    public func run(
+        _ request: SkillExecutionRequest,
+        policy: any PolicyEvaluating
+    ) async throws -> String {
+        guard let skill = skills[request.skillID] else {
+            throw SkillExecutionError.missingSkill(request.skillID)
+        }
+        guard !disabled.contains(skill.identity) else {
+            throw SkillExecutionError.disabledSkill(skill.identity)
+        }
+        guard skill.identity == request.skillID else {
+            throw SkillExecutionError.scopeMismatch
+        }
+        guard let module = modules[request.moduleID] else {
+            throw SkillExecutionError.missingModule(request.moduleID)
+        }
+
+        let decision = await policy.evaluate(
+            ActionIntent(
+                capabilities: [.execute],
+                summary: "Execute Skill \\(request.skillID) through module \\(request.moduleID)"
+            )
+        )
+        if decision.requiresApproval {
+            throw SkillExecutionError.policyRequiresApproval(decision.reason)
+        }
+        guard decision.allowed else {
+            throw SkillExecutionError.policyDenied(decision.reason)
+        }
+        try Task.checkCancellation()
         return try await module(request.input)
     }
 
