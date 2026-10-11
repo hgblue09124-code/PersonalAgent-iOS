@@ -39,6 +39,54 @@ struct LocalModelStorageTests {
         return fileURL
     }
 
+    @Test func testParserReadsContextLengthAfterArrayAndScalarMetadata() throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let fileURL = root.appendingPathComponent("metadata-array.gguf")
+
+        func appendInteger<T: FixedWidthInteger>(_ value: T, to data: inout Data) {
+            var encoded = value.littleEndian
+            withUnsafeBytes(of: &encoded) { data.append(contentsOf: $0) }
+        }
+        func appendString(_ value: String, to data: inout Data) {
+            appendInteger(UInt64(value.utf8.count), to: &data)
+            data.append(contentsOf: value.utf8)
+        }
+        func appendKey(_ key: String, type: UInt32, to data: inout Data) {
+            appendString(key, to: &data)
+            appendInteger(type, to: &data)
+        }
+
+        var data = Data([0x47, 0x47, 0x55, 0x46]) // GGUF
+        appendInteger(UInt32(3), to: &data)
+        appendInteger(UInt64(0), to: &data) // tensor count
+        appendInteger(UInt64(5), to: &data) // metadata count
+
+        appendKey("general.architecture", type: 8, to: &data)
+        appendString("llama", to: &data)
+
+        appendKey("tokenizer.ggml.tokens", type: 9, to: &data)
+        appendInteger(UInt32(8), to: &data) // array element type: string
+        appendInteger(UInt64(2), to: &data)
+        appendString("token-a", to: &data)
+        appendString("token-b", to: &data)
+
+        appendKey("general.test_float", type: 6, to: &data)
+        appendInteger(UInt32(0x3f800000), to: &data) // float32 payload
+
+        appendKey("general.test_bool", type: 7, to: &data)
+        data.append(1) // bool payload is one byte
+
+        appendKey("llama.context_length", type: 4, to: &data)
+        appendInteger(UInt32(4096), to: &data)
+
+        try data.write(to: fileURL)
+        let summary = try GGUFModelParser().parseHeaderAndMetadata(at: fileURL)
+        #expect(summary.architecture == "llama")
+        #expect(summary.contextLength == 4096)
+        #expect(summary.metadataCount == 5)
+    }
+
     @Test func testImportRejectsNonGGUFExtensionBeforeCopying() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
