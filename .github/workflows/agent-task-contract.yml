@@ -1,12 +1,6 @@
 name: Agent Task Contract
 on:
   pull_request:
-    paths:
-      - "AGENTS.md"
-      - ".agentos/**"
-      - "Tasks/**"
-      - "Scripts/agent_task_guard.py"
-      - ".github/workflows/agent-task-contract.yml"
   push:
     branches: [main]
     paths:
@@ -31,14 +25,30 @@ jobs:
         run: python Scripts/agent_task_guard.py validate .agentos/task.example.json
       - name: Compile validator
         run: python -m py_compile Scripts/agent_task_guard.py
-      - name: Validate and scope-check any real task contract
+      - name: Require and validate task contract for changes
         if: ${{ github.event_name == 'pull_request' }}
         shell: bash
         run: |
-          task_file="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep '^Tasks/active/.*\.json$' | head -n 1 || true)"
-          if [ -n "$task_file" ]; then
-            python Scripts/agent_task_guard.py validate "$task_file"
-            python Scripts/agent_task_guard.py check-diff "$task_file" --base "origin/${{ github.base_ref }}"
-          else
-            echo "No Tasks/active task contract changed; structural validation passed."
+          changed_paths="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
+          mapfile -t task_files < <(printf '%s\n' "$changed_paths" | grep -E '^Tasks/active/[^/]+\.json$' || true)
+
+          if [ "${#task_files[@]}" -eq 0 ]; then
+            non_documentation="$(printf '%s\n' "$changed_paths" | grep -Ev '^(Documentation/|README(\.[^/]*)?$|CHANGELOG(\.[^/]*)?$|LICENSE$)' | grep -v '^$' || true)"
+            if [ -n "$non_documentation" ]; then
+              echo "::error::Code, tests, configuration, and workflow changes require exactly one Tasks/active/*.json contract."
+              printf '%s\n' "$non_documentation"
+              exit 1
+            fi
+            echo "Documentation-only pull request; no task contract required."
+            exit 0
           fi
+
+          if [ "${#task_files[@]}" -ne 1 ]; then
+            echo "::error::Exactly one Tasks/active/*.json contract must change per logical task."
+            printf '%s\n' "${task_files[@]}"
+            exit 1
+          fi
+
+          task_file="${task_files[0]}"
+          python Scripts/agent_task_guard.py validate "$task_file"
+          python Scripts/agent_task_guard.py check-diff "$task_file" --base "origin/${{ github.base_ref }}"
