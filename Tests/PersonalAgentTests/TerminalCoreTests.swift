@@ -223,6 +223,33 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertEqual(outputs.last?.text, rootURL.appendingPathComponent("workspace/project").path + "\n")
     }
 
+    func testSyncNowRequiresDestructiveAuthorization() async throws {
+        actor DenyDestructiveSync: TerminalCommandAuthorizing {
+            private(set) var observed: Set<TerminalCapability> = []
+            func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool {
+                observed = capabilities
+                return !capabilities.contains(.destructive)
+            }
+            func lastCapabilities() -> Set<TerminalCapability> { observed }
+        }
+
+        let authorizer = DenyDestructiveSync()
+        let registry = CommandRegistry(authorizer: authorizer).registering("sync") { _, _ in
+            CommandResult(stdout: "sync executed")
+        }
+        let result = try await registry.execute(
+            AgentCommand(name: "sync", arguments: ["now"]),
+            context: CommandContext(workspace: LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory))
+        )
+
+        XCTAssertEqual(result.exitCode, 126)
+        XCTAssertTrue(result.stderr.contains("Permission denied"))
+        let observed = await authorizer.lastCapabilities()
+        XCTAssertTrue(observed.contains(.network))
+        XCTAssertTrue(observed.contains(.write))
+        XCTAssertTrue(observed.contains(.destructive))
+    }
+
     func testBuiltinSurfaceIsRegistered() {
         let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         XCTAssertTrue(registry.contains("pwd")); XCTAssertTrue(registry.contains("skill")); XCTAssertTrue(registry.contains("sync"))

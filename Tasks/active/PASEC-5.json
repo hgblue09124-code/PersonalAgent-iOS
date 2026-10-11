@@ -1,0 +1,33 @@
+{
+  "id": "PASEC-5",
+  "title": "Require destructive approval for GitHub sync mutations",
+  "status": "in_progress",
+  "goal": "Ensure terminal sync operations that can delete local or remote workspace files require the destructive capability and are denied when approval is required.",
+  "context": "CommandRegistry currently classifies `sync now` as network+write, but GitHubRepositorySyncClient can propagate local and remote deletions during synchronization. UserConfiguredPolicyEvaluator treats destructive capability as approval-required, so omitting `.destructive` bypasses that safeguard.",
+  "allowed_paths": [
+    "Tasks/active/PASEC-5.json",
+    "Sources/Terminal/TerminalCore.swift",
+    "Tests/PersonalAgentTests/TerminalCoreTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken UserConfiguredPolicyEvaluator or grant destructive actions by default.",
+    "Do not change sync conflict/rollback semantics or token handling.",
+    "Do not mark preview as a destructive mutation."
+  ],
+  "acceptance_criteria": [
+    "The `sync now` command requires network, write, and destructive capabilities.",
+    "A regression test proves the authorizer sees destructive and denies execution before the handler runs.",
+    "Sync preview remains read-only and does not require destructive capability."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-5.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-5.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA."
+  ],
+  "dependencies": [
+    "Issue #353",
+    "Issue #354"
+  ],
+  "recovery": "Revert the single task commit if preview permissions change or sync mutations bypass destructive authorization."
+}
