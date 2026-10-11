@@ -1,0 +1,33 @@
+{
+  "id": "PAUI-1",
+  "title": "Clarify provider status and surface active endpoint details",
+  "status": "in_progress",
+  "goal": "Make the Providers tab distinguish saved credentials from a tested connection and show the effective OpenAI-compatible model and endpoint.",
+  "context": "Issue #367 starts task-oriented tab improvements. ProvidersScreen currently labels a saved key as Configured although no connection test has occurred in that screen; Settings owns the actual test flow.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-1.json",
+    "App/PersonalAgent/Screens/ProvidersScreen.swift",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "App/PersonalAgent/en.lproj/Localizable.strings"
+  ],
+  "forbidden_changes": [
+    "Do not move provider execution or connection testing out of SettingsScreen/Runtime.",
+    "Do not display or log secret values.",
+    "Do not claim a successful live connection without a successful test result."
+  ],
+  "acceptance_criteria": [
+    "A saved API key is shown as not tested rather than as a proven connection.",
+    "Missing credential, provider lifecycle error, and local mode have distinct statuses.",
+    "OpenAI-compatible provider shows its configured model ID and endpoint.",
+    "New visible status labels are localized in Vietnamese and English."
+  ],
+  "verification": [
+    "Review the ProvidersScreen diff for accurate status semantics.",
+    "Run Apple Native Build & Unsigned IPA workflow on the PR.",
+    "Manually verify provider status against Settings test result on an iPhone; do not infer device success from CI."
+  ],
+  "dependencies": [
+    "Issue #367"
+  ],
+  "recovery": "Revert this single task commit if the Apple build fails or status semantics are inaccurate."
+}
