@@ -51,6 +51,11 @@ struct AgentsScreen: View {
                 )
             }
             .buttonStyle(.borderedProminent)
+            .disabled(session.isSubmitting)
+            if session.isSubmitting {
+                Label("Agent đang thực thi — thay đổi Agent và Team mode tạm khóa.", systemImage: "lock.fill")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Text("Team mode runs matching declared Skills sequentially across Agent.md profiles. Each result is policy-gated and verified; if no Skill matches, Chat falls back to the main runtime.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -191,6 +196,7 @@ struct AgentsScreen: View {
             }
         }
         .buttonStyle(.plain)
+        .disabled(session.isSubmitting)
         .accessibilityLabel(selected ? "\(agent.name), active Agent" : "\(agent.name), select Agent")
     }
 
