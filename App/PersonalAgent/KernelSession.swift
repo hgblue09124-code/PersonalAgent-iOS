@@ -246,22 +246,31 @@ final class KernelSession: ObservableObject {
         firstResponseDeltaAt = nil
         lastError = nil
         appendChatTurn(role: .user, content: normalizedStatement, conversationID: conversationID)
-        let contextualInput: String
-        do {
-            contextualInput = try await buildContextualInput(for: normalizedStatement, conversationID: conversationID)
-        } catch {
-            lastError = String(describing: error)
-            isSubmitting = false
-            await refresh()
-            return
-        }
-
         let streamGeneration = streamingFlushGeneration
         let agentID = selectedAgentID
         let useTeamMode = teamModeEnabled
         let task = Task { @MainActor [weak self] in
             defer { self?.isSubmitting = false }
             guard let self else { return }
+            let contextualInput: String
+            do {
+                try Task.checkCancellation()
+                contextualInput = try await self.buildContextualInput(
+                    for: normalizedStatement,
+                    conversationID: conversationID
+                )
+                try Task.checkCancellation()
+            } catch is CancellationError {
+                self.executionProgress = nil
+                self.chatStreamPresentation.streamingResponse = ""
+                self.discardPendingStreamingDelta()
+                await self.refresh()
+                return
+            } catch {
+                self.lastError = String(describing: error)
+                await self.refresh()
+                return
+            }
             var goalID: GoalID?
             do {
                 let lifecycle = self.state.lifecycle
