@@ -44,6 +44,9 @@ public struct HTTPChatProvider: LLMProvider {
         let response: ProviderTransportResponse
         do {
             response = try await sendWithRetry(wire, request: request)
+            // A transport may ignore cancellation and still return a response.
+            // Never turn that late response into a successful completion.
+            try Task.checkCancellation()
         } catch let error as ProviderRuntimeError {
             throw error
         } catch let error as URLError where error.code == .cancelled {

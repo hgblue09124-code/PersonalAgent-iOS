@@ -1,0 +1,34 @@
+{
+  "id": "PASEC-11",
+  "title": "Reject late Provider completion after cancellation",
+  "status": "in_progress",
+  "goal": "Ensure non-stream HTTP chat completion cannot return success if its transport returns a response after the calling task was cancelled.",
+  "context": "HTTPChatProvider.complete checks cancellation before sending, but does not recheck after awaiting sendWithRetry. A non-cooperative transport can return a successful HTTP response after cancellation and have it decoded as a successful completion.",
+  "allowed_paths": [
+    "Providers/Remote/Shared/HTTPChatProvider.swift",
+    "Tests/PersonalAgentTests/M9RealProviderSliceTests.swift",
+    "Tasks/active/PASEC-11.json"
+  ],
+  "forbidden_changes": [
+    "Do not change retry classification or timeout semantics.",
+    "Do not mask provider errors as successful completions.",
+    "Do not modify App/ or Xcode project files.",
+    "Do not weaken streaming cancellation behavior."
+  ],
+  "acceptance_criteria": [
+    "complete rechecks cancellation after the transport await and maps it to ProviderRuntimeError.cancelled.",
+    "A deterministic regression transport signals request start, ignores cancellation during a wait, then returns HTTP 200.",
+    "The regression test proves the late success is rejected as cancelled.",
+    "All required CI gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-11.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-11.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #354"
+  ],
+  "recovery": "Revert this single logical commit if completion cancellation/error mapping regresses."
+}
