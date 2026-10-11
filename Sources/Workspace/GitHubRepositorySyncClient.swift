@@ -362,14 +362,19 @@ public actor GitHubRepositorySyncClient {
                 guard Self.contains(workspace, child: destination) else {
                     throw GitHubRepositorySyncError.unsafePath(path)
                 }
-                if remote != nil {
+                if let remote {
                     guard let data = downloadedData[path] else {
                         throw GitHubRepositorySyncError.invalidResponse
                     }
                     try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
                     try data.write(to: destination, options: .atomic)
-                    downloadedPaths.append(path)
                     appliedLocalPaths.append(path)
+                    let permissions = remote.mode == "100755" ? 0o755 : 0o644
+                    try FileManager.default.setAttributes(
+                        [.posixPermissions: permissions],
+                        ofItemAtPath: destination.path
+                    )
+                    downloadedPaths.append(path)
                 } else if local != nil {
                     try FileManager.default.removeItem(at: destination)
                     deletedPaths.append(path)
