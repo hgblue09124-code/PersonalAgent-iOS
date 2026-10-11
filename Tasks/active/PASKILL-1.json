@@ -1,0 +1,33 @@
+{
+  "id": "PASKILL-1",
+  "title": "Resolve declared built-in executor for imported Skills",
+  "status": "in_progress",
+  "goal": "Make the supported text.normalize executor declaration in Skill.md resolve for imported Skill IDs while keeping unregistered executor names fail-closed.",
+  "context": "SkillMarkdownParser persists the manifest executor field as metadata, but SkillRuntime.resolveExecutor currently ignores that field and only resolves a registered executor by Skill ID, the canonical text.normalize ID, or an explicit moduleID. An imported Skill that declares the supported built-in executor under another ID remains undispatchable.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-1.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not dynamically load or instantiate arbitrary executor names from untrusted Skill.md metadata.",
+    "Do not change policy, capability grants, ModuleRuntime behavior, UI, or Xcode project files.",
+    "Do not claim full Skill-to-Tool integration from support for this one built-in executor."
+  ],
+  "acceptance_criteria": [
+    "A Skill manifest with metadata executor=text.normalize resolves the built-in normalizer even when its Skill ID differs.",
+    "Registered per-Skill executors retain precedence over metadata aliases.",
+    "Unknown executor names do not become executable code by declaration alone.",
+    "Regression tests cover execution and verification of the imported Skill ID."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-1.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert the single task commit if the regression test or required CI fails; keep Issue #347 open for the remaining module/tool execution and verification work."
+}

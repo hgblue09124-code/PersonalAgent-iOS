@@ -67,6 +67,30 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: output))
     }
 
+    @Test("declared built-in executor resolves for an imported Skill ID")
+    func declaredBuiltinExecutorRunsForImportedSkillID() async throws {
+        let id = SkillID(rawValue: "custom.normalize")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Normalize Imported Text",
+            description: "Uses the explicitly declared built-in text normalizer.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Trim surrounding whitespace.",
+            inputSchema: SchemaDocument(identifier: "skill.custom.normalize.in"),
+            outputSchema: SchemaDocument(identifier: "skill.custom.normalize.out"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["executor": "text.normalize"]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        let output = try await runtime.execute(
+            id: id,
+            inputJSON: #"{"text":"  hello  "}"#,
+            policy: AllowPolicy()
+        )
+        #expect(output == #"{"text":"hello"}"#)
+        #expect(try await runtime.verify(id: id, outputJSON: output))
+    }
+
     @Test("missing executor fails closed")
     func missingExecutorFailsClosed() async {
         let id = SkillID(rawValue: "custom.missing")
