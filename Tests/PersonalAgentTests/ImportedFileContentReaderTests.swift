@@ -53,6 +53,21 @@ final class ImportedFileContentReaderTests: XCTestCase {
         XCTAssertEqual(result.text, String(decoding: payload, as: UTF8.self))
     }
 
+    func testUsesTabSeparatedContentTypeWhenFilenameExtensionIsUnknown() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let input = base.appendingPathComponent("report.payload")
+        let payload = Data("name\\tvalue\\nalpha\\t1\\n".utf8)
+        try payload.write(to: input)
+
+        let record = try await store.importFile(from: input, contentTypeIdentifier: "public.tab-separated-values-text")
+        let result = try await ImportedFileContentReader().read(record, from: store)
+        XCTAssertEqual(result.format, .csv)
+        XCTAssertEqual(result.csvRows, [["name", "value"], ["alpha", "1"]])
+    }
+
     func testContentTypeHintDoesNotBypassFormatValidation() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
