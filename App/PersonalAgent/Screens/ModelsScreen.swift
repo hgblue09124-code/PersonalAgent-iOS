@@ -99,7 +99,12 @@ struct ModelsScreen: View {
                 .buttonStyle(.bordered)
                 .disabled(session.isDownloadingDevModel)
                 if session.isDownloadingDevModel {
-                    ProgressView(value: session.devModelDownloadProgress)
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Downloading and verifying model…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 

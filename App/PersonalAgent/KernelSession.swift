@@ -27,7 +27,6 @@ final class KernelSession: ObservableObject {
     @Published var activeModelDescriptor: LocalModelDescriptor?
     @Published var activeEngineState: LocalModelLifecycleState
     @Published var isDownloadingDevModel = false
-    @Published var devModelDownloadProgress: Double = 0
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionResult: String?
     @Published var presentedResult: String?
@@ -451,7 +450,6 @@ final class KernelSession: ObservableObject {
     func downloadDevModel() async {
         guard !isDownloadingDevModel else { return }
         isDownloadingDevModel = true
-        devModelDownloadProgress = 0
         lastError = nil
         defer { isDownloadingDevModel = false }
 
@@ -488,7 +486,6 @@ final class KernelSession: ObservableObject {
                 from: stagedModelURL,
                 name: "Qwen2.5-0.5B-Instruct Q4_K_M (Dev)"
             )
-            devModelDownloadProgress = 1
             await refresh()
         } catch {
             lastError = String(describing: error)
