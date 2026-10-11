@@ -49,4 +49,24 @@ struct SkillExecutorRegistryTests {
             try await runtime.execute(id: id, inputJSON: "{\"value\":\"input\"}", policy: AllowPolicy())
         }
     }
+    @Test("chat skill input separates instruction from explicit payload")
+    func chatSkillInputUsesExplicitPayload() {
+        #expect(SkillRuntime.chatInputText(from: "normalize this text:   hello  ") == "  hello  ")
+        #expect(SkillRuntime.chatInputText(from: "normalize this text") == "normalize this text")
+        #expect(SkillRuntime.chatInputText(from: "open https://example.com") == "open https://example.com")
+    }
+
+    @Test("normalization verifier rejects output that is not normalized")
+    func normalizationVerificationChecksTheRule() async throws {
+        let runtime = SkillRuntime()
+        #expect(try await runtime.verify(
+            id: SkillRuntime.normalizationManifest.id,
+            outputJSON: #"{"text":"  hello  "}"#
+        ) == false)
+        #expect(try await runtime.verify(
+            id: SkillRuntime.normalizationManifest.id,
+            outputJSON: #"{"text":"hello"}"#
+        ))
+    }
+
 }

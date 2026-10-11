@@ -78,9 +78,9 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
         guard
             let data = outputJSON.data(using: .utf8),
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-            object["text"] is String
+            let text = object["text"] as? String
         else { return false }
-        return true
+        return text == text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
@@ -114,6 +114,16 @@ public struct SkillRuntime: Sendable {
     private let disabled: Set<String>
     private let store: (any SkillStore)?
     private let executors: SkillExecutorRegistry
+
+    public static func chatInputText(from goalStatement: String) -> String {
+        // An explicit ": " separates the instruction from its payload.
+        // Preserve payload whitespace so the Skill's own rule can normalize it.
+        if let separator = goalStatement.range(of: ": "),
+           !goalStatement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return String(goalStatement[separator.upperBound...])
+        }
+        return goalStatement
+    }
 
     public static let normalizationManifest = SkillManifest(
         id: SkillID(rawValue: "text.normalize"),
