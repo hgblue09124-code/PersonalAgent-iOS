@@ -1,4 +1,5 @@
 import XCTest
+import PAKernel
 @testable import PASkills
 
 final class SkillRuntimeTests: XCTestCase {
@@ -39,4 +40,39 @@ final class SkillRuntimeTests: XCTestCase {
         XCTAssertEqual(discovered.filter { $0.id == manifest.id }.count, 1)
     }
 
+}
+
+private struct FixedOutputSkillExecutor: SkillExecutor {
+    let output: String
+    func execute(manifest: SkillManifest, inputJSON: String) async throws -> String { output }
+    func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool { outputJSON == output }
+}
+
+extension SkillRuntimeTests {
+    func testExecutorRegistryDoesNotAllowSilentReplacement() async throws {
+        let registry = SkillExecutorRegistry()
+        await registry.register(FixedOutputSkillExecutor(output: "trusted"), for: "custom.skill")
+        await registry.register(FixedOutputSkillExecutor(output: "replacement"), for: "custom.skill")
+
+        let registered = await registry.executor(for: "custom.skill")
+        let executor = try XCTUnwrap(registered)
+        let output = try await executor.execute(
+            manifest: SkillRuntime.normalizationManifest,
+            inputJSON: #"{"text":"test"}"#
+        )
+        XCTAssertEqual(output, "trusted")
+    }
+
+    func testVerificationDoesNotBorrowNormalizationManifestForUnknownSkill() async throws {
+        let registry = SkillExecutorRegistry()
+        await registry.register(FixedOutputSkillExecutor(output: "accepted"), for: "unlisted.skill")
+        let runtime = SkillRuntime(executors: registry)
+
+        do {
+            _ = try await runtime.verify(id: SkillID(rawValue: "unlisted.skill"), outputJSON: "accepted")
+            XCTFail("Unknown Skill must not be verified using a different manifest")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(SkillID(rawValue: "unlisted.skill")))
+        }
+    }
 }
