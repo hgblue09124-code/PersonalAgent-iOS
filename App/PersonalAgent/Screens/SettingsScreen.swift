@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import PAKernel
 import PAProviders
 import PAProvidersRemote
 import PAComposition
