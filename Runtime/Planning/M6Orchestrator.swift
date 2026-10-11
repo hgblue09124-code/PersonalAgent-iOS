@@ -145,6 +145,13 @@ public struct LLMReasoner: StreamingReasoning {
                 continue
             case .completed(let response):
                 resolvedModel = response.model
+                if !generated.isEmpty,
+                   !response.text.isEmpty,
+                   response.text != generated {
+                    throw KernelError.invalidStateUpdate(
+                        "LLM reasoning stream completion does not match emitted deltas"
+                    )
+                }
                 if generated.isEmpty, !response.text.isEmpty {
                     generated = response.text
                     onDelta(response.text)

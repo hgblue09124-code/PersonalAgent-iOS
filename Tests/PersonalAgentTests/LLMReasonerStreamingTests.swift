@@ -33,6 +33,31 @@ struct LLMReasonerStreamingTests {
         #expect(recorder.deltas == ["A detailed ", "answer."])
     }
 
+    @Test("Reasoner fails closed when final completion contradicts streamed deltas")
+    func mismatchedCompletionFailsClosed() async throws {
+        let model = ModelID(rawValue: "stream-fixture")
+        let provider = StreamingFixtureProvider(events: [
+            .delta("partial response"),
+            .completed(LLMResponse(text: "different final response", finishReason: "stop", model: model))
+        ])
+        let context = ContextBundle(
+            perception: Perception(rawInput: "Explain this", source: "user"),
+            memoryIDs: [],
+            skillIDs: []
+        )
+
+        do {
+            _ = try await LLMReasoner(provider: provider).reason(
+                context: context,
+                onGenerationStarted: {},
+                onDelta: { _ in }
+            )
+            Issue.record("A stream whose final completion contradicts its deltas must fail closed")
+        } catch let error as KernelError {
+            #expect(error.description.contains("does not match emitted deltas"))
+        }
+    }
+
     @Test("Reasoner fails closed when a stream contains no text")
     func emptyStreamFailsClosed() async throws {
         let provider = StreamingFixtureProvider(events: [
