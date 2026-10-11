@@ -27,6 +27,7 @@ public enum GGUFParseError: Error, Sendable, Equatable {
     case unsupportedVersion(UInt32)
     case truncatedFile
     case stringDecodingFailed
+    case invalidContextLength
 }
 
 public final class GGUFModelParser: @unchecked Sendable {
@@ -34,6 +35,7 @@ public final class GGUFModelParser: @unchecked Sendable {
     private static let maximumKeyLength: UInt64 = 1_024
     private static let maximumArrayElements: UInt64 = 2_000_000
     private static let maximumArrayDepth = 8
+    private static let maximumContextLength: UInt64 = 1_048_576
 
     public init() {}
 
@@ -88,12 +90,32 @@ public final class GGUFModelParser: @unchecked Sendable {
             case 4, 5: // UINT32 / INT32
                 let value = try Self.readInteger(fileHandle, as: UInt32.self)
                 if key.contains("context_length") {
-                    contextLength = UInt64(value)
+                    let resolved: UInt64
+                    if valueType == 5 {
+                        let signed = Int32(bitPattern: value)
+                        guard signed > 0 else { throw GGUFParseError.invalidContextLength }
+                        resolved = UInt64(signed)
+                    } else {
+                        resolved = UInt64(value)
+                    }
+                    guard resolved > 0, resolved <= Self.maximumContextLength else { throw GGUFParseError.invalidContextLength }
+                    contextLength = resolved
                 }
             case 10, 11: // UINT64 / INT64
                 let value = try Self.readInteger(fileHandle, as: UInt64.self)
                 if key.contains("context_length") {
-                    contextLength = value
+                    let resolved: UInt64
+                    if valueType == 11 {
+                        let signed = Int64(bitPattern: value)
+                        guard signed > 0 else { throw GGUFParseError.invalidContextLength }
+                        resolved = UInt64(signed)
+                    } else {
+                        resolved = value
+                    }
+                    guard resolved > 0, resolved <= UInt64(Int.max) else {
+                        throw GGUFParseError.invalidContextLength
+                    }
+                    contextLength = resolved
                 }
             default:
                 try Self.skipValue(

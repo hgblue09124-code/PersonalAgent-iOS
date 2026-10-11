@@ -87,6 +87,31 @@ struct LocalModelStorageTests {
         #expect(summary.metadataCount == 5)
     }
 
+    @Test func testParserRejectsContextLengthThatWouldOverflowInt() throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let fileURL = root.appendingPathComponent("overflow-context.gguf")
+
+        func appendInteger<T: FixedWidthInteger>(_ value: T, to data: inout Data) {
+            var encoded = value.littleEndian
+            withUnsafeBytes(of: &encoded) { data.append(contentsOf: $0) }
+        }
+        let key = "llama.context_length"
+        var data = Data([0x47, 0x47, 0x55, 0x46])
+        appendInteger(UInt32(3), to: &data)
+        appendInteger(UInt64(0), to: &data)
+        appendInteger(UInt64(1), to: &data)
+        appendInteger(UInt64(key.utf8.count), to: &data)
+        data.append(contentsOf: key.utf8)
+        appendInteger(UInt32(10), to: &data)
+        appendInteger(UInt64.max, to: &data)
+        try data.write(to: fileURL)
+
+        #expect(throws: GGUFParseError.invalidContextLength) {
+            _ = try GGUFModelParser().parseHeaderAndMetadata(at: fileURL)
+        }
+    }
+
     @Test func testImportRejectsNonGGUFExtensionBeforeCopying() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }

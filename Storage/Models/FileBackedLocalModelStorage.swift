@@ -102,6 +102,8 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
                 throw LocalModelStorageError.invalidGGUFHeader("Truncated GGUF file")
             case .stringDecodingFailed:
                 throw LocalModelStorageError.invalidGGUFHeader("GGUF string decoding failed")
+            case .invalidContextLength:
+                throw LocalModelStorageError.invalidGGUFHeader("Invalid GGUF context length")
             }
         } catch {
             throw LocalModelStorageError.invalidGGUFHeader(error.localizedDescription)
