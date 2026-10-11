@@ -21,6 +21,9 @@ struct ChatScreen: View {
             conversationHeader
             agentPicker
             messages
+            if let error = session.lastError, !error.isEmpty {
+                failureNotice(error)
+            }
             composer
         }
         .alert("Rename conversation", isPresented: $showRename) {
@@ -173,6 +176,27 @@ struct ChatScreen: View {
                 }.font(.caption2).foregroundStyle(.secondary)
             }
         }
+    }
+
+    
+    private func failureNotice(_ error: String) -> some View {
+        GlassPanel {
+            Label("Agent could not complete the request", systemImage: "exclamationmark.triangle.fill")
+                .font(.headline)
+                .foregroundStyle(.red)
+            Text(error)
+                .font(.footnote)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            NavigationLink {
+                SettingsScreen(session: session)
+            } label: {
+                Label("Check provider and model settings", systemImage: "slider.horizontal.3")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+        }
+        .accessibilityElement(children: .contain)
     }
 
     private func send() {
