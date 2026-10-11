@@ -97,7 +97,7 @@ public final class GGUFModelParser: @unchecked Sendable {
                     } else {
                         resolved = UInt64(value)
                     }
-                    guard resolved <= UInt64(Int.max) else { throw GGUFParseError.invalidContextLength }
+                    guard resolved > 0, resolved <= UInt64(Int.max) else { throw GGUFParseError.invalidContextLength }
                     contextLength = resolved
                 }
             case 10, 11: // UINT64 / INT64
