@@ -62,29 +62,29 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
 
                 switch (local, remote) {
                 case (.none, .none):
-                    try await queue.remove(id: id)
+                    try await clearResolvedConflictAndRemoveFromQueue(id: id)
 
                 case (.some(let loc), .none):
                     try await cloudStore.push(loc)
-                    try await queue.remove(id: id)
+                    try await clearResolvedConflictAndRemoveFromQueue(id: id)
 
                 case (.none, .some(let rem)):
                     try await localStore.upsert(rem)
-                    try await queue.remove(id: id)
+                    try await clearResolvedConflictAndRemoveFromQueue(id: id)
 
                 case (.some(let loc), .some(let rem)):
                     if loc == rem {
-                        try await queue.remove(id: id)
+                        try await clearResolvedConflictAndRemoveFromQueue(id: id)
                     } else if let verifier = lineageVerifier {
                         let remoteToLocalProof = await verifier.verifyLineage(candidate: rem, ancestor: loc)
                         let localToRemoteProof = await verifier.verifyLineage(candidate: loc, ancestor: rem)
 
                         if remoteToLocalProof == .provenDescendant {
                             try await updateLocalWithRemote(loc: loc, rem: rem)
-                            try await queue.remove(id: id)
+                            try await clearResolvedConflictAndRemoveFromQueue(id: id)
                         } else if localToRemoteProof == .provenDescendant {
                             try await cloudStore.push(loc)
-                            try await queue.remove(id: id)
+                            try await clearResolvedConflictAndRemoveFromQueue(id: id)
                         } else {
                             let conflict = SyncConflict(local: loc, remote: rem)
                             pendingConflictsMap[id] = conflict
@@ -93,10 +93,10 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
                         // Fallback to direct pair check
                         if rem.isDescendant(of: loc) {
                             try await updateLocalWithRemote(loc: loc, rem: rem)
-                            try await queue.remove(id: id)
+                            try await clearResolvedConflictAndRemoveFromQueue(id: id)
                         } else if loc.isDescendant(of: rem) {
                             try await cloudStore.push(loc)
-                            try await queue.remove(id: id)
+                            try await clearResolvedConflictAndRemoveFromQueue(id: id)
                         } else {
                             let conflict = SyncConflict(local: loc, remote: rem)
                             pendingConflictsMap[id] = conflict
@@ -163,6 +163,12 @@ public actor PASyncEngine<Local: LocalStore, Cloud: CloudStore>: SyncEngine wher
 
         pendingConflictsMap.removeValue(forKey: id)
         try await queue.remove(id: id)
+    }
+
+    private func clearResolvedConflictAndRemoveFromQueue(id: String) async throws {
+        // Preserve the visible conflict if queue persistence fails.
+        try await queue.remove(id: id)
+        pendingConflictsMap.removeValue(forKey: id)
     }
 
     private func updateLocalWithRemote(loc: Record, rem: Record) async throws {

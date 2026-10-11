@@ -497,6 +497,50 @@ struct M5SyncEngineTests {
         #expect(cloudFinal?.record.content == "Local v4 content")
     }
 
+
+    @Test func synchronizationClearsStaleConflictAfterRecordsConverge() async throws {
+        let localStore = InMemoryMemoryStore()
+        let provider = AbstractCloudStorageProvider(identifier: "conflict-recovery-cloud", isAvailable: true)
+        let cloudStore = TestDoubleCloudStore<MemoryStorageRecord>(provider: provider)
+        let queue = PASyncQueue()
+        let engine = PASyncEngine(localStore: localStore, cloudStore: cloudStore, queue: queue)
+
+        let local = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "stale-conflict-record"),
+                kind: .fact,
+                content: "local version",
+                provenance: Provenance(source: "user"),
+                version: 1,
+                revisionToken: "local-v1"
+            )
+        )
+        let remote = MemoryStorageRecord(
+            MemoryRecord(
+                id: MemoryRecordID(rawValue: "stale-conflict-record"),
+                kind: .fact,
+                content: "remote version",
+                provenance: Provenance(source: "cloud"),
+                version: 1,
+                revisionToken: "remote-v1"
+            )
+        )
+        try await localStore.upsert(local)
+        await cloudStore.setRecordDirectly(remote)
+        try await engine.enqueueLocalChange(id: local.id)
+
+        try await engine.synchronize()
+        #expect(await engine.conflict(for: local.id) != nil)
+
+        // The two sides converge after an external reconciliation.
+        await cloudStore.setRecordDirectly(local)
+        try await engine.synchronize()
+
+        #expect(await engine.conflict(for: local.id) == nil)
+        #expect(await engine.pendingConflicts().isEmpty)
+        #expect(!(await queue.allPendingIDs()).contains(local.id))
+    }
+
     // 11. Local change enters sync queue
     @Test func testLocalChangeEntersSyncQueue() async throws {
         let localStore = InMemoryMemoryStore()
