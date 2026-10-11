@@ -9,6 +9,32 @@ import PARuntime
 import PASecurity
 import PAWorkspace
 
+/// Reads user-controlled capability grants at decision time so changing Settings
+/// takes effect without rebuilding the composition root.
+struct UserConfiguredPolicyEvaluator: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+        let defaults = UserDefaults.standard
+        let capabilities: [(CapabilityLevel, String)] = [
+            (.read, "permissions.capability.read"),
+            (.write, "permissions.capability.write"),
+            (.execute, "permissions.capability.execute"),
+            (.network, "permissions.capability.network")
+        ]
+        for (capability, key) in capabilities where intent.capabilities.contains(capability) {
+            let granted = defaults.object(forKey: key) == nil
+                ? capability == .read
+                : defaults.bool(forKey: key)
+            guard granted else {
+                return .deny("Permission disabled in Settings: \(key)")
+            }
+        }
+        if intent.capabilities.contains(.destructive) {
+            return .approve("Destructive action requires explicit confirmation")
+        }
+        return .allow("Granted by user Settings")
+    }
+}
+
 /// Isolates high-frequency stream presentation from app-wide session observers.
 /// Settings and other screens must not redraw for every streamed token batch.
 @MainActor
