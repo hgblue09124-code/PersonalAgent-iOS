@@ -805,7 +805,7 @@ private extension SettingsScreen {
             let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
             importedFiles = await store.listImports()
         } catch {
-            lastImportError = "Could not open imported-file library: \(error)"
+            lastImportError = String(localized: "Could not open imported-file library: \(error.localizedDescription)")
         }
     }
 
@@ -824,7 +824,7 @@ private extension SettingsScreen {
             importedFiles = await store.listImports()
             lastImportError = failures.isEmpty
                 ? nil
-                : "Some files could not be imported: " + failures.joined(separator: "; ")
+                : String(localized: "Some files could not be imported: \(failures.joined(separator: "; "))")
         } catch {
             lastImportError = "Could not open imported-file library: \(error)"
         }
@@ -837,7 +837,7 @@ private extension SettingsScreen {
             importedFiles = await store.listImports()
             lastImportError = nil
         } catch {
-            lastImportError = "Could not delete imported file: \(error)"
+            lastImportError = String(localized: "Could not delete imported file: \(error.localizedDescription)")
         }
     }
 }
