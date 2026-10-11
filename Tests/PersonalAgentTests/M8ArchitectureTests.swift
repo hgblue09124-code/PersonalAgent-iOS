@@ -173,6 +173,73 @@ struct M8ArchitectureTests {
         #expect(output == #"{"value":"production-registry"}"#)
     }
 
+
+    @Test func productionRootExecutesInstalledModuleBackedSkill() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8ModuleSkillE2E_\\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let workspaceURL = tempDir.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspaceURL, withIntermediateDirectories: true)
+        try "needle content".write(
+            to: workspaceURL.appendingPathComponent("needle.txt"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let skillDirectory = tempDir.appendingPathComponent("Skills", isDirectory: true)
+        try FileManager.default.createDirectory(at: skillDirectory, withIntermediateDirectories: true)
+        let markdown = """
+        id: workspace.search.test
+        name: Workspace Search Test
+        version: 1.0.0
+        description: Search workspace files through the authorized workspace read module.
+        moduleID: tool.workspace.read
+        ---
+        ## Input
+        tool.workspace.read.input
+
+        ## Output
+        tool.workspace.read.output
+
+        ## Rule
+        Search workspace text for the supplied query.
+        """
+        try markdown.write(
+            to: skillDirectory.appendingPathComponent("workspace.search.test.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let root = try await M8CompositionRoot(
+            storeDirectoryURL: tempDir,
+            policy: ExplicitAllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let toolArguments = try JSONSerialization.data(
+            withJSONObject: ["operation": "search", "query": "needle"],
+            options: [.sortedKeys]
+        )
+        let inputData = try JSONSerialization.data(
+            withJSONObject: ["arguments": String(decoding: toolArguments, as: UTF8.self)],
+            options: [.sortedKeys]
+        )
+        let outputJSON = try await root.executeSkill(
+            id: SkillID(rawValue: "workspace.search.test"),
+            inputJSON: String(decoding: inputData, as: UTF8.self)
+        )
+
+        let wrapper = try #require(
+            try JSONSerialization.jsonObject(with: Data(outputJSON.utf8)) as? [String: String]
+        )
+        let toolOutput = try #require(wrapper["output"])
+        let result = try #require(
+            try JSONSerialization.jsonObject(with: Data(toolOutput.utf8)) as? [String: Any]
+        )
+        let matches = try #require(result["matches"] as? [String])
+        #expect(matches.contains("workspace/needle.txt"))
+    }
+
     @Test func chatSkillRouteExecutesAndVerifiesDefaultSkill() async throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M8ChatSkillE2E_\(UUID().uuidString)")
