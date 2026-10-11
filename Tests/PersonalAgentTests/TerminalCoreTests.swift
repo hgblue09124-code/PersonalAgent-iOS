@@ -38,8 +38,19 @@ final class TerminalCoreTests: XCTestCase {
     func testRegistryRejectsUnknownCommand() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let context = CommandContext(workspace: workspace)
-        do { _ = try await BuiltinCommandRegistry.make().execute(AgentCommand(name: "nope"), context: context); XCTFail("must reject") } catch { }
+        do { _ = try await BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer()).execute(AgentCommand(name: "nope"), context: context); XCTFail("must reject") } catch { }
     }
+    func testMissingAuthorizerFailsClosed() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        let result = try await BuiltinCommandRegistry.make().execute(
+            AgentCommand(name: "pwd"),
+            context: CommandContext(workspace: workspace)
+        )
+        XCTAssertEqual(result.exitCode, 126)
+        XCTAssertTrue(result.stderr.contains("Permission denied"))
+    }
+
     func testSettingsPolicyDeniesWorkspaceWriteBeforeMutation() async throws {
         struct DenyWrites: TerminalCommandAuthorizing {
             func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool { !capabilities.contains(.write) }
@@ -61,7 +72,7 @@ final class TerminalCoreTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
         let context = CommandContext(workspace: workspace)
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         _ = try await registry.execute(AgentCommand(name: "mkdir", arguments: ["workspace/test"]), context: context)
         _ = try await registry.execute(AgentCommand(name: "touch", arguments: ["workspace/test/a.txt"]), context: context)
         _ = try await registry.execute(AgentCommand(name: "cp", arguments: ["workspace/test/a.txt", "workspace/test/b.txt"]), context: context)
@@ -80,7 +91,7 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.writeFile("needle\n", to: "workspace/project/nested/notes.md")
         try await workspace.writeFile("other\n", to: "workspace/project/readme.txt")
 
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         let result = try await registry.execute(
             AgentCommand(name: "find", arguments: ["workspace/project", ".md"]),
             context: CommandContext(workspace: workspace)
@@ -101,7 +112,7 @@ final class TerminalCoreTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: rootURL) }
 
         do {
-            let result = try await BuiltinCommandRegistry.make().execute(
+            let result = try await BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer()).execute(
                 AgentCommand(name: "find", arguments: ["workspace/tree"]),
                 context: CommandContext(workspace: workspace)
             )
@@ -116,7 +127,7 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.prepare()
         try await workspace.writeFile("first\nNeedle here\nlast needle\n", to: "workspace/log.txt")
 
-        let result = try await BuiltinCommandRegistry.make().execute(
+        let result = try await BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer()).execute(
             AgentCommand(name: "grep", arguments: ["needle", "workspace/log.txt"]),
             context: CommandContext(workspace: workspace)
         )
@@ -127,7 +138,7 @@ final class TerminalCoreTests: XCTestCase {
         let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: rootURL)
         try await workspace.prepare()
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         let context = CommandContext(workspace: workspace)
 
         let status = try await registry.execute(AgentCommand(name: "workspace", arguments: ["status"]), context: context)
@@ -148,7 +159,7 @@ final class TerminalCoreTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
         let context = CommandContext(workspace: workspace)
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         try await workspace.writeFile("a\nb\nc\n", to: "workspace/lines.txt")
         do { _ = try await registry.execute(AgentCommand(name: "head", arguments: ["workspace/lines.txt", "0"]), context: context); XCTFail("zero count must fail") } catch { }
         do { _ = try await registry.execute(AgentCommand(name: "tail", arguments: ["workspace/lines.txt", "-1"]), context: context); XCTFail("negative count must fail") } catch { }
@@ -159,12 +170,12 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.prepare()
         try await workspace.createDirectory(at: "workspace/project")
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        _ = try await session.execute("cd workspace/project", registry: BuiltinCommandRegistry.make())
+        _ = try await session.execute("cd workspace/project", registry: BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer()))
         let workingDirectory = await session.workingDirectory()
         XCTAssertEqual(workingDirectory, "workspace/project")
         let history = await session.history.all()
         XCTAssertTrue(history.contains(AgentCommand(name: "cd", arguments: ["workspace/project"])))
-        _ = try await session.execute("touch file.txt", registry: BuiltinCommandRegistry.make())
+        _ = try await session.execute("touch file.txt", registry: BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer()))
         let fileExists = try await workspace.exists(at: "workspace/project/file.txt")
         XCTAssertTrue(fileExists)
     }
@@ -174,7 +185,7 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.prepare()
         try await workspace.createDirectory(at: "workspace/project")
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
 
         _ = try await session.execute("cd workspace/project", registry: registry)
         _ = try await session.execute("cd ..", registry: registry)
@@ -196,7 +207,7 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.prepare()
         try await workspace.writeFile("x", to: "workspace/file.txt")
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        do { _ = try await session.execute("cd workspace/file.txt", registry: BuiltinCommandRegistry.make()); XCTFail("cd to file must fail") } catch { }
+        do { _ = try await session.execute("cd workspace/file.txt", registry: BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())); XCTFail("cd to file must fail") } catch { }
     }
 
     func testPwdUsesSessionWorkingDirectory() async throws {
@@ -205,7 +216,7 @@ final class TerminalCoreTests: XCTestCase {
         try await workspace.prepare()
         try await workspace.createDirectory(at: "workspace/project")
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         _ = try await session.execute("cd workspace/project", registry: registry)
         _ = try await session.execute("pwd", registry: registry)
         let outputs = await session.outputs()
@@ -213,12 +224,12 @@ final class TerminalCoreTests: XCTestCase {
     }
 
     func testBuiltinSurfaceIsRegistered() {
-        let registry = BuiltinCommandRegistry.make()
+        let registry = BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer())
         XCTAssertTrue(registry.contains("pwd")); XCTAssertTrue(registry.contains("skill")); XCTAssertTrue(registry.contains("sync"))
     }
     func testRegistryBoundsLargeCommandOutput() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
-        let registry = CommandRegistry().registering("large") { _, _ in
+        let registry = CommandRegistry(authorizer: AllowTerminalAuthorizer()).registering("large") { _, _ in
             CommandResult(stdout: String(repeating: "x", count: CommandRegistry.maximumOutputBytes + 1))
         }
         let result = try await registry.execute(AgentCommand(name: "large"), context: CommandContext(workspace: workspace))
@@ -230,4 +241,9 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertThrowsError(try CommandParser.parse(String(repeating: "x", count: CommandParser.maximumInputBytes + 1)))
     }
 
+}
+
+
+private struct AllowTerminalAuthorizer: TerminalCommandAuthorizing {
+    func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool { true }
 }

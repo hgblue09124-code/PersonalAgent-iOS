@@ -8,7 +8,7 @@ final class TerminalSessionTests: XCTestCase {
         try await workspace.prepare()
         let context = CommandContext(workspace: workspace)
         let session = TerminalSession(context: context)
-        let registry = CommandRegistry().registering("echo") { command, _ in CommandResult(stdout: command.arguments.joined(separator: " ")) }
+        let registry = CommandRegistry(authorizer: AllowTerminalAuthorizer()).registering("echo") { command, _ in CommandResult(stdout: command.arguments.joined(separator: " ")) }
         let execution = try await session.execute("echo hello world", registry: registry)
         let outputs = await session.outputs()
         let history = await session.history.all()
@@ -22,7 +22,7 @@ final class TerminalSessionTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        let registry = CommandRegistry().registering("explode") { _, _ in
+        let registry = CommandRegistry(authorizer: AllowTerminalAuthorizer()).registering("explode") { _, _ in
             throw CommandError.invalidArguments("simulated failure")
         }
 
@@ -49,7 +49,7 @@ final class TerminalSessionTests: XCTestCase {
             executionLimit: 2,
             outputLimit: 2
         )
-        let registry = CommandRegistry().registering("echo") { command, _ in
+        let registry = CommandRegistry(authorizer: AllowTerminalAuthorizer()).registering("echo") { command, _ in
             CommandResult(stdout: command.arguments.joined(separator: " "))
         }
 
@@ -83,7 +83,7 @@ final class TerminalSessionTests: XCTestCase {
             outputLimit: 20,
             outputByteLimit: 64
         )
-        let registry = CommandRegistry().registering("echo") { command, _ in
+        let registry = CommandRegistry(authorizer: AllowTerminalAuthorizer()).registering("echo") { command, _ in
             CommandResult(stdout: command.arguments.joined(separator: " "))
         }
 
@@ -96,4 +96,9 @@ final class TerminalSessionTests: XCTestCase {
         XCTAssertLessThanOrEqual(outputs.reduce(0) { $0 + $1.text.utf8.count }, 64)
     }
 
+}
+
+
+private struct AllowTerminalAuthorizer: TerminalCommandAuthorizing {
+    func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool { true }
 }
