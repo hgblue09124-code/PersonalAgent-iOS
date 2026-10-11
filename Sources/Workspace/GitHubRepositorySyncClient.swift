@@ -35,6 +35,7 @@ public enum GitHubRepositorySyncError: Error, Sendable, Equatable, LocalizedErro
     case hashMismatch(String)
     case potentialSecret(String)
     case corruptState
+    case rollbackFailed(paths: [String])
 
     public var errorDescription: String? {
         switch self {
@@ -69,6 +70,8 @@ public enum GitHubRepositorySyncError: Error, Sendable, Equatable, LocalizedErro
             return "Sync blocked a file that may contain a secret: \(path)"
         case .corruptState:
             return "Saved sync baseline is invalid or unreadable. It was not used."
+        case .rollbackFailed(let paths):
+            return "Sync failed and local rollback was incomplete for: \(paths.joined(separator: ", ")). Inspect these files before retrying."
         }
     }
 }
@@ -349,33 +352,48 @@ public actor GitHubRepositorySyncClient {
         }
 
         var downloadedPaths: [String] = []
-        for path in allFinalPaths.sorted() {
-            let local = localFiles[path]
-            let remote = finalRemoteFiles[path]
-            if local?.sha == remote?.sha { continue }
-            let destination = workspace.appendingPathComponent(path).standardizedFileURL
-            guard Self.contains(workspace, child: destination) else {
-                throw GitHubRepositorySyncError.unsafePath(path)
-            }
-            if remote != nil {
-                guard let data = downloadedData[path] else {
-                    throw GitHubRepositorySyncError.invalidResponse
+        var appliedLocalPaths: [String] = []
+        do {
+            for path in allFinalPaths.sorted() {
+                let local = localFiles[path]
+                let remote = finalRemoteFiles[path]
+                if local?.sha == remote?.sha { continue }
+                let destination = workspace.appendingPathComponent(path).standardizedFileURL
+                guard Self.contains(workspace, child: destination) else {
+                    throw GitHubRepositorySyncError.unsafePath(path)
                 }
-                try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try data.write(to: destination, options: .atomic)
-                downloadedPaths.append(path)
-            } else if local != nil {
-                try FileManager.default.removeItem(at: destination)
-                deletedPaths.append(path)
+                if remote != nil {
+                    guard let data = downloadedData[path] else {
+                        throw GitHubRepositorySyncError.invalidResponse
+                    }
+                    try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try data.write(to: destination, options: .atomic)
+                    downloadedPaths.append(path)
+                    appliedLocalPaths.append(path)
+                } else if local != nil {
+                    try FileManager.default.removeItem(at: destination)
+                    deletedPaths.append(path)
+                    appliedLocalPaths.append(path)
+                }
             }
-        }
 
-        let finalState = GitHubSyncState(
-            repositoryKey: repositoryKey,
-            commitSHA: finalCommitSHA,
-            files: finalRemoteFiles.mapValues(\.sha)
-        )
-        try persistState(finalState)
+            let finalState = GitHubSyncState(
+                repositoryKey: repositoryKey,
+                commitSHA: finalCommitSHA,
+                files: finalRemoteFiles.mapValues(\.sha)
+            )
+            try persistState(finalState)
+        } catch {
+            let rollbackFailures = rollbackLocalChanges(
+                paths: appliedLocalPaths,
+                originalFiles: localFiles,
+                workspace: workspace
+            )
+            if !rollbackFailures.isEmpty {
+                throw GitHubRepositorySyncError.rollbackFailed(paths: rollbackFailures)
+            }
+            throw error
+        }
         return GitHubRepositorySyncResult(
             commitSHA: finalCommitSHA,
             uploadedPaths: uploadedPaths.sorted(),
@@ -383,6 +401,40 @@ public actor GitHubRepositorySyncClient {
             deletedPaths: Array(Set(deletedPaths)).sorted(),
             unchanged: treeChanges.isEmpty && downloadedPaths.isEmpty && deletedPaths.isEmpty
         )
+    }
+
+    private func rollbackLocalChanges(
+        paths: [String],
+        originalFiles: [String: GitHubLocalFile],
+        workspace: URL
+    ) -> [String] {
+        var failures: [String] = []
+        for path in paths.reversed() {
+            let destination = workspace.appendingPathComponent(path).standardizedFileURL
+            guard Self.contains(workspace, child: destination) else {
+                failures.append(path)
+                continue
+            }
+            do {
+                if let original = originalFiles[path] {
+                    try FileManager.default.createDirectory(
+                        at: destination.deletingLastPathComponent(),
+                        withIntermediateDirectories: true
+                    )
+                    try original.data.write(to: destination, options: .atomic)
+                    let permissions = original.mode == "100755" ? 0o755 : 0o644
+                    try FileManager.default.setAttributes(
+                        [.posixPermissions: permissions],
+                        ofItemAtPath: destination.path
+                    )
+                } else if FileManager.default.fileExists(atPath: destination.path) {
+                    try FileManager.default.removeItem(at: destination)
+                }
+            } catch {
+                failures.append(path)
+            }
+        }
+        return failures.sorted()
     }
 
     public static func isSafeBranch(_ branch: String) -> Bool {

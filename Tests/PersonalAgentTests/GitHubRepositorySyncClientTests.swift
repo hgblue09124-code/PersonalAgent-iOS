@@ -222,6 +222,71 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertTrue(requests.allSatisfy { $0.httpMethod == "GET" })
     }
 
+    func testApplyFailureRollsBackEarlierLocalDownloadsAndPreservesBaseline() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = base.appendingPathComponent("workspace")
+        let stateURL = base.appendingPathComponent("state/state.json")
+        defer { try? FileManager.default.removeItem(at: base) }
+        let skills = workspace.appendingPathComponent("skills")
+        try FileManager.default.createDirectory(at: skills, withIntermediateDirectories: true)
+
+        let originalBytes = Data("keep executable file\n".utf8)
+        let originalFile = skills.appendingPathComponent("a.md")
+        try originalBytes.write(to: originalFile)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: originalFile.path)
+        let originalSHA = GitBlobSHA1.hash(originalBytes)
+        let obstruction = skills.appendingPathComponent("z")
+        try Data("keep obstruction".utf8).write(to: obstruction)
+
+        let nestedBytes = Data("nested remote file\n".utf8)
+        let nestedSHA = GitBlobSHA1.hash(nestedBytes)
+        let remoteCommit = String(repeating: "b", count: 40)
+        let treeSHA = String(repeating: "c", count: 40)
+        let state: [String: Any] = [
+            "repositoryKey": "example/agentos@main",
+            "commitSHA": String(repeating: "a", count: 40),
+            "files": ["skills/a.md": originalSHA]
+        ]
+        try FileManager.default.createDirectory(at: stateURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try JSONSerialization.data(withJSONObject: state).write(to: stateURL)
+        let originalState = try Data(contentsOf: stateURL)
+        let transport = ScriptedGitHubTransport(responses: [
+            Self.response(["object": ["sha": remoteCommit]]),
+            Self.response(["tree": ["sha": treeSHA]]),
+            Self.response(["sha": treeSHA, "truncated": false, "tree": [[
+                "path": "skills/z/nested.md", "mode": "100644", "type": "blob",
+                "sha": nestedSHA, "size": nestedBytes.count
+            ]]]),
+            Self.response(["sha": nestedSHA, "encoding": "base64", "content": nestedBytes.base64EncodedString()])
+        ])
+        let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+        let client = try GitHubRepositorySyncClient(
+            location: location,
+            stateURL: stateURL,
+            transport: transport,
+            tokenProvider: { "test-token" }
+        )
+
+        do {
+            _ = try await client.synchronize(workspaceURL: workspace)
+            XCTFail("A file-vs-directory obstruction must fail the local apply phase")
+        } catch is GitHubRepositorySyncError {
+            XCTFail("Rollback should preserve the original filesystem error when rollback succeeds")
+        } catch {
+            // Expected: creating skills/z as a directory fails because it is a regular file.
+        }
+
+        XCTAssertEqual(try String(contentsOf: originalFile, encoding: .utf8), "keep executable file\n")
+        let attributes = try FileManager.default.attributesOfItem(atPath: originalFile.path)
+        let permissions = (attributes[.posixPermissions] as? NSNumber)?.intValue ?? 0
+        XCTAssertNotEqual(permissions & 0o111, 0, "Rollback must preserve executable permissions")
+        XCTAssertEqual(try String(contentsOf: obstruction, encoding: .utf8), "keep obstruction")
+        XCTAssertEqual(try Data(contentsOf: stateURL), originalState)
+        let requests = await transport.requests
+        XCTAssertEqual(requests.count, 4)
+        XCTAssertTrue(requests.allSatisfy { $0.httpMethod == "GET" })
+    }
+
     func testDivergentLocalAndRemoteEditsFailBeforeWritingRemote() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = base.appendingPathComponent("workspace")
