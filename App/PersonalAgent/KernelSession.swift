@@ -35,6 +35,20 @@ struct UserConfiguredPolicyEvaluator: PolicyEvaluating {
     }
 }
 
+struct SettingsTerminalCommandAuthorizer: TerminalCommandAuthorizing {
+    private let policy = UserConfiguredPolicyEvaluator()
+    func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool {
+        var required: CapabilityLevel = []
+        if capabilities.contains(.read) { required.insert(.read) }
+        if capabilities.contains(.write) { required.insert(.write) }
+        if capabilities.contains(.execute) { required.insert(.execute) }
+        if capabilities.contains(.network) { required.insert(.network) }
+        if capabilities.contains(.destructive) { required.insert(.destructive) }
+        let decision = await policy.evaluate(ActionIntent(capabilities: required, summary: summary))
+        return decision.allowed && !decision.requiresApproval
+    }
+}
+
 /// Isolates high-frequency stream presentation from app-wide session observers.
 /// Settings and other screens must not redraw for every streamed token batch.
 @MainActor

@@ -40,6 +40,23 @@ final class TerminalCoreTests: XCTestCase {
         let context = CommandContext(workspace: workspace)
         do { _ = try await BuiltinCommandRegistry.make().execute(AgentCommand(name: "nope"), context: context); XCTFail("must reject") } catch { }
     }
+    func testSettingsPolicyDeniesWorkspaceWriteBeforeMutation() async throws {
+        struct DenyWrites: TerminalCommandAuthorizing {
+            func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool { !capabilities.contains(.write) }
+        }
+        let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: rootURL)
+        try await workspace.prepare()
+        let registry = BuiltinCommandRegistry.make(authorizer: DenyWrites())
+        let result = try await registry.execute(
+            AgentCommand(name: "workspace", arguments: ["write", "workspace/blocked.txt", "no"]),
+            context: CommandContext(workspace: workspace)
+        )
+        XCTAssertEqual(result.exitCode, 126)
+        let exists = try await workspace.exists(at: "workspace/blocked.txt")
+        XCTAssertFalse(exists)
+    }
+
     func testFilesystemBuiltinsExecute() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
