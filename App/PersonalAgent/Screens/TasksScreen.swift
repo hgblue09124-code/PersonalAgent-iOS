@@ -98,8 +98,8 @@ struct TasksScreen: View {
         HStack(alignment: .top, spacing: 10) {
             Text(number).font(.caption.monospaced().bold()).foregroundStyle(.tint).frame(width: 26, alignment: .leading)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.subheadline.weight(.semibold))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
+                Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.secondary)
             }
         }
     }
@@ -108,8 +108,8 @@ struct TasksScreen: View {
         HStack(alignment: .top, spacing: 9) {
             Image(systemName: "checkmark.circle").foregroundStyle(.tint).padding(.top, 2)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.subheadline.weight(.semibold))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
+                Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.secondary)
             }
         }
     }

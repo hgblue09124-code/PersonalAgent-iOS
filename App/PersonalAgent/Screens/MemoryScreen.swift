@@ -69,7 +69,7 @@ struct MemoryScreen: View {
                     Picker("Loại", selection: $selectedKind) {
                         Text("Tất cả").tag("all")
                         ForEach(availableKinds, id: \.self) { kind in
-                            Text(kind.capitalized).tag(kind)
+                            Text(LocalizedStringKey(kind.capitalized)).tag(kind)
                         }
                     }
                     .pickerStyle(.menu)
@@ -86,7 +86,7 @@ struct MemoryScreen: View {
                         ForEach(filteredMemories) { record in
                             HStack(alignment: .top, spacing: 10) {
                                 VStack(alignment: .leading, spacing: 4) {
-                                    Text(record.kind.capitalized)
+                                    Text(LocalizedStringKey(record.kind.capitalized))
                                         .font(.caption.weight(.bold)).foregroundStyle(.secondary)
                                     Text(record.content).font(.subheadline).textSelection(.enabled)
                                 }
@@ -148,8 +148,8 @@ struct MemoryScreen: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "circle.fill").font(.system(size: 6)).foregroundStyle(.tint).padding(.top, 6)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.subheadline.weight(.semibold))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
+                Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.secondary)
             }
         }
     }

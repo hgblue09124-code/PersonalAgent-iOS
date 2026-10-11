@@ -73,7 +73,7 @@ struct ScreenScaffold<Content: View>: View {
             PremiumIconTile(systemImage: systemImage)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(AgentDesign.title)
                     .tracking(-0.7)
                 Text("Personal Agent")
@@ -147,7 +147,7 @@ struct StatusBadge: View {
             Circle()
                 .fill(tint)
                 .frame(width: 6, height: 6)
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.caption.weight(.bold))
                 .lineLimit(1)
         }

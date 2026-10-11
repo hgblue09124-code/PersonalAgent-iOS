@@ -74,10 +74,10 @@ struct AgentScreen: View {
         VStack(spacing: 14) {
             Spacer().frame(height: 34)
             Button { showAgentPanel = true } label: { AgentOrb(isActive: running, isThinking: working).frame(width: 92, height: 92) }.buttonStyle(.plain)
-            Text(greeting).font(.system(size: 38, weight: .black, design: .rounded)).tracking(-1.4).foregroundStyle(.white).multilineTextAlignment(.center)
+            Text(LocalizedStringKey(greeting)).font(.system(size: 38, weight: .black, design: .rounded)).tracking(-1.4).foregroundStyle(.white).multilineTextAlignment(.center)
             HStack(spacing: 7) {
                 Circle().fill(working ? .white : .white.opacity(0.68)).frame(width: 6, height: 6)
-                Text(subtitle).font(.subheadline.weight(.semibold)).foregroundStyle(.white.opacity(0.68))
+                Text(LocalizedStringKey(subtitle)).font(.subheadline.weight(.semibold)).foregroundStyle(.white.opacity(0.68))
             }
             Spacer().frame(height: 20)
         }.frame(maxWidth: .infinity)
@@ -105,9 +105,9 @@ struct AgentScreen: View {
         HStack(alignment: .top, spacing: 11) {
             Image(systemName: symbol).foregroundStyle(.white).frame(width: 30, height: 30)
             VStack(alignment: .leading, spacing: 3) {
-                Text(eyebrow).font(.caption2.weight(.bold)).tracking(0.8).foregroundStyle(.white.opacity(0.5))
-                Text(title).font(.subheadline.weight(.bold)).foregroundStyle(.white)
-                Text(detail).font(.caption).foregroundStyle(.white.opacity(0.66)).lineLimit(5)
+                Text(LocalizedStringKey(eyebrow)).font(.caption2.weight(.bold)).tracking(0.8).foregroundStyle(.white.opacity(0.5))
+                Text(LocalizedStringKey(title)).font(.subheadline.weight(.bold)).foregroundStyle(.white)
+                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.white.opacity(0.66)).lineLimit(5)
             }
             Spacer()
         }
@@ -135,7 +135,7 @@ struct AgentScreen: View {
         Button { quickSurface = surface } label: {
             HStack(spacing: 8) {
                 Image(systemName: symbol).font(.subheadline.bold())
-                Text(title).font(.caption.weight(.semibold))
+                Text(LocalizedStringKey(title)).font(.caption.weight(.semibold))
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right").font(.caption2.weight(.bold)).opacity(0.45)
             }
