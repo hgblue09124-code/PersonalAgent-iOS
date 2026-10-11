@@ -1,4 +1,5 @@
 import SwiftUI
+import PAComposition
 
 struct MemoryScreen: View {
     @Environment(\.kernelSession) private var session
