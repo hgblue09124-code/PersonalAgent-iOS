@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-21",
+  "title": "Prevent local inference from passing remote provider connection test",
+  "status": "ready",
+  "context": "DynamicActiveProvider prioritizes the local model when privacy.localOnly is enabled. Settings connection testing calls that same runtime, so a local completion could be incorrectly presented as proof that the selected remote provider works.",
+  "goal": "Fail the remote provider connection test explicitly while local-only mode is enabled, rather than allowing local inference to produce a false remote success.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-21.json"
+  ],
+  "forbidden_changes": [
+    "Do not disable or mutate the user's local-only privacy preference.",
+    "Do not make a network request while local-only mode is enabled.",
+    "Do not alter provider credential storage or runtime routing."
+  ],
+  "acceptance_criteria": [
+    "The remote provider test fails before invoking the provider runtime when privacy.localOnly is true.",
+    "The failure explains that local-only mode blocks remote provider testing.",
+    "The new message is localized in English and Vietnamese.",
+    "The connection test records failure and does not report local inference as remote provider success."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static duplicate-key scan for EN and VI catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if the provider connection test mutates privacy settings or misreports remote availability."
+}

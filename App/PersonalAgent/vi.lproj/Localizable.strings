@@ -640,3 +640,4 @@
 "Some files could not be imported: %@" = "Không thể nhập một số tệp: %@";
 "Could not open imported-file library: %@" = "Không thể mở thư viện tệp đã nhập: %@";
 "Could not delete imported file: %@" = "Không thể xóa tệp đã nhập: %@";
+"Remote provider testing is disabled while Local-only mode is on." = "Không thể kiểm tra Provider từ xa khi chế độ chỉ thực thi cục bộ đang bật.";
