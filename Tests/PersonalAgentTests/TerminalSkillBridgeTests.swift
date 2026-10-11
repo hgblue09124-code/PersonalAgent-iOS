@@ -42,7 +42,7 @@ final class TerminalSkillBridgeTests: XCTestCase {
         let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { input in input == "187 * 43" ? "8041" : "0" }])
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        let execution = try await session.execute(#"skill run calculator "187 * 43""#, registry: BuiltinCommandRegistry.make(skillRuntime: runtime, policy: AllowTerminalSkillPolicy()))
+        let execution = try await session.execute(#"skill run calculator "187 * 43""#, registry: BuiltinCommandRegistry.make(skillRuntime: runtime, executeSkill: { request in try await runtime.run(request, policy: AllowTerminalSkillPolicy()) }))
         let output = await session.outputs()
         XCTAssertEqual(execution.state, .succeeded)
         XCTAssertEqual(output.last?.text, "8041")
