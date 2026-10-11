@@ -616,3 +616,12 @@
 "Generate" = "Sinh văn bản";
 "Connection tested" = "Đã kiểm tra kết nối";
 "Last test failed" = "Lần kiểm tra gần nhất thất bại";
+"Ưu tiên riêng tư và ngoại tuyến; phụ thuộc RAM, nhiệt độ, tốc độ và chất lượng." = "Ưu tiên riêng tư và ngoại tuyến; phụ thuộc RAM, nhiệt độ, tốc độ và chất lượng.";
+"Phù hợp suy luận nặng hơn; cần mạng, credential an toàn và kiểm soát dữ liệu gửi đi." = "Phù hợp suy luận nặng hơn; cần mạng, credential an toàn và kiểm soát dữ liệu gửi đi.";
+"Ưu tiên cho phép tính, parsing, validation và quy tắc cần kết quả xác định." = "Ưu tiên cho phép tính, parsing, validation và quy tắc cần kết quả xác định.";
+"401 / 403" = "401 / 403";
+"Kiểm tra credential, quyền model và trạng thái tài khoản; không đưa key vào chat hoặc log." = "Kiểm tra credential, quyền model và trạng thái tài khoản; không đưa key vào chat hoặc log.";
+"Đối chiếu chính xác model ID và endpoint/base URL." = "Đối chiếu chính xác model ID và endpoint/base URL.";
+"Xác minh mạng, TLS và tình trạng dịch vụ; phân biệt timeout với lỗi nội dung." = "Xác minh mạng, TLS và tình trạng dịch vụ; phân biệt timeout với lỗi nội dung.";
+"Lỗi có thể nằm ở request, stream, runtime hoặc UI; lưu lỗi gốc và tái hiện một lượt ngắn." = "Lỗi có thể nằm ở request, stream, runtime hoặc UI; lưu lỗi gốc và tái hiện một lượt ngắn.";
+"Kiểm tra thứ tự delta, completion cuối, Stop/cancellation và kết quả của request cũ." = "Kiểm tra thứ tự delta, completion cuối, Stop/cancellation và kết quả của request cũ.";
