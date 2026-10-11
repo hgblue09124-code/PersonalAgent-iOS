@@ -614,3 +614,5 @@
 "FAILED" = "Thất bại";
 "Import" = "Nhập";
 "Generate" = "Sinh văn bản";
+"Connection tested" = "Đã kiểm tra kết nối";
+"Last test failed" = "Lần kiểm tra gần nhất thất bại";
