@@ -471,3 +471,5 @@
 "FAILED" = "FAILED";
 "Import" = "Import";
 "Generate" = "Generate";
+"Connection tested" = "Connection tested";
+"Last test failed" = "Last test failed";
