@@ -595,3 +595,10 @@
 "Không đọc/ghi ngoài phạm vi; không tiết lộ credential." = "Không đọc/ghi ngoài phạm vi; không tiết lộ credential.";
 "Có đường phục hồi" = "Có đường phục hồi";
 "Biết điều gì đã thay đổi và cách rollback khi cần." = "Biết điều gì đã thay đổi và cách rollback khi cần.";
+"Quyền thực thi của Agent" = "Quyền thực thi của Agent";
+"Các quyền này được kiểm tra lại trong Runtime mỗi lần chạy Skill; tắt quyền sẽ chặn lần thực thi tiếp theo." = "Các quyền này được kiểm tra lại trong Runtime mỗi lần chạy Skill; tắt quyền sẽ chặn lần thực thi tiếp theo.";
+"Đọc dữ liệu" = "Đọc dữ liệu";
+"Ghi dữ liệu" = "Ghi dữ liệu";
+"Chạy Skills / Modules" = "Chạy Skills / Modules";
+"Truy cập mạng" = "Truy cập mạng";
+"Thao tác phá huỷ luôn cần bước phê duyệt riêng." = "Thao tác phá huỷ luôn cần bước phê duyệt riêng.";
