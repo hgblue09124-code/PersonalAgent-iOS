@@ -93,6 +93,26 @@ struct M8ArchitectureTests {
         #expect(runtimeState == sessionState)
     }
 
+    @Test func memoryPersistsAcrossCompositionRootRecreationAndFeedsContext() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8MemoryE2E_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let expectedMemory = "I prefer green tea in the morning"
+        let firstRoot = try await M8CompositionRoot(storeDirectoryURL: tempDir)
+        try await firstRoot.remember(expectedMemory, kind: "preference")
+
+        let initialContext = try await firstRoot.memoryContext(for: "green tea")
+        #expect(initialContext.contains(expectedMemory))
+
+        let restartedRoot = try await M8CompositionRoot(storeDirectoryURL: tempDir)
+        let restoredContext = try await restartedRoot.memoryContext(for: "green tea")
+        #expect(restoredContext.contains(expectedMemory))
+
+        let snapshot = try await restartedRoot.memorySnapshot(limit: 50)
+        #expect(snapshot.contains { $0.kind == "preference" && $0.content == expectedMemory })
+    }
+
     @Test func testLocalModelProviderAdapter() async throws {
         let mockEngine = MockLocalEngine()
         let adapter = LocalModelProviderAdapter(engine: mockEngine)
