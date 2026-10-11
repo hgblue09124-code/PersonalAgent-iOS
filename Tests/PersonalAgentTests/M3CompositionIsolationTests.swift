@@ -9,8 +9,8 @@ import PAEvents
 struct M3CompositionIsolationTests {
     @Test func rootWiresModuleRuntimeWithoutPrivilegedGrant() async throws {
         let root = try await M3CompositionRoot(
-            identity: AgentIdentity(id: AgentID(rawValue: "m3"), displayName: "Personal")
-        )
+            identity: AgentIdentity(id: AgentID(rawValue: "m3"), displayName: "Personal"),
+            policy: AllowModuleRuntimePolicy())
         #expect(root.milestone == .m3)
         #expect(root.milestone.skillRuntime)
         #expect(root.milestone.toolRuntime)
@@ -32,7 +32,7 @@ struct M3CompositionIsolationTests {
 
     @Test func skillComposesEcho() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         try await catalog.register(EchoSkillModule(runtime: runtime))
         let ok = try await runtime.execute(
             ModuleInvocation(
@@ -45,7 +45,7 @@ struct M3CompositionIsolationTests {
 
     @Test func skillFailurePropagates() async throws {
         let catalog = try ModuleCatalog(modules: [FailingEchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.failEcho))
         do {
             _ = try await runtime.execute(
@@ -66,7 +66,7 @@ struct M3CompositionIsolationTests {
 
     @Test func concurrentExecutionDoesNotCorruptCatalog() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         async let a = runtime.execute(
             ModuleInvocation(
                 moduleID: DeterministicModuleIDs.echo,
@@ -101,8 +101,8 @@ struct M3CompositionIsolationTests {
 
     @Test func kernelInvokeRequiresRunningLifecycleAndPreservesInvariants() async throws {
         let root = try await M3CompositionRoot(
-            identity: AgentIdentity(id: AgentID(rawValue: "m3-invoke"), displayName: "Personal")
-        )
+            identity: AgentIdentity(id: AgentID(rawValue: "m3-invoke"), displayName: "Personal"),
+            policy: AllowModuleRuntimePolicy())
         await #expect(throws: KernelError.runtimeNotExecutable(.created)) {
             _ = try await root.runtime.invokeModule(
                 ModuleInvocation(
@@ -145,10 +145,10 @@ struct M3CompositionIsolationTests {
 
     @Test func compositionRootRegistrationFailureFailsClosed() async {
         await #expect(throws: ModuleRuntimeError.duplicateRegistration(DeterministicModuleIDs.echo)) {
-            _ = try await M3CompositionRoot(additionalModules: [EchoModule()])
+            _ = try await M3CompositionRoot(additionalModules: [EchoModule()], policy: AllowModuleRuntimePolicy())
         }
         await #expect(throws: ModuleRuntimeError.missingDependency(module: DeterministicModuleIDs.needsMissing, missing: ModuleID(rawValue: "mod.does-not-exist"))) {
-            _ = try await M3CompositionRoot(additionalModules: [MissingDependencyModule()])
+            _ = try await M3CompositionRoot(additionalModules: [MissingDependencyModule()], policy: AllowModuleRuntimePolicy())
         }
     }
 
@@ -183,4 +183,8 @@ struct M3CompositionIsolationTests {
             #expect(!text.contains("ServiceLocator"))
         }
     }
+}
+
+private struct AllowModuleRuntimePolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
 }

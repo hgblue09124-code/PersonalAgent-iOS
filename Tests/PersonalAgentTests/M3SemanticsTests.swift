@@ -14,6 +14,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         await #expect(throws: ModuleRuntimeError.timeout) {
@@ -37,6 +38,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         let task = Task {
@@ -67,6 +69,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         await #expect(throws: ModuleRuntimeError.timeout) {
@@ -110,7 +113,7 @@ struct M3SemanticsTests {
 
     @Test func dependencyOrderIsDeterministic() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         try await catalog.register(EchoSkillModule(runtime: runtime))
         let order = try await catalog.dependencyOrder(of: DeterministicModuleIDs.compose)
         #expect(order == [DeterministicModuleIDs.echo, DeterministicModuleIDs.compose])
@@ -120,7 +123,7 @@ struct M3SemanticsTests {
 
     @Test func outputSchemaMismatchRejected() async throws {
         let catalog = try ModuleCatalog(modules: [WrongOutputModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         await #expect(throws: ModuleRuntimeError.invalidOutput("schema")) {
             _ = try await runtime.execute(
                 ModuleInvocation(
@@ -137,6 +140,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         try await catalog.register(EchoSkillModule(runtime: runtime))
@@ -159,6 +163,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.failEcho))
@@ -186,7 +191,7 @@ struct M3SemanticsTests {
 
     @Test func toolExecutesThroughModuleRuntime() async throws {
         let catalog = try ModuleCatalog(modules: [ToolModule(tool: EchoTool())])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         let result = try await runtime.execute(
             ModuleInvocation(
                 moduleID: ModuleID(rawValue: "tool.echo"),
@@ -202,7 +207,7 @@ struct M3SemanticsTests {
 
     @Test func toolCapabilityDenied() async throws {
         let catalog = try ModuleCatalog(modules: [ToolModule(tool: PrivilegedTool())])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         await #expect(throws: ModuleRuntimeError.capabilityDenied(.destructive)) {
             _ = try await runtime.execute(
                 ModuleInvocation(
@@ -232,6 +237,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         let task = Task {
@@ -262,6 +268,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         await #expect(throws: ModuleRuntimeError.timeout) {
@@ -286,6 +293,7 @@ struct M3SemanticsTests {
         let runtime = ModuleRuntime(
             catalog: catalog,
             grantedCapabilities: [.read, .execute],
+            policy: AllowModuleRuntimePolicy(),
             eventLog: log
         )
         let task = Task {
@@ -315,7 +323,7 @@ struct M3SemanticsTests {
 
     @Test func repeatedDeterministicExecution() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule(), ToolModule(tool: EchoTool())])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         let echo = ModuleInvocation(
             moduleID: DeterministicModuleIDs.echo,
             input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "same"])
@@ -331,4 +339,8 @@ struct M3SemanticsTests {
         let toolSecond = try await runtime.execute(tool)
         #expect(toolFirst.output == toolSecond.output)
     }
+}
+
+private struct AllowModuleRuntimePolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
 }

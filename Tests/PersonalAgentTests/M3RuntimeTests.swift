@@ -77,6 +77,19 @@ struct M3RuntimeTests {
         }
     }
 
+    @Test func missingPolicyFailsClosed() async throws {
+        let catalog = try ModuleCatalog(modules: [EchoModule()])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await runtime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "blocked"])
+                )
+            )
+        }
+    }
+
     @Test func capabilityDenied() async throws {
         let runtime = try await armed()
         await #expect(throws: ModuleRuntimeError.capabilityDenied(.destructive)) {
@@ -214,7 +227,7 @@ struct M3RuntimeTests {
 
     @Test func toolModuleExecutesThroughAdapter() async throws {
         let catalog = try ModuleCatalog(modules: [ToolModule(tool: EchoTool())])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         let result = try await runtime.execute(
             ModuleInvocation(
                 moduleID: ModuleID(rawValue: "tool.echo"),
@@ -239,7 +252,12 @@ struct M3RuntimeTests {
         ])
         return ModuleRuntime(
             catalog: catalog,
-            grantedCapabilities: [.read, .write, .execute]
+            grantedCapabilities: [.read, .write, .execute],
+            policy: AllowModuleRuntimePolicy()
         )
     }
+}
+
+private struct AllowModuleRuntimePolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
 }

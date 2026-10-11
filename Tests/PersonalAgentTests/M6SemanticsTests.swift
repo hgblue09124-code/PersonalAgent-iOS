@@ -36,7 +36,8 @@ struct M6SemanticsTests {
 
     // 1. Explicit toolID end-to-end without inference
     @Test func test1_ExplicitToolIDEndToEndWithoutInference() async throws {
-        let root = try await M6CompositionRoot(modules: [EchoModule()])
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy(),
+modules: [EchoModule()])
         let goal = Goal(statement: "Perform custom action")
         try await root.runtime.submit(goal: goal)
 
@@ -72,8 +73,8 @@ struct M6SemanticsTests {
 
     // 2. REAL Concurrent Goal Execution
     @Test func test2_RealConcurrentGoalExecution() async throws {
-        let root1 = try await M6CompositionRoot(identity: AgentIdentity(displayName: "Agent 1"), modules: [EchoModule()])
-        let root2 = try await M6CompositionRoot(identity: AgentIdentity(displayName: "Agent 2"), modules: [EchoModule()])
+        let root1 = try await M6CompositionRoot(identity: AgentIdentity(displayName: "Agent 1"), policy: ExplicitAllowPolicy(), modules: [EchoModule()])
+        let root2 = try await M6CompositionRoot(identity: AgentIdentity(displayName: "Agent 2"), policy: ExplicitAllowPolicy(), modules: [EchoModule()])
 
         let goal1 = Goal(statement: "Goal 1 concurrent")
         let goal2 = Goal(statement: "Goal 2 concurrent")
@@ -116,7 +117,8 @@ struct M6SemanticsTests {
 
     // 3. Prove Causal Audit Chain with Identity Linkage
     @Test func test3_CausalAuditChainWithIdentityLinkage() async throws {
-        let root = try await M6CompositionRoot(modules: [EchoModule()])
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy(),
+modules: [EchoModule()])
         let goal = Goal(statement: "Audit chain test goal")
         try await root.runtime.submit(goal: goal)
 
@@ -200,7 +202,7 @@ struct M6SemanticsTests {
 
     // 5. Authoritative StateUpdate
     @Test func test5_AuthoritativeStateUpdate() async throws {
-        let root = try await M6CompositionRoot()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let goal = Goal(statement: "State update test")
         try await root.runtime.submit(goal: goal)
         try await root.runtime.activate(goalID: goal.id)
@@ -236,7 +238,7 @@ struct M6SemanticsTests {
 
     // 6. Verification Rejection & Policy Denial Fail Closed
     @Test func test6_VerificationRejectionAndPolicyDenial() async throws {
-        let root = try await M6CompositionRoot()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let goal = Goal(statement: "Verification rejection goal")
         try await root.runtime.submit(goal: goal)
 
@@ -261,7 +263,7 @@ struct M6SemanticsTests {
 
     // 7. Multi-cycle Continuation Loop with Feedback
     @Test func test7_MultiCycleContinuationLoop() async throws {
-        let root = try await M6CompositionRoot()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let goal = Goal(statement: "Multi cycle goal")
         try await root.runtime.submit(goal: goal)
 
@@ -292,8 +294,8 @@ struct M6SemanticsTests {
         let customLog = CustomInjectableEventLog()
         let root = try await M6CompositionRoot(
             eventLog: customLog,
-            modules: [EchoModule()]
-        )
+            policy: ExplicitAllowPolicy(),
+            modules: [EchoModule()])
 
         let goal = Goal(statement: "B1 custom log test")
         try await root.runtime.submit(goal: goal)
@@ -351,7 +353,7 @@ struct M6SemanticsTests {
 
     // 8. Missing Execution Target Fails Closed
     @Test func test8_MissingExecutionTargetFailsClosed() async throws {
-        let root = try await M6CompositionRoot() // No modules registered
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy()) // No modules registered
         let goal = Goal(statement: "Unregistered tool goal")
         try await root.runtime.submit(goal: goal)
 
@@ -396,7 +398,7 @@ struct M6SemanticsTests {
     }
 
     @Test func test9_AnswerOnlyProjectsReasoningResult() async throws {
-        let root = try await M6CompositionRoot()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let goal = Goal(statement: "1 + 1 = ?")
         try await root.runtime.submit(goal: goal)
         let orchestrator = M6Orchestrator(runtime: root.runtime, eventLog: root.eventLog, reasoner: FixedReasoner(answer: "2"))
@@ -438,7 +440,7 @@ struct M6SemanticsTests {
     }
 
     @Test func test12_StateUpdateMutationTokenIsIdempotent() async throws {
-        let root = try await M6CompositionRoot()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let goal = Goal(statement: "idempotent state update")
         try await root.runtime.submit(goal: goal)
         try await root.runtime.activate(goalID: goal.id)
@@ -459,7 +461,7 @@ struct M6SemanticsTests {
     }
 
     @Test func test11_RepeatedGoalsRunOnSameRuntime() async throws {
-        let root = try await M6CompositionRoot()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let first = Goal(statement: "hello")
         try await root.runtime.submit(goal: first)
         let orchestrator = M6Orchestrator(
