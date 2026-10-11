@@ -116,7 +116,6 @@ public struct SkillRuntime: Sendable {
     private let store: (any SkillStore)?
     private let executors: SkillExecutorRegistry
     private let moduleRuntime: ModuleRuntime?
-    private let moduleRuntime: ModuleRuntime?
 
     public static func chatInputText(from goalStatement: String) -> String {
         // An explicit ": " separates the instruction from its payload.
