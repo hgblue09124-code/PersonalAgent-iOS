@@ -352,6 +352,9 @@ public struct SkillRuntime: Sendable {
         } else {
             throw SkillExecutionError.unknownSkill(id)
         }
+        // Cancellation may arrive while policy or executor lookup is suspended.
+        // Re-check at the last boundary before invoking capability code.
+        try Task.checkCancellation()
         return try await executor.execute(manifest: manifest, inputJSON: inputJSON)
     }
 
