@@ -178,19 +178,35 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
 
         let previousIndex = index
         let fileURL = modelsDirectoryURL.appendingPathComponent(descriptor.filename)
-        do {
-            if fileManager.fileExists(atPath: fileURL.path) {
-                try fileManager.removeItem(at: fileURL)
-            }
 
-            index.descriptors.removeValue(forKey: id.rawValue)
-            if index.activeModelID == id.rawValue {
-                index.activeModelID = nil
-            }
+        // Persist the metadata removal before deleting the large model file. If
+        // persistence fails, the original file is untouched and can be retried.
+        index.descriptors.removeValue(forKey: id.rawValue)
+        if index.activeModelID == id.rawValue {
+            index.activeModelID = nil
+        }
+        do {
             try persistIndex()
         } catch {
             index = previousIndex
             throw error
+        }
+
+        do {
+            if fileManager.fileExists(atPath: fileURL.path) {
+                try fileManager.removeItem(at: fileURL)
+            }
+        } catch {
+            let removalError = error
+            index = previousIndex
+            do {
+                try persistIndex()
+            } catch {
+                throw LocalModelStorageError.storageCorrupt(
+                    "Model file deletion failed and metadata rollback also failed: \(error.localizedDescription)"
+                )
+            }
+            throw removalError
         }
     }
 
