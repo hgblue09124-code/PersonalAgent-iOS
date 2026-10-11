@@ -461,12 +461,32 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             throw SkillExecutionError.malformedSkill
         }
         var fields: [String: String] = [:]
-        for (key, value) in object {
-            if let string = value as? String {
-                fields[key] = string
-            } else {
-                let encoded = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys, .fragmentsAllowed])
-                fields[key] = String(decoding: encoded, as: UTF8.self)
+        if let adapter = manifest.metadata["chatInputAdapter"] {
+            // Explicitly allow only the known, read-only workspace search adapter.
+            // Skill.md cannot select arbitrary code or operations by naming an adapter.
+            guard adapter == "workspace.search",
+                  moduleID.rawValue == "tool.workspace.read",
+                  Set(object.keys) == ["text"],
+                  let rawQuery = object["text"] as? String else {
+                throw SkillExecutionError.malformedSkill
+            }
+            let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !query.isEmpty, query.count <= 256 else {
+                throw SkillExecutionError.malformedSkill
+            }
+            let arguments = try JSONSerialization.data(
+                withJSONObject: ["operation": "search", "query": query],
+                options: [.sortedKeys]
+            )
+            fields["arguments"] = String(decoding: arguments, as: UTF8.self)
+        } else {
+            for (key, value) in object {
+                if let string = value as? String {
+                    fields[key] = string
+                } else {
+                    let encoded = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys, .fragmentsAllowed])
+                    fields[key] = String(decoding: encoded, as: UTF8.self)
+                }
             }
         }
         let result = try await moduleRuntime.execute(
