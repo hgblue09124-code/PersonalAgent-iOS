@@ -152,9 +152,6 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         activeStreamExecutionID = executionID
 
         let work = Task {
-            defer {
-                Task { await self.finishStreamExecution(executionID) }
-            }
             do {
                 try await self.emitInvoked(model: request.model, mode: "stream")
                 let bound = await self.currentProvider()
@@ -166,15 +163,19 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
                     }
                 }
                 await self.markCompletedIfExecuting(executionID)
+                await self.finishStreamExecution(executionID)
                 continuation.finish()
             } catch is CancellationError {
                 await self.applyFailure(.cancelled)
+                await self.finishStreamExecution(executionID)
                 continuation.finish(throwing: ProviderRuntimeError.cancelled)
             } catch let error as ProviderRuntimeError {
                 await self.applyFailure(error)
+                await self.finishStreamExecution(executionID)
                 continuation.finish(throwing: error)
             } catch {
                 await self.applyFailure(.unknown)
+                await self.finishStreamExecution(executionID)
                 continuation.finish(throwing: error)
             }
         }
