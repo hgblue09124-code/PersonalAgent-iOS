@@ -150,7 +150,7 @@ struct TerminalScreen: View {
 
         commands = commands.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list [query] memory status sync status|now clear help" + "\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list [query] memory status sync status|preview|now clear help" + "\n")
         }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
@@ -183,11 +183,14 @@ struct TerminalScreen: View {
             return CommandResult(stdout: await session.terminalMemoryStatus())
         }
         commands = commands.registering("sync") { command, _ in
-            guard command.arguments == ["status"] || command.arguments == ["now"] else {
-                throw CommandError.invalidArguments("sync status|now")
+            guard command.arguments == ["status"] || command.arguments == ["now"] || command.arguments == ["preview"] else {
+                throw CommandError.invalidArguments("sync status|preview|now")
             }
             if command.arguments[0] == "now" {
                 return CommandResult(stdout: await session.syncGitHubWorkspace())
+            }
+            if command.arguments[0] == "preview" {
+                return CommandResult(stdout: await session.syncGitHubWorkspace(preview: true))
             }
             return CommandResult(stdout: await session.terminalSyncStatus())
         }

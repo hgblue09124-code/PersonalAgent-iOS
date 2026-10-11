@@ -169,6 +169,59 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertEqual(patchJSON["force"] as? Bool, false)
     }
 
+    func testPreviewReportsPlannedChangesWithoutMutatingLocalRemoteOrBaseline() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = base.appendingPathComponent("workspace")
+        let stateURL = base.appendingPathComponent("state/state.json")
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: workspace.appendingPathComponent("skills"), withIntermediateDirectories: true)
+        let localFile = workspace.appendingPathComponent("skills/local.md")
+        try Data("local draft\n".utf8).write(to: localFile)
+
+        let remoteBytes = Data("remote skill\n".utf8)
+        let remoteSHA = GitBlobSHA1.hash(remoteBytes)
+        let remoteCommit = String(repeating: "b", count: 40)
+        let treeSHA = String(repeating: "c", count: 40)
+        let state: [String: Any] = [
+            "repositoryKey": "example/agentos@main",
+            "commitSHA": String(repeating: "a", count: 40),
+            "files": [String: String]()
+        ]
+        try FileManager.default.createDirectory(at: stateURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try JSONSerialization.data(withJSONObject: state).write(to: stateURL)
+        let originalState = try Data(contentsOf: stateURL)
+        let transport = ScriptedGitHubTransport(responses: [
+            Self.response(["object": ["sha": remoteCommit]]),
+            Self.response(["tree": ["sha": treeSHA]]),
+            Self.response(["sha": treeSHA, "truncated": false, "tree": [[
+                "path": "skills/remote.md", "mode": "100644", "type": "blob",
+                "sha": remoteSHA, "size": remoteBytes.count
+            ]]]),
+            Self.response(["sha": remoteSHA, "encoding": "base64", "content": remoteBytes.base64EncodedString()])
+        ])
+        let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+        let client = try GitHubRepositorySyncClient(
+            location: location,
+            stateURL: stateURL,
+            transport: transport,
+            tokenProvider: { "test-token" }
+        )
+
+        let result = try await client.synchronize(workspaceURL: workspace, previewOnly: true)
+        XCTAssertEqual(result.commitSHA, remoteCommit)
+        XCTAssertEqual(result.uploadedPaths, ["skills/local.md"])
+        XCTAssertEqual(result.downloadedPaths, ["skills/remote.md"])
+        XCTAssertEqual(result.deletedPaths, [])
+        XCTAssertFalse(result.unchanged)
+
+        XCTAssertEqual(try String(contentsOf: localFile, encoding: .utf8), "local draft\n")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: workspace.appendingPathComponent("skills/remote.md").path))
+        XCTAssertEqual(try Data(contentsOf: stateURL), originalState)
+        let requests = await transport.requests
+        XCTAssertEqual(requests.count, 4)
+        XCTAssertTrue(requests.allSatisfy { $0.httpMethod == "GET" })
+    }
+
     func testDivergentLocalAndRemoteEditsFailBeforeWritingRemote() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = base.appendingPathComponent("workspace")

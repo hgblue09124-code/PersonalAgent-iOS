@@ -361,7 +361,7 @@ final class KernelSession: ObservableObject {
 
     /// Shared sync entry point for Settings and Terminal. Always sync the same visible
     /// AgentOS workspace; never print or persist the GitHub token.
-    func syncGitHubWorkspace() async -> String {
+    func syncGitHubWorkspace(preview: Bool = false) async -> String {
         let defaults = UserDefaults.standard
         let owner = defaults.string(forKey: "github.sync.owner")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let repository = defaults.string(forKey: "github.sync.repository")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -398,7 +398,15 @@ final class KernelSession: ObservableObject {
                 stateURL: stateURL,
                 tokenProvider: { token }
             )
-            let result = try await client.synchronize(workspaceURL: workspace.rootURL)
+            let result = try await client.synchronize(workspaceURL: workspace.rootURL, previewOnly: preview)
+            if preview {
+                func describe(_ paths: [String]) -> String {
+                    guard !paths.isEmpty else { return "none" }
+                    let shown = paths.prefix(20).joined(separator: ", ")
+                    return paths.count > 20 ? "\(shown), … (+\(paths.count - 20))" : shown
+                }
+                return "Sync preview only · no changes applied · upload: \(describe(result.uploadedPaths)) · download: \(describe(result.downloadedPaths)) · delete: \(describe(result.deletedPaths))\n"
+            }
             return "Sync complete · \(result.commitSHA.prefix(7)) · ↑\(result.uploadedPaths.count) ↓\(result.downloadedPaths.count) −\(result.deletedPaths.count)\n"
         } catch GitHubRepositorySyncError.remoteConflict(let paths) {
             return "Sync conflict in: \(paths.joined(separator: ", ")). Resolve those files, then sync again.\n"
