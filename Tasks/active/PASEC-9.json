@@ -1,0 +1,36 @@
+{
+  "id": "PASEC-9",
+  "title": "Inject Skill executor registry through production M8 composition",
+  "status": "in_progress",
+  "goal": "Allow production composition to receive an explicitly registered SkillExecutorRegistry and prove the M8 runtime uses it for an installed Skill.",
+  "context": "M8CompositionRoot currently creates SkillRuntime with the default empty registry, so custom executors cannot be supplied through the production composition API. Skill.md executor names remain declarative and do not instantiate code; callers must explicitly register trusted executors.",
+  "allowed_paths": [
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M8ArchitectureTests.swift",
+    "Tasks/active/PASEC-9.json"
+  ],
+  "forbidden_changes": [
+    "Do not instantiate executors from arbitrary Skill.md metadata.",
+    "Do not bypass policy, verification, cancellation, module capability, or schema checks.",
+    "Do not modify App/ or Xcode project files.",
+    "Do not silently grant new capabilities to installed Skills."
+  ],
+  "acceptance_criteria": [
+    "M8CompositionRoot initializer accepts an injectable SkillExecutorRegistry with a source-compatible default.",
+    "M8 passes the exact injected registry into SkillRuntime.",
+    "A production-root regression test loads a custom Skill.md and proves an explicitly registered executor can execute and verify it.",
+    "An arbitrary executor name without registry registration remains non-executable.",
+    "All required CI gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-9.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-9.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #354"
+  ],
+  "recovery": "Revert this single logical commit if M8 source compatibility or Skill fail-closed behavior regresses."
+}
