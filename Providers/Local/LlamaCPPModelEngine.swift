@@ -42,6 +42,13 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
         self.streamRunner = streamRunner
     }
 
+    /// Positive temperatures use stochastic sampling; nil, zero, negative, or non-finite
+    /// values preserve the deterministic greedy default. Bound extremes to safe sampler input.
+    static func samplingTemperature(_ temperature: Double?) -> Float? {
+        guard let temperature, temperature.isFinite, temperature > 0 else { return nil }
+        return Float(min(max(temperature, 0.05), 2.0))
+    }
+
     deinit {
         releaseNativeHandles()
     }
@@ -238,8 +245,34 @@ public final class LlamaCPPModelEngine: LocalModelEngine, @unchecked Sendable {
 
                 // Verify loaded state and obtain native pointers
                 #if canImport(cllama)
-                guard let (modelPtr, contextPtr, samplerPtr) = self.getNativeHandles() else {
+                guard let (modelPtr, contextPtr, loadedSamplerPtr) = self.getNativeHandles() else {
                     throw LlamaCPPEngineError.modelNotLoaded
+                }
+
+                // LLMRequest temperature is part of the provider contract. Build a
+                // request-scoped sampler when it is explicitly configured; otherwise
+                // retain the deterministic greedy sampler created at load time.
+                let samplerPtr: UnsafeMutablePointer<llama_sampler>
+                var requestSampler: UnsafeMutablePointer<llama_sampler>?
+                if let temperature = Self.samplingTemperature(request.temperature) {
+                    let chainParams = llama_sampler_chain_default_params()
+                    guard let chain = llama_sampler_chain_init(chainParams) else {
+                        throw LlamaCPPEngineError.nativeContextCreationFailed
+                    }
+                    llama_sampler_chain_add(chain, llama_sampler_init_temp(temperature))
+                    llama_sampler_chain_add(
+                        chain,
+                        llama_sampler_init_dist(UInt32.random(in: UInt32.min...UInt32.max))
+                    )
+                    requestSampler = chain
+                    samplerPtr = chain
+                } else {
+                    samplerPtr = loadedSamplerPtr
+                }
+                defer {
+                    if let requestSampler {
+                        llama_sampler_free(requestSampler)
+                    }
                 }
 
                 // Verify device thermal & memory state
