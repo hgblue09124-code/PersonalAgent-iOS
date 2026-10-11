@@ -8,6 +8,7 @@ import PASkills
 import PARuntime
 import PASecurity
 import PAWorkspace
+import PATerminal
 
 /// Reads user-controlled capability grants at decision time so changing Settings
 /// takes effect without rebuilding the composition root.
@@ -32,6 +33,20 @@ struct UserConfiguredPolicyEvaluator: PolicyEvaluating {
             return .approve("Destructive action requires explicit confirmation")
         }
         return .allow("Granted by user Settings")
+    }
+}
+
+struct SettingsTerminalCommandAuthorizer: TerminalCommandAuthorizing {
+    private let policy = UserConfiguredPolicyEvaluator()
+    func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool {
+        var required: CapabilityLevel = []
+        if capabilities.contains(.read) { required.insert(.read) }
+        if capabilities.contains(.write) { required.insert(.write) }
+        if capabilities.contains(.execute) { required.insert(.execute) }
+        if capabilities.contains(.network) { required.insert(.network) }
+        if capabilities.contains(.destructive) { required.insert(.destructive) }
+        let decision = await policy.evaluate(ActionIntent(capabilities: required, summary: summary))
+        return decision.allowed && !decision.requiresApproval
     }
 }
 
