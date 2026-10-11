@@ -353,7 +353,7 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
             Self.response(["object": ["sha": remoteCommit]]),
             Self.response(["tree": ["sha": treeSHA]]),
             Self.response(["sha": treeSHA, "truncated": false, "tree": [[
-                "path": "skills/remote.md", "mode": "100644", "type": "blob",
+                "path": "skills/remote.md", "mode": "100755", "type": "blob",
                 "sha": blobSHA, "size": remoteBytes.count
             ]]]),
             Self.response(["sha": blobSHA, "encoding": "base64", "content": remoteBytes.base64EncodedString()])
@@ -370,7 +370,11 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertEqual(result.commitSHA, remoteCommit)
         XCTAssertEqual(result.downloadedPaths, ["skills/remote.md"])
         XCTAssertTrue(result.uploadedPaths.isEmpty)
-        XCTAssertEqual(try Data(contentsOf: workspace.appendingPathComponent("skills/remote.md")), remoteBytes)
+        let downloadedFile = workspace.appendingPathComponent("skills/remote.md")
+        XCTAssertEqual(try Data(contentsOf: downloadedFile), remoteBytes)
+        let attributes = try FileManager.default.attributesOfItem(atPath: downloadedFile.path)
+        let permissions = (attributes[.posixPermissions] as? NSNumber)?.intValue ?? 0
+        XCTAssertNotEqual(permissions & 0o111, 0, "Remote executable mode must be preserved")
 
         let requests = await transport.requests
         XCTAssertEqual(requests.map { $0.httpMethod ?? "" }, ["GET", "GET", "GET", "GET"])
