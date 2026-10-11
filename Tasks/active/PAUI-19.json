@@ -1,0 +1,34 @@
+{
+  "id": "PAUI-19",
+  "title": "Localize Agent workspace and imported-file feedback",
+  "status": "ready",
+  "context": "The Agent workspace's link descriptions and several imported-file states remain English-only in Vietnamese mode. Dynamic import/load/delete/preview errors are stored as plain English strings instead of localized format strings.",
+  "goal": "Add EN/VI catalog entries for workspace navigation and imported-file feedback, and route dynamic file-operation errors through localized format strings.",
+  "allowed_paths": [
+    "App/PersonalAgent/RootView.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-19.json",
+    "App/PersonalAgent/Screens/SettingsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change imported-file storage, deletion, or preview authorization behavior.",
+    "Do not execute imported content.",
+    "Do not expose secrets or change preserved original bytes."
+  ],
+  "acceptance_criteria": [
+    "Workspace link descriptions and imported-file empty/loading/error labels have EN/VI entries.",
+    "Dynamic load/delete/preview errors use localized format strings and retain error details.",
+    "Vietnamese values are natural Vietnamese.",
+    "No duplicate localization keys are introduced.",
+    "Settings import-library failures use localized format strings while preserving file names and error details."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static duplicate-key scan for both localization catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if workspace navigation, import handling, or localization regresses."
+}

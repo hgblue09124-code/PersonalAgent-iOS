@@ -790,7 +790,7 @@ private struct ImportedFilesScreen: View {
             files = await target.listImports()
             errorMessage = nil
         } catch {
-            errorMessage = "Unable to load imports: \(error.localizedDescription)"
+            errorMessage = String(localized: "Unable to load imports: \(error.localizedDescription)")
         }
     }
 
@@ -831,7 +831,7 @@ private struct ImportedFilesScreen: View {
                 try await target.removeImport(id: file.id)
                 await reload()
             } catch {
-                errorMessage = "Unable to delete \(file.originalName): \(error.localizedDescription)"
+                errorMessage = String(localized: "Unable to delete \(file.originalName): \(error.localizedDescription)")
             }
         }
     }
@@ -882,7 +882,7 @@ private struct ImportedFilePreviewSheet: View {
             do {
                 content = try await ImportedFileContentReader().read(file, from: store)
             } catch {
-                errorMessage = "The file was imported and preserved, but this build cannot extract a preview for it. \(error.localizedDescription)"
+                errorMessage = String(localized: "The file was imported and preserved, but this build cannot extract a preview for it. \(error.localizedDescription)")
             }
         }
     }
