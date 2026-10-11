@@ -594,7 +594,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
 
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
-            grantedCapabilities: [.read, .write, .execute],
+            grantedCapabilities: [.read, .write, .execute, .network, .destructive],
+            policy: resolvedPolicy,
             eventLog: idempotentLog,
             logger: logger
         )

@@ -13,6 +13,7 @@ import PAEvents
 public actor ModuleRuntime: ModuleExecuting {
     public let grantedCapabilities: CapabilityLevel
     private let catalog: ModuleCatalog
+    private let policy: (any PolicyEvaluating)?
     private let eventLog: (any EventLog)?
     private let logger: any AgentLogger
     private let sessionTrace: TraceID
@@ -21,6 +22,7 @@ public actor ModuleRuntime: ModuleExecuting {
     public init(
         catalog: ModuleCatalog,
         grantedCapabilities: CapabilityLevel,
+        policy: (any PolicyEvaluating)? = nil,
         eventLog: (any EventLog)? = nil,
         logger: any AgentLogger = ModuleNullLogger(),
         sessionTrace: TraceID = TraceID(),
@@ -28,6 +30,7 @@ public actor ModuleRuntime: ModuleExecuting {
     ) {
         self.catalog = catalog
         self.grantedCapabilities = grantedCapabilities
+        self.policy = policy
         self.eventLog = eventLog
         self.logger = logger
         self.sessionTrace = sessionTrace
@@ -59,6 +62,23 @@ public actor ModuleRuntime: ModuleExecuting {
                 "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
             ])
             throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
+        }
+        if let policy {
+            let decision = await policy.evaluate(
+                ActionIntent(
+                    capabilities: contract.capabilities,
+                    summary: "Execute Module \\(contract.id.rawValue)"
+                )
+            )
+            // ModuleRuntime has no approval presenter; approval-required work must
+            // fail closed rather than treating a Settings toggle as consent.
+            guard decision.allowed && !decision.requiresApproval else {
+                await emit(kind: .moduleFailed, payload: [
+                    "moduleID": contract.id.rawValue,
+                    "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
+                ])
+                throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
+            }
         }
         try validateInput(invocation.input, against: contract)
 
