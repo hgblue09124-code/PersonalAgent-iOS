@@ -167,7 +167,7 @@ public struct ImportedFileContentReader: Sendable {
 
         let rows: [[String]]?
         if format == .csv {
-            rows = try Self.parseDelimited(text, delimiter: importedFile.fileExtension.lowercased() == "tsv" ? "\t" : ",")
+            rows = try Self.parseDelimited(text, delimiter: ext == "tsv" ? "\t" : ",")
         } else {
             rows = nil
         }
