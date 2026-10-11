@@ -1,0 +1,30 @@
+{
+  "id": "PAUI-3",
+  "title": "Prevent duplicate model load and unload actions",
+  "status": "in_progress",
+  "goal": "Make the Models tab visibly indicate engine transitions and prevent repeated load/unload taps while a model is loading or unloading.",
+  "context": "Issue #367 prioritizes a complete GGUF/model workflow. ModelsScreen currently leaves the primary action enabled during lifecycle transitions, allowing redundant taps while the engine is busy.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-3.json",
+    "App/PersonalAgent/Screens/ModelsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change GGUF validation, model storage, or provider runtime behavior.",
+    "Do not claim memory or thermal improvements without measurements.",
+    "Do not add new UI text without localization."
+  ],
+  "acceptance_criteria": [
+    "The primary load/unload action is disabled while the engine is loading or unloading.",
+    "A progress indicator is shown during a transition.",
+    "Existing model failure details and lifecycle state remain visible."
+  ],
+  "verification": [
+    "Review ModelsScreen lifecycle-state switch for all enum cases.",
+    "Run validate-contract, M3 and Apple Native Build & Unsigned IPA.",
+    "Verify on device that repeated taps are disabled during load/unload."
+  ],
+  "dependencies": [
+    "Issue #367"
+  ],
+  "recovery": "Revert the single task commit if Swift compilation fails or lifecycle states are misrepresented."
+}
