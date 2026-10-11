@@ -196,6 +196,8 @@ private struct AgentWorkspaceSheet: View {
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
         .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
         .presentationDragIndicator(.visible)
         .sheet(item: $selectedRoadmapFeature) { feature in
