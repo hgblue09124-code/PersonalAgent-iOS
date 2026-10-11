@@ -501,6 +501,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         targetCapabilities: [ExecutionTargetCapability] = [],
         modules: [any Module] = [],
         tools: [any Tool] = [],
+        skillExecutors: SkillExecutorRegistry = SkillExecutorRegistry(),
         runStore: (any RunStore)? = nil,
         attemptStore: (any ExecutionAttemptStore)? = nil,
         checkpointStore: (any RunCheckpointStore)? = nil,
@@ -616,7 +617,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let skillDirectoryURL = rootDirectoryURL.appendingPathComponent("Skills", isDirectory: true)
         let skillStore = FileSkillStore(directoryURL: skillDirectoryURL)
         try await skillStore.ensureDefaultSkill()
-        let skillRuntime = SkillRuntime(store: skillStore, moduleRuntime: moduleRuntime)
+        let skillRuntime = SkillRuntime(store: skillStore, executors: skillExecutors, moduleRuntime: moduleRuntime)
         let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
         self.skillRuntime = skillRuntime
         self.skillAgentOrchestrator = skillAgentOrchestrator

@@ -6,6 +6,7 @@ import PAEvents
 import PAProviders
 import PAProvidersLocal
 import PAMemory
+import PASkills
 @testable import PAComposition
 import PASecurity
 
@@ -72,6 +73,17 @@ struct M8ArchitectureTests {
         func unload() async throws {}
     }
 
+
+    private struct RegisteredProductionSkillExecutor: SkillExecutor {
+        func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+            #"{"value":"production-registry"}"#
+        }
+
+        func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+            outputJSON == #"{"value":"production-registry"}"#
+        }
+    }
+
     @Test func testM8CompositionRootAndAppSession() async throws {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("M8Test_\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -115,6 +127,50 @@ struct M8ArchitectureTests {
 
         let snapshot = try await restartedRoot.memorySnapshot(limit: 50)
         #expect(snapshot.contains { $0.kind == "preference" && $0.content == expectedMemory })
+    }
+
+
+    @Test func productionCompositionUsesInjectedSkillExecutorRegistry() async throws {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8SkillRegistryE2E_\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+        let skillDirectory = tempDir.appendingPathComponent("Skills", isDirectory: true)
+        try FileManager.default.createDirectory(at: skillDirectory, withIntermediateDirectories: true)
+        let markdown = """
+        id: custom.production
+        name: Production Registered Skill
+        version: 1.0.0
+        description: Verify production composition passes the injected executor registry.
+        executor: custom.production
+        ---
+        ## Input
+        input.v1
+
+        ## Output
+        output.v1
+
+        ## Rule
+        Return the registered executor output.
+        """
+        try markdown.write(
+            to: skillDirectory.appendingPathComponent("custom.production.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let registry = SkillExecutorRegistry()
+        await registry.register(RegisteredProductionSkillExecutor(), for: "custom.production")
+        let root = try await M8CompositionRoot(
+            storeDirectoryURL: tempDir,
+            policy: ExplicitAllowPolicy(),
+            skillExecutors: registry
+        )
+        let output = try await root.skillRuntime.executeVerified(
+            id: SkillID(rawValue: "custom.production"),
+            inputJSON: #"{"value":"input"}"#,
+            policy: ExplicitAllowPolicy()
+        )
+        #expect(output == #"{"value":"production-registry"}"#)
     }
 
     @Test func chatSkillRouteExecutesAndVerifiesDefaultSkill() async throws {
