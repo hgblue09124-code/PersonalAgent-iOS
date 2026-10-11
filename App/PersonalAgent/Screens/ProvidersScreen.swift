@@ -105,8 +105,8 @@ struct ProvidersScreen: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: symbol).foregroundStyle(.tint).frame(width: 24).padding(.top, 2)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.subheadline.weight(.semibold))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
+                Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 4)

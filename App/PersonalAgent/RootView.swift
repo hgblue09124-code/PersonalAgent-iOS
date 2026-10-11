@@ -45,8 +45,8 @@ struct RootView: View {
 
 private struct AgentWorkspaceSheet: View {
     @ObservedObject var session: KernelSession
+    @AppStorage("app.language") private var appLanguage = "vi"
     @State private var workspaceExpanded = false
-    @State private var appeared = false
     @State private var selectedRoadmapFeature: RoadmapFeature?
 
     var body: some View {
@@ -194,13 +194,11 @@ private struct AgentWorkspaceSheet: View {
             .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
             .scrollDismissesKeyboard(.interactively)
-            .opacity(appeared ? 1 : 0)
-            .offset(y: appeared ? 0 : 10)
-            .animation(.spring(response: 0.55, dampingFraction: 0.84), value: appeared)
-            .onAppear { appeared = true }
             .navigationTitle("Workspace")
             .navigationBarTitleDisplayMode(.inline)
         }
+        .environment(\.locale, Locale(identifier: appLanguage))
+        .id(appLanguage)
         .presentationDetents(workspaceExpanded ? [.large] : [.medium, .large])
         .presentationDragIndicator(.visible)
         .sheet(item: $selectedRoadmapFeature) { feature in
@@ -211,7 +209,7 @@ private struct AgentWorkspaceSheet: View {
     private func statusPill(_ title: String, _ value: String, _ symbol: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Image(systemName: symbol).font(.caption.bold())
-            Text(title).font(.caption2.weight(.bold))
+            Text(LocalizedStringKey(title)).font(.caption2.weight(.bold))
             Text(value).font(.caption).lineLimit(1)
         }
         .foregroundStyle(.primary)
@@ -223,7 +221,8 @@ private struct AgentWorkspaceSheet: View {
     @ViewBuilder
     private func roadmapGroup<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 9) {
-            Text(title.uppercased())
+            Text(LocalizedStringKey(title))
+                .textCase(.uppercase)
                 .font(.caption2.weight(.bold))
                 .tracking(1.1)
                 .foregroundStyle(.secondary)
@@ -259,15 +258,15 @@ private struct AgentWorkspaceSheet: View {
                         .frame(width: 32, height: 32)
                         .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
                     Spacer()
-                    Text(feature.stateTitle)
+                    Text(LocalizedStringKey(feature.stateTitle))
                         .font(.system(size: 9, weight: .bold, design: .rounded))
                         .foregroundStyle(feature.stateColor)
                         .padding(.horizontal, 7)
                         .padding(.vertical, 4)
                         .background(feature.stateColor.opacity(0.10), in: Capsule())
                 }
-                Text(feature.title).font(.subheadline.weight(.semibold))
-                Text(feature.subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                Text(LocalizedStringKey(feature.title)).font(.subheadline.weight(.semibold))
+                Text(LocalizedStringKey(feature.subtitle)).font(.caption).foregroundStyle(.secondary).lineLimit(2)
             }
             .padding(12)
             .frame(maxWidth: .infinity, minHeight: 108, alignment: .topLeading)
@@ -290,8 +289,8 @@ private struct AgentWorkspaceSheet: View {
                     .frame(width: 34, height: 34)
                     .background(.secondary.opacity(0.10), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.subheadline.weight(.semibold))
-                    Text(subtitle)
+                    Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
+                    Text(LocalizedStringKey(subtitle))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -349,7 +348,35 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
     }
 
     var id: String { rawValue }
-    var title: String { rawValue == "webResearch" ? "Web research" : rawValue == "localEmbeddings" ? "Local embeddings" : rawValue == "multiAgent" ? "Multi-agent" : rawValue == "agentPolicies" ? "Agent policies" : rawValue == "skillMarketplace" ? "Skill marketplace" : rawValue == "privacyCenter" ? "Privacy center" : rawValue == "encryptedBackup" ? "Encrypted backup" : rawValue == "developerAPI" ? "Developer API" : rawValue.capitalized }
+    var title: String {
+        switch self {
+        case .voice: "Voice"
+        case .vision: "Vision"
+        case .webResearch: "Web research"
+        case .longContext: "Long context"
+        case .rag: "RAG"
+        case .localEmbeddings: "Local embeddings"
+        case .automations: "Automations"
+        case .tools: "Tools"
+        case .multiAgent: "Multi-agent"
+        case .plans: "Plans"
+        case .approvals: "Approvals"
+        case .agentPolicies: "Agent policies"
+        case .skillMarketplace: "Skill marketplace"
+        case .files: "Files"
+        case .calendar: "Calendar"
+        case .notifications: "Notifications"
+        case .email: "Email"
+        case .webActions: "Web actions"
+        case .home: "Home"
+        case .sync: "Sync"
+        case .privacyCenter: "Privacy center"
+        case .encryptedBackup: "Encrypted backup"
+        case .export: "Export"
+        case .developerAPI: "Developer API"
+        case .extensions: "Extensions"
+        }
+    }
     var subtitle: String {
         switch self {
         case .voice: "Talk naturally"; case .vision: "Understand images"; case .webResearch: "Search and synthesize"
@@ -404,6 +431,7 @@ private enum RoadmapFeature: String, CaseIterable, Identifiable {
 private struct RoadmapFeatureScreen: View {
     let feature: RoadmapFeature
     @ObservedObject var session: KernelSession
+    @AppStorage("app.language") private var appLanguage = "vi"
     @AppStorage("privacy.localOnly") private var localOnly = false
     @AppStorage("privacy.persistChat") private var persistChat = true
     @State private var exportPayload = ""
@@ -416,22 +444,22 @@ private struct RoadmapFeatureScreen: View {
     @State private var ragResults: [String] = []
 
     var body: some View {
-        ScreenScaffold(title: feature.title, systemImage: feature.symbol) {
+        ScreenScaffold(title: String(localized: String.LocalizationValue(feature.title), locale: Locale(identifier: appLanguage)), systemImage: feature.symbol) {
             GlassPanel {
                 HStack(spacing: 10) {
                     Image(systemName: feature.state == .ready ? "checkmark.circle.fill" : "arrow.triangle.2.circlepath")
                         .foregroundStyle(feature.stateColor)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(feature.stateTitle)
+                        Text(LocalizedStringKey(feature.stateTitle))
                             .font(.headline)
-                        Text(feature.state == .ready ? "Executable UI surface" : "Adapter boundary")
+                        Text(LocalizedStringKey(feature.state == .ready ? "Executable UI surface" : "Adapter boundary"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
                 }
-                Text(feature.subtitle).font(.subheadline).foregroundStyle(.secondary)
-                Text(feature.detailText)
+                Text(LocalizedStringKey(feature.subtitle)).font(.subheadline).foregroundStyle(.secondary)
+                Text(LocalizedStringKey(feature.detailText))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

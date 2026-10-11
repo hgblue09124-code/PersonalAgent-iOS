@@ -235,7 +235,7 @@ struct AgentsScreen: View {
     }
 
     private func scopeBadge(_ title: String, symbol: String, tint: Color) -> some View {
-        Label(title, systemImage: symbol)
+        Label(LocalizedStringKey(title), systemImage: symbol)
             .font(.caption2.weight(.semibold))
             .foregroundStyle(tint)
             .padding(.horizontal, 9)

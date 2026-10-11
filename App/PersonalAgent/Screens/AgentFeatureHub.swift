@@ -590,9 +590,9 @@ private struct HubHeading: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.title3.weight(.bold))
-            Text(detail)
+            Text(LocalizedStringKey(detail))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -610,7 +610,7 @@ private struct HealthMetric: View {
             Image(systemName: symbol)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(tint)
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(.secondary)
             Text(value)
@@ -646,7 +646,7 @@ private struct HubAction: View {
 
     var body: some View {
         Button(action: action) {
-            Label(title, systemImage: symbol)
+            Label(LocalizedStringKey(title), systemImage: symbol)
                 .font(.subheadline.weight(.semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 11)
@@ -665,9 +665,9 @@ private struct HubLink: View {
             HubIcon(symbol: symbol, tint: AgentDesign.accent)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.subheadline.weight(.semibold))
-                Text(detail)
+                Text(LocalizedStringKey(detail))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -697,7 +697,7 @@ private struct CapabilityRow: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.headline)
                     Spacer(minLength: 8)
                     Text(value)
@@ -706,7 +706,7 @@ private struct CapabilityRow: View {
                         .lineLimit(1)
                 }
 
-                Text(detail)
+                Text(LocalizedStringKey(detail))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
@@ -732,12 +732,12 @@ private struct HubMetricCardContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HubIcon(symbol: symbol, tint: tint)
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.subheadline.weight(.semibold))
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(value)
                     .font(.title3.bold())
-                Text(detail)
+                Text(LocalizedStringKey(detail))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -781,9 +781,9 @@ private struct EmptyState: View {
             Image(systemName: symbol)
                 .font(.title2)
                 .foregroundStyle(AgentDesign.accent)
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.headline)
-            Text(detail)
+            Text(LocalizedStringKey(detail))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -884,9 +884,9 @@ private struct ChainStep: View {
                 .foregroundStyle(AgentDesign.accent)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.subheadline.weight(.semibold))
-                Text(detail)
+                Text(LocalizedStringKey(detail))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -906,9 +906,9 @@ private struct Safeguard: View {
                 .foregroundStyle(.green)
                 .frame(width: 22)
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.subheadline.weight(.semibold))
-                Text(detail)
+                Text(LocalizedStringKey(detail))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -927,7 +927,7 @@ private struct LifecycleControls: View {
                 Label("Runtime lifecycle", systemImage: "bolt.fill")
                     .font(.headline)
                 Spacer()
-                Text(session.state.lifecycle.rawValue.capitalized)
+                Text(LocalizedStringKey(session.state.lifecycle.rawValue.capitalized))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
