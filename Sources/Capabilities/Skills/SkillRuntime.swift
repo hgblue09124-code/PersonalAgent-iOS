@@ -1,5 +1,6 @@
 import Foundation
 import PAKernel
+import PAModules
 
 public protocol SkillExecutor: Sendable {
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String
@@ -11,6 +12,7 @@ public actor SkillExecutorRegistry: Sendable {
 
     public init(executors: [String: any SkillExecutor] = [:]) {
         self.executors = executors
+        self.moduleRuntime = moduleRuntime
     }
 
     /// First registration wins so a later/untrusted module cannot silently replace
@@ -114,6 +116,7 @@ public struct SkillRuntime: Sendable {
     private let disabled: Set<String>
     private let store: (any SkillStore)?
     private let executors: SkillExecutorRegistry
+    private let moduleRuntime: ModuleRuntime?
 
     public static func chatInputText(from goalStatement: String) -> String {
         // An explicit ": " separates the instruction from its payload.
@@ -141,7 +144,8 @@ public struct SkillRuntime: Sendable {
         modules: [String: ModuleHandler] = [:],
         disabled: Set<String> = [],
         store: (any SkillStore)? = nil,
-        executors: SkillExecutorRegistry = SkillExecutorRegistry()
+        executors: SkillExecutorRegistry = SkillExecutorRegistry(),
+        moduleRuntime: ModuleRuntime? = nil
     ) {
         self.skills = skills.reduce(into: [:]) { result, skill in
             // Duplicate identities must not trap runtime initialization; first definition wins.
@@ -354,12 +358,7 @@ public struct SkillRuntime: Sendable {
             throw SkillExecutionError.policyDenied(decision.reason)
         }
 
-        let executor: any SkillExecutor
-        if let registered = await executors.executor(for: id.rawValue) {
-            executor = registered
-        } else if id == Self.normalizationManifest.id {
-            executor = TextNormalizeSkillExecutor()
-        } else {
+        guard let executor = await resolveExecutor(for: manifest) else {
             throw SkillExecutionError.unknownSkill(id)
         }
         // Cancellation may arrive while policy or executor lookup is suspended.
@@ -392,20 +391,58 @@ public struct SkillRuntime: Sendable {
 
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
         guard !disabled.contains(id.rawValue) else { return false }
+        let manifest = try await manifestForVerification(id: id)
+        guard let executor = await resolveExecutor(for: manifest) else { return false }
+        return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+    }
 
-        if let executor = await executors.executor(for: id.rawValue) {
-            // Never substitute another Skill's manifest during verification.
-            let manifest = try await manifestForVerification(id: id)
-            return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+    private func resolveExecutor(for manifest: SkillManifest) async -> (any SkillExecutor)? {
+        if let registered = await executors.executor(for: manifest.id.rawValue) {
+            return registered
         }
-
-        if id == Self.normalizationManifest.id {
-            return try await TextNormalizeSkillExecutor().verify(
-                manifest: Self.normalizationManifest,
-                outputJSON: outputJSON
-            )
+        if manifest.id == Self.normalizationManifest.id {
+            return TextNormalizeSkillExecutor()
         }
+        if let moduleID = manifest.metadata["moduleID"],
+           !moduleID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           let moduleRuntime {
+            return ModuleBackedSkillExecutor(moduleRuntime: moduleRuntime, moduleID: ModuleID(rawValue: moduleID))
+        }
+        return nil
+    }
+}
 
-        return false
+private struct ModuleBackedSkillExecutor: SkillExecutor {
+    let moduleRuntime: ModuleRuntime
+    let moduleID: ModuleID
+
+    func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+        guard let data = inputJSON.data(using: .utf8),
+              let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw SkillExecutionError.malformedSkill
+        }
+        var fields: [String: String] = [:]
+        for (key, value) in object {
+            if let string = value as? String {
+                fields[key] = string
+            } else {
+                let encoded = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys, .fragmentsAllowed])
+                fields[key] = String(decoding: encoded, as: UTF8.self)
+            }
+        }
+        let result = try await moduleRuntime.execute(
+            ModuleInvocation(moduleID: moduleID, input: ModulePayload(schema: manifest.inputSchema, fields: fields))
+        )
+        let encoded = try JSONSerialization.data(withJSONObject: result.output.fields, options: [.sortedKeys])
+        return String(decoding: encoded, as: UTF8.self)
+    }
+
+    func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+        guard !manifest.outputSchema.identifier.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let data = outputJSON.data(using: .utf8),
+              (try? JSONSerialization.jsonObject(with: data)) is [String: String] else {
+            return false
+        }
+        return true
     }
 }
