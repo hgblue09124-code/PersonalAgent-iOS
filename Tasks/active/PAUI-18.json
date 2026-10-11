@@ -1,0 +1,30 @@
+{
+  "id": "PAUI-18",
+  "title": "Localize provider selection and diagnostics guidance",
+  "status": "ready",
+  "context": "ProvidersScreen renders model-selection guidance and troubleshooting diagnostics using LocalizedStringKey, but many Vietnamese keys lack English catalog values, so English mode still displays Vietnamese-only guidance.",
+  "goal": "Add English and Vietnamese localization catalog entries for provider selection guidance and common connection/chat diagnostics.",
+  "allowed_paths": [
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-18.json"
+  ],
+  "forbidden_changes": [
+    "Do not change provider selection, network requests, credential handling, or runtime behavior.",
+    "Do not weaken guidance against logging secrets.",
+    "Do not change existing Vietnamese wording."
+  ],
+  "acceptance_criteria": [
+    "Provider guidance and diagnostic headings/details have entries in both catalogs.",
+    "English values are natural English; Vietnamese values preserve the current wording.",
+    "No duplicate localization keys are introduced."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static duplicate-key scan for both localization catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if localization lookup or the Apple build regresses."
+}
