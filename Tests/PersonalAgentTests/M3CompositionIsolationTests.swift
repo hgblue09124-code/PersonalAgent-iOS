@@ -32,7 +32,7 @@ struct M3CompositionIsolationTests {
 
     @Test func skillComposesEcho() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         try await catalog.register(EchoSkillModule(runtime: runtime))
         let ok = try await runtime.execute(
             ModuleInvocation(
@@ -45,7 +45,7 @@ struct M3CompositionIsolationTests {
 
     @Test func skillFailurePropagates() async throws {
         let catalog = try ModuleCatalog(modules: [FailingEchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         try await catalog.register(EchoSkillModule(runtime: runtime, childID: DeterministicModuleIDs.failEcho))
         do {
             _ = try await runtime.execute(
@@ -66,7 +66,7 @@ struct M3CompositionIsolationTests {
 
     @Test func concurrentExecutionDoesNotCorruptCatalog() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule()])
-        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
+        let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute], policy: AllowModuleRuntimePolicy())
         async let a = runtime.execute(
             ModuleInvocation(
                 moduleID: DeterministicModuleIDs.echo,
@@ -183,4 +183,8 @@ struct M3CompositionIsolationTests {
             #expect(!text.contains("ServiceLocator"))
         }
     }
+}
+
+private struct AllowModuleRuntimePolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
 }
