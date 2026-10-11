@@ -63,22 +63,29 @@ public actor ModuleRuntime: ModuleExecuting {
             ])
             throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
         }
-        if let policy {
-            let decision = await policy.evaluate(
-                ActionIntent(
-                    capabilities: contract.capabilities,
-                    summary: "Execute Module \\(contract.id.rawValue)"
-                )
+        guard let policy else {
+            // A missing policy is not an implicit grant. Older composition roots
+            // must inject an explicit evaluator before module code can run.
+            await emit(kind: .moduleFailed, payload: [
+                "moduleID": contract.id.rawValue,
+                "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
+            ])
+            throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
+        }
+        let decision = await policy.evaluate(
+            ActionIntent(
+                capabilities: contract.capabilities,
+                summary: "Execute Module \\(contract.id.rawValue)"
             )
-            // ModuleRuntime has no approval presenter; approval-required work must
-            // fail closed rather than treating a Settings toggle as consent.
-            guard decision.allowed && !decision.requiresApproval else {
-                await emit(kind: .moduleFailed, payload: [
-                    "moduleID": contract.id.rawValue,
-                    "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
-                ])
-                throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
-            }
+        )
+        // ModuleRuntime has no approval presenter; approval-required work must
+        // fail closed rather than treating a Settings toggle as consent.
+        guard decision.allowed && !decision.requiresApproval else {
+            await emit(kind: .moduleFailed, payload: [
+                "moduleID": contract.id.rawValue,
+                "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
+            ])
+            throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
         }
         try validateInput(invocation.input, against: contract)
 

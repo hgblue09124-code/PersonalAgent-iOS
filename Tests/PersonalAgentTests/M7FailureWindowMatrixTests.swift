@@ -28,11 +28,10 @@ struct M7FailureWindowMatrixTests {
             outputSummary: "Success"
         )
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: CompletedResolver(receipt: receipt),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: CompletedResolver(receipt: receipt),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Verified execution test")
         try await composition.runtime.submit(goal: goal)
@@ -71,11 +70,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = EchoTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .nonIdempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: FailingResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: FailingResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Failed verification test")
         try await composition.runtime.submit(goal: goal)
@@ -114,11 +112,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = EchoTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: UnknownResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: UnknownResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Unknown verification test")
         try await composition.runtime.submit(goal: goal)
@@ -151,7 +148,7 @@ struct M7FailureWindowMatrixTests {
     func testExecutorCompletedVerificationUnavailable() async throws {
         let tool = EchoTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .nonIdempotent, supportsEvidenceResolution: false)
-        let composition = try await M7CompositionRoot(targetCapabilities: [cap], tools: [tool])
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(), targetCapabilities: [cap], tools: [tool])
 
         let goal = Goal(statement: "Unavailable verification test")
         try await composition.runtime.submit(goal: goal)
@@ -199,7 +196,7 @@ struct M7FailureWindowMatrixTests {
 
         let tool = ThrowingTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: false)
-        let composition = try await M7CompositionRoot(targetCapabilities: [cap], tools: [tool])
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(), targetCapabilities: [cap], tools: [tool])
 
         let goal = Goal(statement: "Throwing test")
         try await composition.runtime.submit(goal: goal)
@@ -230,7 +227,7 @@ struct M7FailureWindowMatrixTests {
     // 7. PREPARED + crash before mutation -> NOT_APPLIED
     @Test("Failure Window 7: PREPARED journal entry + crash before mutation -> NOT_APPLIED / aborted")
     func testPreparedCrashBeforeMutation() async throws {
-        let composition = try await M7CompositionRoot()
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy())
         let goal = Goal(statement: "Crash before mutation")
         try await composition.runtime.submit(goal: goal)
 
@@ -258,7 +255,7 @@ struct M7FailureWindowMatrixTests {
     // 8. PREPARED + mutation happened + journal missing -> APPLIED_BUT_NOT_JOURNALED
     @Test("Failure Window 8: PREPARED journal entry + mutation happened -> APPLIED_BUT_NOT_JOURNALED / finalized")
     func testPreparedMutationHappened() async throws {
-        let composition = try await M7CompositionRoot()
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy())
         let goal = Goal(statement: "Mutation happened")
         try await composition.runtime.submit(goal: goal)
 
@@ -341,10 +338,9 @@ struct M7FailureWindowMatrixTests {
         let capA = ExecutionTargetCapability(toolID: toolA, idempotencyClass: .nonIdempotent, supportsEvidenceResolution: false)
         let capB = ExecutionTargetCapability(toolID: toolB, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
 
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: GlobalResolver(),
-            targetCapabilities: [capA, capB]
-        )
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: GlobalResolver(),
+            targetCapabilities: [capA, capB])
 
         let attemptA = ExecutionAttempt(runID: RunID(), actionID: ActionID(), toolID: toolA, idempotencyKey: "keyA", status: .startedUnknown)
         let attemptB = ExecutionAttempt(runID: RunID(), actionID: ActionID(), toolID: toolB, idempotencyKey: "keyB", status: .startedUnknown)
@@ -405,11 +401,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = EchoTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: ContradictionResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: ContradictionResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Contradiction test goal")
         try await composition.runtime.submit(goal: goal)
@@ -472,11 +467,10 @@ struct M7FailureWindowMatrixTests {
             outputSummary: "Verified execution"
         )
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: CompletedResolver(receipt: receipt),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: CompletedResolver(receipt: receipt),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Throw with completed evidence goal")
         try await composition.runtime.submit(goal: goal)
@@ -521,7 +515,7 @@ struct M7FailureWindowMatrixTests {
         }
 
         let tool = EchoTool()
-        let composition = try await M7CompositionRoot(targetCapabilities: [], tools: [tool])
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(), targetCapabilities: [], tools: [tool])
 
         let goal = Goal(statement: "Missing capability goal")
         try await composition.runtime.submit(goal: goal)
@@ -567,7 +561,7 @@ struct M7FailureWindowMatrixTests {
 
         let tool = EchoTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(targetCapabilities: [cap], tools: [tool])
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(), targetCapabilities: [cap], tools: [tool])
 
         let goal = Goal(statement: "Lease test goal")
         try await composition.runtime.submit(goal: goal)
@@ -638,10 +632,9 @@ struct M7FailureWindowMatrixTests {
             idempotencyClass: .idempotent,
             supportsEvidenceResolution: false
         )
-        let composition = try await M7CompositionRoot(
-            targetCapabilities: [cap],
-            tools: [tool]
-        )
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+targetCapabilities: [cap],
+            tools: [tool])
 
         let goal = Goal(statement: "Receipt only test goal")
         try await composition.runtime.submit(goal: goal)
@@ -696,11 +689,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = FailingTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: NotStartedResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: NotStartedResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Test A Goal")
         try await composition.runtime.submit(goal: goal)
@@ -755,11 +747,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = FailingTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: UnknownResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: UnknownResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Test B Goal")
         try await composition.runtime.submit(goal: goal)
@@ -814,11 +805,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = FailingTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .idempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: UnavailableResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: UnavailableResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Test C Goal")
         try await composition.runtime.submit(goal: goal)
@@ -873,11 +863,10 @@ struct M7FailureWindowMatrixTests {
 
         let tool = FailingTool()
         let cap = ExecutionTargetCapability(toolID: tool.manifest.id, idempotencyClass: .nonIdempotent, supportsEvidenceResolution: true)
-        let composition = try await M7CompositionRoot(
-            evidenceResolver: UnknownResolver(),
+        let composition = try await M7CompositionRoot(policy: AllowModuleRuntimePolicy(),
+evidenceResolver: UnknownResolver(),
             targetCapabilities: [cap],
-            tools: [tool]
-        )
+            tools: [tool])
 
         let goal = Goal(statement: "Test D Goal")
         try await composition.runtime.submit(goal: goal)
@@ -905,4 +894,9 @@ struct M7FailureWindowMatrixTests {
         #expect(attempt.status == .unresolved)
         #expect(attempt.status != .failed)
     }
+}
+
+
+private struct AllowModuleRuntimePolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
 }

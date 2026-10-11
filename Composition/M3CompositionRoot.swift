@@ -27,7 +27,8 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
         identity: AgentIdentity = AgentIdentity(displayName: "Personal"),
         logger: any AgentLogger = NullLogger(),
         provider: any LLMProvider = DeterministicFakeProvider(),
-        additionalModules: [any Module] = []
+        additionalModules: [any Module] = [],
+        policy: (any PolicyEvaluating)? = nil
     ) async throws {
         let log = InMemoryEventLog()
         self.milestone = .m3
@@ -56,6 +57,7 @@ public struct M3CompositionRoot: CompositionRoot, Sendable {
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
+            policy: policy,
             eventLog: log,
             logger: logger
         )

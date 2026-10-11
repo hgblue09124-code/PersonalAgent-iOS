@@ -1,0 +1,41 @@
+{
+  "id": "PASEC-3",
+  "title": "Fail closed when ModuleRuntime has no policy",
+  "status": "in_progress",
+  "goal": "Prevent ModuleRuntime from executing modules when no explicit policy evaluator has been injected, while preserving intentional test behavior through explicit test policies.",
+  "context": "ModuleRuntime currently treats its optional policy as a skip switch: if nil, it validates only grantedCapabilities and executes module code. M3/M4 composition roots and several direct test constructors omit policy. M6/M7 now forward injected policy, and M8 already supplies resolvedPolicy; the remaining legacy paths need explicit wiring and regression coverage.",
+  "allowed_paths": [
+    "Tasks/active/PASEC-3.json",
+    "Sources/Capabilities/Modules/ModuleRuntime.swift",
+    "Composition/M3CompositionRoot.swift",
+    "Composition/M4CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M3RuntimeTests.swift",
+    "Tests/PersonalAgentTests/M3SemanticsTests.swift",
+    "Tests/PersonalAgentTests/M3CompositionIsolationTests.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift",
+    "Tests/PersonalAgentTests/M7FailureWindowMatrixTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not grant permissions implicitly or change DefaultPolicyEvaluator semantics.",
+    "Do not change UI, provider, storage, or Xcode project files.",
+    "Do not treat approval-required decisions as approved."
+  ],
+  "acceptance_criteria": [
+    "A direct ModuleRuntime call with no policy is rejected before module code executes.",
+    "M3 and M4 roots expose optional policy injection and pass it to ModuleRuntime; omission remains fail-closed.",
+    "Existing tests that intentionally exercise module execution inject an explicit test policy.",
+    "Denied policy, capability-grant checks, cancellation, and output validation retain regression coverage.",
+    "M6/M7 integration tests inject explicit policies where they expect module execution; failure-window tests continue to exercise their intended conditions."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-3.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-3.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #353"
+  ],
+  "recovery": "If required CI exposes unhandled callers, keep the PR open and migrate those callers in this same logical task; do not merge while policy-free execution remains possible."
+}
