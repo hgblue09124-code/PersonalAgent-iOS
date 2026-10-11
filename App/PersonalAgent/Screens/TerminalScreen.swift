@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PAWorkspace
 import PATerminal
 
@@ -17,6 +18,7 @@ struct TerminalScreen: View {
     @State private var command = ""
     @State private var isExecuting = false
     @State private var transcript: [TerminalLine] = []
+    @State private var transcriptCopied = false
     private let maximumTranscriptLines = 500
     private let maximumTranscriptBytes = 256 * 1024
     @State private var status = "Preparing sandbox…"
@@ -34,11 +36,22 @@ struct TerminalScreen: View {
                 }
                 Spacer()
                 Button {
+                    UIPasteboard.general.string = transcript.map(\.text).joined(separator: "\n")
+                    transcriptCopied = true
+                } label: {
+                    Image(systemName: transcriptCopied ? "checkmark" : "doc.on.doc").frame(width: 36, height: 36)
+                }
+                .buttonStyle(.bordered)
+                .disabled(transcript.isEmpty)
+                .accessibilityLabel("Copy terminal output")
+                Button {
                     transcript.removeAll()
+                    transcriptCopied = false
                 } label: {
                     Image(systemName: "trash").frame(width: 36, height: 36)
                 }
                 .buttonStyle(.bordered)
+                .disabled(transcript.isEmpty || isExecuting)
                 .accessibilityLabel("Clear terminal output")
             }
             .padding()
@@ -75,12 +88,15 @@ struct TerminalScreen: View {
                     .focused($commandFocused)
                     .submitLabel(.send)
                     .onSubmit { Task { await executeCommand() } }
-                    .disabled(terminal == nil)
+                    .disabled(terminal == nil || isExecuting)
                 Button {
                     Task { await executeCommand() }
                 } label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.title2)
+                    if isExecuting {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.up.circle.fill").font(.title2)
+                    }
                 }
                 .disabled(terminal == nil || isExecuting || command.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .accessibilityLabel("Run terminal command")
