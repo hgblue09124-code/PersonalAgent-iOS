@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-7",
+  "title": "Improve terminal transcript and busy controls",
+  "status": "ready",
+  "context": "TerminalScreen displays a bounded transcript but only clears it; while a command is running the input remains editable and the submit control does not show progress.",
+  "goal": "Let users copy the visible terminal transcript in one action and make command execution state explicit while preventing input and clear actions during execution.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/TerminalScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-7.json"
+  ],
+  "forbidden_changes": [
+    "Do not change terminal command parsing, authorization, or runtime execution semantics.",
+    "Do not persist or transmit terminal transcript content.",
+    "Do not remove transcript line or byte bounds."
+  ],
+  "acceptance_criteria": [
+    "Copy terminal output copies the currently visible transcript in order.",
+    "Copy action is disabled for an empty transcript and has an accessible localized label.",
+    "Input is disabled during command execution and a progress indicator replaces the submit icon.",
+    "Clear is disabled while executing and the existing transcript limits remain unchanged."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Review terminal controls and transcript-copy behavior"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if the Apple build fails or terminal authorization/execution behavior changes."
+}
