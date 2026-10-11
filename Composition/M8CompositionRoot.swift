@@ -196,15 +196,18 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
     private let fallbackProvider: any LLMProvider
     private let coordinator: LocalModelRuntimeCoordinator
     private let settings: UserDefaults
+    private let policy: (any PolicyEvaluating)?
 
     public init(
         fallbackProvider: any LLMProvider,
         coordinator: LocalModelRuntimeCoordinator,
-        settings: UserDefaults = .standard
+        settings: UserDefaults = .standard,
+        policy: (any PolicyEvaluating)? = nil
     ) {
         self.fallbackProvider = fallbackProvider
         self.coordinator = coordinator
         self.settings = settings
+        self.policy = policy
     }
 
     private enum ActiveResolution {
@@ -218,6 +221,14 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         let remoteEnabled = settings.bool(forKey: "provider.remote.enabled")
             && !settings.bool(forKey: "privacy.localOnly")
         if executionMode == "remote" && remoteEnabled {
+            if let policy {
+                let decision = await policy.evaluate(
+                    ActionIntent(capabilities: .network, summary: "Remote provider inference")
+                )
+                guard decision.allowed && !decision.requiresApproval else {
+                    throw ProviderRuntimeError.authorizationFailure
+                }
+            }
             return .noActiveModel
         }
 
@@ -559,7 +570,8 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         )
         let dynamicProvider = DynamicActiveProvider(
             fallbackProvider: fallbackProvider,
-            coordinator: coordinator
+            coordinator: coordinator,
+            policy: resolvedPolicy
         )
         self.catalog = ProviderCatalog(providers: [dynamicProvider])
 
