@@ -378,4 +378,4 @@
 "Clear terminal output" = "Clear terminal output";
 "help, status, agent run…, skills list…" = "help, status, agent run…, skills list…";
 "Run terminal command" = "Run terminal command";
-"Terminal" = "Terminal";
+"Terminal" = "Terminal";\n\n/* Chat error recovery */\n"Agent could not complete the request" = "Agent could not complete the request";\n"Check provider and model settings" = "Check provider and model settings";\n
