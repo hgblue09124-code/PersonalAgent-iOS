@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-6",
+  "title": "Make latest task result and error copyable",
+  "status": "ready",
+  "context": "TasksScreen shows the latest execution result or error as selectable text, but provides no direct copy action for sharing or troubleshooting.",
+  "goal": "Let users copy the exact latest execution result or error with one tap without changing execution state or implying verification.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/TasksScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-6.json"
+  ],
+  "forbidden_changes": [
+    "Do not change KernelSession or runtime execution semantics.",
+    "Do not add persistence, telemetry, or network calls.",
+    "Do not claim copied content proves task completion or verification."
+  ],
+  "acceptance_criteria": [
+    "A visible copy action copies the exact latest result when a result is displayed.",
+    "A visible copy action copies the exact original error when an error is displayed.",
+    "Copy action labels are localized in English and Vietnamese.",
+    "The change remains limited to the Tasks screen and its localization strings."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Review the diff for exact result/error copy behavior"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if the Apple build fails or copy actions alter runtime behavior."
+}

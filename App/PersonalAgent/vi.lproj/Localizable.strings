@@ -536,3 +536,6 @@
 "Kiểm tra input, quyền và điều kiện trước khi chạy." = "Kiểm tra đầu vào, quyền và điều kiện trước khi chạy.";
 "Runtime chạy capability; UI không tự giả lập kết quả." = "Runtime thực thi năng lực; giao diện không tự giả lập kết quả.";
 "Đối chiếu output với điều kiện hoàn thành trước khi báo PASS." = "Đối chiếu đầu ra với điều kiện hoàn thành trước khi báo ĐẠT.";
+
+"Copy result" = "Sao chép kết quả";
+"Copy error" = "Sao chép lỗi";
