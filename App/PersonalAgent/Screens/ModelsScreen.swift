@@ -33,7 +33,13 @@ struct ModelsScreen: View {
                     .buttonStyle(.borderedProminent)
                     .disabled(session.activeModelDescriptor == nil || isTransitioning)
                 }
-                StatusRow(title: "State", value: lifecycleTitle)
+                HStack(alignment: .firstTextBaseline, spacing: 14) {
+                    Text("State").foregroundStyle(.secondary)
+                    Spacer(minLength: 12)
+                    lifecycleValue.fontWeight(.semibold)
+                }
+                .font(.subheadline)
+                .padding(.vertical, 3)
                 if isTransitioning {
                     ProgressView()
                         .controlSize(.small)
@@ -199,13 +205,25 @@ struct ModelsScreen: View {
         }
     }
 
-    private var lifecycleTitle: String {
+    @ViewBuilder
+    private var lifecycleValue: some View {
         switch session.activeEngineState {
-        case .unloaded: return "UNLOADED"
-        case .loading(let progress): return "LOADING \(Int(progress * 100))%"
-        case .loaded: return "LOADED"
-        case .unloading: return "UNLOADING"
-        case .failed(let reason): return "FAILED · \(reason)"
+        case .unloaded:
+            Text("UNLOADED")
+        case .loading(let progress):
+            HStack(spacing: 2) {
+                Text("LOADING")
+                Text(verbatim: "\(Int(progress * 100))%")
+            }
+        case .loaded:
+            Text("LOADED")
+        case .unloading:
+            Text("UNLOADING")
+        case .failed(let reason):
+            HStack(spacing: 0) {
+                Text("FAILED")
+                Text(verbatim: " · \(reason)")
+            }
         }
     }
 }

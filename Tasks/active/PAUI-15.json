@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-15",
+  "title": "Localize model guidance and lifecycle state",
+  "status": "ready",
+  "context": "ModelsScreen has useful Vietnamese model-selection guidance, but its cards lack English catalog values. Lifecycle status is assembled into a String, which bypasses localization and shows raw uppercase engine states in Vietnamese mode.",
+  "goal": "Localize model guidance and action labels, and render lifecycle state names through SwiftUI localization while preserving progress and failure details.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/ModelsScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-15.json"
+  ],
+  "forbidden_changes": [
+    "Do not change GGUF import, load/unload, inference, or engine lifecycle semantics.",
+    "Do not hide failure reasons or progress percentages.",
+    "Do not alter model storage or delete behavior."
+  ],
+  "acceptance_criteria": [
+    "Model guidance titles and details have English and Vietnamese catalog entries.",
+    "Lifecycle labels UNLOADED, LOADING, LOADED, UNLOADING and FAILED resolve through the selected language.",
+    "Dynamic loading percentage and failure reason remain visible.",
+    "No duplicate localization keys are introduced."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static duplicate-key scan for both localization catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if localization or model lifecycle UI regresses."
+}
