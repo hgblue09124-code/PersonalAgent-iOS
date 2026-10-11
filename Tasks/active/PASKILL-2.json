@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-2",
+  "title": "Validate Skill manifest against Module schemas",
+  "status": "in_progress",
+  "goal": "Reject module-backed Skill manifests whose declared input or output schema identifiers differ from the resolved Module contract.",
+  "context": "ModuleBackedSkillExecutor currently passes the manifest input schema into ModuleRuntime and verifies output JSON only as a string dictionary. It does not ensure the manifest's output schema identifier matches the registered Module's output contract, so an incompatible manifest can be reported verified.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-2.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not claim schema identifiers provide structural JSON Schema validation; this task validates contract identity only.",
+    "Do not add implicit capabilities or bypass ModuleRuntime policy.",
+    "Do not dynamically load arbitrary executor names from Skill.md metadata."
+  ],
+  "acceptance_criteria": [
+    "Module-backed execution requires a registered Module contract matching both manifest input and output schema identifiers.",
+    "Missing Module contract fails closed.",
+    "Skill verification returns false when the declared schema contract does not match the registered Module.",
+    "Regression tests cover schema mismatch while existing matching-schema Skill execution remains green."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-2.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-2.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #396"
+  ],
+  "recovery": "Revert the single task commit if existing matching-schema Skills regress; keep structural input/output schema validation tracked separately."
+}

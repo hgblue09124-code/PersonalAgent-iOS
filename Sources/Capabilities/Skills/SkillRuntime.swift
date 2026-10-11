@@ -421,6 +421,7 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     let moduleID: ModuleID
 
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+        let contract = try await matchingContract(for: manifest)
         guard let data = inputJSON.data(using: .utf8),
               let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw SkillExecutionError.malformedSkill
@@ -435,18 +436,29 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             }
         }
         let result = try await moduleRuntime.execute(
-            ModuleInvocation(moduleID: moduleID, input: ModulePayload(schema: manifest.inputSchema, fields: fields))
+            ModuleInvocation(moduleID: moduleID, input: ModulePayload(schema: contract.inputSchema, fields: fields))
         )
         let encoded = try JSONSerialization.data(withJSONObject: result.output.fields, options: [.sortedKeys])
         return String(decoding: encoded, as: UTF8.self)
     }
 
     func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
-        guard !manifest.outputSchema.identifier.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+        guard (try? await matchingContract(for: manifest)) != nil,
               let data = outputJSON.data(using: .utf8),
               (try? JSONSerialization.jsonObject(with: data)) is [String: String] else {
             return false
         }
         return true
+    }
+
+    private func matchingContract(for manifest: SkillManifest) async throws -> ModuleContract {
+        guard let contract = await moduleRuntime.contracts().first(where: { $0.id == moduleID }) else {
+            throw SkillExecutionError.missingModule(moduleID.rawValue)
+        }
+        guard contract.inputSchema.identifier == manifest.inputSchema.identifier,
+              contract.outputSchema.identifier == manifest.outputSchema.identifier else {
+            throw SkillExecutionError.malformedSkill
+        }
+        return contract
     }
 }
