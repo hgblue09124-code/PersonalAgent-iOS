@@ -1,0 +1,29 @@
+{
+  "id": "PAUI-9",
+  "title": "Close remaining Vietnamese provider-label gaps",
+  "status": "ready",
+  "context": "The localization audit found one English key missing from the Vietnamese catalog and the API Key label still uses English text, leaving provider settings visibly mixed-language when Vietnamese is selected.",
+  "goal": "Translate the remaining Provider and API Key labels into Vietnamese without changing provider configuration or runtime behavior.",
+  "allowed_paths": [
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-9.json"
+  ],
+  "forbidden_changes": [
+    "Do not change English localization values.",
+    "Do not rename localization keys used by SwiftUI.",
+    "Do not change provider execution, credentials, or settings behavior."
+  ],
+  "acceptance_criteria": [
+    "The Vietnamese catalog defines a Provider translation.",
+    "The Vietnamese API Key label reads Khóa API.",
+    "No other localization values or runtime behavior change."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Compare localization key/value diff against main"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if localization lookup or Apple build regresses."
+}
