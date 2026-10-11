@@ -150,6 +150,34 @@ struct SkillExecutorRegistryTests {
         }
     }
 
+
+    @Test("Skill Agent verifies output through the same executor instance")
+    func skillAgentRejectsUnverifiedExecutorOutput() async throws {
+        let id = SkillID(rawValue: "custom.agent-unverified")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Agent Unverified Output",
+            description: "Agent output must pass its executor verifier.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return output that fails verification.",
+            inputSchema: SchemaDocument(identifier: "in"),
+            outputSchema: SchemaDocument(identifier: "out"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(RejectingVerifierExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+        let orchestrator = SkillAgentOrchestrator(runtime: runtime)
+
+        await #expect(throws: SkillAgentOrchestratorError.verificationFailed(id)) {
+            _ = try await orchestrator.run(
+                goalStatement: id.rawValue,
+                inputJSON: #"{"value":"request"}"#,
+                policy: AllowPolicy()
+            )
+        }
+    }
+
     @Test("late executor output is rejected after cancellation")
     func lateExecutorOutputFailsAfterCancellation() async throws {
         let id = SkillID(rawValue: "custom.deferred")
