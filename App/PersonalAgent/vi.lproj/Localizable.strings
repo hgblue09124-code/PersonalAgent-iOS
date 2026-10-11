@@ -97,7 +97,8 @@
 "Use" = "Dùng";
 "Delete" = "Xóa";
 "Runtime" = "Runtime";
-"Provider state" = "Trạng thái Provider";
+"Provider state" = "Trạng thái nhà cung cấp";
+"Provider" = "Nhà cung cấp";
 "Target" = "Thiết bị";
 "UI" = "Giao diện";
 "Secrets" = "Bí mật";
@@ -357,7 +358,7 @@
 "Chat completions endpoint" = "Điểm cuối Chat Completions";
 "Model" = "Mô hình";
 "Model ID" = "ID mô hình";
-"API Key" = "API key";
+"API Key" = "Khóa API";
 "Test connection" = "Kiểm tra kết nối";
 "Enter an API key to configure remote inference." = "Nhập API key để cấu hình suy luận từ xa.";
 "API key saved securely in Keychain." = "API key đã được lưu an toàn trong Keychain.";
