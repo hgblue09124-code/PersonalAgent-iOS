@@ -1,0 +1,35 @@
+{
+  "id": "PASEC-6",
+  "title": "Verify Skill results on direct production execution path",
+  "status": "in_progress",
+  "goal": "Ensure the public M8 executeSkill API never returns executor output as success unless the configured Skill executor verifies it.",
+  "context": "SkillAgentOrchestrator already verifies after execution, but M8CompositionRoot.executeSkill previously returned SkillRuntime.execute output directly. Callers of this public direct API could receive unverified output as a successful result.",
+  "allowed_paths": [
+    "Tasks/active/PASEC-6.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not bypass or weaken policy and approval checks.",
+    "Do not treat missing executors as success.",
+    "Do not alter Agent scope selection or executor registration semantics.",
+    "Do not modify App/ or Xcode project files."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime exposes a direct execution method that only returns output after executor verification.",
+    "M8CompositionRoot.executeSkill uses the verified execution path.",
+    "A regression test proves executor output rejected by its verifier throws instead of returning success.",
+    "Existing SkillAgentOrchestrator behavior remains intact."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-6.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-6.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, Apple Native Build & Unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert this single logical task if verified execution changes existing runtime contracts or fails the full required gates."
+}

@@ -753,7 +753,7 @@ extension M8CompositionRoot {
         inputJSON: String,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> String {
-        try await skillRuntime.execute(
+        try await skillRuntime.executeVerified(
             id: id,
             inputJSON: inputJSON,
             policy: policy ?? skillPolicy

@@ -104,6 +104,7 @@ public enum SkillExecutionError: Error, Sendable, Equatable {
     case unknownSkill(SkillID)
     case policyDenied(String)
     case policyRequiresApproval(String)
+    case verificationFailed(SkillID)
 }
 
 public typealias SkillRuntimeError = SkillExecutionError
@@ -320,7 +321,30 @@ public struct SkillRuntime: Sendable {
         )
     }
 
-    public func execute(id: SkillID, inputJSON: String, policy: any PolicyEvaluating) async throws -> String {
+    public func execute(
+        id: SkillID,
+        inputJSON: String,
+        policy: any PolicyEvaluating
+    ) async throws -> String {
+        try await executeInternal(id: id, inputJSON: inputJSON, policy: policy, verifyOutput: false)
+    }
+
+    /// Execute and verify at the runtime boundary for callers that expose results directly.
+    /// The same executor instance must execute and verify the result.
+    public func executeVerified(
+        id: SkillID,
+        inputJSON: String,
+        policy: any PolicyEvaluating
+    ) async throws -> String {
+        try await executeInternal(id: id, inputJSON: inputJSON, policy: policy, verifyOutput: true)
+    }
+
+    private func executeInternal(
+        id: SkillID,
+        inputJSON: String,
+        policy: any PolicyEvaluating,
+        verifyOutput: Bool
+    ) async throws -> String {
         if disabled.contains(id.rawValue) {
             throw SkillExecutionError.disabledSkill(id.rawValue)
         }
@@ -368,6 +392,12 @@ public struct SkillRuntime: Sendable {
         // Executors may suspend without cooperating with cancellation. Never return
         // a late result as success after the caller has cancelled the Skill run.
         try Task.checkCancellation()
+        if verifyOutput {
+            guard try await executor.verify(manifest: manifest, outputJSON: output) else {
+                throw SkillExecutionError.verificationFailed(id)
+            }
+            try Task.checkCancellation()
+        }
         return output
     }
 
