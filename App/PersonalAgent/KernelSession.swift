@@ -433,15 +433,15 @@ final class KernelSession: ObservableObject {
                 tokenProvider: { token }
             )
             let result = try await client.synchronize(workspaceURL: workspace.rootURL, previewOnly: preview)
+            func describe(_ paths: [String]) -> String {
+                guard !paths.isEmpty else { return "none" }
+                let shown = paths.prefix(20).joined(separator: ", ")
+                return paths.count > 20 ? "\(shown), … (+\(paths.count - 20))" : shown
+            }
             if preview {
-                func describe(_ paths: [String]) -> String {
-                    guard !paths.isEmpty else { return "none" }
-                    let shown = paths.prefix(20).joined(separator: ", ")
-                    return paths.count > 20 ? "\(shown), … (+\(paths.count - 20))" : shown
-                }
                 return "Sync preview only · no changes applied · upload: \(describe(result.uploadedPaths)) · download: \(describe(result.downloadedPaths)) · delete: \(describe(result.deletedPaths))\n"
             }
-            return "Sync complete · \(result.commitSHA.prefix(7)) · ↑\(result.uploadedPaths.count) ↓\(result.downloadedPaths.count) −\(result.deletedPaths.count)\n"
+            return "Sync complete · \(result.commitSHA.prefix(7)) · upload \(result.uploadedPaths.count): \(describe(result.uploadedPaths)) · download \(result.downloadedPaths.count): \(describe(result.downloadedPaths)) · delete \(result.deletedPaths.count): \(describe(result.deletedPaths))\n"
         } catch GitHubRepositorySyncError.remoteConflict(let paths) {
             return "Sync conflict in: \(paths.joined(separator: ", ")). Resolve those files, then sync again.\n"
         } catch GitHubRepositorySyncError.remoteHeadChanged {
