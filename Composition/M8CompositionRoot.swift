@@ -460,6 +460,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let moduleRuntime: ModuleRuntime
     public let skillRuntime: SkillRuntime
     public let skillAgentOrchestrator: SkillAgentOrchestrator
+    public let agentTeamOrchestrator: AgentTeamOrchestrator
     public let agentStore: FileAgentStore
     public let memoryStore: any MemoryStore
     public let memoryRuntime: MemoryRuntime
@@ -599,8 +600,11 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let skillDirectoryURL = rootDirectoryURL.appendingPathComponent("Skills", isDirectory: true)
         let skillStore = FileSkillStore(directoryURL: skillDirectoryURL)
         try await skillStore.ensureDefaultSkill()
-        self.skillRuntime = SkillRuntime(store: skillStore)
-        self.skillAgentOrchestrator = SkillAgentOrchestrator(runtime: self.skillRuntime)
+        let skillRuntime = SkillRuntime(store: skillStore)
+        let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
+        self.skillRuntime = skillRuntime
+        self.skillAgentOrchestrator = skillAgentOrchestrator
+        self.agentTeamOrchestrator = AgentTeamOrchestrator(skillOrchestrator: skillAgentOrchestrator)
 
         let agentDirectoryURL = rootDirectoryURL.appendingPathComponent("Agents", isDirectory: true)
         let agentStore = FileAgentStore(directoryURL: agentDirectoryURL)
@@ -770,6 +774,35 @@ extension M8CompositionRoot {
                 policy: policy ?? DefaultPolicyEvaluator()
             )
         } catch SkillRuntimeError.noSelection {
+            return nil
+        }
+    }
+
+    /// Runs every Agent whose declared Skill can serve this goal. Each result
+    /// must pass that Agent's scope, policy, execution, and verification gates.
+    /// Returns nil when no Agent has a matching Skill so Chat can use the main runtime.
+    public func runChatTeamIfMatched(
+        goalStatement: String,
+        policy: (any PolicyEvaluating)? = nil
+    ) async throws -> AgentTeamResult? {
+        let agents = try await agentStore.discover()
+        let inputData = try JSONSerialization.data(
+            withJSONObject: ["text": goalStatement],
+            options: [.sortedKeys]
+        )
+        guard let inputJSON = String(data: inputData, encoding: .utf8) else {
+            throw KernelError.invalidStateUpdate("Unable to encode team Skill input")
+        }
+        do {
+            return try await agentTeamOrchestrator.run(
+                agents: agents,
+                goalStatement: goalStatement,
+                inputJSON: inputJSON,
+                policy: policy ?? DefaultPolicyEvaluator()
+            )
+        } catch AgentTeamOrchestratorError.noAgents {
+            return nil
+        } catch AgentTeamOrchestratorError.noMatchingSkills {
             return nil
         }
     }
