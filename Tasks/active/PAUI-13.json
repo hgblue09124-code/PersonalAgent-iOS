@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-13",
+  "title": "Localize task lifecycle and verification checklist",
+  "status": "ready",
+  "context": "TasksScreen displays several Vietnamese-only lifecycle and verification checklist strings even when English is selected, and its dynamic task-state title is passed as String rather than LocalizedStringKey.",
+  "goal": "Resolve task state, lifecycle steps, and reliability checklist labels through the selected app language.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/TasksScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-13.json"
+  ],
+  "forbidden_changes": [
+    "Do not change task execution, cancellation, or result verification behavior.",
+    "Do not claim a durable job queue or audit log exists.",
+    "Do not alter runtime state or permissions."
+  ],
+  "acceptance_criteria": [
+    "Dynamic task-state title is rendered through LocalizedStringKey.",
+    "Task lifecycle and reliability checklist strings have English and Vietnamese catalog entries.",
+    "Vietnamese values preserve the current on-screen wording.",
+    "No duplicate localization keys are introduced."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static duplicate-key scan for both localization catalogs"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if localization lookup or Apple build regresses."
+}
