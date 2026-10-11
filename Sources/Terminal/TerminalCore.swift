@@ -107,7 +107,7 @@ public struct CommandRegistry: Sendable {
             default: return [.read]
             }
         case "skill", "skills": return command.arguments.first == "run" ? [.execute] : [.read]
-        case "sync": return command.arguments.first == "now" ? [.network, .write] : (command.arguments.first == "preview" ? [.network] : [.read])
+        case "sync": return command.arguments.first == "now" ? [.network, .write, .destructive] : (command.arguments.first == "preview" ? [.network] : [.read])
         default: return [.execute]
         }
     }
