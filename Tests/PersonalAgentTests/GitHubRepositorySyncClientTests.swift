@@ -57,6 +57,52 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
         XCTAssertTrue(requests.isEmpty)
     }
 
+    func testRemoteSecretBlocksSyncBeforeAnyWorkspaceMutation() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = base.appendingPathComponent("workspace")
+        let stateURL = base.appendingPathComponent("state/state.json")
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+
+        let safeBytes = Data("safe remote skill content\n".utf8)
+        let secretToken = "sk-" + String(repeating: "A", count: 20)
+        let secretBytes = Data("{\"api_key\":\"\(secretToken)\"}\n".utf8)
+        let safeSHA = GitBlobSHA1.hash(safeBytes)
+        let secretSHA = GitBlobSHA1.hash(secretBytes)
+        let remoteCommit = String(repeating: "b", count: 40)
+        let treeSHA = String(repeating: "c", count: 40)
+        let transport = ScriptedGitHubTransport(responses: [
+            Self.response(["object": ["sha": remoteCommit]]),
+            Self.response(["tree": ["sha": treeSHA]]),
+            Self.response(["sha": treeSHA, "truncated": false, "tree": [
+                ["path": "skills/a-safe.md", "mode": "100644", "type": "blob", "sha": safeSHA, "size": safeBytes.count],
+                ["path": "skills/z-notes.md", "mode": "100644", "type": "blob", "sha": secretSHA, "size": secretBytes.count]
+            ]]),
+            Self.response(["sha": safeSHA, "encoding": "base64", "content": safeBytes.base64EncodedString()]),
+            Self.response(["sha": secretSHA, "encoding": "base64", "content": secretBytes.base64EncodedString()])
+        ])
+        let location = try GitHubRepositoryLocation(owner: "example", repository: "agentos")
+        let client = try GitHubRepositorySyncClient(
+            location: location,
+            stateURL: stateURL,
+            transport: transport,
+            tokenProvider: { "test-token" }
+        )
+
+        do {
+            _ = try await client.synchronize(workspaceURL: workspace)
+            XCTFail("Remote secret-like content must fail closed before workspace mutation")
+        } catch let error as GitHubRepositorySyncError {
+            XCTAssertEqual(error, .potentialSecret("skills/z-notes.md"))
+        }
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: workspace.appendingPathComponent("skills/a-safe.md").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: workspace.appendingPathComponent("skills/z-notes.md").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: stateURL.path))
+        let requests = await transport.requests
+        XCTAssertEqual(requests.count, 5)
+    }
+
     func testMissingCredentialFailsBeforeNetworkAccess() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }

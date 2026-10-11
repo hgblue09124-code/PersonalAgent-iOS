@@ -261,6 +261,16 @@ public actor GitHubRepositorySyncClient {
             }
         }
 
+        // Validate every inbound blob before mutating the workspace or advancing the remote ref.
+        // This prevents a later secret-bearing file from leaving an earlier safe file partially applied.
+        let allFinalPaths = Set(localFiles.keys).union(finalRemoteFiles.keys)
+        var downloadedData: [String: Data] = [:]
+        for path in allFinalPaths.sorted() {
+            guard let remote = finalRemoteFiles[path],
+                  localFiles[path]?.sha != remote.sha else { continue }
+            downloadedData[path] = try await fetchBlob(remote.sha, path: path, token: token)
+        }
+
         var finalCommitSHA = remoteCommitSHA
         if !treeChanges.isEmpty {
             let newTree: GitHubSHAResponse = try await post(
@@ -290,7 +300,6 @@ public actor GitHubRepositorySyncClient {
         }
 
         var downloadedPaths: [String] = []
-        let allFinalPaths = Set(localFiles.keys).union(finalRemoteFiles.keys)
         for path in allFinalPaths.sorted() {
             let local = localFiles[path]
             let remote = finalRemoteFiles[path]
@@ -299,8 +308,10 @@ public actor GitHubRepositorySyncClient {
             guard Self.contains(workspace, child: destination) else {
                 throw GitHubRepositorySyncError.unsafePath(path)
             }
-            if let remote {
-                let data = try await fetchBlob(remote.sha, path: path, token: token)
+            if remote != nil {
+                guard let data = downloadedData[path] else {
+                    throw GitHubRepositorySyncError.invalidResponse
+                }
                 try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try data.write(to: destination, options: .atomic)
                 downloadedPaths.append(path)
