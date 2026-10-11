@@ -31,9 +31,14 @@ struct ModelsScreen: View {
                         Text(session.activeEngineState == .loaded ? "Unload" : "Load")
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(session.activeModelDescriptor == nil)
+                    .disabled(session.activeModelDescriptor == nil || isTransitioning)
                 }
                 StatusRow(title: "State", value: lifecycleTitle)
+                if isTransitioning {
+                    ProgressView()
+                        .controlSize(.small)
+                        .accessibilityLabel("Model transition in progress")
+                }
             }
 
             GlassPanel {
@@ -182,6 +187,15 @@ struct ModelsScreen: View {
                 Text(LocalizedStringKey(title)).font(.subheadline.weight(.semibold))
                 Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.secondary)
             }
+        }
+    }
+
+    private var isTransitioning: Bool {
+        switch session.activeEngineState {
+        case .loading, .unloading:
+            return true
+        case .unloaded, .loaded, .failed:
+            return false
         }
     }
 
