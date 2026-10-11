@@ -8,6 +8,7 @@ import PASkills
 import PARuntime
 import PASecurity
 import PAWorkspace
+import PATerminal
 
 /// Reads user-controlled capability grants at decision time so changing Settings
 /// takes effect without rebuilding the composition root.
