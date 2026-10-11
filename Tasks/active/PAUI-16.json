@@ -1,0 +1,33 @@
+{
+  "id": "PAUI-16",
+  "title": "Persist verified provider connection status",
+  "status": "ready",
+  "context": "ProvidersScreen always reports a configured remote provider as Not tested, even after Settings successfully tests it. The test result is held only in transient view state and is lost when the Settings screen closes.",
+  "goal": "Persist only the non-secret result and provider identity of the last connection test, display it in ProvidersScreen, and invalidate it when provider configuration changes.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "App/PersonalAgent/Screens/ProvidersScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-16.json"
+  ],
+  "forbidden_changes": [
+    "Never persist API keys, Authorization headers, or response bodies.",
+    "Do not treat a connection test as proof that chat completion or model inference works.",
+    "Do not change provider request endpoints or credential storage semantics."
+  ],
+  "acceptance_criteria": [
+    "Successful/failed connection tests persist only provider ID and a result enum in UserDefaults.",
+    "ProvidersScreen distinguishes not tested, successful test, failed test, missing key, and local mode.",
+    "Changing provider, endpoint, saving credentials, or deleting credentials invalidates the previous result.",
+    "Status labels resolve through EN/VI localization catalogs."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static check confirms only provider ID/result are persisted and no duplicate localization keys exist."
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if provider settings or status reporting regresses."
+}

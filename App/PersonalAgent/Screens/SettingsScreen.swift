@@ -375,6 +375,7 @@ struct SettingsScreen: View {
                         apiKey = ""
                         credentialState = loadCredentialState(for: newValue)
                         connectionState = .idle
+                        clearProviderConnectionTest()
                     }
 
                     if remoteProvider == "openai-compatible" {
@@ -400,6 +401,7 @@ struct SettingsScreen: View {
                         TextField("Chat completions endpoint", text: $compatibleEndpoint)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .onChange(of: compatibleEndpoint) { _, _ in clearProviderConnectionTest() }
                             .keyboardType(.URL)
                         if compatibleEndpoint.localizedCaseInsensitiveContains("openrouter.ai") && !openRouterModels.isEmpty {
                             Picker("Model", selection: $compatibleModel) {
@@ -895,6 +897,7 @@ private extension SettingsScreen {
             apiKey = ""
             credentialState = .saved
             connectionState = .idle
+            clearProviderConnectionTest()
             UserDefaults.standard.set(remoteProvider, forKey: "provider.remote.id")
             UserDefaults.standard.set(true, forKey: "provider.remote.enabled")
             UserDefaults.standard.set("remote", forKey: "provider.execution.mode")
@@ -909,6 +912,7 @@ private extension SettingsScreen {
             try KeychainSecretStore().delete(account: credentialAccount)
             credentialState = .missing
             connectionState = .idle
+            clearProviderConnectionTest()
             apiKey = ""
             UserDefaults.standard.set(false, forKey: "provider.remote.enabled")
             UserDefaults.standard.set("local", forKey: "provider.execution.mode")
@@ -988,12 +992,23 @@ private extension SettingsScreen {
         }
     }
 
+    func clearProviderConnectionTest() {
+        UserDefaults.standard.removeObject(forKey: "provider.connection.test.provider")
+        UserDefaults.standard.removeObject(forKey: "provider.connection.test.result")
+    }
+
+    func recordProviderConnectionTest(success: Bool) {
+        UserDefaults.standard.set(remoteProvider, forKey: "provider.connection.test.provider")
+        UserDefaults.standard.set(success ? "success" : "failure", forKey: "provider.connection.test.result")
+    }
+
     func testProviderConnection() async {
         let entered = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         // Test the configuration the runtime will actually use, not an unsaved draft.
         saveProviderCredential()
         if case .error = credentialState {
             connectionState = .failure("Save the provider configuration before testing.")
+            recordProviderConnectionTest(success: false)
             return
         }
         let value: String
@@ -1003,10 +1018,15 @@ private extension SettingsScreen {
             do {
                 guard let data = try KeychainSecretStore().load(account: credentialAccount),
                       let saved = String(data: data, encoding: .utf8),
-                      !saved.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+                      !saved.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    connectionState = .failure("Save the provider configuration before testing.")
+                    recordProviderConnectionTest(success: false)
+                    return
+                }
                 value = saved
             } catch {
                 connectionState = .failure("Could not read the saved API key.")
+                recordProviderConnectionTest(success: false)
                 return
             }
         }
@@ -1017,7 +1037,8 @@ private extension SettingsScreen {
         } else if remoteProvider == "openai-compatible" {
             let configured = compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
             if configured.isEmpty {
-                await MainActor.run { connectionState = .failure("Configure the compatible endpoint first.") }
+                connectionState = .failure("Configure the compatible endpoint first.")
+                recordProviderConnectionTest(success: false)
                 return
             }
             if configured.hasSuffix("/chat/completions") {
@@ -1033,9 +1054,8 @@ private extension SettingsScreen {
         do {
             _ = try ChatCompletionsCodec.validateEndpointURL(endpoint)
         } catch {
-            await MainActor.run {
-                connectionState = .failure("Use HTTPS for remote endpoints; HTTP is allowed only for localhost.")
-            }
+            connectionState = .failure("Use HTTPS for remote endpoints; HTTP is allowed only for localhost.")
+            recordProviderConnectionTest(success: false)
             return
         }
         do {
@@ -1044,7 +1064,7 @@ private extension SettingsScreen {
                 ProviderTransportRequest(
                     url: endpoint,
                     method: "GET",
-                    headers: ["Authorization": "Bearer \(value)"]
+                    headers: ["Authorization": "Bearer \\(value)"]
                 )
             )
             guard (200..<300).contains(response.statusCode) else {
@@ -1055,9 +1075,15 @@ private extension SettingsScreen {
             guard let models, !models.isEmpty else {
                 throw URLError(.cannotParseResponse)
             }
-            await MainActor.run { connectionState = .success }
+            await MainActor.run {
+                connectionState = .success
+                recordProviderConnectionTest(success: true)
+            }
         } catch {
-            await MainActor.run { connectionState = .failure("Connection failed. Check the key and provider access.") }
+            await MainActor.run {
+                connectionState = .failure("Connection failed. Check the key and provider access.")
+                recordProviderConnectionTest(success: false)
+            }
         }
     }
 }

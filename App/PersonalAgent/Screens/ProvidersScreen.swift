@@ -10,13 +10,20 @@ struct ProvidersScreen: View {
     }
 
     private var connectionState: String {
+        let defaults = UserDefaults.standard
         if session.providerLifecycle.lowercased().contains("error") {
             return "Provider error"
         }
-        if UserDefaults.standard.bool(forKey: "provider.remote.enabled") {
-            return credentialSaved ? "Not tested" : "Missing API key"
+        guard defaults.bool(forKey: "provider.remote.enabled") else { return "Local mode" }
+        guard credentialSaved else { return "Missing API key" }
+        guard defaults.string(forKey: "provider.connection.test.provider") == remoteProvider else {
+            return "Not tested"
         }
-        return "Local mode"
+        switch defaults.string(forKey: "provider.connection.test.result") {
+        case "success": return "Connection tested"
+        case "failure": return "Last test failed"
+        default: return "Not tested"
+        }
     }
 
     private var providerDisplayName: String {
@@ -34,7 +41,13 @@ struct ProvidersScreen: View {
                     .font(.headline)
                 StatusRow(title: "Provider", value: session.providerID)
                 StatusRow(title: "Lifecycle", value: session.providerLifecycle)
-                StatusRow(title: "Connection", value: connectionState)
+                HStack(alignment: .firstTextBaseline, spacing: 14) {
+                    Text("Connection").foregroundStyle(.secondary)
+                    Spacer(minLength: 12)
+                    Text(LocalizedStringKey(connectionState)).fontWeight(.semibold)
+                }
+                .font(.subheadline)
+                .padding(.vertical, 3)
                 StatusRow(title: "Execution", value: UserDefaults.standard.string(forKey: "provider.execution.mode") == "remote" ? "Remote" : "Local")
                 if remoteProvider == "openai-compatible" {
                     StatusRow(title: "Selected model", value: UserDefaults.standard.string(forKey: "provider.compatible.model") ?? "openrouter/free")
