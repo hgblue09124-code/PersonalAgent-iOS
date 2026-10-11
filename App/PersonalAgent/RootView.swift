@@ -7,6 +7,7 @@ import PhotosUI
 import Vision
 import UIKit
 import PAComposition
+import PAImportGateway
 
 struct RootView: View {
     @ObservedObject var session: KernelSession
@@ -102,6 +103,9 @@ private struct AgentWorkspaceSheet: View {
                     }
                     workspaceLink("Terminal", "Sandboxed commands and workspace file operations", "terminal") {
                         TerminalScreen()
+                    }
+                    workspaceLink("Files", "Import, retain and preview supported document formats", "doc.badge.plus") {
+                        ImportedFilesScreen()
                     }
                 }
 
@@ -664,3 +668,223 @@ private struct RoadmapFeatureScreen: View {
         return text
     }
 }
+
+private struct ImportedFilesScreen: View {
+    @State private var isImporting = false
+    @State private var files: [ImportedFile] = []
+    @State private var store: ImportedFileStore?
+    @State private var selectedFile: ImportedFile?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Text("Import any file from Files or another document provider. Original bytes are preserved; text extraction is available only for supported formats.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                if let errorMessage {
+                    Section("Import status") {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .textSelection(.enabled)
+                    }
+                }
+                Section("Imported files · \(files.count)") {
+                    if files.isEmpty {
+                        ContentUnavailableView(
+                            "No imported files",
+                            systemImage: "doc.badge.plus",
+                            description: Text("Tap + to import one or more files.")
+                        )
+                    } else {
+                        ForEach(files) { file in
+                            Button {
+                                selectedFile = file
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "doc.text")
+                                        .font(.title2)
+                                        .foregroundStyle(.tint)
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(file.originalName)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(.primary)
+                                            .lineLimit(2)
+                                        Text("\(file.fileExtension.isEmpty ? "unknown format" : file.fileExtension.uppercased()) · \(ByteCountFormatter.string(fromByteCount: file.sizeBytes, countStyle: .file))")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer(minLength: 4)
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.tertiary)
+                                }
+                                .padding(.vertical, 3)
+                            }
+                            .buttonStyle(.plain)
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    remove(file)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Files")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isImporting = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Import files")
+                }
+            }
+        }
+        .task { await reload() }
+        .fileImporter(
+            isPresented: $isImporting,
+            allowedContentTypes: [.item],
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case .success(let urls):
+                importURLs(urls)
+            case .failure(let error):
+                errorMessage = error.localizedDescription
+            }
+        }
+        .sheet(item: $selectedFile) { file in
+            if let store {
+                ImportedFilePreviewSheet(file: file, store: store)
+            } else {
+                Text("Import store is unavailable.")
+            }
+        }
+    }
+
+    @MainActor
+    private func ensureStore() throws -> ImportedFileStore {
+        if let store { return store }
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            ?? FileManager.default.temporaryDirectory
+        let directory = support
+            .appendingPathComponent("PersonalAgent", isDirectory: true)
+            .appendingPathComponent("ImportedFiles", isDirectory: true)
+        let created = try ImportedFileStore(directoryURL: directory)
+        store = created
+        return created
+    }
+
+    @MainActor
+    private func reload() async {
+        do {
+            let target = try ensureStore()
+            files = await target.listImports()
+            errorMessage = nil
+        } catch {
+            errorMessage = "Unable to load imports: \(error.localizedDescription)"
+        }
+    }
+
+    private func importURLs(_ urls: [URL]) {
+        Task { @MainActor in
+            do {
+                let target = try ensureStore()
+                var failures: [String] = []
+                for url in urls {
+                    let typeIdentifier: String?
+                    do {
+                        typeIdentifier = try url.resourceValues(forKeys: [.contentTypeKey]).contentType?.identifier
+                    } catch {
+                        typeIdentifier = nil
+                    }
+                    do {
+                        _ = try await target.importFile(from: url, contentTypeIdentifier: typeIdentifier)
+                    } catch {
+                        failures.append("\(url.lastPathComponent): \(error.localizedDescription)")
+                    }
+                }
+                await reload()
+                if !failures.isEmpty {
+                    errorMessage = failures.joined(separator: "\n")
+                } else {
+                    errorMessage = nil
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
+    private func remove(_ file: ImportedFile) {
+        Task { @MainActor in
+            do {
+                let target = try ensureStore()
+                try await target.removeImport(id: file.id)
+                await reload()
+            } catch {
+                errorMessage = "Unable to delete \(file.originalName): \(error.localizedDescription)"
+            }
+        }
+    }
+}
+
+private struct ImportedFilePreviewSheet: View {
+    let file: ImportedFile
+    let store: ImportedFileStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var content: ImportedFileContent?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let content {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label(content.format.rawValue, systemImage: "doc.text")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Text(content.text)
+                                .font(.system(.body, design: .monospaced))
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .padding()
+                    }
+                } else if let errorMessage {
+                    ContentUnavailableView(
+                        "Preview unavailable",
+                        systemImage: "doc.questionmark",
+                        description: Text(errorMessage)
+                    )
+                } else {
+                    ProgressView("Reading file…")
+                }
+            }
+            .navigationTitle(file.originalName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .task {
+            do {
+                content = try await ImportedFileContentReader().read(file, from: store)
+            } catch {
+                errorMessage = "The file was imported and preserved, but this build cannot extract a preview for it. \(error.localizedDescription)"
+            }
+        }
+    }
+}
+
