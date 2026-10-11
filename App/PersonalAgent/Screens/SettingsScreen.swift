@@ -1003,76 +1003,41 @@ private extension SettingsScreen {
     }
 
     func testProviderConnection() async {
-        let entered = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Test the configuration the runtime will actually use, not an unsaved draft.
+        // A successful /models request does not prove chat completions work.
+        // Test the same runtime route that Chat uses, with the saved Keychain credential.
         saveProviderCredential()
         if case .error = credentialState {
             connectionState = .failure("Save the provider configuration before testing.")
             recordProviderConnectionTest(success: false)
             return
         }
-        let value: String
-        if !entered.isEmpty {
-            value = entered
-        } else {
-            do {
-                guard let data = try KeychainSecretStore().load(account: credentialAccount),
-                      let saved = String(data: data, encoding: .utf8),
-                      !saved.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                    connectionState = .failure("Save the provider configuration before testing.")
-                    recordProviderConnectionTest(success: false)
-                    return
-                }
-                value = saved
-            } catch {
-                connectionState = .failure("Could not read the saved API key.")
-                recordProviderConnectionTest(success: false)
-                return
-            }
-        }
-        connectionState = .testing
-        let endpoint: String
-        if remoteProvider == "grok" {
-            endpoint = "https://api.x.ai/v1/models"
-        } else if remoteProvider == "openai-compatible" {
-            let configured = compatibleEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
-            if configured.isEmpty {
-                connectionState = .failure("Configure the compatible endpoint first.")
-                recordProviderConnectionTest(success: false)
-                return
-            }
-            if configured.hasSuffix("/chat/completions") {
-                endpoint = String(configured.dropLast("/chat/completions".count)) + "/models"
-            } else if configured.hasSuffix("/v1") {
-                endpoint = configured + "/models"
-            } else {
-                endpoint = configured.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/models"
-            }
-        } else {
-            endpoint = "https://api.openai.com/v1/models"
-        }
+
         do {
-            _ = try ChatCompletionsCodec.validateEndpointURL(endpoint)
+            guard let data = try KeychainSecretStore().load(account: credentialAccount),
+                  let saved = String(data: data, encoding: .utf8),
+                  !saved.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                connectionState = .failure("Save the provider configuration before testing.")
+                recordProviderConnectionTest(success: false)
+                return
+            }
         } catch {
-            connectionState = .failure("Use HTTPS for remote endpoints; HTTP is allowed only for localhost.")
+            connectionState = .failure("Could not read the saved API key.")
             recordProviderConnectionTest(success: false)
             return
         }
+
+        connectionState = .testing
         do {
-            let transport = SecurityNetworkTransport(network: URLSessionNetworkAccess())
-            let response = try await transport.send(
-                ProviderTransportRequest(
-                    url: endpoint,
-                    method: "GET",
-                    headers: ["Authorization": "Bearer \\(value)"]
+            guard let runtime = session.composition.providerRuntime else {
+                throw URLError(.unsupportedURL)
+            }
+            let response = try await runtime.complete(
+                LLMRequest(
+                    model: ModelID(rawValue: "provider-connection-test"),
+                    prompt: "Reply with OK."
                 )
             )
-            guard (200..<300).contains(response.statusCode) else {
-                throw URLError(.badServerResponse)
-            }
-            let payload = try JSONSerialization.jsonObject(with: response.body) as? [String: Any]
-            let models = payload?["data"] as? [[String: Any]]
-            guard let models, !models.isEmpty else {
+            guard !response.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 throw URLError(.cannotParseResponse)
             }
             await MainActor.run {
@@ -1081,7 +1046,7 @@ private extension SettingsScreen {
             }
         } catch {
             await MainActor.run {
-                connectionState = .failure("Connection failed. Check the key and provider access.")
+                connectionState = .failure("Chat completion failed. Check the key, model access, endpoint, and network.")
                 recordProviderConnectionTest(success: false)
             }
         }
