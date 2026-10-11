@@ -1,0 +1,44 @@
+name: Agent Task Contract
+on:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - ".agentos/**"
+      - "Tasks/**"
+      - "Scripts/agent_task_guard.py"
+      - ".github/workflows/agent-task-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "AGENTS.md"
+      - ".agentos/**"
+      - "Tasks/**"
+      - "Scripts/agent_task_guard.py"
+      - ".github/workflows/agent-task-contract.yml"
+permissions:
+  contents: read
+jobs:
+  validate-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate example contract
+        run: python Scripts/agent_task_guard.py validate .agentos/task.example.json
+      - name: Compile validator
+        run: python -m py_compile Scripts/agent_task_guard.py
+      - name: Validate and scope-check any real task contract
+        if: ${{ github.event_name == 'pull_request' }}
+        shell: bash
+        run: |
+          task_file="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" | grep '^Tasks/active/.*\.json$' | head -n 1 || true)"
+          if [ -n "$task_file" ]; then
+            python Scripts/agent_task_guard.py validate "$task_file"
+            python Scripts/agent_task_guard.py check-diff "$task_file" --base "origin/${{ github.base_ref }}"
+          else
+            echo "No Tasks/active task contract changed; structural validation passed."
+          fi
