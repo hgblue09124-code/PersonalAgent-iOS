@@ -1,6 +1,7 @@
 import Foundation
 import PAWorkspace
 import PASkills
+import PAKernel
 
 public struct AgentCommand: Sendable, Equatable {
     public let name: String
@@ -268,7 +269,7 @@ public struct BuiltinCommandRegistry {
         return registry
     }
 
-    public static func make(skillRuntime: SkillRuntime) -> CommandRegistry {
+    public static func make(skillRuntime: SkillRuntime, policy: (any PolicyEvaluating)? = nil) -> CommandRegistry {
         var registry = make()
         registry = registry.registering("skill") { command, _ in
             guard let operation = command.arguments.first else {
@@ -290,12 +291,19 @@ public struct BuiltinCommandRegistry {
                     throw CommandError.invalidArguments("skill run <skill> <input>")
                 }
                 let input = args.dropFirst().joined(separator: " ")
+                guard let policy else {
+                    return CommandResult(
+                        stderr: "Skill execution blocked: explicit policy is required.",
+                        exitCode: 126
+                    )
+                }
                 let result = try await skillRuntime.run(
                     SkillExecutionRequest(
                         skillID: String(args[0]),
                         moduleID: String(args[0]),
                         input: input
-                    )
+                    ),
+                    policy: policy
                 )
                 return CommandResult(stdout: result)
             default:
