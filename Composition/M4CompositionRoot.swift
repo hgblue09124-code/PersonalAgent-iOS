@@ -49,7 +49,8 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         provider: any LLMProvider = DeterministicFakeProvider(),
         memoryStore: (any MemoryStore)? = nil,
         storeDirectoryURL: URL? = nil,
-        additionalModules: [any Module] = []
+        additionalModules: [any Module] = [],
+        policy: (any PolicyEvaluating)? = nil
     ) async throws {
         let log = InMemoryEventLog()
         self.milestone = .m4
@@ -84,6 +85,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
+            policy: policy,
             eventLog: log,
             logger: logger
         )
