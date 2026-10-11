@@ -43,6 +43,10 @@ struct SettingsScreen: View {
     @State private var connectionState: ConnectionState = .idle
     @AppStorage("chat.context.turns") private var contextTurns = 12
     @AppStorage("privacy.persistChat") private var persistChat = true
+    @AppStorage("permissions.capability.read") private var allowCapabilityRead = true
+    @AppStorage("permissions.capability.write") private var allowCapabilityWrite = false
+    @AppStorage("permissions.capability.execute") private var allowCapabilityExecute = false
+    @AppStorage("permissions.capability.network") private var allowCapabilityNetwork = false
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
@@ -55,6 +59,21 @@ struct SettingsScreen: View {
                         .font(.footnote)
                         .foregroundStyle(.red)
                 }
+            }
+
+            GlassPanel {
+                Label("Quyền thực thi của Agent", systemImage: "checkmark.shield")
+                    .font(.headline)
+                Text("Các quyền này được kiểm tra lại trong Runtime mỗi lần chạy Skill; tắt quyền sẽ chặn lần thực thi tiếp theo.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Toggle("Đọc dữ liệu", isOn: $allowCapabilityRead)
+                Toggle("Ghi dữ liệu", isOn: $allowCapabilityWrite)
+                Toggle("Chạy Skills / Modules", isOn: $allowCapabilityExecute)
+                Toggle("Truy cập mạng", isOn: $allowCapabilityNetwork)
+                Label("Thao tác phá huỷ luôn cần bước phê duyệt riêng.", systemImage: "exclamationmark.triangle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             GlassPanel {

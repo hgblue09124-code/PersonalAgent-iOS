@@ -12,6 +12,10 @@ import PAComposition
 
 @Suite("M6 Semantics and Issue #19 Blocker Tests")
 struct M6SemanticsTests {
+    private struct ExplicitAllowPolicy: PolicyEvaluating {
+        func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
+    }
+
 
     // 1. Explicit toolID end-to-end without inference
     @Test func test1_ExplicitToolIDEndToEndWithoutInference() async throws {
@@ -341,6 +345,7 @@ struct M6SemanticsTests {
             runtime: root.runtime,
             eventLog: root.eventLog,
             proposer: proposer,
+            policy: ExplicitAllowPolicy(),
             moduleRuntime: root.moduleRuntime
         )
 
