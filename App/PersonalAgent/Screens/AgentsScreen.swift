@@ -233,7 +233,8 @@ struct AgentsScreen: View {
             }
         }
     }
-\n    private func scopeBadge(_ title: String, symbol: String, tint: Color) -> some View {
+
+    private func scopeBadge(_ title: String, symbol: String, tint: Color) -> some View {
         Label(title, systemImage: symbol)
             .font(.caption2.weight(.semibold))
             .foregroundStyle(tint)
@@ -242,7 +243,8 @@ struct AgentsScreen: View {
             .background(tint.opacity(0.08), in: Capsule())
     }
 }
-\n
+
+
 private struct AgentRoleIdea: Identifiable {
     let id: String
     let title: String
