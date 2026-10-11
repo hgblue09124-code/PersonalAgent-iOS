@@ -3,9 +3,11 @@ import SwiftUI
 struct MemoryScreen: View {
     @Environment(\.kernelSession) private var session
     @State private var draft = ""
+    @State private var draftKind = "fact"
 
-    private let reservedKinds = [
-        "working", "episodic", "semantic", "preference", "procedural"
+    // Keep choices aligned with the kinds included in contextual memory retrieval.
+    private let availableKinds = [
+        "fact", "preference", "context", "instruction", "semantic"
     ]
 
     var body: some View {
@@ -51,14 +53,22 @@ struct MemoryScreen: View {
                         .padding(.vertical, 4)
                     }
 
+                    Picker("Remember as", selection: $draftKind) {
+                        ForEach(availableKinds, id: \.self) { kind in
+                            Text(kind.capitalized).tag(kind)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
                     HStack {
                         TextField("Remember something…", text: $draft, axis: .vertical)
                             .textFieldStyle(.roundedBorder)
                         Button("Remember") {
                             let value = draft.trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !value.isEmpty else { return }
+                            let kind = draftKind
                             draft = ""
-                            Task { await session.remember(value) }
+                            Task { await session.remember(value, kind: kind) }
                         }
                         .buttonStyle(.borderedProminent)
                     }
@@ -70,38 +80,7 @@ struct MemoryScreen: View {
                 }
             }
 
-            ForEach(reservedKinds, id: \.self) { kind in
-                GlassPanel {
-                    HStack {
-                        Label(LocalizedStringKey(memoryTitle(kind)), systemImage: memoryIcon(kind))
-                            .font(.subheadline.weight(.semibold))
-                        Spacer()
-                        Text("contract")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
         }
     }
 
-    private func memoryTitle(_ kind: String) -> String {
-        switch kind {
-        case "working": return "Working"
-        case "episodic": return "Episodic"
-        case "semantic": return "Semantic"
-        case "preference": return "Preference"
-        default: return "Procedural"
-        }
-    }
-
-    private func memoryIcon(_ kind: String) -> String {
-        switch kind {
-        case "working": return "bolt.fill"
-        case "episodic": return "clock.arrow.circlepath"
-        case "semantic": return "brain.head.profile"
-        case "preference": return "slider.horizontal.3"
-        default: return "arrow.triangle.2.circlepath"
-        }
-    }
 }
