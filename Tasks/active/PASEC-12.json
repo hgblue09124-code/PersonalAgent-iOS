@@ -1,0 +1,33 @@
+{
+  "id": "PASEC-12",
+  "title": "Preserve GGUF file when model index deletion fails",
+  "status": "in_progress",
+  "goal": "Prevent partial deletion from removing a GGUF file when FileBackedLocalModelStorage cannot persist the updated model index.",
+  "context": "deleteModel currently removes the GGUF file before persisting the index. If index persistence fails, the in-memory index is restored but the large model file is already gone. Persist metadata removal first and restore metadata if file removal itself fails.",
+  "allowed_paths": [
+    "Storage/Models/FileBackedLocalModelStorage.swift",
+    "Tests/PersonalAgentTests/LocalModelStorageTests.swift",
+    "Tasks/active/PASEC-12.json"
+  ],
+  "forbidden_changes": [
+    "Do not silently delete a model when index persistence fails.",
+    "Do not weaken GGUF validation, file-size checks, or active-model selection checks.",
+    "Do not modify App/ or Xcode project files."
+  ],
+  "acceptance_criteria": [
+    "Index persistence failure leaves the original GGUF file and in-memory descriptor/selection intact.",
+    "If file removal fails after metadata persistence, restore the prior index and propagate the failure; report storage corruption if metadata rollback fails.",
+    "Regression test forces index persistence failure and confirms the GGUF file, descriptor, and active selection remain.",
+    "All required CI gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-12.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-12.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #354"
+  ],
+  "recovery": "Revert this single logical commit if model deletion or metadata rollback behavior regresses."
+}

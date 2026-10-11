@@ -287,6 +287,36 @@ struct LocalModelStorageTests {
         #expect(!FileManager.default.fileExists(atPath: fileURL.path))
     }
 
+
+    @Test func testDeleteModelPreservesGGUFWhenIndexPersistenceFails() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = try createValidGGUFFile(at: root, filename: "preserve-on-index-failure.gguf")
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+        let descriptor = try await storage.importModel(from: source, name: "Preserve Model")
+        try await storage.setActiveModel(id: descriptor.id)
+        let fileURL = try #require(await storage.modelFileURL(for: descriptor.id))
+        let indexURL = storageDir.appendingPathComponent("models_index.json")
+        let backupURL = root.appendingPathComponent("models_index.backup.json")
+        try FileManager.default.moveItem(at: indexURL, to: backupURL)
+        try FileManager.default.createDirectory(at: indexURL, withIntermediateDirectories: false)
+        defer {
+            try? FileManager.default.removeItem(at: indexURL)
+            try? FileManager.default.moveItem(at: backupURL, to: indexURL)
+        }
+
+        do {
+            try await storage.deleteModel(id: descriptor.id)
+            Issue.record("Deleting a model must fail when the index cannot be persisted")
+        } catch {
+            #expect(FileManager.default.fileExists(atPath: fileURL.path))
+            #expect(try await storage.getModel(id: descriptor.id) == descriptor)
+            #expect(try await storage.activeModelID() == descriptor.id)
+        }
+    }
+
     @Test func testDeleteModelFailsClosedWhenFileRemovalFails() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
