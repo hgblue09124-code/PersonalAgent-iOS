@@ -271,18 +271,40 @@ public struct BuiltinCommandRegistry {
     public static func make(skillRuntime: SkillRuntime) -> CommandRegistry {
         var registry = make()
         registry = registry.registering("skill") { command, _ in
-            guard command.arguments.count >= 3, command.arguments[0] == "run" else {
-                throw CommandError.invalidArguments("skill run <skill> <input>")
+            guard let operation = command.arguments.first else {
+                throw CommandError.invalidArguments("skill list [query]|run <skill> <input>")
             }
-            let input = command.arguments.dropFirst(2).joined(separator: " ")
-            let result = try await skillRuntime.run(
-                SkillExecutionRequest(
-                    skillID: String(command.arguments[1]),
-                    moduleID: String(command.arguments[1]),
-                    input: input
+            let args = Array(command.arguments.dropFirst())
+            switch operation {
+            case "list":
+                guard args.count <= 1 else {
+                    throw CommandError.invalidArguments("skill list [query]")
+                }
+                let manifests = try await skillRuntime.discover(query: args.first ?? "")
+                let rows = manifests.map {
+                    "\($0.id.rawValue)\t\($0.name) — \($0.description)"
+                }
+                return CommandResult(stdout: rows.isEmpty ? "No skills found.\n" : rows.joined(separator: "\n") + "\n")
+            case "run":
+                guard args.count >= 2 else {
+                    throw CommandError.invalidArguments("skill run <skill> <input>")
+                }
+                let input = args.dropFirst().joined(separator: " ")
+                let result = try await skillRuntime.run(
+                    SkillExecutionRequest(
+                        skillID: String(args[0]),
+                        moduleID: String(args[0]),
+                        input: input
+                    )
                 )
-            )
-            return CommandResult(stdout: result)
+                return CommandResult(stdout: result)
+            default:
+                throw CommandError.invalidArguments("skill list [query]|run <skill> <input>")
+            }
+        }
+        registry = registry.registering("help") { command, _ in
+            guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace skill clear help\n")
         }
         return registry
     }
