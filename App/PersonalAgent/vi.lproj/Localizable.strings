@@ -340,6 +340,7 @@
 "Save token securely" = "Lưu mã truy cập an toàn";
 "Delete token" = "Xóa mã truy cập";
 "Sync now" = "Đồng bộ ngay";
+"Preview changes" = "Xem trước thay đổi";
 "Imported files" = "Tệp đã nhập";
 "Import files" = "Nhập tệp";
 "Files are stored locally. Content is processed only when a matching format reader is available." = "Tệp được lưu cục bộ. Nội dung chỉ được xử lý khi có bộ đọc định dạng tương ứng.";
