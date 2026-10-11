@@ -72,6 +72,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
+            policy: policy,
             eventLog: log,
             logger: logger
         )

@@ -108,6 +108,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
+            policy: policy,
             eventLog: idempotentLog,
             logger: logger
         )
