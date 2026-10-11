@@ -71,7 +71,7 @@ public struct CommandRegistry: Sendable {
     public static let maximumOutputBytes = 64 * 1024
 
     public func isAuthorized(_ command: AgentCommand) async -> Bool {
-        guard let authorizer else { return true }
+        guard let authorizer else { return false }
         return await authorizer.authorize(Self.requiredCapabilities(for: command), summary: "Terminal command: \\(command.name)")
     }
 

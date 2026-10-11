@@ -20,7 +20,7 @@ final class TerminalSkillBridgeTests: XCTestCase {
         let runtime = SkillRuntime(skills: [skill])
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        let registry = BuiltinCommandRegistry.make(skillRuntime: runtime)
+        let registry = BuiltinCommandRegistry.make(skillRuntime: runtime, authorizer: AllowTerminalAuthorizer())
 
         let execution = try await session.execute("skill list calc", registry: registry)
         let output = await session.outputs()
@@ -32,7 +32,7 @@ final class TerminalSkillBridgeTests: XCTestCase {
     func testSkillAwareHelpListsDiscoveryAndExecution() async throws {
         let runtime = SkillRuntime()
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
-        let registry = BuiltinCommandRegistry.make(skillRuntime: runtime)
+        let registry = BuiltinCommandRegistry.make(skillRuntime: runtime, authorizer: AllowTerminalAuthorizer())
         let result = try await registry.execute(AgentCommand(name: "help"), context: CommandContext(workspace: workspace))
         XCTAssertTrue(result.stdout.contains("skill"))
     }
@@ -43,7 +43,7 @@ final class TerminalSkillBridgeTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let session = TerminalSession(context: CommandContext(workspace: workspace))
 
-        let execution = try await session.execute("skill run calculator 1+1", registry: BuiltinCommandRegistry.make(skillRuntime: runtime))
+        let execution = try await session.execute("skill run calculator 1+1", registry: BuiltinCommandRegistry.make(skillRuntime: runtime, authorizer: AllowTerminalAuthorizer()))
         let output = await session.outputs()
 
         XCTAssertEqual(execution.state, .failed)
@@ -55,7 +55,7 @@ final class TerminalSkillBridgeTests: XCTestCase {
         let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { input in input == "187 * 43" ? "8041" : "0" }])
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         let session = TerminalSession(context: CommandContext(workspace: workspace))
-        let execution = try await session.execute(#"skill run calculator "187 * 43""#, registry: BuiltinCommandRegistry.make(skillRuntime: runtime, executeSkill: { request in try await runtime.run(request, policy: AllowTerminalSkillPolicy()) }))
+        let execution = try await session.execute(#"skill run calculator "187 * 43""#, registry: BuiltinCommandRegistry.make(skillRuntime: runtime, authorizer: AllowTerminalAuthorizer(), executeSkill: { request in try await runtime.run(request, policy: AllowTerminalSkillPolicy()) }))
         let output = await session.outputs()
         XCTAssertEqual(execution.state, .succeeded)
         XCTAssertEqual(output.last?.text, "8041")
@@ -65,4 +65,9 @@ final class TerminalSkillBridgeTests: XCTestCase {
 
 private struct AllowTerminalSkillPolicy: PolicyEvaluating {
     func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("test-only explicit grant") }
+}
+
+
+private struct AllowTerminalAuthorizer: TerminalCommandAuthorizing {
+    func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool { true }
 }

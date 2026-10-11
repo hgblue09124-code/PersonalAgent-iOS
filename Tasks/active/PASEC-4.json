@@ -1,0 +1,36 @@
+{
+  "id": "PASEC-4",
+  "title": "Fail closed when Terminal has no command authorizer",
+  "status": "in_progress",
+  "goal": "Prevent terminal commands from running when no TerminalCommandAuthorizing policy has been supplied.",
+  "context": "CommandRegistry.isAuthorized currently returns true when its optional authorizer is nil. The production Terminal screen wires SettingsTerminalCommandAuthorizer after sandbox setup, but the reusable terminal API itself defaults to allow-all and can bypass the Settings authorization boundary when constructed incorrectly.",
+  "allowed_paths": [
+    "Tasks/active/PASEC-4.json",
+    "Sources/Terminal/TerminalCore.swift",
+    "Tests/PersonalAgentTests/TerminalCoreTests.swift",
+    "Tests/PersonalAgentTests/TerminalSessionTests.swift",
+    "Tests/PersonalAgentTests/TerminalSkillBridgeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change the production SettingsTerminalCommandAuthorizer or grant new capabilities.",
+    "Do not change terminal command capability classification.",
+    "Do not treat missing authorization as an implicit grant."
+  ],
+  "acceptance_criteria": [
+    "CommandRegistry.isAuthorized returns false when no authorizer is injected.",
+    "Executing a known command without an authorizer returns a permission-denied result and performs no mutation.",
+    "Tests that intentionally exercise command handlers inject an explicit test authorizer.",
+    "Production TerminalScreen remains wired to SettingsTerminalCommandAuthorizer."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-4.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-4.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+  ],
+  "dependencies": [
+    "Issue #353",
+    "Issue #354"
+  ],
+  "recovery": "Revert the single task commit if a terminal command unexpectedly mutates without authorization or required CI fails."
+}
