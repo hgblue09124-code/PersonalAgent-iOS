@@ -400,8 +400,10 @@ final class KernelSession: ObservableObject {
             )
             let result = try await client.synchronize(workspaceURL: workspace.rootURL)
             return "Sync complete · \(result.commitSHA.prefix(7)) · ↑\(result.uploadedPaths.count) ↓\(result.downloadedPaths.count) −\(result.deletedPaths.count)\n"
-        } catch GitHubRepositorySyncError.remoteConflict {
-            return "Sync conflict: local and remote changed the same file. Resolve it, then sync again.\n"
+        } catch GitHubRepositorySyncError.remoteConflict(let paths) {
+            return "Sync conflict in: \(paths.joined(separator: ", ")). Resolve those files, then sync again.\n"
+        } catch GitHubRepositorySyncError.remoteHeadChanged {
+            return "The remote branch changed during sync. Fetch the latest state and sync again.\n"
         } catch GitHubRepositorySyncError.authenticationRequired {
             return "GitHub authentication required. Save a valid repository token.\n"
         } catch {

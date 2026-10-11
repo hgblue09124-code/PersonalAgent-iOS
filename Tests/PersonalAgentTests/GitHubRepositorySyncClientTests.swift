@@ -211,7 +211,8 @@ final class GitHubRepositorySyncClientTests: XCTestCase {
             _ = try await client.synchronize(workspaceURL: workspace)
             XCTFail("Divergent edits must stop as a conflict")
         } catch let error as GitHubRepositorySyncError {
-            XCTAssertEqual(error, .remoteConflict)
+            XCTAssertEqual(error, .remoteConflict(paths: ["skills/demo.md"]))
+            XCTAssertTrue(error.localizedDescription.contains("skills/demo.md"))
         }
         let requests = await transport.requests
         XCTAssertEqual(requests.count, 3)

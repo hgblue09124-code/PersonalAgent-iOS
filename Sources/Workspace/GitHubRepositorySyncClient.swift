@@ -27,7 +27,8 @@ public enum GitHubRepositorySyncError: Error, Sendable, Equatable, LocalizedErro
     case authenticationRequired
     case invalidResponse
     case httpStatus(Int)
-    case remoteConflict
+    case remoteConflict(paths: [String])
+    case remoteHeadChanged
     case unsafePath(String)
     case unsupportedFile(String)
     case fileTooLarge(String)
@@ -51,8 +52,11 @@ public enum GitHubRepositorySyncError: Error, Sendable, Equatable, LocalizedErro
             case 409, 422: return "GitHub rejected the update (HTTP \(status)); the branch may have changed or the token may lack permission."
             default: return "GitHub API request failed with HTTP status \(status)."
             }
-        case .remoteConflict:
-            return "Local and remote changes conflict. No automatic overwrite was performed."
+        case .remoteConflict(let paths):
+            let files = paths.joined(separator: ", ")
+            return "Local and remote changes conflict at: \(files). No automatic overwrite was performed."
+        case .remoteHeadChanged:
+            return "The remote branch changed during sync. Fetch the latest state and sync again."
         case .unsafePath(let path):
             return "Sync blocked an unsafe workspace path: \(path)"
         case .unsupportedFile(let path):
@@ -234,7 +238,7 @@ public actor GitHubRepositorySyncClient {
                 }
             }
         }
-        guard conflicts.isEmpty else { throw GitHubRepositorySyncError.remoteConflict }
+        guard conflicts.isEmpty else { throw GitHubRepositorySyncError.remoteConflict(paths: conflicts) }
 
         var finalRemoteFiles = remoteFiles
         var treeChanges: [[String: Any]] = []
@@ -292,9 +296,9 @@ public actor GitHubRepositorySyncClient {
                     body: ["sha": newCommit.sha, "force": false]
                 )
             } catch GitHubRepositorySyncError.httpStatus(409) {
-                throw GitHubRepositorySyncError.remoteConflict
+                throw GitHubRepositorySyncError.remoteHeadChanged
             } catch GitHubRepositorySyncError.httpStatus(422) {
-                throw GitHubRepositorySyncError.remoteConflict
+                throw GitHubRepositorySyncError.remoteHeadChanged
             }
             finalCommitSHA = newCommit.sha
         }
