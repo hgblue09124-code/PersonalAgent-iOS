@@ -74,6 +74,9 @@ public actor TerminalSession {
         let command: AgentCommand
         if parsed.name == "cd" {
             guard parsed.arguments.count <= 1 else { throw CommandError.invalidArguments("cd [path]") }
+            guard await registry.isAuthorized(parsed) else {
+                throw CommandError.invalidArguments("Permission denied by Settings policy.")
+            }
             let target = parsed.arguments.first ?? ""
             let next = try await resolveWorkingDirectory(target)
             currentDirectory = next
