@@ -94,7 +94,7 @@ public struct ImportedFileContentReader: Sendable {
             throw ImportedFileReaderError.fileTooLarge(limitBytes: maximumReadableBytes)
         }
 
-        let ext = importedFile.fileExtension.lowercased()
+        let ext = Self.resolvedExtension(for: importedFile)
         if ext == "plist" || ext == "strings" {
             return try readPropertyList(importedFile, url: url)
         }
@@ -149,7 +149,7 @@ public struct ImportedFileContentReader: Sendable {
         case "md", "markdown", "mdown":
             format = .markdown
         case "json", "jsonl", "ndjson":
-            guard Self.isValidJSON(text, extension: importedFile.fileExtension.lowercased()) else {
+            guard Self.isValidJSON(text, extension: ext) else {
                 throw ImportedFileReaderError.malformedJSON
             }
             format = .json
@@ -356,6 +356,62 @@ public struct ImportedFileContentReader: Sendable {
         return ImportedFileContent(fileID: importedFile.id, format: .imageOCR, text: extracted)
     }
     #endif
+
+    /// Resolve a standard Uniform Type Identifier when a provider gives a generic
+    /// or nonstandard filename extension. A recognized extension remains primary;
+    /// the UTI is a hint only, and the selected parser still validates the payload.
+    private static func resolvedExtension(for file: ImportedFile) -> String {
+        let ext = file.fileExtension.lowercased()
+        let knownExtensions: Set<String> = [
+            "txt", "text", "swift", "py", "js", "mjs", "cjs", "ts", "tsx", "jsx",
+            "html", "htm", "xml", "xhtml", "toml", "ini", "cfg", "conf", "sh", "bash",
+            "zsh", "fish", "sql", "c", "h", "cc", "cpp", "hpp", "rs", "go", "java",
+            "kt", "kts", "m", "mm", "rb", "php", "pl", "lua", "r", "dart", "ex",
+            "exs", "erl", "hrl", "hs", "lhs", "scala", "sc", "clj", "cljs", "cljc",
+            "edn", "gradle", "properties", "makefile", "dockerfile", "graphql", "gql",
+            "proto", "tf", "hcl", "diff", "patch", "md", "markdown", "mdown", "json",
+            "jsonl", "ndjson", "csv", "tsv", "yaml", "yml", "log", "plist", "strings",
+            "rtf", "pdf", "png", "jpg", "jpeg", "heic", "tif", "tiff", "bmp", "gif", "webp"
+        ]
+        guard !knownExtensions.contains(ext),
+              let identifier = file.contentTypeIdentifier?.lowercased() else {
+            return ext
+        }
+        switch identifier {
+        case "public.json":
+            return "json"
+        case "public.plain-text", "public.utf8-plain-text", "public.text":
+            return "txt"
+        case "net.daringfireball.markdown":
+            return "md"
+        case "public.comma-separated-values-text":
+            return "csv"
+        case "public.tab-separated-values-text":
+            return "tsv"
+        case "com.adobe.pdf":
+            return "pdf"
+        case "public.rtf":
+            return "rtf"
+        case "public.xml":
+            return "xml"
+        case "com.apple.property-list":
+            return "plist"
+        case "public.png":
+            return "png"
+        case "public.jpeg":
+            return "jpg"
+        case "public.tiff":
+            return "tiff"
+        case "com.compuserve.gif":
+            return "gif"
+        case "org.webmproject.webp":
+            return "webp"
+        case "public.heic":
+            return "heic"
+        default:
+            return ext
+        }
+    }
 
     private static func isValidJSON(_ text: String, extension ext: String) -> Bool {
         if ext == "jsonl" || ext == "ndjson" {
