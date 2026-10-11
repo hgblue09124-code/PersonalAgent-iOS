@@ -7,6 +7,24 @@ import PAKernel
 
 @Suite("Dynamic active provider routing")
 struct DynamicActiveProviderRoutingTests {
+    @Test func remoteInferenceFailsClosedWhenNetworkPermissionIsDenied() async throws {
+        struct DenyNetworkPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                intent.capabilities.contains(.network) ? .deny("network disabled") : .allow()
+            }
+        }
+        let suiteName = "DynamicActiveProviderRoutingTests.denied.\\(UUID().uuidString)"
+        let settings = try #require(UserDefaults(suiteName: suiteName))
+        defer { settings.removePersistentDomain(forName: suiteName) }
+        settings.set("remote", forKey: "provider.execution.mode")
+        settings.set(true, forKey: "provider.remote.enabled")
+        settings.set(false, forKey: "privacy.localOnly")
+        let coordinator = LocalModelRuntimeCoordinator(storage: FailingLocalModelStorage(), deviceCapabilityProvider: DefaultDeviceCapabilityProvider())
+        let provider = DynamicActiveProvider(fallbackProvider: DeterministicFakeProvider(), coordinator: coordinator, settings: settings, policy: DenyNetworkPolicy())
+        await #expect(throws: ProviderRuntimeError.authorizationFailure) {
+            _ = try await provider.complete(LLMRequest(model: ModelID(rawValue: "fake-text"), prompt: "must not call remote"))
+        }
+    }
     @Test func remoteStreamingDoesNotResolveLocalModelStorage() async throws {
         let suiteName = "DynamicActiveProviderRoutingTests.\(UUID().uuidString)"
         let settings = try #require(UserDefaults(suiteName: suiteName))
