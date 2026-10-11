@@ -61,6 +61,8 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         self.providerRuntime = providerRuntime
 
         // 2. Module setup (clean production registration, no test fixtures)
+        // Resolve once so every execution boundary uses the same least-privilege policy.
+        let resolvedPolicy = policy ?? DefaultPolicyEvaluator()
         let moduleCatalog = ModuleCatalog()
         for mod in modules {
             try await moduleCatalog.register(mod)
@@ -72,7 +74,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
-            policy: policy,
+            policy: resolvedPolicy,
             eventLog: log,
             logger: logger
         )
@@ -122,7 +124,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
             runtime: agentRuntime,
             eventLog: log,
             logger: logger,
-            policy: policy,
+            policy: resolvedPolicy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime
         )

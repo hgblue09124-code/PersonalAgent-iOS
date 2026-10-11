@@ -105,10 +105,12 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
             try await moduleCatalog.register(ToolModule(tool: tool))
         }
 
+        // Resolve once so module, orchestration, and durable execution share one policy.
+        let resolvedPolicy = policy ?? DefaultPolicyEvaluator()
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
-            policy: policy,
+            policy: resolvedPolicy,
             eventLog: idempotentLog,
             logger: logger
         )
@@ -158,7 +160,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
             runtime: agentRuntime,
             eventLog: idempotentLog,
             logger: logger,
-            policy: policy,
+            policy: resolvedPolicy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime
         )
@@ -208,7 +210,7 @@ public struct M7CompositionRoot: CompositionRoot, Sendable {
 
         let boundary = ExecutionBoundary(
             attemptStore: aStore,
-            policy: policy ?? DefaultPolicyEvaluator(),
+            policy: resolvedPolicy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime,
             evidenceResolver: evidenceResolver,
