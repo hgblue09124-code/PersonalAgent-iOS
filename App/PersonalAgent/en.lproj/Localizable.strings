@@ -315,6 +315,7 @@
 "Save token securely" = "Save token securely";
 "Delete token" = "Delete token";
 "Sync now" = "Sync now";
+"Preview changes" = "Preview changes";
 "Imported files" = "Imported files";
 "Import files" = "Import files";
 "Files are stored locally. Content is processed only when a matching format reader is available." = "Files are stored locally. Content is processed only when a matching format reader is available.";

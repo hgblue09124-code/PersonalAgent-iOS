@@ -234,17 +234,27 @@ struct SettingsScreen: View {
                     Button("Delete token", role: .destructive) { deleteGitHubSyncToken() }
                         .buttonStyle(.bordered)
                 }
-                Button {
-                    Task { await syncGitHubRepository() }
-                } label: {
-                    if isGitHubSyncing {
-                        ProgressView()
-                    } else {
-                        Label("Sync now", systemImage: "arrow.triangle.2.circlepath")
+                HStack {
+                    Button {
+                        Task { await syncGitHubRepository(preview: true) }
+                    } label: {
+                        Label("Preview changes", systemImage: "eye")
                     }
+                    .buttonStyle(.bordered)
+                    .disabled(isGitHubSyncing)
+
+                    Button {
+                        Task { await syncGitHubRepository() }
+                    } label: {
+                        if isGitHubSyncing {
+                            ProgressView()
+                        } else {
+                            Label("Sync now", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isGitHubSyncing)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(isGitHubSyncing)
                 Text(githubSyncStatus)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -764,10 +774,10 @@ private extension SettingsScreen {
         }
     }
 
-    func syncGitHubRepository() async {
+    func syncGitHubRepository(preview: Bool = false) async {
         isGitHubSyncing = true
         defer { isGitHubSyncing = false }
-        let result = await session.syncGitHubWorkspace()
+        let result = await session.syncGitHubWorkspace(preview: preview)
         githubSyncStatus = result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-8",
+  "title": "Add a read-only preview before GitHub sync",
+  "status": "ready",
+  "context": "Settings currently exposes a direct GitHub repository sync action even though KernelSession already supports a preview-only operation that computes upload, download and delete plans without applying changes.",
+  "goal": "Expose the existing read-only sync preview in Settings so users can inspect the planned changes before choosing the separate sync action.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-8.json"
+  ],
+  "forbidden_changes": [
+    "Do not change GitHubRepositorySyncClient conflict detection or filesystem mutation logic.",
+    "Do not make preview mutate workspace files, remote refs, or baseline state.",
+    "Do not store or display the GitHub token in status text."
+  ],
+  "acceptance_criteria": [
+    "Settings has a Preview changes action that calls session.syncGitHubWorkspace(preview: true).",
+    "Preview and sync actions cannot run concurrently and are disabled while an action is in progress.",
+    "Preview results are displayed in the existing status surface.",
+    "The action label is localized in English and Vietnamese."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Confirm preview dispatch uses preview: true and normal sync retains the default path"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if preview invokes the mutating sync path or Apple build fails."
+}
