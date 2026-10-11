@@ -1027,6 +1027,12 @@ private extension SettingsScreen {
             return
         }
 
+        guard !UserDefaults.standard.bool(forKey: "privacy.localOnly") else {
+            connectionState = .failure(String(localized: "Remote provider testing is disabled while Local-only mode is on."))
+            recordProviderConnectionTest(success: false)
+            return
+        }
+
         connectionState = .testing
         do {
             guard let runtime = session.composition.providerRuntime,

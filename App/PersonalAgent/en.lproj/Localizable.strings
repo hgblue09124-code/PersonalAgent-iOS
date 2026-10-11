@@ -512,3 +512,4 @@
 "Some files could not be imported: %@" = "Some files could not be imported: %@";
 "Could not open imported-file library: %@" = "Could not open imported-file library: %@";
 "Could not delete imported file: %@" = "Could not delete imported file: %@";
+"Remote provider testing is disabled while Local-only mode is on." = "Remote provider testing is disabled while Local-only mode is on.";
