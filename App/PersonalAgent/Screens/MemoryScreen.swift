@@ -8,6 +8,8 @@ struct MemoryScreen: View {
     @State private var search = ""
     @State private var selectedKind = "all"
     @State private var showClearConfirmation = false
+    @State private var isSavingMemory = false
+    @State private var memorySaveStatus: String?
 
     // Keep choices aligned with the kinds included in contextual memory retrieval.
     private let availableKinds = ["fact", "preference", "context", "instruction", "semantic"]
@@ -115,16 +117,17 @@ struct MemoryScreen: View {
                         HStack(alignment: .bottom, spacing: 8) {
                             TextField("Ví dụ: Tôi thích câu trả lời ngắn, có checklist…", text: $draft, axis: .vertical)
                                 .textFieldStyle(.roundedBorder).lineLimit(2...5)
-                            Button("Lưu") {
-                                let value = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-                                guard !value.isEmpty else { return }
-                                let kind = draftKind
-                                draft = ""
-                                Task { await session.remember(value, kind: kind) }
+                            Button {
+                                Task { await saveMemory(using: session) }
+                            } label: {
+                                if isSavingMemory { ProgressView().controlSize(.small) } else { Text("Lưu") }
                             }
                             .buttonStyle(.borderedProminent)
-                            .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            .disabled(isSavingMemory || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         }
+                    }
+                    if let memorySaveStatus {
+                        Text(memorySaveStatus).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
                     }
                     Divider()
                     Button(role: .destructive) { showClearConfirmation = true } label: {
@@ -141,6 +144,24 @@ struct MemoryScreen: View {
             Button("Hủy", role: .cancel) {}
         } message: {
             Text("Thao tác này xóa các mục Memory đã lưu. Hãy dùng xóa từng mục nếu chỉ muốn quên một thông tin.")
+        }
+    }
+
+    @MainActor
+    private func saveMemory(using session: KernelSession) async {
+        let value = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty, !isSavingMemory else { return }
+        isSavingMemory = true
+        memorySaveStatus = "Đang lưu Memory…"
+        let kind = draftKind
+        await session.remember(value, kind: kind)
+        isSavingMemory = false
+        let persisted = session.memoryRecords.contains { $0.content == value && $0.kind.caseInsensitiveCompare(kind) == .orderedSame }
+        if persisted {
+            draft = ""
+            memorySaveStatus = "Đã lưu Memory"
+        } else {
+            memorySaveStatus = "Chưa xác minh được Memory đã lưu. Đã giữ bản nháp."
         }
     }
 
