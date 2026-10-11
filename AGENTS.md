@@ -45,3 +45,11 @@
 - PR #117 is the current native implementation baseline. It produced a verified development IPA from commit `397d54462fc2a79284665e8b5ef5a9ba3a46d95b`; physical-device and visual verification remain gates before treating the implementation as final.
 - Pre-release IPA evidence is published through the repository's PR UI branch workflow. For future UI work, preserve this loop: **implement → CI/build → pre-release IPA → physical iPhone visual verification → merge**.
 - Do not redesign the visual direction during implementation. If the rendered result differs from Design Data, fix the responsible token/component rather than introducing a new architecture layer.
+
+## Task Contracts and Scope Guard
+- Before implementing an issue, read `.agentos/README.md` and use a task contract based on `.agentos/task.schema.json`.
+- A task is not ready unless it states a measurable goal, explicit allowed paths, forbidden changes, acceptance criteria, verification commands, dependencies, and recovery.
+- Run `python3 Scripts/agent_task_guard.py validate Tasks/active/<task>.json` before work and `python3 Scripts/agent_task_guard.py check-diff Tasks/active/<task>.json --base origin/main` before committing (use the actual PR target ref).
+- If a changed file is outside the task's allowed paths, stop and ask the planner to split or explicitly rescope the task; do not silently expand scope.
+- A task is VERIFIED only when required checks have actual recorded results. Code presence, an agent's claim, or a green unrelated run is not evidence. Keep CI failures visible; independent tasks may continue, but dependent integration/release tasks remain blocked.
+- Preserve one logical task = one logical commit. Update the Issue after each commit without waiting for CI, and report CI status separately.

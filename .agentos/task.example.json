@@ -1,0 +1,25 @@
+{
+  "id": "EXAMPLE-1",
+  "title": "Example: add a regression test for a confirmed defect",
+  "status": "ready",
+  "goal": "Add a focused regression test that fails for the confirmed defect and passes after the minimal repair.",
+  "context": "The planner has reproduced the defect and identified the owning module. Replace this example with a real approved issue before implementation.",
+  "allowed_paths": [
+    "Tasks/active/EXAMPLE-1.json",
+    "Tests/PersonalAgentTests/ExampleRegressionTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not modify production behavior unless the task is explicitly expanded by the planner.",
+    "Do not alter Package.swift or module boundaries."
+  ],
+  "acceptance_criteria": [
+    "The regression test reproduces the reported behavior before the fix and passes after the fix.",
+    "The diff contains only files covered by this contract.",
+    "The actual required CI checks are recorded separately from local test results."
+  ],
+  "verification": [
+    "swift test --disable-sandbox"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if the regression or required architecture gates fail; preserve failure evidence."
+}
