@@ -64,9 +64,9 @@ public actor SkillAgentOrchestrator {
         if let agent {
             let available = try await runtime.discover(query: "")
             let availableIDs = Set(available.map(\.id))
-            let declaredAvailable = agent.skillIDs.filter { availableIDs.contains($0) }
-            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }),
-               !declaredAvailable.isEmpty {
+            // An Agent manifest is a contract: every declared Skill must exist.
+            // Reject partial and fully stale scopes before intent selection.
+            if let missing = agent.skillIDs.first(where: { !availableIDs.contains($0) }) {
                 throw SkillAgentOrchestratorError.agentDeclaresMissingSkill(missing)
             }
         }
