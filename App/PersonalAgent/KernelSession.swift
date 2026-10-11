@@ -21,6 +21,7 @@ final class KernelSession: ObservableObject {
     @Published var skillManifests: [SkillManifest]
     @Published private(set) var agentManifests: [AgentManifest]
     @Published private(set) var selectedAgentID: String
+    @Published private(set) var teamModeEnabled: Bool
 
     @Published var installedModels: [LocalModelDescriptor]
     @Published var activeModelID: ModelID?
@@ -82,6 +83,7 @@ final class KernelSession: ObservableObject {
         self.skillManifests = []
         self.agentManifests = []
         self.selectedAgentID = UserDefaults.standard.string(forKey: "agent.selected.id") ?? "personal.default"
+        self.teamModeEnabled = UserDefaults.standard.bool(forKey: "agent.team.mode")
         self.installedModels = []
         self.activeModelID = nil
         self.activeModelDescriptor = nil
@@ -207,6 +209,7 @@ final class KernelSession: ObservableObject {
 
         let streamGeneration = streamingFlushGeneration
         let agentID = selectedAgentID
+        let useTeamMode = teamModeEnabled
         let task = Task { @MainActor [weak self] in
             defer { self?.isSubmitting = false }
             guard let self else { return }
@@ -216,7 +219,25 @@ final class KernelSession: ObservableObject {
                 if lifecycle == .stopped {
                     try await self.composition.session.start()
                 }
-                if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, agentID: agentID) {
+                if useTeamMode {
+                    if let teamResult = try await self.composition.runChatTeamIfMatched(goalStatement: normalizedStatement) {
+                        let result = teamResult.members.map { member in
+                            "\(member.agentName) · \(member.skillResult.skillID.rawValue)\n\(Self.cleanSkillResult(member.skillResult.outputJSON))"
+                        }.joined(separator: "\n\n")
+                        guard !result.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                            throw KernelError.invalidStateUpdate("Agent team completed without a result")
+                        }
+                        self.executionResult = result
+                        self.presentedResult = result
+                        self.streamingResponse = ""
+                        self.discardPendingStreamingDelta()
+                        self.responseMetrics = nil
+                        self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
+                        self.executionProgress = nil
+                        await self.refresh()
+                        return
+                    }
+                } else if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, agentID: agentID) {
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
@@ -325,7 +346,15 @@ final class KernelSession: ObservableObject {
     func selectAgent(id: String) {
         guard !isSubmitting, agentManifests.contains(where: { $0.id == id }) else { return }
         selectedAgentID = id
+        teamModeEnabled = false
         UserDefaults.standard.set(id, forKey: "agent.selected.id")
+        UserDefaults.standard.set(false, forKey: "agent.team.mode")
+    }
+
+    func setTeamModeEnabled(_ enabled: Bool) {
+        guard !isSubmitting else { return }
+        teamModeEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "agent.team.mode")
     }
 
     func refreshMemory() async {
