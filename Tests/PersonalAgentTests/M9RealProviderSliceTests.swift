@@ -391,6 +391,49 @@ struct M9RealProviderSliceTests {
     }
 
 
+    @Test func p3_runtimeCanStartNextStreamImmediatelyAfterCompletion() async throws {
+        let firstBody = Data("""
+        data: {"model":"grok-3","choices":[{"delta":{"content":"one"},"finish_reason":null}]}
+        data: [DONE]
+        """.utf8)
+        let secondBody = Data("""
+        data: {"model":"grok-3","choices":[{"delta":{"content":"two"},"finish_reason":null}]}
+        data: [DONE]
+        """.utf8)
+        let transport = ScriptedTransport(scripts: [
+            .response(ProviderTransportResponse(statusCode: 200, body: firstBody)),
+            .response(ProviderTransportResponse(statusCode: 200, body: secondBody))
+        ])
+        let vault = InMemoryCredentialVault()
+        let ref = ProviderCredentialRef(providerID: GrokProviderBoundary.providerID, account: "sequential-stream.test")
+        await vault.store(Data("test-key".utf8), for: ref)
+        let config = ProviderConfiguration(
+            providerID: GrokProviderBoundary.providerID,
+            endpointURL: GrokProviderBoundary.defaultEndpoint,
+            defaultModel: ModelID(rawValue: "grok-3"),
+            credential: ref
+        )
+        let provider = GrokProvider(transport: transport, credentials: vault, configuration: config)
+        let runtime = ProviderRuntime(provider: provider)
+        try await runtime.configure(config)
+        try await runtime.ready()
+
+        for expected in ["one", "two"] {
+            var text = ""
+            var completed = false
+            for try await event in runtime.stream(LLMRequest(model: ModelID(rawValue: "grok-3"), prompt: "stream")) {
+                switch event {
+                case .delta(let value): text += value
+                case .completed(let response): completed = response.text == expected
+                default: break
+                }
+            }
+            #expect(text == expected)
+            #expect(completed)
+        }
+        #expect((await transport.recordedRequests()).count == 2)
+    }
+
     @Test func p3_urlSessionCancellationDuringStreamingIsNotRetriedAsNetworkFailure() async throws {
         let transport = ScriptedTransport(scripts: [.urlSessionCancelled])
         let vault = InMemoryCredentialVault()
