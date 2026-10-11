@@ -1,5 +1,8 @@
 import SwiftUI
 import UIKit
+import Foundation
+import PAKernel
+import PASkills
 import PAWorkspace
 import PATerminal
 
@@ -161,12 +164,40 @@ struct TerminalScreen: View {
         }
     }
     private func makeRuntimeRegistry(session: KernelSession?) -> CommandRegistry {
-        var commands = BuiltinCommandRegistry.make(authorizer: SettingsTerminalCommandAuthorizer())
-        guard let session else { return commands }
+        let authorizer = SettingsTerminalCommandAuthorizer()
+        guard let session else {
+            return BuiltinCommandRegistry.make(authorizer: authorizer)
+        }
+        let skillRuntime = session.composition.skillRuntime
+        let skillPolicy = UserConfiguredPolicyEvaluator()
+        var commands = BuiltinCommandRegistry.make(
+            skillRuntime: skillRuntime,
+            authorizer: authorizer,
+            executeSkill: { request in
+                let inputJSON: String
+                if let data = request.input.data(using: .utf8),
+                   (try? JSONSerialization.jsonObject(with: data)) is [String: Any] {
+                    inputJSON = request.input
+                } else {
+                    let data = try JSONSerialization.data(withJSONObject: ["text": request.input], options: [.sortedKeys])
+                    inputJSON = String(decoding: data, as: UTF8.self)
+                }
+                let skillID = SkillID(rawValue: request.skillID)
+                let output = try await skillRuntime.execute(
+                    id: skillID,
+                    inputJSON: inputJSON,
+                    policy: skillPolicy
+                )
+                guard try await skillRuntime.verify(id: skillID, outputJSON: output) else {
+                    throw SkillExecutionError.malformedSkill
+                }
+                return output
+            }
+        )
 
         commands = commands.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent list [query]|show <id>|use <id>|status|run <request> model status provider status skills list [query] memory status sync status|preview|now clear help" + "\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent list [query]|show <id>|use <id>|status|run <request> model status provider status skills list [query] skill list [query]|run <id> <JSON input> memory status sync status|preview|now clear help" + "\n")
         }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
