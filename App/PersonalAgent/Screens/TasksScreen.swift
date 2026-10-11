@@ -25,7 +25,7 @@ struct TasksScreen: View {
                         .frame(width: 44, height: 44)
                         .background(.tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(taskStateTitle).font(.headline)
+                        Text(LocalizedStringKey(taskStateTitle)).font(.headline)
                         Text(session.executionProgress?.detail ?? "Trạng thái dưới đây phản ánh phiên Agent hiện tại, không phải lịch sử job độc lập.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
