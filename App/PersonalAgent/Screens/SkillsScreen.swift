@@ -107,11 +107,11 @@ struct SkillsScreen: View {
                             Image(systemName: "plus.square.dashed").foregroundStyle(.tint).frame(width: 24)
                             VStack(alignment: .leading, spacing: 3) {
                                 HStack {
-                                    Text(idea.title).font(.subheadline.weight(.semibold))
+                                    Text(LocalizedStringKey(idea.title)).font(.subheadline.weight(.semibold))
                                     Spacer()
-                                    Text(idea.group).font(.caption2).foregroundStyle(.secondary)
+                                    Text(LocalizedStringKey(idea.group)).font(.caption2).foregroundStyle(.secondary)
                                 }
-                                Text(idea.detail).font(.caption).foregroundStyle(.secondary)
+                                Text(LocalizedStringKey(idea.detail)).font(.caption).foregroundStyle(.secondary)
                             }
                         }
                         .padding(.vertical, 5)

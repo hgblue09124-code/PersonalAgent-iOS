@@ -403,3 +403,24 @@
 
 "Agent could not complete the request" = "Agent could not complete the request";
 "Check provider and model settings" = "Check provider and model settings";
+"Đọc và tóm tắt tài liệu" = "Read and summarize documents";
+"Tri thức" = "Knowledge";
+"Nhận tệp đã nhập, trích xuất nội dung được hỗ trợ, tóm tắt và giữ nguồn dẫn chiếu." = "Read imported files, extract supported content, summarize it, and preserve source references.";
+"Tìm kiếm workspace" = "Search workspace";
+"Tìm theo tên và nội dung trong phạm vi được cấp; trả về đường dẫn và đoạn khớp." = "Search names and content within the granted scope; return paths and matching excerpts.";
+"Audit trước phát hành" = "Pre-release audit";
+"Kỹ thuật" = "Engineering";
+"Đối chiếu checklist, test, CI và bằng chứng trên commit cụ thể." = "Compare checklists, tests, CI, and evidence against a specific commit.";
+"Phân loại lỗi repo" = "Repository issue triage";
+"Nhóm lỗi theo nguyên nhân gốc, mức ảnh hưởng, bước tái hiện và regression test." = "Group issues by root cause, impact, reproduction steps, and regression tests.";
+"Quản lý Memory" = "Memory curation";
+"Đề xuất dữ kiện đáng lưu, ghi nguồn và cho phép sửa hoặc quên thông tin." = "Suggest facts worth saving, record sources, and support editing or forgetting them.";
+"Chuyển đổi tệp an toàn" = "Safe file conversion";
+"Dữ liệu" = "Data";
+"Kiểm tra định dạng và giới hạn trước khi chuyển đổi; không ghi đè âm thầm." = "Validate formats and limits before conversion; never silently overwrite files.";
+"Tách việc từ ghi chú" = "Extract actions from notes";
+"Công việc" = "Productivity";
+"Trích xuất quyết định, người phụ trách khi được nêu, thời hạn và việc còn mở." = "Extract decisions, named owners, deadlines, and open actions.";
+"Chẩn đoán Provider" = "Provider diagnostics";
+"Hệ thống" = "System";
+"Phân biệt cấu hình, xác thực, kết nối, HTTP, stream và lỗi runtime mà không lộ secret." = "Distinguish configuration, authentication, connectivity, HTTP, streaming, and runtime failures without exposing secrets.";
