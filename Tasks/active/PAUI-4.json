@@ -1,0 +1,27 @@
+{
+  "id": "PAUI-4",
+  "title": "Add verified save feedback to Memory",
+  "status": "in_progress",
+  "context": "MemoryScreen previously cleared the user's draft before the async persistence operation completed and showed no visible save state.",
+  "goal": "Show progress and only clear the Memory draft when the refreshed snapshot contains the saved item.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-4.json",
+    "App/PersonalAgent/Screens/MemoryScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change memory storage/runtime semantics.",
+    "Do not claim persistence success without a matching item in the refreshed snapshot.",
+    "Do not add sensitive data to logs."
+  ],
+  "acceptance_criteria": [
+    "Prevent repeated save taps while a save is running.",
+    "Keep the draft unless persistence is visible in the refreshed snapshot.",
+    "Show Vietnamese progress, verified-success, or unverified-save status."
+  ],
+  "verification": [
+    "Run Agent Task Contract, M3 and Apple Native Build & Unsigned IPA.",
+    "Verify persistence across a screen revisit on device."
+  ],
+  "dependencies": ["Issue #367"],
+  "recovery": "Revert this task commit if save feedback misreports persistence or loses the draft."
+}
