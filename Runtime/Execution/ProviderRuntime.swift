@@ -114,20 +114,40 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
         }
     }
 
-    public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
+    /// LLMProvider.stream is a synchronous protocol requirement. Keep its witness
+    /// nonisolated and hop into the actor before touching lifecycle state; otherwise
+    /// Swift's executor check can abort when the runtime is called from another executor.
+    nonisolated public func stream(_ request: LLMRequest) -> AsyncThrowingStream<LLMStreamEvent, Error> {
         let (stream, continuation) = AsyncThrowingStream<LLMStreamEvent, Error>.makeStream()
         let executionID = UUID()
+        let startTask = Task {
+            await self.startStreamExecution(request, continuation: continuation, executionID: executionID)
+        }
+        continuation.onTermination = { _ in
+            startTask.cancel()
+            Task { await self.cancelStreamExecution(executionID) }
+        }
+        return stream
+    }
 
+    private func startStreamExecution(
+        _ request: LLMRequest,
+        continuation: AsyncThrowingStream<LLMStreamEvent, Error>.Continuation,
+        executionID: UUID
+    ) {
+        guard !Task.isCancelled else {
+            continuation.finish(throwing: ProviderRuntimeError.cancelled)
+            return
+        }
         guard activeStreamTask == nil else {
             continuation.finish(throwing: ProviderRuntimeError.invalidConfiguration)
-            return stream
+            return
         }
-
         do {
             try prepareExecution()
         } catch {
             continuation.finish(throwing: error)
-            return stream
+            return
         }
         activeStreamExecutionID = executionID
 
@@ -158,10 +178,12 @@ public actor ProviderRuntime: @preconcurrency LLMProvider {
                 continuation.finish(throwing: error)
             }
         }
-
         activeStreamTask = work
-        continuation.onTermination = { _ in work.cancel() }
-        return stream
+    }
+
+    private func cancelStreamExecution(_ executionID: UUID) {
+        guard activeStreamExecutionID == executionID else { return }
+        activeStreamTask?.cancel()
     }
 
     public func cancel() {
