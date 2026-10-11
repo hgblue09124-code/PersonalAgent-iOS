@@ -179,7 +179,7 @@ public actor GitHubRepositorySyncClient {
         self.tokenProvider = tokenProvider
     }
 
-    public func synchronize(workspaceURL: URL, commitMessage: String = "Sync AgentOS workspace") async throws -> GitHubRepositorySyncResult {
+    public func synchronize(workspaceURL: URL, commitMessage: String = "Sync AgentOS workspace", previewOnly: Bool = false) async throws -> GitHubRepositorySyncResult {
         let workspace = workspaceURL.standardizedFileURL
         guard workspace.path != stateURL.path,
               !Self.contains(workspace, child: stateURL),
@@ -239,6 +239,51 @@ public actor GitHubRepositorySyncClient {
             }
         }
         guard conflicts.isEmpty else { throw GitHubRepositorySyncError.remoteConflict(paths: conflicts) }
+
+        if previewOnly {
+            let plannedUploads = localChanges.keys.sorted().filter {
+                if case .upsert? = localChanges[$0] { return true }
+                return false
+            }
+            let localDeletes = localChanges.keys.sorted().filter {
+                if case .delete? = localChanges[$0] { return true }
+                return false
+            }
+            let plannedDownloads = allPaths.sorted().filter { path in
+                let localSHA = localFiles[path]?.sha
+                let remoteSHA = remoteFiles[path]?.sha
+                let baseSHA = oldState?.files[path]
+                let localChanged = localSHA != baseSHA
+                let remoteChanged = remoteSHA != baseSHA
+                return !localChanged && remoteChanged && remoteSHA != nil && localSHA != remoteSHA
+            }
+            let remoteDeletes = allPaths.sorted().filter { path in
+                let localSHA = localFiles[path]?.sha
+                let remoteSHA = remoteFiles[path]?.sha
+                let baseSHA = oldState?.files[path]
+                let localChanged = localSHA != baseSHA
+                let remoteChanged = remoteSHA != baseSHA
+                return !localChanged && remoteChanged && remoteSHA == nil && localSHA != nil
+            }
+
+            // Preview validates inbound content but never posts blobs, advances the remote ref,
+            // writes workspace files, or persists a new sync baseline.
+            for path in plannedDownloads {
+                guard let remote = remoteFiles[path] else {
+                    throw GitHubRepositorySyncError.invalidResponse
+                }
+                _ = try await fetchBlob(remote.sha, path: path, token: token)
+            }
+
+            let plannedDeletes = Array(Set(localDeletes + remoteDeletes)).sorted()
+            return GitHubRepositorySyncResult(
+                commitSHA: remoteCommitSHA,
+                uploadedPaths: plannedUploads,
+                downloadedPaths: plannedDownloads,
+                deletedPaths: plannedDeletes,
+                unchanged: plannedUploads.isEmpty && plannedDownloads.isEmpty && plannedDeletes.isEmpty
+            )
+        }
 
         var finalRemoteFiles = remoteFiles
         var treeChanges: [[String: Any]] = []
