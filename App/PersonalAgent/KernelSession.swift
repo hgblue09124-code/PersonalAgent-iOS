@@ -346,6 +346,17 @@ final class KernelSession: ObservableObject {
                 self.executionProgress = nil
                 self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
+            } catch let error as ProviderRuntimeError where error == .cancelled {
+                // ProviderRuntime normalizes stream cancellation to its typed error.
+                // Treat it as Stop, not a user-visible provider failure.
+                if let goalID,
+                   let status = await self.composition.runtime.goal(id: goalID)?.status,
+                   status == .active || status == .proposed {
+                    try? await self.composition.runtime.abort(goalID: goalID)
+                }
+                self.executionProgress = nil
+                self.chatStreamPresentation.streamingResponse = ""
+                self.discardPendingStreamingDelta()
             } catch let error as URLError where error.code == .cancelled {
                 // URLSession commonly reports task cancellation as URLError.cancelled,
                 // not CancellationError. Treat both as an intentional Stop action.
