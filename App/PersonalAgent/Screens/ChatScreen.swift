@@ -50,7 +50,7 @@ struct ChatScreen: View {
                 Spacer()
                 Menu {
                     Button { session.newConversation() } label: { Label("New conversation", systemImage: "plus") }
-                    Button { showPromptLibrary = true } label: { Label("Thư viện tác vụ · 24 mẫu", systemImage: "books.vertical") }
+                    Button { showPromptLibrary = true } label: { Label("Thư viện tác vụ · 28 mẫu", systemImage: "books.vertical") }
                     Button { renameText = currentTitle; showRename = true } label: { Label("Rename", systemImage: "pencil") }
                     if session.conversations.count > 1 {
                         Section("Conversations") {
