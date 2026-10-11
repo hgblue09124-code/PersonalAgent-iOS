@@ -37,6 +37,19 @@ final class TerminalSkillBridgeTests: XCTestCase {
         XCTAssertTrue(result.stdout.contains("skill"))
     }
 
+    func testSkillRunWithoutInjectedPolicyFailsClosed() async throws {
+        let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: [], dependencies: [], version: "1")
+        let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { _ in "must not execute" }])
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+
+        let execution = try await session.execute("skill run calculator 1+1", registry: BuiltinCommandRegistry.make(skillRuntime: runtime))
+        let output = await session.outputs()
+
+        XCTAssertEqual(execution.state, .failed)
+        XCTAssertTrue(output.last?.text.contains("explicit policy is required") == true)
+    }
+
     func testSkillCommandUsesSkillRuntime() async throws {
         let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: ["MODEL_ACCESS"], dependencies: ["calculator"], version: "1")
         let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { input in input == "187 * 43" ? "8041" : "0" }])
