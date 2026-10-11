@@ -150,18 +150,78 @@ struct TerminalScreen: View {
 
         commands = commands.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list [query] memory status sync status|preview|now clear help" + "\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent list [query]|show <id>|use <id>|status|run <request> model status provider status skills list [query] memory status sync status|preview|now clear help" + "\n")
         }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
             return CommandResult(stdout: await session.terminalStatus())
         }
         commands = commands.registering("agent") { command, _ in
-            guard command.arguments.first == "run", command.arguments.count >= 2 else {
-                throw CommandError.invalidArguments("agent run <request>")
+            guard let action = command.arguments.first else {
+                throw CommandError.invalidArguments("agent list [query]|show <id>|use <id>|status|run <request>")
             }
-            let request = command.arguments.dropFirst().joined(separator: " ")
-            return CommandResult(stdout: await session.runFromTerminal(request))
+            let args = Array(command.arguments.dropFirst())
+            switch action {
+            case "list":
+                guard args.count <= 1 else { throw CommandError.invalidArguments("agent list [query]") }
+                let output = await MainActor.run {
+                    let needle = (args.first ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    let matches = session.agentManifests
+                        .filter {
+                            needle.isEmpty ||
+                            $0.id.lowercased().contains(needle) ||
+                            $0.name.lowercased().contains(needle) ||
+                            $0.description.lowercased().contains(needle)
+                        }
+                        .sorted { $0.id < $1.id }
+                    guard !matches.isEmpty else { return "No Agent profiles found.\n" }
+                    return matches.map { agent in
+                        let active = agent.id == session.selectedAgentID ? " [ACTIVE]" : ""
+                        return "\(agent.id)\(active)\tv\(agent.version.major).\(agent.version.minor).\(agent.version.patch)\t\(agent.name) · \(agent.skillIDs.count) Skills"
+                    }.joined(separator: "\n") + "\n"
+                }
+                return CommandResult(stdout: output)
+            case "show":
+                guard args.count == 1 else { throw CommandError.invalidArguments("agent show <id>") }
+                let output = await MainActor.run {
+                    guard let agent = session.agentManifests.first(where: { $0.id == args[0] }) else {
+                        return "Agent not found: \(args[0])\n"
+                    }
+                    let skills = agent.skillIDs.map(\.rawValue).sorted()
+                    return [
+                        "ID: \(agent.id)",
+                        "Name: \(agent.name)",
+                        "Version: \(agent.version.major).\(agent.version.minor).\(agent.version.patch)",
+                        "Description: \(agent.description)",
+                        "Allowed Skills: \(skills.isEmpty ? "none" : skills.joined(separator: ", "))",
+                        "Rule: \(agent.instructions.isEmpty ? "none" : agent.instructions)"
+                    ].joined(separator: "\n") + "\n"
+                }
+                return CommandResult(stdout: output)
+            case "use":
+                guard args.count == 1 else { throw CommandError.invalidArguments("agent use <id>") }
+                return await MainActor.run {
+                    guard session.agentManifests.contains(where: { $0.id == args[0] }) else {
+                        return CommandResult(stderr: "Agent not found: \(args[0])\n", exitCode: 1)
+                    }
+                    session.selectAgent(id: args[0])
+                    guard session.selectedAgentID == args[0] else {
+                        return CommandResult(stderr: "Agent is busy; selection was not changed.\n", exitCode: 1)
+                    }
+                    return CommandResult(stdout: "Active Agent set to \(args[0]).\n")
+                }
+            case "status":
+                guard args.isEmpty else { throw CommandError.invalidArguments("agent status") }
+                let status = await MainActor.run {
+                    "Active Agent: \(session.selectedAgentID)\nTeam mode: \(session.teamModeEnabled ? "enabled" : "disabled")\n"
+                }
+                return CommandResult(stdout: status)
+            case "run":
+                guard !args.isEmpty else { throw CommandError.invalidArguments("agent run <request>") }
+                return CommandResult(stdout: await session.runFromTerminal(args.joined(separator: " ")))
+            default:
+                throw CommandError.invalidArguments("agent list [query]|show <id>|use <id>|status|run <request>")
+            }
         }
         commands = commands.registering("skills") { command, _ in
             guard command.arguments.first == "list", command.arguments.count <= 2 else {

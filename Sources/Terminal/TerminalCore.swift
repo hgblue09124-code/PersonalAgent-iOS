@@ -100,7 +100,12 @@ public struct CommandRegistry: Sendable {
             case "remove": return [.write, .destructive]
             default: return [.execute]
             }
-        case "agent": return command.arguments.first == "run" ? [.execute] : [.read]
+        case "agent":
+            switch command.arguments.first {
+            case "run": return [.execute]
+            case "use": return [.write]
+            default: return [.read]
+            }
         case "skill", "skills": return command.arguments.first == "run" ? [.execute] : [.read]
         case "sync": return command.arguments.first == "now" ? [.network, .write] : (command.arguments.first == "preview" ? [.network] : [.read])
         default: return [.execute]
