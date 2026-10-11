@@ -150,7 +150,7 @@ struct TerminalScreen: View {
 
         commands = commands.registering("help") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("help") }
-            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list memory status sync status|now clear help" + "\n")
+            return CommandResult(stdout: "pwd ls cd cat head tail mkdir touch cp mv rm find grep workspace status agent run <request> model status provider status skills list [query] memory status sync status|now clear help" + "\n")
         }
         commands = commands.registering("status") { command, _ in
             guard command.arguments.isEmpty else { throw CommandError.invalidArguments("status") }
@@ -164,8 +164,11 @@ struct TerminalScreen: View {
             return CommandResult(stdout: await session.runFromTerminal(request))
         }
         commands = commands.registering("skills") { command, _ in
-            guard command.arguments == ["list"] else { throw CommandError.invalidArguments("skills list") }
-            return CommandResult(stdout: await session.terminalSkillsList())
+            guard command.arguments.first == "list", command.arguments.count <= 2 else {
+                throw CommandError.invalidArguments("skills list [query]")
+            }
+            let query = command.arguments.dropFirst().first ?? ""
+            return CommandResult(stdout: await session.terminalSkillsList(query: query))
         }
         commands = commands.registering("model") { command, _ in
             guard command.arguments == ["status"] else { throw CommandError.invalidArguments("model status") }

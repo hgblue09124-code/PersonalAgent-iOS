@@ -324,9 +324,18 @@ final class KernelSession: ObservableObject {
         "Active model: \(activeModelID?.rawValue ?? "none")\nInstalled models: \(installedModels.count)\n"
     }
 
-    func terminalSkillsList() -> String {
-        let ids = skillManifests.map { String(describing: $0.id) }.sorted()
-        return ids.isEmpty ? "No skills discovered.\n" : ids.joined(separator: "\n") + "\n"
+    func terminalSkillsList(query: String = "") -> String {
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let matches = skillManifests
+            .filter {
+                needle.isEmpty ||
+                $0.id.rawValue.lowercased().contains(needle) ||
+                $0.name.lowercased().contains(needle) ||
+                $0.description.lowercased().contains(needle)
+            }
+            .sorted { $0.id.rawValue < $1.id.rawValue }
+        let rows = matches.map { "\($0.id.rawValue)\t\($0.name) — \($0.description)" }
+        return rows.isEmpty ? "No skills found.\n" : rows.joined(separator: "\n") + "\n"
     }
 
     func terminalMemoryStatus() -> String {
