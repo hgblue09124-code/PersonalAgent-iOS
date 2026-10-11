@@ -4,6 +4,7 @@ import PAComposition
 import PAKernel
 import PAModules
 import PAEvents
+import PAMemory
 
 @Suite("M3 composition and isolation")
 struct M3CompositionIsolationTests {
@@ -28,6 +29,49 @@ struct M3CompositionIsolationTests {
             )
         }
         #expect(await root.runtime.currentState().lifecycle == .created)
+    }
+
+
+    @Test func compositionRootsDefaultToLeastPrivilegePolicy() async throws {
+        let m3 = try await M3CompositionRoot()
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await m3.moduleRuntime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "blocked"])
+                )
+            )
+        }
+
+        let m4 = try await M4CompositionRoot(memoryStore: InMemoryMemoryStore())
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await m4.moduleRuntime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "blocked"])
+                )
+            )
+        }
+
+        let m6 = try await M6CompositionRoot(modules: [EchoModule()])
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await m6.moduleRuntime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "blocked"])
+                )
+            )
+        }
+
+        let m7 = try await M7CompositionRoot(modules: [EchoModule()])
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await m7.moduleRuntime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "blocked"])
+                )
+            )
+        }
     }
 
     @Test func skillComposesEcho() async throws {

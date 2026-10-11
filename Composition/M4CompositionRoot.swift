@@ -85,7 +85,7 @@ public struct M4CompositionRoot: CompositionRoot, Sendable {
         let moduleRuntime = ModuleRuntime(
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
-            policy: policy,
+            policy: policy ?? DefaultPolicyEvaluator(),
             eventLog: log,
             logger: logger
         )

@@ -1,0 +1,44 @@
+{
+  "id": "PASEC-7",
+  "title": "Unify least-privilege policy defaults across composition roots",
+  "status": "in_progress",
+  "goal": "Ensure M3, M4, M6, and M7 composition roots always inject an explicit least-privilege policy when callers omit one, and keep all execution boundaries aligned.",
+  "context": "ModuleRuntime fails closed when its policy is absent, but composition roots still passed nil in some paths. M7 also used a default evaluator for ExecutionBoundary while passing nil to ModuleRuntime and M6Orchestrator. This task aligns policy injection and adds direct regression coverage without granting execution by default.",
+  "allowed_paths": [
+    "Composition/M3CompositionRoot.swift",
+    "Composition/M4CompositionRoot.swift",
+    "Composition/M6CompositionRoot.swift",
+    "Composition/M7CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M3CompositionIsolationTests.swift",
+    "Tasks/active/PASEC-7.json"
+  ],
+  "forbidden_changes": [
+    "Do not make the default policy grant write, execute, network, or destructive capabilities.",
+    "Do not bypass policy, approval, capability, schema, or cancellation checks.",
+    "Do not alter app UI or Xcode project files.",
+    "Do not change explicit injected policy behavior."
+  ],
+  "acceptance_criteria": [
+    "M3 injects DefaultPolicyEvaluator when the caller supplies no policy.",
+    "M4 injects DefaultPolicyEvaluator when the caller supplies no policy.",
+    "M6 resolves one policy and shares it with ModuleRuntime and M6Orchestrator.",
+    "M7 resolves one policy and shares it with ModuleRuntime, M6Orchestrator, and ExecutionBoundary.",
+    "Explicit caller-provided policies continue to be used unchanged.",
+    "Default policy remains least privilege and does not implicitly grant execute capability.",
+    "A regression test proves default M3 execution is denied.",
+    "A regression test proves default M4 execution is denied.",
+    "A regression test proves default M6 execution is denied.",
+    "A regression test proves default M7 execution is denied and required CI gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-7.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-7.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #354"
+  ],
+  "recovery": "Revert this single logical commit if existing explicitly authorized execution paths regress; retain fail-closed behavior for missing or denied policy."
+}
