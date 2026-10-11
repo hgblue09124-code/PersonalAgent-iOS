@@ -40,6 +40,36 @@ final class KernelSession: ObservableObject {
     private var generationStartedAt: Date?
     private var firstResponseDeltaAt: Date?
     private var executionTask: Task<Void, Never>?
+    private var pendingStreamingDelta = ""
+    private var streamingFlushScheduled = false
+    private var streamingFlushGeneration = 0
+    private let streamingFlushInterval: TimeInterval = 0.05
+
+    /// Publish stream text at most 20 times per second, rather than once per token.
+    /// All access is serialized on the main queue.
+    private func enqueueStreamingDelta(_ delta: String) {
+        if firstResponseDeltaAt == nil {
+            firstResponseDeltaAt = Date()
+        }
+        pendingStreamingDelta += delta
+        guard !streamingFlushScheduled else { return }
+        streamingFlushScheduled = true
+        let generation = streamingFlushGeneration
+        DispatchQueue.main.asyncAfter(deadline: .now() + streamingFlushInterval) { [weak self] in
+            guard let self, self.streamingFlushGeneration == generation else { return }
+            self.streamingFlushScheduled = false
+            guard !self.pendingStreamingDelta.isEmpty else { return }
+            self.streamingResponse += self.pendingStreamingDelta
+            self.pendingStreamingDelta = ""
+            self.refreshResponseMetrics()
+        }
+    }
+
+    private func discardPendingStreamingDelta() {
+        pendingStreamingDelta = ""
+        streamingFlushGeneration &+= 1
+        streamingFlushScheduled = false
+    }
 
     init(composition: M8CompositionRoot, state: AgentState) {
         self.composition = composition
@@ -159,6 +189,7 @@ final class KernelSession: ObservableObject {
         executionResult = nil
         presentedResult = nil
         streamingResponse = ""
+        discardPendingStreamingDelta()
         responseMetrics = nil
         generationStartedAt = nil
         firstResponseDeltaAt = nil
@@ -174,6 +205,7 @@ final class KernelSession: ObservableObject {
             return
         }
 
+        let streamGeneration = streamingFlushGeneration
         let agentID = selectedAgentID
         let task = Task { @MainActor [weak self] in
             defer { self?.isSubmitting = false }
@@ -192,6 +224,7 @@ final class KernelSession: ObservableObject {
                     self.executionResult = result
                     self.presentedResult = result
                     self.streamingResponse = ""
+                    self.discardPendingStreamingDelta()
                     self.responseMetrics = nil
                     self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                     self.executionProgress = nil
@@ -214,15 +247,12 @@ final class KernelSession: ObservableObject {
                         }
                     },
                     onReasoningDelta: { delta in
-                        // The main queue is serial: preserve provider delta order when
-                        // hopping from the streaming executor to SwiftUI state.
+                        // Coalesce provider deltas before publishing SwiftUI state.
+                        // Publishing per token invalidates every Settings view observing
+                        // this session and can trigger an animated scroll per token.
                         DispatchQueue.main.async { [weak self] in
-                            guard let self else { return }
-                            if self.firstResponseDeltaAt == nil {
-                                self.firstResponseDeltaAt = Date()
-                            }
-                            self.streamingResponse += delta
-                            self.refreshResponseMetrics()
+                            guard let self, self.streamingFlushGeneration == streamGeneration else { return }
+                            self.enqueueStreamingDelta(delta)
                         }
                     }
                 )
@@ -234,6 +264,7 @@ final class KernelSession: ObservableObject {
                 self.presentedResult = result
                 self.refreshResponseMetrics()
                 self.streamingResponse = ""
+                self.discardPendingStreamingDelta()
                 self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
                 self.executionProgress = nil
             } catch is CancellationError {
@@ -244,6 +275,7 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionProgress = nil
                 self.streamingResponse = ""
+                self.discardPendingStreamingDelta()
             } catch let error as URLError where error.code == .cancelled {
                 // URLSession commonly reports task cancellation as URLError.cancelled,
                 // not CancellationError. Treat both as an intentional Stop action.
@@ -254,6 +286,7 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionProgress = nil
                 self.streamingResponse = ""
+                self.discardPendingStreamingDelta()
             } catch {
                 if let goalID,
                    let status = await self.composition.runtime.goal(id: goalID)?.status,
@@ -262,6 +295,7 @@ final class KernelSession: ObservableObject {
                 }
                 self.executionProgress = nil
                 self.streamingResponse = ""
+                self.discardPendingStreamingDelta()
                 if let kernelError = error as? KernelError {
                     self.lastError = kernelError.description
                 } else {

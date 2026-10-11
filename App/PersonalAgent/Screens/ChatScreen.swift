@@ -94,7 +94,9 @@ struct ChatScreen: View {
                     .frame(minHeight: 260, maxHeight: 500)
                     .onChange(of: session.chatHistory.count) { _, _ in if let id = session.chatHistory.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
                     .onChange(of: session.streamingResponse) { _, value in
-                        if !value.isEmpty { withAnimation(.easeOut(duration: 0.12)) { proxy.scrollTo("streaming-response", anchor: .bottom) } }
+                        guard !value.isEmpty else { return }
+                        // Streaming text is refreshed in batches; don't animate every batch.
+                        proxy.scrollTo("streaming-response", anchor: .bottom)
                     }
                     .onAppear { if let id = session.chatHistory.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
                 }
