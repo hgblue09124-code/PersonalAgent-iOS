@@ -100,6 +100,12 @@ final class AgentWorkspaceTests: XCTestCase {
         } catch let error as AgentWorkspaceError {
             XCTAssertEqual(error, .protectedContent)
         }
+        do {
+            try await workspace.appendFile("safe append", to: "workspace/external-note.md")
+            XCTFail("append must reject a pre-existing secret-bearing file")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
 
         try await workspace.writeFile("safe", to: "workspace/append-note.md")
         do {
@@ -110,6 +116,50 @@ final class AgentWorkspaceTests: XCTestCase {
         }
         let safeValue = try await workspace.readFile(at: "workspace/append-note.md")
         XCTAssertEqual(safeValue, "safe")
+    }
+
+    func testCopyAndMoveRejectSecretLikeContentAndPreserveSource() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let secret = "OPENROUTER_API_KEY = \"or-v1-" + String(repeating: "A", count: 24) + "\""
+        let source = root.appendingPathComponent("workspace/external-note.md")
+        try secret.write(to: source, atomically: true, encoding: .utf8)
+
+        do {
+            try await workspace.copy(from: "workspace/external-note.md", to: "workspace/copied.md")
+            XCTFail("copy must reject secret-like source content")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
+        do {
+            try await workspace.move(from: "workspace/external-note.md", to: "workspace/moved.md")
+            XCTFail("move must reject secret-like source content")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: source.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("workspace/copied.md").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("workspace/moved.md").path))
+    }
+
+    func testCopyRejectsSecretNestedInsideDirectory() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let sourceDirectory = root.appendingPathComponent("workspace/project")
+        try FileManager.default.createDirectory(at: sourceDirectory, withIntermediateDirectories: true)
+        let secret = "token = \"ghp_" + String(repeating: "A", count: 24) + "\""
+        try secret.write(to: sourceDirectory.appendingPathComponent("notes.md"), atomically: true, encoding: .utf8)
+
+        do {
+            try await workspace.copy(from: "workspace/project", to: "workspace/project-copy")
+            XCTFail("directory copy must reject nested secret-like content")
+        } catch let error as AgentWorkspaceError {
+            XCTAssertEqual(error, .protectedContent)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("workspace/project-copy").path))
     }
 
     func testUnicodeWriteReadExistsMetadata() async throws {
