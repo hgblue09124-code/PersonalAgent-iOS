@@ -4,7 +4,13 @@ import Foundation
 public enum WorkspaceContentSafety {
     private static let blockedNames: Set<String> = [
         ".env", ".env.local", "credentials.json", "secrets.json", "api_keys.json",
+        ".git-credentials", ".netrc", ".npmrc", ".pypirc", "known_hosts", "authorized_keys",
         "id_rsa", "id_ed25519"
+    ]
+    // Repository metadata may contain hooks, remotes, or credential-bearing config.
+    // Agents must use the dedicated sync boundary rather than editing these internals.
+    private static let blockedDirectoryNames: Set<String> = [
+        ".git", ".svn", ".hg", ".ssh", ".aws", ".azure", ".kube", ".docker"
     ]
     private static let protectedMarkers = ["credential", "secret", "token", "apikey", "api_key", "api-key", "private_key", "private-key", "access_key", "access-key", "password"]
     private static let secretPatterns = [
@@ -20,7 +26,10 @@ public enum WorkspaceContentSafety {
         // Normalize cross-platform separators before applying policy.
         let normalized = path.replacingOccurrences(of: "\\", with: "/")
         return normalized.split(separator: "/").map { String($0).lowercased() }.contains { component in
-            blockedNames.contains(component) || component.hasPrefix(".env.") || protectedMarkers.contains { component.contains($0) }
+            blockedNames.contains(component)
+                || blockedDirectoryNames.contains(component)
+                || component.hasPrefix(".env.")
+                || protectedMarkers.contains { component.contains($0) }
         }
     }
 

@@ -107,4 +107,22 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let exists = try await workspace.exists(at: "workspace/notes.md")
         XCTAssertFalse(exists)
     }
+
+    func testWorkspaceRejectsRepositoryMetadataAndCredentialDirectories() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+
+        for path in [".git/hooks/pre-commit", ".ssh/id_ed25519", ".aws/credentials"] {
+            do {
+                try await workspace.writeFile("untrusted", to: path)
+                XCTFail("Protected system path must be rejected: \(path)")
+            } catch {
+                // Expected: direct AgentWorkspace calls must enforce the boundary.
+            }
+            XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path))
+        }
+    }
+
 }
