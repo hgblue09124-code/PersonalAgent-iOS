@@ -602,3 +602,15 @@
 "Chạy Skills / Modules" = "Chạy Skills / Modules";
 "Truy cập mạng" = "Truy cập mạng";
 "Thao tác phá huỷ luôn cần bước phê duyệt riêng." = "Thao tác phá huỷ luôn cần bước phê duyệt riêng.";
+"Model transition in progress" = "Model đang chuyển trạng thái";
+"Phù hợp thử nghiệm, tác vụ ngắn và chế độ ngoại tuyến; chất lượng phụ thuộc model, lượng tử hóa và context." = "Phù hợp thử nghiệm, tác vụ ngắn và chế độ ngoại tuyến; chất lượng phụ thuộc model, lượng tử hóa và context.";
+"Có thể xử lý tốt hơn nhưng tăng RAM, thời gian nạp, nhiệt và nguy cơ hệ thống kết thúc tiến trình." = "Có thể xử lý tốt hơn nhưng tăng RAM, thời gian nạp, nhiệt và nguy cơ hệ thống kết thúc tiến trình.";
+"Có thể mạnh hơn với tác vụ khó nhưng cần mạng, credential và kiểm soát dữ liệu gửi ra ngoài." = "Có thể mạnh hơn với tác vụ khó nhưng cần mạng, credential và kiểm soát dữ liệu gửi ra ngoài.";
+"Ưu tiên cho phép tính, validation, parsing và quy tắc cần kết quả xác định." = "Ưu tiên cho phép tính, validation, parsing và quy tắc cần kết quả xác định.";
+"UNLOADED" = "Chưa nạp";
+"LOADING" = "Đang nạp";
+"LOADED" = "Đã nạp";
+"UNLOADING" = "Đang gỡ nạp";
+"FAILED" = "Thất bại";
+"Import" = "Nhập";
+"Generate" = "Sinh văn bản";
