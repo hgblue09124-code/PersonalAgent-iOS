@@ -41,6 +41,18 @@ struct AgentsScreen: View {
             Text("Each profile declares its allowed Skills and rule. Selecting an Agent changes the real Skill scope used by chat execution.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            Button {
+                session.setTeamModeEnabled(!session.teamModeEnabled)
+            } label: {
+                Label(
+                    session.teamModeEnabled ? "Team mode enabled" : "Run matching Skills across Agents",
+                    systemImage: session.teamModeEnabled ? "person.3.fill" : "person.3"
+                )
+            }
+            .buttonStyle(.borderedProminent)
+            Text("Team mode runs matching declared Skills sequentially across Agent.md profiles. Each result is policy-gated and verified; if no Skill matches, Chat falls back to the main runtime.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             HStack(spacing: 8) {
                 scopeBadge("Agent scope", symbol: "scope", tint: .accentColor)
                 scopeBadge("Policy", symbol: "checkmark.shield", tint: .secondary)
