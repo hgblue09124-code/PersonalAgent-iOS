@@ -616,7 +616,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let skillDirectoryURL = rootDirectoryURL.appendingPathComponent("Skills", isDirectory: true)
         let skillStore = FileSkillStore(directoryURL: skillDirectoryURL)
         try await skillStore.ensureDefaultSkill()
-        let skillRuntime = SkillRuntime(store: skillStore)
+        let skillRuntime = SkillRuntime(store: skillStore, moduleRuntime: moduleRuntime)
         let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
         self.skillRuntime = skillRuntime
         self.skillAgentOrchestrator = skillAgentOrchestrator
