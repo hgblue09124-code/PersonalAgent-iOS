@@ -2,6 +2,12 @@ import SwiftUI
 
 struct ChatScreen: View {
     @ObservedObject var session: KernelSession
+    @ObservedObject var streamPresentation: ChatStreamPresentation
+
+    init(session: KernelSession) {
+        self.session = session
+        self._streamPresentation = ObservedObject(wrappedValue: session.chatStreamPresentation)
+    }
     @State private var message = ""
     @State private var renameText = ""
     @State private var showRename = false
@@ -86,14 +92,14 @@ struct ChatScreen: View {
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 14) {
                             ForEach(session.chatHistory) { turn in ChatBubble(turn: turn).id(turn.id) }
-                            if !session.streamingResponse.isEmpty {
-                                StreamingChatBubble(content: session.streamingResponse).id("streaming-response")
+                            if !streamPresentation.streamingResponse.isEmpty {
+                                StreamingChatBubble(content: streamPresentation.streamingResponse).id("streaming-response")
                             }
                         }.padding(.vertical, 4)
                     }
                     .frame(minHeight: 260, maxHeight: 500)
                     .onChange(of: session.chatHistory.count) { _, _ in if let id = session.chatHistory.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
-                    .onChange(of: session.streamingResponse) { _, value in
+                    .onChange(of: streamPresentation.streamingResponse) { _, value in
                         guard !value.isEmpty else { return }
                         // Streaming text is refreshed in batches; don't animate every batch.
                         proxy.scrollTo("streaming-response", anchor: .bottom)
@@ -132,15 +138,15 @@ struct ChatScreen: View {
             if session.isSubmitting {
                 HStack(spacing: 7) {
                     ProgressView().controlSize(.small)
-                    Text(session.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
+                    Text(streamPresentation.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
                         .font(.caption).foregroundStyle(.secondary)
                     Spacer(minLength: 4)
-                    if let metrics = session.responseMetrics {
+                    if let metrics = streamPresentation.responseMetrics {
                         Text("~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
                             .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                     }
                 }
-            } else if let metrics = session.responseMetrics {
+            } else if let metrics = streamPresentation.responseMetrics {
                 HStack(spacing: 6) {
                     Image(systemName: "speedometer").foregroundStyle(.secondary)
                     Text("Last response · ~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
