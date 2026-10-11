@@ -13,6 +13,13 @@ import PAEvents
 import PAObservability
 import PARuntime
 
+private func hasConfiguredEnvironmentValue(_ keys: [String]) -> Bool {
+    keys.contains { key in
+        guard let value = ProcessInfo.processInfo.environment[key] else { return false }
+        return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+}
+
 @Suite("M9 Parallel Track — Real Provider Vertical Slice Tests")
 struct M9RealProviderSliceTests {
     @Test func productProviderBaselineKeepsRetryFailClosedByDefault() {
@@ -547,7 +554,8 @@ struct M9RealProviderSliceTests {
     }
 
     // MARK: - Live Provider Network Execution Gate
-    @Test func testRealLiveProviderExecutionWhenKeyProvided() async throws {
+    @Test(.enabled(if: hasConfiguredEnvironmentValue(["LIVE_PROVIDER_API_KEY", "OPENAI_API_KEY", "GROK_API_KEY"]), "Set a live provider API key to run this network test"))
+    func testRealLiveProviderExecutionWhenKeyProvided() async throws {
         let envKey = ProcessInfo.processInfo.environment["LIVE_PROVIDER_API_KEY"]
             ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
             ?? ProcessInfo.processInfo.environment["GROK_API_KEY"]
@@ -687,7 +695,8 @@ struct M9RealProviderSliceTests {
         #expect(requests.first?.redactedHeaders["Authorization"] == "<redacted>")
     }
 
-    @Test func testLiveOpenRouterFreeRouterWhenKeyProvided() async throws {
+    @Test(.enabled(if: hasConfiguredEnvironmentValue(["OPENROUTER_API_KEY"]), "Set OPENROUTER_API_KEY to run this live network test"))
+    func testLiveOpenRouterFreeRouterWhenKeyProvided() async throws {
         guard let key = ProcessInfo.processInfo.environment["OPENROUTER_API_KEY"],
               !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             print("OPENROUTER LIVE API: SKIPPED (OPENROUTER_API_KEY not configured)")
