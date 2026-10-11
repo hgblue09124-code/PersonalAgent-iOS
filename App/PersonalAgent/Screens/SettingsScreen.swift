@@ -590,7 +590,7 @@ private struct LifecycleStateBadge: View {
     let state: LocalModelLifecycleState
 
     var body: some View {
-        Text(title)
+        Text(LocalizedStringKey(title))
             .font(.caption.bold())
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
