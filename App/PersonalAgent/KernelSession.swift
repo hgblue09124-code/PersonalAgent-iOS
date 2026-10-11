@@ -254,6 +254,7 @@ final class KernelSession: ObservableObject {
             guard let self else { return }
             let contextualInput: String
             do {
+                try Task.checkCancellation()
                 contextualInput = try await self.buildContextualInput(
                     for: normalizedStatement,
                     conversationID: conversationID
