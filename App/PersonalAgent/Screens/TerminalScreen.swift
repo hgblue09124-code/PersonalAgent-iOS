@@ -145,7 +145,7 @@ struct TerminalScreen: View {
         }
     }
     private func makeRuntimeRegistry(session: KernelSession?) -> CommandRegistry {
-        var commands = BuiltinCommandRegistry.make()
+        var commands = BuiltinCommandRegistry.make(authorizer: SettingsTerminalCommandAuthorizer())
         guard let session else { return commands }
 
         commands = commands.registering("help") { command, _ in
