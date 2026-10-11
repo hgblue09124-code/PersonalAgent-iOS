@@ -91,6 +91,40 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: output))
     }
 
+    @Test("module-backed Skill rejects a manifest that lies about module schemas")
+    func moduleBackedSkillRejectsSchemaMismatch() async throws {
+        let id = SkillID(rawValue: "custom.echo")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Mismatched Echo",
+            description: "Its declared output contract does not match the Module.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Echo text.",
+            inputSchema: SchemaDocument(identifier: "mod.echo.in"),
+            outputSchema: SchemaDocument(identifier: "skill.fake.out"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["moduleID": DeterministicModuleIDs.echo.rawValue]
+        )
+        let moduleRuntime = ModuleRuntime(
+            catalog: try ModuleCatalog(modules: [EchoModule()]),
+            grantedCapabilities: [.read, .execute],
+            policy: AllowPolicy()
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+
+        await #expect(throws: SkillRuntimeError.malformedSkill) {
+            try await runtime.execute(
+                id: id,
+                inputJSON: #"{"text":"hello"}"#,
+                policy: AllowPolicy()
+            )
+        }
+        #expect(try await runtime.verify(id: id, outputJSON: #"{"text":"hello"}"#) == false)
+    }
+
     @Test("missing executor fails closed")
     func missingExecutorFailsClosed() async {
         let id = SkillID(rawValue: "custom.missing")
