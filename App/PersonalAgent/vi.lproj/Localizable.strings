@@ -550,3 +550,24 @@
 
 "Agent could not complete the request" = "Agent chưa thể hoàn thành yêu cầu";
 "Check provider and model settings" = "Kiểm tra cài đặt Provider và model";
+"Đọc và tóm tắt tài liệu" = "Đọc và tóm tắt tài liệu";
+"Tri thức" = "Tri thức";
+"Nhận tệp đã nhập, trích xuất nội dung được hỗ trợ, tóm tắt và giữ nguồn dẫn chiếu." = "Nhận tệp đã nhập, trích xuất nội dung được hỗ trợ, tóm tắt và giữ nguồn dẫn chiếu.";
+"Tìm kiếm workspace" = "Tìm kiếm workspace";
+"Tìm theo tên và nội dung trong phạm vi được cấp; trả về đường dẫn và đoạn khớp." = "Tìm theo tên và nội dung trong phạm vi được cấp; trả về đường dẫn và đoạn khớp.";
+"Audit trước phát hành" = "Audit trước phát hành";
+"Kỹ thuật" = "Kỹ thuật";
+"Đối chiếu checklist, test, CI và bằng chứng trên commit cụ thể." = "Đối chiếu checklist, test, CI và bằng chứng trên commit cụ thể.";
+"Phân loại lỗi repo" = "Phân loại lỗi repo";
+"Nhóm lỗi theo nguyên nhân gốc, mức ảnh hưởng, bước tái hiện và regression test." = "Nhóm lỗi theo nguyên nhân gốc, mức ảnh hưởng, bước tái hiện và regression test.";
+"Quản lý Memory" = "Quản lý Memory";
+"Đề xuất dữ kiện đáng lưu, ghi nguồn và cho phép sửa hoặc quên thông tin." = "Đề xuất dữ kiện đáng lưu, ghi nguồn và cho phép sửa hoặc quên thông tin.";
+"Chuyển đổi tệp an toàn" = "Chuyển đổi tệp an toàn";
+"Dữ liệu" = "Dữ liệu";
+"Kiểm tra định dạng và giới hạn trước khi chuyển đổi; không ghi đè âm thầm." = "Kiểm tra định dạng và giới hạn trước khi chuyển đổi; không ghi đè âm thầm.";
+"Tách việc từ ghi chú" = "Tách việc từ ghi chú";
+"Công việc" = "Công việc";
+"Trích xuất quyết định, người phụ trách khi được nêu, thời hạn và việc còn mở." = "Trích xuất quyết định, người phụ trách khi được nêu, thời hạn và việc còn mở.";
+"Chẩn đoán Provider" = "Chẩn đoán Provider";
+"Hệ thống" = "Hệ thống";
+"Phân biệt cấu hình, xác thực, kết nối, HTTP, stream và lỗi runtime mà không lộ secret." = "Phân biệt cấu hình, xác thực, kết nối, HTTP, stream và lỗi runtime mà không lộ secret.";

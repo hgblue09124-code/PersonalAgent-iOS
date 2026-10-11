@@ -1,0 +1,33 @@
+{
+  "id": "PAUI-12",
+  "title": "Localize Skill idea library content",
+  "status": "ready",
+  "context": "SkillsScreen's eight built-in Skill idea cards use Vietnamese-only title, group, and description strings directly. When the app language is English, these cards remain Vietnamese despite the language setting.",
+  "goal": "Route Skill idea titles, categories, and descriptions through the app's localization catalogs so the idea library follows the selected language.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SkillsScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tasks/active/PAUI-12.json"
+  ],
+  "forbidden_changes": [
+    "Do not install or execute idea-library entries as Skills.",
+    "Do not change Skill discovery, authorization, or runtime behavior.",
+    "Do not translate Skill IDs or manifest-supplied content.",
+    "Do not change existing Vietnamese display values."
+  ],
+  "acceptance_criteria": [
+    "Skill idea titles, groups, and descriptions are rendered through LocalizedStringKey.",
+    "English catalog provides English values for all 21 idea-library labels and descriptions.",
+    "Vietnamese catalog preserves the existing Vietnamese values.",
+    "No duplicate localization keys are introduced."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Static check confirms every idea-library key exists in both catalogs and no duplicate keys exist."
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if catalog parsing, localization lookup, or the Apple build regresses."
+}
