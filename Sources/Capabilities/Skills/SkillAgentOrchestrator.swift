@@ -78,10 +78,16 @@ public actor SkillAgentOrchestrator {
         if let agent, !agent.skillIDs.contains(skillID) {
             throw SkillAgentOrchestratorError.skillOutsideAgentScope(skillID)
         }
-        let output = try await runtime.execute(id: skillID, inputJSON: inputJSON, policy: policy)
-        let verified = try await runtime.verify(id: skillID, outputJSON: output)
-        guard verified else {
-            throw SkillAgentOrchestratorError.verificationFailed(skillID)
+        let output: String
+        do {
+            // Execute and verify through one resolved executor instance. A second
+            // registry lookup could otherwise verify with a different implementation.
+            output = try await runtime.executeVerified(id: skillID, inputJSON: inputJSON, policy: policy)
+        } catch let error as SkillExecutionError {
+            if case .verificationFailed(let failedID) = error {
+                throw SkillAgentOrchestratorError.verificationFailed(failedID)
+            }
+            throw error
         }
         return SkillAgentResult(skillID: skillID, outputJSON: output, verified: true)
     }
