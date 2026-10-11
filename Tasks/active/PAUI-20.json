@@ -1,0 +1,30 @@
+{
+  "id": "PAUI-20",
+  "title": "Use configured provider model for connection test",
+  "status": "ready",
+  "context": "Settings tests chat completion through the active provider runtime but currently sends the synthetic model ID provider-connection-test, which may not exist on the provider and can report a false connection failure.",
+  "goal": "Exercise the active runtime with its configured model identity so the test validates the same provider/model route that Chat can actually use.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "Tasks/active/PAUI-20.json"
+  ],
+  "forbidden_changes": [
+    "Do not bypass the active provider runtime or send a direct alternate network request.",
+    "Do not log, expose, or persist API credentials.",
+    "Do not change provider selection, endpoint, or credential storage behavior."
+  ],
+  "acceptance_criteria": [
+    "Connection test obtains the model ID from the active runtime identity rather than a synthetic placeholder.",
+    "Missing runtime or model fails closed and reports connection failure.",
+    "Successful result still requires a non-empty completion response.",
+    "Existing provider credential and connection-state behavior remains unchanged."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Review that test model ID matches runtime.identity.models.first.id"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if connection testing no longer uses the active runtime model."
+}

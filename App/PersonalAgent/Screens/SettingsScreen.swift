@@ -1029,12 +1029,13 @@ private extension SettingsScreen {
 
         connectionState = .testing
         do {
-            guard let runtime = session.composition.providerRuntime else {
+            guard let runtime = session.composition.providerRuntime,
+                  let model = runtime.identity.models.first?.id else {
                 throw URLError(.unsupportedURL)
             }
             let response = try await runtime.complete(
                 LLMRequest(
-                    model: ModelID(rawValue: "provider-connection-test"),
+                    model: model,
                     prompt: "Reply with OK."
                 )
             )
