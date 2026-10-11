@@ -1,0 +1,34 @@
+{
+  "id": "PASEC-13",
+  "title": "Verify installed module-backed Skill through production M8 root",
+  "status": "in_progress",
+  "goal": "Add a production-composition integration test proving an installed Skill.md bound to a registered workspace module executes and returns verified output through M8.",
+  "context": "The generic module-backed executor and trusted registry injection are unit-tested separately. The app composition creates workspace ToolModules when workspaceToolsEnabled, but no test currently proves the complete FileSkillStore -> ModuleRuntime -> WorkspaceReadTool -> verified Skill result path through M8.",
+  "allowed_paths": [
+    "Tests/PersonalAgentTests/M8ArchitectureTests.swift",
+    "Tasks/active/PASEC-13.json"
+  ],
+  "forbidden_changes": [
+    "Do not bypass policy or ModuleRuntime capability checks.",
+    "Do not instantiate arbitrary executors from Skill.md metadata.",
+    "Do not modify App/ or Xcode project files.",
+    "Do not treat this integration test as proof of on-device UI behavior."
+  ],
+  "acceptance_criteria": [
+    "Test creates an installed Skill.md with moduleID tool.workspace.read and exact input/output schema identifiers.",
+    "Test creates a searchable workspace text file and invokes the Skill through M8CompositionRoot.executeSkill.",
+    "Test confirms the verified tool result contains the matching workspace path.",
+    "All required CI gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-13.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-13.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #354"
+  ],
+  "recovery": "Revert the integration test if it reveals an unsupported contract; fix the contract in a separate one-commit task with its own evidence."
+}
