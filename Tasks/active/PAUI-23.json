@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-23",
+  "title": "Honor explicit temperature in local GGUF inference",
+  "status": "ready",
+  "context": "LocalModelProviderAdapter forwards the requested temperature into LocalModelGenerationRequest, but LlamaCPPModelEngine always samples greedily and ignores it. This silently violates the local inference request contract when callers explicitly configure temperature.",
+  "goal": "Honor a valid explicit temperature with a request-scoped llama.cpp temperature/distribution sampler while preserving greedy output for unspecified or non-positive temperatures.",
+  "allowed_paths": [
+    "Providers/Local/LlamaCPPModelEngine.swift",
+    "Tests/PersonalAgentTests/LocalModelGenerationConcurrencyTests.swift",
+    "Tasks/active/PAUI-23.json"
+  ],
+  "forbidden_changes": [
+    "Do not change the default deterministic behavior when temperature is unspecified.",
+    "Do not change model loading, context size, or GPU residency policy.",
+    "Do not expose or persist prompt contents or user data."
+  ],
+  "acceptance_criteria": [
+    "Explicit finite positive temperature selects a request-scoped temperature plus distribution sampler.",
+    "Unspecified, zero, negative, or non-finite temperature retains the existing greedy sampler.",
+    "Temperature is bounded to a safe sampler range.",
+    "Request-scoped sampler is freed on success, error, and cancellation.",
+    "Regression tests cover normalization/bounds; M3 and Apple Native Build compile the native path."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "LocalModelGenerationConcurrencyTests temperature normalization cases"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if native sampler lifecycle or deterministic default behavior regresses."
+}

@@ -2,10 +2,20 @@ import Foundation
 import Testing
 import PAKernel
 import PAProviders
-import PAProvidersLocal
+@testable import PAProvidersLocal
 
 @Suite("Local Model Generation Concurrency Tests")
 struct LocalModelGenerationConcurrencyTests {
+    @Test func explicitTemperatureSelectsBoundedStochasticSampling() {
+        #expect(LlamaCPPModelEngine.samplingTemperature(nil) == nil)
+        #expect(LlamaCPPModelEngine.samplingTemperature(0) == nil)
+        #expect(LlamaCPPModelEngine.samplingTemperature(-0.5) == nil)
+        #expect(LlamaCPPModelEngine.samplingTemperature(Double.nan) == nil)
+        #expect(LlamaCPPModelEngine.samplingTemperature(0.7) == Float(0.7))
+        #expect(LlamaCPPModelEngine.samplingTemperature(0.001) == Float(0.05))
+        #expect(LlamaCPPModelEngine.samplingTemperature(4.0) == Float(2.0))
+    }
+
     @Test func cancellationDoesNotReleaseGenerationLockBeforeTaskFinishes() async throws {
         let engine = LlamaCPPModelEngine(
             identity: LocalModelIdentity(
