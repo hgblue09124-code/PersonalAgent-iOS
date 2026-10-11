@@ -65,7 +65,7 @@ Từ ngày 10/10/2026, dùng checklist này làm nơi theo dõi công việc cò
 ### Ưu tiên P1 — AgentOS workspace
 - [ ] **Storage:** duyệt, tìm kiếm, đọc, sửa và xác minh dữ liệu persistent qua API có ranh giới rõ; từ chối path traversal, secret và thao tác ngoài workspace.
 - [ ] **Terminal Sandbox + GitHub Sync:** quyền tối thiểu, preview thay đổi, đồng bộ hai chiều, xử lý conflict, rollback và báo cáo kết quả có bằng chứng.
-  - Terminal now supports `skill list [query]` via `SkillRuntime.discover` alongside `skill run`; full Terminal/GitHub Sync integration remains open.
+  - Terminal core supports `skill list [query]` via `SkillRuntime.discover`; the iPhone Terminal also supports `skills list [query]` by filtering cached manifest ID/name/description. Full Terminal/GitHub Sync integration remains open.
 - [x] **Kiến trúc GGUF:** tách parser định dạng dùng chung khỏi provider/storage; giữ dependency direction một chiều và có test architecture/import-boundary. Bằng chứng: [commit `7eeb7c7`](https://github.com/hgblue09124-code/PersonalAgent-iOS/commit/7eeb7c71650b193b1ca42d935f81f7ac23b8ab51), [M3 PASS](https://github.com/hgblue09124-code/PersonalAgent-iOS/actions/runs/38052535715), [Apple Native Build & Unsigned IPA PASS](https://github.com/hgblue09124-code/PersonalAgent-iOS/actions/runs/38052535719).
 
 ### Ưu tiên P2 — chất lượng phát hành
