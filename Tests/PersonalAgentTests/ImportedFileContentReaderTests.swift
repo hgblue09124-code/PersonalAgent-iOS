@@ -38,6 +38,37 @@ final class ImportedFileContentReaderTests: XCTestCase {
         }
     }
 
+    func testUsesStandardContentTypeWhenFilenameExtensionIsUnknown() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let input = base.appendingPathComponent("report.payload")
+        try "{\\"answer\\":42}".write(to: input, atomically: true, encoding: .utf8)
+
+        let record = try await store.importFile(from: input, contentTypeIdentifier: "public.json")
+        let result = try await ImportedFileContentReader().read(record, from: store)
+        XCTAssertEqual(result.format, .json)
+        XCTAssertEqual(result.text, "{\\"answer\\":42}")
+    }
+
+    func testContentTypeHintDoesNotBypassFormatValidation() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: base) }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        let store = try ImportedFileStore(directoryURL: base.appendingPathComponent("store"))
+        let input = base.appendingPathComponent("broken.payload")
+        try "{broken".write(to: input, atomically: true, encoding: .utf8)
+
+        let record = try await store.importFile(from: input, contentTypeIdentifier: "public.json")
+        do {
+            _ = try await ImportedFileContentReader().read(record, from: store)
+            XCTFail("A UTI hint must not bypass JSON validation")
+        } catch let error as ImportedFileReaderError {
+            XCTAssertEqual(error, .malformedJSON)
+        }
+    }
+
     func testReadsCommonSourceAndConfigurationFormatsAsPlainText() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: base) }
