@@ -2,6 +2,7 @@ import Testing
 import PAKernel
 import PARuntime
 import PASkills
+import PAModules
 
 @Suite("Skill Executor Registry")
 struct SkillExecutorRegistryTests {
@@ -30,6 +31,39 @@ struct SkillExecutorRegistryTests {
         let runtime = SkillRuntime(store: store, executors: registry)
         let output = try await runtime.execute(id: id, inputJSON: "{\"value\":\"input\"}", policy: AllowPolicy())
         #expect(output == "{\"value\":\"custom\"}")
+        #expect(try await runtime.verify(id: id, outputJSON: output))
+    }
+
+    @Test("Skill manifest can execute through the policy-gated ModuleRuntime")
+    func moduleBackedSkillExecutesAndVerifies() async throws {
+        let id = SkillID(rawValue: "custom.echo")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Module Echo",
+            description: "Echo through ModuleRuntime.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Echo text.",
+            inputSchema: SchemaDocument(identifier: "mod.echo.in"),
+            outputSchema: SchemaDocument(identifier: "mod.echo.out"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["moduleID": DeterministicModuleIDs.echo.rawValue]
+        )
+        let catalog = try ModuleCatalog(modules: [EchoModule()])
+        let moduleRuntime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            policy: AllowPolicy()
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+        let output = try await runtime.execute(
+            id: id,
+            inputJSON: "{\"text\":\"hello\"}",
+            policy: AllowPolicy()
+        )
+        #expect(output == "{\"text\":\"hello\"}")
         #expect(try await runtime.verify(id: id, outputJSON: output))
     }
 

@@ -65,10 +65,19 @@ public struct SkillMarkdownParser: Sendable {
             inputSchema: SchemaDocument(identifier: input.trimmingCharacters(in: .whitespacesAndNewlines)),
             outputSchema: SchemaDocument(identifier: output.trimmingCharacters(in: .whitespacesAndNewlines)),
             requiredCapabilities: [.read, .execute],
-            metadata: [
-                "source": "Skill.md",
-                "executor": fields["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? fields["executor"]!.trimmingCharacters(in: .whitespacesAndNewlines) : id
-            ]
+            metadata: {
+                var metadata = [
+                    "source": "Skill.md",
+                    "executor": fields["executor"]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+                        ? fields["executor"]!.trimmingCharacters(in: .whitespacesAndNewlines)
+                        : id
+                ]
+                if let moduleID = fields["moduleID"]?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !moduleID.isEmpty {
+                    metadata["moduleID"] = moduleID
+                }
+                return metadata
+            }()
         )
     }
 
