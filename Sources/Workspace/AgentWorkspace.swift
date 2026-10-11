@@ -243,6 +243,7 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         guard FileManager.default.fileExists(atPath: source.path) else {
             throw AgentWorkspaceError.missing(sourcePath)
         }
+        try validateCopySource(at: source, relativePath: sourcePath)
         try createParentDirectory(for: destination)
 
         do {
@@ -258,6 +259,7 @@ public actor LocalAgentWorkspace: AgentWorkspace {
         guard FileManager.default.fileExists(atPath: source.path) else {
             throw AgentWorkspaceError.missing(sourcePath)
         }
+        try validateCopySource(at: source, relativePath: sourcePath)
         try createParentDirectory(for: destination)
 
         do {
@@ -289,6 +291,55 @@ public actor LocalAgentWorkspace: AgentWorkspace {
     private func validateContent(_ contents: String) throws {
         guard !WorkspaceContentSafety.containsPotentialSecret(contents) else {
             throw AgentWorkspaceError.protectedContent
+        }
+    }
+
+    /// Copy/move are also data-read surfaces: reject secret-bearing files and unsafe links,
+    /// including when the source is a directory containing nested files.
+    private func validateCopySource(at url: URL, relativePath: String) throws {
+        guard !WorkspaceContentSafety.isProtectedPath(relativePath) else {
+            throw AgentWorkspaceError.invalidPath(relativePath)
+        }
+        let attributes: [FileAttributeKey: Any]
+        do {
+            attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        } catch {
+            throw AgentWorkspaceError.ioFailure(error.localizedDescription)
+        }
+
+        guard let type = attributes[.type] as? FileAttributeType else {
+            throw AgentWorkspaceError.ioFailure("Unable to determine workspace entry type.")
+        }
+        guard type != .typeSymbolicLink else {
+            throw AgentWorkspaceError.escapesSandbox
+        }
+
+        if type == .typeDirectory {
+            let children: [URL]
+            do {
+                children = try FileManager.default.contentsOfDirectory(
+                    at: url,
+                    includingPropertiesForKeys: nil,
+                    options: []
+                )
+            } catch {
+                throw AgentWorkspaceError.ioFailure(error.localizedDescription)
+            }
+            for child in children {
+                let childRelativePath = child.path == rootURL.path
+                    ? ""
+                    : String(child.path.dropFirst(rootURL.path.count + 1))
+                try validateCopySource(at: child, relativePath: childRelativePath)
+            }
+        } else if type == .typeRegular {
+            do {
+                let data = try Data(contentsOf: url)
+                try validateContent(String(decoding: data, as: UTF8.self))
+            } catch let error as AgentWorkspaceError {
+                throw error
+            } catch {
+                throw AgentWorkspaceError.ioFailure(error.localizedDescription)
+            }
         }
     }
 
