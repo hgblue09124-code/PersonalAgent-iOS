@@ -1,0 +1,33 @@
+{
+  "id": "PAUI-17",
+  "title": "Expose imported files and resolve content types safely",
+  "status": "ready",
+  "context": "The import reader currently relies on filename extensions even when the document provider supplies a standard Uniform Type Identifier. The app also lacks a dedicated Files entry in the Agent workspace, making imported-file preview/removal harder to discover.",
+  "goal": "Resolve supported reader formats from standard content-type identifiers when extensions are unknown, validate payloads with the selected parser, and expose the existing safe imported-file store through a workspace Files screen.",
+  "allowed_paths": [
+    "App/PersonalAgent/RootView.swift",
+    "Sources/ImportGateway/ImportedFileContentReader.swift",
+    "Tests/PersonalAgentTests/ImportedFileContentReaderTests.swift",
+    "Tasks/active/PAUI-17.json"
+  ],
+  "forbidden_changes": [
+    "Do not bypass JSON/CSV or binary-content validation based on a content-type hint.",
+    "Do not execute imported content or treat it as trusted instructions.",
+    "Do not expose credentials, model binaries, logs, or cache through the Files screen.",
+    "Do not overwrite original imported bytes during preview."
+  ],
+  "acceptance_criteria": [
+    "Unknown file extensions can resolve supported formats from standard content-type identifiers.",
+    "Regression tests cover JSON, TSV, and malformed JSON with UTI hints.",
+    "Agent workspace has a Files surface to import, preview supported content, and remove imported files.",
+    "Unsupported preview reports a clear error while preserving the original import."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Run ImportedFileContentReaderTests including UTI validation cases"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if import integrity, reader validation, or workspace navigation regresses."
+}
