@@ -5,9 +5,11 @@
   "goal": "Ship a working initial GitHub manifest and one compatible Skill.md update, document the revision/hash contract, and treat repeat checks of the installed revision as up-to-date rather than errors.",
   "context": "This logical task completes the first end-to-end data-only update path on top of the safe transport/staging/activation flow. Native code remains outside soft updates.",
   "allowed_paths": [
+    "Runtime/Updates/AgentUpdateManager.swift",
+    "Tests/PersonalAgentTests/AgentUpdateManagerTests.swift",
     "Sources/Workspace/AgentOSSoftUpdateClient.swift",
-    "App/PersonalAgent/Screens/SettingsScreen.swift",
     "Tests/PersonalAgentTests/AgentOSSoftUpdateClientTests.swift",
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
     "agentos-update.json",
     "skills/text.normalize.Skill.md",
     "Documentation/AGENTOS_SOFT_UPDATE.md",

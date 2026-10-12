@@ -906,12 +906,13 @@ private struct AgentOSUpdateSettingsSection: View {
             let location = try GitHubRepositoryLocation(owner: owner, repository: repository, branch: branch)
             let workspace = try LocalAgentWorkspace.documents()
             try await workspace.prepare()
+            let workspaceRoot = await workspace.rootURL
             let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             let root = support.appendingPathComponent("PersonalAgent/AgentOSUpdateStaging", isDirectory: true)
             let current = UserDefaults.standard.string(forKey: "agentos.update.revision") ?? "initial"
             let client = try AgentOSSoftUpdateClient(location: location, tokenProvider: { token })
             let result = try await client.stageUpdate(currentRevision: current, runtimeCompatibility: "runtime-v1",
-                                                       workspaceURL: workspace.rootURL, stagingRootURL: root)
+                                                       workspaceURL: workspaceRoot, stagingRootURL: root)
             staged = StagedUpdate(manifest: result.manifest, url: result.stagingURL)
             status = "Đã tải và xác minh \(result.manifest.files.count) tệp; workspace chưa thay đổi."
         } catch AgentOSSoftUpdateError.alreadyCurrent {
@@ -928,6 +929,7 @@ private struct AgentOSUpdateSettingsSection: View {
         do {
             let workspace = try LocalAgentWorkspace.documents()
             try await workspace.prepare()
+            let workspaceRoot = await workspace.rootURL
             var files: [(String, String)] = []
             var originals: [(path: String, data: Data?)] = []
             for item in staged.manifest.files {
@@ -935,8 +937,8 @@ private struct AgentOSUpdateSettingsSection: View {
                       AgentOSSoftUpdateClient.isAllowedPath(item.path) else {
                     throw AgentOSSoftUpdateError.invalidManifest
                 }
-                let target = workspace.rootURL.appendingPathComponent(item.path).standardizedFileURL
-                guard target.path.hasPrefix(workspace.rootURL.standardizedFileURL.path + "/") else {
+                let target = workspaceRoot.appendingPathComponent(item.path).standardizedFileURL
+                guard target.path.hasPrefix(workspaceRoot.standardizedFileURL.path + "/") else {
                     throw AgentOSSoftUpdateError.unsafePath(item.path)
                 }
                 let actualBase: String
@@ -970,7 +972,7 @@ private struct AgentOSUpdateSettingsSection: View {
             }
             let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             let snapshots = try DurableWorkspaceSnapshotStore(directoryURL: support.appendingPathComponent("PersonalAgent/AgentOSSnapshots", isDirectory: true))
-            let snapshot = try await snapshots.createSnapshot(of: workspace.rootURL)
+            let snapshot = try await snapshots.createSnapshot(of: workspaceRoot)
             let rollbackRoot = support.appendingPathComponent("PersonalAgent/AgentOSUpdateRollback/\(UUID().uuidString.lowercased())", isDirectory: true)
             do {
                 try FileManager.default.createDirectory(at: rollbackRoot, withIntermediateDirectories: true)
@@ -990,7 +992,7 @@ private struct AgentOSUpdateSettingsSection: View {
             do {
                 for (path, text) in files { try await workspace.writeFile(text, to: path) }
             } catch {
-                try await snapshots.restore(snapshotID: snapshot.id, to: workspace.rootURL)
+                try await snapshots.restore(snapshotID: snapshot.id, to: workspaceRoot)
                 try? FileManager.default.removeItem(at: rollbackRoot)
                 throw error
             }
@@ -1031,11 +1033,12 @@ private struct AgentOSUpdateSettingsSection: View {
         defer { busy = false }
         do {
             let workspace = try LocalAgentWorkspace.documents()
+            let workspaceRoot = await workspace.rootURL
             let record = try JSONDecoder().decode(AgentOSRollbackRecord.self, from: Data(contentsOf: rollbackDirectory.appendingPathComponent("rollback.json")))
             guard record.manifest == manifest else { throw AgentOSSoftUpdateError.invalidManifest }
             for item in manifest.files {
-                let target = workspace.rootURL.appendingPathComponent(item.path).standardizedFileURL
-                guard target.path.hasPrefix(workspace.rootURL.standardizedFileURL.path + "/"),
+                let target = workspaceRoot.appendingPathComponent(item.path).standardizedFileURL
+                guard target.path.hasPrefix(workspaceRoot.standardizedFileURL.path + "/"),
                       FileManager.default.fileExists(atPath: target.path) else {
                     throw AgentOSSoftUpdateError.localConflict(item.path)
                 }
@@ -1047,7 +1050,7 @@ private struct AgentOSUpdateSettingsSection: View {
             }
             let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             let snapshots = try DurableWorkspaceSnapshotStore(directoryURL: support.appendingPathComponent("PersonalAgent/AgentOSSnapshots", isDirectory: true))
-            let safety = try await snapshots.createSnapshot(of: workspace.rootURL)
+            let safety = try await snapshots.createSnapshot(of: workspaceRoot)
             do {
                 for item in manifest.files {
                     if record.missingPaths.contains(item.path) {
@@ -1062,13 +1065,13 @@ private struct AgentOSUpdateSettingsSection: View {
                               AgentOSSoftUpdateClient.sha256Hex(data).caseInsensitiveCompare(baseHash) == .orderedSame else {
                             throw AgentOSSoftUpdateError.hashMismatch(item.path)
                         }
-                        let target = workspace.rootURL.appendingPathComponent(item.path).standardizedFileURL
+                        let target = workspaceRoot.appendingPathComponent(item.path).standardizedFileURL
                         try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
                         try data.write(to: target, options: .atomic)
                     }
                 }
             } catch {
-                try await snapshots.restore(snapshotID: safety.id, to: workspace.rootURL)
+                try await snapshots.restore(snapshotID: safety.id, to: workspaceRoot)
                 throw error
             }
             UserDefaults.standard.set(manifest.baseRevision, forKey: "agentos.update.revision")
