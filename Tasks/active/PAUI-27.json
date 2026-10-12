@@ -1,0 +1,36 @@
+{
+  "id": "PAUI-27",
+  "title": "Localize Chat actions and Agent status in both app languages",
+  "status": "in_progress",
+  "goal": "Ensure key Chat actions, automatic response-language selection, context setting, and Agent busy status render in the selected app language.",
+  "context": "Source inspection found several Vietnamese UI literals used as localization keys without English mappings, and the recently added Settings Picker key `Context turns` was absent from both localization catalogs. This causes language switching to leave mixed-language labels.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-27.json",
+    "App/PersonalAgent/Screens/AgentsScreen.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings"
+  ],
+  "forbidden_changes": [
+    "Do not change Chat behavior, persistence, provider routing, or runtime execution.",
+    "Do not modify unrelated UI copy or redesign controls.",
+    "Do not claim physical-device verification from CI alone."
+  ],
+  "acceptance_criteria": [
+    "Agent busy status uses a stable English localization key with English and Vietnamese translations.",
+    "Automatic, Regenerate answer, Export conversation, Share answer, and Context turns have entries in both localization catalogs.",
+    "Selected locale controls all touched labels without changing action behavior.",
+    "Task contract, M3, and Apple Native Build & Unsigned IPA gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-27.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-27.json --base origin/main",
+    "Confirm task-contract, M3, and Apple Native Build & Unsigned IPA CI gates."
+  ],
+  "dependencies": [
+    "Issue #367",
+    "Issue #350",
+    "Issue #354"
+  ],
+  "recovery": "Revert the single task commit if localization lookup or Chat action behavior regresses."
+}

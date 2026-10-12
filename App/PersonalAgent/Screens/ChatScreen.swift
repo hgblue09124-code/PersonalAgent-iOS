@@ -59,8 +59,8 @@ struct ChatScreen: View {
                 Spacer()
                 Menu {
                     Button { session.newConversation() } label: { Label("New conversation", systemImage: "plus") }
-                    Menu("Ngôn ngữ trả lời") {
-                        Button("Tự động" + (session.chatResponseLanguage == "auto" ? " ✓" : "")) { session.setChatResponseLanguage("auto") }
+                    Menu("Response language") {
+                        Button("Automatic" + (session.chatResponseLanguage == "auto" ? " ✓" : "")) { session.setChatResponseLanguage("auto") }
                         Button("Tiếng Việt" + (session.chatResponseLanguage == "vi" ? " ✓" : "")) { session.setChatResponseLanguage("vi") }
                         Button("English" + (session.chatResponseLanguage == "en" ? " ✓" : "")) { session.setChatResponseLanguage("en") }
                     }
@@ -75,11 +75,11 @@ struct ChatScreen: View {
                         Button {
                             Task { await session.regenerateLastResponse() }
                         } label: {
-                            Label("Tạo lại câu trả lời", systemImage: "arrow.clockwise")
+                            Label("Regenerate answer", systemImage: "arrow.clockwise")
                         }
                     }
                     ShareLink(item: conversationExportText) {
-                        Label("Xuất hội thoại", systemImage: "square.and.arrow.up")
+                        Label("Export conversation", systemImage: "square.and.arrow.up")
                     }
                     .disabled(session.chatHistory.isEmpty)
                     Button { showPromptLibrary = true } label: { Label("Thư viện tác vụ · 28 mẫu", systemImage: "books.vertical") }
@@ -410,7 +410,7 @@ private struct ChatBubble: View {
                 .frame(maxWidth: 310, alignment: .leading)
             if turn.role == .assistant {
                 ShareLink(item: turn.content) {
-                    Label("Chia sẻ câu trả lời", systemImage: "square.and.arrow.up")
+                    Label("Share answer", systemImage: "square.and.arrow.up")
                         .font(.caption)
                 }
                 .buttonStyle(.plain)

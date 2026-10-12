@@ -641,3 +641,12 @@
 "Could not open imported-file library: %@" = "Không thể mở thư viện tệp đã nhập: %@";
 "Could not delete imported file: %@" = "Không thể xóa tệp đã nhập: %@";
 "Remote provider testing is disabled while Local-only mode is on." = "Không thể kiểm tra Provider từ xa khi chế độ chỉ thực thi cục bộ đang bật.";
+
+"Agent is running — changes to Agent and Team mode are temporarily locked." = "Agent đang thực thi — tạm khóa thay đổi Agent và chế độ Nhóm.";
+"Automatic" = "Tự động";
+"Regenerate answer" = "Tạo lại câu trả lời";
+"Export conversation" = "Xuất hội thoại";
+"Share answer" = "Chia sẻ câu trả lời";
+"Context turns" = "Lượt ngữ cảnh";
+
+"Response language" = "Ngôn ngữ trả lời";
