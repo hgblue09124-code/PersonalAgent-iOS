@@ -125,6 +125,29 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertEqual(result.stdout, "workspace/project/nested/notes.md\n")
     }
 
+    func testFindRejectsWorkspaceWithTooManyEntries() async throws {
+        let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: rootURL)
+        try await workspace.prepare()
+        try await workspace.createDirectory(at: "workspace/tree")
+        let directory = rootURL.appendingPathComponent("workspace/tree", isDirectory: true)
+        for index in 0...4_096 {
+            let file = directory.appendingPathComponent("entry-\(index).txt")
+            XCTAssertTrue(FileManager.default.createFile(atPath: file.path, contents: Data()))
+        }
+
+        do {
+            _ = try await BuiltinCommandRegistry.make(authorizer: AllowTerminalAuthorizer()).execute(
+                AgentCommand(name: "find", arguments: ["workspace/tree"]),
+                context: CommandContext(workspace: workspace)
+            )
+            XCTFail("find must stop when the workspace traversal budget is exceeded")
+        } catch let error as CommandError {
+            XCTAssertEqual(error, .invalidArguments("find exceeded maximum entry count (4096)"))
+        }
+    }
+
+
     func testFindFailsClosedOnDirectorySymlinkCycles() async throws {
         let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = LocalAgentWorkspace(rootURL: rootURL)
