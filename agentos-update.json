@@ -1,0 +1,15 @@
+{
+  "repository": "hgblue09124-code/PersonalAgent-iOS",
+  "baseRevision": "initial",
+  "version": "1.0.1",
+  "revision": "agentos-text-normalize-v1",
+  "compatibility": "runtime-v1",
+  "files": [
+    {
+      "path": "skills/text.normalize.Skill.md",
+      "sha256": "4a2b76cb9debb0539621ce47e0f2886346bbbbe0b7b165231354e6cb5e8df86c",
+      "byteCount": 276,
+      "baseSHA256": "11d730449b7f215b9af5c890775333305774ea7cbc67f48cb354cd1bb635ac56"
+    }
+  ]
+}

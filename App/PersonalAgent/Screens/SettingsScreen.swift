@@ -262,6 +262,8 @@ struct SettingsScreen: View {
                     .textSelection(.enabled)
             }
 
+            AgentOSUpdateSettingsSection(session: session)
+
             GlassPanel {
                 HStack {
                     Label("Imported files", systemImage: "doc.on.doc")
@@ -847,6 +849,312 @@ private extension SettingsScreen {
             lastImportError = String(localized: "Could not delete imported file: \(error.localizedDescription)")
         }
     }
+}
+
+
+private struct AgentOSUpdateSettingsSection: View {
+    @ObservedObject var session: KernelSession
+    @AppStorage("github.sync.owner") private var owner = ""
+    @AppStorage("github.sync.repository") private var repository = ""
+    @AppStorage("github.sync.branch") private var branch = "main"
+    @State private var busy = false
+    @State private var isStaging = false
+    @State private var stagingTask: Task<Void, Never>?
+    @State private var status = "Chưa kiểm tra."
+    private struct StagedUpdate { let manifest: AgentOSSoftUpdateManifest; let url: URL }
+    @State private var staged: StagedUpdate?
+    @State private var rollbackDirectory: URL?
+    @State private var activeManifest: AgentOSSoftUpdateManifest?
+
+    var body: some View {
+        GlassPanel {
+            Label("AgentOS Soft Update", systemImage: "arrow.down.circle").font(.headline)
+            Text("Đang cài: \(UserDefaults.standard.string(forKey: "agentos.update.revision") ?? "initial")").font(.caption.monospaced())
+            Text("Cập nhật Agent/Skill/Module dạng văn bản; không tải hay chạy mã Swift.")
+                .font(.caption).foregroundStyle(.secondary)
+            Text(status).font(.footnote).textSelection(.enabled)
+            Button {
+                stagingTask = Task { await stageUpdate() }
+            } label: {
+                if busy { ProgressView() } else { Label("Kiểm tra & tải vào vùng tạm", systemImage: "arrow.down.to.line") }
+            }
+            .buttonStyle(.borderedProminent).disabled(busy)
+            if isStaging {
+                Button("Hủy tải") { stagingTask?.cancel(); status = "Đang hủy tải an toàn..." }
+                    .buttonStyle(.bordered).disabled(!isStaging)
+            }
+            if staged != nil {
+                Button("Xác thực lại, sao lưu và kích hoạt") { Task { await activate() } }
+                    .buttonStyle(.bordered).disabled(busy)
+            }
+            if activeManifest != nil {
+                Button("Khôi phục các tệp đã cập nhật", role: .destructive) { Task { await rollback() } }
+                    .buttonStyle(.bordered).disabled(busy)
+            }
+        }
+        .task { await loadRollbackState() }
+    }
+
+    private func stageUpdate() async {
+        busy = true
+        isStaging = true
+        defer { busy = false; isStaging = false; stagingTask = nil }
+        staged = nil
+        status = "Đang kiểm tra manifest và tải tệp an toàn..."
+        do {
+            guard !owner.isEmpty, !repository.isEmpty, !branch.isEmpty else {
+                status = "Cấu hình GitHub repository trong phần GitHub sync trước."
+                return
+            }
+            guard let tokenData = try KeychainSecretStore().load(account: "github.repository.token"),
+                  let token = String(data: tokenData, encoding: .utf8),
+                  !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                status = "Hãy lưu GitHub token trong Keychain trước."
+                return
+            }
+            let location = try GitHubRepositoryLocation(owner: owner, repository: repository, branch: branch)
+            let workspace = try LocalAgentWorkspace.documents()
+            try await workspace.prepare()
+            let workspaceRoot = await workspace.rootURL
+            let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let root = support.appendingPathComponent("PersonalAgent/AgentOSUpdateStaging", isDirectory: true)
+            let current = UserDefaults.standard.string(forKey: "agentos.update.revision") ?? "initial"
+            let client = try AgentOSSoftUpdateClient(location: location, tokenProvider: { token })
+            let result = try await client.stageUpdate(currentRevision: current, runtimeCompatibility: "runtime-v1",
+                workspaceURL: workspaceRoot, stagingRootURL: root, progress: { completed, total in
+                    await MainActor.run { status = "Đang tải/xác minh tệp \(completed)/\(total)..." }
+                })
+            if Task.isCancelled {
+                try? FileManager.default.removeItem(at: result.stagingURL)
+                status = "Đã hủy tải; workspace chưa thay đổi."
+                return
+            }
+            staged = StagedUpdate(manifest: result.manifest, url: result.stagingURL)
+            status = "Đã tải và xác minh \(result.manifest.files.count) tệp; workspace chưa thay đổi."
+        } catch is CancellationError {
+            status = "Đã hủy tải; workspace chưa thay đổi."
+        } catch let error as URLError where error.code == .cancelled {
+            status = "Đã hủy tải; workspace chưa thay đổi."
+        } catch AgentOSSoftUpdateError.alreadyCurrent {
+            status = "Đang sử dụng bản AgentOS mới nhất."
+        } catch {
+            status = "Không thể tải bản cập nhật: \(error.localizedDescription)"
+        }
+    }
+
+    private func activate() async {
+        guard let staged else { return }
+        busy = true
+        defer { busy = false }
+        do {
+            let workspace = try LocalAgentWorkspace.documents()
+            try await workspace.prepare()
+            let workspaceRoot = await workspace.rootURL
+            var files: [(String, String)] = []
+            var originals: [(path: String, data: Data?)] = []
+            for item in staged.manifest.files {
+                guard let baseHash = item.baseSHA256,
+                      AgentOSSoftUpdateClient.isAllowedPath(item.path) else {
+                    throw AgentOSSoftUpdateError.invalidManifest
+                }
+                let target = workspaceRoot.appendingPathComponent(item.path).standardizedFileURL
+                guard target.path.hasPrefix(workspaceRoot.standardizedFileURL.path + "/") else {
+                    throw AgentOSSoftUpdateError.unsafePath(item.path)
+                }
+                let actualBase: String
+                if FileManager.default.fileExists(atPath: target.path) {
+                    let attributes = try FileManager.default.attributesOfItem(atPath: target.path)
+                    guard (attributes[.type] as? FileAttributeType) == .typeRegular else {
+                        throw AgentOSSoftUpdateError.unsafePath(item.path)
+                    }
+                    let originalData = try Data(contentsOf: target)
+                    originals.append((item.path, originalData))
+                    actualBase = AgentOSSoftUpdateClient.sha256Hex(originalData)
+                } else {
+                    originals.append((item.path, nil))
+                    actualBase = "missing"
+                }
+                guard actualBase.caseInsensitiveCompare(baseHash) == .orderedSame else {
+                    throw AgentOSSoftUpdateError.localConflict(item.path)
+                }
+                let stagedFile = staged.url.appendingPathComponent(item.path).standardizedFileURL
+                guard stagedFile.path.hasPrefix(staged.url.standardizedFileURL.path + "/") else {
+                    throw AgentOSSoftUpdateError.unsafePath(item.path)
+                }
+                let data = try Data(contentsOf: stagedFile)
+                guard Int64(data.count) == item.byteCount,
+                      AgentOSSoftUpdateClient.sha256Hex(data).caseInsensitiveCompare(item.sha256) == .orderedSame,
+                      let text = String(data: data, encoding: .utf8),
+                      !WorkspaceContentSafety.containsPotentialSecret(text) else {
+                    throw AgentOSSoftUpdateError.hashMismatch(item.path)
+                }
+                files.append((item.path, text))
+            }
+            try validateDefinitionPayloads(files, workspaceRoot: workspaceRoot)
+            let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let snapshots = try DurableWorkspaceSnapshotStore(directoryURL: support.appendingPathComponent("PersonalAgent/AgentOSSnapshots", isDirectory: true))
+            let snapshot = try await snapshots.createSnapshot(of: workspaceRoot)
+            let rollbackRoot = support.appendingPathComponent("PersonalAgent/AgentOSUpdateRollback/\(UUID().uuidString.lowercased())", isDirectory: true)
+            do {
+                try FileManager.default.createDirectory(at: rollbackRoot, withIntermediateDirectories: true)
+                for original in originals {
+                    guard let data = original.data else { continue }
+                    let backup = rollbackRoot.appendingPathComponent(original.path).standardizedFileURL
+                    guard backup.path.hasPrefix(rollbackRoot.standardizedFileURL.path + "/") else { throw AgentOSSoftUpdateError.unsafePath(original.path) }
+                    try FileManager.default.createDirectory(at: backup.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    try data.write(to: backup, options: .atomic)
+                }
+                let record = AgentOSRollbackRecord(manifest: staged.manifest, missingPaths: originals.filter { $0.data == nil }.map { $0.path })
+                try JSONEncoder().encode(record).write(to: rollbackRoot.appendingPathComponent("rollback.json"), options: .atomic)
+            } catch {
+                try? FileManager.default.removeItem(at: rollbackRoot)
+                throw error
+            }
+            do {
+                for (path, text) in files { try await workspace.writeFile(text, to: path) }
+            } catch {
+                try await snapshots.restore(snapshotID: snapshot.id, to: workspaceRoot)
+                try? FileManager.default.removeItem(at: rollbackRoot)
+                throw error
+            }
+            self.rollbackDirectory = rollbackRoot
+            activeManifest = staged.manifest
+            UserDefaults.standard.set(rollbackRoot.path, forKey: "agentos.update.rollback.path")
+            UserDefaults.standard.set(staged.manifest.revision, forKey: "agentos.update.revision")
+            await session.refresh()
+            try? FileManager.default.removeItem(at: staged.url)
+            self.staged = nil
+            status = "Đã kích hoạt revision \(staged.manifest.revision); có thể khôi phục bản trước."
+        } catch {
+            status = "Kích hoạt bị chặn/đã rollback: \(error.localizedDescription)"
+        }
+    }
+
+    private func loadRollbackState() async {
+        guard activeManifest == nil,
+              let savedPath = UserDefaults.standard.string(forKey: "agentos.update.rollback.path") else { return }
+        do {
+            let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let allowedRoot = support.appendingPathComponent("PersonalAgent/AgentOSUpdateRollback", isDirectory: true).standardizedFileURL
+            let candidate = URL(fileURLWithPath: savedPath).standardizedFileURL
+            guard candidate.path.hasPrefix(allowedRoot.path + "/"),
+                  FileManager.default.fileExists(atPath: candidate.appendingPathComponent("rollback.json").path) else { return }
+            let record = try JSONDecoder().decode(AgentOSRollbackRecord.self, from: Data(contentsOf: candidate.appendingPathComponent("rollback.json")))
+            guard record.manifest.revision == UserDefaults.standard.string(forKey: "agentos.update.revision") else { return }
+            rollbackDirectory = candidate
+            activeManifest = record.manifest
+        } catch {
+            status = "Không thể khôi phục trạng thái rollback đã lưu."
+        }
+    }
+
+    private func validateDefinitionPayloads(_ updates: [(String, String)], workspaceRoot: URL) throws {
+        let replacementByPath = Dictionary(uniqueKeysWithValues: updates.map { ($0.0.lowercased(), $0.1) })
+        let fileManager = FileManager.default
+
+        var skillTexts: [String: String] = [:]
+        let skillDirectory = workspaceRoot.appendingPathComponent("Skills", isDirectory: true)
+        if fileManager.fileExists(atPath: skillDirectory.path) {
+            for url in try fileManager.contentsOfDirectory(at: skillDirectory, includingPropertiesForKeys: nil)
+                where url.pathExtension.lowercased() == "md" {
+                let path = "skills/" + url.lastPathComponent
+                if let replacement = replacementByPath[path.lowercased()] {
+                    skillTexts[path.lowercased()] = replacement
+                } else {
+                    skillTexts[path.lowercased()] = try String(contentsOf: url, encoding: .utf8)
+                }
+            }
+        }
+        for (path, text) in updates where path.lowercased().hasPrefix("skills/")
+            && URL(fileURLWithPath: path).pathExtension.lowercased() == "md" {
+            skillTexts[path.lowercased()] = text
+        }
+        var agentTexts: [String: String] = [:]
+        let agentDirectory = workspaceRoot.appendingPathComponent("Agents", isDirectory: true)
+        if fileManager.fileExists(atPath: agentDirectory.path) {
+            for url in try fileManager.contentsOfDirectory(at: agentDirectory, includingPropertiesForKeys: nil)
+                where url.pathExtension.lowercased() == "md" {
+                let path = "agents/" + url.lastPathComponent
+                if let replacement = replacementByPath[path.lowercased()] {
+                    agentTexts[path.lowercased()] = replacement
+                } else {
+                    agentTexts[path.lowercased()] = try String(contentsOf: url, encoding: .utf8)
+                }
+            }
+        }
+        for (path, text) in updates where path.lowercased().hasPrefix("agents/")
+            && URL(fileURLWithPath: path).pathExtension.lowercased() == "md" {
+            agentTexts[path.lowercased()] = text
+        }
+        try AgentOSSoftUpdateDefinitionValidator.validate(
+            skillMarkdowns: Array(skillTexts.values),
+            agentMarkdowns: Array(agentTexts.values)
+        )
+    }
+
+    private func rollback() async {
+        guard let rollbackDirectory, let manifest = activeManifest else { return }
+        busy = true
+        defer { busy = false }
+        do {
+            let workspace = try LocalAgentWorkspace.documents()
+            let workspaceRoot = await workspace.rootURL
+            let record = try JSONDecoder().decode(AgentOSRollbackRecord.self, from: Data(contentsOf: rollbackDirectory.appendingPathComponent("rollback.json")))
+            guard record.manifest == manifest else { throw AgentOSSoftUpdateError.invalidManifest }
+            for item in manifest.files {
+                let target = workspaceRoot.appendingPathComponent(item.path).standardizedFileURL
+                guard target.path.hasPrefix(workspaceRoot.standardizedFileURL.path + "/"),
+                      FileManager.default.fileExists(atPath: target.path) else {
+                    throw AgentOSSoftUpdateError.localConflict(item.path)
+                }
+                let attrs = try FileManager.default.attributesOfItem(atPath: target.path)
+                guard (attrs[.type] as? FileAttributeType) == .typeRegular,
+                      AgentOSSoftUpdateClient.sha256Hex(try Data(contentsOf: target)).caseInsensitiveCompare(item.sha256) == .orderedSame else {
+                    throw AgentOSSoftUpdateError.localConflict(item.path)
+                }
+            }
+            let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let snapshots = try DurableWorkspaceSnapshotStore(directoryURL: support.appendingPathComponent("PersonalAgent/AgentOSSnapshots", isDirectory: true))
+            let safety = try await snapshots.createSnapshot(of: workspaceRoot)
+            do {
+                for item in manifest.files {
+                    if record.missingPaths.contains(item.path) {
+                        try await workspace.remove(at: item.path)
+                    } else {
+                        let backup = rollbackDirectory.appendingPathComponent(item.path).standardizedFileURL
+                        guard backup.path.hasPrefix(rollbackDirectory.standardizedFileURL.path + "/") else {
+                            throw AgentOSSoftUpdateError.unsafePath(item.path)
+                        }
+                        let data = try Data(contentsOf: backup)
+                        guard let baseHash = item.baseSHA256, baseHash != "missing",
+                              AgentOSSoftUpdateClient.sha256Hex(data).caseInsensitiveCompare(baseHash) == .orderedSame else {
+                            throw AgentOSSoftUpdateError.hashMismatch(item.path)
+                        }
+                        let target = workspaceRoot.appendingPathComponent(item.path).standardizedFileURL
+                        try FileManager.default.createDirectory(at: target.deletingLastPathComponent(), withIntermediateDirectories: true)
+                        try data.write(to: target, options: .atomic)
+                    }
+                }
+            } catch {
+                try await snapshots.restore(snapshotID: safety.id, to: workspaceRoot)
+                throw error
+            }
+            UserDefaults.standard.set(manifest.baseRevision, forKey: "agentos.update.revision")
+            try? FileManager.default.removeItem(at: rollbackDirectory)
+            self.rollbackDirectory = nil
+            activeManifest = nil
+            UserDefaults.standard.removeObject(forKey: "agentos.update.rollback.path")
+            await session.refresh()
+            status = "Đã khôi phục các tệp đã cập nhật; tệp khác được giữ nguyên."
+        } catch {
+            status = "Khôi phục bị chặn để bảo vệ chỉnh sửa cục bộ: \\(error.localizedDescription)"
+        }
+    }
+}
+
+private struct AgentOSRollbackRecord: Codable {
+    let manifest: AgentOSSoftUpdateManifest
+    let missingPaths: [String]
 }
 
 private struct ImportedFilePreview: Identifiable {

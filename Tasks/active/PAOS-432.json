@@ -1,0 +1,45 @@
+{
+  "id": "PAOS-432",
+  "title": "Complete safe soft-update progress, cancellation, and rollback UX",
+  "status": "in_progress",
+  "goal": "Prevent soft-update payloads from breaking live Agent/Skill discovery and reject path collisions or malformed remote trees before any workspace mutation.",
+  "context": "This checkpoint hardens the already implemented read-only transport and transactional activation. It validates all affected Markdown definitions and rejects case-insensitive path collisions and duplicate Git tree paths.",
+  "allowed_paths": [
+    "Runtime/Updates/AgentUpdateManager.swift",
+    "Tests/PersonalAgentTests/AgentUpdateManagerTests.swift",
+    "Sources/Workspace/AgentOSSoftUpdateClient.swift",
+    "Tests/PersonalAgentTests/AgentOSSoftUpdateClientTests.swift",
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "agentos-update.json",
+    "skills/text.normalize.Skill.md",
+    "Documentation/AGENTOS_SOFT_UPDATE.md",
+    "Tasks/active/PAOS-432.json",
+    "Composition/AgentOSSoftUpdateDefinitionValidator.swift"
+  ],
+  "forbidden_changes": [
+    "Do not load or execute downloaded native code.",
+    "Do not push or mutate the remote repository from the app.",
+    "Do not overwrite local edits when base hashes differ.",
+    "Do not claim native Swift/UI/framework changes can be applied without a signed IPA."
+  ],
+  "acceptance_criteria": [
+    "The repository contains a valid manifest and a real text-only Skill.md update with correct byte count and SHA-256.",
+    "The first update is based on initial state and repeat checks of the installed revision report up-to-date.",
+    "The protocol documents how to advance baseRevision, revision, base hashes, and content hashes for future releases.",
+    "Settings activates only after revalidation and a durable snapshot; rollback preserves unrelated workspace edits and blocks if updated files were changed after activation.",
+    "Before activation, all existing and updated Skill.md and Agent.md files parse successfully with unique IDs; duplicate remote tree paths and case-insensitive file path collisions fail closed.",
+    "Definition validation is exposed by PAComposition (the layer that depends on PASkills); tests cover duplicate Skill/Agent IDs.",
+    "Staging reports file progress and can be cancelled; interrupted downloads remove partial staging and leave the active workspace unchanged."
+  ],
+  "verification": [
+    "swift test --disable-sandbox",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA CI results"
+  ],
+  "dependencies": [
+    "Issue #432",
+    "Existing AgentUpdateManager",
+    "GitHubRepositorySyncClient",
+    "DurableWorkspaceSnapshotStore"
+  ],
+  "recovery": "Revert this single logical commit if package compilation, contract validation, or staging-boundary tests regress."
+}
