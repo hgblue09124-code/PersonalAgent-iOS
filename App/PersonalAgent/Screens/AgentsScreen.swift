@@ -53,7 +53,7 @@ struct AgentsScreen: View {
             .buttonStyle(.borderedProminent)
             .disabled(session.isSubmitting)
             if session.isSubmitting {
-                Label("Agent đang thực thi — thay đổi Agent và Team mode tạm khóa.", systemImage: "lock.fill")
+                Label("Agent is running — changes to Agent and Team mode are temporarily locked.", systemImage: "lock.fill")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Text("Team mode runs matching declared Skills sequentially across Agent.md profiles. Each result is policy-gated and verified; if no Skill matches, Chat falls back to the main runtime.")
