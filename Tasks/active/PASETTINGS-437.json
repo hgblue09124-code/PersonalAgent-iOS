@@ -1,0 +1,24 @@
+{
+  "id": "PASETTINGS-437",
+  "title": "Fix Settings file importer presentation",
+  "status": "in_progress",
+  "goal": "Present the Settings file importer through a stable SwiftUI presentation path.",
+  "context": "Focused Settings UI presentation fix.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "Tasks/active/PASETTINGS-437.json"
+  ],
+  "forbidden_changes": [
+    "Do not modify unrelated modules or weaken security/policy boundaries."
+  ],
+  "acceptance_criteria": [
+    "File importer presents from Settings without presentation warnings or a broken flow.",
+    "Existing Swift package tests and native build pass."
+  ],
+  "verification": [
+    "swift test --disable-sandbox",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA CI"
+  ],
+  "dependencies": [],
+  "recovery": "Revert this single logical task if contract validation, package tests, or native build regress."
+}
