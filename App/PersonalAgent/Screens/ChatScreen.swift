@@ -53,6 +53,18 @@ struct ChatScreen: View {
                 Spacer()
                 Menu {
                     Button { session.newConversation() } label: { Label("New conversation", systemImage: "plus") }
+                    Menu("Ngôn ngữ trả lời") {
+                        Button("Tự động" + (session.chatResponseLanguage == "auto" ? " ✓" : "")) { session.setChatResponseLanguage("auto") }
+                        Button("Tiếng Việt" + (session.chatResponseLanguage == "vi" ? " ✓" : "")) { session.setChatResponseLanguage("vi") }
+                        Button("English" + (session.chatResponseLanguage == "en" ? " ✓" : "")) { session.setChatResponseLanguage("en") }
+                    }
+                    Menu("Độ dài ngữ cảnh · \(session.chatContextTurnLimit) lượt") {
+                        ForEach([4, 8, 12, 24, 48], id: \.self) { limit in
+                            Button("\(limit) lượt" + (session.chatContextTurnLimit == limit ? " ✓" : "")) {
+                                session.setChatContextTurnLimit(limit)
+                            }
+                        }
+                    }
                     Button { showPromptLibrary = true } label: { Label("Thư viện tác vụ · 28 mẫu", systemImage: "books.vertical") }
                     Button { renameText = currentTitle; showRename = true } label: { Label("Rename", systemImage: "pencil") }
                     if session.conversations.count > 1 {
