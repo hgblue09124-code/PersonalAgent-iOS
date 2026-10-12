@@ -477,6 +477,15 @@ public actor M6Orchestrator {
             // 8. Evaluation
             var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
             try Task.checkCancellation()
+            // The cycle budget is terminal: a final "continue" must not leave a
+            // goal active while returning control to the caller as if the run ended.
+            if evaluation.disposition == .continue, cycleCount >= maxCycles {
+                evaluation = Evaluation(
+                    goalID: goalID,
+                    disposition: .abort,
+                    reason: "Agent loop exhausted cycle budget (maxCycles=\(maxCycles))"
+                )
+            }
             // Answer-only proposals have no tool target. Execution success is not the answer.
             if proposals.allSatisfy({ $0.toolID == nil }) {
                 let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)

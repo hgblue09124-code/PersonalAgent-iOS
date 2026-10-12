@@ -321,6 +321,32 @@ modules: [EchoModule()])
         #expect(receivedFeedbackCount == 2)
     }
 
+    @Test func cycleBudgetExhaustionAbortsInsteadOfReturningContinue() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let goal = Goal(statement: "Keep continuing until the budget is exhausted")
+        try await root.runtime.submit(goal: goal)
+        let evaluator = MultiCycleEvaluator(continueForCycles: 10)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            evaluator: evaluator,
+            maxCycles: 2
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(evaluation.reason.contains("cycle budget"))
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        #expect(events.filter { $0.kind == .perceptionReceived }.count == 2)
+        #expect(events.contains {
+            $0.kind == .evaluationCompleted &&
+            $0.payload["disposition"] == AgencyDisposition.abort.rawValue &&
+            $0.payload["reason"]?.contains("cycle budget") == true
+        })
+    }
+
     // B1 Regression Test: Prove custom EventLog receives events via M6CompositionRoot
     @Test func testB1_CustomEventLogInjectionProof() async throws {
         let customLog = CustomInjectableEventLog()
