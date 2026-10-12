@@ -35,7 +35,10 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         policy: (any PolicyEvaluating)? = nil,
         approvalGate: (any ApprovalGate)? = nil,
         modules: [any Module] = [],
-        tools: [any Tool] = []
+        tools: [any Tool] = [],
+        skillStore: (any SkillStore)? = nil,
+        skillExecutors: SkillExecutorRegistry? = nil,
+        allowedSkillIDs: Set<SkillID> = [SkillRuntime.normalizationManifest.id]
     ) async throws {
         let log = eventLog ?? InMemoryEventLog()
         self.milestone = .m6
@@ -80,6 +83,13 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         )
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
+
+        let resolvedSkillStore: any SkillStore = skillStore ?? InMemorySkillStore(manifests: [SkillRuntime.normalizationManifest])
+        let resolvedSkillExecutors = skillExecutors ?? SkillExecutorRegistry(executors: [
+            SkillRuntime.normalizationManifest.id.rawValue: TextNormalizeSkillExecutor()
+        ])
+        let skillRuntime = SkillRuntime(store: resolvedSkillStore, executors: resolvedSkillExecutors, moduleRuntime: moduleRuntime)
+        let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
 
         // 3. Memory setup
         let store: any MemoryStore
@@ -127,6 +137,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
             reasoner: LLMReasoner(provider: activeProvider),
             policy: resolvedPolicy,
             approvalGate: approvalGate,
+            skillBoundary: skillBoundary,
             moduleRuntime: moduleRuntime
         )
     }
