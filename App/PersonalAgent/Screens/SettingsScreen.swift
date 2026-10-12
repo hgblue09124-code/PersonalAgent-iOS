@@ -9,6 +9,11 @@ import PAImportGateway
 import PAWorkspace
 import UIKit
 
+private enum SettingsFileImportKind {
+    case gguf
+    case general
+}
+
 private struct OpenRouterModelOption: Identifiable {
     let id: String
     let name: String
@@ -18,8 +23,8 @@ private struct OpenRouterModelOption: Identifiable {
 
 struct SettingsScreen: View {
     @ObservedObject var session: KernelSession
-    @State private var isImportingGGUF = false
-    @State private var isImportingFiles = false
+    @State private var isImportingFile = false
+    @State private var fileImportKind: SettingsFileImportKind = .general
     @State private var importedFiles: [ImportedFile] = []
     @State private var importPreview: ImportedFilePreview?
     @State private var githubTokenDraft = ""
@@ -119,7 +124,8 @@ struct SettingsScreen: View {
                         .font(.headline)
                     Spacer()
                     Button {
-                        isImportingGGUF = true
+                        fileImportKind = .gguf
+                        isImportingFile = true
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -270,7 +276,8 @@ struct SettingsScreen: View {
                         .font(.headline)
                     Spacer()
                     Button {
-                        isImportingFiles = true
+                        fileImportKind = .general
+                        isImportingFile = true
                     } label: {
                         Label("Import files", systemImage: "plus")
                     }
@@ -336,19 +343,6 @@ struct SettingsScreen: View {
                     }
                 }
             }
-            .fileImporter(
-                isPresented: $isImportingFiles,
-                allowedContentTypes: [.item],
-                allowsMultipleSelection: true
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    Task { await importFiles(urls) }
-                case .failure(let error):
-                    lastImportError = error.localizedDescription
-                }
-            }
-
             GlassPanel {
                 Label("Remote Provider", systemImage: "server.rack")
                     .font(.headline)
@@ -599,23 +593,28 @@ struct SettingsScreen: View {
             compatibleModel = UserDefaults.standard.string(forKey: "provider.compatible.model") ?? compatibleModel
         }
         .fileImporter(
-            isPresented: $isImportingGGUF,
-            allowedContentTypes: [
-                UTType(filenameExtension: "gguf") ?? .data,
-            ],
-            allowsMultipleSelection: false
+            isPresented: $isImportingFile,
+            allowedContentTypes: fileImportKind == .gguf
+                ? [UTType(filenameExtension: "gguf") ?? .data]
+                : [.item],
+            allowsMultipleSelection: fileImportKind == .general
         ) { result in
             switch result {
             case .success(let urls):
-                guard let selectedURL = urls.first else { return }
-                guard selectedURL.pathExtension.lowercased() == "gguf" else {
-                    lastImportError = "Chỉ hỗ trợ tệp GGUF."
-                    return
-                }
-                Task {
-                    lastImportError = nil
-                    await session.importModel(from: selectedURL)
-                    lastImportError = session.lastError
+                switch fileImportKind {
+                case .gguf:
+                    guard let selectedURL = urls.first else { return }
+                    guard selectedURL.pathExtension.lowercased() == "gguf" else {
+                        lastImportError = "Chỉ hỗ trợ tệp GGUF."
+                        return
+                    }
+                    Task {
+                        lastImportError = nil
+                        await session.importModel(from: selectedURL)
+                        lastImportError = session.lastError
+                    }
+                case .general:
+                    Task { await importFiles(urls) }
                 }
             case .failure(let error):
                 lastImportError = error.localizedDescription
