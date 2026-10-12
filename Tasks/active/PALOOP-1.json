@@ -1,0 +1,31 @@
+{
+  "id": "PALOOP-1",
+  "title": "Wire configured provider into M6 reasoning",
+  "status": "in_progress",
+  "goal": "Ensure the canonical M6 Agent loop invokes the provider configured by M6CompositionRoot instead of silently falling back to DefaultReasoner.",
+  "context": "M6CompositionRoot configures activeProvider and ProviderRuntime, but omits the reasoner argument when constructing M6Orchestrator. M6Orchestrator defaults to DefaultReasoner, which returns a synthetic string without calling the configured provider.",
+  "allowed_paths": [
+    "Composition/M6CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6ProviderWiringTests.swift",
+    "Tasks/active/PALOOP-1.json"
+  ],
+  "forbidden_changes": [
+    "Do not modify UI, Package.swift, provider implementations, Skill permissions, or unrelated orchestration behavior.",
+    "Do not claim tests or CI passed without actual results."
+  ],
+  "acceptance_criteria": [
+    "M6CompositionRoot injects LLMReasoner backed by the same activeProvider it configures.",
+    "A regression test proves the configured provider response becomes the M6 evaluation answer.",
+    "The change remains one logical commit and does not alter unrelated files."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PALOOP-1.json",
+    "swift test --disable-sandbox --filter M6ProviderWiringTests",
+    "swift test --disable-sandbox",
+    "Review PR checks and changed-file scope"
+  ],
+  "dependencies": [
+    "Issue #442"
+  ],
+  "recovery": "Revert the single task commit if the focused regression or full Swift package test suite fails."
+}
