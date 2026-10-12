@@ -377,7 +377,7 @@ private struct StreamingChatBubble: View {
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             PremiumIconTile(systemImage: "sparkles")
-            Text(content + "▍")
+            Text(content)
                 .font(.body).textSelection(.enabled).frame(maxWidth: 310, alignment: .leading)
                 .padding(.horizontal, 14).padding(.vertical, 11)
                 .background(AnyShapeStyle(.thinMaterial), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
