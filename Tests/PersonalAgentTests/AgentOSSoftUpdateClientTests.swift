@@ -3,6 +3,7 @@ import XCTest
 import FoundationNetworking
 #endif
 @testable import PAWorkspace
+import PAComposition
 
 final class AgentOSSoftUpdateClientTests: XCTestCase {
     func testSHA256MatchesKnownVector() {
@@ -135,4 +136,78 @@ private actor ScriptedSoftUpdateTransport: GitHubSyncHTTPTransport {
         return responses.removeFirst()
     }
     func recordedRequests() -> [URLRequest] { requests }
+    func testCaseInsensitivePathCollisionsAreRejected() async throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = base.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: base) }
+        let content = Data("same".utf8)
+        let manifest = AgentOSSoftUpdateManifest(repository: "example/agentos", baseRevision: "initial",
+            version: "1", revision: "r1", compatibility: "runtime-v1",
+            files: [
+                .init(path: "skills/Demo.md", sha256: AgentOSSoftUpdateClient.sha256Hex(content),
+                      byteCount: Int64(content.count), baseSHA256: "missing"),
+                .init(path: "skills/demo.md", sha256: AgentOSSoftUpdateClient.sha256Hex(content),
+                      byteCount: Int64(content.count), baseSHA256: "missing")
+            ])
+        let manifestData = try JSONEncoder().encode(manifest)
+        let manifestSHA = GitBlobSHA1.hash(manifestData)
+        let commitSHA = String(repeating: "a", count: 40)
+        let treeSHA = String(repeating: "b", count: 40)
+        let transport = ScriptedSoftUpdateTransport(responses: [
+            Self.response(["object": ["sha": commitSHA]]),
+            Self.response(["tree": ["sha": treeSHA]]),
+            Self.response(["sha": treeSHA, "truncated": false, "tree": [
+                ["path": "agentos-update.json", "type": "blob", "sha": manifestSHA, "size": manifestData.count],
+                ["path": "skills/Demo.md", "type": "blob", "sha": GitBlobSHA1.hash(content), "size": content.count],
+                ["path": "skills/demo.md", "type": "blob", "sha": GitBlobSHA1.hash(content), "size": content.count]
+            ]]),
+            Self.response(["sha": manifestSHA, "encoding": "base64", "content": manifestData.base64EncodedString()])
+        ])
+        let client = try AgentOSSoftUpdateClient(location: GitHubRepositoryLocation(owner: "example", repository: "agentos"),
+            transport: transport, tokenProvider: { "test-token" })
+        do {
+            _ = try await client.stageUpdate(currentRevision: "initial", runtimeCompatibility: "runtime-v1",
+                workspaceURL: workspace, stagingRootURL: base.appendingPathComponent("staging"))
+            XCTFail("Case-colliding paths must fail closed")
+        } catch let error as AgentOSSoftUpdateError {
+            XCTAssertEqual(error, .duplicatePath("skills/demo.md"))
+        }
+        let requests = await transport.recordedRequests()
+        XCTAssertEqual(requests.count, 4)
+    }
+
+
+    func testDefinitionValidatorRejectsDuplicateSkillAndAgentIDs() throws {
+        let skill = """
+        id: text.normalize
+        name: Text Normalize
+        version: 1.0.0
+        executor: text.normalize
+        ---
+        ## Input
+        input
+
+        ## Output
+        output
+
+        ## Rule
+        Trim surrounding whitespace.
+        """
+        XCTAssertThrowsError(try AgentOSSoftUpdateDefinitionValidator.validate(skillMarkdowns: [skill, skill], agentMarkdowns: []))
+        let agent = """
+        id: personal.default
+        name: Personal Agent
+        version: 1.0.0
+        ---
+        ## Skills
+        text.normalize
+
+        ## Rule
+        Select only from declared skills.
+        """
+        XCTAssertThrowsError(try AgentOSSoftUpdateDefinitionValidator.validate(skillMarkdowns: [], agentMarkdowns: [agent, agent]))
+    }
+
+
 }

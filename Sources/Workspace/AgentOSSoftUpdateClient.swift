@@ -108,7 +108,11 @@ public actor AgentOSSoftUpdateClient {
         let commit: CommitResponse = try await get("repos/\(location.owner)/\(location.repository)/git/commits/\(remoteRef.object.sha)", token: token)
         let tree: TreeResponse = try await get("repos/\(location.owner)/\(location.repository)/git/trees/\(commit.tree.sha)?recursive=1", token: token)
         guard !tree.truncated else { throw AgentOSSoftUpdateError.invalidRemoteResponse }
-        let entries = Dictionary(uniqueKeysWithValues: tree.tree.filter { $0.type == "blob" }.map { ($0.path, $0) })
+        var entries: [String: TreeEntry] = [:]
+        for entry in tree.tree where entry.type == "blob" {
+            guard entries[entry.path] == nil else { throw AgentOSSoftUpdateError.invalidRemoteResponse }
+            entries[entry.path] = entry
+        }
         guard let manifestEntry = entries[Self.manifestPath] else { throw AgentOSSoftUpdateError.invalidManifest }
         let manifestData = try await fetchBlob(manifestEntry.sha, token: token, expectedSize: manifestEntry.size, path: Self.manifestPath)
         let manifest: AgentOSSoftUpdateManifest
@@ -129,7 +133,7 @@ public actor AgentOSSoftUpdateClient {
         var total: Int64 = 0
         for file in manifest.files {
             guard Self.isAllowedPath(file.path) else { throw AgentOSSoftUpdateError.unsafePath(file.path) }
-            guard paths.insert(file.path).inserted else { throw AgentOSSoftUpdateError.duplicatePath(file.path) }
+            guard paths.insert(file.path.lowercased()).inserted else { throw AgentOSSoftUpdateError.duplicatePath(file.path) }
             guard file.byteCount >= 0, file.byteCount <= Self.maximumFileBytes,
                   file.sha256.range(of: "^[0-9a-fA-F]{64}$", options: .regularExpression) != nil else {
                 throw AgentOSSoftUpdateError.invalidManifest

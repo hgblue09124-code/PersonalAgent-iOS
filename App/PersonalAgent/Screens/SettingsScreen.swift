@@ -970,6 +970,7 @@ private struct AgentOSUpdateSettingsSection: View {
                 }
                 files.append((item.path, text))
             }
+            try validateDefinitionPayloads(files, workspaceRoot: workspaceRoot)
             let support = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             let snapshots = try DurableWorkspaceSnapshotStore(directoryURL: support.appendingPathComponent("PersonalAgent/AgentOSSnapshots", isDirectory: true))
             let snapshot = try await snapshots.createSnapshot(of: workspaceRoot)
@@ -1025,6 +1026,44 @@ private struct AgentOSUpdateSettingsSection: View {
         } catch {
             status = "Không thể khôi phục trạng thái rollback đã lưu."
         }
+    }
+
+    private func validateDefinitionPayloads(_ updates: [(String, String)], workspaceRoot: URL) throws {
+        let replacementByPath = Dictionary(uniqueKeysWithValues: updates.map { ($0.0.lowercased(), $0.1) })
+        let fileManager = FileManager.default
+
+        var skillTexts: [String: String] = [:]
+        let skillDirectory = workspaceRoot.appendingPathComponent("Skills", isDirectory: true)
+        if fileManager.fileExists(atPath: skillDirectory.path) {
+            for url in try fileManager.contentsOfDirectory(at: skillDirectory, includingPropertiesForKeys: nil)
+                where url.pathExtension.lowercased() == "md" {
+                let path = "skills/" + url.lastPathComponent
+                skillTexts[path.lowercased()] = replacementByPath[path.lowercased()]
+                    ?? (try String(contentsOf: url, encoding: .utf8))
+            }
+        }
+        for (path, text) in updates where path.lowercased().hasPrefix("skills/")
+            && URL(fileURLWithPath: path).pathExtension.lowercased() == "md" {
+            skillTexts[path.lowercased()] = text
+        }
+        var agentTexts: [String: String] = [:]
+        let agentDirectory = workspaceRoot.appendingPathComponent("Agents", isDirectory: true)
+        if fileManager.fileExists(atPath: agentDirectory.path) {
+            for url in try fileManager.contentsOfDirectory(at: agentDirectory, includingPropertiesForKeys: nil)
+                where url.pathExtension.lowercased() == "md" {
+                let path = "agents/" + url.lastPathComponent
+                agentTexts[path.lowercased()] = replacementByPath[path.lowercased()]
+                    ?? (try String(contentsOf: url, encoding: .utf8))
+            }
+        }
+        for (path, text) in updates where path.lowercased().hasPrefix("agents/")
+            && URL(fileURLWithPath: path).pathExtension.lowercased() == "md" {
+            agentTexts[path.lowercased()] = text
+        }
+        try AgentOSSoftUpdateDefinitionValidator.validate(
+            skillMarkdowns: Array(skillTexts.values),
+            agentMarkdowns: Array(agentTexts.values)
+        )
     }
 
     private func rollback() async {
