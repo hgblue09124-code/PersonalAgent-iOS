@@ -9,7 +9,8 @@
     "Runtime/Planning/M6Orchestrator.swift",
     "Composition/M6CompositionRoot.swift",
     "Composition/M6SkillExecutionAdapter.swift",
-    "Tests/PersonalAgentTests/M6SkillExecutionBoundaryTests.swift"
+    "Tests/PersonalAgentTests/M6SkillExecutionBoundaryTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
   ],
   "forbidden_changes": [
     "Do not add a PARuntime dependency on PASkills.",
@@ -17,7 +18,7 @@
     "Do not change UI or unrelated runtime behavior."
   ],
   "acceptance_criteria": [
-    "Skill identity survives discovery, explicit allowlist filtering, planning, proposal, authorization, execution, and observation.",
+    "A registered Skill survives planning, proposal, authorization, execution, and verified observation through M6CompositionRoot.",
     "M6 policy and explicit approval gate run before the concrete Skill executor; capability mismatch fails closed.",
     "Executor output is independently verified before a successful observation is recorded.",
     "No-match preserves answer-only behavior and missing boundary remains fail-closed.",
