@@ -1,0 +1,36 @@
+{
+  "id": "PAIOS-445",
+  "title": "Connect Skill discovery and execution to canonical M6 Agent loop",
+  "status": "in_progress",
+  "goal": "Wire scoped Skill discovery, deterministic selection, capability-preserving proposal, M6 policy and approval handoff, registered execution, and verified observations into the canonical M6 loop.",
+  "context": "Issue #445. Runtime must remain independent of PASkills; Composition owns the concrete adapter. No-match remains answer-only; missing execution boundaries fail closed.",
+  "allowed_paths": [
+    "Tasks/active/PAIOS-445.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Composition/M6CompositionRoot.swift",
+    "Composition/M6SkillExecutionAdapter.swift"
+  ],
+  "forbidden_changes": [
+    "Do not add a PARuntime dependency on PASkills.",
+    "Do not treat approval as an implicit grant or report unverified execution as success.",
+    "Do not change UI or unrelated runtime behavior."
+  ],
+  "acceptance_criteria": [
+    "Skill identity survives discovery, planning, proposal, authorization, execution, and observation.",
+    "M6 policy and explicit approval gate run before the concrete Skill executor; capability mismatch fails closed.",
+    "Executor output is independently verified before a successful observation is recorded.",
+    "No-match preserves answer-only behavior and missing boundary remains fail-closed.",
+    "Required CI gates pass; do not claim local tests without running them."
+  ],
+  "verification": [
+    "swift test --disable-sandbox",
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow"
+  ],
+  "dependencies": [
+    "Issue #445",
+    "PR #450 fail-closed checkpoint"
+  ],
+  "recovery": "If validation fails, fix the same logical change and amend the branch commit; revert the task commit if the security or architecture invariants cannot be preserved."
+}
