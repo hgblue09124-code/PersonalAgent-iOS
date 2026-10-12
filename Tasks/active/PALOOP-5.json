@@ -1,0 +1,35 @@
+{
+  "id": "PALOOP-5",
+  "title": "Preserve Skill identity from planning into action proposals",
+  "status": "in_progress",
+  "goal": "Carry a selected SkillID through the canonical Runtime action proposal without conflating Skills with Tools.",
+  "context": "Issue #445 identifies that PlanStep already has skillID but ActionProposal drops it, preventing downstream execution from preserving the selected Skill identity.",
+  "allowed_paths": [
+    "Runtime/Execution/CognitionExecution.swift",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/ActionProposalSkillIdentityTests.swift",
+    "Tasks/active/PALOOP-5.json"
+  ],
+  "forbidden_changes": [
+    "Do not add a PARuntime dependency on PASkills.",
+    "Do not claim Skill execution is integrated or verified by this plumbing change.",
+    "Do not change policy, approval, or UI behavior."
+  ],
+  "acceptance_criteria": [
+    "ActionProposal carries an optional SkillID independently of toolID.",
+    "DefaultProposer preserves PlanStep.skillID in the resulting ActionProposal.",
+    "Action-proposed audit events include skillID when present and omit it otherwise.",
+    "A regression test proves the planned Skill identity survives proposal construction."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PALOOP-5.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PALOOP-5.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Review the diff to confirm only the declared paths changed."
+  ],
+  "dependencies": [
+    "Issue #445",
+    "PALOOP-4"
+  ],
+  "recovery": "Revert the single task commit if compatibility or regression checks fail."
+}
