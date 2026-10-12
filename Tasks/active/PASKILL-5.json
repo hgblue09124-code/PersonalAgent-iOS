@@ -1,0 +1,37 @@
+{
+  "id": "PASKILL-5",
+  "title": "Pass conversation context into Agent Skill execution",
+  "status": "in_progress",
+  "goal": "Keep Skill selection anchored to the current user request while passing bounded conversation and relevant-memory context to the selected Skill or Agent Team.",
+  "context": "KernelSession already builds contextualInput for model inference, including recent conversation turns, relevant memory, and response-language preference. Skill and team routing previously received only normalizedStatement as their execution input, so context-dependent follow-up requests lost this information. Preserve current-request-only intent selection while forwarding contextualInput as the Skill input payload.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-5.json",
+    "App/PersonalAgent/KernelSession.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change Skill intent-selection semantics or use conversation history to select a Skill.",
+    "Do not bypass capability policy, Agent scope, ModuleRuntime, verification, or cancellation checks.",
+    "Do not change provider/GGUF routing or add a parallel execution loop.",
+    "Do not claim CI passes before the required checks complete."
+  ],
+  "acceptance_criteria": [
+    "Single-Agent Skill selection continues to use the current normalized user request.",
+    "Selected Skill input receives contextualInput when supplied, with a backward-compatible fallback to the goal statement.",
+    "Agent Team selection continues to use the current normalized user request while team Skill input receives contextualInput.",
+    "Existing callers that omit inputContext remain source-compatible.",
+    "validate-contract, Swift package tests + repository integrity, and Apple Native Build & Unsigned IPA are checked on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-5.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-5.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm validate-contract, Swift package tests + repository integrity, and Apple Native Build & Unsigned IPA CI gates."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #436"
+  ],
+  "recovery": "Revert this single logical task commit if contextual input changes selection behavior or causes Skill execution regressions."
+}

@@ -315,7 +315,7 @@ final class KernelSession: ObservableObject {
                     try await self.composition.session.start()
                 }
                 if useTeamMode {
-                    if let teamResult = try await self.composition.runChatTeamIfMatched(goalStatement: normalizedStatement) {
+                    if let teamResult = try await self.composition.runChatTeamIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput) {
                         let result = teamResult.members.map { member in
                             "\(member.agentName) · \(member.skillResult.skillID.rawValue)\n\(Self.cleanSkillResult(member.skillResult.outputJSON))"
                         }.joined(separator: "\n\n")
@@ -332,7 +332,7 @@ final class KernelSession: ObservableObject {
                         await self.refresh()
                         return
                     }
-                } else if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, agentID: agentID) {
+                } else if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput, agentID: agentID) {
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
