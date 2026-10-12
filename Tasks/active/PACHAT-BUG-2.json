@@ -1,0 +1,25 @@
+{
+  "id": "PACHAT-BUG-2",
+  "title": "Handle startup cancellation and normalize chat tokens",
+  "status": "in_progress",
+  "goal": "Avoid surfacing expected startup cancellation as an error and clean chat token handling.",
+  "context": "Focused regression repair in KernelSession and PersonalAgentApp.",
+  "allowed_paths": [
+    "App/PersonalAgent/KernelSession.swift",
+    "App/PersonalAgent/PersonalAgentApp.swift",
+    "Tasks/active/PACHAT-BUG-2.json"
+  ],
+  "forbidden_changes": [
+    "Do not modify unrelated modules or weaken security/policy boundaries."
+  ],
+  "acceptance_criteria": [
+    "Expected cancellation during startup does not show a user-facing failure.",
+    "Chat token cleanup remains deterministic and existing package tests pass."
+  ],
+  "verification": [
+    "swift test --disable-sandbox",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA CI"
+  ],
+  "dependencies": [],
+  "recovery": "Revert this single logical task if contract validation, package tests, or native build regress."
+}
