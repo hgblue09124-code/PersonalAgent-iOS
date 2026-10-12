@@ -57,4 +57,34 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
     }
+
+    @Test("M8 workspace Skill creates and verifies a real file")
+    func m8WorkspaceSkillCreatesVerifiedFile() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let content = "Skill wrote this file."
+        let goal = Goal(statement: "Tạo file workspace/notes.md với nội dung: \(content)")
+        try await root.runtime.submit(goal: goal)
+        let evaluation = try await root.orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .complete)
+
+        let fileURL = directory.appendingPathComponent("workspace/notes.md")
+        #expect(FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(try String(contentsOf: fileURL, encoding: .utf8) == content)
+
+        let events = try await eventLog.allEvents()
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.create-file"
+        }
+        #expect(observation?.payload["succeeded"] == "true")
+        #expect(observation?.payload["verified"] == "true")
+    }
 }
