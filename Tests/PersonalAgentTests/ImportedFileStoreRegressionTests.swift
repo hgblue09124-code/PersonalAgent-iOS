@@ -18,13 +18,15 @@ final class ImportedFileStoreRegressionTests: XCTestCase {
 
         XCTAssertEqual(record.originalName, "sample.txt")
         XCTAssertEqual(record.sizeBytes, Int64(expected.count))
-        let storedURL = try XCTUnwrap(await store.fileURL(for: record.id))
+        let storedURLValue = await store.fileURL(for: record.id)
+        let storedURL = try XCTUnwrap(storedURLValue)
         XCTAssertEqual(try Data(contentsOf: storedURL), expected)
 
         let reopenedStore = try ImportedFileStore(directoryURL: storeRoot)
         let records = await reopenedStore.listImports()
         XCTAssertEqual(records, [record])
-        let reopenedURL = try XCTUnwrap(await reopenedStore.fileURL(for: record.id))
+        let reopenedURLValue = await reopenedStore.fileURL(for: record.id)
+        let reopenedURL = try XCTUnwrap(reopenedURLValue)
         XCTAssertEqual(try Data(contentsOf: reopenedURL), expected)
     }
 
@@ -40,8 +42,9 @@ final class ImportedFileStoreRegressionTests: XCTestCase {
             _ = try await store.importFile(from: temporaryRoot.appendingPathComponent("missing.txt"))
             XCTFail("Import should fail for a missing source.")
         } catch {
-            XCTAssertFalse(error is ImportGatewayError && error as? ImportGatewayError == .sourceIsNotAFile)
+            XCTAssertFalse(error is ImportGatewayError)
         }
-        XCTAssertTrue(await store.listImports().isEmpty)
+        let records = await store.listImports()
+        XCTAssertTrue(records.isEmpty)
     }
 }
