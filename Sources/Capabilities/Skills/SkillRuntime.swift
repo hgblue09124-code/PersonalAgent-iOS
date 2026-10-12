@@ -545,17 +545,26 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             return nil
         }
         let remainder = String(normalized.dropFirst(prefix.count))
-        let delimiters = [" với nội dung:", " with content:", "\nnội dung:", "\ncontent:"]
-        guard let delimiter = delimiters.compactMap({ candidate -> (Range<String.Index>, String)? in
+        // Accept common Vietnamese/English chat phrasing and punctuation variants.
+        // Choose the earliest boundary so delimiters in file content are preserved.
+        let delimiters = [
+            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
+            " with content:", " content:", " với nội dung là ", " với nội dung ",
+            " nội dung là ", " nội dung ", " with content ", " content ",
+            "\\nnội dung:", "\\ncontent:"
+        ]
+        let matches = delimiters.compactMap { candidate -> (Range<String.Index>, String)? in
             guard let range = remainder.range(of: candidate, options: [.caseInsensitive]) else { return nil }
             return (range, candidate)
-        }).first else {
+        }
+        guard let delimiter = matches.min(by: { $0.0.lowerBound < $1.0.lowerBound }) else {
             return nil
         }
         let rawPath = String(remainder[..<delimiter.0.lowerBound])
         let path = rawPath.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'")))
+        // Empty files are valid. The explicit delimiter establishes the content boundary.
         let content = String(remainder[delimiter.0.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !path.isEmpty, !content.isEmpty else { return nil }
+        guard !path.isEmpty else { return nil }
         return (path, content)
     }
-}
+}}
