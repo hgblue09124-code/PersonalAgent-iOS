@@ -294,7 +294,12 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
                             try Task.checkCancellation()
                             continuation.yield(event)
                         }
-                    case .activeModel(let provider):
+                    case .activeModel:
+                        // Keep GGUF loading lazy: resolve the active model when inference
+                        // begins, then load it before streaming. The completion path already
+                        // follows this lifecycle; streaming must not bypass it.
+                        let engine = try await self.coordinator.loadActiveModel()
+                        let provider = LocalModelProviderAdapter(engine: engine)
                         for try await event in provider.stream(request) {
                             try Task.checkCancellation()
                             continuation.yield(event)

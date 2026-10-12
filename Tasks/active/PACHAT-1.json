@@ -1,0 +1,33 @@
+{
+  "id": "PACHAT-1",
+  "title": "Load the active local model on first streamed inference",
+  "status": "in_progress",
+  "goal": "Ensure Chatbot streaming lazily loads the selected local GGUF model at inference time and returns real output instead of failing because the engine is still unloaded.",
+  "context": "DynamicActiveProvider.complete loads the selected engine before local inference, but DynamicActiveProvider.stream currently resolves an adapter and calls generateStream without loading the engine. Chat uses streaming, so local inference can fail on the first request even though non-streaming completion follows the correct lifecycle.",
+  "allowed_paths": [
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/DynamicActiveProviderRoutingTests.swift",
+    "Tasks/active/PACHAT-1.json"
+  ],
+  "forbidden_changes": [
+    "Do not modify App/ or PersonalAgent.xcodeproj.",
+    "Do not load local models at app startup or change remote-provider routing.",
+    "Do not weaken provider policy, cancellation, output validation, or fail-closed behavior."
+  ],
+  "acceptance_criteria": [
+    "The selected local engine remains unloaded until local inference starts.",
+    "The streaming path loads the active local engine before calling its stream method.",
+    "A regression test proves first local streaming inference loads the engine exactly once and returns its response.",
+    "Remote streaming continues to avoid local storage and model loading."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-1.json --base main",
+    "swift test --disable-sandbox",
+    "Confirm validate-contract, Swift package tests + repository integrity, and Apple Native Build & Unsigned IPA on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #354"
+  ],
+  "recovery": "Revert this single task commit if the regression test or CI shows provider lifecycle or cancellation regressions; do not add a separate repair commit."
+}
