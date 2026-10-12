@@ -1,0 +1,32 @@
+{
+  "id": "PAIMPORT-2",
+  "title": "Verify durable file import and visible feedback",
+  "status": "in_progress",
+  "goal": "Make file import outcomes observable, preserve actionable source access errors, and prove bytes and manifest survive store reinitialization.",
+  "context": "The importer currently reports all source attribute failures as file-not-found, and Settings gives stale session errors precedence over import errors with no positive save confirmation.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "Sources/ImportGateway/ImportedFileStore.swift",
+    "Tests/PersonalAgentTests/ImportedFileStoreRegressionTests.swift",
+    "Tasks/active/PAIMPORT-2.json"
+  ],
+  "forbidden_changes": [
+    "Do not weaken file-size limits, path validation, or security-scoped resource handling.",
+    "Do not claim physical iPhone verification from package tests."
+  ],
+  "acceptance_criteria": [
+    "Successful imports show a saved-local-files confirmation and refresh the imported-file list.",
+    "Import-specific errors take precedence over unrelated stale session errors.",
+    "Regression tests verify byte integrity and manifest persistence after store reinitialization.",
+    "Missing-source import fails without adding a record, and the source filesystem error is preserved.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python Scripts/agent_task_guard.py validate Tasks/active/PAIMPORT-2.json",
+    "swift test --disable-sandbox",
+    "M3 and Apple Native Build & Unsigned IPA CI",
+    "On-device import of a small text file followed by app restart and read-back"
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single logical task if tests fail or import policy regresses; preserve failing CI evidence."
+}
