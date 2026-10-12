@@ -1,0 +1,32 @@
+{
+  "id": "PASEC-16",
+  "title": "Require destructive permission for terminal move",
+  "status": "in_progress",
+  "goal": "Prevent terminal move operations from running under a write-only permission grant when they can relocate or overwrite workspace data.",
+  "context": "Sources/Terminal/TerminalCore.swift classifies mv as write-only while rm and workspace remove require both write and destructive capabilities. This lets a policy that grants writes but withholds destructive actions approve mv.",
+  "allowed_paths": [
+    "Sources/Terminal/TerminalCore.swift",
+    "Tests/PersonalAgentTests/TerminalCoreTests.swift",
+    "Tasks/active/PASEC-16.json"
+  ],
+  "forbidden_changes": [
+    "Do not change mv path resolution or workspace move semantics.",
+    "Do not loosen default-deny terminal authorization.",
+    "Do not modify App/ or PersonalAgent.xcodeproj."
+  ],
+  "acceptance_criteria": [
+    "Terminal mv requests both write and destructive capabilities.",
+    "A policy that denies destructive actions rejects mv before the filesystem is mutated.",
+    "A regression test confirms the source remains and destination is absent after denial."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-16.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-16.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #353"
+  ],
+  "recovery": "Revert the capability classification and regression test together if the Settings policy contract does not distinguish destructive moves."
+}

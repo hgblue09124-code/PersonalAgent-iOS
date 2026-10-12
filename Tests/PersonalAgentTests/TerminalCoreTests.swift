@@ -68,6 +68,32 @@ final class TerminalCoreTests: XCTestCase {
         XCTAssertFalse(exists)
     }
 
+    func testMoveRequiresDestructivePermissionAndDoesNotMutateWhenDenied() async throws {
+        struct DenyDestructive: TerminalCommandAuthorizing {
+            func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool {
+                !capabilities.contains(.destructive)
+            }
+        }
+
+        let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let workspace = LocalAgentWorkspace(rootURL: rootURL)
+        try await workspace.prepare()
+        try await workspace.writeFile("keep me", to: "workspace/source.txt")
+
+        let result = try await BuiltinCommandRegistry.make(authorizer: DenyDestructive()).execute(
+            AgentCommand(name: "mv", arguments: ["workspace/source.txt", "workspace/destination.txt"]),
+            context: CommandContext(workspace: workspace)
+        )
+
+        XCTAssertEqual(result.exitCode, 126)
+        let sourceExists = try await workspace.exists(at: "workspace/source.txt")
+        let destinationExists = try await workspace.exists(at: "workspace/destination.txt")
+        let sourceContents = try await workspace.readFile(at: "workspace/source.txt")
+        XCTAssertTrue(sourceExists)
+        XCTAssertFalse(destinationExists)
+        XCTAssertEqual(sourceContents, "keep me")
+    }
+
     func testFilesystemBuiltinsExecute() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
