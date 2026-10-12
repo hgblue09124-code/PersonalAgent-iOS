@@ -1,0 +1,32 @@
+{
+  "id": "PAOS-432",
+  "title": "Implement fail-closed AgentOS soft-update validation core",
+  "status": "in_progress",
+  "goal": "Strengthen the existing AgentUpdateManager so AgentOS definition updates reject untrusted manifests, unsafe paths, incompatible revisions, unexpected files, and local edit conflicts before activation.",
+  "context": "Issue #432 builds on the existing update transaction boundary. This task is limited to portable Swift runtime policy and regression tests; network transport and SwiftUI integration are separate follow-up work.",
+  "allowed_paths": [
+    "Runtime/Updates/AgentUpdateManager.swift",
+    "Tests/PersonalAgentTests/AgentUpdateManagerTests.swift",
+    "Tasks/active/PAOS-432.json"
+  ],
+  "forbidden_changes": [
+    "Do not load or execute downloaded native code.",
+    "Do not change App UI, Xcode project, entitlements, provider credentials, or unrelated modules.",
+    "Do not claim download or filesystem activation is implemented by this policy-only manager."
+  ],
+  "acceptance_criteria": [
+    "Manifest decoding rejects malformed or hard-update manifests.",
+    "Only bounded Markdown, JSON, and text files in approved AgentOS roots are accepted.",
+    "Repository, base revision, checksum, staged file set, and local edit conflicts are validated before snapshot and activation.",
+    "Regression tests cover traversal, executable files, duplicate paths, bad manifests, repository/base mismatch, conflicts, and unexpected files."
+  ],
+  "verification": [
+    "swift test --disable-sandbox",
+    "CI workflow results for the commit"
+  ],
+  "dependencies": [
+    "Issue #432",
+    "Existing AgentUpdateManager and DurableWorkspaceSnapshotStore"
+  ],
+  "recovery": "Revert this single commit if package compilation or transaction-boundary tests regress."
+}
