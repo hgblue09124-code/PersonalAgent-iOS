@@ -635,15 +635,21 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let skillStore = FileSkillStore(directoryURL: skillDirectoryURL)
         try await skillStore.ensureDefaultSkill()
         let skillRuntime = SkillRuntime(store: skillStore, executors: skillExecutors, moduleRuntime: moduleRuntime)
-        let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
         self.skillRuntime = skillRuntime
-        self.skillAgentOrchestrator = skillAgentOrchestrator
-        self.agentTeamOrchestrator = AgentTeamOrchestrator(skillOrchestrator: skillAgentOrchestrator)
 
+        // The canonical chat loop must use the same declared Skill scope as the active default Agent.
         let agentDirectoryURL = rootDirectoryURL.appendingPathComponent("Agents", isDirectory: true)
         let agentStore = FileAgentStore(directoryURL: agentDirectoryURL)
         try await agentStore.ensureDefaultAgent()
+        let defaultAgent = try await agentStore.load(id: "personal.default")
         self.agentStore = agentStore
+        let allowedSkillIDs = Set(defaultAgent.skillIDs.filter {
+            $0.rawValue != "workspace.create-file" || workspaceToolsEnabled
+        })
+        let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
+        let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
+        self.skillAgentOrchestrator = skillAgentOrchestrator
+        self.agentTeamOrchestrator = AgentTeamOrchestrator(skillOrchestrator: skillAgentOrchestrator)
 
         let store: any MemoryStore
         if let memoryStore {
@@ -689,6 +695,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             reasoner: LLMReasoner(provider: providerRuntime),
             policy: resolvedPolicy,
             approvalGate: approvalGate,
+            skillBoundary: skillBoundary,
             moduleRuntime: moduleRuntime
         )
 
