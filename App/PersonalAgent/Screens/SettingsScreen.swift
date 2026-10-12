@@ -591,7 +591,6 @@ struct SettingsScreen: View {
             }
         }
         .environment(\.locale, Locale(identifier: appLanguage))
-        .id(appLanguage)
         .task {
             credentialState = loadCredentialState(for: remoteProvider)
             compatibleEndpoint = UserDefaults.standard.string(forKey: "provider.compatible.endpoint") ?? compatibleEndpoint

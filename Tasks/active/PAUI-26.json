@@ -1,0 +1,33 @@
+{
+  "id": "PAUI-26",
+  "title": "Preserve Settings state when changing app language",
+  "status": "in_progress",
+  "goal": "Switching language should update localized presentation without recreating Settings and discarding in-progress provider configuration or triggering redundant credential reloads.",
+  "context": "SettingsScreen applies `.environment(\\.locale, Locale(identifier: appLanguage))` and then `.id(appLanguage)` to the entire screen. A language change therefore replaces the Settings subtree and reruns its `.task`, potentially resetting draft form state and reloading Keychain-backed provider configuration unnecessarily. RootView no longer requires this identity reset after PR #425.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "Tasks/active/PAUI-26.json"
+  ],
+  "forbidden_changes": [
+    "Do not change provider credential persistence, endpoint/model values, or Keychain behavior.",
+    "Do not change RootView, KernelSession, provider routing, or unrelated screen layouts.",
+    "Do not claim physical-device verification from CI alone."
+  ],
+  "acceptance_criteria": [
+    "Settings locale changes are driven by the environment without forcing a new Settings view identity.",
+    "Provider configuration drafts are not discarded solely because appLanguage changes.",
+    "The Settings `.task` is not rerun solely due to a locale identity reset.",
+    "All required task-contract, M3, and Apple Native Build & Unsigned IPA gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-26.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-26.json --base origin/main",
+    "Confirm task-contract, M3, and Apple Native Build & Unsigned IPA CI gates."
+  ],
+  "dependencies": [
+    "Issue #350",
+    "Issue #367",
+    "Issue #354"
+  ],
+  "recovery": "Revert the single task commit if locale changes stop updating visible localized strings or Settings behavior regresses."
+}
