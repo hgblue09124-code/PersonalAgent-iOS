@@ -491,7 +491,14 @@ struct SettingsScreen: View {
             GlassPanel {
                 Label("Conversation context", systemImage: "text.alignleft")
                     .font(.headline)
-                Stepper("Context turns: \(contextTurns)", value: $contextTurns, in: 1...128)
+                Picker("Context turns", selection: $contextTurns) {
+                    ForEach([4, 8, 12, 24, 48], id: \.self) { limit in
+                        Text("\(limit) turns").tag(limit)
+                    }
+                }
+                .onChange(of: contextTurns) { _, limit in
+                    session.setChatContextTurnLimit(limit)
+                }
                 Text("Controls how many recent turns are sent into the next model request.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

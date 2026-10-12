@@ -425,7 +425,7 @@ final class KernelSession: ObservableObject {
     }
 
     func setChatContextTurnLimit(_ limit: Int) {
-        guard !isSubmitting, [4, 8, 12, 24, 48].contains(limit) else { return }
+        guard [4, 8, 12, 24, 48].contains(limit) else { return }
         chatContextTurnLimit = limit
         UserDefaults.standard.set(limit, forKey: "chat.context.turns")
     }
@@ -799,7 +799,11 @@ final class KernelSession: ObservableObject {
     }
 
     private func buildContextualInput(for statement: String, conversationID: UUID) async throws -> String {
-        let contextTurns = chatContextTurnLimit
+        let storedContextTurns = UserDefaults.standard.integer(forKey: "chat.context.turns")
+        let contextTurns = [4, 8, 12, 24, 48].contains(storedContextTurns) ? storedContextTurns : 12
+        if chatContextTurnLimit != contextTurns {
+            chatContextTurnLimit = contextTurns
+        }
         let conversationTurns = conversations.first(where: { $0.id == conversationID })?.turns ?? []
         let priorTurns = (conversationTurns.last?.role == .user && conversationTurns.last?.content == statement)
             ? conversationTurns.dropLast()
