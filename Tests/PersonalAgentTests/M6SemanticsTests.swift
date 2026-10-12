@@ -34,6 +34,33 @@ struct M6SemanticsTests {
         }
     }
 
+    @Test func skillProposalWithoutExecutionBoundaryFailsClosed() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let goal = Goal(statement: "Run the unconfigured Skill")
+        try await root.runtime.submit(goal: goal)
+        let skillID = SkillID(rawValue: "skill.not-wired")
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "The requested Skill is not configured."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ExplicitAllowPolicy()
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let skillObservation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue
+        }
+        #expect(skillObservation?.payload["succeeded"] == "false")
+        #expect(skillObservation?.payload["summary"]?.contains("Skill execution unavailable") == true)
+        #expect(!events.contains {
+            $0.kind == .actionExecuted && $0.payload["actionID"] == skillObservation?.payload["actionID"]
+        })
+    }
+
     @Test func approvalRequiredWithoutGateFailsClosed() async throws {
         struct ApprovalRequiredPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
@@ -576,6 +603,21 @@ private actor RecordingProvider: LLMProvider {
 private struct FixedReasoner: Reasoning {
     let answer: String
     func reason(context: ContextBundle) async throws -> ReasoningResult { ReasoningResult(summary: answer, providerID: nil, modelID: nil) }
+}
+
+private struct DirectSkillProposer: Executing {
+    let skillID: SkillID
+
+    func propose(plan: Plan) async throws -> [ActionProposal] {
+        [
+            ActionProposal(
+                planID: plan.id,
+                skillID: skillID,
+                description: "Run selected Skill",
+                capabilities: .execute
+            )
+        ]
+    }
 }
 
 private struct DirectProposer: Executing {
