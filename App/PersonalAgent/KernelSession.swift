@@ -250,7 +250,6 @@ final class KernelSession: ObservableObject {
         let agentID = selectedAgentID
         let useTeamMode = teamModeEnabled
         let task = Task { @MainActor [weak self] in
-            defer { self?.isSubmitting = false }
             guard let self else { return }
             let contextualInput: String
             do {
@@ -397,6 +396,7 @@ final class KernelSession: ObservableObject {
         executionTask = task
         await task.value
         executionTask = nil
+        isSubmitting = false
     }
 
     private func refreshResponseMetrics() {
@@ -728,6 +728,25 @@ final class KernelSession: ObservableObject {
         persistConversations()
     }
 
+    var canRegenerateLastResponse: Bool {
+        guard !isSubmitting, executionTask == nil,
+              let conversation = conversations.first(where: { $0.id == currentConversationID }),
+              conversation.turns.count >= 2 else { return false }
+        return conversation.turns[conversation.turns.count - 1].role == .assistant
+            && conversation.turns[conversation.turns.count - 2].role == .user
+    }
+
+    /// Re-runs the most recent user request without duplicating it in visible history.
+    func regenerateLastResponse() async {
+        guard canRegenerateLastResponse,
+              let index = conversations.firstIndex(where: { $0.id == currentConversationID }) else { return }
+        let prompt = conversations[index].turns[conversations[index].turns.count - 2].content
+        conversations[index].turns.removeLast(2)
+        conversations[index].updatedAt = Date()
+        chatHistory = conversations[index].turns
+        persistConversations()
+        await submitGoal(prompt)
+    }
     func selectConversation(id: UUID) {
         guard !isSubmitting, let conversation = conversations.first(where: { $0.id == id }) else { return }
         currentConversationID = id

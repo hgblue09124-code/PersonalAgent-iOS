@@ -15,6 +15,12 @@ struct ChatScreen: View {
     @FocusState private var focused: Bool
 
     private var currentTitle: String { session.conversations.first(where: { $0.id == session.currentConversationID })?.title ?? "Conversation" }
+    private var conversationExportText: String {
+        session.chatHistory.map { turn in
+            let speaker = turn.role == .user ? "You" : "Personal Agent"
+            return "\(speaker):\n\(turn.content)"
+        }.joined(separator: "\n\n")
+    }
 
     var body: some View {
         ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right") {
@@ -53,6 +59,17 @@ struct ChatScreen: View {
                 Spacer()
                 Menu {
                     Button { session.newConversation() } label: { Label("New conversation", systemImage: "plus") }
+                    if session.canRegenerateLastResponse {
+                        Button {
+                            Task { await session.regenerateLastResponse() }
+                        } label: {
+                            Label("Tạo lại câu trả lời", systemImage: "arrow.clockwise")
+                        }
+                    }
+                    ShareLink(item: conversationExportText) {
+                        Label("Xuất hội thoại", systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(session.chatHistory.isEmpty)
                     Button { showPromptLibrary = true } label: { Label("Thư viện tác vụ · 28 mẫu", systemImage: "books.vertical") }
                     Button { renameText = currentTitle; showRename = true } label: { Label("Rename", systemImage: "pencil") }
                     if session.conversations.count > 1 {
@@ -374,9 +391,21 @@ private struct ChatBubble: View {
         }
     }
     private var bubble: some View {
-        Text(turn.content).font(.body).textSelection(.enabled).frame(maxWidth: 310, alignment: .leading)
-            .padding(.horizontal, 14).padding(.vertical, 11)
-            .background(turn.role == .assistant ? AnyShapeStyle(.thinMaterial) : AnyShapeStyle(AgentDesign.accent.opacity(0.11)), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
+        VStack(alignment: .leading, spacing: 8) {
+            Text(turn.content)
+                .font(.body)
+                .textSelection(.enabled)
+                .frame(maxWidth: 310, alignment: .leading)
+            if turn.role == .assistant {
+                ShareLink(item: turn.content) {
+                    Label("Chia sẻ câu trả lời", systemImage: "square.and.arrow.up")
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14).padding(.vertical, 11)
+        .background(turn.role == .assistant ? AnyShapeStyle(.thinMaterial) : AnyShapeStyle(AgentDesign.accent.opacity(0.11)), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
     }
 }
