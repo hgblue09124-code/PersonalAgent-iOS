@@ -462,22 +462,37 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         }
         var fields: [String: String] = [:]
         if let adapter = manifest.metadata["chatInputAdapter"] {
-            // Explicitly allow only the known, read-only workspace search adapter.
-            // Skill.md cannot select arbitrary code or operations by naming an adapter.
-            guard adapter == "workspace.search",
-                  moduleID.rawValue == "tool.workspace.read",
-                  Set(object.keys) == ["text"],
-                  let rawQuery = object["text"] as? String else {
+            guard Set(object.keys) == ["text"],
+                  let rawText = object["text"] as? String else {
                 throw SkillExecutionError.malformedSkill
             }
-            let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !query.isEmpty, query.count <= 256 else {
+            let argumentsObject: [String: String]
+            switch adapter {
+            case "workspace.search":
+                // Skill.md cannot select arbitrary code or operations by naming an adapter.
+                guard moduleID.rawValue == "tool.workspace.read" else {
+                    throw SkillExecutionError.malformedSkill
+                }
+                let query = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !query.isEmpty, query.count <= 256 else {
+                    throw SkillExecutionError.malformedSkill
+                }
+                argumentsObject = ["operation": "search", "query": query]
+            case "workspace.create-file":
+                guard moduleID.rawValue == "tool.workspace.write",
+                      let request = Self.parseCreateFileRequest(rawText) else {
+                    throw SkillExecutionError.malformedSkill
+                }
+                argumentsObject = [
+                    "operation": "write",
+                    "path": request.path,
+                    "content": request.content
+                ]
+            default:
+                // Adapters are allowlisted executable code, not dynamic Skill instructions.
                 throw SkillExecutionError.malformedSkill
             }
-            let arguments = try JSONSerialization.data(
-                withJSONObject: ["operation": "search", "query": query],
-                options: [.sortedKeys]
-            )
+            let arguments = try JSONSerialization.data(withJSONObject: argumentsObject, options: [.sortedKeys])
             fields["arguments"] = String(decoding: arguments, as: UTF8.self)
         } else {
             for (key, value) in object {
@@ -514,5 +529,26 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             throw SkillExecutionError.malformedSkill
         }
         return contract
+    }
+
+    private static func parseCreateFileRequest(_ rawText: String) -> (path: String, content: String)? {
+        let normalized = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let prefixes = ["tạo file ", "tạo tệp ", "create file ", "write file "]
+        guard let prefix = prefixes.first(where: { normalized.lowercased().hasPrefix($0) }) else {
+            return nil
+        }
+        let remainder = String(normalized.dropFirst(prefix.count))
+        let delimiters = [" với nội dung:", " with content:", "\nnội dung:", "\ncontent:"]
+        guard let delimiter = delimiters.compactMap({ candidate -> (Range<String.Index>, String)? in
+            guard let range = remainder.range(of: candidate, options: [.caseInsensitive]) else { return nil }
+            return (range, candidate)
+        }).first else {
+            return nil
+        }
+        let rawPath = String(remainder[..<delimiter.0.lowerBound])
+        let path = rawPath.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'")))
+        let content = String(remainder[delimiter.0.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !path.isEmpty, !content.isEmpty else { return nil }
+        return (path, content)
     }
 }
