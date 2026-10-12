@@ -60,6 +60,10 @@ struct PersonalAgentApp: App {
             session = newSession
             await newSession.refresh()
             await newSession.prepareActiveModel()
+        } catch is CancellationError {
+            // SwiftUI may cancel startup while tearing down/recreating the root task.
+        } catch let error as URLError where error.code == .cancelled {
+            // URLSession cancellation is an expected startup lifecycle event.
         } catch {
             initializationError = String(describing: error)
         }
