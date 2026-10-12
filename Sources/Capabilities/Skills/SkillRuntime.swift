@@ -127,10 +127,10 @@ public struct SkillRuntime: Sendable {
         if fileCommandPrefixes.contains(where: { normalized.hasPrefix($0) }) {
             return statement
         }
-        // For ordinary prompts, an explicit ": " separates instruction from payload.
-        if let separator = statement.range(of: ": "),
-           !statement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return String(statement[separator.upperBound...])
+        // For ordinary prompts, preserve the payload exactly, including trailing whitespace.
+        if let separator = goalStatement.range(of: ": "),
+           !goalStatement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return String(goalStatement[separator.upperBound...])
         }
         return statement
     }
