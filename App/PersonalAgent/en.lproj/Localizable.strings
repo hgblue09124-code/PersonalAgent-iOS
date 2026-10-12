@@ -513,3 +513,12 @@
 "Could not open imported-file library: %@" = "Could not open imported-file library: %@";
 "Could not delete imported file: %@" = "Could not delete imported file: %@";
 "Remote provider testing is disabled while Local-only mode is on." = "Remote provider testing is disabled while Local-only mode is on.";
+
+"Agent is running — changes to Agent and Team mode are temporarily locked." = "Agent is running — changes to Agent and Team mode are temporarily locked.";
+"Automatic" = "Automatic";
+"Regenerate answer" = "Regenerate answer";
+"Export conversation" = "Export conversation";
+"Share answer" = "Share answer";
+"Context turns" = "Context turns";
+
+"Response language" = "Response language";
