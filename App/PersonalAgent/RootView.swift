@@ -18,14 +18,12 @@ struct RootView: View {
         AgentScreen(session: session, showWorkspace: $showWorkspace)
         .environment(\.locale, Locale(identifier: appLanguage))
         .environment(\.kernelSession, session)
-        .id(appLanguage)
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
         }
         .task {
             await session.refresh()
             await session.prepareActiveModel()
-            await session.refresh()
         }
         .onOpenURL { url in
             if url.scheme == "personalagent", url.host == "chat",

@@ -46,26 +46,38 @@ enum AgentDesign {
 struct ScreenScaffold<Content: View>: View {
     let title: String
     let systemImage: String
+    var scrollable: Bool = true
     @ViewBuilder var content: () -> Content
 
     var body: some View {
         ZStack {
             AgentDesign.background
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    screenHeader
-                    content()
+            Group {
+                if scrollable {
+                    ScrollView {
+                        scaffoldContent
+                    }
+                    .scrollIndicators(.hidden)
+                } else {
+                    scaffoldContent
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, AgentDesign.horizontalPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 32)
             }
-            .scrollIndicators(.hidden)
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var scaffoldContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            screenHeader
+            content()
+        }
+        .frame(maxWidth: .infinity, maxHeight: scrollable ? nil : .infinity, alignment: .topLeading)
+        .padding(.horizontal, AgentDesign.horizontalPadding)
+        .padding(.top, 8)
+        .padding(.bottom, 32)
     }
 
     private var screenHeader: some View {

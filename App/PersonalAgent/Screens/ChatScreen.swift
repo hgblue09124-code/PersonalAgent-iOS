@@ -23,7 +23,7 @@ struct ChatScreen: View {
     }
 
     var body: some View {
-        ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right") {
+        ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false) {
             conversationHeader
             agentPicker
             messages
@@ -135,7 +135,7 @@ struct ChatScreen: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .padding(.top, 2)
-                }.frame(maxWidth: .infinity).padding(.vertical, 36)
+                }.frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity).padding(.vertical, 36)
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -146,7 +146,7 @@ struct ChatScreen: View {
                             }
                         }.padding(.vertical, 4)
                     }
-                    .frame(minHeight: 260, maxHeight: 500)
+                    .frame(minHeight: 120, maxHeight: .infinity)
                     .onChange(of: session.chatHistory.count) { _, _ in if let id = session.chatHistory.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
                     .onChange(of: streamPresentation.streamingResponse) { _, value in
                         guard !value.isEmpty else { return }

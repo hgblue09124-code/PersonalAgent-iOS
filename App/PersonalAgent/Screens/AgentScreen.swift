@@ -241,9 +241,9 @@ private struct AgentOrb: View {
     var body: some View {
         ZStack {
             Circle()
-                .fill(AgentDesign.accent.opacity(0.18))
+                .fill(AgentDesign.accent.opacity(isThinking ? 0.18 : 0.08))
                 .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
-                .blur(radius: 7)
+                .blur(radius: isThinking ? 7 : 0)
 
             Image("AppIcon")
                 .resizable()
@@ -271,40 +271,49 @@ private struct AgentOrb: View {
                 .rotationEffect(.degrees(rotation * 1.7))
 
             Circle()
-                .stroke(AgentDesign.accent.opacity(0.3), lineWidth: 5)
+                .stroke(AgentDesign.accent.opacity(isThinking ? 0.3 : 0.16), lineWidth: isThinking ? 5 : 2)
                 .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
                 .opacity(0.3 + 0.28 * energy)
 
-            ForEach(0..<3, id: \.self) { index in
-                Circle()
-                    .fill(.white.opacity(isThinking ? 0.95 : 0.55))
-                    .frame(width: isThinking ? 4 : 3, height: isThinking ? 4 : 3)
-                    .shadow(color: AgentDesign.accent.opacity(0.8), radius: 5)
-                    .offset(y: -50)
-                    .rotationEffect(.degrees(rotation + Double(index) * 120))
+            if isThinking {
+                ForEach(0..<3, id: \.self) { index in
+                    Circle()
+                        .fill(.white.opacity(0.95))
+                        .frame(width: 4, height: 4)
+                        .shadow(color: AgentDesign.accent.opacity(0.8), radius: 5)
+                        .offset(y: -50)
+                        .rotationEffect(.degrees(rotation + Double(index) * 120))
+                }
             }
 
-            Circle()
-                .stroke(
-                    AngularGradient(
-                        colors: [.clear, .white.opacity(0.32), .clear],
-                        center: .center,
-                        angle: .degrees(-rotation * 0.7)
-                    ),
-                    lineWidth: 8
-                )
-                .blur(radius: 2)
-                .opacity(0.35 + 0.35 * energy)
+            if isThinking {
+                Circle()
+                    .stroke(
+                        AngularGradient(
+                            colors: [.clear, .white.opacity(0.32), .clear],
+                            center: .center,
+                            angle: .degrees(-rotation * 0.7)
+                        ),
+                        lineWidth: 8
+                    )
+                    .blur(radius: 2)
+                    .opacity(0.7)
+            }
         }
-        .shadow(color: AgentDesign.accent.opacity(0.34 + 0.18 * energy), radius: isThinking ? 22 : 14, y: 6)
-        .scaleEffect(pulse ? (isThinking ? 1.055 : isActive ? 1.025 : 1) : 1)
-        .animation(.easeInOut(duration: isThinking ? 0.55 : 1.8).repeatForever(autoreverses: true), value: pulse)
+        .shadow(color: AgentDesign.accent.opacity(isThinking ? 0.52 : isActive ? 0.16 : 0), radius: isThinking ? 22 : isActive ? 8 : 0, y: 6)
+        .scaleEffect(pulse ? 1.055 : 1)
+        .animation(isThinking ? .easeInOut(duration: 0.55).repeatForever(autoreverses: true) : nil, value: pulse)
         .animation(.easeInOut(duration: 0.35), value: isThinking)
         .onAppear {
+            guard isThinking else { return }
             pulse = true
             rotation = 360
         }
-        .animation(.linear(duration: isThinking ? 2.2 : 5.5).repeatForever(autoreverses: false), value: rotation)
+        .onChange(of: isThinking) { _, thinking in
+            pulse = thinking
+            rotation = thinking ? 360 : 0
+        }
+        .animation(isThinking ? .linear(duration: 2.2).repeatForever(autoreverses: false) : nil, value: rotation)
         .accessibilityLabel(isThinking ? "Agent thinking" : isActive ? "Agent active" : "Agent idle")
     }
 }
