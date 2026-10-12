@@ -1,0 +1,35 @@
+{
+  "id": "PACHAT-2",
+  "title": "Complete core Chat conversation actions",
+  "status": "in_progress",
+  "goal": "Make core Chat conversations more usable by letting users regenerate the latest answer without duplicating history and share either an individual answer or the visible conversation.",
+  "context": "Chat already stores multi-turn conversations and streams responses. It lacks first-class actions to recover from an unsatisfactory answer and export useful conversation content without manually selecting text.",
+  "allowed_paths": [
+    "App/PersonalAgent/KernelSession.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "Tasks/active/PACHAT-2.json"
+  ],
+  "forbidden_changes": [
+    "Do not modify provider routing or model loading in this feature task.",
+    "Do not weaken cancellation, authorization, privacy settings, or output validation.",
+    "Do not modify PersonalAgent.xcodeproj or unrelated runtime modules."
+  ],
+  "acceptance_criteria": [
+    "A completed latest assistant turn can be regenerated from its preceding user prompt.",
+    "Regeneration replaces the previous user/assistant pair rather than duplicating the user message.",
+    "Users can share an individual assistant answer.",
+    "Users can export the currently visible conversation as readable speaker-labeled text.",
+    "Existing conversation persistence and the no-persistence privacy mode remain in effect."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-2.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-2.json --base main",
+    "Apple Native Build & Unsigned IPA",
+    "Review final diff and verify PR checks on the final head"
+  ],
+  "dependencies": [
+    "Issue #354",
+    "PACHAT-1 merged"
+  ],
+  "recovery": "Revert the single task commit if the Apple build or interaction review fails; do not create a separate repair commit."
+}
