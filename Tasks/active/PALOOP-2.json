@@ -1,0 +1,31 @@
+{
+  "id": "PALOOP-2",
+  "title": "Fail closed when approval is required but no gate exists",
+  "status": "in_progress",
+  "goal": "Ensure M6 never executes a policy decision requiring approval unless an ApprovalGate exists and explicitly approves the action.",
+  "context": "M6Orchestrator currently enters approval flow only when requiresApproval and approvalGate are both non-nil. If a PolicyEvaluating implementation returns allowed=true and requiresApproval=true, a missing gate leaves allowed=true and permits execution.",
+  "allowed_paths": [
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift",
+    "Tasks/active/PALOOP-2.json"
+  ],
+  "forbidden_changes": [
+    "Do not change policy decision semantics, UI, provider wiring, Skill behavior, or unrelated runtime transitions.",
+    "Do not claim test pass without CI evidence."
+  ],
+  "acceptance_criteria": [
+    "requiresApproval with no gate is denied regardless of allowed bit.",
+    "Regression test proves actionDenied exists and actionExecuted does not.",
+    "Single logical commit; full test and CI results recorded separately."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PALOOP-2.json",
+    "swift test --disable-sandbox --filter M6SemanticsTests",
+    "swift test --disable-sandbox",
+    "Apple Native Build & Unsigned IPA"
+  ],
+  "dependencies": [
+    "Issue #445"
+  ],
+  "recovery": "Revert the single task commit if regression or CI fails."
+}
