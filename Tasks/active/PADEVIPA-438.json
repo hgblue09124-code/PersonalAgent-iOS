@@ -1,0 +1,24 @@
+{
+  "id": "PADEVIPA-438",
+  "title": "Trigger unsigned development IPA build",
+  "status": "in_progress",
+  "goal": "Trigger the repository's existing development IPA workflow without changing application behavior.",
+  "context": "This PR only adds a build-trigger marker and its task contract so CI can produce an unsigned development IPA artifact.",
+  "allowed_paths": [
+    ".github/dev-ipa-trigger-438.txt",
+    "Tasks/active/PADEVIPA-438.json"
+  ],
+  "forbidden_changes": [
+    "Do not modify unrelated modules or weaken security/policy boundaries."
+  ],
+  "acceptance_criteria": [
+    "The trigger marker remains non-executable and contains no secrets.",
+    "The Apple Native Build & Unsigned IPA workflow succeeds and uploads its expected artifact."
+  ],
+  "verification": [
+    "Agent Task Contract validation",
+    "Apple Native Build & Unsigned IPA CI artifact"
+  ],
+  "dependencies": [],
+  "recovery": "Revert this single logical task if contract validation, package tests, or native build regress."
+}
