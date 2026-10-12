@@ -551,7 +551,7 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
             " with content:", " content:", " với nội dung là ", " với nội dung ",
             " nội dung là ", " nội dung ", " with content ", " content ",
-            "\\nnội dung:", "\\ncontent:"
+            "\nnội dung:", "\ncontent:"
         ]
         let matches = delimiters.compactMap { candidate -> (Range<String.Index>, String)? in
             guard let range = remainder.range(of: candidate, options: [.caseInsensitive]) else { return nil }
@@ -566,5 +566,5 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         let content = String(remainder[delimiter.0.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !path.isEmpty else { return nil }
         return (path, content)
-    }
-}}
+    }}
+}
