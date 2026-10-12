@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import PAKernel
 import PARuntime
@@ -29,6 +30,29 @@ struct M6SkillCompositionIntegrationTests {
         let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let observation = events.first {
             $0.kind == .observationProduced && $0.payload["skillID"] == manifest.id.rawValue
+        }
+        #expect(observation?.payload["succeeded"] == "true")
+        #expect(observation?.payload["verified"] == "true")
+    }
+
+    @Test("M8 canonical chat loop executes and verifies a declared Skill")
+    func m8CanonicalLoopExecutesSkill() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy()
+        )
+        let goal = Goal(statement: "text.normalize")
+        try await root.runtime.submit(goal: goal)
+        let evaluation = try await root.orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .complete)
+        let events = try await eventLog.allEvents()
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == "text.normalize"
         }
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
