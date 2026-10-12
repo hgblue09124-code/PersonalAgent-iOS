@@ -1,37 +1,35 @@
 {
   "id": "PASKILL-5",
-  "title": "Pass conversation context into Agent Skill execution",
+  "title": "Connect M8 canonical Agent loop to scoped Skill execution",
   "status": "in_progress",
-  "goal": "Keep Skill selection anchored to the current user request while passing bounded conversation and relevant-memory context to the selected Skill or Agent Team.",
-  "context": "KernelSession already builds contextualInput for model inference, including recent conversation turns, relevant memory, and response-language preference. Skill and team routing previously received only normalizedStatement as their execution input, so context-dependent follow-up requests lost this information. Preserve current-request-only intent selection while forwarding contextualInput as the Skill input payload.",
+  "goal": "Ensure the production M8 chat/Agent loop discovers, selects, executes, and verifies only Skills declared by the active default Agent.",
+  "context": "M8CompositionRoot already constructs SkillRuntime and SkillAgentOrchestrator, but its canonical M6Orchestrator was initialized without SkillExecutionBoundary. The separate Skill runtime therefore did not prove that ordinary M8 Agent goals could execute Skills.",
   "allowed_paths": [
     "Tasks/active/PASKILL-5.json",
-    "App/PersonalAgent/KernelSession.swift",
     "Composition/M8CompositionRoot.swift",
-    "Sources/Capabilities/Skills/SkillRuntime.swift"
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
   ],
   "forbidden_changes": [
-    "Do not change Skill intent-selection semantics or use conversation history to select a Skill.",
-    "Do not bypass capability policy, Agent scope, ModuleRuntime, verification, or cancellation checks.",
-    "Do not change provider/GGUF routing or add a parallel execution loop.",
-    "Do not claim CI passes before the required checks complete."
+    "Do not add a PARuntime dependency on PASkills.",
+    "Do not bypass M6 policy/approval or SkillRuntime output verification.",
+    "Do not allow workspace.create-file when workspace tools are disabled.",
+    "Do not change UI or unrelated provider/model behavior."
   ],
   "acceptance_criteria": [
-    "Single-Agent Skill selection continues to use the current normalized user request.",
-    "Selected Skill input receives contextualInput when supplied, with a backward-compatible fallback to the goal statement.",
-    "Agent Team selection continues to use the current normalized user request while team Skill input receives contextualInput.",
-    "Existing callers that omit inputContext remain source-compatible.",
-    "validate-contract, Swift package tests + repository integrity, and Apple Native Build & Unsigned IPA are checked on the final PR head."
+    "M8 canonical M6Orchestrator receives the Composition-owned SkillExecutionBoundary.",
+    "Allowed Skill IDs derive from the default Agent manifest; workspace.create-file is excluded unless workspace tools are enabled.",
+    "A regression test executes text.normalize through M8CompositionRoot and asserts a verified successful Skill observation.",
+    "M3, Agent Task Contract, and Apple Native Build & Unsigned IPA workflows pass."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-5.json",
     "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-5.json --base origin/main",
     "swift test --disable-sandbox",
-    "Confirm validate-contract, Swift package tests + repository integrity, and Apple Native Build & Unsigned IPA CI gates."
+    "Confirm M3, Agent Task Contract, and Apple Native Build & Unsigned IPA CI gates."
   ],
   "dependencies": [
     "Issue #347",
-    "PR #436"
+    "PR #451 canonical M6 Skill execution boundary"
   ],
-  "recovery": "Revert this single logical task commit if contextual input changes selection behavior or causes Skill execution regressions."
+  "recovery": "If the boundary or scope checks regress, amend this single task commit or revert it; do not claim acceptance before required CI passes."
 }
