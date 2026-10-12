@@ -94,9 +94,9 @@ final class KernelSession: ObservableObject {
     private var pendingStreamingDelta = ""
     private var streamingFlushScheduled = false
     private var streamingFlushGeneration = 0
-    private let streamingFlushInterval: TimeInterval = 0.05
+    private let streamingFlushInterval: TimeInterval = 0.1
 
-    /// Publish stream text at most 20 times per second, rather than once per token.
+    /// Publish stream text at most 10 times per second to limit repeated SwiftUI layout work.
     /// All access is serialized on the main queue.
     private func enqueueStreamingDelta(_ delta: String) {
         if firstResponseDeltaAt == nil {

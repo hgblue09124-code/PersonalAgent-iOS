@@ -1,0 +1,37 @@
+{
+  "id": "PAUI-25",
+  "title": "Audit and reduce recurring UI lag across startup, chat, and Agent presentation",
+  "status": "ready",
+  "context": "Code audit found: RootView forced full AgentScreen identity reset on language changes and performed a redundant refresh after prepareActiveModel (whose run wrapper already refreshes after an actual load attempt); Chat nested its message ScrollView inside ScreenScaffold's vertical ScrollView; streamed text and metrics were published every 50 ms; AgentOrb ran repeating pulse/rotation and expensive blur/shadow layers while idle.",
+  "goal": "Remove unnecessary full-screen resets and duplicate startup refreshes, give Chat one vertical scroll container with a fixed composer, reduce stream publication frequency, and stop repeating GPU animation when the Agent is not thinking.",
+  "allowed_paths": [
+    "App/PersonalAgent/RootView.swift",
+    "App/PersonalAgent/Screens/AgentScreen.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "App/PersonalAgent/Screens/Shared.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "Tasks/active/PAUI-25.json"
+  ],
+  "forbidden_changes": [
+    "Do not change inference/runtime behavior, provider calls, model settings, or permission policy.",
+    "Do not remove chat history or streaming output.",
+    "Do not change scroll behavior of screens other than Chat.",
+    "Do not change translations or language preference keys."
+  ],
+  "acceptance_criteria": [
+    "Changing app.language updates locale without resetting AgentScreen identity.",
+    "Startup performs one initial refresh; model preparation remains responsible for refreshing after a real load attempt.",
+    "Chat has no competing outer vertical ScrollView and keeps its composer in the fixed layout.",
+    "Stream presentation is published at no more than 10 batches per second.",
+    "AgentOrb has no repeating pulse/rotation or animated particle/blur layers while not thinking.",
+    "Other screens keep the default scrollable scaffold."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "M3 workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Review Chat compact-layout and stream-scroll behavior; review Orb transitions into and out of thinking."
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if compact Chat layout clips the composer or Orb animation does not start/stop correctly."
+}
