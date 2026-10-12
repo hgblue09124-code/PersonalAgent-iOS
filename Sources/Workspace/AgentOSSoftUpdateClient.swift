@@ -134,19 +134,23 @@ public actor AgentOSSoftUpdateClient {
             total += file.byteCount
             guard total <= Self.maximumTotalBytes else { throw AgentOSSoftUpdateError.sizeLimit }
             if locallyModifiedPaths.contains(file.path) { throw AgentOSSoftUpdateError.localConflict(file.path) }
-            if let baseHash = file.baseSHA256 {
-                let currentURL = workspaceURL.appendingPathComponent(file.path).standardizedFileURL
-                guard currentURL.path.hasPrefix(workspaceURL.standardizedFileURL.path + "/") else {
+            guard let baseHash = file.baseSHA256,
+                  baseHash == "missing" || baseHash.range(of: "^[0-9a-fA-F]{64}$", options: .regularExpression) != nil else { throw AgentOSSoftUpdateError.invalidManifest }
+            let currentURL = workspaceURL.appendingPathComponent(file.path).standardizedFileURL
+            guard currentURL.path.hasPrefix(workspaceURL.standardizedFileURL.path + "/") else {
+                throw AgentOSSoftUpdateError.unsafePath(file.path)
+            }
+            if FileManager.default.fileExists(atPath: currentURL.path) {
+                let attributes = try FileManager.default.attributesOfItem(atPath: currentURL.path)
+                guard (attributes[.type] as? FileAttributeType) == .typeRegular else {
                     throw AgentOSSoftUpdateError.unsafePath(file.path)
                 }
-                if FileManager.default.fileExists(atPath: currentURL.path) {
-                    let currentData = try Data(contentsOf: currentURL)
-                    guard SHA256Portable.hex(currentData).caseInsensitiveCompare(baseHash) == .orderedSame else {
-                        throw AgentOSSoftUpdateError.localConflict(file.path)
-                    }
-                } else if baseHash != "missing" {
+                let currentData = try Data(contentsOf: currentURL)
+                guard SHA256Portable.hex(currentData).caseInsensitiveCompare(baseHash) == .orderedSame else {
                     throw AgentOSSoftUpdateError.localConflict(file.path)
                 }
+            } else if baseHash != "missing" {
+                throw AgentOSSoftUpdateError.localConflict(file.path)
             }
         }
 
@@ -177,6 +181,8 @@ public actor AgentOSSoftUpdateClient {
             throw error
         }
     }
+
+    public static func sha256Hex(_ data: Data) -> String { SHA256Portable.hex(data) }
 
     public static func isAllowedPath(_ path: String) -> Bool {
         guard !path.isEmpty, !path.hasPrefix("/"), !path.contains("\\"), !path.contains(":"), !path.contains("\0") else { return false }
