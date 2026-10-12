@@ -1,0 +1,33 @@
+{
+  "id": "PALOOP-6",
+  "title": "Fail closed for Skill proposals without an execution boundary",
+  "status": "in_progress",
+  "goal": "Prevent a Skill-bearing action proposal from being reported as executed until canonical Skill execution is wired.",
+  "context": "PALOOP-5 carries Skill identity into ActionProposal; M6Orchestrator currently handles toolID but does not execute skillID, which could otherwise produce the default synthetic success observation.",
+  "allowed_paths": [
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift",
+    "Tasks/active/PALOOP-6.json"
+  ],
+  "forbidden_changes": [
+    "Do not add PARuntime -> PASkills dependency.",
+    "Do not claim Skill integration is complete.",
+    "Do not change UI or bypass policy/approval."
+  ],
+  "acceptance_criteria": [
+    "Skill proposals without an execution boundary produce an explicit failed observation with skillID.",
+    "No actionExecuted event is emitted for an unexecuted Skill.",
+    "Regression test asserts fail-closed behavior and terminal abort."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PALOOP-6.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PALOOP-6.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm CI M3, Agent Task Contract, and Apple Native Build & Unsigned IPA."
+  ],
+  "dependencies": [
+    "Issue #445",
+    "PALOOP-5"
+  ],
+  "recovery": "Revert this task's single commit if the regression test or CI fails."
+}

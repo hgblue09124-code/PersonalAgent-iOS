@@ -578,6 +578,28 @@ public actor M6Orchestrator {
     }
 
     private func executeProposal(_ proposal: ActionProposal, traceID: TraceID, goalID: GoalID) async throws -> Observation {
+        // A Skill ID is not a Tool ID. Until the canonical Skill execution boundary
+        // is injected, never let an unhandled Skill proposal become a synthetic success.
+        if let skillID = proposal.skillID {
+            let observation = Observation(
+                actionID: proposal.actionID,
+                summary: "Skill execution unavailable: no SkillExecutionBoundary configured for '\(skillID.rawValue)'",
+                succeeded: false
+            )
+            try await emit(
+                traceID: traceID,
+                kind: .observationProduced,
+                payload: [
+                    "goalID": goalID.rawValue,
+                    "actionID": proposal.actionID.rawValue,
+                    "skillID": skillID.rawValue,
+                    "summary": observation.summary,
+                    "succeeded": "false",
+                ]
+            )
+            return observation
+        }
+
         var obsSummary = "Executed proposal"
         var succeeded = true
 
