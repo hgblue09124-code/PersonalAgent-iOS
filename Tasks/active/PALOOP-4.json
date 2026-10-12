@@ -1,0 +1,32 @@
+{
+  "id": "PALOOP-4",
+  "title": "Specify the canonical Agent loop and Skill integration contract",
+  "status": "in_progress",
+  "goal": "Define a source-grounded, testable contract for wiring Skill selection and verified execution into M6 without reversing package dependencies or weakening policy.",
+  "context": "Source review confirms the Skill subsystem exists but is not connected to the canonical M6 path: context skills are empty, planning emits nil skillID, ActionProposal cannot carry skill identity, and the existing SkillAgentOrchestrator does not handle ApprovalGate semantics.",
+  "allowed_paths": [
+    "Documentation/AgentLoop-Skill-Integration.md",
+    "Tasks/active/PALOOP-4.json"
+  ],
+  "forbidden_changes": [
+    "Do not claim this document implements runtime integration.",
+    "Do not modify source, UI, package graph, or policy behavior in this documentation task.",
+    "Do not claim tests or CI prove runtime Skill integration."
+  ],
+  "acceptance_criteria": [
+    "Document current verified code facts and clearly mark the proposed contract as not implemented.",
+    "Specify dependency direction, selection/fallback, authorization/approval, execution verification, cancellation, audit, Skill.md lifecycle, and regression matrix.",
+    "One logical task equals one commit."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PALOOP-4.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PALOOP-4.json --base origin/main",
+    "Review source references and ensure every unimplemented behavior is explicitly marked as proposed"
+  ],
+  "dependencies": [
+    "Issue #445",
+    "PALOOP-2",
+    "PALOOP-3"
+  ],
+  "recovery": "Revert the documentation-only commit if it contradicts source or violates the allowed-path contract."
+}
