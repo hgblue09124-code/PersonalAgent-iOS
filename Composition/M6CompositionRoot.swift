@@ -119,11 +119,12 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         try await agentRuntime.start()
         self.runtime = agentRuntime
 
-        // 5. M6 Orchestrator
+        // 5. M6 Orchestrator: use the configured provider for real reasoning.
         self.orchestrator = M6Orchestrator(
             runtime: agentRuntime,
             eventLog: log,
             logger: logger,
+            reasoner: LLMReasoner(provider: activeProvider),
             policy: resolvedPolicy,
             approvalGate: approvalGate,
             moduleRuntime: moduleRuntime

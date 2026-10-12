@@ -962,13 +962,11 @@ final class KernelSession: ObservableObject {
                 lastError = error.description
             }
         } catch is CancellationError {
-            // Cancellation is expected during startup/view teardown and must not leave
-            // a stale failure banner from a previous attempt visible.
-            lastError = nil
+            // Cancellation is not success; keep the refreshed persisted state.
         } catch let error as URLError where error.code == .cancelled {
-            lastError = nil
+            // URLSession cancellation during startup/model preparation is expected.
         } catch let error as ProviderRuntimeError where error == .cancelled {
-            lastError = nil
+            // Providers may normalize cancellation into their typed runtime error.
         } catch {
             lastError = String(describing: error)
         }
