@@ -6,7 +6,8 @@
   "context": "Confirmed source defect: chatInputText only recognized direct file-create prefixes and could strip command text before parseCreateFileRequest.",
   "allowed_paths": [
     "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Tasks/active/PASKILL-6.json"
+    "Tasks/active/PASKILL-6.json",
+    "Tests/PersonalAgentTests/SkillChatInputNormalizationTests.swift"
   ],
   "forbidden_changes": [
     "Do not bypass workspace policy, scope checks, or the explicit create-file parser.",
@@ -15,13 +16,15 @@
   "acceptance_criteria": [
     "Common allowlisted polite lead-ins are removed only when followed by an explicit supported file-create prefix.",
     "Ordinary prompts retain existing normalization behavior.",
-    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass.",
+    "Regression tests cover polite lead-ins for Vietnamese and English file-create commands while ordinary colon prompts retain prior behavior."
   ],
   "verification": [
     "python Scripts/agent_task_guard.py validate Tasks/active/PASKILL-6.json",
     "python Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-6.json --base origin/main",
     "swift test --disable-sandbox",
-    "M3 and Apple Native Build & Unsigned IPA CI"
+    "M3 and Apple Native Build & Unsigned IPA CI",
+    "swift test --disable-sandbox"
   ],
   "dependencies": [],
   "recovery": "Revert this task if parser or policy regressions occur; keep CI failure evidence."
