@@ -175,9 +175,13 @@ final class KernelSession: ObservableObject {
         moduleIDs = await composition.registeredModuleIDs()
         do {
             skillManifests = try await composition.discoverSkills()
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
         } catch {
+            // Optional startup discovery must not masquerade as a failed chat request.
             skillManifests = []
-            lastError = String(describing: error)
         }
 
         do {
@@ -187,9 +191,13 @@ final class KernelSession: ObservableObject {
                 selectedAgentID = discoveredAgents.first?.id ?? "personal.default"
                 UserDefaults.standard.set(selectedAgentID, forKey: "agent.selected.id")
             }
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
         } catch {
+            // Profile discovery may be temporarily unavailable while storage initializes.
             agentManifests = []
-            lastError = String(describing: error)
         }
 
         let storage = composition.localModelStorage
@@ -197,11 +205,16 @@ final class KernelSession: ObservableObject {
             installedModels = try await storage.listModels()
             activeModelID = try await storage.activeModelID()
             activeModelDescriptor = try await storage.activeModelDescriptor()
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
         } catch {
+            // Inventory failures should not become chat-request banners. Engine load
+            // failures remain visible in the following lifecycle-state check.
             installedModels = []
             activeModelID = nil
             activeModelDescriptor = nil
-            lastError = String(describing: error)
         }
 
         do {
@@ -210,6 +223,12 @@ final class KernelSession: ObservableObject {
             } else {
                 activeEngineState = .unloaded
             }
+        } catch is CancellationError {
+            activeEngineState = .unloaded
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            activeEngineState = .unloaded
+            return
         } catch {
             activeEngineState = .failed(reason: error.localizedDescription)
             lastError = String(describing: error)
@@ -460,6 +479,10 @@ final class KernelSession: ObservableObject {
     func refreshMemory() async {
         do {
             memoryRecords = try await composition.memorySnapshot(limit: 50)
+        } catch is CancellationError {
+            // View/startup cancellation is expected and must not surface as an Agent error.
+        } catch let error as URLError where error.code == .cancelled {
+            // URLSession cancellation is also an expected lifecycle event.
         } catch {
             lastError = String(describing: error)
         }
@@ -939,6 +962,10 @@ final class KernelSession: ObservableObject {
             }
         } catch is CancellationError {
             // Cancellation is not success; keep the refreshed persisted state.
+        } catch let error as URLError where error.code == .cancelled {
+            // URLSession cancellation during startup/model preparation is expected.
+        } catch let error as ProviderRuntimeError where error == .cancelled {
+            // Providers may normalize cancellation into their typed runtime error.
         } catch {
             lastError = String(describing: error)
         }

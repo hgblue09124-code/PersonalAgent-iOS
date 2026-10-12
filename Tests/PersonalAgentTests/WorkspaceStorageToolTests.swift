@@ -135,7 +135,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let output = try await orchestrator.run(
             agent: agent,
             goalStatement: "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật",
-            inputJSON: #"{"text":"Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"}"#,
+            inputJSON: try XCTUnwrap(String(data: JSONSerialization.data(withJSONObject: ["text": SkillRuntime.chatInputText(from: "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật")], options: [.sortedKeys]), encoding: .utf8)),
             policy: policy
         )
 
@@ -147,7 +147,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let englishOutput = try await orchestrator.run(
             agent: agent,
             goalStatement: "Create file workspace/english.md with content: English file",
-            inputJSON: #"{"text":"Create file workspace/english.md with content: English file"}"#,
+            inputJSON: try XCTUnwrap(String(data: JSONSerialization.data(withJSONObject: ["text": SkillRuntime.chatInputText(from: "Create file workspace/english.md with content: English file")], options: [.sortedKeys]), encoding: .utf8)),
             policy: policy
         )
         XCTAssertTrue(englishOutput.verified)

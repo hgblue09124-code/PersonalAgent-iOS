@@ -123,40 +123,7 @@ struct ChatScreen: View {
     }
 
     private var messages: some View {
-        GlassPanel {
-            if session.chatHistory.isEmpty {
-                VStack(spacing: 12) {
-                    PremiumIconTile(systemImage: "sparkles")
-                    Text("Start a conversation").font(.headline)
-                    Text("Ask the Agent to explain, plan, create or act.").font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
-                    Button { showPromptLibrary = true } label: {
-                        Label("Khám phá thư viện tác vụ", systemImage: "books.vertical")
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.top, 2)
-                }.frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity).padding(.vertical, 36)
-            } else {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 14) {
-                            ForEach(session.chatHistory) { turn in ChatBubble(turn: turn).id(turn.id) }
-                            if !streamPresentation.streamingResponse.isEmpty {
-                                StreamingChatBubble(content: streamPresentation.streamingResponse).id("streaming-response")
-                            }
-                        }.padding(.vertical, 4)
-                    }
-                    .frame(minHeight: 120, maxHeight: .infinity)
-                    .onChange(of: session.chatHistory.count) { _, _ in if let id = session.chatHistory.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
-                    .onChange(of: streamPresentation.streamingResponse) { _, value in
-                        guard !value.isEmpty else { return }
-                        // Streaming text is refreshed in batches; don't animate every batch.
-                        proxy.scrollTo("streaming-response", anchor: .bottom)
-                    }
-                    .onAppear { if let id = session.chatHistory.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
-                }
-            }
-        }
+        ChatMessagesPanel(history: session.chatHistory, streamPresentation: streamPresentation, onOpenPromptLibrary: { showPromptLibrary = true })
     }
 
     private var composer: some View {
@@ -241,6 +208,49 @@ struct ChatScreen: View {
     }
 }
 
+
+private struct ChatMessagesPanel: View {
+    let history: [ChatTurn]
+    @ObservedObject var streamPresentation: ChatStreamPresentation
+    let onOpenPromptLibrary: () -> Void
+
+    var body: some View {
+        GlassPanel {
+            if history.isEmpty {
+                VStack(spacing: 12) {
+                    PremiumIconTile(systemImage: "sparkles")
+                    Text("Start a conversation").font(.headline)
+                    Text("Ask the Agent to explain, plan, create or act.").font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    Button(action: onOpenPromptLibrary) {
+                        Label("Khám phá thư viện tác vụ", systemImage: "books.vertical")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 2)
+                }.frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity).padding(.vertical, 36)
+            } else {
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 14) {
+                            ForEach(history) { turn in ChatBubble(turn: turn).id(turn.id) }
+                            if !streamPresentation.streamingResponse.isEmpty {
+                                StreamingChatBubble(content: streamPresentation.streamingResponse).id("streaming-response")
+                            }
+                        }.padding(.vertical, 4)
+                    }
+                    .frame(minHeight: 120, maxHeight: .infinity)
+                    .onChange(of: history.count) { _, _ in if let id = history.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
+                    .onChange(of: streamPresentation.streamingResponse) { _, value in
+                        guard !value.isEmpty else { return }
+                        // Streaming text is refreshed in batches; don't animate every batch.
+                        proxy.scrollTo("streaming-response", anchor: .bottom)
+                    }
+                    .onAppear { if let id = history.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
+                }
+            }
+        }
+    }
+}
 
 private enum PromptCategory: String, CaseIterable, Identifiable {
     case all = "Tất cả", planning = "Kế hoạch", knowledge = "Tri thức", writing = "Sáng tạo", coding = "Lập trình", workspace = "Workspace", agentOS = "AgentOS", review = "Kiểm tra"

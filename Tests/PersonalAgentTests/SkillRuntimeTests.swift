@@ -3,6 +3,17 @@ import PAKernel
 @testable import PASkills
 
 final class SkillRuntimeTests: XCTestCase {
+    func testChatInputTextPreservesCreateFileCommandGrammar() {
+        let vietnamese = "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"
+        XCTAssertEqual(SkillRuntime.chatInputText(from: vietnamese), vietnamese)
+        let english = "Create file workspace/english.md with content: English file"
+        XCTAssertEqual(SkillRuntime.chatInputText(from: english), english)
+    }
+
+    func testChatInputTextStillExtractsOrdinaryColonDelimitedPayload() {
+        XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text"), "actual text")
+    }
+
     func testSkillRunsThroughNamedModule() async throws {
         let skill = SkillDefinition(identity: "calculator", scope: "arithmetic", input: "expression", rule: "evaluate", output: "integer", permissions: ["MODEL_ACCESS"], dependencies: ["calculator"], version: "1")
         let runtime = SkillRuntime(skills: [skill], modules: ["calculator": { input in input == "187 * 43" ? "8041" : "0" }])
