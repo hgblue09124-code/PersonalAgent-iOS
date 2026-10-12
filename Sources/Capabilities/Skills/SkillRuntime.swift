@@ -566,5 +566,5 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         let content = String(remainder[delimiter.0.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !path.isEmpty else { return nil }
         return (path, content)
-    }}
+    }
 }
