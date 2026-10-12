@@ -1,0 +1,37 @@
+{
+  "id": "PASKILL-4",
+  "title": "Enable verified workspace file creation from Chat",
+  "status": "in_progress",
+  "goal": "Allow the default Agent to create a text file in its bounded Workspace through the existing policy-gated Skill and Module runtime, then verify persisted content.",
+  "context": "WorkspaceReadTool and WorkspaceWriteTool are registered in the production composition root, but the default Skill/Agent manifests do not expose a create-file Skill and ModuleBackedSkillExecutor only adapts read-only workspace search. This leaves the capability unreachable from ordinary Chat requests.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-4.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Sources/Capabilities/Skills/AgentMarkdownStore.swift",
+    "Tests/PersonalAgentTests/WorkspaceStorageToolTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not bypass user capability settings or ModuleRuntime policy checks.",
+    "Do not permit writes outside the existing bounded Workspace roots or support arbitrary shell execution.",
+    "Do not overwrite customized Agent.md or Skill.md files during migration.",
+    "Do not claim end-to-end success without a test proving the file was persisted and read back."
+  ],
+  "acceptance_criteria": [
+    "Default Skill store installs a workspace.create-file Skill backed by the existing workspace.write Tool contract.",
+    "Chat input in the documented Vietnamese or English form is translated to a strict workspace.write invocation.",
+    "The default built-in Agent is migrated to include the new Skill only when its existing manifest is unchanged from the previous default.",
+    "The Skill executes through ModuleRuntime policy and reports success only when the file content is read-back verified.",
+    "Regression tests cover Agent scope and intent selection through ModuleRuntime, real temporary-workspace file persistence/read-back, and safe default-Agent migration."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-4.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-4.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, validate-contract, and Apple Native Build & Unsigned IPA CI gates."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert the single logical task commit if workspace path boundaries, policy checks, existing Skill execution, or customized Agent manifests regress."
+}

@@ -137,7 +137,14 @@ public actor FileAgentStore: Sendable {
     public func ensureDefaultAgent() throws {
         try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
         let url = directoryURL.appendingPathComponent("personal.default.Agent.md")
-        guard !FileManager.default.fileExists(atPath: url.path) else { return }
+        if FileManager.default.fileExists(atPath: url.path) {
+            let existing = try String(contentsOf: url, encoding: .utf8)
+            // Migrate only the exact previous built-in manifest. Preserve user edits and scopes.
+            if existing == Self.legacyDefaultAgentMarkdown {
+                try Self.defaultAgentMarkdown.write(to: url, atomically: true, encoding: .utf8)
+            }
+            return
+        }
         try Self.defaultAgentMarkdown.write(to: url, atomically: true, encoding: .utf8)
     }
 
@@ -159,7 +166,7 @@ public actor FileAgentStore: Sendable {
         return manifest
     }
 
-    private static let defaultAgentMarkdown = """
+    private static let legacyDefaultAgentMarkdown = """
     id: personal.default
     name: Personal Default Agent
     version: 1.0.0
@@ -170,6 +177,20 @@ public actor FileAgentStore: Sendable {
 
     ## Rule
     Select only from the declared skills.
+    """
+
+    private static let defaultAgentMarkdown = """
+    id: personal.default
+    name: Personal Default Agent
+    version: 1.0.0
+    description: Default personal agent.
+    ---
+    ## Skills
+    text.normalize
+    workspace.create-file
+
+    ## Rule
+    Select only from the declared skills. Use the workspace.create-file Skill for explicit file creation requests.
     """
 
     private func loadAll() throws -> [AgentManifest] {
