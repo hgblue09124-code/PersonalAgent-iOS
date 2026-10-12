@@ -69,8 +69,15 @@ public actor TerminalSession {
     public func workingDirectory() -> String { currentDirectory }
     public func setWorkingDirectory(_ path: String) { currentDirectory = path }
 
-    public func execute(_ input: String, registry: CommandRegistry) async throws -> TerminalCommandExecution {
+    public func execute(
+        _ input: String,
+        registry: CommandRegistry,
+        confirmationGranted: Bool = false
+    ) async throws -> TerminalCommandExecution {
         let parsed = try CommandParser.parse(input)
+        guard parsed.name == "cd" || registry.contains(parsed.name) else {
+            throw CommandError.unknownCommand(parsed.name)
+        }
         let command: AgentCommand
         if parsed.name == "cd" {
             guard parsed.arguments.count <= 1 else { throw CommandError.invalidArguments("cd [path]") }
@@ -83,6 +90,14 @@ public actor TerminalSession {
             command = parsed
         } else {
             command = try await commandInWorkingDirectory(parsed)
+            switch await registry.authorizationDecision(command, confirmationGranted: confirmationGranted) {
+            case .allowed:
+                break
+            case .requiresConfirmation:
+                throw CommandError.confirmationRequired(command.name)
+            case .denied:
+                throw CommandError.invalidArguments("Permission denied by Settings policy.")
+            }
         }
         await history.append(command)
         let execution = TerminalCommandExecution(command: command)
@@ -95,7 +110,7 @@ public actor TerminalSession {
                 result = CommandResult()
             } else {
                 let executionContext = CommandContext(workspace: context.workspace, workingDirectory: currentDirectory)
-                result = try await registry.execute(command, context: executionContext)
+                result = try await registry.execute(command, context: executionContext, confirmationGranted: confirmationGranted)
             }
             if !result.stdout.isEmpty { appendOutput(TerminalOutput(stream: .stdout, text: result.stdout)) }
             if !result.stderr.isEmpty { appendOutput(TerminalOutput(stream: .stderr, text: result.stderr)) }
