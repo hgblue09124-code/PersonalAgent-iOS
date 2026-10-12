@@ -59,14 +59,34 @@ public protocol Reflecting: Sendable {
     func reflect(goalID: GoalID, observations: [Observation], evaluation: Evaluation) async throws -> Reflection
 }
 
+/// Runtime-facing seam for Skill discovery, selection, authorization-aware execution, and verification.
+public struct SkillExecutionReceipt: Sendable, Equatable {
+    public let skillID: SkillID
+    public let output: String
+    public let verified: Bool
+    public init(skillID: SkillID, output: String, verified: Bool) {
+        self.skillID = skillID
+        self.output = output
+        self.verified = verified
+    }
+}
+
+public protocol SkillExecutionBoundary: Sendable {
+    func discoverSkillIDs() async throws -> [SkillID]
+    func selectSkill(goalStatement: String, availableSkillIDs: [SkillID]) async throws -> SkillID?
+    func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel
+    func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt
+}
+
 public struct DefaultContextAssembler: ContextAssembling {
-    public init() {}
+    private let skillBoundary: (any SkillExecutionBoundary)?
+    public init(skillBoundary: (any SkillExecutionBoundary)? = nil) { self.skillBoundary = skillBoundary }
     public func assembleContext(
         perception: Perception,
         observations: [Observation] = [],
         evaluation: Evaluation? = nil
     ) async throws -> ContextBundle {
-        ContextBundle(perception: perception, memoryIDs: [], skillIDs: [])
+        ContextBundle(perception: perception, memoryIDs: [], skillIDs: try await skillBoundary?.discoverSkillIDs() ?? [])
     }
 }
 
@@ -178,24 +198,43 @@ public struct DefaultReasoner: Reasoning {
 }
 
 public struct DefaultPlanner: Planning {
-    public init() {}
+    private let skillBoundary: (any SkillExecutionBoundary)?
+    public init(skillBoundary: (any SkillExecutionBoundary)? = nil) { self.skillBoundary = skillBoundary }
     public func plan(goalID: GoalID, context: ContextBundle, reasoning: ReasoningResult) async throws -> Plan {
-        let step = PlanStep(index: 0, description: context.perception.rawInput, skillID: nil)
+        let selectedSkill: SkillID?
+        if let skillBoundary {
+            selectedSkill = try await skillBoundary.selectSkill(
+                goalStatement: context.perception.rawInput,
+                availableSkillIDs: context.skillIDs
+            )
+        } else {
+            selectedSkill = nil
+        }
+        let step = PlanStep(index: 0, description: context.perception.rawInput, skillID: selectedSkill)
         return Plan(goalID: goalID, steps: [step])
     }
 }
 
 public struct DefaultProposer: Executing {
-    public init() {}
+    private let skillBoundary: (any SkillExecutionBoundary)?
+    public init(skillBoundary: (any SkillExecutionBoundary)? = nil) { self.skillBoundary = skillBoundary }
     public func propose(plan: Plan) async throws -> [ActionProposal] {
-        plan.steps.map { step in
-            ActionProposal(
+        var proposals: [ActionProposal] = []
+        for step in plan.steps {
+            let capabilities: CapabilityLevel
+            if let skillID = step.skillID, let skillBoundary {
+                capabilities = try await skillBoundary.requiredCapabilities(for: skillID)
+            } else {
+                capabilities = .read
+            }
+            proposals.append(ActionProposal(
                 planID: plan.id,
                 skillID: step.skillID,
                 description: step.description,
-                capabilities: .read
-            )
+                capabilities: capabilities
+            ))
         }
+        return proposals
     }
 }
 
@@ -257,6 +296,7 @@ public actor M6Orchestrator {
     private let verifier: any Verifying
     private let policy: any PolicyEvaluating
     private let approvalGate: (any ApprovalGate)?
+    private let skillBoundary: (any SkillExecutionBoundary)?
     private let moduleRuntime: ModuleRuntime?
     private let evaluator: any Evaluating
     private let reflector: any Reflecting
@@ -273,6 +313,7 @@ public actor M6Orchestrator {
         verifier: (any Verifying)? = nil,
         policy: (any PolicyEvaluating)? = nil,
         approvalGate: (any ApprovalGate)? = nil,
+        skillBoundary: (any SkillExecutionBoundary)? = nil,
         moduleRuntime: ModuleRuntime? = nil,
         evaluator: (any Evaluating)? = nil,
         reflector: (any Reflecting)? = nil,
@@ -281,13 +322,14 @@ public actor M6Orchestrator {
         self.runtime = runtime
         self.eventLog = eventLog
         self.logger = logger
-        self.contextAssembler = contextAssembler ?? DefaultContextAssembler()
+        self.contextAssembler = contextAssembler ?? DefaultContextAssembler(skillBoundary: skillBoundary)
         self.reasoner = reasoner ?? DefaultReasoner()
-        self.planner = planner ?? DefaultPlanner()
-        self.proposer = proposer ?? DefaultProposer()
+        self.planner = planner ?? DefaultPlanner(skillBoundary: skillBoundary)
+        self.proposer = proposer ?? DefaultProposer(skillBoundary: skillBoundary)
         self.verifier = verifier ?? DefaultVerifier()
         self.policy = policy ?? DefaultPolicyEvaluator()
         self.approvalGate = approvalGate
+        self.skillBoundary = skillBoundary
         self.moduleRuntime = moduleRuntime
         self.evaluator = evaluator ?? DefaultEvaluator()
         self.reflector = reflector ?? DefaultReflector()
@@ -581,6 +623,31 @@ public actor M6Orchestrator {
         // A Skill ID is not a Tool ID. Until the canonical Skill execution boundary
         // is injected, never let an unhandled Skill proposal become a synthetic success.
         if let skillID = proposal.skillID {
+            if let skillBoundary {
+                let receipt = try await skillBoundary.execute(
+                    skillID: skillID,
+                    input: proposal.description,
+                    authorizedCapabilities: proposal.capabilities
+                )
+                let succeeded = receipt.skillID == skillID && receipt.verified
+                let summary = succeeded
+                    ? "Skill '\(skillID.rawValue)' executed and verified"
+                    : "Skill '\(skillID.rawValue)' did not produce verified output"
+                let observation = Observation(actionID: proposal.actionID, summary: summary, succeeded: succeeded)
+                try await emit(
+                    traceID: traceID,
+                    kind: .observationProduced,
+                    payload: [
+                        "goalID": goalID.rawValue,
+                        "actionID": proposal.actionID.rawValue,
+                        "skillID": skillID.rawValue,
+                        "verified": "\(receipt.verified)",
+                        "summary": summary,
+                        "succeeded": "\(succeeded)",
+                    ]
+                )
+                return observation
+            }
             let observation = Observation(
                 actionID: proposal.actionID,
                 summary: "Skill execution unavailable: no SkillExecutionBoundary configured for '\(skillID.rawValue)'",

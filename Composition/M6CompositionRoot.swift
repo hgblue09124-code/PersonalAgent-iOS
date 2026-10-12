@@ -37,8 +37,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         modules: [any Module] = [],
         tools: [any Tool] = [],
         skillStore: (any SkillStore)? = nil,
-        skillExecutors: SkillExecutorRegistry? = nil,
-        allowedSkillIDs: Set<SkillID> = [SkillRuntime.normalizationManifest.id]
+        skillExecutors: SkillExecutorRegistry? = nil
     ) async throws {
         let log = eventLog ?? InMemoryEventLog()
         self.milestone = .m6
@@ -84,12 +83,24 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
         self.moduleCatalog = moduleCatalog
         self.moduleRuntime = moduleRuntime
 
-        let resolvedSkillStore: any SkillStore = skillStore ?? InMemorySkillStore(manifests: [SkillRuntime.normalizationManifest])
-        let resolvedSkillExecutors = skillExecutors ?? SkillExecutorRegistry(executors: [
-            SkillRuntime.normalizationManifest.id.rawValue: TextNormalizeSkillExecutor()
-        ])
-        let skillRuntime = SkillRuntime(store: resolvedSkillStore, executors: resolvedSkillExecutors, moduleRuntime: moduleRuntime)
-        let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
+        // Skill code is only executable through the registered executor boundary.
+        let resolvedSkillStore: any SkillStore = skillStore ?? InMemorySkillStore(
+            manifests: [SkillRuntime.normalizationManifest]
+        )
+        let resolvedSkillExecutors: SkillExecutorRegistry
+        if let skillExecutors {
+            resolvedSkillExecutors = skillExecutors
+        } else {
+            resolvedSkillExecutors = SkillExecutorRegistry(executors: [
+                SkillRuntime.normalizationManifest.id.rawValue: TextNormalizeSkillExecutor()
+            ])
+        }
+        let skillRuntime = SkillRuntime(
+            store: resolvedSkillStore,
+            executors: resolvedSkillExecutors,
+            moduleRuntime: moduleRuntime
+        )
+        let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime)
 
         // 3. Memory setup
         let store: any MemoryStore
