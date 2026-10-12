@@ -176,8 +176,8 @@ final class KernelSession: ObservableObject {
         do {
             skillManifests = try await composition.discoverSkills()
         } catch {
+            // Optional startup discovery must not masquerade as a failed chat request.
             skillManifests = []
-            lastError = String(describing: error)
         }
 
         do {
@@ -188,8 +188,8 @@ final class KernelSession: ObservableObject {
                 UserDefaults.standard.set(selectedAgentID, forKey: "agent.selected.id")
             }
         } catch {
+            // Profile discovery may be temporarily unavailable while storage initializes.
             agentManifests = []
-            lastError = String(describing: error)
         }
 
         let storage = composition.localModelStorage
@@ -198,10 +198,11 @@ final class KernelSession: ObservableObject {
             activeModelID = try await storage.activeModelID()
             activeModelDescriptor = try await storage.activeModelDescriptor()
         } catch {
+            // Inventory failures should not become chat-request banners. Engine load
+            // failures remain visible in the following lifecycle-state check.
             installedModels = []
             activeModelID = nil
             activeModelDescriptor = nil
-            lastError = String(describing: error)
         }
 
         do {
