@@ -98,20 +98,32 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         // Actor methods are reentrant across awaits. Keep one shared load task so
         // simultaneous chat requests cannot both observe .unloaded and load twice.
         if let activeLoadTask {
-            let loaded = try await activeLoadTask.value
-            return loaded
+            return try await awaitLoadedEngine(activeLoadTask)
         }
 
         let opts = options ?? LocalModelLoadingOptions()
         let task = Task { try await Self.ensureLoaded(engine, options: opts) }
         activeLoadTask = task
         do {
-            let loaded = try await task.value
+            let loaded = try await awaitLoadedEngine(task)
             activeLoadTask = nil
             return loaded
         } catch {
             activeLoadTask = nil
             throw error
+        }
+    }
+
+    private func awaitLoadedEngine(
+        _ task: Task<any LocalModelEngine, Error>
+    ) async throws -> any LocalModelEngine {
+        do {
+            let loaded = try await task.value
+            // The shared load may finish after this particular caller was cancelled.
+            try Task.checkCancellation()
+            return loaded
+        } catch is CancellationError {
+            throw LlamaCPPEngineError.cancelled
         }
     }
 
