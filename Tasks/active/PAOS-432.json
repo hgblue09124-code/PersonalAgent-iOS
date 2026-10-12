@@ -1,30 +1,29 @@
 {
   "id": "PAOS-432",
-  "title": "Implement safe AgentOS soft-update staging, activation, and rollback",
+  "title": "Complete AgentOS soft-update bootstrap and revision protocol",
   "status": "in_progress",
-  "goal": "Build a fail-closed AgentOS soft-update pipeline that fetches bounded text definitions read-only from GitHub, verifies integrity and local base hashes, stages separately, activates transactionally with a durable snapshot, and exposes it in Settings.",
-  "context": "Issue #432 covers read-only GitHub transport, isolated staging, revalidation, durable snapshot, activation, rollback, and Settings UI. Native executable code remains out of scope.",
+  "goal": "Ship a working initial GitHub manifest and one compatible Skill.md update, document the revision/hash contract, and treat repeat checks of the installed revision as up-to-date rather than errors.",
+  "context": "This logical task completes the first end-to-end data-only update path on top of the safe transport/staging/activation flow. Native code remains outside soft updates.",
   "allowed_paths": [
-    "Runtime/Updates/AgentUpdateManager.swift",
-    "Tests/PersonalAgentTests/AgentUpdateManagerTests.swift",
     "Sources/Workspace/AgentOSSoftUpdateClient.swift",
-    "Tests/PersonalAgentTests/AgentOSSoftUpdateClientTests.swift",
     "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "Tests/PersonalAgentTests/AgentOSSoftUpdateClientTests.swift",
+    "agentos-update.json",
+    "skills/text.normalize.Skill.md",
+    "Documentation/AGENTOS_SOFT_UPDATE.md",
     "Tasks/active/PAOS-432.json"
   ],
   "forbidden_changes": [
     "Do not load or execute downloaded native code.",
-    "Do not change Xcode project, entitlements, provider credentials, or unrelated modules.",
-    "Do not push to GitHub or mutate the active workspace during fetch/staging.",
-    "Activation must snapshot first, re-check base hashes, and restore the snapshot if any write fails."
+    "Do not push or mutate the remote repository from the app.",
+    "Do not overwrite local edits when base hashes differ.",
+    "Do not claim native Swift/UI/framework changes can be applied without a signed IPA."
   ],
   "acceptance_criteria": [
-    "Manifest and paths are validated; only bounded Markdown, JSON, and text files in approved AgentOS roots are accepted.",
-    "Remote Git blob integrity, SHA-256 content hashes, byte counts, repository/base revision, and local base hashes are checked.",
-    "Files are staged separately and active workspace remains unchanged until explicit activation.",
-    "Activation revalidates local content, creates a durable snapshot, and rolls back on any partial failure.",
-    "Settings exposes check/stage, activate, and rollback actions; no native code is loaded.",
-    "Regression tests cover SHA-256 known vector, traversal, executable files, manifest round-trip, and safe-path boundaries."
+    "The repository contains a valid manifest and a real text-only Skill.md update with correct byte count and SHA-256.",
+    "The first update is based on initial state and repeat checks of the installed revision report up-to-date.",
+    "The protocol documents how to advance baseRevision, revision, base hashes, and content hashes for future releases.",
+    "Settings activates only after revalidation and a durable snapshot; rollback preserves unrelated workspace edits and blocks if updated files were changed after activation."
   ],
   "verification": [
     "swift test --disable-sandbox",

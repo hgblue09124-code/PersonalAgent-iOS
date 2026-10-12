@@ -37,6 +37,7 @@ public struct AgentOSSoftUpdateManifest: Codable, Sendable, Equatable {
 
 public enum AgentOSSoftUpdateError: Error, Sendable, Equatable, LocalizedError {
     case invalidManifest
+    case alreadyCurrent
     case incompatibleRepository
     case staleRevision
     case unsafePath(String)
@@ -49,6 +50,7 @@ public enum AgentOSSoftUpdateError: Error, Sendable, Equatable, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidManifest: return "The AgentOS update manifest is invalid."
+        case .alreadyCurrent: return "AgentOS is already at this revision."
         case .incompatibleRepository: return "The update belongs to another repository."
         case .staleRevision: return "The update base revision is stale."
         case .unsafePath(let path): return "Unsafe update path: \(path)"
@@ -117,6 +119,7 @@ public actor AgentOSSoftUpdateClient {
         guard manifest.repository.caseInsensitiveCompare(repositoryKey) == .orderedSame else {
             throw AgentOSSoftUpdateError.incompatibleRepository
         }
+        if manifest.revision == currentRevision { throw AgentOSSoftUpdateError.alreadyCurrent }
         guard manifest.baseRevision == currentRevision else { throw AgentOSSoftUpdateError.staleRevision }
         guard !manifest.version.isEmpty, !manifest.revision.isEmpty,
               manifest.compatibility == runtimeCompatibility,

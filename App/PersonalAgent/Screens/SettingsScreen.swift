@@ -914,6 +914,8 @@ private struct AgentOSUpdateSettingsSection: View {
                                                        workspaceURL: workspace.rootURL, stagingRootURL: root)
             staged = StagedUpdate(manifest: result.manifest, url: result.stagingURL)
             status = "Đã tải và xác minh \(result.manifest.files.count) tệp; workspace chưa thay đổi."
+        } catch AgentOSSoftUpdateError.alreadyCurrent {
+            status = "Đang sử dụng bản AgentOS mới nhất."
         } catch {
             status = "Không thể tải bản cập nhật: \(error.localizedDescription)"
         }
