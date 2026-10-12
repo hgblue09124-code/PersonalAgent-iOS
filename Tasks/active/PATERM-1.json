@@ -1,0 +1,42 @@
+{
+  "id": "PATERM-1",
+  "title": "Add explicit one-shot confirmation for destructive Terminal commands",
+  "status": "in_progress",
+  "goal": "Allow users to explicitly approve a single destructive Terminal command without weakening Settings capability grants or persistently granting destructive access.",
+  "context": "Terminal's SettingsTerminalCommandAuthorizer correctly fails closed when policy requires approval, but Terminal UI has no confirmation path. As a result, destructive commands and sync now remain unusable even when the relevant write/network grants are enabled. Approval must be one-shot and bound to the command being retried.",
+  "allowed_paths": [
+    "Tasks/active/PATERM-1.json",
+    "Sources/Terminal/TerminalCore.swift",
+    "Sources/Terminal/TerminalSession.swift",
+    "App/PersonalAgent/Screens/TerminalScreen.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "Tests/PersonalAgentTests/TerminalSessionTests.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings"
+  ],
+  "forbidden_changes": [
+    "Do not change Settings grants or turn destructive approval into a persistent capability grant.",
+    "Do not allow confirmation to override missing read/write/network/execute grants.",
+    "Do not change GitHub sync conflict semantics or expose credentials.",
+    "Do not claim physical-device verification from CI alone."
+  ],
+  "acceptance_criteria": [
+    "Terminal authorization distinguishes allowed, denied, and approval-required outcomes.",
+    "An approval-required command is not added to history or executed before confirmation.",
+    "The UI presents the exact pending command and requires explicit user confirmation.",
+    "Confirmation applies only to the immediate retry; all Settings capability grants are rechecked.",
+    "Regression test proves destructive command is blocked before confirmation and runs only when confirmation is explicitly passed.",
+    "Task-contract, M3, and Apple Native Build & Unsigned IPA gates pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PATERM-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PATERM-1.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm task-contract, M3, and Apple Native Build & Unsigned IPA gates."
+  ],
+  "dependencies": [
+    "Issue #367",
+    "Issue #354"
+  ],
+  "recovery": "Revert the single task commit if a command executes without confirmation or existing capability-denial behavior changes."
+}

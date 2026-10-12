@@ -20,6 +20,8 @@ struct TerminalScreen: View {
     @Environment(\.kernelSession) private var kernelSession
     @State private var command = ""
     @State private var isExecuting = false
+    @State private var pendingDestructiveCommand: String?
+    @State private var showDestructiveConfirmation = false
     @State private var transcript: [TerminalLine] = []
     @State private var transcriptCopied = false
     private let maximumTranscriptLines = 500
@@ -110,6 +112,24 @@ struct TerminalScreen: View {
         .navigationTitle("Terminal")
         .navigationBarTitleDisplayMode(.inline)
         .task { await prepareSandbox() }
+        .confirmationDialog(
+            "Confirm destructive command",
+            isPresented: $showDestructiveConfirmation,
+            titleVisibility: .visible
+        ) {
+            if let pendingDestructiveCommand {
+                Button("Run command", role: .destructive) {
+                    Task { await executeCommand(confirmed: true, commandToExecute: pendingDestructiveCommand) }
+                }
+            }
+            Button("Cancel", role: .cancel) { pendingDestructiveCommand = nil }
+        } message: {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Command to run:")
+                Text(pendingDestructiveCommand ?? "").font(.caption.monospaced())
+                Text("This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing.")
+            }
+        }
     }
 
     private func color(for kind: TerminalLine.Kind) -> Color {
@@ -139,17 +159,18 @@ struct TerminalScreen: View {
     }
 
     @MainActor
-    private func executeCommand() async {
+    private func executeCommand(confirmed: Bool = false, commandToExecute: String? = nil) async {
         guard let terminal, !isExecuting else { return }
-        let input = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        let input = (commandToExecute ?? command).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !input.isEmpty else { return }
         isExecuting = true
         defer { isExecuting = false }
-        command = ""
+        if commandToExecute == nil { command = "" }
+        if confirmed { pendingDestructiveCommand = nil }
         let priorOutputCount = await terminal.outputs().count
-        appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
         do {
-            _ = try await terminal.execute(input, registry: registry)
+            _ = try await terminal.execute(input, registry: registry, confirmationGranted: confirmed)
+            appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
             let outputs = await terminal.outputs()
             if input == "clear" {
                 transcript.removeAll()
@@ -159,10 +180,21 @@ struct TerminalScreen: View {
                     appendTranscript(TerminalLine(text: item.text, kind: kind))
                 }
             }
+            pendingDestructiveCommand = nil
+        } catch let error as CommandError {
+            if case .confirmationRequired(_) = error {
+                pendingDestructiveCommand = input
+                showDestructiveConfirmation = true
+                return
+            }
+            appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
+            appendTranscript(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
         } catch {
+            appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
             appendTranscript(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
         }
     }
+
     private func makeRuntimeRegistry(session: KernelSession?) -> CommandRegistry {
         let authorizer = SettingsTerminalCommandAuthorizer()
         guard let session else {
