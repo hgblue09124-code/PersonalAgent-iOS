@@ -166,20 +166,25 @@ struct ChatScreen: View {
                 if session.isSubmitting {
                     Button(action: session.cancelCurrentGeneration) {
                         Image(systemName: "stop.fill")
-                            .font(.system(size: 13, weight: .bold))
-                            .frame(width: 40, height: 40)
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(.red)
+                            .frame(width: 34, height: 34)
+                            .background(.red.opacity(0.10), in: Circle())
+                            .contentShape(Circle())
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.red)
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Stop response generation")
                     .accessibilityHint("Cancels the current Agent request")
                 } else {
                     Button(action: send) {
                         Image(systemName: "arrow.up")
-                            .font(.system(size: 14, weight: .bold))
-                            .frame(width: 40, height: 40)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 34, height: 34)
+                            .background(AgentDesign.accent, in: Circle())
+                            .contentShape(Circle())
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.plain)
                     .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityLabel("Send message")
                 }
