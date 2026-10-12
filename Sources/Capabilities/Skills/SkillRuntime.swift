@@ -119,13 +119,20 @@ public struct SkillRuntime: Sendable {
     private let moduleRuntime: ModuleRuntime?
 
     public static func chatInputText(from goalStatement: String) -> String {
-        // An explicit ": " separates the instruction from its payload.
-        // Preserve payload whitespace so the Skill's own rule can normalize it.
-        if let separator = goalStatement.range(of: ": "),
-           !goalStatement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return String(goalStatement[separator.upperBound...])
+        let statement = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = statement.lowercased()
+        // File creation uses a colon as part of its command grammar ("with content:").
+        // Keep the full command so the allowlisted workspace adapter can parse path and content.
+        let fileCommandPrefixes = ["tạo file ", "tạo tệp ", "create file ", "write file "]
+        if fileCommandPrefixes.contains(where: { normalized.hasPrefix($0) }) {
+            return statement
         }
-        return goalStatement
+        // For ordinary prompts, an explicit ": " separates instruction from payload.
+        if let separator = statement.range(of: ": "),
+           !statement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return String(statement[separator.upperBound...])
+        }
+        return statement
     }
 
     public static let normalizationManifest = SkillManifest(
