@@ -1,0 +1,38 @@
+{
+  "id": "PAOS-432",
+  "title": "Implement safe AgentOS soft-update transport and validation",
+  "status": "in_progress",
+  "goal": "Build a fail-closed AgentOS soft-update pipeline that validates untrusted manifests, fetches bounded definition files read-only from GitHub, verifies content integrity, detects local conflicts, and stages updates outside the active workspace.",
+  "context": "Issue #432 builds on the existing update transaction boundary. This checkpoint adds portable validation plus read-only GitHub transport and isolated staging. Activation, rollback, and SwiftUI integration remain follow-up checkpoints.",
+  "allowed_paths": [
+    "Runtime/Updates/AgentUpdateManager.swift",
+    "Tests/PersonalAgentTests/AgentUpdateManagerTests.swift",
+    "Sources/Workspace/AgentOSSoftUpdateClient.swift",
+    "Tests/PersonalAgentTests/AgentOSSoftUpdateClientTests.swift",
+    "Tasks/active/PAOS-432.json"
+  ],
+  "forbidden_changes": [
+    "Do not load or execute downloaded native code.",
+    "Do not change App UI, Xcode project, entitlements, provider credentials, or unrelated modules.",
+    "Do not push to GitHub or mutate the active workspace during the fetch/staging phase.",
+    "Do not claim activation or rollback is implemented by the staging client."
+  ],
+  "acceptance_criteria": [
+    "Manifest decoding rejects malformed metadata, wrong repository/base revision, unsupported compatibility, duplicates, and unsafe paths.",
+    "Only bounded Markdown, JSON, and text files in approved AgentOS roots are accepted.",
+    "Remote blob integrity, SHA-256 content hashes, declared byte counts, local base hashes, and local edit conflicts are verified before staging.",
+    "Fetched files are staged separately; active workspace and remote branch are not mutated.",
+    "Regression tests cover traversal, executable files, manifest round-trip, and safe-path boundaries."
+  ],
+  "verification": [
+    "swift test --disable-sandbox",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA CI results"
+  ],
+  "dependencies": [
+    "Issue #432",
+    "Existing AgentUpdateManager",
+    "GitHubRepositorySyncClient",
+    "DurableWorkspaceSnapshotStore"
+  ],
+  "recovery": "Revert this single logical commit if package compilation, contract validation, or staging-boundary tests regress."
+}
