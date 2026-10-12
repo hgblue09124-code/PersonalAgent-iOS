@@ -1,0 +1,31 @@
+{
+  "id": "PALOOP-3",
+  "title": "Terminate the Agent loop when its cycle budget is exhausted",
+  "status": "in_progress",
+  "goal": "A bounded M6 run must not return a continuing evaluation while leaving the goal active after maxCycles is exhausted.",
+  "context": "M6Orchestrator currently exits the while loop when cycleCount reaches maxCycles and returns the last Evaluation unchanged. If the last disposition is .continue, the goal remains active and the caller receives a non-terminal result with no remaining cycles.",
+  "allowed_paths": [
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift",
+    "Tasks/active/PALOOP-3.json"
+  ],
+  "forbidden_changes": [
+    "Do not change normal continue-then-complete semantics before the final cycle.",
+    "Do not add unbounded retries or alter UI/provider/Skill behavior."
+  ],
+  "acceptance_criteria": [
+    "A final .continue at maxCycles becomes an explicit abort before evaluation/state persistence.",
+    "Regression test proves exactly maxCycles cycles run and authoritative goal status becomes aborted.",
+    "One logical task per commit; report actual CI separately."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PALOOP-3.json",
+    "swift test --disable-sandbox --filter M6SemanticsTests",
+    "swift test --disable-sandbox",
+    "Apple Native Build & Unsigned IPA"
+  ],
+  "dependencies": [
+    "PALOOP-2"
+  ],
+  "recovery": "Revert the single task commit if existing continuation tests regress or CI fails."
+}
