@@ -483,6 +483,15 @@ public actor M6Orchestrator {
                 guard !answer.isEmpty else { throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output") }
                 evaluation = Evaluation(goalID: evaluation.goalID, disposition: evaluation.disposition, reason: answer)
             }
+            // Apply the hard budget after answer projection so no later branch can
+            // overwrite the terminal reason or disguise exhaustion as a normal answer.
+            if evaluation.disposition == .continue, cycleCount >= maxCycles {
+                evaluation = Evaluation(
+                    goalID: evaluation.goalID,
+                    disposition: .abort,
+                    reason: "Agent loop exhausted cycle budget (maxCycles=\(maxCycles))"
+                )
+            }
             try await emit(
                 traceID: traceID,
                 kind: .evaluationCompleted,
