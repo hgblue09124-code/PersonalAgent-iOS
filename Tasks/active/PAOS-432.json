@@ -1,6 +1,6 @@
 {
   "id": "PAOS-432",
-  "title": "Harden soft-update activation against invalid definitions and path collisions",
+  "title": "Complete safe soft-update progress, cancellation, and rollback UX",
   "status": "in_progress",
   "goal": "Prevent soft-update payloads from breaking live Agent/Skill discovery and reject path collisions or malformed remote trees before any workspace mutation.",
   "context": "This checkpoint hardens the already implemented read-only transport and transactional activation. It validates all affected Markdown definitions and rejects case-insensitive path collisions and duplicate Git tree paths.",
@@ -28,7 +28,8 @@
     "The protocol documents how to advance baseRevision, revision, base hashes, and content hashes for future releases.",
     "Settings activates only after revalidation and a durable snapshot; rollback preserves unrelated workspace edits and blocks if updated files were changed after activation.",
     "Before activation, all existing and updated Skill.md and Agent.md files parse successfully with unique IDs; duplicate remote tree paths and case-insensitive file path collisions fail closed.",
-    "Definition validation is exposed by PAComposition (the layer that depends on PASkills); tests cover duplicate Skill/Agent IDs."
+    "Definition validation is exposed by PAComposition (the layer that depends on PASkills); tests cover duplicate Skill/Agent IDs.",
+    "Staging reports file progress and can be cancelled; interrupted downloads remove partial staging and leave the active workspace unchanged."
   ],
   "verification": [
     "swift test --disable-sandbox",

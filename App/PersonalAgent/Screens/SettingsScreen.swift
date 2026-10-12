@@ -858,6 +858,8 @@ private struct AgentOSUpdateSettingsSection: View {
     @AppStorage("github.sync.repository") private var repository = ""
     @AppStorage("github.sync.branch") private var branch = "main"
     @State private var busy = false
+    @State private var isStaging = false
+    @State private var stagingTask: Task<Void, Never>?
     @State private var status = "Chưa kiểm tra."
     private struct StagedUpdate { let manifest: AgentOSSoftUpdateManifest; let url: URL }
     @State private var staged: StagedUpdate?
@@ -867,15 +869,20 @@ private struct AgentOSUpdateSettingsSection: View {
     var body: some View {
         GlassPanel {
             Label("AgentOS Soft Update", systemImage: "arrow.down.circle").font(.headline)
+            Text("Đang cài: \(UserDefaults.standard.string(forKey: "agentos.update.revision") ?? "initial")").font(.caption.monospaced())
             Text("Cập nhật Agent/Skill/Module dạng văn bản; không tải hay chạy mã Swift.")
                 .font(.caption).foregroundStyle(.secondary)
             Text(status).font(.footnote).textSelection(.enabled)
             Button {
-                Task { await stageUpdate() }
+                stagingTask = Task { await stageUpdate() }
             } label: {
                 if busy { ProgressView() } else { Label("Kiểm tra & tải vào vùng tạm", systemImage: "arrow.down.to.line") }
             }
             .buttonStyle(.borderedProminent).disabled(busy)
+            if isStaging {
+                Button("Hủy tải") { stagingTask?.cancel(); status = "Đang hủy tải an toàn..." }
+                    .buttonStyle(.bordered).disabled(!isStaging)
+            }
             if staged != nil {
                 Button("Xác thực lại, sao lưu và kích hoạt") { Task { await activate() } }
                     .buttonStyle(.bordered).disabled(busy)
@@ -890,8 +897,10 @@ private struct AgentOSUpdateSettingsSection: View {
 
     private func stageUpdate() async {
         busy = true
-        defer { busy = false }
+        isStaging = true
+        defer { busy = false; isStaging = false; stagingTask = nil }
         staged = nil
+        status = "Đang kiểm tra manifest và tải tệp an toàn..."
         do {
             guard !owner.isEmpty, !repository.isEmpty, !branch.isEmpty else {
                 status = "Cấu hình GitHub repository trong phần GitHub sync trước."
@@ -912,9 +921,20 @@ private struct AgentOSUpdateSettingsSection: View {
             let current = UserDefaults.standard.string(forKey: "agentos.update.revision") ?? "initial"
             let client = try AgentOSSoftUpdateClient(location: location, tokenProvider: { token })
             let result = try await client.stageUpdate(currentRevision: current, runtimeCompatibility: "runtime-v1",
-                                                       workspaceURL: workspaceRoot, stagingRootURL: root)
+                workspaceURL: workspaceRoot, stagingRootURL: root, progress: { completed, total in
+                    await MainActor.run { status = "Đang tải/xác minh tệp \(completed)/\(total)..." }
+                })
+            if Task.isCancelled {
+                try? FileManager.default.removeItem(at: result.stagingURL)
+                status = "Đã hủy tải; workspace chưa thay đổi."
+                return
+            }
             staged = StagedUpdate(manifest: result.manifest, url: result.stagingURL)
             status = "Đã tải và xác minh \(result.manifest.files.count) tệp; workspace chưa thay đổi."
+        } catch is CancellationError {
+            status = "Đã hủy tải; workspace chưa thay đổi."
+        } catch let error as URLError where error.code == .cancelled {
+            status = "Đã hủy tải; workspace chưa thay đổi."
         } catch AgentOSSoftUpdateError.alreadyCurrent {
             status = "Đang sử dụng bản AgentOS mới nhất."
         } catch {

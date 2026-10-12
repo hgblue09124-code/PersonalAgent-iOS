@@ -100,13 +100,19 @@ public actor AgentOSSoftUpdateClient {
     /// The returned directory is owned by the caller and may be inspected before activation.
     public func stageUpdate(currentRevision: String, runtimeCompatibility: String,
                             workspaceURL: URL, stagingRootURL: URL,
-                            locallyModifiedPaths: Set<String> = []) async throws -> (manifest: AgentOSSoftUpdateManifest, stagingURL: URL) {
+                            locallyModifiedPaths: Set<String> = [],
+                            progress: (@Sendable (Int, Int) async -> Void)? = nil) async throws -> (manifest: AgentOSSoftUpdateManifest, stagingURL: URL) {
+        try Task.checkCancellation()
         guard let token = try await tokenProvider(), !token.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw GitHubRepositorySyncError.authenticationRequired
         }
+        try Task.checkCancellation()
         let remoteRef: RefResponse = try await get("repos/\(location.owner)/\(location.repository)/git/ref/heads/\(location.branch)", token: token)
+        try Task.checkCancellation()
         let commit: CommitResponse = try await get("repos/\(location.owner)/\(location.repository)/git/commits/\(remoteRef.object.sha)", token: token)
+        try Task.checkCancellation()
         let tree: TreeResponse = try await get("repos/\(location.owner)/\(location.repository)/git/trees/\(commit.tree.sha)?recursive=1", token: token)
+        try Task.checkCancellation()
         guard !tree.truncated else { throw AgentOSSoftUpdateError.invalidRemoteResponse }
         var entries: [String: TreeEntry] = [:]
         for entry in tree.tree where entry.type == "blob" {
@@ -114,7 +120,9 @@ public actor AgentOSSoftUpdateClient {
             entries[entry.path] = entry
         }
         guard let manifestEntry = entries[Self.manifestPath] else { throw AgentOSSoftUpdateError.invalidManifest }
+        try Task.checkCancellation()
         let manifestData = try await fetchBlob(manifestEntry.sha, token: token, expectedSize: manifestEntry.size, path: Self.manifestPath)
+        try Task.checkCancellation()
         let manifest: AgentOSSoftUpdateManifest
         do { manifest = try JSONDecoder().decode(AgentOSSoftUpdateManifest.self, from: manifestData) }
         catch { throw AgentOSSoftUpdateError.invalidManifest }
@@ -164,9 +172,12 @@ public actor AgentOSSoftUpdateClient {
         let stagingURL = stagingRootURL.appendingPathComponent(UUID().uuidString.lowercased(), isDirectory: true)
         try FileManager.default.createDirectory(at: stagingURL, withIntermediateDirectories: true)
         do {
+            var completedFiles = 0
             for file in manifest.files {
+                try Task.checkCancellation()
                 guard let entry = entries[file.path] else { throw AgentOSSoftUpdateError.invalidManifest }
                 let data = try await fetchBlob(entry.sha, token: token, expectedSize: entry.size, path: file.path)
+                try Task.checkCancellation()
                 guard Int64(data.count) == file.byteCount,
                       SHA256Portable.hex(data).caseInsensitiveCompare(file.sha256) == .orderedSame else {
                     throw AgentOSSoftUpdateError.hashMismatch(file.path)
@@ -181,7 +192,10 @@ public actor AgentOSSoftUpdateClient {
                 }
                 try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
                 try data.write(to: destination, options: .atomic)
+                completedFiles += 1
+                await progress?(completedFiles, manifest.files.count)
             }
+            try Task.checkCancellation()
             return (manifest, stagingURL)
         } catch {
             try? FileManager.default.removeItem(at: stagingURL)
