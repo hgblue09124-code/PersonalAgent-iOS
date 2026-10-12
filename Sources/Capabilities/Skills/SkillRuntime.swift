@@ -120,12 +120,19 @@ public struct SkillRuntime: Sendable {
 
     public static func chatInputText(from goalStatement: String) -> String {
         let statement = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalized = statement.lowercased()
-        // File creation uses a colon as part of its command grammar ("with content:").
-        // Keep the full command so the allowlisted workspace adapter can parse path and content.
+        // Keep file-creation commands intact for the allowlisted workspace adapter.
+        // Chat commonly adds a short polite lead-in; strip only known lead-ins so
+        // the downstream parser still receives its explicit, fail-closed grammar.
         let fileCommandPrefixes = ["tạo file ", "tạo tệp ", "create file ", "write file "]
-        if fileCommandPrefixes.contains(where: { normalized.hasPrefix($0) }) {
-            return statement
+        let politePrefixes = ["hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em "]
+        var command = statement
+        while true {
+            let normalized = command.lowercased()
+            if fileCommandPrefixes.contains(where: { normalized.hasPrefix($0) }) {
+                return command
+            }
+            guard let lead = politePrefixes.first(where: { normalized.hasPrefix($0) }) else { break }
+            command = String(command.dropFirst(lead.count)).trimmingCharacters(in: .whitespacesAndNewlines)
         }
         // For ordinary prompts, preserve the payload exactly, including trailing whitespace.
         if let separator = goalStatement.range(of: ": "),
