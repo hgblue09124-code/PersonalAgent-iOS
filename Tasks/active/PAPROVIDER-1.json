@@ -1,0 +1,33 @@
+{
+  "id": "PAPROVIDER-1",
+  "title": "Decode OpenAI-compatible streamed tool calls",
+  "status": "in_progress",
+  "goal": "Preserve function-call deltas from OpenAI-compatible SSE streams as validated semantic toolCall events instead of silently discarding them.",
+  "context": "Palvia's useful donor pattern is incremental tool-call accumulation. PersonalAgent already defines LLMStreamEvent.toolCall, but ChatCompletionsStreamDecoder currently reads only delta.content and therefore discards provider tool calls.",
+  "allowed_paths": [
+    "Providers/Remote/Shared/ChatCompletionsCodec.swift",
+    "Tests/PersonalAgentTests/ChatCompletionsStreamingTests.swift",
+    "Tasks/active/PAPROVIDER-1.json"
+  ],
+  "forbidden_changes": [
+    "Do not import or copy Palvia's app-specific models or UI.",
+    "Do not execute tools or bypass Skill/Module permission and approval boundaries.",
+    "Do not modify App UI, Package.swift, Xcode project, or unrelated provider contracts."
+  ],
+  "acceptance_criteria": [
+    "Incremental SSE decoding accumulates fragmented tool names and argument JSON by tool index.",
+    "A tool-only completion is accepted only with a terminal marker and valid JSON arguments.",
+    "Malformed tool arguments and truncated streams fail closed.",
+    "Existing text streaming regression tests remain compatible."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAPROVIDER-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAPROVIDER-1.json --base main",
+    "swift test --disable-sandbox",
+    "M3 and Apple Native Build checks"
+  ],
+  "dependencies": [
+    "Existing PAProviders LLMStreamEvent.toolCall contract"
+  ],
+  "recovery": "Revert the single task commit if streaming regressions appear; keep tool execution disabled until a separate integration task routes events through existing authorization and verification."
+}

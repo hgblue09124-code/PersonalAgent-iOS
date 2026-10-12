@@ -108,6 +108,12 @@ public enum ChatCompletionsCodec: Sendable {
 public struct ChatCompletionsStreamDecoder: Sendable {
     private var pending = Data()
     private var fullText = ""
+    private var toolCalls: [Int: ToolCallParts] = [:]
+
+    private struct ToolCallParts: Sendable {
+        var name = ""
+        var argumentsJSON = ""
+    }
     private var finishReason = "stop"
     private var model: ModelID?
     private var sawTerminalMarker = false
@@ -133,8 +139,18 @@ public struct ChatCompletionsStreamDecoder: Sendable {
             pending.removeAll(keepingCapacity: false)
         }
         guard sawTerminalMarker,
-              !fullText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+              !fullText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !toolCalls.isEmpty else {
             throw ProviderRuntimeError.decodingFailure
+        }
+        for index in toolCalls.keys.sorted() {
+            guard let call = toolCalls[index],
+                  !call.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  !call.argumentsJSON.isEmpty,
+                  let data = call.argumentsJSON.data(using: .utf8),
+                  (try? JSONSerialization.jsonObject(with: data)) != nil else {
+                throw ProviderRuntimeError.decodingFailure
+            }
+            events.append(.toolCall(name: call.name, argumentsJSON: call.argumentsJSON))
         }
         events.append(.completed(LLMResponse(text: fullText, finishReason: finishReason, model: model)))
         return events
@@ -168,10 +184,23 @@ public struct ChatCompletionsStreamDecoder: Sendable {
         if let reason = first["finish_reason"] as? String {
             finishReason = reason
         }
-        guard let delta = first["delta"] as? [String: Any],
-              let content = delta["content"] as? String,
-              !content.isEmpty else { return }
-        fullText += content
-        events.append(.delta(content))
+        guard let delta = first["delta"] as? [String: Any] else { return }
+        if let content = delta["content"] as? String, !content.isEmpty {
+            fullText += content
+            events.append(.delta(content))
+        }
+        if let deltas = delta["tool_calls"] as? [[String: Any]] {
+            for item in deltas {
+                guard let index = item["index"] as? Int else {
+                    throw ProviderRuntimeError.decodingFailure
+                }
+                var parts = toolCalls[index] ?? ToolCallParts()
+                if let function = item["function"] as? [String: Any] {
+                    if let name = function["name"] as? String { parts.name += name }
+                    if let arguments = function["arguments"] as? String { parts.argumentsJSON += arguments }
+                }
+                toolCalls[index] = parts
+            }
+        }
     }
 }
