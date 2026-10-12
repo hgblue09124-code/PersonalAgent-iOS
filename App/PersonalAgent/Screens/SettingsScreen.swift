@@ -1038,8 +1038,11 @@ private struct AgentOSUpdateSettingsSection: View {
             for url in try fileManager.contentsOfDirectory(at: skillDirectory, includingPropertiesForKeys: nil)
                 where url.pathExtension.lowercased() == "md" {
                 let path = "skills/" + url.lastPathComponent
-                skillTexts[path.lowercased()] = replacementByPath[path.lowercased()]
-                    ?? (try String(contentsOf: url, encoding: .utf8))
+                if let replacement = replacementByPath[path.lowercased()] {
+                    skillTexts[path.lowercased()] = replacement
+                } else {
+                    skillTexts[path.lowercased()] = try String(contentsOf: url, encoding: .utf8)
+                }
             }
         }
         for (path, text) in updates where path.lowercased().hasPrefix("skills/")
@@ -1052,8 +1055,11 @@ private struct AgentOSUpdateSettingsSection: View {
             for url in try fileManager.contentsOfDirectory(at: agentDirectory, includingPropertiesForKeys: nil)
                 where url.pathExtension.lowercased() == "md" {
                 let path = "agents/" + url.lastPathComponent
-                agentTexts[path.lowercased()] = replacementByPath[path.lowercased()]
-                    ?? (try String(contentsOf: url, encoding: .utf8))
+                if let replacement = replacementByPath[path.lowercased()] {
+                    agentTexts[path.lowercased()] = replacement
+                } else {
+                    agentTexts[path.lowercased()] = try String(contentsOf: url, encoding: .utf8)
+                }
             }
         }
         for (path, text) in updates where path.lowercased().hasPrefix("agents/")
