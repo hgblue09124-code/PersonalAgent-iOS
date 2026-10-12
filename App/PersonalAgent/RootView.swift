@@ -18,7 +18,6 @@ struct RootView: View {
         AgentScreen(session: session, showWorkspace: $showWorkspace)
         .environment(\.locale, Locale(identifier: appLanguage))
         .environment(\.kernelSession, session)
-        .id(appLanguage)
         .sheet(isPresented: $showWorkspace) {
             AgentWorkspaceSheet(session: session)
         }

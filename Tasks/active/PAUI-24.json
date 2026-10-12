@@ -1,0 +1,28 @@
+{
+  "id": "PAUI-24",
+  "title": "Prevent full app reset when changing UI language",
+  "status": "ready",
+  "context": "RootView applies .id(appLanguage) to AgentScreen. Changing locale destroys and recreates the complete screen subtree, reruns RootView.task, repeats session discovery and may prepare/load the active model again. This creates avoidable work for a presentation preference change.",
+  "goal": "Apply locale changes through SwiftUI environment updates without resetting the entire AgentScreen identity or rerunning startup/model preparation.",
+  "allowed_paths": [
+    "App/PersonalAgent/RootView.swift",
+    "Tasks/active/PAUI-24.json"
+  ],
+  "forbidden_changes": [
+    "Do not change language preference keys or translations.",
+    "Do not change model load/unload behavior or session refresh semantics.",
+    "Do not redesign the UI or modify unrelated screens."
+  ],
+  "acceptance_criteria": [
+    "Changing app.language updates the environment locale without changing AgentScreen identity.",
+    "The root startup task is not re-triggered solely by changing language.",
+    "The diff contains only the targeted identity-reset removal and this task contract."
+  ],
+  "verification": [
+    "Agent Task Contract workflow",
+    "Apple Native Build & Unsigned IPA workflow",
+    "Review RootView diff to confirm .id(appLanguage) is removed and .environment(\\.locale, ...) remains."
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if locale switching no longer updates visible localized content."
+}
