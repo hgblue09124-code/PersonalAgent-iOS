@@ -1,0 +1,34 @@
+{
+  "id": "PACHAT-BUG-1",
+  "title": "Keep Chat context setting consistent across screens",
+  "status": "in_progress",
+  "goal": "Fix the mismatch where Settings can save a context length that Chat does not use, and align both screens on the same supported context window values.",
+  "context": "Chat's contextual input builder reads the cached KernelSession chatContextTurnLimit, while Settings directly mutates the same UserDefaults key with a 1...128 Stepper. Values outside Chat's supported [4, 8, 12, 24, 48] options are silently ignored by Chat, and Settings changes can leave the session cache stale.",
+  "allowed_paths": [
+    "App/PersonalAgent/KernelSession.swift",
+    "App/PersonalAgent/Screens/SettingsScreen.swift",
+    "Tasks/active/PACHAT-BUG-1.json"
+  ],
+  "forbidden_changes": [
+    "Do not change provider routing, model loading, memory retrieval, or privacy persistence behavior.",
+    "Do not change unrelated UI or runtime modules.",
+    "Do not modify PersonalAgent.xcodeproj."
+  ],
+  "acceptance_criteria": [
+    "Settings offers the same context-turn values as Chat: 4, 8, 12, 24, 48.",
+    "Settings changes synchronize into KernelSession and persist for the next request.",
+    "Contextual input reads the persisted value at request time rather than relying on stale cached state.",
+    "Changing context preference does not require restarting the app."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-BUG-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-BUG-1.json --base main",
+    "Apple Native Build & Unsigned IPA",
+    "Review final PR checks and changed-file scope"
+  ],
+  "dependencies": [
+    "Issue #354",
+    "PACHAT-3 merged"
+  ],
+  "recovery": "Revert the single task commit if Settings and Chat context controls diverge or the app build fails."
+}
