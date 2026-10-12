@@ -1,0 +1,28 @@
+{
+  "id": "PASKILL-6",
+  "title": "Preserve polite chat file creation commands",
+  "status": "in_progress",
+  "goal": "Preserve explicit file-create commands when chat adds common polite lead-ins so the workspace parser receives a valid command.",
+  "context": "Confirmed source defect: chatInputText only recognized direct file-create prefixes and could strip command text before parseCreateFileRequest.",
+  "allowed_paths": [
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tasks/active/PASKILL-6.json"
+  ],
+  "forbidden_changes": [
+    "Do not bypass workspace policy, scope checks, or the explicit create-file parser.",
+    "Do not change unrelated Skills or provider behavior."
+  ],
+  "acceptance_criteria": [
+    "Common allowlisted polite lead-ins are removed only when followed by an explicit supported file-create prefix.",
+    "Ordinary prompts retain existing normalization behavior.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python Scripts/agent_task_guard.py validate Tasks/active/PASKILL-6.json",
+    "python Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-6.json --base origin/main",
+    "swift test --disable-sandbox",
+    "M3 and Apple Native Build & Unsigned IPA CI"
+  ],
+  "dependencies": [],
+  "recovery": "Revert this task if parser or policy regressions occur; keep CI failure evidence."
+}
