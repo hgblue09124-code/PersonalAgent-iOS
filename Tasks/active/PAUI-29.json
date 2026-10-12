@@ -1,0 +1,28 @@
+{
+  "id": "PAUI-29",
+  "title": "Normalize chat send and stop control sizing",
+  "status": "in_progress",
+  "goal": "Make the chat send arrow visually compact and consistent with the composer, without changing send, cancellation, or accessibility behavior.",
+  "context": "User reported the chat arrow is larger than normal. Current source uses 40pt bordered controls, which add extra visual bulk. This is a focused correction separate from the broader Orb/startup/rendering task.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-29.json",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change chat submission or cancellation behavior.",
+    "Do not modify provider/runtime logic or unrelated UI.",
+    "Do not claim physical-device verification from CI alone."
+  ],
+  "acceptance_criteria": [
+    "Send and stop controls use a compact 34pt circular style.",
+    "Send remains disabled for blank input and both accessibility labels remain intact.",
+    "Only the two declared paths change."
+  ],
+  "verification": [
+    "Run python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-29.json.",
+    "Run python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-29.json --base origin/main.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA gates."
+  ],
+  "dependencies": [],
+  "recovery": "Revert the single task commit if chat send or cancellation behavior regresses."
+}
