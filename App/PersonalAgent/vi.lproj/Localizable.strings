@@ -650,3 +650,8 @@
 "Context turns" = "Lượt ngữ cảnh";
 
 "Response language" = "Ngôn ngữ trả lời";
+
+"Confirm destructive command" = "Xác nhận lệnh có thay đổi dữ liệu";
+"Run command" = "Chạy lệnh";
+"Command to run:" = "Lệnh sẽ chạy:";
+"This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing." = "Lệnh này có thể di chuyển, ghi đè, xóa tệp trong không gian làm việc hoặc áp dụng thay đổi từ xa. Hãy kiểm tra trước khi tiếp tục.";

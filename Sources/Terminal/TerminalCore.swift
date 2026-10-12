@@ -14,6 +14,7 @@ public enum CommandError: Error, Sendable, Equatable, LocalizedError {
     case invalidEscape
     case unknownCommand(String)
     case invalidArguments(String)
+    case confirmationRequired(String)
 
     public var errorDescription: String? {
         switch self {
@@ -27,6 +28,8 @@ public enum CommandError: Error, Sendable, Equatable, LocalizedError {
             return "Unknown command: \(name). Type 'help' to list available commands."
         case .invalidArguments(let usage):
             return "Invalid arguments. Usage: \(usage)"
+        case .confirmationRequired(let command):
+            return "Command requires explicit confirmation before destructive changes: \(command)"
         }
     }
 }
@@ -49,8 +52,29 @@ public typealias CommandHandler = @Sendable (AgentCommand, CommandContext) async
 
 public enum TerminalCapability: Hashable, Sendable { case read, write, execute, network, destructive }
 
+public enum TerminalAuthorizationDecision: Sendable, Equatable {
+    case allowed
+    case denied
+    case requiresConfirmation
+}
+
 public protocol TerminalCommandAuthorizing: Sendable {
     func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool
+    func authorizationDecision(
+        _ capabilities: Set<TerminalCapability>,
+        summary: String,
+        confirmationGranted: Bool
+    ) async -> TerminalAuthorizationDecision
+}
+
+public extension TerminalCommandAuthorizing {
+    func authorizationDecision(
+        _ capabilities: Set<TerminalCapability>,
+        summary: String,
+        confirmationGranted: Bool
+    ) async -> TerminalAuthorizationDecision {
+        await authorize(capabilities, summary: summary) ? .allowed : .denied
+    }
 }
 
 public struct CommandRegistry: Sendable {
@@ -70,14 +94,34 @@ public struct CommandRegistry: Sendable {
     /// Bound each stream centrally so every command inherits the same UI/memory limit.
     public static let maximumOutputBytes = 64 * 1024
 
-    public func isAuthorized(_ command: AgentCommand) async -> Bool {
-        guard let authorizer else { return false }
-        return await authorizer.authorize(Self.requiredCapabilities(for: command), summary: "Terminal command: \\(command.name)")
+    public func authorizationDecision(
+        _ command: AgentCommand,
+        confirmationGranted: Bool = false
+    ) async -> TerminalAuthorizationDecision {
+        guard let authorizer else { return .denied }
+        return await authorizer.authorizationDecision(
+            Self.requiredCapabilities(for: command),
+            summary: "Terminal command: \(command.name)",
+            confirmationGranted: confirmationGranted
+        )
     }
 
-    public func execute(_ command: AgentCommand, context: CommandContext) async throws -> CommandResult {
+    public func isAuthorized(_ command: AgentCommand) async -> Bool {
+        await authorizationDecision(command) == .allowed
+    }
+
+    public func execute(
+        _ command: AgentCommand,
+        context: CommandContext,
+        confirmationGranted: Bool = false
+    ) async throws -> CommandResult {
         guard let handler = handlers[command.name] else { throw CommandError.unknownCommand(command.name) }
-        guard await isAuthorized(command) else {
+        switch await authorizationDecision(command, confirmationGranted: confirmationGranted) {
+        case .allowed:
+            break
+        case .requiresConfirmation:
+            throw CommandError.confirmationRequired(command.name)
+        case .denied:
             return CommandResult(stderr: "Permission denied by Settings policy.\n", exitCode: 126)
         }
         let result = try await handler(command, context)

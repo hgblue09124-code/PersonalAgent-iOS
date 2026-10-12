@@ -18,6 +18,29 @@ final class TerminalSessionTests: XCTestCase {
         XCTAssertEqual(history.count, 1)
     }
 
+    func testDestructiveCommandRequiresExplicitConfirmationBeforeExecution() async throws {
+        let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
+        try await workspace.prepare()
+        let session = TerminalSession(context: CommandContext(workspace: workspace))
+        let registry = CommandRegistry(authorizer: ConfirmingTerminalAuthorizer()).registering("rm") { _, _ in
+            CommandResult(stdout: "deleted")
+        }
+
+        do {
+            _ = try await session.execute("rm notes.md", registry: registry)
+            XCTFail("destructive command must require confirmation")
+        } catch let error as CommandError {
+            XCTAssertEqual(error, .confirmationRequired("rm"))
+        }
+        let historyBeforeConfirmation = await session.history.all()
+        XCTAssertTrue(historyBeforeConfirmation.isEmpty)
+
+        let execution = try await session.execute("rm notes.md", registry: registry, confirmationGranted: true)
+        XCTAssertEqual(execution.state, .succeeded)
+        let historyAfterConfirmation = await session.history.all()
+        XCTAssertEqual(historyAfterConfirmation.count, 1)
+    }
+
     func testThrownCommandMarksExecutionFailedInsteadOfLeavingItRunning() async throws {
         let workspace = LocalAgentWorkspace(rootURL: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString))
         try await workspace.prepare()
@@ -101,4 +124,19 @@ final class TerminalSessionTests: XCTestCase {
 
 private struct AllowTerminalAuthorizer: TerminalCommandAuthorizing {
     func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool { true }
+}
+
+private struct ConfirmingTerminalAuthorizer: TerminalCommandAuthorizing {
+    func authorize(_ capabilities: Set<TerminalCapability>, summary: String) async -> Bool {
+        !capabilities.contains(.destructive)
+    }
+
+    func authorizationDecision(
+        _ capabilities: Set<TerminalCapability>,
+        summary: String,
+        confirmationGranted: Bool
+    ) async -> TerminalAuthorizationDecision {
+        guard capabilities.contains(.destructive) else { return .allowed }
+        return confirmationGranted ? .allowed : .requiresConfirmation
+    }
 }
