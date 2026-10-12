@@ -191,6 +191,7 @@ public struct DefaultProposer: Executing {
         plan.steps.map { step in
             ActionProposal(
                 planID: plan.id,
+                skillID: step.skillID,
                 description: step.description,
                 capabilities: .read
             )
@@ -372,6 +373,9 @@ public actor M6Orchestrator {
                 ]
                 if let toolID = proposal.toolID {
                     payload["toolID"] = toolID.rawValue
+                }
+                if let skillID = proposal.skillID {
+                    payload["skillID"] = skillID.rawValue
                 }
                 try await emit(traceID: traceID, kind: .actionProposed, payload: payload)
             }

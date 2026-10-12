@@ -4,6 +4,7 @@ public struct ActionProposal: Sendable, Codable, Equatable {
     public let actionID: ActionID
     public let planID: PlanID
     public let toolID: ToolID?
+    public let skillID: SkillID?
     public let description: String
     public let capabilities: CapabilityLevel
 
@@ -11,12 +12,14 @@ public struct ActionProposal: Sendable, Codable, Equatable {
         actionID: ActionID = ActionID(),
         planID: PlanID,
         toolID: ToolID? = nil,
+        skillID: SkillID? = nil,
         description: String,
         capabilities: CapabilityLevel
     ) {
         self.actionID = actionID
         self.planID = planID
         self.toolID = toolID
+        self.skillID = skillID
         self.description = description
         self.capabilities = capabilities
     }
