@@ -921,7 +921,8 @@ final class KernelSession: ObservableObject {
     private static func cleanModelResult(_ raw: String) -> String {
         var result = sanitizeModelOutput(raw)
 
-        for token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>", "<|eot_id|>", "<|assistant|>", "<|user|>"] {
+        // Strip complete control tokens and common truncated variants from GGUF output.
+        for token in ["<|im_end|>", "||im_end|>", "|im_end|>", "<|im_start|>", "||im_start|>", "<|endoftext|>", "||endoftext|>", "<|eot_id|>", "||eot_id|>", "<|assistant|>", "<|user|>"] {
             result = result.replacingOccurrences(of: token, with: "")
         }
 
