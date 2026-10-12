@@ -792,12 +792,13 @@ extension M8CompositionRoot {
 
     public func runChatSkillIfMatched(
         goalStatement: String,
+        inputContext: String? = nil,
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
         let agent = try await agentStore.load(id: agentID)
         let inputData = try JSONSerialization.data(
-            withJSONObject: ["text": SkillRuntime.chatInputText(from: goalStatement)],
+            withJSONObject: ["text": SkillRuntime.chatInputText(from: inputContext ?? goalStatement)],
             options: [.sortedKeys]
         )
         guard let inputJSON = String(data: inputData, encoding: .utf8) else {
@@ -820,11 +821,12 @@ extension M8CompositionRoot {
     /// Returns nil when no Agent has a matching Skill so Chat can use the main runtime.
     public func runChatTeamIfMatched(
         goalStatement: String,
+        inputContext: String? = nil,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> AgentTeamResult? {
         let agents = try await agentStore.discover()
         let inputData = try JSONSerialization.data(
-            withJSONObject: ["text": goalStatement],
+            withJSONObject: ["text": inputContext ?? goalStatement],
             options: [.sortedKeys]
         )
         guard let inputJSON = String(data: inputData, encoding: .utf8) else {
