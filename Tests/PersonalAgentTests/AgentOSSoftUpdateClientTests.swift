@@ -124,18 +124,7 @@ final class AgentOSSoftUpdateClientTests: XCTestCase {
         GitHubSyncHTTPResponse(statusCode: 200, data: try! JSONSerialization.data(withJSONObject: object))
     }
 
-}
 
-private actor ScriptedSoftUpdateTransport: GitHubSyncHTTPTransport {
-    private var responses: [GitHubSyncHTTPResponse]
-    private var requests: [URLRequest] = []
-    init(responses: [GitHubSyncHTTPResponse]) { self.responses = responses }
-    func send(_ request: URLRequest) async throws -> GitHubSyncHTTPResponse {
-        requests.append(request)
-        guard !responses.isEmpty else { throw AgentOSSoftUpdateError.invalidRemoteResponse }
-        return responses.removeFirst()
-    }
-    func recordedRequests() -> [URLRequest] { requests }
     func testCaseInsensitivePathCollisionsAreRejected() async throws {
         let base = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let workspace = base.appendingPathComponent("workspace", isDirectory: true)
@@ -208,6 +197,16 @@ private actor ScriptedSoftUpdateTransport: GitHubSyncHTTPTransport {
         """
         XCTAssertThrowsError(try AgentOSSoftUpdateDefinitionValidator.validate(skillMarkdowns: [], agentMarkdowns: [agent, agent]))
     }
+}
 
-
+private actor ScriptedSoftUpdateTransport: GitHubSyncHTTPTransport {
+    private var responses: [GitHubSyncHTTPResponse]
+    private var requests: [URLRequest] = []
+    init(responses: [GitHubSyncHTTPResponse]) { self.responses = responses }
+    func send(_ request: URLRequest) async throws -> GitHubSyncHTTPResponse {
+        requests.append(request)
+        guard !responses.isEmpty else { throw AgentOSSoftUpdateError.invalidRemoteResponse }
+        return responses.removeFirst()
+    }
+    func recordedRequests() -> [URLRequest] { requests }
 }
