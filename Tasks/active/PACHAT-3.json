@@ -1,0 +1,34 @@
+{
+  "id": "PACHAT-3",
+  "title": "Add Chat language and context controls",
+  "status": "in_progress",
+  "goal": "Give users persistent controls for Chat response language and the number of recent conversation turns included in the model context.",
+  "context": "Chat already builds contextual input from recent conversation turns and relevant memory, but the context length has no user-facing control and the assistant language preference cannot be selected from Chat.",
+  "allowed_paths": [
+    "App/PersonalAgent/KernelSession.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "Tasks/active/PACHAT-3.json"
+  ],
+  "forbidden_changes": [
+    "Do not change provider routing, model loading, or tool execution.",
+    "Do not weaken privacy controls or remove relevant memory from contextual input.",
+    "Do not modify PersonalAgent.xcodeproj or unrelated modules."
+  ],
+  "acceptance_criteria": [
+    "Users can select automatic, Vietnamese, or English response language from Chat.",
+    "The selected language preference is persisted and included in contextual input unless the user explicitly requests another language.",
+    "Users can select 4, 8, 12, 24, or 48 recent turns for context.",
+    "Context length selection is persisted and the active conversation builder uses the selected limit."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-3.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-3.json --base main",
+    "Apple Native Build & Unsigned IPA",
+    "Review final PR checks and changed-file scope"
+  ],
+  "dependencies": [
+    "Issue #354",
+    "PACHAT-1 merged"
+  ],
+  "recovery": "Revert the single task commit if build or interaction review fails; preserve existing conversation history and privacy behavior."
+}

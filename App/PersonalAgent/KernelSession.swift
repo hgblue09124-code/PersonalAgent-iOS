@@ -71,6 +71,8 @@ final class KernelSession: ObservableObject {
     @Published private(set) var agentManifests: [AgentManifest]
     @Published private(set) var selectedAgentID: String
     @Published private(set) var teamModeEnabled: Bool
+    @Published private(set) var chatResponseLanguage: String
+    @Published private(set) var chatContextTurnLimit: Int
 
     @Published var installedModels: [LocalModelDescriptor]
     @Published var activeModelID: ModelID?
@@ -133,6 +135,10 @@ final class KernelSession: ObservableObject {
         self.agentManifests = []
         self.selectedAgentID = UserDefaults.standard.string(forKey: "agent.selected.id") ?? "personal.default"
         self.teamModeEnabled = UserDefaults.standard.bool(forKey: "agent.team.mode")
+        let savedResponseLanguage = UserDefaults.standard.string(forKey: "chat.response.language") ?? "auto"
+        self.chatResponseLanguage = ["auto", "vi", "en"].contains(savedResponseLanguage) ? savedResponseLanguage : "auto"
+        let savedContextTurnLimit = UserDefaults.standard.integer(forKey: "chat.context.turns")
+        self.chatContextTurnLimit = [4, 8, 12, 24, 48].contains(savedContextTurnLimit) ? savedContextTurnLimit : 12
         self.installedModels = []
         self.activeModelID = nil
         self.activeModelDescriptor = nil
@@ -410,6 +416,18 @@ final class KernelSession: ObservableObject {
             estimatedOutputTokens: estimatedTokens,
             estimatedTokensPerSecond: Double(estimatedTokens) / elapsed
         )
+    }
+
+    func setChatResponseLanguage(_ language: String) {
+        guard !isSubmitting, ["auto", "vi", "en"].contains(language) else { return }
+        chatResponseLanguage = language
+        UserDefaults.standard.set(language, forKey: "chat.response.language")
+    }
+
+    func setChatContextTurnLimit(_ limit: Int) {
+        guard !isSubmitting, [4, 8, 12, 24, 48].contains(limit) else { return }
+        chatContextTurnLimit = limit
+        UserDefaults.standard.set(limit, forKey: "chat.context.turns")
     }
 
     func selectAgent(id: String) {
@@ -781,10 +799,12 @@ final class KernelSession: ObservableObject {
     }
 
     private func buildContextualInput(for statement: String, conversationID: UUID) async throws -> String {
-        let contextTurns = max(1, min(128, UserDefaults.standard.integer(forKey: "chat.context.turns").nonZeroOr(12)))
+        let contextTurns = chatContextTurnLimit
         let conversationTurns = conversations.first(where: { $0.id == conversationID })?.turns ?? []
-        let recentTurns = conversationTurns.suffix(contextTurns)
-        let recent = (recentTurns.last?.role == .user && recentTurns.last?.content == statement) ? recentTurns.dropLast() : recentTurns
+        let priorTurns = (conversationTurns.last?.role == .user && conversationTurns.last?.content == statement)
+            ? conversationTurns.dropLast()
+            : conversationTurns[...]
+        let recent = priorTurns.suffix(contextTurns)
         let memory = try await composition.memoryContext(for: statement)
         var sections: [String] = []
         if !recent.isEmpty {
@@ -793,6 +813,14 @@ final class KernelSession: ObservableObject {
         }
         if !memory.isEmpty {
             sections.append("Relevant memory:\n" + memory.joined(separator: "\n"))
+        }
+        switch chatResponseLanguage {
+        case "vi":
+            sections.append("Response preference: Reply in natural, fluent Vietnamese unless the user explicitly asks for another language.")
+        case "en":
+            sections.append("Response preference: Reply in clear, natural English unless the user explicitly asks for another language.")
+        default:
+            break
         }
         sections.append("Current user request:\n\(statement)")
         return sections.joined(separator: "\n\n")

@@ -59,6 +59,18 @@ struct ChatScreen: View {
                 Spacer()
                 Menu {
                     Button { session.newConversation() } label: { Label("New conversation", systemImage: "plus") }
+                    Menu("Ngôn ngữ trả lời") {
+                        Button("Tự động" + (session.chatResponseLanguage == "auto" ? " ✓" : "")) { session.setChatResponseLanguage("auto") }
+                        Button("Tiếng Việt" + (session.chatResponseLanguage == "vi" ? " ✓" : "")) { session.setChatResponseLanguage("vi") }
+                        Button("English" + (session.chatResponseLanguage == "en" ? " ✓" : "")) { session.setChatResponseLanguage("en") }
+                    }
+                    Menu("Độ dài ngữ cảnh · \(session.chatContextTurnLimit) lượt") {
+                        ForEach([4, 8, 12, 24, 48], id: \.self) { limit in
+                            Button("\(limit) lượt" + (session.chatContextTurnLimit == limit ? " ✓" : "")) {
+                                session.setChatContextTurnLimit(limit)
+                            }
+                        }
+                    }
                     if session.canRegenerateLastResponse {
                         Button {
                             Task { await session.regenerateLastResponse() }
