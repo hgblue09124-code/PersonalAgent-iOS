@@ -1,7 +1,7 @@
 {
   "id": "PAIOS-445",
   "title": "Connect Skill discovery and execution to canonical M6 Agent loop",
-  "status": "in_progress",
+  "status": "verified",
   "goal": "Wire scoped Skill discovery, deterministic selection, capability-preserving proposal, M6 policy and approval handoff, registered execution, and verified observations into the canonical M6 loop.",
   "context": "Issue #445. Runtime must remain independent of PASkills; Composition owns the concrete adapter. No-match remains answer-only; missing execution boundaries fail closed.",
   "allowed_paths": [
@@ -34,5 +34,12 @@
     "Issue #445",
     "PR #450 fail-closed checkpoint"
   ],
-  "recovery": "If validation fails, fix the same logical change and amend the branch commit; revert the task commit if the security or architecture invariants cannot be preserved."
+  "recovery": "If validation fails, fix the same logical change and amend the branch commit; revert the task commit if the security or architecture invariants cannot be preserved.",
+  "evidence": [
+    "Verified code head before evidence update: 5a2e2815060c13e17c6324490847c339ae50eb50",
+    "M3 Swift package tests + repository integrity passed: workflow run 38262055774",
+    "Agent Task Contract passed: workflow run 38262054526",
+    "Apple Native Build & Unsigned IPA passed, including Publish PR Pre-release: workflow run 38262054553",
+    "Canonical M6 integration test exercises registered text-normalization Skill and asserts verified successful observation."
+  ]
 }
