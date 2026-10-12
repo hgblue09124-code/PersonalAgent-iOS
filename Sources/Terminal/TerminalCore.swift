@@ -168,21 +168,32 @@ private func limitedLines(path: String, count: Int, fromStart: Bool, workspace: 
 private func findPaths(
     under path: String,
     matching name: String?,
-    workspace: AgentWorkspace,
-    depth: Int = 0
+    workspace: AgentWorkspace
 ) async throws -> [String] {
-    guard depth < 64 else {
-        throw CommandError.invalidArguments("find exceeded maximum directory depth (64)")
-    }
-    let entries = try await workspace.listDirectory(at: path)
+    let maximumDepth = 64
+    let maximumVisitedEntries = 4_096
+    var pending: [(path: String, depth: Int)] = [(path, 0)]
+    var visitedEntries = 0
     var matches: [String] = []
-    for entry in entries {
-        let leaf = entry.relativePath.split(separator: "/").last.map(String.init) ?? entry.relativePath
-        if name == nil || leaf.localizedCaseInsensitiveContains(name!) {
-            matches.append(entry.relativePath)
+
+    while !pending.isEmpty {
+        let current = pending.removeFirst()
+        guard current.depth < maximumDepth else {
+            throw CommandError.invalidArguments("find exceeded maximum directory depth (64)")
         }
-        if entry.isDirectory {
-            matches += try await findPaths(under: entry.relativePath, matching: name, workspace: workspace, depth: depth + 1)
+        let entries = try await workspace.listDirectory(at: current.path)
+        for entry in entries {
+            guard visitedEntries < maximumVisitedEntries else {
+                throw CommandError.invalidArguments("find exceeded maximum entry count (4096)")
+            }
+            visitedEntries += 1
+            let leaf = entry.relativePath.split(separator: "/").last.map(String.init) ?? entry.relativePath
+            if name == nil || leaf.localizedCaseInsensitiveContains(name!) {
+                matches.append(entry.relativePath)
+            }
+            if entry.isDirectory {
+                pending.append((entry.relativePath, current.depth + 1))
+            }
         }
     }
     return matches.sorted()

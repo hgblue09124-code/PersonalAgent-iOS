@@ -1,0 +1,32 @@
+{
+  "id": "PASEC-17",
+  "title": "Bound terminal find traversal work",
+  "status": "in_progress",
+  "goal": "Prevent terminal find from traversing an unbounded number of workspace entries and accumulating unbounded results before output truncation.",
+  "context": "Sources/Terminal/TerminalCore.swift limits recursive directory depth but has no global entry budget. A wide workspace can therefore make find consume excessive time and memory before the central output limit applies.",
+  "allowed_paths": [
+    "Sources/Terminal/TerminalCore.swift",
+    "Tests/PersonalAgentTests/TerminalCoreTests.swift",
+    "Tasks/active/PASEC-17.json"
+  ],
+  "forbidden_changes": [
+    "Do not change workspace path validation or symlink policy.",
+    "Do not alter find matching semantics for workspaces within the traversal budget.",
+    "Do not modify App/ or PersonalAgent.xcodeproj."
+  ],
+  "acceptance_criteria": [
+    "Terminal find enforces both maximum directory depth and a global 4096-entry traversal budget.",
+    "Exceeding the entry budget fails with an actionable error instead of returning partial results.",
+    "A regression test verifies the entry budget rejects an oversized directory."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASEC-17.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASEC-17.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Swift package tests + repository integrity, macOS Xcode iOS arm64 build/unsigned IPA, and validate-contract CI gates."
+  ],
+  "dependencies": [
+    "Issue #353"
+  ],
+  "recovery": "Revert the traversal budget change and regression test together if valid workspace searches exceed the documented limit in supported use cases."
+}
