@@ -1,6 +1,9 @@
 import Foundation
 import XCTest
+import PAKernel
 import PAWorkspace
+import PAModules
+import PASkills
 @testable import PAComposition
 
 final class WorkspaceStorageToolTests: XCTestCase {
@@ -108,6 +111,83 @@ final class WorkspaceStorageToolTests: XCTestCase {
         XCTAssertFalse(exists)
     }
 
+    func testChatSkillCreatesAndReadBackVerifiesWorkspaceFile() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+
+        let catalog = try ModuleCatalog(modules: [ToolModule(tool: WorkspaceWriteTool(workspace: workspace))])
+        let policy = AllowWorkspaceToolPolicy()
+        let moduleRuntime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .write, .execute],
+            policy: policy
+        )
+        let skillStore = FileSkillStore(directoryURL: root.appendingPathComponent("Skills", isDirectory: true))
+        try await skillStore.ensureDefaultSkill()
+        let runtime = SkillRuntime(store: skillStore, moduleRuntime: moduleRuntime)
+        let agentStore = FileAgentStore(directoryURL: root.appendingPathComponent("Agents", isDirectory: true))
+        try await agentStore.ensureDefaultAgent()
+        let agent = try await agentStore.load(id: "personal.default")
+        let orchestrator = SkillAgentOrchestrator(runtime: runtime)
+
+        let output = try await orchestrator.run(
+            agent: agent,
+            goalStatement: "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật",
+            inputJSON: #"{"text":"Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"}"#,
+            policy: policy
+        )
+
+        XCTAssertTrue(output.verified)
+        XCTAssertTrue(output.outputJSON.contains("verified"))
+        let vietnameseFile = try await workspace.readFile(at: "workspace/notes.md")
+        XCTAssertEqual(vietnameseFile, "Nội dung đã ghi thật")
+
+        let englishOutput = try await orchestrator.run(
+            agent: agent,
+            goalStatement: "Create file workspace/english.md with content: English file",
+            inputJSON: #"{"text":"Create file workspace/english.md with content: English file"}"#,
+            policy: policy
+        )
+        XCTAssertTrue(englishOutput.verified)
+        XCTAssertTrue(englishOutput.outputJSON.contains("verified"))
+        let englishFile = try await workspace.readFile(at: "workspace/english.md")
+        XCTAssertEqual(englishFile, "English file")
+    }
+
+    func testDefaultAgentMigrationAddsFileSkillWithoutReplacingCustomizedAgent() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let agents = root.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: agents, withIntermediateDirectories: true)
+        let legacy = """
+        id: personal.default
+        name: Personal Default Agent
+        version: 1.0.0
+        description: Default personal agent.
+        ---
+        ## Skills
+        text.normalize
+
+        ## Rule
+        Select only from the declared skills.
+        """
+        try legacy.write(to: agents.appendingPathComponent("personal.default.Agent.md"), atomically: true, encoding: .utf8)
+        let store = FileAgentStore(directoryURL: agents)
+        try await store.ensureDefaultAgent()
+        let migrated = try await store.load(id: "personal.default")
+        XCTAssertTrue(migrated.skillIDs.contains(SkillID(rawValue: "workspace.create-file")))
+
+        let customRoot = root.appendingPathComponent("CustomAgents", isDirectory: true)
+        try FileManager.default.createDirectory(at: customRoot, withIntermediateDirectories: true)
+        let custom = legacy + "\n# user customization"
+        try custom.write(to: customRoot.appendingPathComponent("personal.default.Agent.md"), atomically: true, encoding: .utf8)
+        let customStore = FileAgentStore(directoryURL: customRoot)
+        try await customStore.ensureDefaultAgent()
+        XCTAssertEqual(try String(contentsOf: customRoot.appendingPathComponent("personal.default.Agent.md"), encoding: .utf8), custom)
+    }
+
     func testWorkspaceRejectsRepositoryMetadataAndCredentialDirectories() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
@@ -125,4 +205,11 @@ final class WorkspaceStorageToolTests: XCTestCase {
         }
     }
 
+}
+
+
+private struct AllowWorkspaceToolPolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+        .allow("workspace execution test")
+    }
 }

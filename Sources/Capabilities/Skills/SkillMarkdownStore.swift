@@ -123,9 +123,14 @@ public actor FileSkillStore: SkillStore {
 
     public func ensureDefaultSkill() throws {
         try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-        let url = directoryURL.appendingPathComponent("text.normalize.Skill.md")
-        guard !FileManager.default.fileExists(atPath: url.path) else { return }
-        try Self.defaultSkillMarkdown.write(to: url, atomically: true, encoding: .utf8)
+        let normalizeURL = directoryURL.appendingPathComponent("text.normalize.Skill.md")
+        if !FileManager.default.fileExists(atPath: normalizeURL.path) {
+            try Self.defaultSkillMarkdown.write(to: normalizeURL, atomically: true, encoding: .utf8)
+        }
+        let createFileURL = directoryURL.appendingPathComponent("workspace.create-file.Skill.md")
+        if !FileManager.default.fileExists(atPath: createFileURL.path) {
+            try Self.defaultCreateFileSkillMarkdown.write(to: createFileURL, atomically: true, encoding: .utf8)
+        }
     }
 
     public func discover(query: String) async throws -> [SkillManifest] {
@@ -182,5 +187,23 @@ public actor FileSkillStore: SkillStore {
 
     ## Rule
     Trim surrounding whitespace.
+    """
+
+    private static let defaultCreateFileSkillMarkdown = """
+    id: workspace.create-file
+    name: Tạo File
+    version: 1.0.0
+    description: Create file in workspace, write file, tạo tệp trong workspace.
+    moduleID: tool.workspace.write
+    chatInputAdapter: workspace.create-file
+    ---
+    ## Input
+    tool.workspace.write.input
+
+    ## Output
+    tool.workspace.write.output
+
+    ## Rule
+    Create a text file only inside the permitted AgentOS workspace. Use the explicit form "Tạo file workspace/notes.md với nội dung: nội dung tệp" or "Create file workspace/notes.md with content: file contents". Never claim success unless the Workspace tool returns verified output.
     """
 }
