@@ -91,7 +91,8 @@ public struct CommandRegistry: Sendable {
     private static func requiredCapabilities(for command: AgentCommand) -> Set<TerminalCapability> {
         switch command.name {
         case "pwd", "cd", "ls", "cat", "head", "tail", "find", "grep", "status", "model", "provider", "memory", "help", "clear": return [.read]
-        case "mkdir", "touch", "cp", "mv": return [.write]
+        case "mkdir", "touch", "cp": return [.write]
+        case "mv": return [.write, .destructive]
         case "rm": return [.write, .destructive]
         case "workspace":
             switch command.arguments.first {
