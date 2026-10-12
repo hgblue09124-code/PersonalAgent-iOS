@@ -422,18 +422,24 @@ public actor M6Orchestrator {
                 let decision = await policy.evaluate(intent)
                 var allowed = decision.allowed
 
-                if decision.requiresApproval, let gate = approvalGate {
-                    try await emit(
-                        traceID: traceID,
-                        kind: .approvalRequested,
-                        payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue]
-                    )
-                    allowed = try await gate.requestApproval(for: intent)
-                    try await emit(
-                        traceID: traceID,
-                        kind: .approvalResolved,
-                        payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue, "approved": "\(allowed)"]
-                    )
+                if decision.requiresApproval {
+                    if let gate = approvalGate {
+                        try await emit(
+                            traceID: traceID,
+                            kind: .approvalRequested,
+                            payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue]
+                        )
+                        allowed = try await gate.requestApproval(for: intent)
+                        try await emit(
+                            traceID: traceID,
+                            kind: .approvalResolved,
+                            payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue, "approved": "\(allowed)"]
+                        )
+                    } else {
+                        // Approval is a separate requirement, not an implicit grant.
+                        // A permissive allowed bit must never bypass a missing gate.
+                        allowed = false
+                    }
                 }
 
                 if !allowed {
