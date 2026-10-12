@@ -522,3 +522,8 @@
 "Context turns" = "Context turns";
 
 "Response language" = "Response language";
+
+"Confirm destructive command" = "Confirm destructive command";
+"Run command" = "Run command";
+"Command to run:" = "Command to run:";
+"This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing." = "This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing.";
