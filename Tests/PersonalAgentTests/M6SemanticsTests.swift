@@ -34,6 +34,38 @@ struct M6SemanticsTests {
         }
     }
 
+    @Test func approvalRequiredWithoutGateFailsClosed() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                PolicyDecision(allowed: true, requiresApproval: true, reason: "explicit approval required")
+            }
+        }
+
+        let policy = ApprovalRequiredPolicy()
+        let root = try await M6CompositionRoot(policy: policy, modules: [EchoModule()])
+        let goal = Goal(statement: "Must not execute without approval")
+        try await root.runtime.submit(goal: goal)
+        let proposer = DirectProposer(
+            toolID: ToolID(rawValue: DeterministicModuleIDs.echo.rawValue),
+            description: "execute echo only after approval"
+        )
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            proposer: proposer,
+            policy: policy,
+            moduleRuntime: root.moduleRuntime
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == AgencyDisposition.abort)
+
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        #expect(events.contains { $0.kind == .actionDenied })
+        #expect(!events.contains { $0.kind == .actionExecuted })
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+    }
+
     // 1. Explicit toolID end-to-end without inference
     @Test func test1_ExplicitToolIDEndToEndWithoutInference() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy(),
