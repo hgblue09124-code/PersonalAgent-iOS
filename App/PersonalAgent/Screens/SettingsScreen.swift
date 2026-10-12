@@ -34,6 +34,7 @@ struct SettingsScreen: View {
     @AppStorage("github.sync.repository") private var githubSyncRepository = ""
     @AppStorage("github.sync.branch") private var githubSyncBranch = "main"
     @State private var lastImportError: String?
+    @State private var lastImportStatus: String?
     @AppStorage("app.language") private var appLanguage = "vi"
     @State private var updateState: UpdateState = .idle
     @State private var copiedUpdateLink = false
@@ -56,7 +57,7 @@ struct SettingsScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
-            if let error = session.lastError ?? lastImportError {
+            if let error = lastImportError ?? session.lastError {
                 GlassPanel {
                     Label("Attention", systemImage: "exclamationmark.triangle.fill")
                         .font(.headline)
@@ -287,6 +288,12 @@ struct SettingsScreen: View {
                 Text("Files are stored locally. Content is processed only when a matching format reader is available.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let status = lastImportStatus {
+                    Label(status, systemImage: "checkmark.circle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.green)
+                        .textSelection(.enabled)
+                }
 
                 if importedFiles.isEmpty {
                     Text("No imported files yet.")
@@ -818,23 +825,35 @@ private extension SettingsScreen {
     }
 
     func importFiles(_ urls: [URL]) async {
-        guard !urls.isEmpty else { return }
+        guard !urls.isEmpty else {
+            lastImportStatus = nil
+            lastImportError = "No files were selected."
+            return
+        }
+        lastImportStatus = nil
+        lastImportError = nil
         do {
             let store = try ImportedFileStore(directoryURL: importedFilesDirectoryURL)
             var failures: [String] = []
+            var importedCount = 0
             for url in urls {
                 do {
-                    _ = try await store.importFile(from: url)
+                    let typeIdentifier = UTType(filenameExtension: url.pathExtension)?.identifier
+                    _ = try await store.importFile(from: url, contentTypeIdentifier: typeIdentifier)
+                    importedCount += 1
                 } catch {
-                    failures.append("\(url.lastPathComponent): \(error)")
+                    failures.append(url.lastPathComponent + ": " + error.localizedDescription)
                 }
             }
             importedFiles = await store.listImports()
-            lastImportError = failures.isEmpty
-                ? nil
-                : String(localized: "Some files could not be imported: \(failures.joined(separator: "; "))")
+            if failures.isEmpty {
+                lastImportStatus = "Imported and saved " + String(importedCount) + " file(s) locally."
+                lastImportError = nil
+            } else {
+                lastImportError = "Imported " + String(importedCount) + " file(s); failed: " + failures.joined(separator: "; ")
+            }
         } catch {
-            lastImportError = "Could not open imported-file library: \(error)"
+            lastImportError = "Could not open imported-file library: " + error.localizedDescription
         }
     }
 

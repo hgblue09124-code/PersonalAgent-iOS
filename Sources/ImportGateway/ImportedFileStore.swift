@@ -96,7 +96,9 @@ public actor ImportedFileStore {
         do {
             attributes = try fileManager.attributesOfItem(atPath: sourceURL.path)
         } catch {
-            throw CocoaError(.fileNoSuchFile)
+            // Preserve permission and provider errors; reporting every failure as
+            // "file not found" hid the actual reason an import could not proceed.
+            throw error
         }
         guard attributes[.type] as? FileAttributeType == .typeRegular,
               let size = (attributes[.size] as? NSNumber)?.int64Value,
