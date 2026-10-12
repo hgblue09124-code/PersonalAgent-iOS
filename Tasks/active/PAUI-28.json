@@ -1,0 +1,37 @@
+{
+  "id": "PAUI-28",
+  "title": "Restore glass Agent Orb and stabilize startup and tab rendering",
+  "status": "in_progress",
+  "goal": "Restore the approved animated glass orb, stop non-critical startup discovery failures from appearing as chat request errors, and isolate stream-driven rendering to the chat message list.",
+  "context": "Issue #429 consolidates the startup Attention Agent error, orb visual regression, and lag from broad tab rendering. Chat send-arrow sizing is tracked separately in PR #430.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-28.json",
+    "App/PersonalAgent/Screens/AgentScreen.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not modify PersonalAgent.xcodeproj or unrelated application files.",
+    "Do not suppress genuine model-loading or request-execution failures.",
+    "Do not introduce orbit rings, particles, avatar artwork, global timers, or a UI architecture rewrite.",
+    "Do not claim performance gains without profiling or reproducible evidence."
+  ],
+  "acceptance_criteria": [
+    "AgentOrb uses a glass-sphere treatment with a small state-driven pulse and no rotating rings or particles.",
+    "Non-critical skill, agent-profile, and model-inventory discovery failures do not populate the chat request error banner during startup.",
+    "Genuine active-model engine and request execution errors remain visible.",
+    "Orb animation stops when its view disappears and only pulses while thinking.",
+    "Chat stream updates are isolated in a dedicated message-list subview.",
+    "Changes stay within one logical commit and the PR diff is reviewed."
+  ],
+  "verification": [
+    "Run python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-28.json.",
+    "Run python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-28.json --base origin/main.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA CI gates.",
+    "Profile affected tabs on an iPhone before claiming measured performance improvement."
+  ],
+  "dependencies": [
+    "Issue #429"
+  ],
+  "recovery": "Revert the single task commit if the orb fails to render, startup errors are incorrectly suppressed, or chat streaming regresses."
+}
