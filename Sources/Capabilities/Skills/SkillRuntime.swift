@@ -65,6 +65,7 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
         guard
             let data = inputJSON.data(using: .utf8),
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+            Set(object.keys) == ["text"],
             let text = object["text"] as? String
         else {
             throw SkillExecutionError.malformedSkill
@@ -79,6 +80,7 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
         guard
             let data = outputJSON.data(using: .utf8),
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+            Set(object.keys) == ["text"],
             let text = object["text"] as? String
         else { return false }
         return text == text.trimmingCharacters(in: .whitespacesAndNewlines)
