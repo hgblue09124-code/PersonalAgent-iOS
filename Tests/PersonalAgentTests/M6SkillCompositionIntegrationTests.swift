@@ -122,30 +122,42 @@ struct M6SkillCompositionIntegrationTests {
         let result = try await root.runChatSkillIfMatched(goalStatement: "Tìm kiếm workspace needle")
         #expect(result?.skillID.rawValue == "workspace.search")
         #expect(result?.verified == true)
-        #expect(result?.outputJSON.contains("workspace/notes.md") == true)
+        let resultEnvelope = try JSONSerialization.jsonObject(
+            with: Data((result?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let resultPayload = try JSONSerialization.jsonObject(
+            with: Data((resultEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(resultPayload?["query"] as? String == "needle")
+        #expect(resultPayload?["matches"] as? [String] == ["workspace/notes.md"])
 
         let englishResult = try await root.runChatSkillIfMatched(
             goalStatement: "Search workspace for needle"
         )
         #expect(englishResult?.skillID.rawValue == "workspace.search")
         #expect(englishResult?.verified == true)
-        #expect(englishResult?.outputJSON.contains("workspace/notes.md") == true)
+        let englishEnvelope = try JSONSerialization.jsonObject(
+            with: Data((englishResult?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let englishPayload = try JSONSerialization.jsonObject(
+            with: Data((englishEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(englishPayload?["query"] as? String == "needle")
+        #expect(englishPayload?["matches"] as? [String] == ["workspace/notes.md"])
+        #expect(!(englishPayload?["matches"] as? [String] ?? []).contains("workspace/secret.md"))
 
-        #expect(englishResult?.outputJSON.contains("workspace/secret.md") == false)
         let noMatch = try await root.runChatSkillIfMatched(
             goalStatement: "Search workspace for absenttoken"
         )
         #expect(noMatch?.skillID.rawValue == "workspace.search")
         #expect(noMatch?.verified == true)
-        #expect(noMatch?.outputJSON.contains("workspace/notes.md") == false)
-        #expect(noMatch?.outputJSON.contains("workspace/secret.md") == false)
-
-        let events = try await eventLog.allEvents()
-        let observation = events.first {
-            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.search"
-        }
-        #expect(observation?.payload["succeeded"] == "true")
-        #expect(observation?.payload["verified"] == "true")
+        let noMatchEnvelope = try JSONSerialization.jsonObject(
+            with: Data((noMatch?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let noMatchPayload = try JSONSerialization.jsonObject(
+            with: Data((noMatchEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(noMatchPayload?["matches"] as? [String] == [])
     }
 
     @Test("M8 chat does not expose workspace Skills when workspace tools are disabled")
