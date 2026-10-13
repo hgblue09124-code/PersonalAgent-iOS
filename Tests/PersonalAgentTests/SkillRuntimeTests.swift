@@ -3,6 +3,27 @@ import PAKernel
 @testable import PASkills
 
 final class SkillRuntimeTests: XCTestCase {
+    func testTextNormalizeRejectsUndeclaredInputFields() async throws {
+        do {
+            _ = try await SkillRuntime().execute(
+                id: SkillRuntime.normalizationManifest.id,
+                inputJSON: #"{"text":"ok","unexpected":"field"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("Undeclared input fields must fail closed")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .malformedSkill)
+        }
+    }
+
+    func testTextNormalizeVerificationRejectsUndeclaredOutputFields() async throws {
+        let verified = try await SkillRuntime().verify(
+            id: SkillRuntime.normalizationManifest.id,
+            outputJSON: #"{"text":"ok","unexpected":"field"}"#
+        )
+        XCTAssertFalse(verified)
+    }
+
     func testChatInputTextPreservesCreateFileCommandGrammar() {
         let vietnamese = "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"
         XCTAssertEqual(SkillRuntime.chatInputText(from: vietnamese), vietnamese)
