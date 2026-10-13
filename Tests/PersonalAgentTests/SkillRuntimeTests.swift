@@ -293,3 +293,95 @@ extension SkillRuntimeTests {
         }
     }
 }
+
+
+extension SkillRuntimeTests {
+    func testExactNameAmbiguityFailsClosed() async throws {
+        let first = SkillManifest(
+            id: SkillID(rawValue: "workspace.search"),
+            name: "Workspace Search",
+            description: "Search workspace files",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Search workspace files.",
+            inputSchema: SchemaDocument(identifier: "workspace.search.input"),
+            outputSchema: SchemaDocument(identifier: "workspace.search.output"),
+            requiredCapabilities: [.read]
+        )
+        let second = SkillManifest(
+            id: SkillID(rawValue: "document.search"),
+            name: "Workspace Search",
+            description: "Search document files",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Search document files.",
+            inputSchema: SchemaDocument(identifier: "document.search.input"),
+            outputSchema: SchemaDocument(identifier: "document.search.output"),
+            requiredCapabilities: [.read]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [first, second]))
+
+        do {
+            _ = try await runtime.select(goalStatement: "Workspace Search")
+            XCTFail("Ambiguous exact Skill names must not select an arbitrary capability")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .noSelection)
+        }
+    }
+}
+
+
+extension SkillRuntimeTests {
+    private func selectionManifest(id: String, name: String, description: String) -> SkillManifest {
+        SkillManifest(
+            id: SkillID(rawValue: id),
+            name: name,
+            description: description,
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Perform \(name).",
+            inputSchema: SchemaDocument(identifier: "\(id).input"),
+            outputSchema: SchemaDocument(identifier: "\(id).output"),
+            requiredCapabilities: [.read]
+        )
+    }
+
+    func testAllowedSkillScopeIsAppliedBeforeAmbiguityResolution() async throws {
+        let first = selectionManifest(
+            id: "workspace.search",
+            name: "Workspace Search",
+            description: "Search workspace files"
+        )
+        let second = selectionManifest(
+            id: "document.search",
+            name: "Workspace Search",
+            description: "Search document files"
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [first, second]))
+
+        let selected = try await runtime.select(
+            goalStatement: "Workspace Search",
+            allowedSkillIDs: [first.id]
+        )
+
+        XCTAssertEqual(selected, first.id)
+    }
+
+    func testEqualPartialNameMatchesFailClosed() async throws {
+        let first = selectionManifest(
+            id: "workspace.search",
+            name: "Workspace Search",
+            description: "Search workspace files"
+        )
+        let second = selectionManifest(
+            id: "document.search",
+            name: "Document Search",
+            description: "Search document files"
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [first, second]))
+
+        do {
+            _ = try await runtime.select(goalStatement: "search workspace document")
+            XCTFail("Equally matching Skill names must not be resolved by identifier ordering")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .noSelection)
+        }
+    }
+}

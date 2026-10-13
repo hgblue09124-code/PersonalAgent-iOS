@@ -1,0 +1,32 @@
+{
+  "id": "PASKILL-10",
+  "title": "Prove ambiguous Skill selection fails closed",
+  "status": "in_progress",
+  "goal": "Ensure Skill selection refuses equally matching Skills instead of arbitrarily selecting one and running the wrong capability.",
+  "context": "Issue #347 requires the Skill execution path to fail closed on missing, ambiguous, or out-of-scope Skills. SkillRuntime.select has explicit ambiguity branches, but current SkillRuntimeTests do not prove duplicate exact-name matches return noSelection.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-10.json",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change Skill selection behavior unless the regression test exposes a failure.",
+    "Do not weaken policy, scope checks, cancellation, schema validation, or verification.",
+    "Do not modify production runtime, module, workspace, provider, UI, or project files."
+  ],
+  "acceptance_criteria": [
+    "Two distinct Skill IDs with the same exact name produce SkillExecutionError.noSelection for that name.",
+    "The test uses valid manifests and exercises exact-name ambiguity rather than malformed input.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-10.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-10.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #457"
+  ],
+  "recovery": "If the regression fails, inspect only the exact-name ambiguity branch in SkillRuntime.select and make the smallest correction within the approved scope."
+}
