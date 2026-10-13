@@ -22,7 +22,8 @@
     "executeVerified throws verificationFailed when the resolved executor rejects its own output.",
     "Regression tests cover cancellation, schema mismatch, and failed output verification.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass.",
-    "Verified execution continues to respect an explicitly denied policy."
+    "Verified execution continues to respect an explicitly denied policy.",
+    "Regression fixtures use valid JSON so each test exercises the intended schema or verification path."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-8.json",
