@@ -99,6 +99,12 @@ struct M6SkillCompositionIntegrationTests {
             atomically: true,
             encoding: .utf8
         )
+        let fakeSecret = "api_key = \"sk-" + String(repeating: "A", count: 24) + "\" needle"
+        try fakeSecret.write(
+            to: workspace.appendingPathComponent("secret.md"),
+            atomically: true,
+            encoding: .utf8
+        )
         let eventLog = InMemoryEventLog()
         let root = try await M8CompositionRoot(
             eventLog: eventLog,
@@ -124,6 +130,15 @@ struct M6SkillCompositionIntegrationTests {
         #expect(englishResult?.skillID.rawValue == "workspace.search")
         #expect(englishResult?.verified == true)
         #expect(englishResult?.outputJSON.contains("workspace/notes.md") == true)
+
+        #expect(englishResult?.outputJSON.contains("workspace/secret.md") == false)
+        let noMatch = try await root.runChatSkillIfMatched(
+            goalStatement: "Search workspace for absenttoken"
+        )
+        #expect(noMatch?.skillID.rawValue == "workspace.search")
+        #expect(noMatch?.verified == true)
+        #expect(noMatch?.outputJSON.contains("workspace/notes.md") == false)
+        #expect(noMatch?.outputJSON.contains("workspace/secret.md") == false)
 
         let events = try await eventLog.allEvents()
         let observation = events.first {
