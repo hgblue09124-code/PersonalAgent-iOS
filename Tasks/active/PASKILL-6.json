@@ -1,31 +1,34 @@
 {
   "id": "PASKILL-6",
-  "title": "Preserve polite chat file creation commands",
+  "title": "Verify workspace.create-file Skill through the real M8 chat path",
   "status": "in_progress",
-  "goal": "Preserve explicit file-create commands when chat adds common polite lead-ins so the workspace parser receives a valid command.",
-  "context": "Confirmed source defect: chatInputText only recognized direct file-create prefixes and could strip command text before parseCreateFileRequest.",
+  "goal": "Prove that an explicit user file-creation request selects the declared workspace Skill, writes only inside the enabled workspace, and returns success only after read-back verification.",
+  "context": "The M8 composition has a workspace.create-file manifest and a ModuleRuntime-backed executor. Existing integration coverage only proves text.normalize, so the previously reported file-creation failure is not protected by a full production-composition regression.",
   "allowed_paths": [
-    "Sources/Capabilities/Skills/SkillRuntime.swift",
     "Tasks/active/PASKILL-6.json",
-    "Tests/PersonalAgentTests/SkillChatInputNormalizationTests.swift"
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
   ],
   "forbidden_changes": [
-    "Do not bypass workspace policy, scope checks, or the explicit create-file parser.",
-    "Do not change unrelated Skills or provider behavior."
+    "Do not bypass Skill scope, ModuleRuntime policy, workspace path validation, or read-back verification.",
+    "Do not enable workspace tools by default.",
+    "Do not change provider/GGUF or unrelated UI behavior."
   ],
   "acceptance_criteria": [
-    "Common allowlisted polite lead-ins are removed only when followed by an explicit supported file-create prefix.",
-    "Ordinary prompts retain existing normalization behavior.",
-    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass.",
-    "Regression tests cover polite lead-ins for Vietnamese and English file-create commands while ordinary colon prompts retain prior behavior."
+    "With workspaceToolsEnabled=true, a Vietnamese explicit file request is selected as workspace.create-file in M8.",
+    "The requested workspace file exists and contains exactly the requested content.",
+    "The canonical Agent observation reports succeeded=true and verified=true only after real write/read-back.",
+    "With workspace tools disabled, workspace.create-file remains outside the allowed Skill scope.",
+    "M3, Agent Task Contract, and Apple Native Build & Unsigned IPA pass."
   ],
   "verification": [
-    "python Scripts/agent_task_guard.py validate Tasks/active/PASKILL-6.json",
-    "python Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-6.json --base origin/main",
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-6.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-6.json --base origin/main",
     "swift test --disable-sandbox",
-    "M3 and Apple Native Build & Unsigned IPA CI",
-    "swift test --disable-sandbox"
+    "Confirm M3, Agent Task Contract, and Apple Native Build & Unsigned IPA CI gates."
   ],
-  "dependencies": [],
-  "recovery": "Revert this task if parser or policy regressions occur; keep CI failure evidence."
+  "dependencies": [
+    "Issue #347",
+    "PR #452"
+  ],
+  "recovery": "If the end-to-end test exposes a failure, fix the narrow root cause in this same logical task and retain the regression test; do not report success without green required gates."
 }
