@@ -146,7 +146,7 @@ extension SkillRuntimeTests {
 
 private struct RejectingVerifierExecutor: SkillExecutor {
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
-        #"{\"result\":\"unverified\"}"#
+        #"{"result":"unverified"}"#
     }
     func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
         false
@@ -160,7 +160,7 @@ extension SkillRuntimeTests {
             withUnsafeCurrentTask { $0?.cancel() }
             return try await runtime.verify(
                 id: SkillRuntime.normalizationManifest.id,
-                outputJSON: #"{\"text\":\"ok\"}"#
+                outputJSON: #"{"text":"ok"}"#
             )
         }
 
@@ -217,13 +217,13 @@ extension SkillRuntimeTests {
         let executor = TextNormalizeSkillExecutor()
 
         do {
-            _ = try await executor.execute(manifest: mismatched, inputJSON: #"{\"text\":\"ok\"}"#)
+            _ = try await executor.execute(manifest: mismatched, inputJSON: #"{"text":"ok"}"#)
             XCTFail("Normalization executor must not run against a different schema contract")
         } catch {
             XCTAssertEqual(error as? SkillExecutionError, .malformedSkill)
         }
 
-        let verified = try await executor.verify(manifest: mismatched, outputJSON: #"{\"text\":\"ok\"}"#)
+        let verified = try await executor.verify(manifest: mismatched, outputJSON: #"{"text":"ok"}"#)
         XCTAssertFalse(verified, "A different manifest schema must not verify as text.normalize")
     }
 }
@@ -234,7 +234,7 @@ extension SkillRuntimeTests {
         do {
             _ = try await SkillRuntime().executeVerified(
                 id: SkillRuntime.normalizationManifest.id,
-                inputJSON: #"{\"text\":\"must not execute\"}"#,
+                inputJSON: #"{"text":"must not execute"}"#,
                 policy: DenySkillExecutionPolicy()
             )
             XCTFail("Verified execution must not bypass a denied policy")
