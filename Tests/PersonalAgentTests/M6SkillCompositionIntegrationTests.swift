@@ -220,7 +220,7 @@ struct M6SkillCompositionIntegrationTests {
             policy: AllowPolicy()
         )
         let agent = try await root.loadAgent(id: "personal.default")
-        #expect(agent.skillIDs.map(\\.rawValue) == ["text.normalize"])
+        #expect(agent.skillIDs.map(\.rawValue) == ["text.normalize"])
         #expect(agent.instructions == "Keep the custom scope unchanged.")
     }
 }
