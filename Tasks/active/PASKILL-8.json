@@ -3,11 +3,12 @@
   "title": "Harden Skill verification cancellation and schema binding",
   "status": "in_progress",
   "goal": "Ensure standalone Skill verification observes cancellation, built-in normalization only executes against its declared schema, and outputs rejected by their executor never count as verified.",
-  "context": "Audit found two contract-boundary gaps: standalone verification lacked cancellation checks around awaited work, and the built-in text.normalize executor did not bind execution or verification to its own schema identifiers. Regression coverage also needs to prove executeVerified rejects a false verifier result.",
+  "context": "Audit found two contract-boundary gaps: standalone verification lacked cancellation checks around awaited work, and the built-in text.normalize executor did not bind execution or verification to its own schema identifiers. Regression coverage also needs to prove executeVerified rejects a false verifier result. The first M3 run exposed an existing integration fixture that declared text.normalize as its executor while using unrelated schema IDs; the fixture must declare the built-in schema IDs to represent a valid contract.",
   "allowed_paths": [
     "Tasks/active/PASKILL-8.json",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
   ],
   "forbidden_changes": [
     "Do not bypass policy, executor resolution, Agent scope, or verification.",
@@ -23,7 +24,8 @@
     "Regression tests cover cancellation, schema mismatch, and failed output verification.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass.",
     "Verified execution continues to respect an explicitly denied policy.",
-    "Regression fixtures use valid JSON so each test exercises the intended schema or verification path."
+    "Regression fixtures use valid JSON so each test exercises the intended schema or verification path.",
+    "Imported Skills that declare the built-in normalizer use the normalizer's exact schema identifiers."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-8.json",
