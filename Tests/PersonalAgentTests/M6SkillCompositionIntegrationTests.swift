@@ -88,8 +88,46 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
-    @Test("M8 chat does not expose workspace Skill when workspace tools are disabled")
-    func m8WorkspaceSkillRemainsOutOfScopeWhenDisabled() async throws {
+    @Test("M8 workspace search finds a real matching file through the Skill loop")
+    func m8WorkspaceSearchFindsMatchingFile() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let workspace = directory.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        try "A unique needle appears here.".write(
+            to: workspace.appendingPathComponent("notes.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        let skills = try await root.discoverSkills()
+        #expect(skills.contains { $0.id.rawValue == "workspace.search" })
+        let agent = try await root.loadAgent(id: "personal.default")
+        #expect(agent.skillIDs.contains { $0.rawValue == "workspace.search" })
+
+        let result = try await root.runChatSkillIfMatched(goalStatement: "Tìm kiếm workspace needle")
+        #expect(result?.skillID.rawValue == "workspace.search")
+        #expect(result?.verified == true)
+        #expect(result?.outputJSON.contains("workspace/notes.md") == true)
+
+        let events = try await eventLog.allEvents()
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.search"
+        }
+        #expect(observation?.payload["succeeded"] == "true")
+        #expect(observation?.payload["verified"] == "true")
+    }
+
+    @Test("M8 chat does not expose workspace Skills when workspace tools are disabled")
+    func m8WorkspaceSkillsRemainOutOfScopeWhenDisabled() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let eventLog = InMemoryEventLog()
@@ -101,16 +139,88 @@ struct M6SkillCompositionIntegrationTests {
             workspaceToolsEnabled: false
         )
 
-        let result = try await root.runChatSkillIfMatched(
+        let createResult = try await root.runChatSkillIfMatched(
             goalStatement: "Tạo file workspace/blocked.md với nội dung: must not be written"
         )
-        #expect(result == nil)
+        let searchResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Tìm kiếm workspace secretneedle"
+        )
+        #expect(createResult == nil)
+        #expect(searchResult == nil)
         #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/blocked.md").path))
 
         let events = try await eventLog.allEvents()
-        let observation = events.first {
-            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.create-file"
-        }
-        #expect(observation == nil)
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.read"
+        })
+        #expect(!events.contains {
+            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.search"
+        })
+    }
+
+    @Test("Default Agent migrates only the exact previous built-in scope")
+    func defaultAgentMigratesPreviousBuiltInScope() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let agents = directory.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: agents, withIntermediateDirectories: true)
+        let previousDefault = """
+        id: personal.default
+        name: Personal Default Agent
+        version: 1.0.0
+        description: Default personal agent.
+        ---
+        ## Skills
+        text.normalize
+        workspace.create-file
+
+        ## Rule
+        Select only from the declared skills. Use the workspace.create-file Skill for explicit file creation requests.
+        """
+        try previousDefault.write(
+            to: agents.appendingPathComponent("personal.default.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy()
+        )
+        let agent = try await root.loadAgent(id: "personal.default")
+        #expect(agent.skillIDs.contains { $0.rawValue == "workspace.search" })
+    }
+
+    @Test("User-edited Agent scope is preserved during workspace Skill installation")
+    func userEditedAgentScopeIsPreserved() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let agents = directory.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: agents, withIntermediateDirectories: true)
+        let customAgent = """
+        id: personal.default
+        name: Personal Default Agent
+        version: 1.0.0
+        description: Custom user scope.
+        ---
+        ## Skills
+        text.normalize
+
+        ## Rule
+        Keep the custom scope unchanged.
+        """
+        try customAgent.write(
+            to: agents.appendingPathComponent("personal.default.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy()
+        )
+        let agent = try await root.loadAgent(id: "personal.default")
+        #expect(agent.skillIDs.map(\\.rawValue) == ["text.normalize"])
+        #expect(agent.instructions == "Keep the custom scope unchanged.")
     }
 }
