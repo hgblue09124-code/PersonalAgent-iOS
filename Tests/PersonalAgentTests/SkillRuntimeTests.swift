@@ -227,3 +227,19 @@ extension SkillRuntimeTests {
         XCTAssertFalse(verified, "A different manifest schema must not verify as text.normalize")
     }
 }
+
+
+extension SkillRuntimeTests {
+    func testExecuteVerifiedStillEnforcesDeniedPolicy() async throws {
+        do {
+            _ = try await SkillRuntime().executeVerified(
+                id: SkillRuntime.normalizationManifest.id,
+                inputJSON: #"{\"text\":\"must not execute\"}"#,
+                policy: DenySkillExecutionPolicy()
+            )
+            XCTFail("Verified execution must not bypass a denied policy")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .policyDenied("test denial"))
+        }
+    }
+}
