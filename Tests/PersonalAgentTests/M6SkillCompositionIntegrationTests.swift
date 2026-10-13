@@ -169,6 +169,74 @@ struct M6SkillCompositionIntegrationTests {
         })
     }
 
+    @Test("Workspace Skills stay out of scope after agent-specific selection")
+    func workspaceSkillsCannotLeakThroughCustomAgentScopeWhenDisabled() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skills = directory.appendingPathComponent("Skills", isDirectory: true)
+        let agents = directory.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: skills, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: agents, withIntermediateDirectories: true)
+        let unrelatedSkill = """
+        id: workspace.query
+        name: Workspace Query
+        version: 1.0.0
+        description: A helper for workspace search queries.
+        ---
+        ## Input
+        workspace.query.input
+
+        ## Output
+        workspace.query.output
+
+        ## Rule
+        Describe a workspace query.
+        """
+        try unrelatedSkill.write(
+            to: skills.appendingPathComponent("workspace.query.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let workspaceOnlyAgent = """
+        id: personal.workspace-only
+        name: Workspace-only Agent
+        version: 1.0.0
+        description: Only the workspace search Skill is allowed.
+        ---
+        ## Skills
+        workspace.search
+
+        ## Rule
+        Search workspace content only when the workspace capability is enabled.
+        """
+        try workspaceOnlyAgent.write(
+            to: agents.appendingPathComponent("personal.workspace-only.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: false
+        )
+
+        let direct = try await root.runChatSkillIfMatched(
+            goalStatement: "Workspace Query search",
+            agentID: "personal.workspace-only"
+        )
+        let team = try await root.runChatTeamIfMatched(goalStatement: "Workspace Query search")
+        #expect(direct == nil)
+        #expect(team == nil)
+
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.read"
+        })
+    }
+
     @Test("Default Agent migrates only the exact previous built-in scope")
     func defaultAgentMigratesPreviousBuiltInScope() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
