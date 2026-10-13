@@ -63,6 +63,8 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
 
     public func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
         guard
+            manifest.inputSchema.identifier == SkillRuntime.normalizationManifest.inputSchema.identifier,
+            manifest.outputSchema.identifier == SkillRuntime.normalizationManifest.outputSchema.identifier,
             let data = inputJSON.data(using: .utf8),
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
             Set(object.keys) == ["text"],
@@ -78,6 +80,8 @@ public struct TextNormalizeSkillExecutor: SkillExecutor {
 
     public func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
         guard
+            manifest.inputSchema.identifier == SkillRuntime.normalizationManifest.inputSchema.identifier,
+            manifest.outputSchema.identifier == SkillRuntime.normalizationManifest.outputSchema.identifier,
             let data = outputJSON.data(using: .utf8),
             let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
             Set(object.keys) == ["text"],
@@ -440,10 +444,15 @@ public struct SkillRuntime: Sendable {
     }
 
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
+        try Task.checkCancellation()
         guard !disabled.contains(id.rawValue) else { return false }
         let manifest = try await manifestForVerification(id: id)
+        try Task.checkCancellation()
         guard let executor = await resolveExecutor(for: manifest) else { return false }
-        return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+        try Task.checkCancellation()
+        let verified = try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+        try Task.checkCancellation()
+        return verified
     }
 
     private func resolveExecutor(for manifest: SkillManifest) async -> (any SkillExecutor)? {
