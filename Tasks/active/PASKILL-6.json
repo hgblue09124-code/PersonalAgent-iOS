@@ -1,9 +1,9 @@
 {
   "id": "PASKILL-6",
   "title": "Verify workspace.create-file Skill through the real M8 chat path",
-  "status": "in_progress",
+  "status": "completed",
   "goal": "Prove that an explicit user file-creation request selects the declared workspace Skill, writes only inside the enabled workspace, and returns success only after read-back verification.",
-  "context": "The M8 composition has a workspace.create-file manifest and a ModuleRuntime-backed executor. Integration coverage now checks both real file creation when enabled and fail-closed Skill scope when workspace tools are disabled.",
+  "context": "PASKILL-6 verified: M8 integration coverage checks the real Vietnamese workspace.create-file request with workspace enabled (exact file contents and verified success observation) and fail-closed behavior with workspace tools disabled. PR #454 merged after all required CI gates passed.",
   "allowed_paths": [
     "Tasks/active/PASKILL-6.json",
     "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
@@ -25,7 +25,8 @@
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-6.json",
     "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-6.json --base origin/main",
     "swift test --disable-sandbox",
-    "Confirm M3, Agent Task Contract, and Apple Native Build & Unsigned IPA CI gates."
+    "Confirm M3, Agent Task Contract, and Apple Native Build & Unsigned IPA CI gates.",
+    "PR #454 merged after M3, Agent Task Contract, and Apple Native Build & Unsigned IPA passed."
   ],
   "dependencies": [
     "Issue #347",
