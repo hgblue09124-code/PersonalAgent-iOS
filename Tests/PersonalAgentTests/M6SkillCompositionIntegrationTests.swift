@@ -87,4 +87,30 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
     }
+
+    @Test("M8 chat does not expose workspace Skill when workspace tools are disabled")
+    func m8WorkspaceSkillRemainsOutOfScopeWhenDisabled() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: false
+        )
+
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Tạo file workspace/blocked.md với nội dung: must not be written"
+        )
+        #expect(result == nil)
+        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/blocked.md").path))
+
+        let events = try await eventLog.allEvents()
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.create-file"
+        }
+        #expect(observation == nil)
+    }
 }
