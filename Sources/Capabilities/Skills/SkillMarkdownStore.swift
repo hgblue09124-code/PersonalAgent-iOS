@@ -131,6 +131,10 @@ public actor FileSkillStore: SkillStore {
         if !FileManager.default.fileExists(atPath: createFileURL.path) {
             try Self.defaultCreateFileSkillMarkdown.write(to: createFileURL, atomically: true, encoding: .utf8)
         }
+        let searchURL = directoryURL.appendingPathComponent("workspace.search.Skill.md")
+        if !FileManager.default.fileExists(atPath: searchURL.path) {
+            try Self.defaultSearchSkillMarkdown.write(to: searchURL, atomically: true, encoding: .utf8)
+        }
     }
 
     public func discover(query: String) async throws -> [SkillManifest] {
@@ -205,5 +209,23 @@ public actor FileSkillStore: SkillStore {
 
     ## Rule
     Create a text file only inside the permitted AgentOS workspace. Use the explicit form "Tạo file workspace/notes.md với nội dung: nội dung tệp" or "Create file workspace/notes.md with content: file contents". Never claim success unless the Workspace tool returns verified output.
+    """
+
+    private static let defaultSearchSkillMarkdown = """
+    id: workspace.search
+    name: Tìm kiếm Workspace
+    version: 1.0.0
+    description: Search workspace text content, find matching files, tìm nội dung trong workspace.
+    moduleID: tool.workspace.read
+    chatInputAdapter: workspace.search
+    ---
+    ## Input
+    tool.workspace.read.input
+
+    ## Output
+    tool.workspace.read.output
+
+    ## Rule
+    Search readable text files only within the permitted AgentOS workspace. Never expose protected files or secret-like content. Report only paths returned by the Workspace Read tool.
     """
 }

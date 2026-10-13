@@ -505,7 +505,7 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
                 guard moduleID.rawValue == "tool.workspace.read" else {
                     throw SkillExecutionError.malformedSkill
                 }
-                let query = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+                let query = Self.parseWorkspaceSearchQuery(rawText)
                 guard !query.isEmpty, query.count <= 256 else {
                     throw SkillExecutionError.malformedSkill
                 }
@@ -561,6 +561,25 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             throw SkillExecutionError.malformedSkill
         }
         return contract
+    }
+
+    private static func parseWorkspaceSearchQuery(_ rawText: String) -> String {
+        let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = trimmed.lowercased()
+        let prefixes = [
+            "tìm kiếm trong workspace: ", "tìm kiếm trong workspace ",
+            "tìm trong workspace: ", "tìm trong workspace ",
+            "tìm kiếm workspace: ", "tìm kiếm workspace ",
+            "search workspace for: ", "search workspace for ",
+            "search workspace: ", "search workspace ",
+            "find in workspace: ", "find in workspace ",
+            "find workspace: ", "find workspace "
+        ]
+        guard let prefix = prefixes.first(where: { normalized.hasPrefix($0) }) else {
+            return trimmed
+        }
+        return String(trimmed.dropFirst(prefix.count))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private static func parseCreateFileRequest(_ rawText: String) -> (path: String, content: String)? {

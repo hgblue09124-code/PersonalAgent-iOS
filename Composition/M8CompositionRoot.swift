@@ -646,7 +646,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let defaultAgent = try await agentStore.load(id: "personal.default")
         self.agentStore = agentStore
         let allowedSkillIDs = Set(defaultAgent.skillIDs.filter {
-            $0.rawValue != "workspace.create-file" || workspaceToolsEnabled
+            !["workspace.create-file", "workspace.search"].contains($0.rawValue) || workspaceToolsEnabled
         })
         let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
         let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
@@ -808,7 +808,7 @@ extension M8CompositionRoot {
         if !workspaceToolsEnabled {
             do {
                 let selectedSkill = try await skillRuntime.select(goalStatement: goalStatement)
-                if selectedSkill.rawValue == "workspace.create-file" {
+                if ["workspace.create-file", "workspace.search"].contains(selectedSkill.rawValue) {
                     return nil
                 }
             } catch SkillRuntimeError.noSelection {
@@ -846,7 +846,7 @@ extension M8CompositionRoot {
         if !workspaceToolsEnabled {
             do {
                 let selectedSkill = try await skillRuntime.select(goalStatement: goalStatement)
-                if selectedSkill.rawValue == "workspace.create-file" {
+                if ["workspace.create-file", "workspace.search"].contains(selectedSkill.rawValue) {
                     return nil
                 }
             } catch SkillRuntimeError.noSelection {
