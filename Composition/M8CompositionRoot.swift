@@ -501,6 +501,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let lifecycleManager: RunLifecycleManager
     public let recoveryEngine: RunRecoveryEngine
     private let skillPolicy: any PolicyEvaluating
+    private let workspaceToolsEnabled: Bool
 
     public init(
         identity: AgentIdentity = AgentIdentity(displayName: "Personal M8 Agent"),
@@ -636,6 +637,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         try await skillStore.ensureDefaultSkill()
         let skillRuntime = SkillRuntime(store: skillStore, executors: skillExecutors, moduleRuntime: moduleRuntime)
         self.skillRuntime = skillRuntime
+        self.workspaceToolsEnabled = workspaceToolsEnabled
 
         // The canonical chat loop must use the same declared Skill scope as the active default Agent.
         let agentDirectoryURL = rootDirectoryURL.appendingPathComponent("Agents", isDirectory: true)
@@ -803,6 +805,16 @@ extension M8CompositionRoot {
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
+        if !workspaceToolsEnabled {
+            do {
+                let selectedSkill = try await skillRuntime.select(goalStatement: goalStatement)
+                if selectedSkill.rawValue == "workspace.create-file" {
+                    return nil
+                }
+            } catch SkillRuntimeError.noSelection {
+                return nil
+            }
+        }
         let agent = try await agentStore.load(id: agentID)
         let inputData = try JSONSerialization.data(
             withJSONObject: ["text": SkillRuntime.chatInputText(from: inputContext ?? goalStatement)],
@@ -831,6 +843,16 @@ extension M8CompositionRoot {
         inputContext: String? = nil,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> AgentTeamResult? {
+        if !workspaceToolsEnabled {
+            do {
+                let selectedSkill = try await skillRuntime.select(goalStatement: goalStatement)
+                if selectedSkill.rawValue == "workspace.create-file" {
+                    return nil
+                }
+            } catch SkillRuntimeError.noSelection {
+                return nil
+            }
+        }
         let agents = try await agentStore.discover()
         let inputData = try JSONSerialization.data(
             withJSONObject: ["text": inputContext ?? goalStatement],
