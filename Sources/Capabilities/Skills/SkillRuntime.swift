@@ -372,6 +372,9 @@ public struct SkillRuntime: Sendable {
         let manifest: SkillManifest
         if let store {
             manifest = try await store.load(id: id)
+            guard manifest.id == id else {
+                throw SkillExecutionError.unknownSkill(id)
+            }
         } else if id == Self.normalizationManifest.id {
             manifest = Self.normalizationManifest
         } else if let definition = skills[id.rawValue] {
@@ -423,7 +426,11 @@ public struct SkillRuntime: Sendable {
 
     private func manifestForVerification(id: SkillID) async throws -> SkillManifest {
         if let store {
-            return try await store.load(id: id)
+            let manifest = try await store.load(id: id)
+            guard manifest.id == id else {
+                throw SkillExecutionError.unknownSkill(id)
+            }
+            return manifest
         }
         if id == Self.normalizationManifest.id {
             return Self.normalizationManifest

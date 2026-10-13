@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-9",
+  "title": "Bind loaded Skill manifests to requested identity",
+  "status": "in_progress",
+  "goal": "Prevent a faulty or adversarial SkillStore from returning a different manifest identity than requested and causing policy/executor confusion.",
+  "context": "SkillRuntime.executeInternal and manifestForVerification trust SkillStore.load(id:) to return a manifest whose id equals the requested id. If a store violates that contract, the runtime may evaluate capabilities and resolve an executor for a different Skill than the caller requested.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-9.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken policy checks, approval handling, executor verification, or cancellation.",
+    "Do not enable new capabilities or change workspace behavior.",
+    "Do not modify unrelated provider, UI, or project files."
+  ],
+  "acceptance_criteria": [
+    "A loaded manifest must match the requested SkillID before policy evaluation or executor resolution.",
+    "Standalone verification must fail closed if a store returns a manifest with the wrong identity.",
+    "Regression tests prove mismatched store identity cannot execute or verify another Skill.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-9.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-9.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #455",
+    "PR #456"
+  ],
+  "recovery": "If a regression fails, inspect the identity boundary, make the smallest in-scope correction, and rerun required gates before merge."
+}

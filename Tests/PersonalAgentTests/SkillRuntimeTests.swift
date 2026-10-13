@@ -243,3 +243,53 @@ extension SkillRuntimeTests {
         }
     }
 }
+
+
+private struct MismatchedIdentitySkillStore: SkillStore {
+    let manifest: SkillManifest
+
+    func discover(query: String) async throws -> [SkillManifest] {
+        [manifest]
+    }
+
+    func load(id: SkillID) async throws -> SkillManifest {
+        manifest
+    }
+}
+
+extension SkillRuntimeTests {
+    func testExecutionRejectsStoreManifestWithDifferentIdentity() async throws {
+        let requestedID = SkillID(rawValue: "requested.skill")
+        let runtime = SkillRuntime(store: MismatchedIdentitySkillStore(
+            manifest: SkillRuntime.normalizationManifest
+        ))
+
+        do {
+            _ = try await runtime.execute(
+                id: requestedID,
+                inputJSON: #"{"text":"must not execute"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("A store must not substitute a different Skill manifest")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(requestedID))
+        }
+    }
+
+    func testVerificationRejectsStoreManifestWithDifferentIdentity() async throws {
+        let requestedID = SkillID(rawValue: "requested.skill")
+        let runtime = SkillRuntime(store: MismatchedIdentitySkillStore(
+            manifest: SkillRuntime.normalizationManifest
+        ))
+
+        do {
+            _ = try await runtime.verify(
+                id: requestedID,
+                outputJSON: #"{"text":"already normalized"}"#
+            )
+            XCTFail("A store must not verify output against another Skill's manifest")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(requestedID))
+        }
+    }
+}
