@@ -105,6 +105,13 @@ struct M6SkillCompositionIntegrationTests {
             atomically: true,
             encoding: .utf8
         )
+        let protectedDirectory = workspace.appendingPathComponent("secrets", isDirectory: true)
+        try FileManager.default.createDirectory(at: protectedDirectory, withIntermediateDirectories: true)
+        try "ordinary content".write(
+            to: protectedDirectory.appendingPathComponent("note.md"),
+            atomically: true,
+            encoding: .utf8
+        )
         let eventLog = InMemoryEventLog()
         let root = try await M8CompositionRoot(
             eventLog: eventLog,
@@ -190,6 +197,26 @@ struct M6SkillCompositionIntegrationTests {
             secretReadRejected = true
         }
         #expect(secretReadRejected)
+
+        var protectedReadRejected = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Read file workspace/secrets/note.md"
+            )
+        } catch {
+            protectedReadRejected = true
+        }
+        #expect(protectedReadRejected)
+
+        var traversalReadRejected = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Read file workspace/../workspace/notes.md"
+            )
+        } catch {
+            traversalReadRejected = true
+        }
+        #expect(traversalReadRejected)
     }
 
     @Test("M8 chat does not expose workspace Skills when workspace tools are disabled")
