@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-8",
+  "title": "Honor cancellation during standalone Skill verification",
+  "status": "in_progress",
+  "goal": "Ensure SkillRuntime.verify stops promptly when its caller is cancelled and that executeVerified rejects outputs from executors that fail verification.",
+  "context": "The execution path checks cancellation around executor work, but the standalone verify API awaits manifest lookup, executor lookup, and verification without checking cancellation. Existing tests also do not prove executeVerified rejects a false verifier result.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-8.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not bypass policy, executor resolution, Agent scope, or verification.",
+    "Do not enable new capabilities or alter workspace behavior.",
+    "Do not change unrelated provider, UI, or app project files."
+  ],
+  "acceptance_criteria": [
+    "Standalone verification checks cancellation before and after awaited operations.",
+    "A cancelled verification task throws CancellationError rather than returning a verification result.",
+    "executeVerified throws verificationFailed when the resolved executor rejects its own output.",
+    "Regression tests cover both cancellation and failed output verification.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-8.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-8.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #455"
+  ],
+  "recovery": "If the cancellation or verification regression fails, inspect the exact execution boundary, make the smallest in-scope correction, and rerun all required gates before merge."
+}
