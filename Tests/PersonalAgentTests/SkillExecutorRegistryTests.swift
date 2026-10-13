@@ -76,8 +76,8 @@ struct SkillExecutorRegistryTests {
             description: "Uses the explicitly declared built-in text normalizer.",
             version: SemanticVersion(major: 1, minor: 0, patch: 0),
             instructions: "Trim surrounding whitespace.",
-            inputSchema: SchemaDocument(identifier: "skill.custom.normalize.in"),
-            outputSchema: SchemaDocument(identifier: "skill.custom.normalize.out"),
+            inputSchema: SchemaDocument(identifier: "skill.text.normalize.in"),
+            outputSchema: SchemaDocument(identifier: "skill.text.normalize.out"),
             requiredCapabilities: [.read, .execute],
             metadata: ["executor": "text.normalize"]
         )
