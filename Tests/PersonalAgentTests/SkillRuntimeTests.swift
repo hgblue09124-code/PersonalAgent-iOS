@@ -142,3 +142,104 @@ extension SkillRuntimeTests {
         }
     }
 }
+
+
+private struct RejectingVerifierExecutor: SkillExecutor {
+    func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+        #"{"result":"unverified"}"#
+    }
+    func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+        false
+    }
+}
+
+extension SkillRuntimeTests {
+    func testStandaloneVerificationHonorsExistingTaskCancellation() async throws {
+        let runtime = SkillRuntime()
+        let task = Task { () throws -> Bool in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return try await runtime.verify(
+                id: SkillRuntime.normalizationManifest.id,
+                outputJSON: #"{"text":"ok"}"#
+            )
+        }
+
+        do {
+            _ = try await task.value
+            XCTFail("Cancelled verification must not return a result")
+        } catch is CancellationError {
+            // Expected: cancellation is observed at the verification boundary.
+        }
+    }
+
+    func testExecuteVerifiedRejectsOutputWhenExecutorVerificationFails() async throws {
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "test.rejecting-verifier"),
+            name: "Rejecting verifier",
+            description: "Test executor that rejects its own output",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return output that does not verify.",
+            inputSchema: SchemaDocument(identifier: "test.input"),
+            outputSchema: SchemaDocument(identifier: "test.output"),
+            requiredCapabilities: [.execute]
+        )
+        let store = InMemorySkillStore(manifests: [manifest])
+        let registry = SkillExecutorRegistry()
+        await registry.register(RejectingVerifierExecutor(), for: manifest.id.rawValue)
+        let runtime = SkillRuntime(store: store, executors: registry)
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{"input":"test"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("An output rejected by its executor must not be returned as verified")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .verificationFailed(manifest.id))
+        }
+    }
+}
+
+
+extension SkillRuntimeTests {
+    func testNormalizationExecutorRejectsManifestWithMismatchedSchemas() async throws {
+        let mismatched = SkillManifest(
+            id: SkillRuntime.normalizationManifest.id,
+            name: SkillRuntime.normalizationManifest.name,
+            description: SkillRuntime.normalizationManifest.description,
+            version: SkillRuntime.normalizationManifest.version,
+            instructions: SkillRuntime.normalizationManifest.instructions,
+            inputSchema: SchemaDocument(identifier: "unrelated.input"),
+            outputSchema: SchemaDocument(identifier: "unrelated.output"),
+            requiredCapabilities: SkillRuntime.normalizationManifest.requiredCapabilities
+        )
+        let executor = TextNormalizeSkillExecutor()
+
+        do {
+            _ = try await executor.execute(manifest: mismatched, inputJSON: #"{"text":"ok"}"#)
+            XCTFail("Normalization executor must not run against a different schema contract")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .malformedSkill)
+        }
+
+        let verified = try await executor.verify(manifest: mismatched, outputJSON: #"{"text":"ok"}"#)
+        XCTAssertFalse(verified, "A different manifest schema must not verify as text.normalize")
+    }
+}
+
+
+extension SkillRuntimeTests {
+    func testExecuteVerifiedStillEnforcesDeniedPolicy() async throws {
+        do {
+            _ = try await SkillRuntime().executeVerified(
+                id: SkillRuntime.normalizationManifest.id,
+                inputJSON: #"{"text":"must not execute"}"#,
+                policy: DenySkillExecutionPolicy()
+            )
+            XCTFail("Verified execution must not bypass a denied policy")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .policyDenied("test denial"))
+        }
+    }
+}
