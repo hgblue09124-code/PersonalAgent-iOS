@@ -646,7 +646,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let defaultAgent = try await agentStore.load(id: "personal.default")
         self.agentStore = agentStore
         let allowedSkillIDs = Set(defaultAgent.skillIDs.filter {
-            $0.rawValue != "workspace.create-file" || workspaceToolsEnabled
+            !["workspace.create-file", "workspace.search"].contains($0.rawValue) || workspaceToolsEnabled
         })
         let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
         let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
@@ -759,6 +759,20 @@ public struct MemorySnapshotItem: Sendable, Equatable, Identifiable {
 }
 
 extension M8CompositionRoot {
+    private func scopeAgentForWorkspaceSetting(_ agent: AgentManifest) -> AgentManifest {
+        guard !workspaceToolsEnabled else { return agent }
+        let workspaceSkillIDs: Set<String> = ["workspace.create-file", "workspace.search"]
+        let allowedSkillIDs = agent.skillIDs.filter { !workspaceSkillIDs.contains($0.rawValue) }
+        return AgentManifest(
+            id: agent.id,
+            name: agent.name,
+            description: agent.description,
+            version: agent.version,
+            skillIDs: allowedSkillIDs,
+            instructions: agent.instructions
+        )
+    }
+
     public func discoverAgents(query: String = "") async throws -> [AgentManifest] {
         try await agentStore.discover(query: query)
     }
@@ -805,17 +819,9 @@ extension M8CompositionRoot {
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
-        if !workspaceToolsEnabled {
-            do {
-                let selectedSkill = try await skillRuntime.select(goalStatement: goalStatement)
-                if selectedSkill.rawValue == "workspace.create-file" {
-                    return nil
-                }
-            } catch SkillRuntimeError.noSelection {
-                return nil
-            }
-        }
-        let agent = try await agentStore.load(id: agentID)
+        let storedAgent = try await agentStore.load(id: agentID)
+        let agent = scopeAgentForWorkspaceSetting(storedAgent)
+        guard !agent.skillIDs.isEmpty else { return nil }
         let inputData = try JSONSerialization.data(
             withJSONObject: ["text": SkillRuntime.chatInputText(from: inputContext ?? goalStatement)],
             options: [.sortedKeys]
@@ -843,17 +849,11 @@ extension M8CompositionRoot {
         inputContext: String? = nil,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> AgentTeamResult? {
-        if !workspaceToolsEnabled {
-            do {
-                let selectedSkill = try await skillRuntime.select(goalStatement: goalStatement)
-                if selectedSkill.rawValue == "workspace.create-file" {
-                    return nil
-                }
-            } catch SkillRuntimeError.noSelection {
-                return nil
-            }
-        }
-        let agents = try await agentStore.discover()
+        let storedAgents = try await agentStore.discover()
+        let agents = storedAgents
+            .map { scopeAgentForWorkspaceSetting($0) }
+            .filter { !$0.skillIDs.isEmpty }
+        guard !agents.isEmpty else { return nil }
         let inputData = try JSONSerialization.data(
             withJSONObject: ["text": inputContext ?? goalStatement],
             options: [.sortedKeys]

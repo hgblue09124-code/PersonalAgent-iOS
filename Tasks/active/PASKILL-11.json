@@ -1,0 +1,47 @@
+{
+  "id": "PASKILL-11",
+  "title": "Enable verified workspace search Skill",
+  "status": "verified",
+  "goal": "Make workspace content search a real, scoped Skill in the default Agent and verify it end-to-end through the canonical M8 loop.",
+  "context": "SkillRuntime already contains an allowlisted workspace.search adapter and WorkspaceReadTool implements bounded, secret-filtered search, but FileSkillStore does not install a workspace.search manifest and the default Agent does not include it. Existing workspaceToolsEnabled guards only block workspace.create-file, so adding search without updating every guard could expose workspace access when disabled. The adapter also currently forwards the whole natural-language request as the search query.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-11.json",
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Sources/Capabilities/Skills/AgentMarkdownStore.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/AgentMarkdownAggregationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not broaden workspace read/write roots, protected-file rules, or secret filtering.",
+    "Do not bypass ModuleRuntime policy, Agent scope, executor schema binding, or verification.",
+    "Do not migrate or overwrite user-edited Agent manifests; migrate only the exact previous built-in default.",
+    "Do not change unrelated UI, provider, storage, or terminal behavior."
+  ],
+  "acceptance_criteria": [
+    "FileSkillStore installs a valid workspace.search Skill bound only to tool.workspace.read and the allowlisted workspace.search adapter.",
+    "The built-in default Agent includes workspace.search while preserving any user-edited Agent scope.",
+    "When workspace tools are disabled, neither workspace.search nor workspace.create-file can be selected or executed by the canonical chat/team Skill routes.",
+    "Vietnamese and English search requests extract a bounded non-empty query and return actual matching workspace paths through ModuleRuntime.",
+    "End-to-end search does not expose secret-like file contents or paths and returns a verified empty result when no files match.",
+    "Integration tests prove a real search result is verified and disabled workspace search returns no result without reading workspace content.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-11.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-11.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #458"
+  ],
+  "recovery": "If integration tests fail, inspect the exact manifest installation, default Agent migration, natural-language query adapter, and workspaceToolsEnabled scope filters; keep the repair within the declared files and rerun all required gates.",
+  "evidence": [
+    "PR #459 head 8bbb01b7e2e69c153d4560e133c778712a309d02: Agent Task Contract workflow run 38411501241 passed.",
+    "PR #459 head 8bbb01b7e2e69c153d4560e133c778712a309d02: M3 workflow run 38411500311 passed; Swift tests 559 tests across 67 suites passed, including Vietnamese/English workspace search, secret filtering, no-match behavior, and Agent-scope bypass regression.",
+    "PR #459 head 8bbb01b7e2e69c153d4560e133c778712a309d02: Apple Native Build & Unsigned IPA workflow run 38411499844 passed; arm64 build, unsigned IPA packaging, and artifact upload succeeded."
+  ]
+}
