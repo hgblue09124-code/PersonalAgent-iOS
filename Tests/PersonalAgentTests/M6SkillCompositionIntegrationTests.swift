@@ -144,7 +144,6 @@ struct M6SkillCompositionIntegrationTests {
         ) as? [String: Any]
         #expect(englishPayload?["query"] as? String == "needle")
         #expect(englishPayload?["matches"] as? [String] == ["workspace/notes.md"])
-        #expect(!(englishPayload?["matches"] as? [String] ?? []).contains("workspace/secret.md"))
 
         let noMatch = try await root.runChatSkillIfMatched(
             goalStatement: "Search workspace for absenttoken"
