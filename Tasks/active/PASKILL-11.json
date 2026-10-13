@@ -24,6 +24,7 @@
     "The built-in default Agent includes workspace.search while preserving any user-edited Agent scope.",
     "When workspace tools are disabled, neither workspace.search nor workspace.create-file can be selected or executed by the canonical chat/team Skill routes.",
     "Vietnamese and English search requests extract a bounded non-empty query and return actual matching workspace paths through ModuleRuntime.",
+    "End-to-end search does not expose secret-like file contents or paths and returns a verified empty result when no files match.",
     "Integration tests prove a real search result is verified and disabled workspace search returns no result without reading workspace content.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
   ],
