@@ -118,6 +118,13 @@ struct M6SkillCompositionIntegrationTests {
         #expect(result?.verified == true)
         #expect(result?.outputJSON.contains("workspace/notes.md") == true)
 
+        let englishResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Search workspace for needle"
+        )
+        #expect(englishResult?.skillID.rawValue == "workspace.search")
+        #expect(englishResult?.verified == true)
+        #expect(englishResult?.outputJSON.contains("workspace/notes.md") == true)
+
         let events = try await eventLog.allEvents()
         let observation = events.first {
             $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.search"
@@ -145,8 +152,12 @@ struct M6SkillCompositionIntegrationTests {
         let searchResult = try await root.runChatSkillIfMatched(
             goalStatement: "Tìm kiếm workspace secretneedle"
         )
+        let teamSearchResult = try await root.runChatTeamIfMatched(
+            goalStatement: "Search workspace for secretneedle"
+        )
         #expect(createResult == nil)
         #expect(searchResult == nil)
+        #expect(teamSearchResult == nil)
         #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/blocked.md").path))
 
         let events = try await eventLog.allEvents()
