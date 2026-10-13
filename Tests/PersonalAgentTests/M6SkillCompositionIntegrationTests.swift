@@ -105,6 +105,13 @@ struct M6SkillCompositionIntegrationTests {
             atomically: true,
             encoding: .utf8
         )
+        let protectedDirectory = workspace.appendingPathComponent("secrets", isDirectory: true)
+        try FileManager.default.createDirectory(at: protectedDirectory, withIntermediateDirectories: true)
+        try "ordinary content".write(
+            to: protectedDirectory.appendingPathComponent("note.md"),
+            atomically: true,
+            encoding: .utf8
+        )
         let eventLog = InMemoryEventLog()
         let root = try await M8CompositionRoot(
             eventLog: eventLog,
@@ -157,6 +164,59 @@ struct M6SkillCompositionIntegrationTests {
             with: Data((noMatchEnvelope?["output"] ?? "{}").utf8)
         ) as? [String: Any]
         #expect(noMatchPayload?["matches"] as? [String] == [])
+
+        let readResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Đọc file workspace/notes.md"
+        )
+        #expect(readResult?.skillID.rawValue == "workspace.read-file")
+        #expect(readResult?.verified == true)
+        let readEnvelope = try JSONSerialization.jsonObject(
+            with: Data((readResult?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let readPayload = try JSONSerialization.jsonObject(
+            with: Data((readEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(readPayload?["operation"] as? String == "read")
+        #expect(readPayload?["verified"] as? Bool == true)
+        #expect(readPayload?["path"] as? String == "workspace/notes.md")
+        #expect(readPayload?["content"] as? String == "A unique needle appears here.")
+        #expect(readPayload?["bytes"] as? Int == "A unique needle appears here.".utf8.count)
+
+        let englishRead = try await root.runChatSkillIfMatched(
+            goalStatement: "Read file workspace/notes.md"
+        )
+        #expect(englishRead?.skillID.rawValue == "workspace.read-file")
+        #expect(englishRead?.verified == true)
+
+        var secretReadRejected = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Read file workspace/secret.md"
+            )
+        } catch {
+            secretReadRejected = true
+        }
+        #expect(secretReadRejected)
+
+        var protectedReadRejected = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Read file workspace/secrets/note.md"
+            )
+        } catch {
+            protectedReadRejected = true
+        }
+        #expect(protectedReadRejected)
+
+        var traversalReadRejected = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Read file workspace/../workspace/notes.md"
+            )
+        } catch {
+            traversalReadRejected = true
+        }
+        #expect(traversalReadRejected)
     }
 
     @Test("M8 chat does not expose workspace Skills when workspace tools are disabled")
@@ -178,12 +238,20 @@ struct M6SkillCompositionIntegrationTests {
         let searchResult = try await root.runChatSkillIfMatched(
             goalStatement: "Tìm kiếm workspace secretneedle"
         )
+        let readResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Đọc file workspace/blocked.md"
+        )
         let teamSearchResult = try await root.runChatTeamIfMatched(
             goalStatement: "Search workspace for secretneedle"
         )
+        let teamReadResult = try await root.runChatTeamIfMatched(
+            goalStatement: "Read file workspace/blocked.md"
+        )
         #expect(createResult == nil)
         #expect(searchResult == nil)
+        #expect(readResult == nil)
         #expect(teamSearchResult == nil)
+        #expect(teamReadResult == nil)
         #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/blocked.md").path))
 
         let events = try await eventLog.allEvents()
@@ -227,13 +295,14 @@ struct M6SkillCompositionIntegrationTests {
         id: personal.workspace-only
         name: Workspace-only Agent
         version: 1.0.0
-        description: Only the workspace search Skill is allowed.
+        description: Only workspace search and read Skills are allowed.
         ---
         ## Skills
         workspace.search
+        workspace.read-file
 
         ## Rule
-        Search workspace content only when the workspace capability is enabled.
+        Search or read workspace content only when the workspace capability is enabled.
         """
         try workspaceOnlyAgent.write(
             to: agents.appendingPathComponent("personal.workspace-only.Agent.md"),
@@ -253,9 +322,16 @@ struct M6SkillCompositionIntegrationTests {
             goalStatement: "Workspace Query search",
             agentID: "personal.workspace-only"
         )
+        let directRead = try await root.runChatSkillIfMatched(
+            goalStatement: "Workspace Query read",
+            agentID: "personal.workspace-only"
+        )
         let team = try await root.runChatTeamIfMatched(goalStatement: "Workspace Query search")
+        let teamRead = try await root.runChatTeamIfMatched(goalStatement: "Workspace Query read")
         #expect(direct == nil)
+        #expect(directRead == nil)
         #expect(team == nil)
+        #expect(teamRead == nil)
 
         let events = try await eventLog.allEvents()
         #expect(!events.contains {
@@ -294,6 +370,40 @@ struct M6SkillCompositionIntegrationTests {
         )
         let agent = try await root.loadAgent(id: "personal.default")
         #expect(agent.skillIDs.contains { $0.rawValue == "workspace.search" })
+    }
+
+    @Test("Default Agent migrates the exact previous search-enabled scope")
+    func defaultAgentMigratesPreviousSearchScope() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let agents = directory.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: agents, withIntermediateDirectories: true)
+        let previousDefault = """
+        id: personal.default
+        name: Personal Default Agent
+        version: 1.0.0
+        description: Default personal agent.
+        ---
+        ## Skills
+        text.normalize
+        workspace.create-file
+        workspace.search
+
+        ## Rule
+        Select only from the declared skills. Use workspace.create-file for explicit file creation requests and workspace.search to find content in permitted workspace files.
+        """
+        try previousDefault.write(
+            to: agents.appendingPathComponent("personal.default.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy()
+        )
+        let agent = try await root.loadAgent(id: "personal.default")
+        #expect(agent.skillIDs.contains { $0.rawValue == "workspace.read-file" })
     }
 
     @Test("User-edited Agent scope is preserved during workspace Skill installation")

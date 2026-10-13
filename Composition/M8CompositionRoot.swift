@@ -646,7 +646,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         let defaultAgent = try await agentStore.load(id: "personal.default")
         self.agentStore = agentStore
         let allowedSkillIDs = Set(defaultAgent.skillIDs.filter {
-            !["workspace.create-file", "workspace.search"].contains($0.rawValue) || workspaceToolsEnabled
+            !["workspace.create-file", "workspace.search", "workspace.read-file"].contains($0.rawValue) || workspaceToolsEnabled
         })
         let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
         let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
@@ -761,7 +761,7 @@ public struct MemorySnapshotItem: Sendable, Equatable, Identifiable {
 extension M8CompositionRoot {
     private func scopeAgentForWorkspaceSetting(_ agent: AgentManifest) -> AgentManifest {
         guard !workspaceToolsEnabled else { return agent }
-        let workspaceSkillIDs: Set<String> = ["workspace.create-file", "workspace.search"]
+        let workspaceSkillIDs: Set<String> = ["workspace.create-file", "workspace.search", "workspace.read-file"]
         let allowedSkillIDs = agent.skillIDs.filter { !workspaceSkillIDs.contains($0.rawValue) }
         return AgentManifest(
             id: agent.id,

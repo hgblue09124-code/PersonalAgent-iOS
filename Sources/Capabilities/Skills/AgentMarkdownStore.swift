@@ -140,7 +140,9 @@ public actor FileAgentStore: Sendable {
         if FileManager.default.fileExists(atPath: url.path) {
             let existing = try String(contentsOf: url, encoding: .utf8)
             // Migrate only the exact previous built-in manifest. Preserve user edits and scopes.
-            if existing == Self.legacyDefaultAgentMarkdown || existing == Self.previousDefaultAgentMarkdown {
+            if existing == Self.legacyDefaultAgentMarkdown
+                || existing == Self.previousDefaultAgentMarkdown
+                || existing == Self.previousSearchDefaultAgentMarkdown {
                 try Self.defaultAgentMarkdown.write(to: url, atomically: true, encoding: .utf8)
             }
             return
@@ -193,7 +195,7 @@ public actor FileAgentStore: Sendable {
     Select only from the declared skills. Use the workspace.create-file Skill for explicit file creation requests.
     """
 
-    private static let defaultAgentMarkdown = """
+    private static let previousSearchDefaultAgentMarkdown = """
     id: personal.default
     name: Personal Default Agent
     version: 1.0.0
@@ -206,6 +208,22 @@ public actor FileAgentStore: Sendable {
 
     ## Rule
     Select only from the declared skills. Use workspace.create-file for explicit file creation requests and workspace.search to find content in permitted workspace files.
+    """
+
+    private static let defaultAgentMarkdown = """
+    id: personal.default
+    name: Personal Default Agent
+    version: 1.0.0
+    description: Default personal agent.
+    ---
+    ## Skills
+    text.normalize
+    workspace.create-file
+    workspace.search
+    workspace.read-file
+
+    ## Rule
+    Select only from the declared skills. Use workspace.create-file for explicit file creation requests, workspace.search to find content, and workspace.read-file to read a named permitted text file.
     """
 
     private func loadAll() throws -> [AgentManifest] {

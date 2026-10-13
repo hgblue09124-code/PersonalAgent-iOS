@@ -1,0 +1,43 @@
+{
+  "id": "PASKILL-12",
+  "title": "Add verified workspace file reading Skill",
+  "status": "in_progress",
+  "goal": "Expose the existing bounded, secret-filtered Workspace Read operation as a real Skill that reads permitted workspace text files and verifies the returned content.",
+  "context": "WorkspaceReadTool already implements a safe read operation with path validation, readable-text restrictions, protected-path filtering, secret detection, and a verified result. The Skill runtime currently has an allowlisted workspace.search adapter but no workspace.read-file adapter or default manifest, so Agents cannot request a file's contents through the Skill boundary. The module-backed verifier currently checks only the outer JSON string map; read-file needs to verify the nested tool result and its byte count before claiming success.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-12.json",
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Sources/Capabilities/Skills/AgentMarkdownStore.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/AgentMarkdownAggregationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not broaden workspace read/write roots, protected-file rules, readable extensions, or secret filtering.",
+    "Do not allow Skill.md to select arbitrary executable code or module IDs outside the existing allowlist.",
+    "Do not migrate or overwrite user-edited Agent manifests; migrate only exact prior built-in versions.",
+    "Do not bypass policy, Agent scope, module schema checks, cancellation, or output verification.",
+    "Do not change unrelated UI, provider, storage, or terminal behavior."
+  ],
+  "acceptance_criteria": [
+    "FileSkillStore installs workspace.read-file bound only to tool.workspace.read and the allowlisted workspace.read-file adapter.",
+    "The default Agent includes workspace.read-file, while migration updates only exact previous built-in scopes and preserves user-edited manifests.",
+    "Vietnamese and English read requests extract one bounded workspace-relative path and return the actual file content through ModuleRuntime.",
+    "The read-file verifier requires the nested tool operation, verified flag, workspace-relative path, string content, and accurate UTF-8 byte count.",
+    "When workspace tools are disabled, workspace.read-file, workspace.search, and workspace.create-file are excluded from canonical chat/team Agent scopes.",
+    "End-to-end tests prove real content readback and fail-closed behavior for secret-like/protected paths and disabled scope.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-12.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-12.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #459"
+  ],
+  "recovery": "If a regression fails, inspect only the read-file Skill manifest, path adapter, nested output verification, Agent migration, and workspace toggle scope. Preserve the existing WorkspaceReadTool safety checks and rerun all required gates."
+}
