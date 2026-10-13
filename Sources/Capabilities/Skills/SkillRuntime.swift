@@ -440,10 +440,15 @@ public struct SkillRuntime: Sendable {
     }
 
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {
+        try Task.checkCancellation()
         guard !disabled.contains(id.rawValue) else { return false }
         let manifest = try await manifestForVerification(id: id)
+        try Task.checkCancellation()
         guard let executor = await resolveExecutor(for: manifest) else { return false }
-        return try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+        try Task.checkCancellation()
+        let verified = try await executor.verify(manifest: manifest, outputJSON: outputJSON)
+        try Task.checkCancellation()
+        return verified
     }
 
     private func resolveExecutor(for manifest: SkillManifest) async -> (any SkillExecutor)? {
