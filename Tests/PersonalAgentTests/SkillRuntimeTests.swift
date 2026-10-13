@@ -200,3 +200,30 @@ extension SkillRuntimeTests {
         }
     }
 }
+
+
+extension SkillRuntimeTests {
+    func testNormalizationExecutorRejectsManifestWithMismatchedSchemas() async throws {
+        let mismatched = SkillManifest(
+            id: SkillRuntime.normalizationManifest.id,
+            name: SkillRuntime.normalizationManifest.name,
+            description: SkillRuntime.normalizationManifest.description,
+            version: SkillRuntime.normalizationManifest.version,
+            instructions: SkillRuntime.normalizationManifest.instructions,
+            inputSchema: SchemaDocument(identifier: "unrelated.input"),
+            outputSchema: SchemaDocument(identifier: "unrelated.output"),
+            requiredCapabilities: SkillRuntime.normalizationManifest.requiredCapabilities
+        )
+        let executor = TextNormalizeSkillExecutor()
+
+        do {
+            _ = try await executor.execute(manifest: mismatched, inputJSON: #"{\"text\":\"ok\"}"#)
+            XCTFail("Normalization executor must not run against a different schema contract")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .malformedSkill)
+        }
+
+        let verified = try await executor.verify(manifest: mismatched, outputJSON: #"{\"text\":\"ok\"}"#)
+        XCTAssertFalse(verified, "A different manifest schema must not verify as text.normalize")
+    }
+}
