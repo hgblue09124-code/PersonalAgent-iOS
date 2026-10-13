@@ -293,3 +293,37 @@ extension SkillRuntimeTests {
         }
     }
 }
+
+
+extension SkillRuntimeTests {
+    func testExactNameAmbiguityFailsClosed() async throws {
+        let first = SkillManifest(
+            id: SkillID(rawValue: "workspace.search"),
+            name: "Workspace Search",
+            description: "Search workspace files",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Search workspace files.",
+            inputSchema: SchemaDocument(identifier: "workspace.search.input"),
+            outputSchema: SchemaDocument(identifier: "workspace.search.output"),
+            requiredCapabilities: [.read]
+        )
+        let second = SkillManifest(
+            id: SkillID(rawValue: "document.search"),
+            name: "Workspace Search",
+            description: "Search document files",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Search document files.",
+            inputSchema: SchemaDocument(identifier: "document.search.input"),
+            outputSchema: SchemaDocument(identifier: "document.search.output"),
+            requiredCapabilities: [.read]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [first, second]))
+
+        do {
+            _ = try await runtime.select(goalStatement: "Workspace Search")
+            XCTFail("Ambiguous exact Skill names must not select an arbitrary capability")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .noSelection)
+        }
+    }
+}
