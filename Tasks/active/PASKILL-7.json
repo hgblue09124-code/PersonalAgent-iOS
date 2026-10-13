@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-7",
+  "title": "Reject malformed text.normalize Skill payloads",
+  "status": "in_progress",
+  "goal": "Ensure the built-in text.normalize Skill rejects undeclared input and output fields instead of treating malformed payloads as valid execution results.",
+  "context": "Issue #347 requires installed Skills to execute and verify only through explicit contracts. The built-in normalization executor currently reads text while tolerating extra keys, and its verifier can accept output with undeclared fields.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-7.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not bypass Skill policy, executor resolution, cancellation, or verification.",
+    "Do not enable new capabilities or alter workspace behavior.",
+    "Do not change unrelated provider, UI, or app project files."
+  ],
+  "acceptance_criteria": [
+    "text.normalize rejects input objects containing fields beyond text.",
+    "text.normalize verification rejects output objects containing fields beyond text.",
+    "Regression tests prove malformed payloads fail closed.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-7.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-7.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #454"
+  ],
+  "recovery": "If a regression test or required gate fails, inspect the failure, make the smallest in-scope correction, and rerun all required gates before merge."
+}
