@@ -28,13 +28,15 @@
     "The read-file verifier requires the nested tool operation, verified flag, workspace-relative path, string content, and accurate UTF-8 byte count.",
     "When workspace tools are disabled, workspace.read-file, workspace.search, and workspace.create-file are excluded from canonical chat/team Agent scopes.",
     "End-to-end tests prove real content readback and fail-closed behavior for secret-like/protected paths and disabled scope.",
-    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "A direct WorkspaceReadTool regression proves symlinks cannot escape the workspace root."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-12.json",
     "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-12.json --base origin/main",
     "swift test --disable-sandbox",
-    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Run the WorkspaceReadTool symlink-escape regression on macOS CI."
   ],
   "dependencies": [
     "Issue #347",
