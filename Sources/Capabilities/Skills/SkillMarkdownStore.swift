@@ -235,9 +235,9 @@ public actor FileSkillStore: SkillStore {
 
     private static let defaultReadFileSkillMarkdown = """
     id: workspace.read-file
-    name: Đọc File Workspace
+    name: Read / Đọc File
     version: 1.0.0
-    description: Read permitted workspace text files and return verified content, đọc nội dung tệp trong workspace.
+    description: Read a named path and return the actual file text, đọc nội dung theo đường dẫn đã chỉ định.
     moduleID: tool.workspace.read
     chatInputAdapter: workspace.read-file
     ---
