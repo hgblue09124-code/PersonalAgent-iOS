@@ -1,7 +1,7 @@
 {
   "id": "PASKILL-14",
   "title": "Verify structured outputs from built-in workspace Skills",
-  "status": "in_progress",
+  "status": "verified",
   "goal": "Do not report a workspace Skill result as verified unless the adapter-specific result envelope is structurally valid and carries the expected operation and read-back verification evidence.",
   "context": "SkillRuntime.executeVerified delegates to ModuleBackedSkillExecutor.verify. Current verification validates the read-file payload, but treats search and create-file outputs as verified whenever the outer output is a string dictionary. ModuleRuntime currently validates output schema identifiers, not adapter-specific result semantics. Tighten the Skill boundary without weakening ModuleRuntime policy, capability, schema, cancellation, or workspace tool safeguards.",
   "allowed_paths": [
@@ -33,5 +33,11 @@
     "Issue #347",
     "PR #461"
   ],
-  "recovery": "Keep the change within ModuleBackedSkillExecutor.verify and focused SkillRuntime regression tests. If valid integration output differs from assumptions, inspect the actual WorkspaceReadTool/WorkspaceWriteTool envelope and adjust the validator without weakening fail-closed behavior."
+  "recovery": "Keep the change within ModuleBackedSkillExecutor.verify and focused SkillRuntime regression tests. If valid integration output differs from assumptions, inspect the actual WorkspaceReadTool/WorkspaceWriteTool envelope and adjust the validator without weakening fail-closed behavior.",
+  "evidence": [
+    "PR #462 head 9ea3b982c4c2075d112b2662705cb1cae71fe322: Agent Task Contract run 38542813196 passed.",
+    "PR #462 head 9ea3b982c4c2075d112b2662705cb1cae71fe322: M3 run 38542813159 passed; 561 tests across 67 suites passed, including forged create-file verification and unsafe search path regressions.",
+    "PR #462 head 9ea3b982c4c2075d112b2662705cb1cae71fe322: focused workspace import/storage/readback gate passed with 3 tests in 1 suite.",
+    "PR #462 head 9ea3b982c4c2075d112b2662705cb1cae71fe322: Apple Native Build & Unsigned IPA run 38542813343 passed; arm64 build, unsigned IPA packaging, artifact upload, and PR pre-release publication succeeded."
+  ]
 }
