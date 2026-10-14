@@ -170,7 +170,18 @@ final class KernelSession: ObservableObject {
         state = await composition.session.currentState()
         goals = await composition.session.activeGoals()
         providerID = await composition.currentProviderIdentityID()
-        await refreshMemory()
+        // Memory snapshots are auxiliary dashboard data. A transient read failure
+        // during startup/refresh must not appear as an Agent execution failure.
+        // Explicit memory actions still use refreshMemory() and surface their own errors.
+        do {
+            memoryRecords = try await composition.memorySnapshot(limit: 50)
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
+        } catch {
+            memoryRecords = []
+        }
         providerLifecycle = await composition.currentProviderLifecycle()
         moduleIDs = await composition.registeredModuleIDs()
         do {

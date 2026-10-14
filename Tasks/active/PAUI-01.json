@@ -1,0 +1,30 @@
+{
+  "id": "PAUI-01",
+  "title": "Prevent auxiliary memory refresh failures from surfacing as startup Agent errors",
+  "status": "in_progress",
+  "goal": "Keep startup and routine session refresh from presenting a memory snapshot read failure as an Agent execution error, while preserving visible errors for explicit memory operations and genuine runtime/model failures.",
+  "context": "RootView invokes KernelSession.refresh() on launch. refresh() called refreshMemory(), whose generic catch assigns lastError; AgentFeatureHub then presents that value as an Agent error card. A transient memory snapshot failure can therefore look like a core Agent failure even when execution is healthy.",
+  "allowed_paths": [
+    "App/PersonalAgent/KernelSession.swift",
+    "Tasks/active/PAUI-01.json"
+  ],
+  "forbidden_changes": [
+    "Do not suppress genuine provider, model-load, or execution failures.",
+    "Do not alter explicit remember/forget/clear memory error reporting.",
+    "Do not change Agent Orb visuals or unrelated UI layout.",
+    "Do not claim physical iPhone verification from CI."
+  ],
+  "acceptance_criteria": [
+    "Routine refresh loads memory snapshots without routing snapshot-only errors into global Agent lastError.",
+    "Cancellation during snapshot refresh exits without producing a user-facing failure.",
+    "Explicit memory actions retain existing refreshMemory error behavior.",
+    "Apple Native Build and Unsigned IPA passes on the final PR head."
+  ],
+  "verification": [
+    "Review the exact KernelSession.refresh diff and confirm only the routine snapshot error path changed.",
+    "Run Agent Task Contract, M3, and Apple Native Build & Unsigned IPA on the PR head.",
+    "Physically relaunch on iPhone to confirm no false startup Attention Agent banner; separately verify genuine model/runtime failures remain visible."
+  ],
+  "dependencies": [],
+  "recovery": "If build or behavior regresses, revert this focused change; preserve the explicit memory-operation error path."
+}
