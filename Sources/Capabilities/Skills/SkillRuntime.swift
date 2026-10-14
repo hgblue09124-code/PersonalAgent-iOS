@@ -466,19 +466,40 @@ public struct SkillRuntime: Sendable {
         if let registered = await executors.executor(for: manifest.id.rawValue) {
             return registered
         }
-        // Skill.md's executor field is declarative, not executable code. Resolve
-        // only the built-in executor here; arbitrary names must never instantiate
-        // or authorize an implementation by themselves.
-        if manifest.metadata["executor"] == "text.normalize"
-            || manifest.id == Self.normalizationManifest.id {
+        // Built-ins are bound to exact Skill identity. Metadata alone cannot grant
+        // a built-in executor to another manifest.
+        if manifest.id == Self.normalizationManifest.id {
             return TextNormalizeSkillExecutor()
         }
-        if let moduleID = manifest.metadata["moduleID"],
-           !moduleID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-           let moduleRuntime {
-            return ModuleBackedSkillExecutor(moduleRuntime: moduleRuntime, moduleID: ModuleID(rawValue: moduleID))
+        guard let rawModuleID = manifest.metadata["moduleID"],
+              !rawModuleID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let moduleRuntime else {
+            return nil
         }
-        return nil
+        let moduleID = ModuleID(rawValue: rawModuleID)
+        guard BuiltInModuleSkillBinding.matches(manifest: manifest, moduleID: moduleID) else {
+            return nil
+        }
+        return ModuleBackedSkillExecutor(moduleRuntime: moduleRuntime, moduleID: moduleID)
+    }
+}
+
+private enum BuiltInModuleSkillBinding {
+    static func matches(manifest: SkillManifest, moduleID: ModuleID) -> Bool {
+        let expected: (moduleID: String, adapter: String)
+        switch manifest.id.rawValue {
+        case "workspace.search":
+            expected = ("tool.workspace.read", "workspace.search")
+        case "workspace.read-file":
+            expected = ("tool.workspace.read", "workspace.read-file")
+        case "workspace.create-file":
+            expected = ("tool.workspace.write", "workspace.create-file")
+        default:
+            return false
+        }
+        return moduleID.rawValue == expected.moduleID
+            && manifest.metadata["moduleID"] == expected.moduleID
+            && manifest.metadata["chatInputAdapter"] == expected.adapter
     }
 }
 
@@ -487,61 +508,44 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     let moduleID: ModuleID
 
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
-        let contract = try await matchingContract(for: manifest)
-        guard let data = inputJSON.data(using: .utf8),
-              let object = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        guard BuiltInModuleSkillBinding.matches(manifest: manifest, moduleID: moduleID) else {
             throw SkillExecutionError.malformedSkill
         }
-        var fields: [String: String] = [:]
-        if let adapter = manifest.metadata["chatInputAdapter"] {
-            guard Set(object.keys) == ["text"],
-                  let rawText = object["text"] as? String else {
-                throw SkillExecutionError.malformedSkill
-            }
-            let argumentsObject: [String: String]
-            switch adapter {
-            case "workspace.search":
-                // Skill.md cannot select arbitrary code or operations by naming an adapter.
-                guard moduleID.rawValue == "tool.workspace.read" else {
-                    throw SkillExecutionError.malformedSkill
-                }
-                let query = Self.parseWorkspaceSearchQuery(rawText)
-                guard !query.isEmpty, query.count <= 256 else {
-                    throw SkillExecutionError.malformedSkill
-                }
-                argumentsObject = ["operation": "search", "query": query]
-            case "workspace.read-file":
-                guard moduleID.rawValue == "tool.workspace.read",
-                      let path = Self.parseWorkspaceReadPath(rawText) else {
-                    throw SkillExecutionError.malformedSkill
-                }
-                argumentsObject = ["operation": "read", "path": path]
-            case "workspace.create-file":
-                guard moduleID.rawValue == "tool.workspace.write",
-                      let request = Self.parseCreateFileRequest(rawText) else {
-                    throw SkillExecutionError.malformedSkill
-                }
-                argumentsObject = [
-                    "operation": "write",
-                    "path": request.path,
-                    "content": request.content
-                ]
-            default:
-                // Adapters are allowlisted executable code, not dynamic Skill instructions.
-                throw SkillExecutionError.malformedSkill
-            }
-            let arguments = try JSONSerialization.data(withJSONObject: argumentsObject, options: [.sortedKeys])
-            fields["arguments"] = String(decoding: arguments, as: UTF8.self)
-        } else {
-            for (key, value) in object {
-                if let string = value as? String {
-                    fields[key] = string
-                } else {
-                    let encoded = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys, .fragmentsAllowed])
-                    fields[key] = String(decoding: encoded, as: UTF8.self)
-                }
-            }
+        let contract = try await matchingContract(for: manifest)
+        guard let data = inputJSON.data(using: .utf8),
+              let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              Set(object.keys) == ["text"],
+              let rawText = object["text"] as? String,
+              let adapter = manifest.metadata["chatInputAdapter"] else {
+            throw SkillExecutionError.malformedSkill
         }
+        let argumentsObject: [String: String]
+        switch adapter {
+        case "workspace.search":
+            let query = Self.parseWorkspaceSearchQuery(rawText)
+            guard !query.isEmpty, query.count <= 256 else {
+                throw SkillExecutionError.malformedSkill
+            }
+            argumentsObject = ["operation": "search", "query": query]
+        case "workspace.read-file":
+            guard let path = Self.parseWorkspaceReadPath(rawText) else {
+                throw SkillExecutionError.malformedSkill
+            }
+            argumentsObject = ["operation": "read", "path": path]
+        case "workspace.create-file":
+            guard let request = Self.parseCreateFileRequest(rawText) else {
+                throw SkillExecutionError.malformedSkill
+            }
+            argumentsObject = [
+                "operation": "write",
+                "path": request.path,
+                "content": request.content
+            ]
+        default:
+            throw SkillExecutionError.malformedSkill
+        }
+        let arguments = try JSONSerialization.data(withJSONObject: argumentsObject, options: [.sortedKeys])
+        let fields = ["arguments": String(decoding: arguments, as: UTF8.self)]
         let result = try await moduleRuntime.execute(
             ModuleInvocation(moduleID: moduleID, input: ModulePayload(schema: contract.inputSchema, fields: fields))
         )
@@ -550,7 +554,8 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     }
 
     func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
-        guard (try? await matchingContract(for: manifest)) != nil,
+        guard BuiltInModuleSkillBinding.matches(manifest: manifest, moduleID: moduleID),
+              (try? await matchingContract(for: manifest)) != nil,
               let data = outputJSON.data(using: .utf8),
               let envelope = (try? JSONSerialization.jsonObject(with: data)) as? [String: String] else {
             return false

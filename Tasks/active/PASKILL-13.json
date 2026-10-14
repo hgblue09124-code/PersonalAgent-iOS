@@ -1,0 +1,48 @@
+{
+  "id": "PASKILL-13",
+  "title": "Bind installed Skills to explicit trusted executors",
+  "status": "verified",
+  "goal": "Ensure a Skill manifest cannot gain access to any registered Module or Tool merely by naming its moduleID or adapter; only explicitly supported Skill IDs with matching module and adapter bindings may execute.",
+  "context": "Issue #347 remains open for production executor mapping. SkillRuntime.resolveExecutor currently constructs ModuleBackedSkillExecutor for any manifest that declares a non-empty moduleID when ModuleRuntime exists. The executor allowlists adapter strings and checks module IDs for workspace search/read/create, but it does not bind each adapter to its exact Skill ID, and manifests without a chatInputAdapter can pass arbitrary string fields to the named module. This permits an imported or user-edited Skill manifest to try to reuse a registered capability outside the intended Skill identity. Existing ModuleRuntime policy and capability checks must remain intact; explicit registry injection is still a trusted extension point.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-13.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tests/PersonalAgentTests/M8ArchitectureTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken ModuleRuntime policy, approval, cancellation, capability grants, or schema validation.",
+    "Do not allow Skill.md to select arbitrary Swift code, executor types, Module IDs, or adapter names.",
+    "Do not remove explicitly injected SkillExecutorRegistry support or the built-in text.normalize executor.",
+    "Do not broaden workspace roots, secret filtering, file extension rules, or workspace toggle behavior.",
+    "Do not change unrelated UI, provider, storage, terminal, or Xcode project files."
+  ],
+  "acceptance_criteria": [
+    "The built-in module-backed bindings are explicit and exact: workspace.search → tool.workspace.read + workspace.search adapter; workspace.read-file → tool.workspace.read + workspace.read-file adapter; workspace.create-file → tool.workspace.write + workspace.create-file adapter.",
+    "A manifest with an arbitrary Skill ID cannot execute a built-in workspace adapter even when it copies the matching moduleID and adapter metadata.",
+    "A manifest that names a registered moduleID but has no allowlisted adapter fails closed before the module is invoked.",
+    "Mismatched Skill ID, module ID, or adapter combinations fail closed and produce no successful verification or mutation.",
+    "Explicitly registered custom executors and the built-in text.normalize executor continue to work.",
+    "Regression tests prove no unauthorized module invocation occurs for forged manifests and supported M8 Skills still pass end-to-end.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-13.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-13.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #460"
+  ],
+  "recovery": "If a test fails, inspect only SkillRuntime executor resolution, exact manifest/module/adapter bindings, and focused runtime or M8 integration tests. Keep unsupported Skills unavailable, preserve the explicit executor registry, and rerun all required gates.",
+  "evidence": [
+    "PR #461 head 8a0ff911a40ea3d0157f23815f2dd5760c59d02b: Agent Task Contract run 38521826363 passed.",
+    "PR #461 head 8a0ff911a40ea3d0157f23815f2dd5760c59d02b: M3 run 38521826346 passed; 561 XCTest cases across 67 suites passed, including arbitrary moduleID rejection, executor metadata spoof rejection, and explicit custom executor success.",
+    "PR #461 head 8a0ff911a40ea3d0157f23815f2dd5760c59d02b: the focused import-to-storage/readback gate passed with 3 tests in 1 suite; M8 regressions confirmed supported workspace.search execution and rejected an imported Skill attempting to borrow workspace.create-file.",
+    "PR #461 head 8a0ff911a40ea3d0157f23815f2dd5760c59d02b: Apple Native Build & Unsigned IPA run 38521826358 passed; arm64 app build, unsigned IPA packaging, and artifact upload succeeded."
+  ]
+}

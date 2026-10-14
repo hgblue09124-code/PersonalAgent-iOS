@@ -34,8 +34,8 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: output))
     }
 
-    @Test("Skill manifest can execute through the policy-gated ModuleRuntime")
-    func moduleBackedSkillExecutesAndVerifies() async throws {
+    @Test("An unlisted Skill cannot bind itself to a registered Module")
+    func unlistedModuleBackedSkillFailsClosed() async throws {
         let id = SkillID(rawValue: "custom.echo")
         let manifest = SkillManifest(
             id: id,
@@ -58,17 +58,18 @@ struct SkillExecutorRegistryTests {
             store: InMemorySkillStore(manifests: [manifest]),
             moduleRuntime: moduleRuntime
         )
-        let output = try await runtime.execute(
-            id: id,
-            inputJSON: "{\"text\":\"hello\"}",
-            policy: AllowPolicy()
-        )
-        #expect(output == "{\"text\":\"hello\"}")
-        #expect(try await runtime.verify(id: id, outputJSON: output))
+        await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
+            try await runtime.execute(
+                id: id,
+                inputJSON: "{\"text\":\"hello\"}",
+                policy: AllowPolicy()
+            )
+        }
+        #expect(try await runtime.verify(id: id, outputJSON: "{\"text\":\"hello\"}") == false)
     }
 
-    @Test("declared built-in executor resolves for an imported Skill ID")
-    func declaredBuiltinExecutorRunsForImportedSkillID() async throws {
+    @Test("Executor metadata cannot grant a built-in executor to an imported Skill ID")
+    func executorMetadataCannotGrantBuiltinToImportedSkillID() async throws {
         let id = SkillID(rawValue: "custom.normalize")
         let manifest = SkillManifest(
             id: id,
@@ -82,17 +83,18 @@ struct SkillExecutorRegistryTests {
             metadata: ["executor": "text.normalize"]
         )
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
-        let output = try await runtime.execute(
-            id: id,
-            inputJSON: #"{"text":"  hello  "}"#,
-            policy: AllowPolicy()
-        )
-        #expect(output == #"{"text":"hello"}"#)
-        #expect(try await runtime.verify(id: id, outputJSON: output))
+        await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
+            try await runtime.execute(
+                id: id,
+                inputJSON: #"{"text":"  hello  "}"#,
+                policy: AllowPolicy()
+            )
+        }
+        #expect(try await runtime.verify(id: id, outputJSON: #"{"text":"hello"}"#) == false)
     }
 
-    @Test("module-backed Skill rejects a manifest that lies about module schemas")
-    func moduleBackedSkillRejectsSchemaMismatch() async throws {
+    @Test("An unmapped module Skill is rejected before trusting its schema claims")
+    func unmappedModuleSkillRejectsSchemaClaims() async throws {
         let id = SkillID(rawValue: "custom.echo")
         let manifest = SkillManifest(
             id: id,
@@ -115,7 +117,7 @@ struct SkillExecutorRegistryTests {
             moduleRuntime: moduleRuntime
         )
 
-        await #expect(throws: SkillRuntimeError.malformedSkill) {
+        await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
             try await runtime.execute(
                 id: id,
                 inputJSON: #"{"text":"hello"}"#,
