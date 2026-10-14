@@ -298,7 +298,7 @@ struct M8ArchitectureTests {
         let skillDirectory = tempDir.appendingPathComponent("Skills", isDirectory: true)
         try FileManager.default.createDirectory(at: skillDirectory, withIntermediateDirectories: true)
         let skillMarkdown = """
-        id: workspace.search.test
+        id: workspace.search
         name: Workspace Search
         version: 1.0.0
         description: Search workspace files for a text query.
@@ -315,7 +315,7 @@ struct M8ArchitectureTests {
         Search workspace text for the supplied query.
         """
         try skillMarkdown.write(
-            to: skillDirectory.appendingPathComponent("workspace.search.test.Skill.md"),
+            to: skillDirectory.appendingPathComponent("workspace.search.Skill.md"),
             atomically: true,
             encoding: .utf8
         )
@@ -329,7 +329,7 @@ struct M8ArchitectureTests {
         description: Search workspace content.
         ---
         ## Skills
-        workspace.search.test
+        workspace.search
 
         ## Rule
         Select only the declared workspace search Skill.
@@ -350,7 +350,7 @@ struct M8ArchitectureTests {
             agentID: "personal.default"
         )
         let verified = try #require(result)
-        #expect(verified.skillID == SkillID(rawValue: "workspace.search.test"))
+        #expect(verified.skillID == SkillID(rawValue: "workspace.search"))
         #expect(verified.verified)
 
         let wrapper = try #require(
@@ -364,7 +364,7 @@ struct M8ArchitectureTests {
         #expect(matches.contains("workspace/needle.txt"))
     }
 
-    @Test func productionRootExecutesInstalledModuleBackedSkill() async throws {
+    @Test func productionRootExecutesInstalledBuiltInSkillAdapter() async throws {
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("M8ModuleSkillE2E_\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -380,11 +380,12 @@ struct M8ArchitectureTests {
         let skillDirectory = tempDir.appendingPathComponent("Skills", isDirectory: true)
         try FileManager.default.createDirectory(at: skillDirectory, withIntermediateDirectories: true)
         let markdown = """
-        id: workspace.search.test
-        name: Workspace Search Test
+        id: workspace.search
+        name: Workspace Search
         version: 1.0.0
         description: Search workspace files through the authorized workspace read module.
         moduleID: tool.workspace.read
+        chatInputAdapter: workspace.search
         ---
         ## Input
         tool.workspace.read.input
@@ -396,7 +397,7 @@ struct M8ArchitectureTests {
         Search workspace text for the supplied query.
         """
         try markdown.write(
-            to: skillDirectory.appendingPathComponent("workspace.search.test.Skill.md"),
+            to: skillDirectory.appendingPathComponent("workspace.search.Skill.md"),
             atomically: true,
             encoding: .utf8
         )
@@ -406,16 +407,12 @@ struct M8ArchitectureTests {
             policy: ExplicitAllowPolicy(),
             workspaceToolsEnabled: true
         )
-        let toolArguments = try JSONSerialization.data(
-            withJSONObject: ["operation": "search", "query": "needle"],
-            options: [.sortedKeys]
-        )
         let inputData = try JSONSerialization.data(
-            withJSONObject: ["arguments": String(decoding: toolArguments, as: UTF8.self)],
+            withJSONObject: ["text": "Search workspace for needle"],
             options: [.sortedKeys]
         )
         let outputJSON = try await root.executeSkill(
-            id: SkillID(rawValue: "workspace.search.test"),
+            id: SkillID(rawValue: "workspace.search"),
             inputJSON: String(decoding: inputData, as: UTF8.self)
         )
 
