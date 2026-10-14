@@ -117,7 +117,10 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
 
-        let catalog = try ModuleCatalog(modules: [ToolModule(tool: WorkspaceWriteTool(workspace: workspace))])
+        let catalog = try ModuleCatalog(modules: [
+            ToolModule(tool: WorkspaceReadTool(workspace: workspace)),
+            ToolModule(tool: WorkspaceWriteTool(workspace: workspace))
+        ])
         let policy = AllowWorkspaceToolPolicy()
         let moduleRuntime = ModuleRuntime(
             catalog: catalog,
