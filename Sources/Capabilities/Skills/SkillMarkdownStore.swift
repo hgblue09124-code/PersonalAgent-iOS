@@ -135,6 +135,10 @@ public actor FileSkillStore: SkillStore {
         if !FileManager.default.fileExists(atPath: searchURL.path) {
             try Self.defaultSearchSkillMarkdown.write(to: searchURL, atomically: true, encoding: .utf8)
         }
+        let readFileURL = directoryURL.appendingPathComponent("workspace.read-file.Skill.md")
+        if !FileManager.default.fileExists(atPath: readFileURL.path) {
+            try Self.defaultReadFileSkillMarkdown.write(to: readFileURL, atomically: true, encoding: .utf8)
+        }
     }
 
     public func discover(query: String) async throws -> [SkillManifest] {
@@ -227,5 +231,23 @@ public actor FileSkillStore: SkillStore {
 
     ## Rule
     Search readable text files only within the permitted AgentOS workspace. Never expose protected files or secret-like content. Report only paths returned by the Workspace Read tool.
+    """
+
+    private static let defaultReadFileSkillMarkdown = """
+    id: workspace.read-file
+    name: Read / Đọc File
+    version: 1.0.0
+    description: Read a named path and return the actual file text, đọc nội dung theo đường dẫn đã chỉ định.
+    moduleID: tool.workspace.read
+    chatInputAdapter: workspace.read-file
+    ---
+    ## Input
+    tool.workspace.read.input
+
+    ## Output
+    tool.workspace.read.output
+
+    ## Rule
+    Read only a specifically named readable text file inside the permitted workspace. Never read protected paths or secret-like content. Return the content only when the Workspace Read tool reports a verified read.
     """
 }

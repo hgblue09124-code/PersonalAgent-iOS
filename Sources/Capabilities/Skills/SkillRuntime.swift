@@ -510,6 +510,12 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
                     throw SkillExecutionError.malformedSkill
                 }
                 argumentsObject = ["operation": "search", "query": query]
+            case "workspace.read-file":
+                guard moduleID.rawValue == "tool.workspace.read",
+                      let path = Self.parseWorkspaceReadPath(rawText) else {
+                    throw SkillExecutionError.malformedSkill
+                }
+                argumentsObject = ["operation": "read", "path": path]
             case "workspace.create-file":
                 guard moduleID.rawValue == "tool.workspace.write",
                       let request = Self.parseCreateFileRequest(rawText) else {
@@ -546,7 +552,22 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
         guard (try? await matchingContract(for: manifest)) != nil,
               let data = outputJSON.data(using: .utf8),
-              (try? JSONSerialization.jsonObject(with: data)) is [String: String] else {
+              let envelope = (try? JSONSerialization.jsonObject(with: data)) as? [String: String] else {
+            return false
+        }
+        guard manifest.metadata["chatInputAdapter"] == "workspace.read-file" else {
+            return true
+        }
+        guard let toolJSON = envelope["output"],
+              let toolData = toolJSON.data(using: .utf8),
+              let payload = (try? JSONSerialization.jsonObject(with: toolData)) as? [String: Any],
+              payload["operation"] as? String == "read",
+              payload["verified"] as? Bool == true,
+              let path = payload["path"] as? String,
+              Self.isWorkspaceReadPath(path),
+              let content = payload["content"] as? String,
+              let byteCount = payload["bytes"] as? Int,
+              byteCount == content.utf8.count else {
             return false
         }
         return true
@@ -580,6 +601,37 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         }
         return String(trimmed.dropFirst(prefix.count))
             .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func parseWorkspaceReadPath(_ rawText: String) -> String? {
+        let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = trimmed.lowercased()
+        let prefixes = [
+            "đọc file ", "đọc tệp ", "đọc workspace/",
+            "mở file ", "mở tệp ", "mở workspace/",
+            "read file ", "read workspace/",
+            "open file ", "open workspace/",
+            "show file ", "show workspace/"
+        ]
+        let candidate: String
+        if let prefix = prefixes.first(where: { normalized.hasPrefix($0) }) {
+            candidate = String(trimmed.dropFirst(prefix.count))
+        } else {
+            candidate = trimmed
+        }
+        let path = candidate.trimmingCharacters(
+            in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'"))
+        )
+        guard path.count <= 512, isWorkspaceReadPath(path) else { return nil }
+        return path
+    }
+
+    private static func isWorkspaceReadPath(_ path: String) -> Bool {
+        guard path.hasPrefix("workspace/"), !path.contains("\\") else { return false }
+        let components = path.split(separator: "/", omittingEmptySubsequences: false)
+        return components.count >= 2
+            && components[0] == "workspace"
+            && components.dropFirst().allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." }
     }
 
     private static func parseCreateFileRequest(_ rawText: String) -> (path: String, content: String)? {

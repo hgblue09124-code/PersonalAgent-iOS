@@ -62,6 +62,36 @@ final class WorkspaceStorageToolTests: XCTestCase {
         }
     }
 
+    func testReadToolRejectsSymlinkEscapingWorkspace() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let external = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer {
+            try? FileManager.default.removeItem(at: root)
+            try? FileManager.default.removeItem(at: external)
+        }
+
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        try FileManager.default.createDirectory(at: external, withIntermediateDirectories: true)
+        try "external private content".write(
+            to: external.appendingPathComponent("private.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try FileManager.default.createSymbolicLink(
+            at: root.appendingPathComponent("workspace/linked.md"),
+            withDestinationURL: external.appendingPathComponent("private.md")
+        )
+
+        let reader = WorkspaceReadTool(workspace: workspace)
+        do {
+            _ = try await reader.run(argumentsJSON: #"{"operation":"read","path":"workspace/linked.md"}"#)
+            XCTFail("Reading a symlink outside the workspace must be rejected")
+        } catch {
+            // Fail-closed is the expected contract.
+        }
+    }
+
     func testSearchSkipsProtectedSymlinkDirectories() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         let external = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
@@ -117,7 +147,10 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
 
-        let catalog = try ModuleCatalog(modules: [ToolModule(tool: WorkspaceWriteTool(workspace: workspace))])
+        let catalog = try ModuleCatalog(modules: [
+            ToolModule(tool: WorkspaceReadTool(workspace: workspace)),
+            ToolModule(tool: WorkspaceWriteTool(workspace: workspace))
+        ])
         let policy = AllowWorkspaceToolPolicy()
         let moduleRuntime = ModuleRuntime(
             catalog: catalog,

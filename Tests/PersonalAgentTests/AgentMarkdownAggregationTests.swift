@@ -54,6 +54,6 @@ struct AgentMarkdownAggregationTests {
         try await store.ensureDefaultAgent()
         let found = try await store.discover(query: "personal.default")
         #expect(found.count == 1)
-        #expect(found.first?.skillIDs.map(\.rawValue) == ["text.normalize", "workspace.create-file", "workspace.search"])
+        #expect(found.first?.skillIDs.map(\.rawValue) == ["text.normalize", "workspace.create-file", "workspace.search", "workspace.read-file"])
     }
 }
