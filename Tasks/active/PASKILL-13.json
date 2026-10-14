@@ -8,7 +8,9 @@
     "Tasks/active/PASKILL-13.json",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
     "Tests/PersonalAgentTests/SkillRuntimeTests.swift",
-    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tests/PersonalAgentTests/M8ArchitectureTests.swift"
   ],
   "forbidden_changes": [
     "Do not weaken ModuleRuntime policy, approval, cancellation, capability grants, or schema validation.",
