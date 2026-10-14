@@ -11,7 +11,8 @@
     "Sources/Capabilities/Skills/SkillRuntime.swift",
     "Composition/M8CompositionRoot.swift",
     "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
-    "Tests/PersonalAgentTests/AgentMarkdownAggregationTests.swift"
+    "Tests/PersonalAgentTests/AgentMarkdownAggregationTests.swift",
+    "Tests/PersonalAgentTests/WorkspaceStorageToolTests.swift"
   ],
   "forbidden_changes": [
     "Do not broaden workspace read/write roots, protected-file rules, readable extensions, or secret filtering.",
