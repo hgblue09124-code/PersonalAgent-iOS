@@ -94,7 +94,7 @@ struct SkillExecutorRegistryTests {
     }
 
     @Test("An unmapped module Skill is rejected before trusting its schema claims")
-    func moduleBackedSkillRejectsSchemaMismatch() async throws {
+    func unmappedModuleSkillRejectsSchemaClaims() async throws {
         let id = SkillID(rawValue: "custom.echo")
         let manifest = SkillManifest(
             id: id,
