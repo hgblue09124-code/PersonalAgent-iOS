@@ -1,5 +1,6 @@
 import XCTest
 import PAKernel
+import PAModules
 @testable import PASkills
 
 final class SkillRuntimeTests: XCTestCase {
@@ -74,6 +75,22 @@ final class SkillRuntimeTests: XCTestCase {
 
 }
 
+private actor ModuleInvocationCounter {
+    private var invocations = 0
+    func increment() { invocations += 1 }
+    func value() -> Int { invocations }
+}
+
+private struct InvocationCountingModule: Module {
+    let contract: ModuleContract
+    let counter: ModuleInvocationCounter
+
+    func execute(_ input: ModulePayload) async throws -> ModulePayload {
+        await counter.increment()
+        return ModulePayload(schema: contract.outputSchema, fields: ["output": "executed"])
+    }
+}
+
 private struct FixedOutputSkillExecutor: SkillExecutor {
     let output: String
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String { output }
@@ -81,6 +98,105 @@ private struct FixedOutputSkillExecutor: SkillExecutor {
 }
 
 extension SkillRuntimeTests {
+    func testModuleIDAloneCannotAuthorizeArbitraryInstalledSkill() async throws {
+        let counter = ModuleInvocationCounter()
+        let inputSchema = SchemaDocument(identifier: "test.raw-module.input")
+        let outputSchema = SchemaDocument(identifier: "test.raw-module.output")
+        let contract = ModuleContract(
+            id: ModuleID(rawValue: "test.raw-module"),
+            name: "Test raw module",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            kind: .atomic,
+            capabilities: .execute,
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredFields: ["arguments"]
+        )
+        let module = InvocationCountingModule(contract: contract, counter: counter)
+        let catalog = try ModuleCatalog(modules: [module])
+        let moduleRuntime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.execute],
+            policy: AllowSkillExecutionPolicy()
+        )
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "untrusted.raw-module"),
+            name: "Untrusted raw module",
+            description: "Attempts to forward arbitrary arguments to a registered module.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Run arbitrary module arguments.",
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredCapabilities: [.execute],
+            metadata: ["moduleID": "test.raw-module"]
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{"arguments":"must-not-run"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("A moduleID without an exact allowlisted Skill adapter must not authorize execution")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
+        }
+        XCTAssertEqual(await counter.value(), 0)
+    }
+
+    func testExecutorMetadataCannotGrantNormalizationToAnotherSkillID() async throws {
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "untrusted.normalize"),
+            name: "Untrusted normalization",
+            description: "Attempts to select a built-in executor through metadata.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Normalize text.",
+            inputSchema: SkillRuntime.normalizationManifest.inputSchema,
+            outputSchema: SkillRuntime.normalizationManifest.outputSchema,
+            requiredCapabilities: SkillRuntime.normalizationManifest.requiredCapabilities,
+            metadata: ["executor": "text.normalize"]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{"text":"  must-not-normalize  "}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("Executor metadata must not grant a built-in executor to another Skill ID")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
+        }
+    }
+
+    func testExplicitlyRegisteredCustomExecutorStillExecutesAndVerifies() async throws {
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "custom.explicit"),
+            name: "Explicit custom executor",
+            description: "Uses a trusted executor registered by the host.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return trusted output.",
+            inputSchema: SchemaDocument(identifier: "custom.explicit.input"),
+            outputSchema: SchemaDocument(identifier: "custom.explicit.output"),
+            requiredCapabilities: [.execute]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(FixedOutputSkillExecutor(output: "trusted"), for: manifest.id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+
+        let output = try await runtime.executeVerified(
+            id: manifest.id,
+            inputJSON: #"{"input":"ignored-by-test-executor"}"#,
+            policy: AllowSkillExecutionPolicy()
+        )
+        XCTAssertEqual(output, "trusted")
+    }
+
     func testExecutorRegistryDoesNotAllowSilentReplacement() async throws {
         let registry = SkillExecutorRegistry()
         await registry.register(FixedOutputSkillExecutor(output: "trusted"), for: "custom.skill")
