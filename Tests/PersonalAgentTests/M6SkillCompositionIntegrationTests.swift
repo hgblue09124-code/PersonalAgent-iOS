@@ -146,8 +146,8 @@ struct M6SkillCompositionIntegrationTests {
         let englishEnvelope = try JSONSerialization.jsonObject(
             with: Data((englishResult?.outputJSON ?? "{}").utf8)
         ) as? [String: String]
-        let englishPayload = try JSONSerialization.jsonObject(
-            with: Data((englishEnvelope?["output"] ?? "{}").utf8)
+        let englishReadPayload = try JSONSerialization.jsonObject(
+            with: Data((englishReadEnvelope?["output"] ?? "{}").utf8)
         ) as? [String: Any]
         #expect(englishPayload?["query"] as? String == "needle")
         #expect(englishPayload?["matches"] as? [String] == ["workspace/notes.md"])
@@ -187,14 +187,14 @@ struct M6SkillCompositionIntegrationTests {
         )
         #expect(englishRead?.skillID.rawValue == "workspace.read-file")
         #expect(englishRead?.verified == true)
-        let englishEnvelope = try JSONSerialization.jsonObject(
+        let englishReadEnvelope = try JSONSerialization.jsonObject(
             with: Data((englishRead?.outputJSON ?? "{}").utf8)
         ) as? [String: String]
         let englishPayload = try JSONSerialization.jsonObject(
             with: Data((englishEnvelope?["output"] ?? "{}").utf8)
         ) as? [String: Any]
-        #expect(englishPayload?["content"] as? String == "A unique needle appears here.")
-        #expect(englishPayload?["bytes"] as? Int == "A unique needle appears here.".utf8.count)
+        #expect(englishReadPayload?["content"] as? String == "A unique needle appears here.")
+        #expect(englishReadPayload?["bytes"] as? Int == "A unique needle appears here.".utf8.count)
 
         var missingReadRejected = false
         do {
