@@ -84,10 +84,17 @@ private actor ModuleInvocationCounter {
 private struct InvocationCountingModule: Module {
     let contract: ModuleContract
     let counter: ModuleInvocationCounter
+    let outputJSON: String
+
+    init(contract: ModuleContract, counter: ModuleInvocationCounter, outputJSON: String = "executed") {
+        self.contract = contract
+        self.counter = counter
+        self.outputJSON = outputJSON
+    }
 
     func execute(_ input: ModulePayload) async throws -> ModulePayload {
         await counter.increment()
-        return ModulePayload(schema: contract.outputSchema, fields: ["output": "executed"])
+        return ModulePayload(schema: contract.outputSchema, fields: ["output": outputJSON])
     }
 }
 
@@ -202,6 +209,108 @@ extension SkillRuntimeTests {
         }
         let invocationCount = await counter.value()
         XCTAssertEqual(invocationCount, 0)
+    }
+
+    func testCreateFileAdapterRejectsOutputWithoutReadbackVerification() async throws {
+        let counter = ModuleInvocationCounter()
+        let inputSchema = SchemaDocument(identifier: "tool.workspace.write.input")
+        let outputSchema = SchemaDocument(identifier: "tool.workspace.write.output")
+        let contract = ModuleContract(
+            id: ModuleID(rawValue: "tool.workspace.write"),
+            name: "Test workspace write module",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            kind: .atomic,
+            capabilities: .write,
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredFields: ["arguments"]
+        )
+        let forgedResult = #"{"operation":"write","path":"workspace/blocked.md","bytes":2,"verified":false}"#
+        let catalog = try ModuleCatalog(modules: [
+            InvocationCountingModule(contract: contract, counter: counter, outputJSON: forgedResult)
+        ])
+        let moduleRuntime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.write],
+            policy: AllowSkillExecutionPolicy()
+        )
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "workspace.create-file"),
+            name: "Tạo File",
+            description: "Creates a workspace file.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Create a file and verify read-back.",
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredCapabilities: [.write],
+            metadata: ["moduleID": "tool.workspace.write", "chatInputAdapter": "workspace.create-file"]
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{"text":"Tạo file workspace/blocked.md với nội dung: hi"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("A write result without read-back verification must not be accepted")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .verificationFailed(manifest.id))
+        }
+    }
+
+    func testSearchAdapterRejectsUnsafeMatchPaths() async throws {
+        let counter = ModuleInvocationCounter()
+        let inputSchema = SchemaDocument(identifier: "tool.workspace.read.input")
+        let outputSchema = SchemaDocument(identifier: "tool.workspace.read.output")
+        let contract = ModuleContract(
+            id: ModuleID(rawValue: "tool.workspace.read"),
+            name: "Test workspace read module",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            kind: .atomic,
+            capabilities: .read,
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredFields: ["arguments"]
+        )
+        let forgedResult = #"{"operation":"search","query":"needle","matches":["../secrets.txt"],"visited":1,"truncated":false}"#
+        let catalog = try ModuleCatalog(modules: [
+            InvocationCountingModule(contract: contract, counter: counter, outputJSON: forgedResult)
+        ])
+        let moduleRuntime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read],
+            policy: AllowSkillExecutionPolicy()
+        )
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "workspace.search"),
+            name: "Workspace Search",
+            description: "Searches workspace text.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Search workspace text.",
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredCapabilities: [.read],
+            metadata: ["moduleID": "tool.workspace.read", "chatInputAdapter": "workspace.search"]
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{"text":"Search workspace for needle"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("Search results containing an unsafe path must not be accepted as verified")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .verificationFailed(manifest.id))
+        }
     }
 
     func testExecutorMetadataCannotGrantNormalizationToAnotherSkillID() async throws {

@@ -557,25 +557,67 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         guard BuiltInModuleSkillBinding.matches(manifest: manifest, moduleID: moduleID),
               (try? await matchingContract(for: manifest)) != nil,
               let data = outputJSON.data(using: .utf8),
-              let envelope = (try? JSONSerialization.jsonObject(with: data)) as? [String: String] else {
-            return false
-        }
-        guard manifest.metadata["chatInputAdapter"] == "workspace.read-file" else {
-            return true
-        }
-        guard let toolJSON = envelope["output"],
+              let envelope = (try? JSONSerialization.jsonObject(with: data)) as? [String: String],
+              let toolJSON = envelope["output"],
               let toolData = toolJSON.data(using: .utf8),
               let payload = (try? JSONSerialization.jsonObject(with: toolData)) as? [String: Any],
-              payload["operation"] as? String == "read",
-              payload["verified"] as? Bool == true,
-              let path = payload["path"] as? String,
-              Self.isWorkspaceReadPath(path),
-              let content = payload["content"] as? String,
-              let byteCount = payload["bytes"] as? Int,
-              byteCount == content.utf8.count else {
+              let operation = payload["operation"] as? String else {
             return false
         }
-        return true
+
+        switch manifest.metadata["chatInputAdapter"] {
+        case "workspace.read-file":
+            guard operation == "read",
+                  payload["verified"] as? Bool == true,
+                  let path = payload["path"] as? String,
+                  Self.isSafeRelativePath(path, roots: ["workspace"]),
+                  let content = payload["content"] as? String,
+                  let byteCount = payload["bytes"] as? Int,
+                  byteCount == content.utf8.count,
+                  byteCount <= 256 * 1024 else {
+                return false
+            }
+            return true
+        case "workspace.create-file":
+            guard operation == "write",
+                  payload["verified"] as? Bool == true,
+                  let path = payload["path"] as? String,
+                  Self.isSafeRelativePath(path, roots: ["agents", "skills", "modules", "tools", "workspace"]),
+                  let byteCount = payload["bytes"] as? Int,
+                  (0...256 * 1024).contains(byteCount) else {
+                return false
+            }
+            return true
+        case "workspace.search":
+            guard operation == "search",
+                  let query = payload["query"] as? String,
+                  !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  query.count <= 256,
+                  let matches = payload["matches"] as? [String],
+                  matches.count <= 50,
+                  matches.allSatisfy({ Self.isSafeRelativePath($0, roots: ["agents", "skills", "modules", "tools", "workspace"]) }),
+                  let visited = payload["visited"] as? Int,
+                  (0...500).contains(visited),
+                  payload["truncated"] as? Bool != nil else {
+                return false
+            }
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func isSafeRelativePath(_ path: String, roots: Set<String>) -> Bool {
+        guard !path.isEmpty, path.count <= 512, !path.hasPrefix("/"), !path.contains("\\") else {
+            return false
+        }
+        let components = path.split(separator: "/", omittingEmptySubsequences: false)
+        guard components.count >= 2,
+              let root = components.first?.lowercased(),
+              roots.contains(root) else {
+            return false
+        }
+        return components.dropFirst().allSatisfy { !$0.isEmpty && $0 != "." && $0 != ".." }
     }
 
     private func matchingContract(for manifest: SkillManifest) async throws -> ModuleContract {
