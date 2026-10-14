@@ -1,0 +1,37 @@
+{
+  "id": "PASKILL-15",
+  "title": "Normalize Vietnamese intent for built-in Skill selection",
+  "status": "in_progress",
+  "goal": "Ensure common Vietnamese requests select the intended built-in workspace Skill without falling through to answer-only chat when the request clearly names a supported action.",
+  "context": "SkillRuntime.intentTokens currently tokenizes words but removes only English stop words and does not map Vietnamese action verbs to the English Skill names. A request such as “Hãy tìm kiếm trong workspace” has only one meaningful overlap with “Workspace Search”, so the existing subset/overlap selection rules can return noSelection even though the built-in Skill is in scope.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-15.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change policy, capability grants, executor mapping, workspace scope, or output verification.",
+    "Do not make ambiguous requests select an arbitrary Skill.",
+    "Do not modify UI, provider, storage, terminal, or unrelated composition code."
+  ],
+  "acceptance_criteria": [
+    "Vietnamese search/read/create requests normalize to action tokens that match the exact built-in Skill names.",
+    "English Skill selection behavior remains unchanged.",
+    "Ambiguous or unsupported requests continue to return noSelection.",
+    "Regression tests cover Vietnamese search, read-file, and create-file intent selection.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-15.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-15.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #459",
+    "PR #460"
+  ],
+  "recovery": "Keep changes confined to SkillRuntime intent token normalization and focused SkillRuntime tests. If a test becomes ambiguous, improve Vietnamese stop-word/synonym normalization rather than adding broad fallback selection.",
+  "evidence": []
+}
