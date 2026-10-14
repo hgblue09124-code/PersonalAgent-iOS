@@ -608,7 +608,7 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     }
 
     private static func isSafeRelativePath(_ path: String, roots: Set<String>) -> Bool {
-        guard !path.isEmpty, path.count <= 512, !path.hasPrefix("/"), !path.contains("\\\\") else {
+        guard !path.isEmpty, path.count <= 512, !path.hasPrefix("/"), !path.contains("\\") else {
             return false
         }
         let components = path.split(separator: "/", omittingEmptySubsequences: false)
