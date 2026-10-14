@@ -337,15 +337,15 @@ struct M6SkillCompositionIntegrationTests {
         )
 
         let direct = try await root.runChatSkillIfMatched(
-            goalStatement: "Workspace Query search",
+            goalStatement: "Tìm kiếm workspace secretneedle",
             agentID: "personal.workspace-only"
         )
         let directRead = try await root.runChatSkillIfMatched(
-            goalStatement: "Workspace Query read",
+            goalStatement: "Đọc file workspace/blocked.md",
             agentID: "personal.workspace-only"
         )
-        let team = try await root.runChatTeamIfMatched(goalStatement: "Workspace Query search")
-        let teamRead = try await root.runChatTeamIfMatched(goalStatement: "Workspace Query read")
+        let team = try await root.runChatTeamIfMatched(goalStatement: "Tìm kiếm workspace secretneedle")
+        let teamRead = try await root.runChatTeamIfMatched(goalStatement: "Đọc file workspace/blocked.md")
         #expect(direct == nil)
         #expect(directRead == nil)
         #expect(team == nil)
