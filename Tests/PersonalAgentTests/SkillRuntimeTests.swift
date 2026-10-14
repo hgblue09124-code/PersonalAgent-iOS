@@ -32,6 +32,50 @@ final class SkillRuntimeTests: XCTestCase {
         XCTAssertEqual(SkillRuntime.chatInputText(from: english), english)
     }
 
+    func testVietnameseWorkspaceRequestsSelectTheMatchingBuiltInSkill() async throws {
+        let manifests = [
+            SkillManifest(
+                id: SkillID(rawValue: "workspace.search"),
+                name: "Workspace Search",
+                description: "Search workspace files by query.",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                instructions: "Search workspace files.",
+                inputSchema: SchemaDocument(identifier: "search.input"),
+                outputSchema: SchemaDocument(identifier: "search.output"),
+                requiredCapabilities: [.read]
+            ),
+            SkillManifest(
+                id: SkillID(rawValue: "workspace.read-file"),
+                name: "Workspace Read File",
+                description: "Read a file from the workspace.",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                instructions: "Read workspace files.",
+                inputSchema: SchemaDocument(identifier: "read.input"),
+                outputSchema: SchemaDocument(identifier: "read.output"),
+                requiredCapabilities: [.read]
+            ),
+            SkillManifest(
+                id: SkillID(rawValue: "workspace.create-file"),
+                name: "Create File",
+                description: "Create a new workspace file.",
+                version: SemanticVersion(major: 1, minor: 0, patch: 0),
+                instructions: "Create workspace files.",
+                inputSchema: SchemaDocument(identifier: "create.input"),
+                outputSchema: SchemaDocument(identifier: "create.output"),
+                requiredCapabilities: [.write]
+            )
+        ]
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: manifests))
+
+        let search = try await runtime.select(goalStatement: "Hãy tìm kiếm trong workspace các ghi chú")
+        let read = try await runtime.select(goalStatement: "Vui lòng đọc file workspace/notes.md")
+        let create = try await runtime.select(goalStatement: "Hãy tạo file workspace/notes.md với nội dung: Xin chào")
+
+        XCTAssertEqual(search.rawValue, "workspace.search")
+        XCTAssertEqual(read.rawValue, "workspace.read-file")
+        XCTAssertEqual(create.rawValue, "workspace.create-file")
+    }
+
     func testChatInputTextStillExtractsOrdinaryColonDelimitedPayload() {
         XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text"), "actual text")
     }
