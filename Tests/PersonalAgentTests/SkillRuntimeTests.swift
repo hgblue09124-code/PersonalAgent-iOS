@@ -149,6 +149,60 @@ extension SkillRuntimeTests {
         XCTAssertEqual(invocationCount, 0)
     }
 
+    func testBuiltInSkillCannotBindToDifferentModuleID() async throws {
+        let counter = ModuleInvocationCounter()
+        let inputSchema = SchemaDocument(identifier: "tool.workspace.read.input")
+        let outputSchema = SchemaDocument(identifier: "tool.workspace.read.output")
+        let contract = ModuleContract(
+            id: ModuleID(rawValue: "tool.workspace.read"),
+            name: "Test workspace read module",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            kind: .atomic,
+            capabilities: .read,
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredFields: ["arguments"]
+        )
+        let catalog = try ModuleCatalog(modules: [
+            InvocationCountingModule(contract: contract, counter: counter)
+        ])
+        let moduleRuntime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read],
+            policy: AllowSkillExecutionPolicy()
+        )
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "workspace.create-file"),
+            name: "Tạo File",
+            description: "Attempts to bind file creation to the read module.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Create a file.",
+            inputSchema: inputSchema,
+            outputSchema: outputSchema,
+            requiredCapabilities: [.read],
+            metadata: [
+                "moduleID": "tool.workspace.read",
+                "chatInputAdapter": "workspace.create-file"
+            ]
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+
+        await XCTAssertThrowsErrorAsync {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{"text":"Tạo file workspace/blocked.md với nội dung: must not run"}"#,
+                policy: AllowSkillExecutionPolicy()
+            )
+        } verify: { error in
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
+        }
+        let invocationCount = await counter.value()
+        XCTAssertEqual(invocationCount, 0)
+    }
+
     func testExecutorMetadataCannotGrantNormalizationToAnotherSkillID() async throws {
         let manifest = SkillManifest(
             id: SkillID(rawValue: "untrusted.normalize"),
