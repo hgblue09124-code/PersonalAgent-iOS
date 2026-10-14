@@ -145,7 +145,8 @@ extension SkillRuntimeTests {
         } catch {
             XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
         }
-        XCTAssertEqual(await counter.value(), 0)
+        let invocationCount = await counter.value()
+        XCTAssertEqual(invocationCount, 0)
     }
 
     func testExecutorMetadataCannotGrantNormalizationToAnotherSkillID() async throws {
