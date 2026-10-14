@@ -331,12 +331,22 @@ public struct SkillRuntime: Sendable {
             "make", "using", "use", "with", "from", "into", "about",
             "this", "that", "these", "those", "your", "you", "the",
             "and", "for", "are", "was", "were", "have", "has", "had",
-            "can", "how", "what", "when", "where", "why", "who"
+            "can", "how", "what", "when", "where", "why", "who",
+            "hãy", "vui", "lòng", "giúp", "tôi", "mình", "anh", "em",
+            "trong", "trên", "dưới", "với", "cho", "của", "một", "các",
+            "những", "và", "là", "để", "này", "đó", "tôi", "bạn"
+        ]
+        let actionSynonyms: [String: String] = [
+            "tìm": "search", "kiếm": "search", "tra": "search", "cứu": "search",
+            "đọc": "read", "xem": "read", "mở": "read",
+            "tạo": "create", "viết": "create", "soạn": "create",
+            "tệp": "file"
         ]
         return Set(
             value.lowercased()
                 .split { !$0.isLetter && !$0.isNumber }
                 .map(String.init)
+                .map { actionSynonyms[$0] ?? $0 }
                 .filter { $0.count > 2 && !stopWords.contains($0) }
         )
     }
