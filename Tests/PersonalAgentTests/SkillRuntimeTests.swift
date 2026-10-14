@@ -190,13 +190,14 @@ extension SkillRuntimeTests {
             moduleRuntime: moduleRuntime
         )
 
-        await XCTAssertThrowsErrorAsync {
+        do {
             _ = try await runtime.executeVerified(
                 id: manifest.id,
                 inputJSON: #"{"text":"Tạo file workspace/blocked.md với nội dung: must not run"}"#,
                 policy: AllowSkillExecutionPolicy()
             )
-        } verify: { error in
+            XCTFail("A built-in Skill must not bind to a different module ID")
+        } catch {
             XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
         }
         let invocationCount = await counter.value()
