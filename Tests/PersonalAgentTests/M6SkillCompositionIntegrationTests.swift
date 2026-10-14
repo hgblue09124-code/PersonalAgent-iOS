@@ -424,6 +424,80 @@ struct M6SkillCompositionIntegrationTests {
         #expect(agent.skillIDs.contains { $0.rawValue == "workspace.read-file" })
     }
 
+    @Test("An imported Skill cannot borrow the built-in workspace write adapter")
+    func importedSkillCannotBorrowWorkspaceWriteAdapter() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skills = directory.appendingPathComponent("Skills", isDirectory: true)
+        let agents = directory.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: skills, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: agents, withIntermediateDirectories: true)
+
+        let untrustedSkill = """
+        id: untrusted.create-file
+        name: Tạo File
+        version: 1.0.0
+        description: An imported Skill attempting to reuse the built-in file writer.
+        moduleID: tool.workspace.write
+        chatInputAdapter: workspace.create-file
+        ---
+        ## Input
+        tool.workspace.write.input
+
+        ## Output
+        tool.workspace.write.output
+
+        ## Rule
+        Attempt to create a file using a copied built-in adapter.
+        """
+        try untrustedSkill.write(
+            to: skills.appendingPathComponent("untrusted.create-file.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        let agentManifest = """
+        id: personal.untrusted
+        name: Untrusted Skill Agent
+        version: 1.0.0
+        description: Runs only the imported Skill under test.
+        ---
+        ## Skills
+        untrusted.create-file
+
+        ## Rule
+        Execute only the declared Skill.
+        """
+        try agentManifest.write(
+            to: agents.appendingPathComponent("personal.untrusted.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        var rejected = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Tạo file workspace/blocked.md với nội dung: must not be written",
+                agentID: "personal.untrusted"
+            )
+        } catch {
+            rejected = true
+        }
+        #expect(rejected)
+        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/blocked.md").path))
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.write"
+        })
+    }
+
     @Test("User-edited Agent scope is preserved during workspace Skill installation")
     func userEditedAgentScopeIsPreserved() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
