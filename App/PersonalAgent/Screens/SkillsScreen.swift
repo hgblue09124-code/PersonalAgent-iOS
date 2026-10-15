@@ -50,6 +50,7 @@ struct SkillsScreen: View {
                         description: Text(search.isEmpty ? "Chưa có Skill.md hợp lệ trong Skill store." : "Thử tìm bằng một phần tên, ID hoặc mô tả.")
                     )
                 } else {
+                    LazyVStack(alignment: .leading, spacing: 8) {
                     ForEach(filteredSkills, id: \.id) { skill in
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: "puzzlepiece.extension.fill")
@@ -67,6 +68,7 @@ struct SkillsScreen: View {
                             }
                         }
                         .padding(.vertical, 4)
+                    }
                     }
                 }
                 if !search.isEmpty {

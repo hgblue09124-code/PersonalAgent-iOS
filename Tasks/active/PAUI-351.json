@@ -1,0 +1,36 @@
+{
+  "id": "PAUI-351",
+  "title": "Render long capability lists on demand",
+  "status": "in_progress",
+  "goal": "Reduce SwiftUI work when opening Skills, Memory, and Models by lazily creating rows in potentially long lists without changing data, ordering, actions, or persistence behavior.",
+  "context": "PR #470 removed duplicate startup refresh and deferred model preparation to Chat. Follow-up inspection found Skills, Memory, and installed-model rows are rendered inside eager VStack containers even though the screens are hosted in scrolling surfaces. Use LazyVStack for these repeated rows so off-screen row views are created on demand. Chat already uses LazyVStack; workspace uses List and should remain unchanged.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/SkillsScreen.swift",
+    "App/PersonalAgent/Screens/MemoryScreen.swift",
+    "App/PersonalAgent/Screens/ModelsScreen.swift",
+    "Tasks/active/PAUI-351.json"
+  ],
+  "forbidden_changes": [
+    "Do not change Agent visual design, navigation, or row ordering.",
+    "Do not change model, Skill, Memory, persistence, or security contracts.",
+    "Do not claim measured performance gains without physical-device measurements.",
+    "Do not modify unrelated screens or add dependencies."
+  ],
+  "acceptance_criteria": [
+    "Skills rows are hosted by LazyVStack and preserve search, empty-state, and row content behavior.",
+    "Memory rows are hosted by LazyVStack and preserve filtering and forget actions.",
+    "Installed model rows are hosted by LazyVStack and preserve selection, deletion, and import behavior.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Physical-device performance remains unmeasured unless device evidence is collected."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-351.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-351.json --base origin/main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Review the diff to verify only repeated-row container behavior changed."
+  ],
+  "dependencies": [
+    "PR #470 startup/model deferral baseline"
+  ],
+  "recovery": "Revert the single task commit if native build or row interactions regress; restore eager row containers only in the affected screen."
+}
