@@ -70,9 +70,18 @@ struct ScreenScaffold<Content: View>: View {
     }
 
     private var scaffoldContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            screenHeader
-            content()
+        Group {
+            if scrollable {
+                LazyVStack(alignment: .leading, spacing: 16) {
+                    screenHeader
+                    content()
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 16) {
+                    screenHeader
+                    content()
+                }
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: scrollable ? nil : .infinity, alignment: .topLeading)
         .padding(.horizontal, AgentDesign.horizontalPadding)

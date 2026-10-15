@@ -1,0 +1,34 @@
+{
+  "id": "PAUI-353",
+  "title": "Defer off-screen content in scrollable screens",
+  "status": "in_progress",
+  "goal": "Reduce initial layout and rendering work on long native screens by lazily constructing off-screen sections while preserving the non-scrollable Chat layout.",
+  "context": "ScreenScaffold currently wraps all scrollable screen sections in a regular VStack inside a ScrollView. Screens such as Settings contain many panels and controls, so this eagerly builds the entire content tree before the user scrolls. Use LazyVStack only when scrollable is true; keep the existing VStack for scrollable=false to avoid changing fixed Chat layout behavior.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/Shared.swift",
+    "Tasks/active/PAUI-353.json"
+  ],
+  "forbidden_changes": [
+    "Do not change screen content, order, spacing, navigation, or control behavior.",
+    "Do not apply lazy layout to scrollable=false screens.",
+    "Do not modify Chat stream/runtime/provider behavior, Orb, or startup error handling.",
+    "Do not claim measured device performance improvement without physical-device measurements."
+  ],
+  "acceptance_criteria": [
+    "Scrollable ScreenScaffold content uses LazyVStack for deferred off-screen rendering.",
+    "Non-scrollable ScreenScaffold content retains the existing VStack layout behavior.",
+    "Existing padding, spacing, alignment, screen header, and content order remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Physical-device performance is reported as unmeasured unless actual iPhone evidence is collected."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-353.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-353.json --base origin/main",
+    "Review the conditional lazy/non-lazy layout branch and unchanged modifiers.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PR #472 stream-render isolation baseline"
+  ],
+  "recovery": "Revert the single task commit if native build fails or scrolling/layout regressions are reported."
+}
