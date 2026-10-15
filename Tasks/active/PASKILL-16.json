@@ -3,7 +3,7 @@
   "title": "Preserve workspace root when parsing direct read commands",
   "status": "in_progress",
   "goal": "Make supported direct Vietnamese and English workspace-read phrases execute against the intended workspace-relative path rather than stripping the required workspace root and failing as malformed input.",
-  "context": "SkillRuntime.parseWorkspaceReadPath advertises prefixes such as “đọc workspace/” and “read workspace/”, but strips the entire prefix including “workspace/”. The resulting relative path no longer passes isWorkspaceReadPath, which requires the workspace/ root. Existing integration tests cover “đọc file workspace/...” but not the direct forms.",
+  "context": "SkillRuntime.parseWorkspaceReadPath advertises prefixes such as “đọc workspace/” and “read workspace/”, but strips the entire prefix including “workspace/”. The resulting relative path no longer passes isWorkspaceReadPath, which requires the workspace/ root. Existing integration tests cover “đọc file workspace/...” but not the direct forms. The first CI run also proved these direct phrases do not select the read Skill because the filename path does not contribute the `file` intent token. The fix therefore also recognizes an explicit workspace path as a file target when the normalized goal is a read action.",
   "allowed_paths": [
     "Tasks/active/PASKILL-16.json",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
@@ -15,10 +15,11 @@
     "Do not modify UI, provider, storage, terminal, or unrelated composition code."
   ],
   "acceptance_criteria": [
-    "Direct Vietnamese and English workspace-read prefixes preserve the workspace/ root.",
+    "Direct Vietnamese and English workspace-read phrases select the read Skill and preserve the workspace/ root.",
     "Existing file-read phrasing and security checks continue to pass.",
     "Regression tests prove the direct command reads the real file and returns verified output.",
-    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Explicit workspace-path read intent remains scoped to read requests; traversal and unsupported paths still fail closed."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-16.json",
@@ -30,6 +31,6 @@
     "Issue #347",
     "PR #460"
   ],
-  "recovery": "Revert the single squashed task commit if direct workspace-read commands regress; retain existing path-root and traversal validation.",
+  "recovery": "Revert the single squashed task commit if direct workspace-read commands regress; retain existing path-root, intent-scope, and traversal validation.",
   "evidence": []
 }
