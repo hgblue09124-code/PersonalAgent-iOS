@@ -237,6 +237,21 @@ struct M6SkillCompositionIntegrationTests {
         #expect(directReadPayload?["content"] as? String == "A unique needle appears here.")
         #expect(directReadPayload?["verified"] as? Bool == true)
 
+        let politeRead = try await root.runChatSkillIfMatched(
+            goalStatement: "Hãy đọc file workspace/notes.md"
+        )
+        #expect(politeRead?.skillID.rawValue == "workspace.read-file")
+        #expect(politeRead?.verified == true)
+        let politeReadEnvelope = try JSONSerialization.jsonObject(
+            with: Data((politeRead?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let politeReadPayload = try JSONSerialization.jsonObject(
+            with: Data((politeReadEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(politeReadPayload?["path"] as? String == "workspace/notes.md")
+        #expect(politeReadPayload?["content"] as? String == "A unique needle appears here.")
+        #expect(politeReadPayload?["verified"] as? Bool == true)
+
         let directEnglishRead = try await root.runChatSkillIfMatched(
             goalStatement: "Read workspace/notes.md"
         )
