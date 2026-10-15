@@ -138,6 +138,20 @@ struct M6SkillCompositionIntegrationTests {
         #expect(resultPayload?["query"] as? String == "needle")
         #expect(resultPayload?["matches"] as? [String] == ["workspace/notes.md"])
 
+        let politeResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Hãy tìm kiếm trong workspace needle"
+        )
+        #expect(politeResult?.skillID.rawValue == "workspace.search")
+        #expect(politeResult?.verified == true)
+        let politeEnvelope = try JSONSerialization.jsonObject(
+            with: Data((politeResult?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let politePayload = try JSONSerialization.jsonObject(
+            with: Data((politeEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(politePayload?["query"] as? String == "needle")
+        #expect(politePayload?["matches"] as? [String] == ["workspace/notes.md"])
+
         let englishResult = try await root.runChatSkillIfMatched(
             goalStatement: "Search workspace for needle"
         )
@@ -164,6 +178,16 @@ struct M6SkillCompositionIntegrationTests {
             with: Data((noMatchEnvelope?["output"] ?? "{}").utf8)
         ) as? [String: Any]
         #expect(noMatchPayload?["matches"] as? [String] == [])
+
+        for emptySearch in ["Hãy tìm kiếm trong workspace", "Search workspace"] {
+            var rejectedAsMalformed = false
+            do {
+                _ = try await root.runChatSkillIfMatched(goalStatement: emptySearch)
+            } catch let error as SkillExecutionError {
+                rejectedAsMalformed = error == .malformedSkill
+            }
+            #expect(rejectedAsMalformed)
+        }
 
         let readResult = try await root.runChatSkillIfMatched(
             goalStatement: "Đọc file workspace/notes.md"

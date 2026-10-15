@@ -649,7 +649,25 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
 
     private static func parseWorkspaceSearchQuery(_ rawText: String) -> String {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalized = trimmed.lowercased()
+        var command = trimmed
+        let politePrefixes = ["hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em "]
+        while let prefix = politePrefixes.first(where: { command.lowercased().hasPrefix($0) }) {
+            command = String(command.dropFirst(prefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        let normalized = command.lowercased()
+        let emptyCommands: Set<String> = [
+            "tìm kiếm trong workspace", "tìm kiếm trong workspace:",
+            "tìm trong workspace", "tìm trong workspace:",
+            "tìm kiếm workspace", "tìm kiếm workspace:",
+            "search workspace for", "search workspace for:",
+            "search workspace", "search workspace:",
+            "find in workspace", "find in workspace:",
+            "find workspace", "find workspace:"
+        ]
+        if emptyCommands.contains(normalized) {
+            return ""
+        }
         let prefixes = [
             "tìm kiếm trong workspace: ", "tìm kiếm trong workspace ",
             "tìm trong workspace: ", "tìm trong workspace ",
@@ -660,9 +678,9 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             "find workspace: ", "find workspace "
         ]
         guard let prefix = prefixes.first(where: { normalized.hasPrefix($0) }) else {
-            return trimmed
+            return command
         }
-        return String(trimmed.dropFirst(prefix.count))
+        return String(command.dropFirst(prefix.count))
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
