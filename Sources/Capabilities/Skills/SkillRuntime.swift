@@ -650,6 +650,18 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     private static func parseWorkspaceSearchQuery(_ rawText: String) -> String {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalized = trimmed.lowercased()
+        let emptyCommands: Set<String> = [
+            "tìm kiếm trong workspace", "tìm kiếm trong workspace:",
+            "tìm trong workspace", "tìm trong workspace:",
+            "tìm kiếm workspace", "tìm kiếm workspace:",
+            "search workspace for", "search workspace for:",
+            "search workspace", "search workspace:",
+            "find in workspace", "find in workspace:",
+            "find workspace", "find workspace:"
+        ]
+        if emptyCommands.contains(normalized) {
+            return ""
+        }
         let prefixes = [
             "tìm kiếm trong workspace: ", "tìm kiếm trong workspace ",
             "tìm trong workspace: ", "tìm trong workspace ",

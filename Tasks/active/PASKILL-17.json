@@ -1,0 +1,36 @@
+{
+  "id": "PASKILL-17",
+  "title": "Reject workspace search commands without a query",
+  "status": "in_progress",
+  "goal": "Prevent a bare workspace-search command with no search term from being executed as a successful search for the command words themselves.",
+  "context": "The workspace search parser accepts prefixed queries, but a bare phrase such as “tìm kiếm trong workspace” or “Search workspace” currently falls through as a non-empty literal query and can return a verified empty result instead of rejecting malformed Skill input.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-17.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace path or secret filtering.",
+    "Do not change Skill executor identity binding, policy, or output verification.",
+    "Do not alter answer-only chat fallback for genuinely unrelated requests."
+  ],
+  "acceptance_criteria": [
+    "Recognized Vietnamese and English search commands with no query fail as malformed Skill input.",
+    "Search commands with explicit non-empty terms still return verified results.",
+    "Ambiguous and unsupported intents remain fail-closed.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-17.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-17.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #459",
+    "PR #467"
+  ],
+  "recovery": "Revert the single squashed task commit if empty-query handling changes valid search behavior; keep the exact empty-command guard ahead of prefix parsing.",
+  "evidence": []
+}
