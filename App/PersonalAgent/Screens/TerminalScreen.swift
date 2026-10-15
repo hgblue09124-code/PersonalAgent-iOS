@@ -170,15 +170,16 @@ struct TerminalScreen: View {
         let priorOutputCount = await terminal.outputs().count
         do {
             _ = try await terminal.execute(input, registry: registry, confirmationGranted: confirmed)
-            appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
             let outputs = await terminal.outputs()
             if input == "clear" {
                 transcript.removeAll()
             } else {
-                for item in outputs.dropFirst(priorOutputCount) {
+                var newLines = [TerminalLine(text: "$ " + input, kind: .command)]
+                newLines.append(contentsOf: outputs.dropFirst(priorOutputCount).map { item in
                     let kind: TerminalLine.Kind = item.stream == .stderr ? .error : .output
-                    appendTranscript(TerminalLine(text: item.text, kind: kind))
-                }
+                    return TerminalLine(text: item.text, kind: kind)
+                })
+                appendTranscript(contentsOf: newLines)
             }
             pendingDestructiveCommand = nil
         } catch let error as CommandError {
@@ -187,11 +188,15 @@ struct TerminalScreen: View {
                 showDestructiveConfirmation = true
                 return
             }
-            appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
-            appendTranscript(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
+            appendTranscript(contentsOf: [
+                TerminalLine(text: "$ " + input, kind: .command),
+                TerminalLine(text: "error: \(error.localizedDescription)", kind: .error)
+            ])
         } catch {
-            appendTranscript(TerminalLine(text: "$ " + input, kind: .command))
-            appendTranscript(TerminalLine(text: "error: \(error.localizedDescription)", kind: .error))
+            appendTranscript(contentsOf: [
+                TerminalLine(text: "$ " + input, kind: .command),
+                TerminalLine(text: "error: \(error.localizedDescription)", kind: .error)
+            ])
         }
     }
 
@@ -337,7 +342,12 @@ struct TerminalScreen: View {
     }
 
     private func appendTranscript(_ line: TerminalLine) {
-        transcript.append(line)
+        appendTranscript(contentsOf: [line])
+    }
+
+    private func appendTranscript(contentsOf lines: [TerminalLine]) {
+        guard !lines.isEmpty else { return }
+        transcript.append(contentsOf: lines)
         var retainedBytes = transcript.reduce(0) { $0 + $1.text.utf8.count }
         while transcript.count > maximumTranscriptLines || retainedBytes > maximumTranscriptBytes {
             let removed = transcript.removeFirst()
