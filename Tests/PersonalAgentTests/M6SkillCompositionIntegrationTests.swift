@@ -138,6 +138,20 @@ struct M6SkillCompositionIntegrationTests {
         #expect(resultPayload?["query"] as? String == "needle")
         #expect(resultPayload?["matches"] as? [String] == ["workspace/notes.md"])
 
+        let politeResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Hãy tìm kiếm trong workspace needle"
+        )
+        #expect(politeResult?.skillID.rawValue == "workspace.search")
+        #expect(politeResult?.verified == true)
+        let politeEnvelope = try JSONSerialization.jsonObject(
+            with: Data((politeResult?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let politePayload = try JSONSerialization.jsonObject(
+            with: Data((politeEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(politePayload?["query"] as? String == "needle")
+        #expect(politePayload?["matches"] as? [String] == ["workspace/notes.md"])
+
         let englishResult = try await root.runChatSkillIfMatched(
             goalStatement: "Search workspace for needle"
         )
