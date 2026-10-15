@@ -281,7 +281,13 @@ public struct SkillRuntime: Sendable {
             throw SkillExecutionError.noSelection
         }
 
-        let goalTokens = Self.intentTokens(normalizedGoal)
+        var goalTokens = Self.intentTokens(normalizedGoal)
+        // A direct request such as “Read workspace/notes.md” names a file path
+        // without the word “file”. Treat the explicit workspace path as that
+        // intent only when the action is already a read, preserving ambiguity guards.
+        if goalTokens.contains("read"), normalizedGoal.contains("workspace/") {
+            goalTokens.insert("file")
+        }
         let nameMatches = manifests.compactMap { manifest -> (id: SkillID, tokenCount: Int)? in
             let nameTokens = Self.intentTokens(manifest.name)
             guard !nameTokens.isEmpty, nameTokens.isSubset(of: goalTokens) else { return nil }
