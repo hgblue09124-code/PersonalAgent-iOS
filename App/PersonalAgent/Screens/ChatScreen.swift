@@ -2,11 +2,8 @@ import SwiftUI
 
 struct ChatScreen: View {
     @ObservedObject var session: KernelSession
-    @ObservedObject var streamPresentation: ChatStreamPresentation
-
     init(session: KernelSession) {
         self.session = session
-        self._streamPresentation = ObservedObject(wrappedValue: session.chatStreamPresentation)
     }
     @State private var message = ""
     @State private var renameText = ""
@@ -126,13 +123,60 @@ struct ChatScreen: View {
     }
 
     private var messages: some View {
-        ChatMessagesPanel(history: session.chatHistory, streamPresentation: streamPresentation, onOpenPromptLibrary: { showPromptLibrary = true })
+        ChatMessagesPanel(history: session.chatHistory, streamPresentation: session.chatStreamPresentation, onOpenPromptLibrary: { showPromptLibrary = true })
     }
 
     private var composer: some View {
+        ChatComposerPanel(
+            session: session,
+            streamPresentation: session.chatStreamPresentation,
+            message: $message,
+            focused: $focused,
+            onSend: send
+        )
+    }
+
+    
+    private func failureNotice(_ error: String) -> some View {
+        GlassPanel {
+            Label("Agent could not complete the request", systemImage: "exclamationmark.triangle.fill")
+                .font(.headline)
+                .foregroundStyle(.red)
+            Text(error)
+                .font(.footnote)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            NavigationLink {
+                SettingsScreen(session: session)
+            } label: {
+                Label("Check provider and model settings", systemImage: "slider.horizontal.3")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func send() {
+        let value = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty, !session.isSubmitting else { return }
+        message = ""; focused = false
+        Task { await session.submitGoal(value) }
+    }
+}
+
+
+private struct ChatComposerPanel: View {
+    @ObservedObject var session: KernelSession
+    @ObservedObject var streamPresentation: ChatStreamPresentation
+    @Binding var message: String
+    var focused: FocusState<Bool>.Binding
+    let onSend: () -> Void
+
+    var body: some View {
         GlassPanel {
             HStack(alignment: .bottom, spacing: 9) {
-                TextField("Message your Agent…", text: $message, axis: .vertical).focused($focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(send)
+                TextField("Message your Agent…", text: $message, axis: .vertical).focused(focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(onSend)
                 if session.isSubmitting {
                     Button(action: session.cancelCurrentGeneration) {
                         Image(systemName: "stop.fill")
@@ -146,7 +190,7 @@ struct ChatScreen: View {
                     .accessibilityLabel("Stop response generation")
                     .accessibilityHint("Cancels the current Agent request")
                 } else {
-                    Button(action: send) {
+                    Button(action: onSend) {
                         Image(systemName: "arrow.up")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.white)
@@ -181,36 +225,7 @@ struct ChatScreen: View {
             }
         }
     }
-
-    
-    private func failureNotice(_ error: String) -> some View {
-        GlassPanel {
-            Label("Agent could not complete the request", systemImage: "exclamationmark.triangle.fill")
-                .font(.headline)
-                .foregroundStyle(.red)
-            Text(error)
-                .font(.footnote)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            NavigationLink {
-                SettingsScreen(session: session)
-            } label: {
-                Label("Check provider and model settings", systemImage: "slider.horizontal.3")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-        }
-        .accessibilityElement(children: .contain)
-    }
-
-    private func send() {
-        let value = message.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty, !session.isSubmitting else { return }
-        message = ""; focused = false
-        Task { await session.submitGoal(value) }
-    }
 }
-
 
 private struct ChatMessagesPanel: View {
     let history: [ChatTurn]
