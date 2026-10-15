@@ -2,11 +2,8 @@ import SwiftUI
 
 struct ChatScreen: View {
     @ObservedObject var session: KernelSession
-    @ObservedObject var streamPresentation: ChatStreamPresentation
-
     init(session: KernelSession) {
         self.session = session
-        self._streamPresentation = ObservedObject(wrappedValue: session.chatStreamPresentation)
     }
     @State private var message = ""
     @State private var renameText = ""
@@ -126,60 +123,17 @@ struct ChatScreen: View {
     }
 
     private var messages: some View {
-        ChatMessagesPanel(history: session.chatHistory, streamPresentation: streamPresentation, onOpenPromptLibrary: { showPromptLibrary = true })
+        ChatMessagesPanel(history: session.chatHistory, streamPresentation: session.chatStreamPresentation, onOpenPromptLibrary: { showPromptLibrary = true })
     }
 
     private var composer: some View {
-        GlassPanel {
-            HStack(alignment: .bottom, spacing: 9) {
-                TextField("Message your Agent…", text: $message, axis: .vertical).focused($focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(send)
-                if session.isSubmitting {
-                    Button(action: session.cancelCurrentGeneration) {
-                        Image(systemName: "stop.fill")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(.red)
-                            .frame(width: 34, height: 34)
-                            .background(.red.opacity(0.10), in: Circle())
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Stop response generation")
-                    .accessibilityHint("Cancels the current Agent request")
-                } else {
-                    Button(action: send) {
-                        Image(systemName: "arrow.up")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 34, height: 34)
-                            .background(AgentDesign.accent, in: Circle())
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .accessibilityLabel("Send message")
-                }
-            }
-            if session.isSubmitting {
-                HStack(spacing: 7) {
-                    ProgressView().controlSize(.small)
-                    Text(streamPresentation.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
-                        .font(.caption).foregroundStyle(.secondary)
-                    Spacer(minLength: 4)
-                    if let metrics = streamPresentation.responseMetrics {
-                        Text("~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
-                            .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
-                    }
-                }
-            } else if let metrics = streamPresentation.responseMetrics {
-                HStack(spacing: 6) {
-                    Image(systemName: "speedometer").foregroundStyle(.secondary)
-                    Text("Last response · ~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
-                    if let ttft = metrics.timeToFirstToken {
-                        Text("· first token \(ttft, specifier: "%.2f")s")
-                    }
-                }.font(.caption2).foregroundStyle(.secondary)
-            }
-        }
+        ChatComposerPanel(
+            session: session,
+            streamPresentation: session.chatStreamPresentation,
+            message: $message,
+            focused: $focused,
+            onSend: send
+        )
     }
 
     
@@ -211,6 +165,67 @@ struct ChatScreen: View {
     }
 }
 
+
+private struct ChatComposerPanel: View {
+    @ObservedObject var session: KernelSession
+    @ObservedObject var streamPresentation: ChatStreamPresentation
+    @Binding var message: String
+    var focused: FocusState<Bool>.Binding
+    let onSend: () -> Void
+
+    var body: some View {
+        GlassPanel {
+                    HStack(alignment: .bottom, spacing: 9) {
+                        TextField("Message your Agent…", text: $message, axis: .vertical).focused($focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(onSend)
+                        if session.isSubmitting {
+                            Button(action: session.cancelCurrentGeneration) {
+                                Image(systemName: "stop.fill")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(.red)
+                                    .frame(width: 34, height: 34)
+                                    .background(.red.opacity(0.10), in: Circle())
+                                    .contentShape(Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Stop response generation")
+                            .accessibilityHint("Cancels the current Agent request")
+                        } else {
+                            Button(action: onSend) {
+                                Image(systemName: "arrow.up")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 34, height: 34)
+                                    .background(AgentDesign.accent, in: Circle())
+                                    .contentShape(Circle())
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            .accessibilityLabel("Send message")
+                        }
+                    }
+                    if session.isSubmitting {
+                        HStack(spacing: 7) {
+                            ProgressView().controlSize(.small)
+                            Text(streamPresentation.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
+                                .font(.caption).foregroundStyle(.secondary)
+                            Spacer(minLength: 4)
+                            if let metrics = streamPresentation.responseMetrics {
+                                Text("~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
+                                    .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                            }
+                        }
+                    } else if let metrics = streamPresentation.responseMetrics {
+                        HStack(spacing: 6) {
+                            Image(systemName: "speedometer").foregroundStyle(.secondary)
+                            Text("Last response · ~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
+                            if let ttft = metrics.timeToFirstToken {
+                                Text("· first token \(ttft, specifier: "%.2f")s")
+                            }
+                        }.font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
+    }
+}
 
 private struct ChatMessagesPanel: View {
     let history: [ChatTurn]

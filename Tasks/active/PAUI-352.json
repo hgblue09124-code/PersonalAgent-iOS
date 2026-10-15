@@ -1,0 +1,34 @@
+{
+  "id": "PAUI-352",
+  "title": "Isolate Chat stream updates from screen-wide rendering",
+  "status": "in_progress",
+  "goal": "Reduce unnecessary Chat screen recomputation during streamed responses by isolating high-frequency stream observation in the message and composer subviews.",
+  "context": "KernelSession already coalesces streamed deltas to at most 10 publications per second through ChatStreamPresentation. ChatScreen also observes ChatStreamPresentation directly, so each publication can invalidate the parent and reevaluate unrelated content including the full conversation export text. Keep stream observation in the subviews that display streaming text and response metrics.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "Tasks/active/PAUI-352.json"
+  ],
+  "forbidden_changes": [
+    "Do not change stream cadence, Agent runtime, provider behavior, or session state contracts.",
+    "Do not change Chat layout, scrolling semantics, composer actions, or accessibility labels.",
+    "Do not modify Orb, startup error handling, or unrelated screens.",
+    "Do not claim measured performance improvement without device measurements."
+  ],
+  "acceptance_criteria": [
+    "ChatScreen no longer observes ChatStreamPresentation directly.",
+    "Stream updates remain observed by the message list and composer, preserving visible streaming text and metrics.",
+    "Message send, cancellation, keyboard focus, and prompt text editing continue through existing bindings and callbacks.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Physical-device performance is reported as unmeasured unless actual iPhone evidence is collected."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-352.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-352.json --base origin/main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Review Chat streaming, send, cancel, focus, and response metrics code paths in the final diff."
+  ],
+  "dependencies": [
+    "PR #470 and #471 stream/list rendering baseline"
+  ],
+  "recovery": "Revert the single task commit if the native build fails or stream display, sending, cancellation, or focus regresses."
+}
