@@ -85,6 +85,7 @@ struct MemoryScreen: View {
                                 : "Thử từ khóa khác hoặc chọn loại Tất cả.")
                         )
                     } else {
+                        LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(filteredMemories) { record in
                             HStack(alignment: .top, spacing: 10) {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -103,6 +104,7 @@ struct MemoryScreen: View {
                             }
                             .padding(.vertical, 5)
                             Divider().opacity(0.45)
+                        }
                         }
                     }
 

@@ -65,6 +65,7 @@ struct ModelsScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
+                    LazyVStack(alignment: .leading, spacing: 8) {
                     ForEach(session.installedModels, id: \.id) { model in
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
@@ -92,6 +93,7 @@ struct ModelsScreen: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
+                    }
                     }
                 }
             }
