@@ -1,0 +1,33 @@
+{
+  "id": "PAUI-350",
+  "title": "Remove duplicate startup data and model loading",
+  "status": "in_progress",
+  "goal": "Ensure the app has a single owner for startup refresh and active-model preparation so launch does not trigger the same expensive work twice.",
+  "context": "PersonalAgentApp.initialize assigns the new KernelSession to SwiftUI, after which RootView appears and its .task already calls session.refresh() and session.prepareActiveModel(). initialize then awaits the same two operations again on the same session. This duplicates startup work and may trigger avoidable state updates while the interface is becoming interactive. Keep RootView as the owner of view-lifecycle refresh and preparation.",
+  "allowed_paths": [
+    "App/PersonalAgent/PersonalAgentApp.swift",
+    "Tasks/active/PAUI-350.json"
+  ],
+  "forbidden_changes": [
+    "Do not change Agent visual design or navigation behavior.",
+    "Do not alter Kernel, provider, model-loading, or persistence contracts.",
+    "Do not claim measured performance gains without launch-time measurements."
+  ],
+  "acceptance_criteria": [
+    "A newly created KernelSession is assigned once and startup refresh/model preparation are not repeated by PersonalAgentApp.",
+    "RootView remains the single existing owner of refresh and active-model preparation.",
+    "Cancellation and initialization error handling remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Report startup performance as unmeasured unless before/after timing evidence is collected."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-350.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-350.json --base origin/main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "On iPhone, compare cold launch and first-chat readiness before/after if device access is available."
+  ],
+  "dependencies": [
+    "Issue #350"
+  ],
+  "recovery": "Revert the single task commit if removing the duplicate calls exposes a lifecycle dependency; restore exactly one startup owner rather than reintroducing both call sites."
+}
