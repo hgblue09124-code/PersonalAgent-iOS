@@ -165,6 +165,16 @@ struct M6SkillCompositionIntegrationTests {
         ) as? [String: Any]
         #expect(noMatchPayload?["matches"] as? [String] == [])
 
+        for emptySearch in ["Hãy tìm kiếm trong workspace", "Search workspace"] {
+            var rejectedAsMalformed = false
+            do {
+                _ = try await root.runChatSkillIfMatched(goalStatement: emptySearch)
+            } catch let error as SkillExecutionError {
+                rejectedAsMalformed = error == .malformedSkill
+            }
+            #expect(rejectedAsMalformed)
+        }
+
         let readResult = try await root.runChatSkillIfMatched(
             goalStatement: "Đọc file workspace/notes.md"
         )
