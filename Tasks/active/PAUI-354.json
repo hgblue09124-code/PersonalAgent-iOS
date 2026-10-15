@@ -1,0 +1,34 @@
+{
+  "id": "PAUI-354",
+  "title": "Debounce Memory search filtering",
+  "status": "in_progress",
+  "goal": "Keep Memory search responsive with large stored-memory collections by avoiding a full content scan for every intermediate keystroke.",
+  "context": "MemoryScreen.filteredMemories scans all stored records and runs localized case-insensitive matching on each search state update. Apply a short cancellable debounce before using the search query for filtering, while leaving memory changes and kind selection responsive.",
+  "allowed_paths": [
+    "App/PersonalAgent/Screens/MemoryScreen.swift",
+    "Tasks/active/PAUI-354.json"
+  ],
+  "forbidden_changes": [
+    "Do not change memory persistence, deletion, retrieval, or record ordering.",
+    "Do not debounce memory kind selection or delay add/forget/clear actions.",
+    "Do not change Chat, Agent runtime, Orb, or startup handling.",
+    "Do not claim measured performance improvement without device measurements."
+  ],
+  "acceptance_criteria": [
+    "Search filtering uses a separately applied query after a short cancellable debounce.",
+    "Rapid typing cancels prior pending debounce work.",
+    "Changing memory kind and updating stored memory records still updates the displayed results.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Device-level performance is reported as unmeasured unless actual device evidence is collected."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-354.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-354.json --base origin/main",
+    "Review task cancellation and ensure filteredMemories reads only appliedSearch.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PR #473 lazy rendering of scrollable screens"
+  ],
+  "recovery": "Revert the single task commit if search results become stale or native build fails."
+}
