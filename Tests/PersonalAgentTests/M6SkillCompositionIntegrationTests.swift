@@ -196,6 +196,29 @@ struct M6SkillCompositionIntegrationTests {
         #expect(englishReadPayload?["content"] as? String == "A unique needle appears here.")
         #expect(englishReadPayload?["bytes"] as? Int == "A unique needle appears here.".utf8.count)
 
+        // Direct read phrasing includes the workspace root in the prefix. It must
+        // preserve that root through parsing and return verified content.
+        let directVietnameseRead = try await root.runChatSkillIfMatched(
+            goalStatement: "Đọc workspace/notes.md"
+        )
+        #expect(directVietnameseRead?.skillID.rawValue == "workspace.read-file")
+        #expect(directVietnameseRead?.verified == true)
+        let directReadEnvelope = try JSONSerialization.jsonObject(
+            with: Data((directVietnameseRead?.outputJSON ?? "{}").utf8)
+        ) as? [String: String]
+        let directReadPayload = try JSONSerialization.jsonObject(
+            with: Data((directReadEnvelope?["output"] ?? "{}").utf8)
+        ) as? [String: Any]
+        #expect(directReadPayload?["path"] as? String == "workspace/notes.md")
+        #expect(directReadPayload?["content"] as? String == "A unique needle appears here.")
+        #expect(directReadPayload?["verified"] as? Bool == true)
+
+        let directEnglishRead = try await root.runChatSkillIfMatched(
+            goalStatement: "Read workspace/notes.md"
+        )
+        #expect(directEnglishRead?.skillID.rawValue == "workspace.read-file")
+        #expect(directEnglishRead?.verified == true)
+
         var missingReadRejected = false
         do {
             _ = try await root.runChatSkillIfMatched(
