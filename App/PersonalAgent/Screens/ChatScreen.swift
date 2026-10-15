@@ -32,6 +32,9 @@ struct ChatScreen: View {
             }
             composer
         }
+        .task {
+            await session.prepareActiveModel()
+        }
         .alert("Rename conversation", isPresented: $showRename) {
             TextField("Conversation name", text: $renameText)
             Button("Cancel", role: .cancel) {}

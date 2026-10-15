@@ -246,10 +246,27 @@ final class KernelSession: ObservableObject {
         }
     }
 
-    /// Startup-only residency preparation. Refresh remains observational and side-effect free.
+    /// Load the selected local model only when the chat surface is opened.
+    /// Do not route this through run(_:): that helper refreshes every catalog and
+    /// would invalidate unrelated screens after a model load.
     func prepareActiveModel() async {
         guard activeModelID != nil else { return }
-        await run { _ = try await composition.loadActiveLocalModel() }
+        if case .loaded = activeEngineState { return }
+
+        do {
+            _ = try await composition.loadActiveLocalModel()
+            if let engine = try await composition.activeLocalModelEngine() {
+                activeEngineState = await engine.lifecycleState
+            }
+            lastError = nil
+        } catch is CancellationError {
+            // Leaving the chat surface may cancel its task; this is not an Agent failure.
+        } catch let error as URLError where error.code == .cancelled {
+            // URLSession cancellation is an expected view lifecycle event.
+        } catch {
+            activeEngineState = .failed(reason: error.localizedDescription)
+            lastError = String(describing: error)
+        }
     }
 
     func start() async { await run { try await composition.session.start() } }
