@@ -23,7 +23,6 @@ struct RootView: View {
         }
         .task {
             await session.refresh()
-            await session.prepareActiveModel()
         }
         .onOpenURL { url in
             if url.scheme == "personalagent", url.host == "chat",

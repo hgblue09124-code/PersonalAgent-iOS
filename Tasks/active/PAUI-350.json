@@ -1,0 +1,39 @@
+{
+  "id": "PAUI-350",
+  "title": "Load only the active UI surface and avoid duplicate startup refresh",
+  "status": "in_progress",
+  "goal": "Reduce launch and screen-transition work by removing repeated startup refreshes, deferring local model residency until Chat is opened, and avoiding a full catalog refresh after model preparation.",
+  "context": "The app previously refreshed the session in both PersonalAgentApp.initialize and RootView.task. RootView also prepared the active model immediately, and prepareActiveModel used run(_:), which refreshes all catalogs after loading. This stacks model loading and broad state updates into startup. RootView should own one observational refresh; ChatScreen should request model preparation only when it is presented; preparation must update only model lifecycle/error state.",
+  "allowed_paths": [
+    "App/PersonalAgent/PersonalAgentApp.swift",
+    "App/PersonalAgent/RootView.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "Tasks/active/PAUI-350.json"
+  ],
+  "forbidden_changes": [
+    "Do not change Agent visual design or navigation behavior.",
+    "Do not alter Kernel, provider, model-loading, or persistence contracts.",
+    "Do not change Skill execution, security policy, or verification behavior.",
+    "Do not claim measured performance gains without launch-time measurements."
+  ],
+  "acceptance_criteria": [
+    "PersonalAgentApp assigns the session without running a second refresh or model preparation.",
+    "RootView performs one session refresh and does not load the local model during initial app launch.",
+    "Opening Chat triggers local model preparation, but repeated visits do not reload an already loaded model.",
+    "Model preparation does not call the broad run(_:)/refresh path or reload unrelated catalogs.",
+    "Cancellation remains non-fatal; real model-load errors remain visible.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Startup latency and physical-device behavior remain explicitly unmeasured unless device evidence is collected."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-350.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-350.json --base origin/main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "On iPhone, compare cold launch and first-chat readiness before/after if device access is available."
+  ],
+  "dependencies": [
+    "Issue #350"
+  ],
+  "recovery": "Revert the single squashed task commit if deferred model preparation breaks local chat startup; restore preparation at the chat boundary rather than app launch."
+}
