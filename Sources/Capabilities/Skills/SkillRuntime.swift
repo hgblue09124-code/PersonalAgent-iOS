@@ -672,7 +672,13 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         ]
         let candidate: String
         if let prefix = prefixes.first(where: { normalized.hasPrefix($0) }) {
-            candidate = String(trimmed.dropFirst(prefix.count))
+            // These prefixes include the workspace root itself. Preserve that root
+            // so the common path validator still receives a workspace-relative path.
+            if prefix.hasSuffix("workspace/") {
+                candidate = "workspace/" + String(trimmed.dropFirst(prefix.count))
+            } else {
+                candidate = String(trimmed.dropFirst(prefix.count))
+            }
         } else {
             candidate = trimmed
         }
