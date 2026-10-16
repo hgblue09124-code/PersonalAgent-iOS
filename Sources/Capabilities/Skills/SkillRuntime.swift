@@ -728,7 +728,14 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     }
 
     private static func parseCreateFileRequest(_ rawText: String) -> (path: String, content: String)? {
-        let normalized = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        var normalized = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Match the read/search adapters: strip only known polite lead-ins at the
+        // command boundary, leaving the path/content grammar and safety checks intact.
+        let politePrefixes = ["hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em ", "please ", "kindly "]
+        while let prefix = politePrefixes.first(where: { normalized.lowercased().hasPrefix($0) }) {
+            normalized = String(normalized.dropFirst(prefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
         let prefixes = ["tạo file ", "tạo tệp ", "create file ", "write file "]
         guard let prefix = prefixes.first(where: { normalized.lowercased().hasPrefix($0) }) else {
             return nil

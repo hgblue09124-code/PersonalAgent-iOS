@@ -88,6 +88,30 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
+    @Test("M8 workspace Skill accepts polite Vietnamese create-file commands")
+    func m8WorkspaceSkillCreatesFileFromPoliteRequest() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let content = "Nội dung đã tạo thật"
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Hãy tạo file workspace/polite.md với nội dung: \(content)"
+        )
+        #expect(result?.skillID.rawValue == "workspace.create-file")
+        #expect(result?.verified == true)
+
+        let fileURL = directory.appendingPathComponent("workspace/polite.md")
+        #expect(FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(try String(contentsOf: fileURL, encoding: .utf8) == content)
+    }
+
     @Test("M8 workspace search finds a real matching file through the Skill loop")
     func m8WorkspaceSearchFindsMatchingFile() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)

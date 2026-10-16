@@ -1,0 +1,36 @@
+{
+  "id": "PASKILL-19",
+  "title": "Normalize polite prefixes for workspace create-file commands",
+  "status": "in_progress",
+  "goal": "Make polite Vietnamese and common English workspace file-creation requests execute through the existing verified create-file Skill without weakening path or output verification.",
+  "context": "The canonical Skill selector recognizes polite commands such as “Hãy tạo file workspace/notes.md với nội dung: …”, but parseCreateFileRequest only accepts commands beginning directly with “tạo file”, “tạo tệp”, “create file”, or “write file”. The selected Skill therefore rejects the unchanged polite lead-in at execution time.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-19.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace-root, traversal, symlink, protected-file, or size validation.",
+    "Do not change executor identity binding, policy/approval, or output verification.",
+    "Do not alter general chat input, unrelated Skill parsing, or UI."
+  ],
+  "acceptance_criteria": [
+    "Only known polite command prefixes are removed at the create-file parser boundary.",
+    "A polite Vietnamese request creates a real workspace file with exact requested contents and verified=true.",
+    "Existing direct create-file commands and content delimiters continue to work.",
+    "Unsafe paths and invalid output remain fail-closed.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-19.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-19.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PASKILL-18"
+  ],
+  "recovery": "Revert the single squashed task commit if command parsing changes valid file paths or content boundaries; retain all existing path and verification guards.",
+  "evidence": []
+}
