@@ -234,77 +234,85 @@ private struct AgentOrb: View {
     let isActive: Bool
     let isThinking: Bool
     @State private var pulse = false
-    @State private var rotation = 0.0
 
-    private var energy: Double { isThinking ? 1.0 : isActive ? 0.72 : 0.38 }
+    private var pulseScale: CGFloat {
+        isThinking ? 1.04 : isActive ? 1.02 : 1.012
+    }
+
+    private var pulseDuration: Double {
+        isThinking ? 0.8 : isActive ? 1.35 : 2.4
+    }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(AgentDesign.accent.opacity(0.18))
-                .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
-                .blur(radius: 7)
+        GeometryReader { geometry in
+            let diameter = min(geometry.size.width, geometry.size.height)
 
-            Image("AppIcon")
-                .resizable()
-                .scaledToFill()
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .stroke(.white.opacity(0.28), lineWidth: 1)
-                )
-
-            Circle()
-                .stroke(
-                    AngularGradient(
-                        colors: [.white.opacity(0.18), .white.opacity(0.9), AgentDesign.accent.opacity(0.35), .white.opacity(0.18)],
-                        center: .center,
-                        angle: .degrees(rotation)
-                    ),
-                    lineWidth: isThinking ? 2.5 : 1.5
-                )
-                .rotationEffect(.degrees(rotation))
-
-            Circle()
-                .trim(from: 0.04, to: 0.31)
-                .stroke(.white.opacity(0.95), style: StrokeStyle(lineWidth: isThinking ? 3 : 2, lineCap: .round))
-                .rotationEffect(.degrees(rotation * 1.7))
-
-            Circle()
-                .stroke(AgentDesign.accent.opacity(0.3), lineWidth: 5)
-                .scaleEffect(1.08 + (pulse ? 0.06 * energy : 0))
-                .opacity(0.3 + 0.28 * energy)
-
-            ForEach(0..<3, id: \.self) { index in
+            ZStack {
                 Circle()
-                    .fill(.white.opacity(isThinking ? 0.95 : 0.55))
-                    .frame(width: isThinking ? 4 : 3, height: isThinking ? 4 : 3)
-                    .shadow(color: AgentDesign.accent.opacity(0.8), radius: 5)
-                    .offset(y: -50)
-                    .rotationEffect(.degrees(rotation + Double(index) * 120))
-            }
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.white.opacity(0.96),
+                                AgentDesign.accent.opacity(0.92),
+                                AgentDesign.accentDeep.opacity(0.98)
+                            ],
+                            center: UnitPoint(x: 0.28, y: 0.24),
+                            startRadius: diameter * 0.02,
+                            endRadius: diameter * 0.72
+                        )
+                    )
 
-            Circle()
-                .stroke(
-                    AngularGradient(
-                        colors: [.clear, .white.opacity(0.32), .clear],
-                        center: .center,
-                        angle: .degrees(-rotation * 0.7)
-                    ),
-                    lineWidth: 8
-                )
-                .blur(radius: 2)
-                .opacity(0.35 + 0.35 * energy)
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.24),
+                                Color.white.opacity(0.02),
+                                Color.black.opacity(0.12)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .blendMode(.screen)
+
+                Ellipse()
+                    .fill(Color.white.opacity(isThinking ? 0.5 : 0.34))
+                    .frame(width: diameter * 0.42, height: diameter * 0.2)
+                    .blur(radius: diameter * 0.035)
+                    .offset(x: -diameter * 0.14, y: -diameter * 0.25)
+
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.82),
+                                Color.white.opacity(0.16),
+                                AgentDesign.accent.opacity(0.48),
+                                Color.white.opacity(0.58)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: max(0.8, diameter * 0.018)
+                    )
+            }
+            .clipShape(Circle())
+            .shadow(
+                color: AgentDesign.accent.opacity(isThinking ? 0.32 : 0.2),
+                radius: diameter * (isThinking ? 0.13 : 0.09),
+                y: diameter * 0.035
+            )
         }
-        .shadow(color: AgentDesign.accent.opacity(0.34 + 0.18 * energy), radius: isThinking ? 22 : 14, y: 6)
-        .scaleEffect(pulse ? (isThinking ? 1.055 : isActive ? 1.025 : 1) : 1)
-        .animation(.easeInOut(duration: isThinking ? 0.55 : 1.8).repeatForever(autoreverses: true), value: pulse)
-        .animation(.easeInOut(duration: 0.35), value: isThinking)
+        .scaleEffect(pulse ? pulseScale : 1)
+        .animation(
+            .easeInOut(duration: pulseDuration).repeatForever(autoreverses: true),
+            value: pulse
+        )
+        .animation(.easeInOut(duration: 0.3), value: isThinking)
         .onAppear {
             pulse = true
-            rotation = 360
         }
-        .animation(.linear(duration: isThinking ? 2.2 : 5.5).repeatForever(autoreverses: false), value: rotation)
         .accessibilityLabel(isThinking ? "Agent thinking" : isActive ? "Agent active" : "Agent idle")
     }
 }

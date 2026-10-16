@@ -1,0 +1,38 @@
+{
+  "id": "PAUI-356",
+  "title": "Restore the restrained glass Agent Orb",
+  "status": "in_progress",
+  "goal": "Bring the reusable Agent Orb back to the approved glass-sphere design with a low-cost idle pulse and stronger state-driven thinking motion.",
+  "context": "Issue #429's latest source audit found the current AgentOrb still uses rotating circular strokes, partial arcs, and orbiting dots, contradicting AGENTS.md and the canonical splash Design Data, which specify a glossy translucent sphere with a glass rim/highlight and no rings or particles.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-356.json",
+    "App/PersonalAgent/Screens/AgentScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not modify PersonalAgent.xcodeproj, Kernel, Runtime, or unrelated screens.",
+    "Do not add orbit rings, particles, rotation loops, global timers, or avatar artwork.",
+    "Do not change navigation, Agent state semantics, or startup error handling.",
+    "Do not claim visual acceptance without physical iPhone verification."
+  ],
+  "acceptance_criteria": [
+    "AgentOrb is rendered as a glossy glass sphere with a colored core, restrained rim/highlight, and soft shadow.",
+    "A subtle idle pulse is visible while the Orb is on screen; active/thinking states increase motion without rings or particles.",
+    "No rotating gradients/arcs, orbiting dots, or continuous rotation state remain in AgentOrb.",
+    "The existing AgentOrb API, accessibility label, and state inputs remain intact.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head; physical visual acceptance remains a separate gate."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-356.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-356.json --base origin/main",
+    "Review AgentOrb source for only sphere layers and state-driven scale animation.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #429",
+    "AGENTS.md",
+    "Documentation/DESIGN DATA PersonalAgent Splash.md",
+    "Documentation/designui/DESIGN TOKENS PersonalAgent Splash.md"
+  ],
+  "recovery": "Revert the single logical task commit if native build fails or the Orb loses its state-driven animation; retain the approved sphere-only visual constraint.",
+  "evidence": []
+}
