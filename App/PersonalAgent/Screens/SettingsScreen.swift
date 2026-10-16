@@ -138,31 +138,33 @@ struct SettingsScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(session.installedModels, id: \.id) { model in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(model.name).font(.subheadline.weight(.semibold))
-                                Text(ByteCountFormatter.string(fromByteCount: model.fileSizeBytes, countStyle: .file))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if model.id == session.activeModelID {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
-                            } else {
-                                Button("Use") {
-                                    Task { await session.selectActiveModel(id: model.id) }
+                    LazyVStack(alignment: .leading, spacing: 12) {
+                        ForEach(session.installedModels, id: \.id) { model in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(model.name).font(.subheadline.weight(.semibold))
+                                    Text(ByteCountFormatter.string(fromByteCount: model.fileSizeBytes, countStyle: .file))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
                                 }
-                                .buttonStyle(.bordered)
+                                Spacer()
+                                if model.id == session.activeModelID {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundStyle(.green)
+                                } else {
+                                    Button("Use") {
+                                        Task { await session.selectActiveModel(id: model.id) }
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
                             }
-                        }
-                        .padding(.vertical, 4)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                Task { await session.deleteModel(id: model.id) }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                            .padding(.vertical, 4)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    Task { await session.deleteModel(id: model.id) }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
                         }
                     }
@@ -300,34 +302,36 @@ struct SettingsScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(importedFiles) { file in
-                        HStack(alignment: .top, spacing: 10) {
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(file.originalName)
-                                    .font(.subheadline.weight(.medium))
-                                    .lineLimit(2)
-                                Text(ByteCountFormatter.string(fromByteCount: file.sizeBytes, countStyle: .file))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text("Stored · readable formats can be previewed")
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                    LazyVStack(alignment: .leading, spacing: 12) {
+                        ForEach(importedFiles) { file in
+                            HStack(alignment: .top, spacing: 10) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(file.originalName)
+                                        .font(.subheadline.weight(.medium))
+                                        .lineLimit(2)
+                                    Text(ByteCountFormatter.string(fromByteCount: file.sizeBytes, countStyle: .file))
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text("Stored · readable formats can be previewed")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 4)
+                                Button {
+                                    Task { await previewImportedFile(file) }
+                                } label: {
+                                    Label("Read", systemImage: "doc.text.magnifyingglass")
+                                }
+                                .buttonStyle(.bordered)
+                                Button(role: .destructive) {
+                                    Task { await removeImportedFile(file.id) }
+                                } label: {
+                                    Image(systemName: "trash")
+                                }
+                                .accessibilityLabel("Delete \(file.originalName)")
                             }
-                            Spacer(minLength: 4)
-                            Button {
-                                Task { await previewImportedFile(file) }
-                            } label: {
-                                Label("Read", systemImage: "doc.text.magnifyingglass")
-                            }
-                            .buttonStyle(.bordered)
-                            Button(role: .destructive) {
-                                Task { await removeImportedFile(file.id) }
-                            } label: {
-                                Image(systemName: "trash")
-                            }
-                            .accessibilityLabel("Delete \(file.originalName)")
+                            .padding(.vertical, 3)
                         }
-                        .padding(.vertical, 3)
                     }
                 }
             }
@@ -1476,14 +1480,16 @@ private struct AgentOSStorageBrowserScreen: View {
             GlassPanel {
                 if isBusy { ProgressView() }
                 if !searchResults.isEmpty {
-                    ForEach(searchResults, id: \.self) { path in
-                        Button {
-                            Task { await openFile(path) }
-                        } label: {
-                            Label(path, systemImage: "doc.text")
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                    LazyVStack(alignment: .leading, spacing: 12) {
+                        ForEach(searchResults, id: \.self) { path in
+                            Button {
+                                Task { await openFile(path) }
+                            } label: {
+                                Label(path, systemImage: "doc.text")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                     Button("Clear search") { searchResults = [] }
                         .buttonStyle(.bordered)
@@ -1492,29 +1498,31 @@ private struct AgentOSStorageBrowserScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(visibleEntries, id: \.relativePath) { entry in
-                        Button {
-                            if entry.isDirectory {
-                                currentPath = entry.relativePath
-                                query = ""
-                                Task { await loadDirectory() }
-                            } else {
-                                Task { await openFile(entry.relativePath) }
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: entry.isDirectory ? "folder" : "doc.text")
-                                Text(URL(fileURLWithPath: entry.relativePath).lastPathComponent)
-                                    .lineLimit(2)
-                                Spacer()
+                    LazyVStack(alignment: .leading, spacing: 12) {
+                        ForEach(visibleEntries, id: \.relativePath) { entry in
+                            Button {
                                 if entry.isDirectory {
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption)
+                                    currentPath = entry.relativePath
+                                    query = ""
+                                    Task { await loadDirectory() }
+                                } else {
+                                    Task { await openFile(entry.relativePath) }
                                 }
+                            } label: {
+                                HStack {
+                                    Image(systemName: entry.isDirectory ? "folder" : "doc.text")
+                                    Text(URL(fileURLWithPath: entry.relativePath).lastPathComponent)
+                                        .lineLimit(2)
+                                    Spacer()
+                                    if entry.isDirectory {
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                    }
+                                }
+                                .contentShape(Rectangle())
                             }
-                            .contentShape(Rectangle())
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
 
