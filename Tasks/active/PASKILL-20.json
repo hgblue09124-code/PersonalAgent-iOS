@@ -1,0 +1,45 @@
+{
+  "id": "PASKILL-20",
+  "title": "Expose truthful Skill executor availability in the UI",
+  "status": "in_progress",
+  "goal": "Show whether each discovered Skill has a resolvable, schema-compatible executor so installed manifests without executable capability are not presented as ready.",
+  "context": "SkillsScreen currently lists every discovered Skill manifest under “Available Skills” but has no runtime executor availability status. SkillRuntime fails unsupported Skills closed during execution, yet the UI cannot distinguish an installed manifest from one whose executor/module contract is actually available.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-20.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M8CompositionRoot.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "App/PersonalAgent/Screens/SkillsScreen.swift",
+    "App/PersonalAgent/en.lproj/Localizable.strings",
+    "App/PersonalAgent/vi.lproj/Localizable.strings",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not execute Skills during availability checks or treat availability as permission/approval.",
+    "Do not bypass Agent scope, policy, capability, schema, cancellation, or output verification checks.",
+    "Do not expose secrets or change Skill installation/import behavior.",
+    "Do not modify unrelated UI, runtime layers, or Xcode project files."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime reports unavailable for missing, disabled, unsupported, or schema-incompatible executor mappings without executing code.",
+    "Explicitly registered executors and valid built-in module-backed Skills are reported available only when the required module contract exists and schemas match.",
+    "KernelSession refresh exposes availability for discovered Skills and handles cancellation without surfacing a false chat error.",
+    "SkillsScreen clearly labels executor availability and explains that policy/approval is still checked at execution time.",
+    "English and Vietnamese labels are localized; regression tests cover unsupported executors and workspace-tool enabled/disabled states.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-20.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-20.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "Issue #367",
+    "PAIOS-445"
+  ],
+  "recovery": "Revert the single logical task commit if availability disagrees with actual executor resolution; keep the UI informational and preserve all execution-time security gates.",
+  "evidence": []
+}

@@ -58,6 +58,30 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
+    @Test("M8 Skill availability reflects registered workspace tool contracts")
+    func m8SkillAvailabilityTracksWorkspaceToolRegistration() async throws {
+        let enabledDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: enabledDirectory) }
+        let enabledRoot = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: enabledDirectory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let workspaceSearch = SkillID(rawValue: "workspace.search")
+        #expect(await enabledRoot.skillExecutorAvailability(for: workspaceSearch) == .available)
+
+        let disabledDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: disabledDirectory) }
+        let disabledRoot = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: disabledDirectory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: false
+        )
+        #expect(await disabledRoot.skillExecutorAvailability(for: workspaceSearch) == .unavailable)
+    }
+
     @Test("M8 workspace Skill creates and verifies a real file")
     func m8WorkspaceSkillCreatesVerifiedFile() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)

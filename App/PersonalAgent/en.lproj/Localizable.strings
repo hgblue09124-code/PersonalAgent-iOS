@@ -527,3 +527,9 @@
 "Run command" = "Run command";
 "Command to run:" = "Command to run:";
 "This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing." = "This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing.";
+
+"Executor available" = "Executor available";
+"Unavailable" = "Unavailable";
+"Checking executor…" = "Checking executor…";
+"Executor status is informational; policy and approval are checked when you run a Skill." = "Executor status is informational; policy and approval are checked when you run a Skill.";
+"Discovered Skills" = "Discovered Skills";
