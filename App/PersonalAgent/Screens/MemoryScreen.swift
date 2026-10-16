@@ -6,6 +6,7 @@ struct MemoryScreen: View {
     @State private var draft = ""
     @State private var draftKind = "fact"
     @State private var search = ""
+    @State private var appliedSearch = ""
     @State private var selectedKind = "all"
     @State private var showClearConfirmation = false
     @State private var isSavingMemory = false
@@ -18,8 +19,8 @@ struct MemoryScreen: View {
         guard let session else { return [] }
         return session.memoryRecords.filter { record in
             (selectedKind == "all" || record.kind.caseInsensitiveCompare(selectedKind) == .orderedSame) &&
-            (search.isEmpty || record.content.localizedCaseInsensitiveContains(search) ||
-             record.kind.localizedCaseInsensitiveContains(search))
+            (appliedSearch.isEmpty || record.content.localizedCaseInsensitiveContains(appliedSearch) ||
+             record.kind.localizedCaseInsensitiveContains(appliedSearch))
         }
     }
 
@@ -138,6 +139,15 @@ struct MemoryScreen: View {
                     .buttonStyle(.bordered)
                 }
             }
+        }
+        .task(id: search) {
+            do {
+                try await Task.sleep(for: .milliseconds(180))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            appliedSearch = search.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         .confirmationDialog("Xóa toàn bộ Memory?", isPresented: $showClearConfirmation, titleVisibility: .visible) {
             Button("Xóa toàn bộ", role: .destructive) {
