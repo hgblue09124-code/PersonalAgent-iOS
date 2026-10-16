@@ -1,0 +1,37 @@
+{
+  "id": "PAUI-357",
+  "title": "Defer long Settings collection rows",
+  "status": "in_progress",
+  "goal": "Avoid eagerly constructing every row in the Settings model library, imported-file list, and workspace search/directory results while preserving existing actions and order.",
+  "context": "SettingsScreen is hosted in the scrollable ScreenScaffold, but four potentially long collections are direct children of GlassPanel's eager VStack: installed models, imported files, workspace search results, and visible workspace entries. This creates every row when the panel is rendered rather than when it approaches the viewport.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-357.json",
+    "App/PersonalAgent/Screens/SettingsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change data loading, ordering, filtering, persistence, authorization, or destructive-action confirmation.",
+    "Do not change Provider model selection Picker behavior or nested scroll behavior.",
+    "Do not modify other screens, Kernel, Runtime, or Xcode project files.",
+    "Do not claim measured device performance gains without physical-device profiling."
+  ],
+  "acceptance_criteria": [
+    "The installed-model rows use a LazyVStack while preserving select/delete behavior and row order.",
+    "The imported-file rows use a LazyVStack while preserving preview/delete behavior and row order.",
+    "Workspace search-result and directory-entry rows use LazyVStack while preserving navigation/open behavior and row order.",
+    "Empty/loading states and surrounding Settings content remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head; physical-device performance remains unmeasured without device evidence."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-357.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-357.json --base origin/main",
+    "Review all four list branches and their unchanged actions/order.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #367",
+    "Issue #429",
+    "PR #473 lazy scroll sections"
+  ],
+  "recovery": "Revert the single logical task commit if row interaction or native build regresses; retain existing eager behavior only for a collection that cannot safely use a lazy container.",
+  "evidence": []
+}
