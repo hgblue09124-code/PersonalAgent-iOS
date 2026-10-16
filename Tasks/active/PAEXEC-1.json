@@ -1,0 +1,33 @@
+{
+  "id": "PAEXEC-1",
+  "title": "Require execution authorization regardless of Skill manifest claims",
+  "status": "in_progress",
+  "goal": "Ensure every Skill executor invocation requires an explicit execute capability grant even when an installed manifest declares only read or another weaker capability set.",
+  "context": "Issue #347 requires runtime-owned authorization rather than trusting capability claims in imported Skill manifests. SkillRuntime currently evaluates only manifest.requiredCapabilities before invoking an explicitly registered executor, so a manifest declaring [.read] can be executed by a read-only policy.",
+  "allowed_paths": [
+    "Tasks/active/PAEXEC-1.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not trust manifest-declared capabilities as grants or bypass policy, approval, schema, cancellation, or output verification.",
+    "Do not add arbitrary executor mappings or broaden workspace capability exposure.",
+    "Do not modify UI, provider/GGUF, or unrelated runtime behavior."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime always includes execute in the policy intent before invoking any Skill executor.",
+    "A Skill manifest declaring only read cannot execute through a policy that grants read but denies execute.",
+    "Existing registered executor, fail-closed, approval, cancellation, and verification tests remain passing.",
+    "M3, Agent Task Contract, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAEXEC-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAEXEC-1.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm M3, Agent Task Contract, and Apple Native Build & Unsigned IPA checks on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "If the regression test exposes an unexpected policy contract, preserve fail-closed execution and adapt only the authorization boundary and focused test; do not weaken the test or claim verification before required checks pass."
+}

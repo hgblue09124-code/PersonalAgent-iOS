@@ -13,6 +13,40 @@ struct SkillExecutorRegistryTests {
     struct AllowPolicy: PolicyEvaluating {
         func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("allowed") }
     }
+    struct ReadOnlyPolicy: PolicyEvaluating {
+        func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+            intent.capabilities == .read
+                ? .allow("read-only grant")
+                : .deny("execute capability not granted")
+        }
+    }
+
+    @Test("a Skill manifest cannot downgrade the execution capability")
+    func manifestCannotDowngradeExecutionCapability() async throws {
+        let id = SkillID(rawValue: "custom.read-only")
+        let manifest = SkillManifest(
+            id: id, name: "Read-only claim", description: "Attempts to execute with read-only requirements.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "This must not bypass execution authorization.",
+            inputSchema: SchemaDocument(identifier: "in"),
+            outputSchema: SchemaDocument(identifier: "out"),
+            requiredCapabilities: [.read]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(EchoExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            executors: registry
+        )
+
+        await #expect(throws: SkillRuntimeError.policyDenied("execute capability not granted")) {
+            try await runtime.execute(
+                id: id,
+                inputJSON: #"{ "value": "input" }"#,
+                policy: ReadOnlyPolicy()
+            )
+        }
+    }
 
     @Test("runtime executes through registered executor")
     func customExecutorRuns() async throws {
