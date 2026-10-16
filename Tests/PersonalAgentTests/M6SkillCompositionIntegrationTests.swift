@@ -12,6 +12,67 @@ struct M6SkillCompositionIntegrationTests {
         func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("integration test grant") }
     }
 
+    private struct UntrustedRegisteredExecutor: SkillExecutor {
+        func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+            #"{"result":"executed"}"#
+        }
+        func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+            outputJSON == #"{"result":"executed"}"#
+        }
+    }
+
+    @Test("public M8 Skill APIs enforce the active default Agent scope")
+    func publicSkillAPIsRespectDefaultAgentScope() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skillsDirectory = directory.appendingPathComponent("Skills", isDirectory: true)
+        try FileManager.default.createDirectory(at: skillsDirectory, withIntermediateDirectories: true)
+        let customSkill = """
+        id: custom.unscoped
+        name: Unscoped Skill
+        version: 1.0.0
+        description: A discoverable Skill not declared by the default Agent.
+        ---
+        ## Input
+        custom.unscoped.input
+
+        ## Output
+        custom.unscoped.output
+
+        ## Rule
+        Return the registered executor result.
+        """
+        try customSkill.write(
+            to: skillsDirectory.appendingPathComponent("custom.unscoped.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let skillID = SkillID(rawValue: "custom.unscoped")
+        let registry = SkillExecutorRegistry()
+        await registry.register(UntrustedRegisteredExecutor(), for: skillID.rawValue)
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            skillExecutors: registry
+        )
+
+        #expect(try await root.discoverSkills().contains { $0.id == skillID })
+        #expect(await root.skillExecutorAvailability(for: skillID) == .available)
+
+        await #expect(throws: SkillAgentOrchestratorError.skillOutsideAgentScope(skillID)) {
+            _ = try await root.executeSkill(id: skillID, inputJSON: "{}", policy: AllowPolicy())
+        }
+        await #expect(throws: SkillExecutionError.noSelection) {
+            _ = try await root.runSkillAgent(
+                goalStatement: skillID.rawValue,
+                inputJSON: "{}",
+                policy: AllowPolicy()
+            )
+        }
+    }
+
     @Test("registered Skill executes and verifies through canonical composition")
     func executesVerifiedSkill() async throws {
         let manifest = SkillRuntime.normalizationManifest
