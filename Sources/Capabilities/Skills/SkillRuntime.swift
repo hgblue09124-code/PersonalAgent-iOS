@@ -686,7 +686,13 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
 
     private static func parseWorkspaceReadPath(_ rawText: String) -> String? {
         let trimmed = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalized = trimmed.lowercased()
+        var command = trimmed
+        let politePrefixes = ["hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em "]
+        while let prefix = politePrefixes.first(where: { command.lowercased().hasPrefix($0) }) {
+            command = String(command.dropFirst(prefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        let normalized = command.lowercased()
         let prefixes = [
             "đọc file ", "đọc tệp ", "đọc workspace/",
             "mở file ", "mở tệp ", "mở workspace/",
@@ -699,12 +705,12 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             // These prefixes include the workspace root itself. Preserve that root
             // so the common path validator still receives a workspace-relative path.
             if prefix.hasSuffix("workspace/") {
-                candidate = "workspace/" + String(trimmed.dropFirst(prefix.count))
+                candidate = "workspace/" + String(command.dropFirst(prefix.count))
             } else {
-                candidate = String(trimmed.dropFirst(prefix.count))
+                candidate = String(command.dropFirst(prefix.count))
             }
         } else {
-            candidate = trimmed
+            candidate = command
         }
         let path = candidate.trimmingCharacters(
             in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'"))

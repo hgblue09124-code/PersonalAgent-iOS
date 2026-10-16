@@ -1,0 +1,38 @@
+{
+  "id": "PASKILL-18",
+  "title": "Normalize polite prefixes for workspace read commands",
+  "status": "in_progress",
+  "goal": "Make polite Vietnamese workspace-read requests execute through the existing verified read Skill instead of being rejected because the command parser receives the original polite lead-in.",
+  "context": "The canonical Chat input helper preserves ordinary prompt text even after inspecting polite prefixes. The search Skill now normalizes those prefixes at its own parser boundary, but parseWorkspaceReadPath still expects the action at the beginning. Requests such as “Hãy đọc file workspace/notes.md” therefore select the read Skill but fail its input parser.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-18.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace-root, traversal, symlink, or protected-file validation.",
+    "Do not change Skill executor identity binding, policy, or output verification.",
+    "Do not alter general chat input or unrelated workspace/search behavior."
+  ],
+  "acceptance_criteria": [
+    "Known polite Vietnamese lead-ins are stripped at the read parser boundary before command parsing.",
+    "Polite Vietnamese read requests return verified real-file content.",
+    "Existing direct and file-prefixed read commands continue to pass.",
+    "Traversal, secret, and out-of-scope paths continue to fail closed.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-18.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-18.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #460",
+    "PR #467",
+    "PR #468"
+  ],
+  "recovery": "Revert the single squashed task commit if polite read parsing changes valid path behavior; retain the exact workspace-root and traversal guards.",
+  "evidence": []
+}
