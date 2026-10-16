@@ -25,6 +25,40 @@ final class SkillRuntimeTests: XCTestCase {
         XCTAssertFalse(verified)
     }
 
+    func testUnsupportedManifestIsReportedUnavailableWithoutExecuting() async throws {
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "custom.unsupported"),
+            name: "Unsupported Skill",
+            description: "A manifest with no registered executor.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Do not execute.",
+            inputSchema: SchemaDocument(identifier: "custom.unsupported.input"),
+            outputSchema: SchemaDocument(identifier: "custom.unsupported.output"),
+            requiredCapabilities: [.read]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        let availability = await runtime.executorAvailability(for: manifest.id)
+        XCTAssertEqual(availability, .unavailable)
+    }
+
+    func testExplicitlyRegisteredExecutorIsReportedAvailable() async throws {
+        let manifest = SkillManifest(
+            id: SkillID(rawValue: "custom.registered"),
+            name: "Registered Skill",
+            description: "A Skill with an explicitly registered executor.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Run through the host executor.",
+            inputSchema: SchemaDocument(identifier: "custom.registered.input"),
+            outputSchema: SchemaDocument(identifier: "custom.registered.output"),
+            requiredCapabilities: [.read]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(FixedOutputSkillExecutor(output: "trusted"), for: manifest.id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+        let availability = await runtime.executorAvailability(for: manifest.id)
+        XCTAssertEqual(availability, .available)
+    }
+
     func testChatInputTextPreservesCreateFileCommandGrammar() {
         let vietnamese = "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"
         XCTAssertEqual(SkillRuntime.chatInputText(from: vietnamese), vietnamese)

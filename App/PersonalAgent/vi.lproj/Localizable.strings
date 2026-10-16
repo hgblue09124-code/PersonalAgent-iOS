@@ -655,3 +655,9 @@
 "Run command" = "Chạy lệnh";
 "Command to run:" = "Lệnh sẽ chạy:";
 "This command may move, overwrite, delete workspace files, or apply remote changes. Review it before continuing." = "Lệnh này có thể di chuyển, ghi đè, xóa tệp trong không gian làm việc hoặc áp dụng thay đổi từ xa. Hãy kiểm tra trước khi tiếp tục.";
+
+"Executor available" = "Bộ thực thi khả dụng";
+"Unavailable" = "Chưa khả dụng";
+"Checking executor…" = "Đang kiểm tra bộ thực thi…";
+"Executor status is informational; policy and approval are checked when you run a Skill." = "Trạng thái bộ thực thi chỉ mang tính thông tin; quyền và phê duyệt vẫn được kiểm tra khi chạy Skill.";
+"Discovered Skills" = "Các Skill đã phát hiện";

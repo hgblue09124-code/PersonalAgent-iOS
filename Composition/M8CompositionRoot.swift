@@ -785,6 +785,10 @@ extension M8CompositionRoot {
         try await skillRuntime.discover(query: query)
     }
 
+    public func skillExecutorAvailability(for id: SkillID) async -> SkillExecutorAvailability {
+        await skillRuntime.executorAvailability(for: id)
+    }
+
     public func selectSkill(goalStatement: String) async throws -> SkillID {
         try await skillRuntime.select(goalStatement: goalStatement)
     }

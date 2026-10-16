@@ -81,6 +81,7 @@ final class KernelSession: ObservableObject {
     @Published var providerLifecycle: String
     @Published var moduleIDs: [String]
     @Published var skillManifests: [SkillManifest]
+    @Published private(set) var skillExecutorAvailability: [String: SkillExecutorAvailability]
     @Published private(set) var agentManifests: [AgentManifest]
     @Published private(set) var selectedAgentID: String
     @Published private(set) var teamModeEnabled: Bool
@@ -145,6 +146,7 @@ final class KernelSession: ObservableObject {
         self.providerLifecycle = "unknown"
         self.moduleIDs = []
         self.skillManifests = []
+        self.skillExecutorAvailability = [:]
         self.agentManifests = []
         self.selectedAgentID = UserDefaults.standard.string(forKey: "agent.selected.id") ?? "personal.default"
         self.teamModeEnabled = UserDefaults.standard.bool(forKey: "agent.team.mode")
@@ -185,7 +187,16 @@ final class KernelSession: ObservableObject {
         providerLifecycle = await composition.currentProviderLifecycle()
         moduleIDs = await composition.registeredModuleIDs()
         do {
-            skillManifests = try await composition.discoverSkills()
+            let discoveredSkills = try await composition.discoverSkills()
+            skillManifests = discoveredSkills
+            skillExecutorAvailability = [:]
+            var availability: [String: SkillExecutorAvailability] = [:]
+            for skill in discoveredSkills {
+                guard !Task.isCancelled else { return }
+                availability[skill.id.rawValue] = await composition.skillExecutorAvailability(for: skill.id)
+            }
+            guard !Task.isCancelled else { return }
+            skillExecutorAvailability = availability
         } catch is CancellationError {
             return
         } catch let error as URLError where error.code == .cancelled {
@@ -193,6 +204,7 @@ final class KernelSession: ObservableObject {
         } catch {
             // Optional startup discovery must not masquerade as a failed chat request.
             skillManifests = []
+            skillExecutorAvailability = [:]
         }
 
         do {
