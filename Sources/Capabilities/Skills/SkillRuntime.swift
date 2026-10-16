@@ -418,8 +418,12 @@ public struct SkillRuntime: Sendable {
             throw SkillExecutionError.unknownSkill(id)
         }
 
+        // Executing an executor is itself an execution capability. A Skill manifest
+        // may request fewer capabilities, but it cannot downgrade the authorization
+        // required by the runtime to invoke capability code.
+        let executionCapabilities = manifest.requiredCapabilities.union(.execute)
         let decision = await policy.evaluate(
-            ActionIntent(capabilities: manifest.requiredCapabilities, summary: "Execute skill \(id.rawValue)")
+            ActionIntent(capabilities: executionCapabilities, summary: "Execute skill \(id.rawValue)")
         )
         if decision.requiresApproval {
             throw SkillExecutionError.policyRequiresApproval(decision.reason)
