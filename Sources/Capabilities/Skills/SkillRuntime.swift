@@ -115,6 +115,13 @@ public enum SkillExecutionError: Error, Sendable, Equatable {
 
 public typealias SkillRuntimeError = SkillExecutionError
 
+/// Reports whether a concrete executor can be resolved. This does not grant capability
+/// or bypass policy/approval checks at execution time.
+public enum SkillExecutorAvailability: String, Sendable, Equatable {
+    case available
+    case unavailable
+}
+
 public struct SkillRuntime: Sendable {
     public typealias ModuleHandler = @Sendable (String) async throws -> String
     private let skills: [String: SkillDefinition]
@@ -464,6 +471,45 @@ public struct SkillRuntime: Sendable {
             )
         }
         throw SkillExecutionError.unknownSkill(id)
+    }
+
+    /// Reports executor availability without executing a Skill or granting permissions.
+    public func executorAvailability(for id: SkillID) async -> SkillExecutorAvailability {
+        guard !disabled.contains(id.rawValue) else { return .unavailable }
+
+        let manifest: SkillManifest
+        do {
+            manifest = try await manifestForVerification(id: id)
+        } catch {
+            return .unavailable
+        }
+        guard manifest.id == id else { return .unavailable }
+
+        // Explicitly registered executors are host-authorized by exact Skill ID.
+        if await executors.executor(for: id.rawValue) != nil {
+            return .available
+        }
+
+        if id == Self.normalizationManifest.id {
+            return manifest.inputSchema.identifier == Self.normalizationManifest.inputSchema.identifier
+                && manifest.outputSchema.identifier == Self.normalizationManifest.outputSchema.identifier
+                ? .available
+                : .unavailable
+        }
+
+        guard let rawModuleID = manifest.metadata["moduleID"],
+              !rawModuleID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let moduleRuntime else {
+            return .unavailable
+        }
+        let moduleID = ModuleID(rawValue: rawModuleID)
+        guard BuiltInModuleSkillBinding.matches(manifest: manifest, moduleID: moduleID),
+              let contract = await moduleRuntime.contracts().first(where: { $0.id == moduleID }),
+              contract.inputSchema.identifier == manifest.inputSchema.identifier,
+              contract.outputSchema.identifier == manifest.outputSchema.identifier else {
+            return .unavailable
+        }
+        return .available
     }
 
     public func verify(id: SkillID, outputJSON: String) async throws -> Bool {

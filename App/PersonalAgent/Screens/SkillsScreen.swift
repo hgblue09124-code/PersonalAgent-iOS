@@ -30,12 +30,14 @@ struct SkillsScreen: View {
         ScreenScaffold(title: "Skills", systemImage: "puzzlepiece") {
             GlassPanel {
                 HStack {
-                    Label("Available Skills", systemImage: "sparkles").font(.headline)
+                    Label("Discovered Skills", systemImage: "sparkles").font(.headline)
                     Spacer()
                     Text("\(session.skillManifests.count)").font(.title3.bold())
                 }
                 Text("Danh sách bên dưới chỉ gồm Skill đã được runtime phát hiện. Ý tưởng trong thư viện không được cài hoặc thực thi tự động.")
                     .font(.subheadline).foregroundStyle(.secondary)
+                Text("Executor status is informational; policy and approval are checked when you run a Skill.")
+                    .font(.caption).foregroundStyle(.secondary)
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                     TextField("Tìm Skill theo tên, ID hoặc mô tả…", text: $search)
@@ -65,6 +67,19 @@ struct SkillsScreen: View {
                                 }
                                 Text(skill.id.rawValue).font(.caption.monospaced()).foregroundStyle(.secondary)
                                 Text(skill.description).font(.subheadline).foregroundStyle(.secondary)
+                                if session.skillExecutorAvailability[skill.id.rawValue] == .available {
+                                    Label("Executor available", systemImage: "checkmark.circle.fill")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.green)
+                                } else if session.skillExecutorAvailability[skill.id.rawValue] == .unavailable {
+                                    Label("Unavailable", systemImage: "exclamationmark.triangle.fill")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.orange)
+                                } else {
+                                    Label("Checking executor…", systemImage: "hourglass")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
                         .padding(.vertical, 4)
