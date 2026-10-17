@@ -143,6 +143,46 @@ struct M3RuntimeTests {
         #expect(!events.contains { $0.kind == .moduleInvoked })
     }
 
+
+    @Test func cancellationDuringApprovalNeverInvokesModule() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                .approve("explicit module approval required")
+            }
+        }
+        let gate = ApprovalGateLatch()
+        let eventLog = InMemoryEventLog()
+        let runtime = ModuleRuntime(
+            catalog: try ModuleCatalog(modules: [EchoModule()]),
+            grantedCapabilities: [.read, .execute],
+            policy: ApprovalRequiredPolicy(),
+            approvalGate: gate,
+            eventLog: eventLog
+        )
+        let task = Task {
+            try await runtime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "cancelled"])
+                )
+            )
+        }
+        await gate.waitUntilRequested()
+        task.cancel()
+        await gate.resolve(true)
+        do {
+            _ = try await task.value
+            Issue.record("cancelled approval must not execute the module")
+        } catch let error as ModuleRuntimeError {
+            #expect(error == .cancelled)
+        } catch {
+            Issue.record("expected ModuleRuntimeError.cancelled, got \(error)")
+        }
+        let events = try await eventLog.allEvents()
+        #expect(events.contains { $0.kind == .moduleCancelled })
+        #expect(!events.contains { $0.kind == .moduleInvoked })
+    }
+
     @Test func missingPolicyFailsClosed() async throws {
         let catalog = try ModuleCatalog(modules: [EchoModule()])
         let runtime = ModuleRuntime(catalog: catalog, grantedCapabilities: [.read, .execute])
@@ -326,4 +366,32 @@ struct M3RuntimeTests {
 
 private struct AllowModuleRuntimePolicy: PolicyEvaluating {
     func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("explicit test grant") }
+}
+
+
+private actor ApprovalGateLatch: ApprovalGate {
+    private var approvalContinuation: CheckedContinuation<Bool, Never>?
+    private var startedContinuation: CheckedContinuation<Void, Never>?
+    private var requested = false
+
+    func requestApproval(for intent: ActionIntent) async throws -> Bool {
+        requested = true
+        startedContinuation?.resume()
+        startedContinuation = nil
+        return await withCheckedContinuation { continuation in
+            approvalContinuation = continuation
+        }
+    }
+
+    func waitUntilRequested() async {
+        if requested { return }
+        await withCheckedContinuation { continuation in
+            startedContinuation = continuation
+        }
+    }
+
+    func resolve(_ approved: Bool) {
+        approvalContinuation?.resume(returning: approved)
+        approvalContinuation = nil
+    }
 }

@@ -103,6 +103,10 @@ public actor ModuleRuntime: ModuleExecuting {
         } else {
             allowed = decision.allowed
         }
+        if Task.isCancelled {
+            await emit(kind: .moduleCancelled, payload: ["moduleID": contract.id.rawValue])
+            throw ModuleRuntimeError.cancelled
+        }
         guard allowed else {
             await emit(kind: .moduleFailed, payload: [
                 "moduleID": contract.id.rawValue,
