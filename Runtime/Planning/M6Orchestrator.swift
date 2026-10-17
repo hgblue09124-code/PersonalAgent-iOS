@@ -524,7 +524,7 @@ public actor M6Orchestrator {
             var evaluation = try await evaluator.evaluate(goalID: goalID, observations: observations)
             try Task.checkCancellation()
             // Answer-only proposals have no tool target. Execution success is not the answer.
-            if proposals.allSatisfy({ $0.toolID == nil }) {
+            if proposals.allSatisfy({ $0.toolID == nil && $0.skillID == nil }) {
                 let answer = reasoningResult.summary.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !answer.isEmpty else { throw KernelError.invalidStateUpdate("Answer-only reasoning returned empty output") }
                 evaluation = Evaluation(goalID: evaluation.goalID, disposition: evaluation.disposition, reason: answer)
@@ -624,11 +624,34 @@ public actor M6Orchestrator {
         // is injected, never let an unhandled Skill proposal become a synthetic success.
         if let skillID = proposal.skillID {
             if let skillBoundary {
-                let receipt = try await skillBoundary.execute(
-                    skillID: skillID,
-                    input: proposal.description,
-                    authorizedCapabilities: proposal.capabilities
-                )
+                let receipt: SkillExecutionReceipt
+                do {
+                    receipt = try await skillBoundary.execute(
+                        skillID: skillID,
+                        input: proposal.description,
+                        authorizedCapabilities: proposal.capabilities
+                    )
+                } catch {
+                    if Task.isCancelled { throw CancellationError() }
+                    if error is CancellationError || (error as? ModuleRuntimeError) == .cancelled {
+                        throw error
+                    }
+                    let summary = "Skill execution failed: \(error)"
+                    let observation = Observation(actionID: proposal.actionID, summary: summary, succeeded: false)
+                    try await emit(
+                        traceID: traceID,
+                        kind: .observationProduced,
+                        payload: [
+                            "goalID": goalID.rawValue,
+                            "actionID": proposal.actionID.rawValue,
+                            "skillID": skillID.rawValue,
+                            "verified": "false",
+                            "summary": summary,
+                            "succeeded": "false",
+                        ]
+                    )
+                    return observation
+                }
                 let succeeded = receipt.skillID == skillID && receipt.verified
                 let summary = succeeded
                     ? "Skill '\(skillID.rawValue)' executed and verified"
