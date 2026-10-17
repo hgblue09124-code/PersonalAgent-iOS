@@ -185,7 +185,48 @@ struct M6SemanticsTests {
         #expect(evaluation.disposition == AgencyDisposition.abort)
 
         let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let denied = events.first { $0.kind == .actionDenied }
+        #expect(denied?.payload["reason"] == "Approval required but no approval gate is configured")
         #expect(events.contains { $0.kind == .actionDenied })
+        #expect(!events.contains { $0.kind == .actionExecuted })
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+    }
+
+
+    @Test func approvalGateRejectionRecordsActualDenialReason() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                PolicyDecision(allowed: true, requiresApproval: true, reason: "explicit approval required")
+            }
+        }
+        struct RejectingApprovalGate: ApprovalGate {
+            func requestApproval(for intent: ActionIntent) async throws -> Bool { false }
+        }
+        let policy = ApprovalRequiredPolicy()
+        let root = try await M6CompositionRoot(policy: policy, modules: [EchoModule()])
+        let goal = Goal(statement: "Do not execute without granted approval")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            proposer: DirectProposer(
+                toolID: ToolID(rawValue: DeterministicModuleIDs.echo.rawValue),
+                description: "execute echo after approval"
+            ),
+            policy: policy,
+            approvalGate: RejectingApprovalGate(),
+            moduleRuntime: root.moduleRuntime
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let resolved = events.first { $0.kind == .approvalResolved }
+        let denied = events.first { $0.kind == .actionDenied }
+        let observation = events.first { $0.kind == .observationProduced }
+        #expect(resolved?.payload["approved"] == "false")
+        #expect(denied?.payload["reason"] == "Approval not granted")
+        #expect(observation?.payload["summary"] == "Denied: Approval not granted")
         #expect(!events.contains { $0.kind == .actionExecuted })
         #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
     }

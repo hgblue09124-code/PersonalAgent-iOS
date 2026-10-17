@@ -467,6 +467,7 @@ public actor M6Orchestrator {
 
                 let decision = await policy.evaluate(intent)
                 var allowed = decision.allowed
+                var denialReason = decision.reason
 
                 if decision.requiresApproval {
                     if let gate = approvalGate {
@@ -476,6 +477,9 @@ public actor M6Orchestrator {
                             payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue]
                         )
                         allowed = try await gate.requestApproval(for: intent)
+                        if !allowed {
+                            denialReason = "Approval not granted"
+                        }
                         try await emit(
                             traceID: traceID,
                             kind: .approvalResolved,
@@ -485,6 +489,7 @@ public actor M6Orchestrator {
                         // Approval is a separate requirement, not an implicit grant.
                         // A permissive allowed bit must never bypass a missing gate.
                         allowed = false
+                        denialReason = "Approval required but no approval gate is configured"
                     }
                 }
 
@@ -492,7 +497,7 @@ public actor M6Orchestrator {
                     var payload: [String: String] = [
                         "goalID": goalID.rawValue,
                         "actionID": proposal.actionID.rawValue,
-                        "reason": decision.reason,
+                        "reason": denialReason,
                     ]
                     if let toolID = intent.toolID {
                         payload["toolID"] = toolID.rawValue
@@ -501,7 +506,7 @@ public actor M6Orchestrator {
                         payload["skillID"] = skillID.rawValue
                     }
                     try await emit(traceID: traceID, kind: .actionDenied, payload: payload)
-                    let summary = "Denied by policy: \(decision.reason)"
+                    let summary = "Denied: \(denialReason)"
                     observations.append(Observation(actionID: proposal.actionID, summary: summary, succeeded: false))
                     var observationPayload: [String: String] = [
                         "goalID": goalID.rawValue,
