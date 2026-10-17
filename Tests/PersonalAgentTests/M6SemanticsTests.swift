@@ -54,12 +54,16 @@ struct M6SemanticsTests {
         #expect(evaluation.disposition == .complete)
         #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
         let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let authorized = events.first {
+            $0.kind == .actionAuthorized && $0.payload["skillID"] == skillID.rawValue
+        }
         let action = events.first {
             $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue
         }
         let observation = events.first {
             $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue
         }
+        #expect(authorized?.payload["actionID"] == action?.payload["actionID"])
         #expect(action?.payload["succeeded"] == "true")
         #expect(action?.payload["verified"] == "true")
         #expect(observation?.payload["actionID"] == action?.payload["actionID"])

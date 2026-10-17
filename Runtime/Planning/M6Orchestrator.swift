@@ -533,6 +533,9 @@ public actor M6Orchestrator {
                 if let toolID = intent.toolID {
                     authPayload["toolID"] = toolID.rawValue
                 }
+                if let skillID = proposal.skillID {
+                    authPayload["skillID"] = skillID.rawValue
+                }
                 try await emit(traceID: traceID, kind: .actionAuthorized, payload: authPayload)
 
                 // Execute action
