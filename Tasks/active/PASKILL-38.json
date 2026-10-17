@@ -1,24 +1,23 @@
 {
   "id": "PASKILL-38",
-  "title": "Prevent approval from overriding policy denial",
+  "title": "Preserve approval-required policy semantics",
   "status": "in_progress",
-  "goal": "Ensure user approval can only satisfy a policy-approved action's additional approval requirement and never override an explicit policy denial.",
-  "context": "M6 initializes allowed from PolicyDecision.allowed but unconditionally replaces it with ApprovalGate's result whenever requiresApproval is true. A contradictory decision with allowed=false and requiresApproval=true can therefore execute when the gate returns true.",
+  "goal": "Ensure M6 treats requiresApproval as a distinct approval workflow and does not confuse it with an explicit policy denial.",
+  "context": "PolicyDecision.approve intentionally sets allowed=false and requiresApproval=true. A prior audit incorrectly treated that shape as a denial, which would bypass the configured ApprovalGate. Explicit denial is represented by PolicyDecision.deny with requiresApproval=false.",
   "allowed_paths": [
     "Tasks/active/PASKILL-38.json",
     "Runtime/Planning/M6Orchestrator.swift",
     "Tests/PersonalAgentTests/M6SemanticsTests.swift"
   ],
   "forbidden_changes": [
-    "Do not let approval change a policy denial into an allow.",
-    "Do not invoke the approval gate for an action already denied by policy.",
-    "Do not weaken normal approval requirements for policy-approved actions."
+    "Do not skip ApprovalGate when PolicyDecision.requiresApproval is true.",
+    "Do not allow PolicyDecision.deny to invoke the approval gate or execute a capability.",
+    "Do not infer approval intent from summary strings."
   ],
   "acceptance_criteria": [
-    "A policy decision with allowed=false and requiresApproval=true remains denied.",
-    "The approval gate is not called for a policy-denied action.",
-    "The goal is aborted, the denial reason is preserved, and no actionExecuted event is emitted.",
-    "Normal policy-approved actions requiring approval still use the gate.",
+    "PolicyDecision.approve requests the configured approval gate and can proceed only if that gate approves.",
+    "PolicyDecision.deny remains denied and does not call the approval gate.",
+    "Approval audit events preserve typed Skill identity through request and resolution.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
   ],
   "verification": [
@@ -31,5 +30,5 @@
     "Issue #347",
     "PR #502"
   ],
-  "recovery": "Gate the approval branch on both requiresApproval and decision.allowed; add a regression where a permissive gate must not reverse explicit policy denial."
+  "recovery": "Preserve the defined PolicyDecision.approve contract, keep explicit deny separate, and test both cases end-to-end."
 }
