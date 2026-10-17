@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-21",
+  "title": "Unify chat input normalization across Agent and Agent-team Skill execution",
+  "status": "in_progress",
+  "goal": "Ensure Agent-team execution receives the same normalized, fail-closed natural-language payload as single-Agent Skill execution, so polite file commands preserve exact content.",
+  "context": "M8 runChatSkillIfMatched passes SkillRuntime.chatInputText through its text input, but runChatTeamIfMatched passed raw inputContext or goalStatement. This made team execution inconsistent with the canonical single-Agent path for polite lead-ins and colon-delimited payload extraction.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-21.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not widen Agent Skill scope or workspace capabilities.",
+    "Do not change file path validation, policy, approval, cancellation, or output verification.",
+    "Do not modify UI, provider/GGUF, or unrelated runtime behavior."
+  ],
+  "acceptance_criteria": [
+    "Agent-team Skill input uses the same SkillRuntime.chatInputText normalization as the single-Agent path.",
+    "A polite Vietnamese team file-creation request creates the exact requested file content and returns a verified Skill result.",
+    "Existing workspace-disabled and fail-closed team tests remain passing.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-21.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-21.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #483"
+  ],
+  "recovery": "If the regression fails, preserve exact file-content assertions and fail-closed workspace policy; fix only the shared input normalization boundary."
+}
