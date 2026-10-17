@@ -442,7 +442,9 @@ public struct SkillRuntime: Sendable {
         guard let executor = await resolveExecutor(for: manifest) else {
             throw SkillExecutionError.unknownSkill(id)
         }
-        // Cancellation may arrive while policy or executor lookup is suspended.
+        try Task.checkCancellation()
+        try SkillJSONSchemaValidator.validate(inputJSON: inputJSON, schema: manifest.inputSchema)
+        // Cancellation may arrive while policy, executor lookup, or validation is suspended.
         // Re-check at the last boundary before invoking capability code.
         try Task.checkCancellation()
         let output = try await executor.execute(manifest: manifest, inputJSON: inputJSON)
