@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-35",
+  "title": "Bind Skill verification to the requested identity",
+  "status": "in_progress",
+  "goal": "Ensure M6 reports verified=true only when both the SkillExecutionReceipt identity matches the requested Skill and the executor verifies its output.",
+  "context": "M6 already treats a receipt as successful only when receipt.skillID matches the requested skillID, but its audit payload currently copies receipt.verified directly. A mismatched receipt with verified=true can therefore produce succeeded=false alongside verified=true.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-35.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not accept output from a mismatched Skill identity.",
+    "Do not change Skill selection, policy, or capability semantics.",
+    "Do not convert a mismatched receipt into a successful observation."
+  ],
+  "acceptance_criteria": [
+    "A receipt with the wrong skillID and verified=true results in succeeded=false and verified=false in both actionExecuted and observationProduced.",
+    "The goal aborts and actionID linkage remains intact.",
+    "A matching receipt with verified=true continues to pass the existing success regression.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-35.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-35.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #499"
+  ],
+  "recovery": "Derive the externally recorded verified flag from both receipt identity and receipt verification; preserve fail-closed behavior."
+}
