@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-34",
+  "title": "Preserve Skill identity in authorization events",
+  "status": "in_progress",
+  "goal": "Keep skillID attached to actionAuthorized events so the M6 audit trail can link proposal, authorization, execution, and observation for Skills.",
+  "context": "M6 includes skillID in actionProposed, actionExecuted, and observationProduced, but actionAuthorized only copies toolID from ActionIntent. Since Skill proposals have no toolID, the authorization event loses the Skill identity.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-34.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change policy decisions or capabilities.",
+    "Do not fabricate toolID for Skill proposals.",
+    "Do not emit authorization for a denied or unapproved action."
+  ],
+  "acceptance_criteria": [
+    "A successfully authorized Skill emits actionAuthorized with its skillID and actionID.",
+    "The authorization actionID matches actionExecuted and observationProduced.",
+    "Denied Skills remain fail-closed and are not marked authorized.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-34.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-34.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #496"
+  ],
+  "recovery": "Add only the missing skillID metadata and regression assertion; preserve authorization boundaries."
+}
