@@ -372,6 +372,15 @@ struct M6SemanticsTests {
         #expect(intents.count == 1)
         #expect(intents.first?.skillID == skillID)
         #expect(intents.first?.toolID == nil)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let requested = events.first { $0.kind == .approvalRequested && $0.payload["actionID"] != nil }
+        let resolved = events.first { $0.kind == .approvalResolved && $0.payload["actionID"] != nil }
+        #expect(requested?.payload["skillID"] == skillID.rawValue)
+        #expect(requested?.payload["toolID"] == nil)
+        #expect(resolved?.payload["skillID"] == skillID.rawValue)
+        #expect(resolved?.payload["toolID"] == nil)
+        #expect(resolved?.payload["actionID"] == requested?.payload["actionID"])
+        #expect(resolved?.payload["approved"] == "true")
     }
 
     // 1. Explicit toolID end-to-end without inference

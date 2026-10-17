@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-39",
+  "title": "Identify approval targets in audit events",
+  "status": "in_progress",
+  "goal": "Make approvalRequested and approvalResolved event records identify the exact typed Skill or Tool being approved, linked by actionID.",
+  "context": "ActionIntent now carries typed skillID and toolID, but approval audit events currently omit target identity. The event stream records that approval happened without revealing which Skill/Tool the user was asked to approve.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-39.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not infer target identity from summary text.",
+    "Do not change approval outcomes or policy semantics.",
+    "Do not put both toolID and skillID on a single action unless the proposal actually carries both."
+  ],
+  "acceptance_criteria": [
+    "approvalRequested includes typed skillID or toolID when present.",
+    "approvalResolved preserves the same target identity and actionID.",
+    "Skill approval events carry skillID and omit toolID.",
+    "Approval behavior remains unchanged and all three required CI gates pass on final head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-39.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-39.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #503"
+  ],
+  "recovery": "Build event payload from the already typed ActionIntent and assert request/resolution identity consistency in the approval integration test."
+}
