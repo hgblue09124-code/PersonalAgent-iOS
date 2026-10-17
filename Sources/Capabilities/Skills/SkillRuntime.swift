@@ -484,6 +484,34 @@ public struct SkillRuntime: Sendable {
         throw SkillExecutionError.unknownSkill(id)
     }
 
+
+    /// Returns the capabilities M6 must authorize for a Skill, including the
+    /// concrete Module contract for exact built-in module-backed Skill bindings.
+    public func requiredCapabilities(for id: SkillID) async throws -> CapabilityLevel {
+        let manifest = try await manifestForVerification(id: id)
+        guard manifest.id == id else { throw SkillExecutionError.unknownSkill(id) }
+
+        let moduleBackedSkillIDs: Set<String> = [
+            "workspace.search", "workspace.read-file", "workspace.create-file"
+        ]
+        guard moduleBackedSkillIDs.contains(id.rawValue) else {
+            return manifest.requiredCapabilities.union(.execute)
+        }
+        guard let rawModuleID = manifest.metadata["moduleID"],
+              !rawModuleID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw SkillExecutionError.malformedSkill
+        }
+        let moduleID = ModuleID(rawValue: rawModuleID)
+        guard BuiltInModuleSkillBinding.matches(manifest: manifest, moduleID: moduleID),
+              let moduleRuntime,
+              let contract = await moduleRuntime.contracts().first(where: { $0.id == moduleID }),
+              contract.inputSchema.identifier == manifest.inputSchema.identifier,
+              contract.outputSchema.identifier == manifest.outputSchema.identifier else {
+            throw SkillExecutionError.malformedSkill
+        }
+        return manifest.requiredCapabilities.union(contract.capabilities).union(.execute)
+    }
+
     /// Reports executor availability without executing a Skill or granting permissions.
     public func executorAvailability(for id: SkillID) async -> SkillExecutorAvailability {
         guard !disabled.contains(id.rawValue) else { return .unavailable }

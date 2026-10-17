@@ -1,0 +1,36 @@
+{
+  "id": "PASKILL-28",
+  "title": "Authorize module-backed Skills using concrete Module capabilities",
+  "status": "in_progress",
+  "goal": "Ensure M6 authorization for a module-backed Skill includes the actual capability declared by its bound Module contract.",
+  "context": "M6 proposals for module-backed Skills currently use manifest capabilities. The built-in workspace.create-file manifest can declare read/execute while its bound Module requires write, so M6 authorization does not reflect the full effective capability set.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-28.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M6SkillExecutionAdapter.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not infer module bindings from arbitrary metadata; use the existing exact built-in Skill-to-Module binding.",
+    "Do not weaken ModuleRuntime policy or approval checks.",
+    "Do not modify UI, provider/GGUF, or workspace path validation."
+  ],
+  "acceptance_criteria": [
+    "Exact built-in module-backed Skills derive effective capabilities from manifest requirements union the matching Module contract capabilities union execute.",
+    "Schema or binding mismatch fails closed.",
+    "M6 rejects an authorization set that differs from effective Skill capabilities.",
+    "Regression proves workspace.create-file authorization includes read, write, and execute rather than the stale manifest read/execute set.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-28.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-28.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #487"
+  ],
+  "recovery": "If a built-in Skill cannot resolve its exact Module contract, keep it unavailable and repair the binding/schema fixture rather than falling back to manifest-declared capabilities."
+}
