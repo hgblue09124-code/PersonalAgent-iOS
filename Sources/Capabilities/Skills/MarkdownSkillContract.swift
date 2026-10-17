@@ -46,7 +46,14 @@ public enum LegacySkillDefinitionParser {
             return value
         }
         func list(_ key: String) throws -> [String] {
-            try required(key).split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.map { String($0) }
+            let values = try required(key)
+                .split(separator: ",", omittingEmptySubsequences: false)
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+                .map { String($0) }
+            guard !values.isEmpty, values.allSatisfy({ !$0.isEmpty }) else {
+                throw SkillDefinitionError.malformed
+            }
+            return values
         }
         return SkillDefinition(
             identity: try required("identity"),

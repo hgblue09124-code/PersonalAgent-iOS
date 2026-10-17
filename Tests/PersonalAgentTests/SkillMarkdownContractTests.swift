@@ -51,6 +51,22 @@ final class SkillMarkdownContractTests: XCTestCase {
         }
     }
 
+
+    func testEmptyListEntriesFailClosed() {
+        XCTAssertThrowsError(try SkillMarkdownParser.parse("""
+        identity: calculator
+        scope: deterministic arithmetic
+        input: expression
+        rule: evaluate exactly once
+        output: integer
+        permissions: READ_WORKSPACE,,WRITE_WORKSPACE
+        dependencies: calculator-module
+        version: 1
+        """)) { error in
+            XCTAssertEqual(error as? SkillDefinitionError, .malformed)
+        }
+    }
+
     func testMissingRuleFailsClosed() {
         XCTAssertThrowsError(try SkillMarkdownParser.parse("""
         identity: calculator

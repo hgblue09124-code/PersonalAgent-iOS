@@ -1,0 +1,33 @@
+{
+  "id": "PASKILL-26",
+  "title": "Reject empty entries in legacy Skill lists",
+  "status": "in_progress",
+  "goal": "Reject legacy Skill contracts whose comma-separated permissions or dependencies contain empty entries.",
+  "context": "After malformed lines and duplicate fields were made fail-closed, the legacy parser still uses split's default empty-subsequence omission. Values such as `READ_WORKSPACE,,WRITE_WORKSPACE` silently lose the empty entry and appear valid.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-26.json",
+    "Sources/Capabilities/Skills/MarkdownSkillContract.swift",
+    "Tests/PersonalAgentTests/SkillMarkdownContractTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change the canonical Skill.md grammar or field names.",
+    "Do not silently drop empty permission or dependency entries.",
+    "Do not modify executor mapping, policy, UI, or provider behavior."
+  ],
+  "acceptance_criteria": [
+    "Comma-separated lists preserve empty subsequences during validation.",
+    "Any empty permission or dependency entry throws SkillDefinitionError.malformed.",
+    "Valid existing legacy Skill contracts continue to parse.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-26.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-26.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PR #488"
+  ],
+  "recovery": "If valid contracts fail, preserve existing trimming and required-field behavior while rejecting only empty list entries."
+}
