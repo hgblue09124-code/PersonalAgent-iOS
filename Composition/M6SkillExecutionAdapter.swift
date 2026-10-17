@@ -22,17 +22,16 @@ struct M6SkillExecutionAdapter: SkillExecutionBoundary, Sendable {
         } catch SkillExecutionError.noSelection { return nil }
     }
     func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel {
-        guard allowedSkillIDs.contains(skillID),
-              let manifest = try await runtime.discover(query: "").first(where: { $0.id == skillID }) else {
-            throw SkillExecutionError.unknownSkill(skillID)
-        }
-        return manifest.requiredCapabilities.union(.execute)
+        guard allowedSkillIDs.contains(skillID) else { throw SkillExecutionError.unknownSkill(skillID) }
+        return try await runtime.requiredCapabilities(for: skillID)
     }
     func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
-        guard allowedSkillIDs.contains(skillID),
-              let manifest = try await runtime.discover(query: "").first(where: { $0.id == skillID }),
-              manifest.requiredCapabilities.union(.execute) == authorizedCapabilities else {
-            throw SkillExecutionError.policyDenied("M6 authorization does not match Skill capabilities")
+        guard allowedSkillIDs.contains(skillID) else {
+            throw SkillExecutionError.policyDenied("M6 authorization does not match Skill scope")
+        }
+        let effectiveCapabilities = try await runtime.requiredCapabilities(for: skillID)
+        guard effectiveCapabilities == authorizedCapabilities else {
+            throw SkillExecutionError.policyDenied("M6 authorization does not match effective Skill capabilities")
         }
         let inputJSON: String
         if let data = input.data(using: .utf8), (try? JSONSerialization.jsonObject(with: data)) is [String: Any] {
@@ -43,17 +42,17 @@ struct M6SkillExecutionAdapter: SkillExecutionBoundary, Sendable {
         }
         let output = try await runtime.executeVerified(
             id: skillID, inputJSON: inputJSON,
-            policy: M6ApprovedSkillPolicy(capabilities: authorizedCapabilities)
+            policy: M6ApprovedSkillPolicy(skillID: skillID)
         )
         try Task.checkCancellation()
         return SkillExecutionReceipt(skillID: skillID, output: output, verified: true)
     }
 }
 private struct M6ApprovedSkillPolicy: PolicyEvaluating {
-    let capabilities: CapabilityLevel
+    let skillID: SkillID
     func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
-        intent.capabilities == capabilities
+        intent.summary == "Execute skill \(skillID.rawValue)" && intent.capabilities.contains(.execute)
             ? .allow("Authorized by canonical M6 policy and approval gate")
-            : .deny("Skill capability mismatch after M6 authorization")
+            : .deny("Skill identity or execution capability mismatch after M6 authorization")
     }
 }
