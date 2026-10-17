@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-24",
+  "title": "Align M6 Skill authorization with runtime execution capability",
+  "status": "in_progress",
+  "goal": "Make M6 authorize the effective Skill execution capability set consistently with SkillRuntime, including the mandatory execute capability.",
+  "context": "M6SkillExecutionAdapter currently reports manifest.requiredCapabilities to M6 but SkillRuntime evaluates that set union execute. Its exact-equality policy then rejects valid read-only manifests after M6 has approved them.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-24.json",
+    "Composition/M6SkillExecutionAdapter.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken SkillRuntime's mandatory execute capability check.",
+    "Do not grant capabilities beyond manifest requirements plus execute.",
+    "Do not modify ModuleRuntime approval behavior, UI, or provider/GGUF code."
+  ],
+  "acceptance_criteria": [
+    "M6 proposes manifest.requiredCapabilities union execute.",
+    "The adapter validates the same effective capability set before execution.",
+    "A read-only Skill manifest executes and verifies through M6 when policy explicitly allows the effective set.",
+    "Mismatched capabilities still fail closed.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-24.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-24.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "If the regression fails, inspect the effective capability set at proposal and SkillRuntime boundaries; preserve the mandatory execute check and exact authorization matching."
+}

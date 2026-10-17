@@ -26,12 +26,12 @@ struct M6SkillExecutionAdapter: SkillExecutionBoundary, Sendable {
               let manifest = try await runtime.discover(query: "").first(where: { $0.id == skillID }) else {
             throw SkillExecutionError.unknownSkill(skillID)
         }
-        return manifest.requiredCapabilities
+        return manifest.requiredCapabilities.union(.execute)
     }
     func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
         guard allowedSkillIDs.contains(skillID),
               let manifest = try await runtime.discover(query: "").first(where: { $0.id == skillID }),
-              manifest.requiredCapabilities == authorizedCapabilities else {
+              manifest.requiredCapabilities.union(.execute) == authorizedCapabilities else {
             throw SkillExecutionError.policyDenied("M6 authorization does not match Skill capabilities")
         }
         let inputJSON: String
