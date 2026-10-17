@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 import PAKernel
+import PAEvents
 import PAModules
 import PATools
 import PASkills
@@ -75,6 +76,71 @@ struct M3RuntimeTests {
                 )
             )
         }
+    }
+
+
+    @Test func approvalRequiredModuleExecutesOnlyAfterExplicitApproval() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                .approve("explicit module approval required")
+            }
+        }
+        struct ApprovingGate: ApprovalGate {
+            func requestApproval(for intent: ActionIntent) async throws -> Bool {
+                intent.capabilities == [.read, .execute] &&
+                    intent.summary.hasPrefix("Execute Module ")
+            }
+        }
+        let eventLog = InMemoryEventLog()
+        let catalog = try ModuleCatalog(modules: [EchoModule()])
+        let runtime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            policy: ApprovalRequiredPolicy(),
+            approvalGate: ApprovingGate(),
+            eventLog: eventLog
+        )
+        let result = try await runtime.execute(
+            ModuleInvocation(
+                moduleID: DeterministicModuleIDs.echo,
+                input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "approved"])
+            )
+        )
+        #expect(result.output.value(for: "text") == "approved")
+        let events = try await eventLog.allEvents()
+        #expect(events.contains { $0.kind == .moduleInvoked })
+        #expect(events.contains { $0.kind == .moduleCompleted })
+    }
+
+    @Test func approvalRequiredModuleStillFailsClosedWhenRejected() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                .approve("explicit module approval required")
+            }
+        }
+        struct RejectingGate: ApprovalGate {
+            func requestApproval(for intent: ActionIntent) async throws -> Bool { false }
+        }
+        let eventLog = InMemoryEventLog()
+        let catalog = try ModuleCatalog(modules: [EchoModule()])
+        let runtime = ModuleRuntime(
+            catalog: catalog,
+            grantedCapabilities: [.read, .execute],
+            policy: ApprovalRequiredPolicy(),
+            approvalGate: RejectingGate(),
+            eventLog: eventLog
+        )
+        await #expect(throws: ModuleRuntimeError.capabilityDenied([.read, .execute])) {
+            _ = try await runtime.execute(
+                ModuleInvocation(
+                    moduleID: DeterministicModuleIDs.echo,
+                    input: ModulePayload(schema: SchemaDocument(identifier: "mod.echo.in"), fields: ["text": "rejected"])
+                )
+            )
+        }
+        let events = try await eventLog.allEvents()
+        #expect(events.contains { $0.kind == .moduleFailed })
+        #expect(!events.contains { $0.kind == .moduleInvoked })
     }
 
     @Test func missingPolicyFailsClosed() async throws {

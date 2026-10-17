@@ -627,6 +627,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute, .network, .destructive],
             policy: resolvedPolicy,
+            approvalGate: approvalGate,
             eventLog: idempotentLog,
             logger: logger
         )
