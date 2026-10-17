@@ -505,7 +505,7 @@ public actor M6Orchestrator {
                 var allowed = decision.allowed
                 var denialReason = decision.reason
 
-                if decision.requiresApproval {
+                if decision.requiresApproval && decision.allowed {
                     if let gate = approvalGate {
                         try await emit(
                             traceID: traceID,

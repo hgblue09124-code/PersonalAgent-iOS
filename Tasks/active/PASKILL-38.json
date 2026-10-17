@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-38",
+  "title": "Prevent approval from overriding policy denial",
+  "status": "in_progress",
+  "goal": "Ensure user approval can only satisfy a policy-approved action's additional approval requirement and never override an explicit policy denial.",
+  "context": "M6 initializes allowed from PolicyDecision.allowed but unconditionally replaces it with ApprovalGate's result whenever requiresApproval is true. A contradictory decision with allowed=false and requiresApproval=true can therefore execute when the gate returns true.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-38.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not let approval change a policy denial into an allow.",
+    "Do not invoke the approval gate for an action already denied by policy.",
+    "Do not weaken normal approval requirements for policy-approved actions."
+  ],
+  "acceptance_criteria": [
+    "A policy decision with allowed=false and requiresApproval=true remains denied.",
+    "The approval gate is not called for a policy-denied action.",
+    "The goal is aborted, the denial reason is preserved, and no actionExecuted event is emitted.",
+    "Normal policy-approved actions requiring approval still use the gate.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-38.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-38.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #502"
+  ],
+  "recovery": "Gate the approval branch on both requiresApproval and decision.allowed; add a regression where a permissive gate must not reverse explicit policy denial."
+}
