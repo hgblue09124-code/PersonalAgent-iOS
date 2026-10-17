@@ -65,6 +65,38 @@ struct M6SemanticsTests {
         #expect(observation?.payload["actionID"] == action?.payload["actionID"])
     }
 
+
+    @Test func policyDeniedSkillIsAuditableWithoutClaimingExecution() async throws {
+        struct DenySkillPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                .deny("Skill execution not authorized")
+            }
+        }
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.denied")
+        let goal = Goal(statement: "Run a Skill without authorization")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "Do not mask the policy denial."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: DenySkillPolicy(),
+            skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let denied = events.first { $0.kind == .actionDenied && $0.payload["skillID"] == skillID.rawValue }
+        let observation = events.first { $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue }
+        #expect(denied?.payload["actionID"] == observation?.payload["actionID"])
+        #expect(observation?.payload["succeeded"] == "false")
+        #expect(observation?.payload["verified"] == "false")
+        #expect(!events.contains { $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue })
+    }
+
     @Test func skillBoundaryFailureAbortsGoalAndRecordsFailure() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let skillID = SkillID(rawValue: "skill.failing")
