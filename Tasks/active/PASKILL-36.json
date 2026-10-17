@@ -1,0 +1,39 @@
+{
+  "id": "PASKILL-36",
+  "title": "Bind Skill approval to a typed Skill identity",
+  "status": "in_progress",
+  "goal": "Make policy and approval boundaries receive the exact Skill ID as structured ActionIntent data instead of relying on parsing a free-form summary.",
+  "context": "M6 currently constructs ActionIntent without skillID, so an ApprovalGate cannot identify which Skill it is authorizing. M6ApprovedSkillPolicy also identifies the Skill by exact summary-string matching rather than a typed field.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-36.json",
+    "Kernel/PolicyContracts.swift",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M6SkillExecutionAdapter.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not make skillID mandatory for existing non-Skill ActionIntent callers.",
+    "Do not weaken policy or approval checks.",
+    "Do not identify Skills by parsing free-form summary text when a typed ID is available."
+  ],
+  "acceptance_criteria": [
+    "ActionIntent has an optional typed skillID field while existing non-Skill call sites remain source-compatible.",
+    "M6 passes proposal.skillID into the policy and approval boundary.",
+    "SkillRuntime passes its requested Skill ID into its policy boundary.",
+    "M6ApprovedSkillPolicy validates the typed skillID rather than parsing summary text.",
+    "Regression proves ApprovalGate receives the exact requested skillID and no toolID for a Skill proposal.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-36.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-36.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #500"
+  ],
+  "recovery": "Keep the field optional and source-compatible, thread exact Skill identity through M6 and SkillRuntime, and retain all existing fail-closed capability checks."
+}
