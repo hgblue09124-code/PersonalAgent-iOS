@@ -1,0 +1,38 @@
+{
+  "id": "PASKILL-23",
+  "title": "Carry explicit approval through the ModuleRuntime boundary",
+  "status": "in_progress",
+  "goal": "Allow ModuleRuntime to complete approval-required work only after an explicit ApprovalGate decision for the concrete module capability.",
+  "context": "M6 and M8 composition roots already expose ApprovalGate to the orchestration layer but do not inject it into ModuleRuntime. As a result, a Skill can be approved at its own boundary and still fail at ModuleRuntime even when a gate exists; ModuleRuntime must ask for approval against the concrete module intent without weakening policy.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-23.json",
+    "Sources/Capabilities/Modules/ModuleRuntime.swift",
+    "Composition/M6CompositionRoot.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M3RuntimeTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Never infer module approval from a Skill-level approval or a Settings toggle.",
+    "Missing or rejected approval must fail closed before moduleInvoked.",
+    "Do not change workspace path validation, tool capabilities, UI, or provider/GGUF behavior."
+  ],
+  "acceptance_criteria": [
+    "M6 and M8 composition roots inject the existing approval gate into ModuleRuntime.",
+    "ModuleRuntime requests approval for the concrete module intent only when policy requires it.",
+    "Missing and rejected approval fail closed and produce no moduleInvoked event.",
+    "An approved module completes and emits moduleInvoked and moduleCompleted.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-23.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-23.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #485"
+  ],
+  "recovery": "If the build or tests fail, inspect the exact failing boundary and repair only the scoped task while preserving fail-closed behavior."
+}

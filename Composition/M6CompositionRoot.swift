@@ -78,6 +78,7 @@ public struct M6CompositionRoot: CompositionRoot, Sendable {
             catalog: moduleCatalog,
             grantedCapabilities: [.read, .write, .execute],
             policy: resolvedPolicy,
+            approvalGate: approvalGate,
             eventLog: log,
             logger: logger
         )
