@@ -17,6 +17,7 @@ public enum SkillAgentOrchestratorError: Error, Sendable, Equatable {
     case verificationFailed(SkillID)
     case skillOutsideAgentScope(SkillID)
     case agentDeclaresMissingSkill(SkillID)
+    case agentScopeRequired
 }
 
 /// Owns the Agent-level Skill loop:
@@ -28,17 +29,13 @@ public actor SkillAgentOrchestrator {
         self.runtime = runtime
     }
 
+    /// An Agent loop must have an explicit scope; never select from every installed Skill implicitly.
     public func run(
         goalStatement: String,
         inputJSON: String,
         policy: any PolicyEvaluating
     ) async throws -> SkillAgentResult {
-        try await run(
-            agent: nil,
-            goalStatement: goalStatement,
-            inputJSON: inputJSON,
-            policy: policy
-        )
+        throw SkillAgentOrchestratorError.agentScopeRequired
     }
 
     public func run(
