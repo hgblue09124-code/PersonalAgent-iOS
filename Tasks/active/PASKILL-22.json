@@ -1,0 +1,33 @@
+{
+  "id": "PASKILL-22",
+  "title": "Prove approval-required policy blocks production module-backed Skills",
+  "status": "in_progress",
+  "goal": "Verify the production M8 chat-to-Skill-to-Module path refuses a module-backed Skill when the injected live policy requires explicit approval, without executing the underlying tool.",
+  "context": "SkillRuntime and ModuleRuntime already fail closed on approval-required decisions, and existing unit coverage checks approval for the built-in text normalizer. Issue #347 requires evidence on the production module-backed path as well, where workspace Skills resolve through ToolModule and ModuleRuntime.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-22.json",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not treat approval-required as an implicit grant or weaken the production policy boundary.",
+    "Do not change executor mappings, workspace scope/path validation, or runtime policy behavior.",
+    "Do not modify UI, provider/GGUF, or unrelated tests."
+  ],
+  "acceptance_criteria": [
+    "An M8 workspace Skill selected from chat throws the typed module-policy failure when Skill policy allows but Module policy requires approval.",
+    "The regression exercises the module-backed production mapping with workspace tools enabled.",
+    "The event log proves the Module is failed and never invoked.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-22.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-22.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #484"
+  ],
+  "recovery": "If the test reveals a policy bypass, fix only the failing production boundary and retain explicit approval semantics; if setup is invalid, repair the fixture rather than weakening the assertion."
+}
