@@ -473,6 +473,13 @@ extension SkillRuntimeTests {
 private struct AllowSkillExecutionPolicy: PolicyEvaluating {
     func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("test-only explicit grant") }
 }
+
+private struct DenyAndRequireApprovalSkillExecutionPolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+        PolicyDecision(allowed: false, requiresApproval: true, reason: "test denial with approval flag")
+    }
+}
+
 private struct DenySkillExecutionPolicy: PolicyEvaluating {
     func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .deny("test denial") }
 }
@@ -588,6 +595,25 @@ extension SkillRuntimeTests {
     }
 }
 
+
+
+extension SkillRuntimeTests {
+    func testExplicitPolicyDenialWinsOverApprovalRequirement() async throws {
+        do {
+            _ = try await SkillRuntime().executeVerified(
+                id: SkillRuntime.normalizationManifest.id,
+                inputJSON: #"{"text":"must not execute"}"#,
+                policy: DenyAndRequireApprovalSkillExecutionPolicy()
+            )
+            XCTFail("An approval flag must not override explicit policy denial")
+        } catch {
+            XCTAssertEqual(
+                error as? SkillExecutionError,
+                .policyDenied("test denial with approval flag")
+            )
+        }
+    }
+}
 
 extension SkillRuntimeTests {
     func testExecuteVerifiedStillEnforcesDeniedPolicy() async throws {

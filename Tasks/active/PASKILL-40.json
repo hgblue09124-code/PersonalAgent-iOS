@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-40",
+  "title": "Preserve Skill policy denial when approval is also required",
+  "status": "in_progress",
+  "goal": "Ensure SkillRuntime reports an explicit policy denial before considering the separate approval requirement.",
+  "context": "SkillRuntime currently checks requiresApproval before allowed. If a policy returns allowed=false and requiresApproval=true, the runtime reports policyRequiresApproval rather than policyDenied; callers could mistake an explicit denial for a request that user approval can satisfy.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-40.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not let approval satisfy an explicit policy denial.",
+    "Do not weaken the separate approval requirement when policy allows an action.",
+    "Do not invoke the executor when policy denies."
+  ],
+  "acceptance_criteria": [
+    "A decision with allowed=false and requiresApproval=true throws policyDenied with the policy reason.",
+    "A decision with allowed=true and requiresApproval=true still throws policyRequiresApproval.",
+    "Regression uses executeVerified and proves denied Skill execution does not return output.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-40.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-40.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #503"
+  ],
+  "recovery": "Check decision.allowed first, then handle requiresApproval only for policy-approved actions; assert the precise policyDenied error."
+}
