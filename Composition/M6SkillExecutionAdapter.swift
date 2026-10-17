@@ -52,7 +52,7 @@ private struct M6ApprovedSkillPolicy: PolicyEvaluating {
     let skillID: SkillID
     let capabilities: CapabilityLevel
     func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
-        intent.summary == "Execute skill \(skillID.rawValue)"
+        intent.skillID == skillID
             && capabilities.contains(intent.capabilities)
             && intent.capabilities.contains(.execute)
             ? .allow("Authorized by canonical M6 policy and approval gate")

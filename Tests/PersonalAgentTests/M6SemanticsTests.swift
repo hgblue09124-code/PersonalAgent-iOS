@@ -267,6 +267,35 @@ struct M6SemanticsTests {
         #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
     }
 
+
+    @Test func approvalGateReceivesTypedSkillIdentity() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                PolicyDecision(allowed: true, requiresApproval: true, reason: "Skill approval required")
+            }
+        }
+        let skillID = SkillID(rawValue: "skill.approval-target")
+        let recorder = ApprovalIntentRecorder()
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let goal = Goal(statement: "Run the selected Skill")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ApprovalRequiredPolicy(),
+            approvalGate: RecordingApprovalGate(recorder: recorder),
+            skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .complete)
+        let intents = await recorder.captured()
+        #expect(intents.count == 1)
+        #expect(intents.first?.skillID == skillID)
+        #expect(intents.first?.toolID == nil)
+    }
+
     // 1. Explicit toolID end-to-end without inference
     @Test func test1_ExplicitToolIDEndToEndWithoutInference() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy(),
@@ -870,6 +899,21 @@ private actor PolicyCaptureSpy: PolicyEvaluating {
 
     func getCapturedIntents() -> [ActionIntent] {
         capturedIntents
+    }
+}
+
+
+private actor ApprovalIntentRecorder {
+    private var intents: [ActionIntent] = []
+    func record(_ intent: ActionIntent) { intents.append(intent) }
+    func captured() -> [ActionIntent] { intents }
+}
+
+private struct RecordingApprovalGate: ApprovalGate {
+    let recorder: ApprovalIntentRecorder
+    func requestApproval(for intent: ActionIntent) async throws -> Bool {
+        await recorder.record(intent)
+        return true
     }
 }
 

@@ -29,17 +29,20 @@ public struct PolicyDecision: Sendable, Equatable {
 public struct ActionIntent: Sendable, Equatable {
     public let actionID: ActionID
     public let toolID: ToolID?
+    public let skillID: SkillID?
     public let capabilities: CapabilityLevel
     public let summary: String
 
     public init(
         actionID: ActionID = ActionID(),
         toolID: ToolID? = nil,
+        skillID: SkillID? = nil,
         capabilities: CapabilityLevel,
         summary: String
     ) {
         self.actionID = actionID
         self.toolID = toolID
+        self.skillID = skillID
         self.capabilities = capabilities
         self.summary = summary
     }

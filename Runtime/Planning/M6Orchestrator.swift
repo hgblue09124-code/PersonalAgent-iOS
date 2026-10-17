@@ -496,6 +496,7 @@ public actor M6Orchestrator {
                 let intent = ActionIntent(
                     actionID: proposal.actionID,
                     toolID: proposal.toolID,
+                    skillID: proposal.skillID,
                     capabilities: proposal.capabilities,
                     summary: proposal.description
                 )

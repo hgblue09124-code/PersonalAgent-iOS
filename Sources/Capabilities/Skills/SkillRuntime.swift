@@ -430,7 +430,7 @@ public struct SkillRuntime: Sendable {
         // required by the runtime to invoke capability code.
         let executionCapabilities = manifest.requiredCapabilities.union(.execute)
         let decision = await policy.evaluate(
-            ActionIntent(capabilities: executionCapabilities, summary: "Execute skill \(id.rawValue)")
+            ActionIntent(skillID: id, capabilities: executionCapabilities, summary: "Execute skill \(id.rawValue)")
         )
         if decision.requiresApproval {
             throw SkillExecutionError.policyRequiresApproval(decision.reason)
