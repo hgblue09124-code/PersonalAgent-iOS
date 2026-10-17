@@ -25,6 +25,18 @@ struct M6SkillCompositionIntegrationTests {
         }
     }
 
+
+    private struct ReadOnlyManifestExecutor: SkillExecutor {
+        func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+            #"{ "text": "read-only capability executed" }"#
+        }
+        func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+            guard let data = outputJSON.data(using: .utf8),
+                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: String] else { return false }
+            return object["text"] == "read-only capability executed"
+        }
+    }
+
     private struct UntrustedRegisteredExecutor: SkillExecutor {
         func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
             #"{"result":"executed"}"#
@@ -116,6 +128,39 @@ struct M6SkillCompositionIntegrationTests {
         let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         let observation = events.first {
             $0.kind == .observationProduced && $0.payload["skillID"] == manifest.id.rawValue
+        }
+        #expect(observation?.payload["succeeded"] == "true")
+        #expect(observation?.payload["verified"] == "true")
+    }
+
+
+    @Test("M6 adds the required execute capability to read-only Skill grants")
+    func m6ReadOnlyManifestReceivesExecutionCapability() async throws {
+        let id = SkillID(rawValue: "custom.read-only")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Read Only Skill",
+            description: "A Skill with read-only declared capabilities.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return the fixed verified result.",
+            inputSchema: SchemaDocument(identifier: "custom.read-only.input"),
+            outputSchema: SchemaDocument(identifier: "custom.read-only.output"),
+            requiredCapabilities: .read
+        )
+        let root = try await M6CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            policy: AllowPolicy(),
+            skillStore: InMemorySkillStore(manifests: [manifest]),
+            skillExecutors: SkillExecutorRegistry(executors: [id.rawValue: ReadOnlyManifestExecutor()]),
+            allowedSkillIDs: [id]
+        )
+        let goal = Goal(statement: id.rawValue)
+        try await root.runtime.submit(goal: goal)
+        let evaluation = try await root.orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .complete)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == id.rawValue
         }
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
