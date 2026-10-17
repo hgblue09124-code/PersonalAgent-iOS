@@ -5,7 +5,7 @@ import PARuntime
 import PAEvents
 import PASkills
 import PAModules
-import PAComposition
+@testable import PAComposition
 
 @Suite("Canonical M6 Skill Composition")
 struct M6SkillCompositionIntegrationTests {
@@ -165,6 +165,110 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
     }
+
+
+    private struct WriteCapabilityModule: Module {
+        let contract = ModuleContract(
+            id: ModuleID(rawValue: "tool.workspace.write"),
+            name: "Workspace Write",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            kind: .atomic,
+            capabilities: .write,
+            inputSchema: SchemaDocument(identifier: "tool.workspace.write.input"),
+            outputSchema: SchemaDocument(identifier: "tool.workspace.write.output"),
+            requiredFields: ["arguments"]
+        )
+        func execute(_ input: ModulePayload) async throws -> ModulePayload {
+            ModulePayload(schema: contract.outputSchema, fields: ["output": "{}"])
+        }
+    }
+
+    @Test("M6 authorizes the actual Module capability for a module-backed Skill")
+    func m6ModuleBackedSkillUsesConcreteModuleCapabilities() async throws {
+        let id = SkillID(rawValue: "workspace.create-file")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Tạo File",
+            description: "Create a file in the workspace.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Create a file in workspace.",
+            inputSchema: SchemaDocument(identifier: "tool.workspace.write.input"),
+            outputSchema: SchemaDocument(identifier: "tool.workspace.write.output"),
+            requiredCapabilities: [.read, .execute],
+            metadata: [
+                "moduleID": "tool.workspace.write",
+                "chatInputAdapter": "workspace.create-file"
+            ]
+        )
+        let moduleRuntime = ModuleRuntime(
+            catalog: try ModuleCatalog(modules: [WriteCapabilityModule()]),
+            grantedCapabilities: [.read, .write, .execute],
+            policy: AllowPolicy()
+        )
+        let runtime = SkillRuntime(
+            store: InMemorySkillStore(manifests: [manifest]),
+            moduleRuntime: moduleRuntime
+        )
+        let adapter = M6SkillExecutionAdapter(runtime: runtime, allowedSkillIDs: [id])
+        let capabilities = try await adapter.requiredCapabilities(for: id)
+        #expect(capabilities == [.read, .write, .execute])
+    }
+
+
+
+    @Test("M6 fails closed when a built-in module-backed Skill binding is mismatched")
+    func m6ModuleBackedSkillRejectsMismatchedBinding() async throws {
+        let id = SkillID(rawValue: "workspace.create-file")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Tạo File",
+            description: "Create a file in the workspace.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Create a file in workspace.",
+            inputSchema: SchemaDocument(identifier: "tool.workspace.write.input"),
+            outputSchema: SchemaDocument(identifier: "tool.workspace.write.output"),
+            requiredCapabilities: [.read, .execute],
+            metadata: [
+                "moduleID": "tool.workspace.read",
+                "chatInputAdapter": "workspace.create-file"
+            ]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        let adapter = M6SkillExecutionAdapter(runtime: runtime, allowedSkillIDs: [id])
+        await #expect(throws: SkillExecutionError.malformedSkill) {
+            _ = try await adapter.requiredCapabilities(for: id)
+        }
+    }
+
+    @Test("M6 fails closed when a module-backed Skill schema differs from its Module")
+    func m6ModuleBackedSkillRejectsSchemaMismatch() async throws {
+        let id = SkillID(rawValue: "workspace.create-file")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Tạo File",
+            description: "Create a file in the workspace.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Create a file in workspace.",
+            inputSchema: SchemaDocument(identifier: "tool.workspace.write.input"),
+            outputSchema: SchemaDocument(identifier: "incorrect.output"),
+            requiredCapabilities: [.read, .execute],
+            metadata: [
+                "moduleID": "tool.workspace.write",
+                "chatInputAdapter": "workspace.create-file"
+            ]
+        )
+        let moduleRuntime = ModuleRuntime(
+            catalog: try ModuleCatalog(modules: [WriteCapabilityModule()]),
+            grantedCapabilities: [.read, .write, .execute],
+            policy: AllowPolicy()
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), moduleRuntime: moduleRuntime)
+        let adapter = M6SkillExecutionAdapter(runtime: runtime, allowedSkillIDs: [id])
+        await #expect(throws: SkillExecutionError.malformedSkill) {
+            _ = try await adapter.requiredCapabilities(for: id)
+        }
+    }
+
 
     @Test("M8 module-backed Skill fails closed when ModuleRuntime requires approval")
     func m8ModuleBackedSkillFailsClosedWhenApprovalRequired() async throws {
