@@ -640,6 +640,19 @@ public actor M6Orchestrator {
                     let observation = Observation(actionID: proposal.actionID, summary: summary, succeeded: false)
                     try await emit(
                         traceID: traceID,
+                        kind: .actionExecuted,
+                        payload: [
+                            "goalID": goalID.rawValue,
+                            "actionID": proposal.actionID.rawValue,
+                            "skillID": skillID.rawValue,
+                            "description": proposal.description,
+                            "summary": summary,
+                            "succeeded": "false",
+                            "verified": "false",
+                        ]
+                    )
+                    try await emit(
+                        traceID: traceID,
                         kind: .observationProduced,
                         payload: [
                             "goalID": goalID.rawValue,
@@ -657,6 +670,19 @@ public actor M6Orchestrator {
                     ? "Skill '\(skillID.rawValue)' executed and verified"
                     : "Skill '\(skillID.rawValue)' did not produce verified output"
                 let observation = Observation(actionID: proposal.actionID, summary: summary, succeeded: succeeded)
+                try await emit(
+                    traceID: traceID,
+                    kind: .actionExecuted,
+                    payload: [
+                        "goalID": goalID.rawValue,
+                        "actionID": proposal.actionID.rawValue,
+                        "skillID": skillID.rawValue,
+                        "description": proposal.description,
+                        "summary": summary,
+                        "succeeded": "\(succeeded)",
+                        "verified": "\(receipt.verified)",
+                    ]
+                )
                 try await emit(
                     traceID: traceID,
                     kind: .observationProduced,

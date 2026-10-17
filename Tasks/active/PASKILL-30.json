@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-30",
+  "title": "Complete the M6 Skill action audit chain",
+  "status": "in_progress",
+  "goal": "Emit an actionExecuted event for actual Skill execution attempts and link it to the resulting verified or failed observation.",
+  "context": "M6's Module branch emits actionExecuted after an execution attempt, but the Skill branch emits only observationProduced. This leaves the causal audit chain incomplete for successful and failed Skill executions.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-30.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not emit actionExecuted when no SkillExecutionBoundary is configured and no execution was attempted.",
+    "Do not mark a Skill successful unless its receipt is verified and its Skill ID matches.",
+    "Do not change policy, capability, or cancellation behavior."
+  ],
+  "acceptance_criteria": [
+    "Successful Skill execution emits actionExecuted with matching actionID, skillID, verified=true, and succeeded=true.",
+    "Failed Skill execution emits actionExecuted with succeeded=false and links to a failed observation.",
+    "The actionExecuted and observationProduced events share the same actionID.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-30.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-30.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #493"
+  ],
+  "recovery": "If the event chain fails, preserve actionID/goalID/skillID linkage and never create an actionExecuted event for an unavailable execution boundary."
+}
