@@ -1,0 +1,35 @@
+{
+  "id": "PAEXEC-2",
+  "title": "Enforce active Agent scope at public M8 Skill entry points",
+  "status": "in_progress",
+  "goal": "Ensure every public M8 Skill execution entry point enforces the active default Agent manifest and workspace setting before allowing a discovered Skill to execute.",
+  "context": "Issue #347 requires Agent scope to be enforced at the execution boundary. M8CompositionRoot.runChatSkillIfMatched passes a scoped Agent to SkillAgentOrchestrator, but public executeSkill calls SkillRuntime directly and runSkillAgent invokes the unscoped orchestrator overload.",
+  "allowed_paths": [
+    "Tasks/active/PAEXEC-2.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not broaden the default Agent Skill list or auto-authorize imported Skills.",
+    "Do not bypass ModuleRuntime policy, approval, schema, cancellation, or verification.",
+    "Do not modify UI, provider/GGUF, or unrelated runtime behavior."
+  ],
+  "acceptance_criteria": [
+    "M8 executeSkill rejects a discoverable Skill that is not declared by the active default Agent.",
+    "M8 runSkillAgent selects and executes only Skills declared by the active default Agent.",
+    "Workspace Skills remain excluded when workspaceToolsEnabled is false.",
+    "Regression tests prove an explicitly registered but out-of-scope Skill cannot execute through either public API.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAEXEC-2.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAEXEC-2.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA checks on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #481"
+  ],
+  "recovery": "If scope tests expose compatibility issues, preserve fail-closed Agent scope and make the smallest change within M8 composition; do not weaken the regression to permit unscoped execution."
+}

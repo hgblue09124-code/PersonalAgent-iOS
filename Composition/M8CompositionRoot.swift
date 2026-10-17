@@ -798,7 +798,12 @@ extension M8CompositionRoot {
         inputJSON: String,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> String {
-        try await skillRuntime.executeVerified(
+        let storedAgent = try await agentStore.load(id: "personal.default")
+        let agent = scopeAgentForWorkspaceSetting(storedAgent)
+        guard agent.skillIDs.contains(id) else {
+            throw SkillAgentOrchestratorError.skillOutsideAgentScope(id)
+        }
+        return try await skillRuntime.executeVerified(
             id: id,
             inputJSON: inputJSON,
             policy: policy ?? skillPolicy
@@ -810,7 +815,10 @@ extension M8CompositionRoot {
         inputJSON: String,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult {
-        try await skillAgentOrchestrator.run(
+        let storedAgent = try await agentStore.load(id: "personal.default")
+        let agent = scopeAgentForWorkspaceSetting(storedAgent)
+        return try await skillAgentOrchestrator.run(
+            agent: agent,
             goalStatement: goalStatement,
             inputJSON: inputJSON,
             policy: policy ?? skillPolicy
