@@ -1,27 +1,24 @@
 {
   "id": "PASKILL-42",
-  "title": "Validate Skill input JSON against manifest schema",
+  "title": "Propagate cancellation from Module execution",
   "status": "in_progress",
-  "goal": "Validate manifest input JSON centrally before any Skill executor runs, so custom executors cannot receive malformed or schema-invalid inputs.",
-  "context": "SkillRuntime passes inputJSON directly to custom registered executors. Built-in executors perform their own checks, but the runtime does not enforce SchemaDocument.rawJSON for custom executors, allowing required-field/type/additional-property violations to reach capability code.",
+  "goal": "Ensure cancellation from ModuleRuntime propagates through M6 without being recorded as an ordinary failed action or observation.",
+  "context": "M6 executeProposal catches every ModuleRuntime error and converts it into a normal failed action. When ModuleRuntime throws its explicit cancelled error, this produces misleading actionExecuted/observationProduced events before cancellation is noticed by the outer loop.",
   "allowed_paths": [
     "Tasks/active/PASKILL-42.json",
-    "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Sources/Capabilities/Skills/SkillJSONSchemaValidator.swift",
-    "Tests/PersonalAgentTests/SkillInputSchemaValidationTests.swift"
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
   ],
   "forbidden_changes": [
-    "Do not call an executor before input validation succeeds.",
-    "Do not silently ignore malformed schema JSON or unsupported validation keywords.",
-    "Do not change policy/approval semantics or output verification.",
-    "Do not claim full JSON Schema support beyond the explicitly supported subset."
+    "Do not convert ModuleRuntimeError.cancelled or task cancellation into a normal execution failure.",
+    "Do not alter ordinary Module failure handling.",
+    "Do not change ModuleRuntime timeout semantics or claim a cancelled action completed."
   ],
   "acceptance_criteria": [
-    "Every manifest-backed Skill execution validates inputJSON before executor invocation.",
-    "Malformed input JSON or malformed schema fails closed with malformedSkill.",
-    "Supported type/required/properties/additionalProperties/items/enum/const and simple bounds are enforced; unsupported schema keywords fail closed.",
-    "Regression proves invalid input and malformed schema never invoke the custom executor.",
-    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on final PR head."
+    "CancellationError and ModuleRuntimeError.cancelled propagate as CancellationError from executeProposal.",
+    "The regression confirms ModuleRuntime emits moduleCancelled for the target module.",
+    "A cancelled module invocation emits no ordinary actionExecuted or observationProduced event.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-42.json",
@@ -33,5 +30,5 @@
     "Issue #347",
     "PR #506"
   ],
-  "recovery": "Keep validation centralized before executor invocation, reject malformed schemas/inputs, and add a custom executor counter proving no side effects occur on validation failure."
+  "recovery": "Handle cancellation before the generic failure branch and assert no ordinary action outcome is emitted for the cancelled Module."
 }
