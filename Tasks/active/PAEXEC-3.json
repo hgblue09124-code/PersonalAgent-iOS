@@ -1,0 +1,35 @@
+{
+  "id": "PAEXEC-3",
+  "title": "Require an explicit Agent scope for every Skill agent loop",
+  "status": "in_progress",
+  "goal": "Prevent the public SkillAgentOrchestrator entry point from selecting and executing any installed Skill when no Agent manifest supplies an allowlist.",
+  "context": "After M8 public entry points were scoped, SkillAgentOrchestrator still exposes run(goalStatement:inputJSON:policy:) that delegates with agent:nil, making all installed Skills eligible. This contradicts fail-closed Agent scope at the orchestration boundary. CI exposed one existing registry test that still calls the now-forbidden unscoped overload; migrate that test to assert the fail-closed contract.",
+  "allowed_paths": [
+    "Tasks/active/PAEXEC-3.json",
+    "Sources/Capabilities/Skills/SkillAgentOrchestrator.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not widen Agent manifests or silently synthesize a default allowlist.",
+    "Do not bypass runtime policy, execute capability checks, approval, cancellation, or output verification.",
+    "Do not modify UI, provider/GGUF, or unrelated runtime behavior."
+  ],
+  "acceptance_criteria": [
+    "The public orchestrator overload without an Agent fails closed with a typed error.",
+    "The overload accepting AgentManifest remains the only successful orchestration path.",
+    "Regression test proves unscoped execution is rejected before Skill selection or executor invocation.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAEXEC-3.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAEXEC-3.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA checks on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #482"
+  ],
+  "recovery": "If source compatibility tests reveal a legitimate unscoped caller, migrate that caller to an explicit AgentManifest; do not restore implicit all-Skill selection."
+}

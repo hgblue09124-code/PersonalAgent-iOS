@@ -187,8 +187,8 @@ struct SkillExecutorRegistryTests {
     }
 
 
-    @Test("Skill Agent verifies output through the same executor instance")
-    func skillAgentRejectsUnverifiedExecutorOutput() async throws {
+    @Test("unscoped Skill Agent rejects execution before selecting an executor")
+    func unscopedSkillAgentRejectsExecution() async throws {
         let id = SkillID(rawValue: "custom.agent-unverified")
         let manifest = SkillManifest(
             id: id,
@@ -205,7 +205,7 @@ struct SkillExecutorRegistryTests {
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
         let orchestrator = SkillAgentOrchestrator(runtime: runtime)
 
-        await #expect(throws: SkillAgentOrchestratorError.verificationFailed(id)) {
+        await #expect(throws: SkillAgentOrchestratorError.agentScopeRequired) {
             _ = try await orchestrator.run(
                 goalStatement: id.rawValue,
                 inputJSON: #"{"value":"request"}"#,

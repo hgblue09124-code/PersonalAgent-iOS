@@ -21,6 +21,18 @@ struct M6SkillCompositionIntegrationTests {
         }
     }
 
+    @Test("orchestrator refuses to run without an explicit Agent scope")
+    func orchestratorRequiresExplicitAgentScope() async throws {
+        let orchestrator = SkillAgentOrchestrator()
+        await #expect(throws: SkillAgentOrchestratorError.agentScopeRequired) {
+            _ = try await orchestrator.run(
+                goalStatement: "Text Normalize",
+                inputJSON: #"{ "text": "input" }"#,
+                policy: AllowPolicy()
+            )
+        }
+    }
+
     @Test("public M8 Skill APIs enforce the active default Agent scope")
     func publicSkillAPIsRespectDefaultAgentScope() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
