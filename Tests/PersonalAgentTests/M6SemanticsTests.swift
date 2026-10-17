@@ -35,6 +35,36 @@ struct M6SemanticsTests {
     }
 
 
+
+    @Test func successfulSkillExecutionEmitsCausalActionEvent() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.succeeds")
+        let goal = Goal(statement: "Run a successful Skill")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "Reasoning is not the Skill result."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ExplicitAllowPolicy(),
+            skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .complete)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .completed)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let action = events.first {
+            $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue
+        }
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue
+        }
+        #expect(action?.payload["succeeded"] == "true")
+        #expect(action?.payload["verified"] == "true")
+        #expect(observation?.payload["actionID"] == action?.payload["actionID"])
+    }
+
     @Test func skillBoundaryFailureAbortsGoalAndRecordsFailure() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let skillID = SkillID(rawValue: "skill.failing")
@@ -60,6 +90,11 @@ struct M6SemanticsTests {
         }
         #expect(failure?.payload["succeeded"] == "false")
         #expect(failure?.payload["verified"] == "false")
+        let failedAction = events.first {
+            $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue
+        }
+        #expect(failedAction?.payload["succeeded"] == "false")
+        #expect(failedAction?.payload["actionID"] == failure?.payload["actionID"])
         #expect(failure?.payload["summary"]?.contains("synthetic Skill boundary denial") == true)
         #expect(events.contains { $0.kind == .stateUpdated && $0.payload["goalID"] == goal.id.rawValue })
     }
@@ -630,6 +665,17 @@ private actor RecordingProvider: LLMProvider {
 
 
 
+
+
+private struct SuccessfulSkillExecutionBoundary: SkillExecutionBoundary {
+    let skillID: SkillID
+    func discoverSkillIDs() async throws -> [SkillID] { [skillID] }
+    func selectSkill(goalStatement: String, availableSkillIDs: [SkillID]) async throws -> SkillID? { skillID }
+    func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel { .execute }
+    func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
+        SkillExecutionReceipt(skillID: skillID, output: "verified output", verified: true)
+    }
+}
 
 private struct ThrowingSkillExecutionBoundary: SkillExecutionBoundary {
     let skillID: SkillID
