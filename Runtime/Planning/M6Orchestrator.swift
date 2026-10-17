@@ -507,10 +507,20 @@ public actor M6Orchestrator {
 
                 if decision.requiresApproval && decision.allowed {
                     if let gate = approvalGate {
+                        var approvalPayload: [String: String] = [
+                            "goalID": goalID.rawValue,
+                            "actionID": proposal.actionID.rawValue,
+                        ]
+                        if let toolID = intent.toolID {
+                            approvalPayload["toolID"] = toolID.rawValue
+                        }
+                        if let skillID = intent.skillID {
+                            approvalPayload["skillID"] = skillID.rawValue
+                        }
                         try await emit(
                             traceID: traceID,
                             kind: .approvalRequested,
-                            payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue]
+                            payload: approvalPayload
                         )
                         do {
                             allowed = try await gate.requestApproval(for: intent)
@@ -524,15 +534,12 @@ public actor M6Orchestrator {
                             allowed = false
                             denialReason = "Approval gate failed: \(error)"
                         }
+                        approvalPayload["approved"] = "\(allowed)"
+                        approvalPayload["reason"] = denialReason
                         try await emit(
                             traceID: traceID,
                             kind: .approvalResolved,
-                            payload: [
-                                "goalID": goalID.rawValue,
-                                "actionID": proposal.actionID.rawValue,
-                                "approved": "\(allowed)",
-                                "reason": denialReason,
-                            ]
+                            payload: approvalPayload
                         )
                     } else {
                         // Approval is a separate requirement, not an implicit grant.
