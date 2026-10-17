@@ -505,7 +505,7 @@ public actor M6Orchestrator {
                 var allowed = decision.allowed
                 var denialReason = decision.reason
 
-                if decision.requiresApproval && decision.allowed {
+                if decision.requiresApproval {
                     if let gate = approvalGate {
                         var approvalPayload: [String: String] = [
                             "goalID": goalID.rawValue,

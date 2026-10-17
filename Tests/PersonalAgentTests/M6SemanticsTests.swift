@@ -271,9 +271,9 @@ struct M6SemanticsTests {
 
 
     @Test func policyDenialCannotBeOverriddenByApprovalGate() async throws {
-        struct DenyAndRequireApprovalPolicy: PolicyEvaluating {
+        struct DenySkillPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
-                PolicyDecision(allowed: false, requiresApproval: true, reason: "policy explicitly denied")
+                .deny("policy explicitly denied")
             }
         }
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
@@ -285,7 +285,7 @@ struct M6SemanticsTests {
             runtime: root.runtime,
             eventLog: root.eventLog,
             proposer: DirectSkillProposer(skillID: skillID),
-            policy: DenyAndRequireApprovalPolicy(),
+            policy: DenySkillPolicy(),
             approvalGate: RecordingApprovalGate(recorder: recorder),
             skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
         )
@@ -349,7 +349,7 @@ struct M6SemanticsTests {
     @Test func approvalGateReceivesTypedSkillIdentity() async throws {
         struct ApprovalRequiredPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
-                PolicyDecision(allowed: true, requiresApproval: true, reason: "Skill approval required")
+                .approve("Skill approval required")
             }
         }
         let skillID = SkillID(rawValue: "skill.approval-target")
