@@ -223,11 +223,11 @@ public struct SkillRuntime: Sendable {
                 summary: "Execute Skill \\(request.skillID) through module \\(request.moduleID)"
             )
         )
-        if decision.requiresApproval {
-            throw SkillExecutionError.policyRequiresApproval(decision.reason)
-        }
         guard decision.allowed else {
             throw SkillExecutionError.policyDenied(decision.reason)
+        }
+        if decision.requiresApproval {
+            throw SkillExecutionError.policyRequiresApproval(decision.reason)
         }
         try Task.checkCancellation()
         return try await module(request.input)
@@ -432,11 +432,11 @@ public struct SkillRuntime: Sendable {
         let decision = await policy.evaluate(
             ActionIntent(skillID: id, capabilities: executionCapabilities, summary: "Execute skill \(id.rawValue)")
         )
-        if decision.requiresApproval {
-            throw SkillExecutionError.policyRequiresApproval(decision.reason)
-        }
         guard decision.allowed else {
             throw SkillExecutionError.policyDenied(decision.reason)
+        }
+        if decision.requiresApproval {
+            throw SkillExecutionError.policyRequiresApproval(decision.reason)
         }
 
         guard let executor = await resolveExecutor(for: manifest) else {
