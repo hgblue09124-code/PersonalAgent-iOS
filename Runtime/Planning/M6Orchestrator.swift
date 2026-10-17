@@ -497,8 +497,26 @@ public actor M6Orchestrator {
                     if let toolID = intent.toolID {
                         payload["toolID"] = toolID.rawValue
                     }
+                    if let skillID = proposal.skillID {
+                        payload["skillID"] = skillID.rawValue
+                    }
                     try await emit(traceID: traceID, kind: .actionDenied, payload: payload)
-                    observations.append(Observation(actionID: proposal.actionID, summary: "Denied by policy: \(decision.reason)", succeeded: false))
+                    let summary = "Denied by policy: \(decision.reason)"
+                    observations.append(Observation(actionID: proposal.actionID, summary: summary, succeeded: false))
+                    var observationPayload: [String: String] = [
+                        "goalID": goalID.rawValue,
+                        "actionID": proposal.actionID.rawValue,
+                        "summary": summary,
+                        "succeeded": "false",
+                        "verified": "false",
+                    ]
+                    if let toolID = proposal.toolID {
+                        observationPayload["toolID"] = toolID.rawValue
+                    }
+                    if let skillID = proposal.skillID {
+                        observationPayload["skillID"] = skillID.rawValue
+                    }
+                    try await emit(traceID: traceID, kind: .observationProduced, payload: observationPayload)
                     continue
                 }
 

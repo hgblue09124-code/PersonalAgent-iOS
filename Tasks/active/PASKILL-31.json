@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-31",
+  "title": "Audit policy-denied Skill actions",
+  "status": "in_progress",
+  "goal": "Ensure a Skill rejected by M6 policy has a complete denial and failed-observation trail, without falsely recording execution.",
+  "context": "M6 currently omits skillID from actionDenied payloads and does not emit observationProduced for denied proposals. This makes denied Skill attempts difficult to trace and breaks the action-to-observation audit chain.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-31.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not emit actionExecuted for a policy-denied proposal.",
+    "Do not invoke SkillExecutionBoundary after denial.",
+    "Do not change policy or approval semantics."
+  ],
+  "acceptance_criteria": [
+    "actionDenied includes skillID and actionID for a denied Skill proposal.",
+    "observationProduced includes the same skillID/actionID and succeeded=false, verified=false.",
+    "A denied Skill never emits actionExecuted and the goal aborts.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-31.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-31.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #494"
+  ],
+  "recovery": "Preserve fail-closed policy behavior; add only denial/observation metadata and regression coverage."
+}
