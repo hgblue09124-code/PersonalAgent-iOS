@@ -1,0 +1,33 @@
+{
+  "id": "PASKILL-25",
+  "title": "Fail closed on malformed legacy Skill contract lines",
+  "status": "in_progress",
+  "goal": "Make the legacy Skill contract parser reject malformed and duplicate fields rather than silently dropping or overwriting ambiguous input.",
+  "context": "LegacySkillDefinitionParser currently skips non-comment lines without a colon and overwrites duplicate keys. The public static SkillMarkdownParser.parse entry point delegates to it, so malformed or ambiguous imported contract text can be accepted silently.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-25.json",
+    "Sources/Capabilities/Skills/MarkdownSkillContract.swift",
+    "Tests/PersonalAgentTests/SkillMarkdownContractTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change the canonical Skill.md parser grammar or field names.",
+    "Do not silently normalize malformed or duplicate fields into a valid contract.",
+    "Do not modify executor mapping, policy, UI, or provider behavior."
+  ],
+  "acceptance_criteria": [
+    "A non-empty non-comment line without a delimiter throws SkillDefinitionError.malformed.",
+    "Duplicate field keys throw SkillDefinitionError.malformed instead of last-write-wins.",
+    "Existing valid legacy Skill contracts continue to parse.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-25.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-25.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "If valid legacy contracts fail, preserve the existing required-field semantics while rejecting only malformed lines and duplicate keys."
+}
