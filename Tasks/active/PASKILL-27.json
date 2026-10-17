@@ -1,0 +1,33 @@
+{
+  "id": "PASKILL-27",
+  "title": "Stop Module execution when approval is cancelled",
+  "status": "in_progress",
+  "goal": "Ensure a task cancelled while awaiting explicit Module approval never emits moduleInvoked or executes the Module.",
+  "context": "ModuleRuntime awaits ApprovalGate and then proceeds directly to input validation/invocation. If a gate suspends and later returns approval after the caller cancels, the runtime must re-check cancellation before crossing the execution boundary.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-27.json",
+    "Sources/Capabilities/Modules/ModuleRuntime.swift",
+    "Tests/PersonalAgentTests/M3RuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not treat a cancelled approval as a grant.",
+    "Do not change policy denial or capability checks.",
+    "Do not modify Skill mapping, UI, or provider behavior."
+  ],
+  "acceptance_criteria": [
+    "Cancellation after an approval request but before its resolution ends the module run as cancelled.",
+    "The event log records moduleCancelled and never moduleInvoked for the cancelled run.",
+    "An approval that completes while the task remains active still follows normal policy and capability checks.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-27.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-27.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PR #486"
+  ],
+  "recovery": "If cancellation tests expose a race, preserve the gate's cancellation behavior and add a final cancellation check immediately before module invocation."
+}
