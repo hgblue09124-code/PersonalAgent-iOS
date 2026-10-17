@@ -132,7 +132,14 @@ public struct SkillRuntime: Sendable {
     private let moduleRuntime: ModuleRuntime?
 
     public static func chatInputText(from goalStatement: String) -> String {
-        let statement = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Contextual chat input may contain prior turns and memory. The explicit
+        // current-request boundary is authoritative; never parse an earlier turn as
+        // the active Skill command.
+        var payloadStatement = goalStatement
+        if let marker = goalStatement.range(of: "Current user request:\n", options: .backwards) {
+            payloadStatement = String(goalStatement[marker.upperBound...])
+        }
+        let statement = payloadStatement.trimmingCharacters(in: .whitespacesAndNewlines)
         // Keep file-creation commands intact for the allowlisted workspace adapter.
         // Chat commonly adds a short polite lead-in; strip only known lead-ins so
         // the downstream parser still receives its explicit, fail-closed grammar.
@@ -148,9 +155,9 @@ public struct SkillRuntime: Sendable {
             command = String(command.dropFirst(lead.count)).trimmingCharacters(in: .whitespacesAndNewlines)
         }
         // For ordinary prompts, preserve the payload exactly, including trailing whitespace.
-        if let separator = goalStatement.range(of: ": "),
-           !goalStatement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return String(goalStatement[separator.upperBound...])
+        if let separator = payloadStatement.range(of: ": "),
+           !payloadStatement[separator.upperBound...].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return String(payloadStatement[separator.upperBound...])
         }
         return statement
     }
