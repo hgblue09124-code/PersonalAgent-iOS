@@ -101,6 +101,38 @@ struct M6SemanticsTests {
         #expect(!events.contains { $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue })
     }
 
+
+    @Test func mismatchedSkillReceiptCannotClaimVerifiedOutput() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.requested")
+        let goal = Goal(statement: "Run the requested Skill only")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "A mismatched receipt must not count as success."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ExplicitAllowPolicy(),
+            skillBoundary: MismatchedSkillReceiptBoundary(requestedSkillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let action = events.first {
+            $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue
+        }
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue
+        }
+        #expect(action?.payload["succeeded"] == "false")
+        #expect(action?.payload["verified"] == "false")
+        #expect(observation?.payload["succeeded"] == "false")
+        #expect(observation?.payload["verified"] == "false")
+        #expect(action?.payload["actionID"] == observation?.payload["actionID"])
+    }
+
     @Test func skillBoundaryFailureAbortsGoalAndRecordsFailure() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let skillID = SkillID(rawValue: "skill.failing")
@@ -764,6 +796,21 @@ private struct SuccessfulSkillExecutionBoundary: SkillExecutionBoundary {
     func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel { .execute }
     func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
         SkillExecutionReceipt(skillID: skillID, output: "verified output", verified: true)
+    }
+}
+
+
+private struct MismatchedSkillReceiptBoundary: SkillExecutionBoundary {
+    let requestedSkillID: SkillID
+    func discoverSkillIDs() async throws -> [SkillID] { [requestedSkillID] }
+    func selectSkill(goalStatement: String, availableSkillIDs: [SkillID]) async throws -> SkillID? { requestedSkillID }
+    func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel { .execute }
+    func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
+        SkillExecutionReceipt(
+            skillID: SkillID(rawValue: "skill.unrelated"),
+            output: "output from an unrelated Skill",
+            verified: true
+        )
     }
 }
 
