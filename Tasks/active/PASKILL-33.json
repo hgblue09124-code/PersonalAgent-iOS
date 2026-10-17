@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-33",
+  "title": "Complete audit events for verifier rejection",
+  "status": "in_progress",
+  "goal": "Ensure verifier rejection records failed observations, evaluation, reflection, and the authoritative aborted state in the same event trail as normal M6 cycles.",
+  "context": "M6 currently applies an aborted StateUpdate and returns immediately when verification rejects a plan, but omits observationProduced, evaluationCompleted, and reflectionCompleted events.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-33.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not execute proposals rejected by verification.",
+    "Do not change verification acceptance or policy behavior.",
+    "Do not change the terminal abort reason."
+  ],
+  "acceptance_criteria": [
+    "Every rejected proposal produces a failed observation with matching actionID and toolID/skillID where present.",
+    "evaluationCompleted and reflectionCompleted are emitted before the authoritative state update.",
+    "The goal is aborted and no actionExecuted event is emitted.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-33.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-33.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #496"
+  ],
+  "recovery": "Keep verifier rejection fail-closed and add only the missing audit events plus regression assertions."
+}

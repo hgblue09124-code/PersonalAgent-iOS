@@ -443,6 +443,7 @@ modules: [EchoModule()])
         let orchestrator = M6Orchestrator(
             runtime: root.runtime,
             eventLog: root.eventLog,
+            proposer: DirectSkillProposer(skillID: SkillID(rawValue: "skill.verifier-rejected")),
             verifier: rejectingVerifier
         )
 
@@ -455,6 +456,18 @@ modules: [EchoModule()])
 
         let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
         #expect(events.contains { $0.kind == .verificationCompleted && $0.payload["accepted"] == "false" })
+        #expect(events.contains {
+            $0.kind == .observationProduced
+                && $0.payload["summary"]?.contains("Verification rejected: Unsafe operational parameters") == true
+                && $0.payload["succeeded"] == "false"
+        })
+        #expect(events.contains {
+            $0.kind == .evaluationCompleted
+                && $0.payload["disposition"] == AgencyDisposition.abort.rawValue
+                && $0.payload["reason"] == "Verification rejected"
+        })
+        #expect(events.contains { $0.kind == .reflectionCompleted && $0.payload["goalID"] == goal.id.rawValue })
+        #expect(events.contains { $0.kind == .stateUpdated && $0.payload["targetStatus"] == GoalStatus.aborted.rawValue })
         #expect(!events.contains { $0.kind == .actionExecuted })
     }
 

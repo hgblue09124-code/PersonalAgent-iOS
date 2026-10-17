@@ -439,8 +439,42 @@ public actor M6Orchestrator {
 
             if !verification.accepted {
                 let obs = proposals.map { Observation(actionID: $0.actionID, summary: "Verification rejected: \(verification.notes)", succeeded: false) }
+                for (proposal, observation) in zip(proposals, obs) {
+                    var payload: [String: String] = [
+                        "goalID": goalID.rawValue,
+                        "actionID": proposal.actionID.rawValue,
+                        "summary": observation.summary,
+                        "succeeded": "false",
+                        "verified": "false",
+                    ]
+                    if let toolID = proposal.toolID {
+                        payload["toolID"] = toolID.rawValue
+                    }
+                    if let skillID = proposal.skillID {
+                        payload["skillID"] = skillID.rawValue
+                    }
+                    try await emit(traceID: traceID, kind: .observationProduced, payload: payload)
+                }
                 let eval = Evaluation(goalID: goalID, disposition: .abort, reason: "Verification rejected")
+                try await emit(
+                    traceID: traceID,
+                    kind: .evaluationCompleted,
+                    payload: [
+                        "goalID": goalID.rawValue,
+                        "disposition": eval.disposition.rawValue,
+                        "reason": eval.reason,
+                    ]
+                )
                 let refl = try await reflector.reflect(goalID: goalID, observations: obs, evaluation: eval)
+                try await emit(
+                    traceID: traceID,
+                    kind: .reflectionCompleted,
+                    payload: [
+                        "goalID": goalID.rawValue,
+                        "notes": refl.notes,
+                        "shouldAdapt": "\(refl.shouldAdapt)",
+                    ]
+                )
 
                 let stateUpdate = StateUpdate(
                     goalID: goalID,
@@ -449,6 +483,7 @@ public actor M6Orchestrator {
                         "disposition": eval.disposition.rawValue,
                         "reason": eval.reason,
                         "reflection": refl.notes,
+                        "observationIDs": obs.map(\.actionID.rawValue).joined(separator: ","),
                     ]
                 )
                 try await runtime.applyStateUpdate(stateUpdate)
