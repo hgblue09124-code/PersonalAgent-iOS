@@ -726,8 +726,9 @@ public actor M6Orchestrator {
                     )
                     return observation
                 }
-                let succeeded = receipt.skillID == skillID && receipt.verified
-                let summary = succeeded
+                let verified = receipt.skillID == skillID && receipt.verified
+                let succeeded = verified
+                let summary = verified
                     ? "Skill '\(skillID.rawValue)' executed and verified"
                     : "Skill '\(skillID.rawValue)' did not produce verified output"
                 let observation = Observation(actionID: proposal.actionID, summary: summary, succeeded: succeeded)
@@ -741,7 +742,7 @@ public actor M6Orchestrator {
                         "description": proposal.description,
                         "summary": summary,
                         "succeeded": "\(succeeded)",
-                        "verified": "\(receipt.verified)",
+                        "verified": "\(verified)",
                     ]
                 )
                 try await emit(
@@ -751,7 +752,7 @@ public actor M6Orchestrator {
                         "goalID": goalID.rawValue,
                         "actionID": proposal.actionID.rawValue,
                         "skillID": skillID.rawValue,
-                        "verified": "\(receipt.verified)",
+                        "verified": "\(verified)",
                         "summary": summary,
                         "succeeded": "\(succeeded)",
                     ]
