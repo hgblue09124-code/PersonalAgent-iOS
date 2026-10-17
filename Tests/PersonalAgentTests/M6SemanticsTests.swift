@@ -268,6 +268,51 @@ struct M6SemanticsTests {
     }
 
 
+
+    @Test func approvalGateErrorFailsClosedAndAbortsGoal() async throws {
+        struct ApprovalRequiredPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                PolicyDecision(allowed: true, requiresApproval: true, reason: "explicit approval required")
+            }
+        }
+        struct ThrowingApprovalGate: ApprovalGate {
+            func requestApproval(for intent: ActionIntent) async throws -> Bool {
+                throw NSError(
+                    domain: "test.approval",
+                    code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "approval UI unavailable"]
+                )
+            }
+        }
+
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.approval-error")
+        let goal = Goal(statement: "Run Skill only after explicit approval")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "Do not treat approval UI failure as approval."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ApprovalRequiredPolicy(),
+            approvalGate: ThrowingApprovalGate(),
+            skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let resolved = events.first { $0.kind == .approvalResolved && $0.payload["actionID"] != nil }
+        let denied = events.first { $0.kind == .actionDenied && $0.payload["skillID"] == skillID.rawValue }
+        let observation = events.first { $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue }
+        #expect(resolved?.payload["approved"] == "false")
+        #expect(resolved?.payload["reason"]?.contains("approval UI unavailable") == true)
+        #expect(denied?.payload["actionID"] == observation?.payload["actionID"])
+        #expect(observation?.payload["succeeded"] == "false")
+        #expect(!events.contains { $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue })
+    }
+
     @Test func approvalGateReceivesTypedSkillIdentity() async throws {
         struct ApprovalRequiredPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
