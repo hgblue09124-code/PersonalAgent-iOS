@@ -1,0 +1,37 @@
+{
+  "id": "PASKILL-21",
+  "title": "Unify chat input normalization across Agent and Agent-team Skill execution",
+  "status": "in_progress",
+  "goal": "Ensure Agent-team execution receives the same normalized, fail-closed natural-language payload as single-Agent Skill execution, so polite file commands preserve exact content.",
+  "context": "The single-Agent path normalizes contextual input, but the Agent-team path previously passed the whole transcript to the executor. The existing helper also searched for the first colon-space in the full context, which could select an earlier user turn instead of the explicit `Current user request:` section. Both paths must extract the active request and apply the same normalization.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-21.json",
+    "Composition/M8CompositionRoot.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not widen Agent Skill scope or workspace capabilities.",
+    "Do not change file path validation, policy, approval, cancellation, or output verification.",
+    "Do not modify UI, provider/GGUF, or unrelated runtime behavior."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime.chatInputText extracts the explicit Current user request section when contextual chat history is supplied, without leaking earlier turns into the Skill input.",
+    "Agent-team execution uses the same canonical input normalization as the single-Agent path.",
+    "An end-to-end regression with an earlier conflicting file request creates only the current request's file with exact content and returns a verified Skill result.",
+    "Existing workspace-disabled and fail-closed team tests remain passing.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-21.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-21.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #483"
+  ],
+  "recovery": "If the regression fails, preserve exact file-content assertions and fail-closed workspace policy; fix only the shared input normalization boundary."
+}

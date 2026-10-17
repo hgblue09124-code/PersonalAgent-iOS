@@ -185,6 +185,38 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
+    @Test("M8 Agent team normalizes polite Vietnamese create-file commands")
+    func m8AgentTeamCreatesFileFromPoliteRequest() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let content = "Nội dung qua Agent team"
+        let contextualInput = """
+        Conversation context:
+        user: Hãy tạo file workspace/old.md với nội dung: nội dung cũ
+
+        Response preference: Reply in natural Vietnamese.
+        Current user request:
+        Hãy tạo file workspace/team-polite.md với nội dung: \(content)
+        """
+        let result = try await root.runChatTeamIfMatched(
+            goalStatement: "Tạo file workspace/team-polite.md với nội dung: \(content)",
+            inputContext: contextualInput
+        )
+        #expect(result?.members.contains {
+            $0.skillResult.skillID.rawValue == "workspace.create-file" && $0.skillResult.verified
+        } == true)
+
+        let fileURL = directory.appendingPathComponent("workspace/team-polite.md")
+        #expect(FileManager.default.fileExists(atPath: fileURL.path))
+        #expect(try String(contentsOf: fileURL, encoding: .utf8) == content)
+    }
+
     @Test("M8 workspace Skill accepts polite Vietnamese create-file commands")
     func m8WorkspaceSkillCreatesFileFromPoliteRequest() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)

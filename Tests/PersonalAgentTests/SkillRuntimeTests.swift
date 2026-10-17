@@ -112,6 +112,7 @@ final class SkillRuntimeTests: XCTestCase {
 
     func testChatInputTextStillExtractsOrdinaryColonDelimitedPayload() {
         XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text"), "actual text")
+        XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text  "), "actual text  ")
     }
 
     func testSkillRunsThroughNamedModule() async throws {
