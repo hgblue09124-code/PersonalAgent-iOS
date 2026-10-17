@@ -250,6 +250,9 @@ public struct DefaultVerifier: Verifying {
         guard proposals.allSatisfy({ $0.planID == plan.id }) else {
             return VerificationResult(accepted: false, notes: "Rejected proposal referencing a different plan")
         }
+        guard proposals.allSatisfy({ !($0.toolID != nil && $0.skillID != nil) }) else {
+            return VerificationResult(accepted: false, notes: "Rejected proposal with conflicting Tool and Skill targets")
+        }
         guard Set(proposals.map(\.actionID)).count == proposals.count else {
             return VerificationResult(accepted: false, notes: "Rejected duplicate action identifiers")
         }
