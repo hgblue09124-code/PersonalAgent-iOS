@@ -1,0 +1,36 @@
+{
+  "id": "PASKILL-37",
+  "title": "Fail closed when the approval gate throws",
+  "status": "in_progress",
+  "goal": "Treat approval UI/gate errors as explicit denial and failed observation so a goal does not remain active or accidentally execute without approval.",
+  "context": "M6 awaits ApprovalGate.requestApproval with try; non-cancellation errors escape run() before denial/evaluation/state update. A broken or dismissed approval interface can therefore leave the goal active without an authoritative result.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-37.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Never treat a thrown approval error as approval.",
+    "Preserve cancellation propagation.",
+    "Do not invoke the Skill or Module after approval failure.",
+    "Do not weaken policy or approval requirements."
+  ],
+  "acceptance_criteria": [
+    "A non-cancellation ApprovalGate error becomes approved=false with a diagnostic reason.",
+    "The proposal is denied and receives a failed observation linked by actionID.",
+    "The goal reaches aborted state and emits no actionExecuted for the denied Skill.",
+    "Cancellation from the gate still propagates as cancellation.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-37.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-37.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #501"
+  ],
+  "recovery": "Keep cancellation exceptional, map ordinary gate errors to explicit denial, and assert no execution plus authoritative aborted goal state."
+}

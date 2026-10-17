@@ -512,14 +512,27 @@ public actor M6Orchestrator {
                             kind: .approvalRequested,
                             payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue]
                         )
-                        allowed = try await gate.requestApproval(for: intent)
-                        if !allowed {
-                            denialReason = "Approval not granted"
+                        do {
+                            allowed = try await gate.requestApproval(for: intent)
+                            if !allowed {
+                                denialReason = "Approval not granted"
+                            }
+                        } catch {
+                            if Task.isCancelled || error is CancellationError {
+                                throw CancellationError()
+                            }
+                            allowed = false
+                            denialReason = "Approval gate failed: \(error)"
                         }
                         try await emit(
                             traceID: traceID,
                             kind: .approvalResolved,
-                            payload: ["goalID": goalID.rawValue, "actionID": proposal.actionID.rawValue, "approved": "\(allowed)"]
+                            payload: [
+                                "goalID": goalID.rawValue,
+                                "actionID": proposal.actionID.rawValue,
+                                "approved": "\(allowed)",
+                                "reason": denialReason,
+                            ]
                         )
                     } else {
                         // Approval is a separate requirement, not an implicit grant.
