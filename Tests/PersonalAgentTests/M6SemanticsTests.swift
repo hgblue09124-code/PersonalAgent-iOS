@@ -269,6 +269,39 @@ struct M6SemanticsTests {
 
 
 
+
+    @Test func policyDenialCannotBeOverriddenByApprovalGate() async throws {
+        struct DenyAndRequireApprovalPolicy: PolicyEvaluating {
+            func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+                PolicyDecision(allowed: false, requiresApproval: true, reason: "policy explicitly denied")
+            }
+        }
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.policy-denied")
+        let goal = Goal(statement: "Attempt a policy-denied Skill")
+        try await root.runtime.submit(goal: goal)
+        let recorder = ApprovalIntentRecorder()
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: DenyAndRequireApprovalPolicy(),
+            approvalGate: RecordingApprovalGate(recorder: recorder),
+            skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+        #expect(await recorder.captured().isEmpty)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let denied = events.first { $0.kind == .actionDenied && $0.payload["skillID"] == skillID.rawValue }
+        #expect(denied?.payload["reason"] == "policy explicitly denied")
+        #expect(!events.contains { $0.kind == .approvalRequested })
+        #expect(!events.contains { $0.kind == .approvalResolved })
+        #expect(!events.contains { $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue })
+    }
+
     @Test func approvalGateErrorFailsClosedAndAbortsGoal() async throws {
         struct ApprovalRequiredPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
