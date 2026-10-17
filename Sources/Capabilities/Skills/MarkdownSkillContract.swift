@@ -33,9 +33,13 @@ public enum LegacySkillDefinitionParser {
         for raw in markdown.components(separatedBy: .newlines) {
             let line = raw.trimmingCharacters(in: .whitespaces)
             guard !line.isEmpty, !line.hasPrefix("#") else { continue }
-            guard let colon = line.firstIndex(of: ":") else { continue }
-            fields[String(line[..<colon]).trimmingCharacters(in: .whitespaces)] =
-                String(line[line.index(after: colon)...]).trimmingCharacters(in: .whitespaces)
+            guard let colon = line.firstIndex(of: ":") else { throw SkillDefinitionError.malformed }
+            let key = String(line[..<colon]).trimmingCharacters(in: .whitespaces)
+            let value = String(line[line.index(after: colon)...]).trimmingCharacters(in: .whitespaces)
+            guard !key.isEmpty, !value.isEmpty, fields[key] == nil else {
+                throw SkillDefinitionError.malformed
+            }
+            fields[key] = value
         }
         func required(_ key: String) throws -> String {
             guard let value = fields[key], !value.isEmpty else { throw SkillDefinitionError.missingField(key) }
