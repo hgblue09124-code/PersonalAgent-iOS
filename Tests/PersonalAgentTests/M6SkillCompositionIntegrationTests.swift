@@ -4,12 +4,25 @@ import PAKernel
 import PARuntime
 import PAEvents
 import PASkills
+import PAModules
 import PAComposition
 
 @Suite("Canonical M6 Skill Composition")
 struct M6SkillCompositionIntegrationTests {
     private struct AllowPolicy: PolicyEvaluating {
         func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("integration test grant") }
+    }
+
+    private struct ModuleApprovalPolicy: PolicyEvaluating {
+        func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+            if intent.summary.hasPrefix("Execute skill ") {
+                return .allow("skill boundary allowed")
+            }
+            if intent.summary.hasPrefix("Execute Module ") {
+                return .approve("module execution requires approval")
+            }
+            return .deny("unexpected action: \(intent.summary)")
+        }
     }
 
     private struct UntrustedRegisteredExecutor: SkillExecutor {
@@ -106,6 +119,29 @@ struct M6SkillCompositionIntegrationTests {
         }
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
+    }
+
+    @Test("M8 module-backed Skill fails closed when ModuleRuntime requires approval")
+    func m8ModuleBackedSkillFailsClosedWhenApprovalRequired() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: ModuleApprovalPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        // SkillRuntime allows the Skill; the second policy boundary in ModuleRuntime
+        // requires approval and must reject before invoking the workspace tool.
+        await #expect(throws: ModuleRuntimeError.capabilityDenied(.read)) {
+            _ = try await root.runChatSkillIfMatched(goalStatement: "Tìm kiếm workspace approval-sentinel")
+        }
+        let events = try await eventLog.allEvents()
+        #expect(events.contains { $0.kind == .moduleFailed })
+        #expect(!events.contains { $0.kind == .moduleInvoked })
     }
 
     @Test("M8 canonical chat loop executes and verifies a declared Skill")
