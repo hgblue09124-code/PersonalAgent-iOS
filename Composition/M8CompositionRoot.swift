@@ -867,7 +867,7 @@ extension M8CompositionRoot {
             .filter { !$0.skillIDs.isEmpty }
         guard !agents.isEmpty else { return nil }
         let inputData = try JSONSerialization.data(
-            withJSONObject: ["text": inputContext ?? goalStatement],
+            withJSONObject: ["text": SkillRuntime.chatInputText(from: inputContext ?? goalStatement)],
             options: [.sortedKeys]
         )
         guard let inputJSON = String(data: inputData, encoding: .utf8) else {
