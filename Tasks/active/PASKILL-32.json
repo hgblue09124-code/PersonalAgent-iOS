@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-32",
+  "title": "Record the actual approval denial reason",
+  "status": "in_progress",
+  "goal": "Make M6 denial records distinguish policy denial from approval not being granted, without weakening fail-closed behavior.",
+  "context": "When an ApprovalGate returns false, M6 currently records the policy's original reason (for example, 'explicit approval required') as if that described the outcome. Missing-gate denial is similarly ambiguous.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-32.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not permit execution after a rejected or missing approval gate.",
+    "Do not describe a false approval result as user rejection specifically; the gate may represent other no-approval outcomes.",
+    "Do not change policy decisions or approval request semantics."
+  ],
+  "acceptance_criteria": [
+    "A gate returning false produces actionDenied reason 'Approval not granted' and matching failed observation.",
+    "A missing gate produces an explicit reason that no approval gate is configured.",
+    "No actionExecuted event occurs after approval is not granted.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-32.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-32.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #496"
+  ],
+  "recovery": "Keep all approval failures fail-closed; adjust only denial reason propagation and regression coverage."
+}
