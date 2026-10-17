@@ -12,6 +12,12 @@ struct M6SkillCompositionIntegrationTests {
         func evaluate(_ intent: ActionIntent) async -> PolicyDecision { .allow("integration test grant") }
     }
 
+    private struct ApprovalPolicy: PolicyEvaluating {
+        func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+            .approve("skill execution requires approval")
+        }
+    }
+
     private struct UntrustedRegisteredExecutor: SkillExecutor {
         func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
             #"{"result":"executed"}"#
@@ -106,6 +112,22 @@ struct M6SkillCompositionIntegrationTests {
         }
         #expect(observation?.payload["succeeded"] == "true")
         #expect(observation?.payload["verified"] == "true")
+    }
+
+    @Test("M8 module-backed Skill fails closed when policy requires approval")
+    func m8ModuleBackedSkillFailsClosedWhenApprovalRequired() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: ApprovalPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        await #expect(throws: SkillExecutionError.policyRequiresApproval("skill execution requires approval")) {
+            _ = try await root.runChatSkillIfMatched(goalStatement: "Tìm kiếm workspace approval-sentinel")
+        }
     }
 
     @Test("M8 canonical chat loop executes and verifies a declared Skill")
