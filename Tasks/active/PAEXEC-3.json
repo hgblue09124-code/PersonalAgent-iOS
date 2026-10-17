@@ -3,11 +3,12 @@
   "title": "Require an explicit Agent scope for every Skill agent loop",
   "status": "in_progress",
   "goal": "Prevent the public SkillAgentOrchestrator entry point from selecting and executing any installed Skill when no Agent manifest supplies an allowlist.",
-  "context": "After M8 public entry points were scoped, SkillAgentOrchestrator still exposes run(goalStatement:inputJSON:policy:) that delegates with agent:nil, making all installed Skills eligible. This contradicts fail-closed Agent scope at the orchestration boundary.",
+  "context": "After M8 public entry points were scoped, SkillAgentOrchestrator still exposes run(goalStatement:inputJSON:policy:) that delegates with agent:nil, making all installed Skills eligible. This contradicts fail-closed Agent scope at the orchestration boundary. CI exposed one existing registry test that still calls the now-forbidden unscoped overload; migrate that test to assert the fail-closed contract.",
   "allowed_paths": [
     "Tasks/active/PAEXEC-3.json",
     "Sources/Capabilities/Skills/SkillAgentOrchestrator.swift",
-    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
   ],
   "forbidden_changes": [
     "Do not widen Agent manifests or silently synthesize a default allowlist.",
