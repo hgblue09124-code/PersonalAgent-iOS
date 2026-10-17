@@ -18,6 +18,39 @@ final class SkillMarkdownContractTests: XCTestCase {
         XCTAssertEqual(skill.version, "1")
     }
 
+
+    func testMalformedNonCommentLineFailsClosed() {
+        XCTAssertThrowsError(try SkillMarkdownParser.parse("""
+        identity: calculator
+        this line has no delimiter
+        scope: deterministic arithmetic
+        input: expression
+        rule: evaluate exactly once
+        output: integer
+        permissions: READ_WORKSPACE
+        dependencies: calculator-module
+        version: 1
+        """)) { error in
+            XCTAssertEqual(error as? SkillDefinitionError, .malformed)
+        }
+    }
+
+    func testDuplicateFieldsFailClosedInsteadOfOverwritingEarlierValues() {
+        XCTAssertThrowsError(try SkillMarkdownParser.parse("""
+        identity: calculator
+        identity: attacker-controlled
+        scope: deterministic arithmetic
+        input: expression
+        rule: evaluate exactly once
+        output: integer
+        permissions: READ_WORKSPACE
+        dependencies: calculator-module
+        version: 1
+        """)) { error in
+            XCTAssertEqual(error as? SkillDefinitionError, .malformed)
+        }
+    }
+
     func testMissingRuleFailsClosed() {
         XCTAssertThrowsError(try SkillMarkdownParser.parse("""
         identity: calculator
