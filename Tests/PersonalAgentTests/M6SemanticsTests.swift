@@ -346,6 +346,34 @@ struct M6SemanticsTests {
         #expect(!events.contains { $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue })
     }
 
+
+    @Test func ambiguousToolAndSkillTargetsFailVerificationBeforeExecution() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.ambiguous")
+        let toolID = ToolID(rawValue: DeterministicModuleIDs.echo.rawValue)
+        let goal = Goal(statement: "Run exactly one capability")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            proposer: AmbiguousTargetProposer(toolID: toolID, skillID: skillID),
+            policy: ExplicitAllowPolicy(),
+            moduleRuntime: root.moduleRuntime,
+            skillBoundary: SuccessfulSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        #expect(events.contains {
+            $0.kind == .verificationCompleted
+                && $0.payload["accepted"] == "false"
+                && $0.payload["notes"]?.contains("conflicting Tool and Skill targets") == true
+        })
+        #expect(!events.contains { $0.kind == .actionExecuted && ($0.payload["skillID"] == skillID.rawValue || $0.payload["toolID"] == toolID.rawValue) })
+    }
+
     @Test func approvalGateReceivesTypedSkillIdentity() async throws {
         struct ApprovalRequiredPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
@@ -943,6 +971,23 @@ private struct ThrowingSkillExecutionBoundary: SkillExecutionBoundary {
 private struct FixedReasoner: Reasoning {
     let answer: String
     func reason(context: ContextBundle) async throws -> ReasoningResult { ReasoningResult(summary: answer, providerID: nil, modelID: nil) }
+}
+
+
+private struct AmbiguousTargetProposer: Executing {
+    let toolID: ToolID
+    let skillID: SkillID
+    func propose(plan: Plan) async throws -> [ActionProposal] {
+        [
+            ActionProposal(
+                planID: plan.id,
+                toolID: toolID,
+                skillID: skillID,
+                description: "Conflicting target identities must fail closed",
+                capabilities: .execute
+            )
+        ]
+    }
 }
 
 private struct DirectSkillProposer: Executing {
