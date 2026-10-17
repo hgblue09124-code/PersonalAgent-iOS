@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-29",
+  "title": "Abort M6 goals when Skill execution fails",
+  "status": "in_progress",
+  "goal": "Convert non-cancellation Skill boundary failures into failed observations so M6 evaluates and authoritatively aborts the goal instead of leaking an exception and leaving the goal active.",
+  "context": "M6Orchestrator catches ModuleRuntime failures but lets SkillExecutionBoundary errors escape. In addition, its answer-only projection treats any proposal without a toolID as answer-only, including Skill proposals, allowing the reasoning answer to overwrite the failure reason.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-29.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not turn Skill execution errors into successful receipts or answers.",
+    "Do not swallow CancellationError or ModuleRuntimeError.cancelled.",
+    "Do not change policy authorization, capability grants, or Skill verification."
+  ],
+  "acceptance_criteria": [
+    "A non-cancellation Skill boundary error produces a failed observation with verified=false and succeeded=false.",
+    "M6 evaluates the failed observation, returns abort, and updates the goal to aborted.",
+    "Skill proposals are excluded from answer-only reasoning projection.",
+    "Cancellation still propagates rather than being converted into ordinary failure.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-29.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-29.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #492"
+  ],
+  "recovery": "If the regression fails, preserve cancellation propagation, record failed Skill execution as a failed Observation, and verify the authoritative goal StateUpdate."
+}

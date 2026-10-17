@@ -34,6 +34,36 @@ struct M6SemanticsTests {
         }
     }
 
+
+    @Test func skillBoundaryFailureAbortsGoalAndRecordsFailure() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.failing")
+        let goal = Goal(statement: "Run a failing Skill")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "This answer must not mask the failed Skill."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ExplicitAllowPolicy(),
+            skillBoundary: ThrowingSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(evaluation.reason == "Execution failed")
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let failure = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue
+        }
+        #expect(failure?.payload["succeeded"] == "false")
+        #expect(failure?.payload["verified"] == "false")
+        #expect(failure?.payload["summary"]?.contains("synthetic Skill boundary denial") == true)
+        #expect(events.contains { $0.kind == .stateUpdated && $0.payload["goalID"] == goal.id.rawValue })
+    }
+
     @Test func skillProposalWithoutExecutionBoundaryFailsClosed() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let goal = Goal(statement: "Run the unconfigured Skill")
@@ -599,6 +629,17 @@ private actor RecordingProvider: LLMProvider {
 }
 
 
+
+
+private struct ThrowingSkillExecutionBoundary: SkillExecutionBoundary {
+    let skillID: SkillID
+    func discoverSkillIDs() async throws -> [SkillID] { [skillID] }
+    func selectSkill(goalStatement: String, availableSkillIDs: [SkillID]) async throws -> SkillID? { skillID }
+    func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel { .execute }
+    func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
+        throw SkillExecutionError.policyDenied("synthetic Skill boundary denial")
+    }
+}
 
 private struct FixedReasoner: Reasoning {
     let answer: String
