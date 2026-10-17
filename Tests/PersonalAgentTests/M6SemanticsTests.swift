@@ -36,6 +36,38 @@ struct M6SemanticsTests {
 
 
 
+
+    @Test func deniedSkillEmitsLinkedFailureObservationWithoutExecution() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
+        let skillID = SkillID(rawValue: "skill.denied")
+        let goal = Goal(statement: "Run a denied Skill")
+        try await root.runtime.submit(goal: goal)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "A denial must not become an answer."),
+            proposer: DirectSkillProposer(skillID: skillID),
+            policy: ExplicitDenyPolicy(),
+            skillBoundary: ThrowingSkillExecutionBoundary(skillID: skillID)
+        )
+
+        let evaluation = try await orchestrator.run(goalID: goal.id)
+        #expect(evaluation.disposition == .abort)
+        #expect(await root.runtime.goal(id: goal.id)?.status == .aborted)
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        let denial = events.first {
+            $0.kind == .actionDenied && $0.payload["skillID"] == skillID.rawValue
+        }
+        let observation = events.first {
+            $0.kind == .observationProduced && $0.payload["skillID"] == skillID.rawValue
+        }
+        #expect(denial != nil)
+        #expect(observation?.payload["succeeded"] == "false")
+        #expect(observation?.payload["verified"] == "false")
+        #expect(observation?.payload["actionID"] == denial?.payload["actionID"])
+        #expect(!events.contains { $0.kind == .actionExecuted && $0.payload["skillID"] == skillID.rawValue })
+    }
+
     @Test func successfulSkillExecutionEmitsCausalActionEvent() async throws {
         let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy())
         let skillID = SkillID(rawValue: "skill.succeeds")
@@ -684,6 +716,13 @@ private struct ThrowingSkillExecutionBoundary: SkillExecutionBoundary {
     func requiredCapabilities(for skillID: SkillID) async throws -> CapabilityLevel { .execute }
     func execute(skillID: SkillID, input: String, authorizedCapabilities: CapabilityLevel) async throws -> SkillExecutionReceipt {
         throw SkillExecutionError.policyDenied("synthetic Skill boundary denial")
+    }
+}
+
+
+private struct ExplicitDenyPolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+        .deny("synthetic policy denial")
     }
 }
 

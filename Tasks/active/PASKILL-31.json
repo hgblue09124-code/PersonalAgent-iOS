@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-31",
+  "title": "Record policy-denied Skill actions in the audit chain",
+  "status": "in_progress",
+  "goal": "Ensure policy-denied Skill proposals include their Skill identity and a failed observation linked by actionID, without claiming execution occurred.",
+  "context": "M6 actionDenied events currently include toolID only and denied proposals append an observation in memory without emitting observationProduced. Skill denials therefore lose identity linkage in the event log.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-31.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not emit actionExecuted for a denied proposal.",
+    "Do not invoke SkillExecutionBoundary after policy denial.",
+    "Do not change policy decisions, capabilities, or cancellation behavior."
+  ],
+  "acceptance_criteria": [
+    "actionDenied includes skillID for Skill proposals.",
+    "Denied proposals emit observationProduced with succeeded=false and the same actionID.",
+    "Skill denial observations have verified=false and never actionExecuted.",
+    "The goal is authoritatively aborted after denial.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-31.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-31.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #494"
+  ],
+  "recovery": "If event assertions fail, preserve the original policy denial, include Skill identity on the denial, and emit only a failed observation—not an execution event."
+}
