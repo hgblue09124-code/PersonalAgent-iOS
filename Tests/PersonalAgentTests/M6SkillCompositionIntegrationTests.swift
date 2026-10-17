@@ -144,6 +144,35 @@ struct M6SkillCompositionIntegrationTests {
         #expect(!events.contains { $0.kind == .moduleInvoked })
     }
 
+
+    private struct ApprovingModuleGate: ApprovalGate {
+        func requestApproval(for intent: ActionIntent) async throws -> Bool {
+            intent.summary.hasPrefix("Execute Module ")
+        }
+    }
+
+    @Test("M8 module-backed Skill runs only after explicit Module approval")
+    func m8ModuleBackedSkillRunsAfterModuleApproval() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: ModuleApprovalPolicy(),
+            approvalGate: ApprovingModuleGate(),
+            workspaceToolsEnabled: true
+        )
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Tìm kiếm workspace approval-sentinel"
+        )
+        #expect(result?.verified == true)
+        let events = try await eventLog.allEvents()
+        #expect(events.contains { $0.kind == .moduleInvoked })
+        #expect(events.contains { $0.kind == .moduleCompleted })
+    }
+
     @Test("M8 canonical chat loop executes and verifies a declared Skill")
     func m8CanonicalLoopExecutesSkill() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)

@@ -14,6 +14,7 @@ public actor ModuleRuntime: ModuleExecuting {
     public let grantedCapabilities: CapabilityLevel
     private let catalog: ModuleCatalog
     private let policy: (any PolicyEvaluating)?
+    private let approvalGate: (any ApprovalGate)?
     private let eventLog: (any EventLog)?
     private let logger: any AgentLogger
     private let sessionTrace: TraceID
@@ -23,6 +24,7 @@ public actor ModuleRuntime: ModuleExecuting {
         catalog: ModuleCatalog,
         grantedCapabilities: CapabilityLevel,
         policy: (any PolicyEvaluating)? = nil,
+        approvalGate: (any ApprovalGate)? = nil,
         eventLog: (any EventLog)? = nil,
         logger: any AgentLogger = ModuleNullLogger(),
         sessionTrace: TraceID = TraceID(),
@@ -31,6 +33,7 @@ public actor ModuleRuntime: ModuleExecuting {
         self.catalog = catalog
         self.grantedCapabilities = grantedCapabilities
         self.policy = policy
+        self.approvalGate = approvalGate
         self.eventLog = eventLog
         self.logger = logger
         self.sessionTrace = sessionTrace
@@ -72,15 +75,35 @@ public actor ModuleRuntime: ModuleExecuting {
             ])
             throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
         }
-        let decision = await policy.evaluate(
-            ActionIntent(
-                capabilities: contract.capabilities,
-                summary: "Execute Module \\(contract.id.rawValue)"
-            )
+        let intent = ActionIntent(
+            capabilities: contract.capabilities,
+            summary: "Execute Module \(contract.id.rawValue)"
         )
-        // ModuleRuntime has no approval presenter; approval-required work must
-        // fail closed rather than treating a Settings toggle as consent.
-        guard decision.allowed && !decision.requiresApproval else {
+        let decision = await policy.evaluate(intent)
+        let allowed: Bool
+        if decision.requiresApproval {
+            // Approval is requested for the concrete Module capability, never
+            // inferred from an earlier Skill-level grant. Missing gates fail closed.
+            guard let approvalGate else {
+                await emit(kind: .moduleFailed, payload: [
+                    "moduleID": contract.id.rawValue,
+                    "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
+                ])
+                throw ModuleRuntimeError.capabilityDenied(contract.capabilities)
+            }
+            do {
+                allowed = try await approvalGate.requestApproval(for: intent)
+            } catch {
+                await emit(kind: .moduleFailed, payload: [
+                    "moduleID": contract.id.rawValue,
+                    "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
+                ])
+                throw error
+            }
+        } else {
+            allowed = decision.allowed
+        }
+        guard allowed else {
             await emit(kind: .moduleFailed, payload: [
                 "moduleID": contract.id.rawValue,
                 "error": ModuleRuntimeError.capabilityDenied(contract.capabilities).description,
