@@ -187,6 +187,35 @@ struct SkillExecutorRegistryTests {
     }
 
 
+    @Test("verified execution rejects output that violates the manifest schema even when executor accepts it")
+    func verifiedExecutionRejectsOutputOutsideManifestSchema() async throws {
+        let id = SkillID(rawValue: "custom.invalid-schema-output")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Invalid schema output",
+            description: "The executor accepts output that violates the declared output schema.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return an object that violates the output schema.",
+            inputSchema: SchemaDocument(identifier: "in"),
+            outputSchema: SchemaDocument(
+                identifier: "out",
+                rawJSON: #"{"type":"object","properties":{"value":{"type":"string"}},"required":["value"],"additionalProperties":false}"#
+            ),
+            requiredCapabilities: [.read, .execute]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(AcceptingInvalidSchemaExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+
+        await #expect(throws: SkillRuntimeError.verificationFailed(id)) {
+            _ = try await runtime.executeVerified(
+                id: id,
+                inputJSON: #"{"request":"hello"}"#,
+                policy: AllowPolicy()
+            )
+        }
+    }
+
     @Test("unscoped Skill Agent rejects execution before selecting an executor")
     func unscopedSkillAgentRejectsExecution() async throws {
         let id = SkillID(rawValue: "custom.agent-unverified")
@@ -317,6 +346,15 @@ private struct DeferredExecutor: SkillExecutor {
     func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool { true }
 }
 
+
+private struct AcceptingInvalidSchemaExecutor: SkillExecutor {
+    func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+        #"{"unexpected":true}"#
+    }
+    func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+        true
+    }
+}
 
 private struct RejectingVerifierExecutor: SkillExecutor {
     func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
