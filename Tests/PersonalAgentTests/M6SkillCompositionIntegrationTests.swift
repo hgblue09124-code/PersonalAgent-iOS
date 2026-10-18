@@ -300,6 +300,143 @@ struct M6SkillCompositionIntegrationTests {
         }
     }
 
+    private actor SkillExecutorCallCounter {
+        private var calls = 0
+        func increment() { calls += 1 }
+        func value() -> Int { calls }
+    }
+
+    private struct CountingSkillExecutor: SkillExecutor {
+        let counter: SkillExecutorCallCounter
+        func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+            await counter.increment()
+            return #"{ "text": "approved" }"#
+        }
+        func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+            guard let data = outputJSON.data(using: .utf8),
+                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: String] else { return false }
+            return object["text"] == "approved"
+        }
+    }
+
+    private struct DirectSkillApprovalPolicy: PolicyEvaluating {
+        func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+            .approve("direct Skill approval required")
+        }
+    }
+
+    private struct DirectSkillApprovalGate: ApprovalGate {
+        let expectedSkillID: SkillID
+        let approved: Bool
+        func requestApproval(for intent: ActionIntent) async throws -> Bool {
+            guard intent.skillID == expectedSkillID,
+                  intent.capabilities.contains(.execute) else { return false }
+            return approved
+        }
+    }
+
+    @Test("M8 direct Skill Agent executes only after typed Skill approval")
+    func m8DirectSkillAgentExecutesAfterSkillApproval() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skillID = SkillRuntime.normalizationManifest.id
+        let counter = SkillExecutorCallCounter()
+        let registry = SkillExecutorRegistry()
+        await registry.register(CountingSkillExecutor(counter: counter), for: skillID.rawValue)
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            approvalGate: DirectSkillApprovalGate(expectedSkillID: skillID, approved: true),
+            skillExecutors: registry
+        )
+
+        let result = try await root.runSkillAgent(
+            goalStatement: skillID.rawValue,
+            inputJSON: #"{ "text": "input" }"#,
+            policy: DirectSkillApprovalPolicy()
+        )
+        #expect(result.skillID == skillID)
+        #expect(result.verified)
+        #expect(await counter.value() == 1)
+    }
+
+    @Test("M8 explicit executeSkill API honors the same approval boundary")
+    func m8ExecuteSkillUsesApprovalBoundary() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skillID = SkillRuntime.normalizationManifest.id
+        let counter = SkillExecutorCallCounter()
+        let registry = SkillExecutorRegistry()
+        await registry.register(CountingSkillExecutor(counter: counter), for: skillID.rawValue)
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            approvalGate: DirectSkillApprovalGate(expectedSkillID: skillID, approved: true),
+            skillExecutors: registry
+        )
+
+        let output = try await root.executeSkill(
+            id: skillID,
+            inputJSON: #"{ "text": "input" }"#,
+            policy: DirectSkillApprovalPolicy()
+        )
+        #expect(output == #"{ "text": "approved" }"#)
+        #expect(await counter.value() == 1)
+    }
+
+    @Test("M8 direct Skill Agent never executes after approval rejection")
+    func m8DirectSkillAgentDoesNotExecuteAfterApprovalRejection() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skillID = SkillRuntime.normalizationManifest.id
+        let counter = SkillExecutorCallCounter()
+        let registry = SkillExecutorRegistry()
+        await registry.register(CountingSkillExecutor(counter: counter), for: skillID.rawValue)
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            approvalGate: DirectSkillApprovalGate(expectedSkillID: skillID, approved: false),
+            skillExecutors: registry
+        )
+
+        await #expect(throws: SkillExecutionError.policyDenied("Approval not granted")) {
+            _ = try await root.runSkillAgent(
+                goalStatement: skillID.rawValue,
+                inputJSON: #"{ "text": "input" }"#,
+                policy: DirectSkillApprovalPolicy()
+            )
+        }
+        #expect(await counter.value() == 0)
+    }
+
+    @Test("M8 direct Skill Agent fails closed when approval is required but no gate exists")
+    func m8DirectSkillAgentRequiresApprovalGate() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let skillID = SkillRuntime.normalizationManifest.id
+        let counter = SkillExecutorCallCounter()
+        let registry = SkillExecutorRegistry()
+        await registry.register(CountingSkillExecutor(counter: counter), for: skillID.rawValue)
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            skillExecutors: registry
+        )
+
+        await #expect(throws: SkillExecutionError.policyRequiresApproval("direct Skill approval required")) {
+            _ = try await root.runSkillAgent(
+                goalStatement: skillID.rawValue,
+                inputJSON: #"{ "text": "input" }"#,
+                policy: DirectSkillApprovalPolicy()
+            )
+        }
+        #expect(await counter.value() == 0)
+    }
+
     @Test("M8 module-backed Skill runs only after explicit Module approval")
     func m8ModuleBackedSkillRunsAfterModuleApproval() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
