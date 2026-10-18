@@ -120,10 +120,11 @@ struct SkillExecutorRegistryTests {
         #expect(await runtime.executorAvailability(for: id) == .available)
         let output = try await runtime.executeVerified(
             id: id,
-            inputJSON: #"{\"text\":\"  hello  \"}"#,
+            inputJSON: #"{ "text": "  hello  " }"#,
             policy: AllowPolicy()
         )
-        #expect(output == #"{\"text\":\"hello\"}"#)
+        let outputObject = try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: String]
+        #expect(outputObject?["text"] == "hello")
         #expect(try await runtime.verify(id: id, outputJSON: output))
     }
 
@@ -146,7 +147,7 @@ struct SkillExecutorRegistryTests {
         await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
             _ = try await runtime.execute(
                 id: id,
-                inputJSON: #"{\"text\":\"  must not run  \"}"#,
+                inputJSON: #"{ "text": "  must not run  " }"#,
                 policy: AllowPolicy()
             )
         }
@@ -171,7 +172,7 @@ struct SkillExecutorRegistryTests {
         await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
             _ = try await runtime.execute(
                 id: id,
-                inputJSON: #"{\"text\":\"hello\"}"#,
+                inputJSON: #"{ "text": "hello" }"#,
                 policy: AllowPolicy()
             )
         }
