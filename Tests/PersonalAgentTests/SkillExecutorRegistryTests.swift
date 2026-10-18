@@ -319,6 +319,74 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: #"{ "value": "valid" }"#) == true)
     }
 
+    @Test("Agent intent selection skips installed Skills without executors")
+    func agentSelectionSkipsUnavailableSkills() async throws {
+        let id = SkillID(rawValue: "custom.unavailable")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Unavailable Workspace Search",
+            description: "Search files with no host executor installed.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Do not execute.",
+            inputSchema: SchemaDocument(identifier: "custom.unavailable.input"),
+            outputSchema: SchemaDocument(identifier: "custom.unavailable.output"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        let orchestrator = SkillAgentOrchestrator(runtime: runtime)
+        let agent = AgentManifest(
+            id: "test.agent",
+            name: "Test Agent",
+            description: "Agent with an unavailable Skill",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            skillIDs: [id],
+            instructions: "Only use declared Skills."
+        )
+
+        await #expect(throws: SkillExecutionError.noSelection) {
+            _ = try await orchestrator.run(
+                agent: agent,
+                goalStatement: "Unavailable Workspace Search",
+                inputJSON: #"{"text":"query"}"#,
+                policy: AllowPolicy()
+            )
+        }
+    }
+
+    @Test("Explicit Agent execution rejects unavailable Skill before execution")
+    func explicitAgentExecutionRejectsUnavailableSkill() async throws {
+        let id = SkillID(rawValue: "custom.unavailable-explicit")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Unavailable Explicit Skill",
+            description: "A manifest without a registered executor.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Do not execute.",
+            inputSchema: SchemaDocument(identifier: "custom.unavailable-explicit.input"),
+            outputSchema: SchemaDocument(identifier: "custom.unavailable-explicit.output"),
+            requiredCapabilities: [.read, .execute]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        let orchestrator = SkillAgentOrchestrator(runtime: runtime)
+        let agent = AgentManifest(
+            id: "test.agent.explicit",
+            name: "Test Agent",
+            description: "Agent with an unavailable Skill",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            skillIDs: [id],
+            instructions: "Only use declared Skills."
+        )
+
+        await #expect(throws: SkillExecutionError.unavailableSkill(id)) {
+            _ = try await orchestrator.execute(
+                agent: agent,
+                skillID: id,
+                inputJSON: #"{"text":"query"}"#,
+                policy: AllowPolicy()
+            )
+        }
+    }
+
     @Test("unscoped Skill Agent rejects execution before selecting an executor")
     func unscopedSkillAgentRejectsExecution() async throws {
         let id = SkillID(rawValue: "custom.agent-unverified")

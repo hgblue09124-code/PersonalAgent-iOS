@@ -91,9 +91,23 @@ public actor SkillAgentOrchestrator {
             }
         }
 
+        // Agent execution must only intent-match Skills with a concrete executor.
+        // Generic SkillRuntime.select remains manifest-only for discovery/UI callers.
+        let candidateIDs: [SkillID]
+        if let agent {
+            candidateIDs = agent.skillIDs
+        } else {
+            candidateIDs = try await runtime.discover(query: "").map(\.id)
+        }
+        var executableSkillIDs = Set<SkillID>()
+        for candidateID in candidateIDs {
+            if await runtime.executorAvailability(for: candidateID) == .available {
+                executableSkillIDs.insert(candidateID)
+            }
+        }
         let skillID = try await runtime.select(
             goalStatement: goalStatement,
-            allowedSkillIDs: agent.map { Set($0.skillIDs) }
+            allowedSkillIDs: executableSkillIDs
         )
         if let agent, !agent.skillIDs.contains(skillID) {
             throw SkillAgentOrchestratorError.skillOutsideAgentScope(skillID)
@@ -106,6 +120,9 @@ public actor SkillAgentOrchestrator {
         inputJSON: String,
         policy: any PolicyEvaluating
     ) async throws -> SkillAgentResult {
+        guard await runtime.executorAvailability(for: skillID) == .available else {
+            throw SkillExecutionError.unavailableSkill(skillID)
+        }
         let capabilities = try await runtime.requiredCapabilities(for: skillID)
         let intent = ActionIntent(
             skillID: skillID,

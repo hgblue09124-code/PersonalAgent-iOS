@@ -1,0 +1,37 @@
+{
+  "id": "PASKILL-47",
+  "title": "Do not select unavailable Skills for Agent execution",
+  "status": "in_progress",
+  "goal": "Ensure Agent-driven Skill selection only considers Skills with a resolvable executor, and explicit execution fails clearly before policy prompts when the selected Skill is unavailable.",
+  "context": "SkillRuntime.select intentionally operates on manifests and does not require an executor because it is also a generic selection API. SkillAgentOrchestrator.run currently passes every Skill in the Agent manifest to that selector. An imported Skill with no executor can win intent matching; execution then throws unknownSkill and M8 runChatSkillIfMatched does not treat that as no match, so normal chat fallback is interrupted. Filter to executor-available Skill IDs in the Agent execution path without changing generic SkillRuntime.select semantics. The M6 integration regression test now asserts that an unavailable imported Skill yields no selection/falls back, while still asserting that no file is created and no workspace write module is invoked.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-47.json",
+    "Sources/Capabilities/Skills/SkillAgentOrchestrator.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change generic SkillRuntime.select behavior or manifest discovery.",
+    "Do not bypass policy, approval, Agent scope, schema validation, cancellation, or verification.",
+    "Do not make unsupported Skills executable or weaken fail-closed behavior."
+  ],
+  "acceptance_criteria": [
+    "Agent run selects only among Skills whose executorAvailability is available.",
+    "When no in-scope Skill is executable/matching, Agent run returns noSelection so M8 chat can continue normal fallback.",
+    "Explicit Agent execute of an unavailable Skill throws a dedicated unavailableSkill error before policy or executor side effects.",
+    "Agent manifests with stale Skill IDs are still rejected before selection.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-47.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-47.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillExecutorRegistryTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert this single logical change if selection or policy regressions occur; preserve generic manifest-only selection and fail-closed execution."
+}

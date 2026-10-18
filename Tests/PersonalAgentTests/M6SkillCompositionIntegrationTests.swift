@@ -1050,16 +1050,11 @@ struct M6SkillCompositionIntegrationTests {
             policy: AllowPolicy(),
             workspaceToolsEnabled: true
         )
-        var rejected = false
-        do {
-            _ = try await root.runChatSkillIfMatched(
-                goalStatement: "Tạo file workspace/blocked.md với nội dung: must not be written",
-                agentID: "personal.untrusted"
-            )
-        } catch {
-            rejected = true
-        }
-        #expect(rejected)
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Tạo file workspace/blocked.md với nội dung: must not be written",
+            agentID: "personal.untrusted"
+        )
+        #expect(result == nil)
         #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/blocked.md").path))
         let events = try await eventLog.allEvents()
         #expect(!events.contains {

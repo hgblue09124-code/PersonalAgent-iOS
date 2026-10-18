@@ -107,6 +107,7 @@ public enum SkillExecutionError: Error, Sendable, Equatable {
     case malformedSkill
     case scopeMismatch
     case noSelection
+    case unavailableSkill(SkillID)
     case unknownSkill(SkillID)
     case policyDenied(String)
     case policyRequiresApproval(String)
