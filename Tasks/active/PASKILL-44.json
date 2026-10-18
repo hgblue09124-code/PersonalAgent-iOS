@@ -1,0 +1,39 @@
+{
+  "id": "PASKILL-44",
+  "title": "Honor approval for direct M8 Skill Agent execution",
+  "status": "in_progress",
+  "goal": "Make direct M8 Skill Agent and chat-team execution honor an explicit approval gate before invoking a Skill executor when policy requires approval.",
+  "context": "The canonical M6 adapter carries prior approval into SkillRuntime, but SkillAgentOrchestrator only accepts PolicyEvaluating. Its direct M8 APIs therefore fail closed for requiresApproval even when M8CompositionRoot has an ApprovalGate configured.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-44.json",
+    "Sources/Capabilities/Skills/SkillAgentOrchestrator.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not allow an executor to run after policy denial, missing approval gate, approval rejection, or cancellation.",
+    "Do not bypass ModuleRuntime's own policy or approval boundary for module-backed Skills.",
+    "Do not change the canonical M6 approval flow or claim direct Skill Agent calls emit M6 audit events.",
+    "Do not accept approval for a different Skill ID or capabilities than the selected Skill requires."
+  ],
+  "acceptance_criteria": [
+    "M8 SkillAgentOrchestrator receives the configured ApprovalGate from composition.",
+    "A requiresApproval decision requests approval with the selected typed Skill ID and effective capabilities.",
+    "Approved direct Skill execution uses one scoped authorization decision and verifies output through the same executor instance.",
+    "Rejected, missing, failed, or cancelled approval produces no executor invocation and no verified result.",
+    "Module-backed Skills continue to pass through ModuleRuntime policy and approval independently.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "The explicit M8 executeSkill API uses the same approval-aware Agent scope boundary as runSkillAgent."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-44.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-44.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "M8 SkillAgentOrchestrator direct execution APIs"
+  ],
+  "recovery": "Keep approval at the Skill boundary explicit, scope the post-approval policy wrapper to the selected Skill and effective capabilities, and leave ModuleRuntime authorization unchanged."
+}
