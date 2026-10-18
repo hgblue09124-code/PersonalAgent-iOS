@@ -335,7 +335,7 @@ struct SkillExecutorRegistryTests {
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
         let orchestrator = SkillAgentOrchestrator(runtime: runtime)
         let agent = AgentManifest(
-            id: AgentID(rawValue: "test.agent"),
+            id: "test.agent",
             name: "Test Agent",
             description: "Agent with an unavailable Skill",
             version: SemanticVersion(major: 1, minor: 0, patch: 0),
@@ -369,7 +369,7 @@ struct SkillExecutorRegistryTests {
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
         let orchestrator = SkillAgentOrchestrator(runtime: runtime)
         let agent = AgentManifest(
-            id: AgentID(rawValue: "test.agent.explicit"),
+            id: "test.agent.explicit",
             name: "Test Agent",
             description: "Agent with an unavailable Skill",
             version: SemanticVersion(major: 1, minor: 0, patch: 0),
