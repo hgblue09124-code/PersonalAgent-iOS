@@ -104,7 +104,7 @@ public struct SkillMarkdownParser: Sendable {
         guard let data = rawJSON.data(using: .utf8),
               let value = try? JSONSerialization.jsonObject(with: data),
               let object = value as? [String: Any] else {
-            throw SkillMarkdownError.invalidSchema("invalid JSON object in \\(field)")
+            throw SkillMarkdownError.invalidSchema("invalid JSON object in \(field)")
         }
         let canonicalData = try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
         return SchemaDocument(identifier: identifier, rawJSON: String(decoding: canonicalData, as: UTF8.self))
