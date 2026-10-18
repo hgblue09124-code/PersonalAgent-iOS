@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import PAKernel
 import PARuntime
@@ -126,6 +127,31 @@ struct SkillExecutorRegistryTests {
         let outputObject = try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: String]
         #expect(outputObject?["text"] == "hello")
         #expect(try await runtime.verify(id: id, outputJSON: output))
+    }
+
+    @Test("Registered per-Skill executor takes precedence over metadata aliases")
+    func registeredExecutorTakesPrecedenceOverMetadataAlias() async throws {
+        let id = SkillID(rawValue: "custom.normalize-override")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Host Registered Executor",
+            description: "A host-registered executor must take precedence.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Use the explicit host registration.",
+            inputSchema: SchemaDocument(identifier: "skill.text.normalize.in"),
+            outputSchema: SchemaDocument(identifier: "skill.text.normalize.out"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["executor": "text.normalize"]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(EchoExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+        let output = try await runtime.execute(
+            id: id,
+            inputJSON: #"{ "text": "hello" }"#,
+            policy: AllowPolicy()
+        )
+        #expect(output == "{\\"value\\":\\"custom\\"}")
     }
 
     @Test("Unknown executor metadata does not instantiate arbitrary code")
