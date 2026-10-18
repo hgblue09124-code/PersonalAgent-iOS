@@ -314,7 +314,8 @@ struct SkillExecutorRegistryTests {
         await registry.register(AcceptingInvalidSchemaExecutor(), for: id.rawValue)
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
 
-        #expect(try await runtime.verify(id: id, outputJSON: #"{ "unexpected": true }"#) == false)
+        #expect(try await runtime.verify(id: id, outputJSON: #"{}"#) == false)
+        #expect(try await runtime.verify(id: id, outputJSON: #"{ "value": "valid", "unexpected": true }"#) == false)
         #expect(try await runtime.verify(id: id, outputJSON: #"{ "value": "valid" }"#) == true)
     }
 
