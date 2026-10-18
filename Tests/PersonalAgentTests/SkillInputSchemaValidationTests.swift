@@ -124,7 +124,8 @@ final class SkillInputSchemaValidationTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? SkillExecutionError, .malformedSkill)
         }
-        XCTAssertEqual(await counter.count(), 0)
+        let rejectedExecutionCount = await counter.count()
+        XCTAssertEqual(rejectedExecutionCount, 0)
 
         let output = try await runtime.executeVerified(
             id: manifest.id,
@@ -132,7 +133,8 @@ final class SkillInputSchemaValidationTests: XCTestCase {
             policy: AllowInputSchemaTestPolicy()
         )
         XCTAssertEqual(output, #"{\"ok\":true}"#)
-        XCTAssertEqual(await counter.count(), 1)
+        let successfulExecutionCount = await counter.count()
+        XCTAssertEqual(successfulExecutionCount, 1)
     }
 
     func testMarkdownParserRejectsMalformedStructuralSchemaJSON() throws {
