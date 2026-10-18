@@ -1,0 +1,38 @@
+{
+  "id": "PASKILL-48",
+  "title": "Support structural JSON Schemas in imported Skill.md manifests",
+  "status": "in_progress",
+  "goal": "Allow imported Skill.md files to carry actual input/output JSON Schema contracts so central SkillRuntime validation enforces declared constraints instead of treating section identifiers as unconstrained schemas.",
+  "context": "SkillMarkdownParser currently maps the Input and Output sections to SchemaDocument.identifier while leaving rawJSON at its default '{}'. Runtime validation therefore has no structural constraints for imported Skills, even though direct manifests can declare JSON Schema. Add optional single-line inputSchemaJSON and outputSchemaJSON front-matter fields; preserve existing identifier sections and backward compatibility when fields are absent.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-48.json",
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Tests/PersonalAgentTests/SkillInputSchemaValidationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not reinterpret the existing Input/Output section identifiers or break existing Skill.md files.",
+    "Do not claim full JSON Schema support; runtime remains limited to the validator's explicitly supported subset.",
+    "Do not silently accept malformed JSON Schema documents.",
+    "Do not weaken Agent scope, policy, approval, cancellation, executor availability, or verification."
+  ],
+  "acceptance_criteria": [
+    "SkillMarkdownParser preserves the existing Input/Output identifiers while loading optional inputSchemaJSON/outputSchemaJSON into SchemaDocument.rawJSON.",
+    "Malformed or non-object schema JSON is rejected during Skill.md parsing.",
+    "Runtime regression proves a parsed imported Skill with a structural input schema rejects invalid input before executor side effects.",
+    "A parsed output schema is carried into executeVerified so output contract validation is enforceable.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-48.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-48.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillInputSchemaValidationTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PASKILL-42 input schema validation",
+    "PASKILL-2 output schema validation"
+  ],
+  "recovery": "Revert the single logical change if existing Skill.md files regress; retain backward-compatible unconstrained schemas when the new front-matter fields are absent."
+}
