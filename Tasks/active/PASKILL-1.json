@@ -7,7 +7,8 @@
   "allowed_paths": [
     "Tasks/active/PASKILL-1.json",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
   ],
   "forbidden_changes": [
     "Do not dynamically load or instantiate arbitrary executor names from untrusted Skill.md metadata.",
@@ -18,7 +19,7 @@
     "A Skill manifest with metadata executor=text.normalize resolves the built-in normalizer even when its Skill ID differs, provided both schema identifiers match the canonical normalization contract.",
     "A host-registered per-Skill executor takes precedence over any metadata alias.",
     "Unknown executor names and schema-mismatched normalization aliases remain unavailable and fail closed.",
-    "Regression tests cover execution and verification of the imported Skill ID, host executor precedence, unknown executor metadata, and schema mismatch."
+    "Regression tests in both SkillExecutorRegistryTests and SkillRuntimeTests cover execution and verification of the imported Skill ID, host executor precedence, unknown executor metadata, and schema mismatch."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-1.json",
