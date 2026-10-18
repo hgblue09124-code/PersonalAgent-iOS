@@ -151,7 +151,8 @@ struct SkillExecutorRegistryTests {
             inputJSON: #"{ "text": "hello" }"#,
             policy: AllowPolicy()
         )
-        #expect(output == "{\\"value\\":\\"custom\\"}")
+        let outputObject = try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: String]
+        #expect(outputObject?["value"] == "custom")
     }
 
     @Test("Unknown executor metadata does not instantiate arbitrary code")
