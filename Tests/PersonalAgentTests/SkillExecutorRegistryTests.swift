@@ -294,6 +294,31 @@ struct SkillExecutorRegistryTests {
         }
     }
 
+    @Test("standalone verify rejects schema-invalid output even when executor accepts it")
+    func standaloneVerifyRejectsOutputOutsideManifestSchema() async throws {
+        let id = SkillID(rawValue: "custom.invalid-schema-output")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Invalid schema output",
+            description: "The executor accepts output that violates the declared output schema.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Return an object that violates the output schema.",
+            inputSchema: SchemaDocument(identifier: "in"),
+            outputSchema: SchemaDocument(
+                identifier: "out",
+                rawJSON: #"{ "type": "object", "properties": { "value": { "type": "string" } }, "required": ["value"], "additionalProperties": false }"#
+            ),
+            requiredCapabilities: [.read, .execute]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(AcceptingInvalidSchemaExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+
+        #expect(try await runtime.verify(id: id, outputJSON: #"{}"#) == false)
+        #expect(try await runtime.verify(id: id, outputJSON: #"{ "value": "valid", "unexpected": true }"#) == false)
+        #expect(try await runtime.verify(id: id, outputJSON: #"{ "value": "valid" }"#) == true)
+    }
+
     @Test("unscoped Skill Agent rejects execution before selecting an executor")
     func unscopedSkillAgentRejectsExecution() async throws {
         let id = SkillID(rawValue: "custom.agent-unverified")

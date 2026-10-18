@@ -570,6 +570,16 @@ public struct SkillRuntime: Sendable {
         try Task.checkCancellation()
         guard let executor = await resolveExecutor(for: manifest) else { return false }
         try Task.checkCancellation()
+        // Standalone verification must enforce the manifest's output contract too;
+        // an executor's own verifier is not allowed to override schema violations.
+        // Keep the legacy empty-schema form unconstrained for opaque text outputs.
+        if manifest.outputSchema.rawJSON.trimmingCharacters(in: .whitespacesAndNewlines) != "{}" {
+            do {
+                try SkillJSONSchemaValidator.validate(inputJSON: outputJSON, schema: manifest.outputSchema)
+            } catch {
+                return false
+            }
+        }
         let verified = try await executor.verify(manifest: manifest, outputJSON: outputJSON)
         try Task.checkCancellation()
         return verified
