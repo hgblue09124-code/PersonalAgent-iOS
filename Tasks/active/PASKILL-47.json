@@ -3,12 +3,13 @@
   "title": "Do not select unavailable Skills for Agent execution",
   "status": "in_progress",
   "goal": "Ensure Agent-driven Skill selection only considers Skills with a resolvable executor, and explicit execution fails clearly before policy prompts when the selected Skill is unavailable.",
-  "context": "SkillRuntime.select intentionally operates on manifests and does not require an executor because it is also a generic selection API. SkillAgentOrchestrator.run currently passes every Skill in the Agent manifest to that selector. An imported Skill with no executor can win intent matching; execution then throws unknownSkill and M8 runChatSkillIfMatched does not treat that as no match, so normal chat fallback is interrupted. Filter to executor-available Skill IDs in the Agent execution path without changing generic SkillRuntime.select semantics.",
+  "context": "SkillRuntime.select intentionally operates on manifests and does not require an executor because it is also a generic selection API. SkillAgentOrchestrator.run currently passes every Skill in the Agent manifest to that selector. An imported Skill with no executor can win intent matching; execution then throws unknownSkill and M8 runChatSkillIfMatched does not treat that as no match, so normal chat fallback is interrupted. Filter to executor-available Skill IDs in the Agent execution path without changing generic SkillRuntime.select semantics. The M6 integration regression test now asserts that an unavailable imported Skill yields no selection/falls back, while still asserting that no file is created and no workspace write module is invoked.",
   "allowed_paths": [
     "Tasks/active/PASKILL-47.json",
     "Sources/Capabilities/Skills/SkillAgentOrchestrator.swift",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
   ],
   "forbidden_changes": [
     "Do not change generic SkillRuntime.select behavior or manifest discovery.",
