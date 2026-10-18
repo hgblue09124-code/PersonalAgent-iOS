@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-41",
+  "title": "Reject proposals with both Tool and Skill targets",
+  "status": "in_progress",
+  "goal": "Fail closed during structural verification when one action proposal declares both a Tool target and a Skill target.",
+  "context": "M6 execution dispatch prioritizes skillID and returns before the tool path. DefaultVerifier currently accepts a proposal that contains both IDs, so policy and audit metadata can describe two targets while only one executes.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-41.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not reject answer-only proposals with neither target.",
+    "Do not change valid Tool-only or Skill-only proposal behavior.",
+    "Do not attempt either execution path for an ambiguous proposal."
+  ],
+  "acceptance_criteria": [
+    "DefaultVerifier rejects proposals with both toolID and skillID.",
+    "The goal aborts with a verification failure before action execution.",
+    "No actionExecuted event is emitted for either target.",
+    "Regression covers the exact ambiguous proposal.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-41.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-41.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #504"
+  ],
+  "recovery": "Add a structural verifier guard for mutually exclusive target IDs and assert no execution event occurs."
+}
