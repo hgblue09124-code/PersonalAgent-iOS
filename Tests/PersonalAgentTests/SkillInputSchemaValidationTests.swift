@@ -117,7 +117,7 @@ final class SkillInputSchemaValidationTests: XCTestCase {
         do {
             _ = try await runtime.executeVerified(
                 id: manifest.id,
-                inputJSON: #"{\"unexpected\":true}"#,
+                inputJSON: #"{"unexpected":true}"#,
                 policy: AllowInputSchemaTestPolicy()
             )
             XCTFail("Imported structural input schema must reject undeclared properties")
