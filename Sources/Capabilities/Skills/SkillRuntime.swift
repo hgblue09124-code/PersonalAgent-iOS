@@ -452,6 +452,14 @@ public struct SkillRuntime: Sendable {
         // a late result as success after the caller has cancelled the Skill run.
         try Task.checkCancellation()
         if verifyOutput {
+            // The manifest contract is independent of the executor's own verifier.
+            // Never expose output that violates the declared JSON schema, even if
+            // a custom executor incorrectly reports that output as verified.
+            do {
+                try SkillJSONSchemaValidator.validate(inputJSON: output, schema: manifest.outputSchema)
+            } catch {
+                throw SkillExecutionError.verificationFailed(id)
+            }
             guard try await executor.verify(manifest: manifest, outputJSON: output) else {
                 throw SkillExecutionError.verificationFailed(id)
             }

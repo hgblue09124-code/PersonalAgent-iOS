@@ -1,34 +1,35 @@
 {
   "id": "PASKILL-2",
-  "title": "Validate Skill manifest against Module schemas",
+  "title": "Validate Skill output against its declared schema",
   "status": "in_progress",
-  "goal": "Reject module-backed Skill manifests whose declared input or output schema identifiers differ from the resolved Module contract.",
-  "context": "ModuleBackedSkillExecutor currently passes the manifest input schema into ModuleRuntime and verifies output JSON only as a string dictionary. It does not ensure the manifest's output schema identifier matches the registered Module's output contract, so an incompatible manifest can be reported verified.",
+  "goal": "Ensure executeVerified rejects executor output that violates the installed Skill manifest output schema, independently of the executor-provided verifier.",
+  "context": "SkillRuntime validates inputJSON against inputSchema but currently trusts executor.verify as the only output gate. A custom executor whose verifier returns true can expose JSON that violates outputSchema.",
   "allowed_paths": [
-    "Tasks/active/PASKILL-2.json",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tasks/active/PASKILL-2.json"
   ],
   "forbidden_changes": [
-    "Do not claim schema identifiers provide structural JSON Schema validation; this task validates contract identity only.",
-    "Do not add implicit capabilities or bypass ModuleRuntime policy.",
-    "Do not dynamically load arbitrary executor names from Skill.md metadata."
+    "Do not weaken policy, Agent scope, cancellation, executor registration, or fail-closed behavior.",
+    "Do not change public APIs, UI, provider routing, or unrelated runtime modules.",
+    "Do not claim tests or CI passed without actual evidence."
   ],
   "acceptance_criteria": [
-    "Module-backed execution requires a registered Module contract matching both manifest input and output schema identifiers.",
-    "Missing Module contract fails closed.",
-    "Skill verification returns false when the declared schema contract does not match the registered Module.",
-    "Regression tests cover schema mismatch while existing matching-schema Skill execution remains green."
+    "executeVerified validates executor output against manifest.outputSchema before returning it.",
+    "Output violating the schema fails with a typed verification error even if executor.verify returns true.",
+    "Valid output that passes both schema validation and executor verification remains supported.",
+    "The focused Skill executor tests and full Swift package tests pass, and CI gates pass on the final PR head."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-2.json",
     "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-2.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillExecutorRegistryTests",
     "swift test --disable-sandbox",
-    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA on the final PR head."
   ],
   "dependencies": [
     "Issue #347",
-    "PR #396"
+    "Issue #354"
   ],
-  "recovery": "Revert the single task commit if existing matching-schema Skills regress; keep structural input/output schema validation tracked separately."
+  "recovery": "Revert the single task commit if output validation breaks valid executor contracts; retain fail-closed behavior and adjust only the validator boundary and focused regression test."
 }
