@@ -1,5 +1,14 @@
 # Task Handoff
 
+Last reconciled against GitHub: 2026-10-18. The durable restart prompt in [`.agentos/CURRENT-WORK-PROMPT.md`](../.agentos/CURRENT-WORK-PROMPT.md) is the authoritative current execution handoff; recheck GitHub before acting.
+
+## Current execution snapshot
+
+- PR #506 (ambiguous action targets) and PR #509 (Module cancellation propagation) were open at the last check. All three required workflows passed on each listed head; check mergeability and exact head before merging, sequentially, because both touch M6 orchestration.
+- Current work priority remains Issue #347: continue narrow, regression-backed security and correctness work in the production Skill execution path. The new prompt preserves last-observed SHAs, run IDs, order of operations, and runtime invariants.
+
+---
+
 Last reconciled against GitHub: 2026-10-16.
 
 ## CURRENT STATE — SOURCE OF TRUTH
