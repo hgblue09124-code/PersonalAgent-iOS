@@ -791,7 +791,12 @@ extension M8CompositionRoot {
     }
 
     public func selectSkill(goalStatement: String) async throws -> SkillID {
-        try await skillRuntime.select(goalStatement: goalStatement)
+        let storedAgent = try await agentStore.load(id: "personal.default")
+        let agent = scopeAgentForWorkspaceSetting(storedAgent)
+        return try await skillRuntime.select(
+            goalStatement: goalStatement,
+            allowedSkillIDs: Set(agent.skillIDs)
+        )
     }
 
     public func executeSkill(
