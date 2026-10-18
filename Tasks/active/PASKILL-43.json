@@ -1,0 +1,34 @@
+{
+  "id": "PASKILL-43",
+  "title": "Propagate cancellation from Module execution",
+  "status": "in_progress",
+  "goal": "Ensure cancellation from ModuleRuntime propagates through M6 without being recorded as an ordinary failed action or observation.",
+  "context": "M6 executeProposal catches every ModuleRuntime error and converts it into a normal failed action. When ModuleRuntime throws its explicit cancelled error, this produces misleading actionExecuted/observationProduced events before cancellation is noticed by the outer loop.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-43.json",
+    "Runtime/Planning/M6Orchestrator.swift",
+    "Tests/PersonalAgentTests/M6SemanticsTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not convert ModuleRuntimeError.cancelled or task cancellation into a normal execution failure.",
+    "Do not alter ordinary Module failure handling.",
+    "Do not change ModuleRuntime timeout semantics or claim a cancelled action completed."
+  ],
+  "acceptance_criteria": [
+    "CancellationError and ModuleRuntimeError.cancelled propagate as CancellationError from executeProposal.",
+    "The regression confirms ModuleRuntime emits moduleCancelled for the target module.",
+    "A cancelled module invocation emits no ordinary actionExecuted or observationProduced event.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-43.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-43.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #506"
+  ],
+  "recovery": "Handle cancellation before the generic failure branch and assert no ordinary action outcome is emitted for the cancelled Module."
+}
