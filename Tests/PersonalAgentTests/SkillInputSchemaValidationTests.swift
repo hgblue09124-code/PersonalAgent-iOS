@@ -85,6 +85,77 @@ final class SkillInputSchemaValidationTests: XCTestCase {
         XCTAssertEqual(executions, 0)
     }
 
+    func testMarkdownImportedSkillEnforcesStructuralInputAndOutputSchemas() async throws {
+        let markdown = #"""
+        id: custom.markdown-schema
+        name: Markdown Schema
+        version: 1.0.0
+        description: Imported Skill with structural contracts.
+        inputSchemaJSON: {"type":"object","required":["name"],"properties":{"name":{"type":"string","minLength":1}},"additionalProperties":false}
+        outputSchemaJSON: {"type":"object","required":["ok"],"properties":{"ok":{"type":"boolean"}},"additionalProperties":false}
+        ---
+        ## Input
+        custom.markdown-schema.input
+
+        ## Output
+        custom.markdown-schema.output
+
+        ## Rule
+        Accept a name and return a verified result.
+        """#
+        let manifest = try SkillMarkdownParser().parse(markdown)
+        XCTAssertEqual(manifest.inputSchema.identifier, "custom.markdown-schema.input")
+        XCTAssertEqual(manifest.outputSchema.identifier, "custom.markdown-schema.output")
+        XCTAssertNotEqual(manifest.inputSchema.rawJSON, "{}")
+        XCTAssertNotEqual(manifest.outputSchema.rawJSON, "{}")
+
+        let counter = SkillExecutionCounter()
+        let registry = SkillExecutorRegistry()
+        await registry.register(CountingSkillExecutor(counter: counter), for: manifest.id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: #"{\"unexpected\":true}"#,
+                policy: AllowInputSchemaTestPolicy()
+            )
+            XCTFail("Imported structural input schema must reject undeclared properties")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .malformedSkill)
+        }
+        XCTAssertEqual(await counter.count(), 0)
+
+        let output = try await runtime.executeVerified(
+            id: manifest.id,
+            inputJSON: #"{\"name\":\"Ada\"}"#,
+            policy: AllowInputSchemaTestPolicy()
+        )
+        XCTAssertEqual(output, #"{\"ok\":true}"#)
+        XCTAssertEqual(await counter.count(), 1)
+    }
+
+    func testMarkdownParserRejectsMalformedStructuralSchemaJSON() throws {
+        let markdown = #"""
+        id: custom.bad-schema
+        name: Bad Schema
+        version: 1.0.0
+        inputSchemaJSON: {"type":
+        ---
+        ## Input
+        custom.bad-schema.input
+
+        ## Output
+        custom.bad-schema.output
+
+        ## Rule
+        Reject malformed schema.
+        """#
+        XCTAssertThrowsError(try SkillMarkdownParser().parse(markdown)) { error in
+            XCTAssertEqual(error as? SkillMarkdownError, .invalidSchema("invalid JSON object in inputSchemaJSON"))
+        }
+    }
+
     private func makeManifest(schema: String) -> SkillManifest {
         SkillManifest(
             id: SkillID(rawValue: "custom.schema-checked"),
