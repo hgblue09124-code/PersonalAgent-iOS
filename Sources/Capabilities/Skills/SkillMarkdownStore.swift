@@ -62,8 +62,16 @@ public struct SkillMarkdownParser: Sendable {
             description: description,
             version: version,
             instructions: rule.trimmingCharacters(in: .whitespacesAndNewlines),
-            inputSchema: SchemaDocument(identifier: input.trimmingCharacters(in: .whitespacesAndNewlines)),
-            outputSchema: SchemaDocument(identifier: output.trimmingCharacters(in: .whitespacesAndNewlines)),
+            inputSchema: try makeSchemaDocument(
+                identifier: input.trimmingCharacters(in: .whitespacesAndNewlines),
+                rawJSON: fields["inputSchemaJSON"],
+                field: "inputSchemaJSON"
+            ),
+            outputSchema: try makeSchemaDocument(
+                identifier: output.trimmingCharacters(in: .whitespacesAndNewlines),
+                rawJSON: fields["outputSchemaJSON"],
+                field: "outputSchemaJSON"
+            ),
             requiredCapabilities: [.read, .execute],
             metadata: {
                 var metadata = [
@@ -83,6 +91,23 @@ public struct SkillMarkdownParser: Sendable {
                 return metadata
             }()
         )
+    }
+
+    /// Optional front-matter schemas add structural validation without changing the
+    /// existing Input/Output section identifiers used by Module contracts.
+    private func makeSchemaDocument(
+        identifier: String,
+        rawJSON: String?,
+        field: String
+    ) throws -> SchemaDocument {
+        guard let rawJSON else { return SchemaDocument(identifier: identifier) }
+        guard let data = rawJSON.data(using: .utf8),
+              let value = try? JSONSerialization.jsonObject(with: data),
+              let object = value as? [String: Any] else {
+            throw SkillMarkdownError.invalidSchema("invalid JSON object in \\(field)")
+        }
+        let canonicalData = try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+        return SchemaDocument(identifier: identifier, rawJSON: String(decoding: canonicalData, as: UTF8.self))
     }
 
     private func parseVersion(_ value: String) -> SemanticVersion? {
