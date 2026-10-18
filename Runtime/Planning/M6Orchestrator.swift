@@ -871,6 +871,9 @@ public actor M6Orchestrator {
                 obsSummary = res.output.fields["output"] ?? res.output.fields["result"] ?? res.output.fields["message"] ?? res.output.fields["text"] ?? "Success"
                 succeeded = (res.state == .completed)
             } catch {
+                if Task.isCancelled || error is CancellationError || (error as? ModuleRuntimeError) == .cancelled {
+                    throw CancellationError()
+                }
                 obsSummary = "Module execution failed: \(error)"
                 succeeded = false
             }

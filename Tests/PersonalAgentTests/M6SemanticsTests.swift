@@ -17,6 +17,40 @@ struct M6SemanticsTests {
     }
 
 
+
+    @Test func cancelledModuleExecutionPropagatesWithoutOrdinaryActionOutcome() async throws {
+        let root = try await M6CompositionRoot(policy: ExplicitAllowPolicy(), modules: [HangModule()])
+        let goal = Goal(statement: "Cancel a running Module")
+        try await root.runtime.submit(goal: goal)
+        let toolID = ToolID(rawValue: DeterministicModuleIDs.hang.rawValue)
+        let orchestrator = M6Orchestrator(
+            runtime: root.runtime,
+            eventLog: root.eventLog,
+            reasoner: FixedReasoner(answer: "A cancelled action is not a completed answer."),
+            proposer: DirectProposer(toolID: toolID, description: "wait until cancelled"),
+            policy: ExplicitAllowPolicy(),
+            moduleRuntime: root.moduleRuntime
+        )
+
+        let execution = Task { try await orchestrator.run(goalID: goal.id) }
+        try await Task.sleep(for: .milliseconds(150))
+        execution.cancel()
+        await #expect(throws: CancellationError.self) {
+            _ = try await execution.value
+        }
+
+        let events = try await (root.eventLog as? InMemoryEventLog)?.allEvents() ?? []
+        #expect(events.contains {
+            $0.kind == .moduleCancelled && $0.payload["moduleID"] == toolID.rawValue
+        })
+        #expect(!events.contains {
+            $0.kind == .actionExecuted && $0.payload["toolID"] == toolID.rawValue
+        })
+        #expect(!events.contains {
+            $0.kind == .observationProduced && $0.payload["toolID"] == toolID.rawValue
+        })
+    }
+
     @Test func suppliedPolicyAlsoGuardsDirectModuleExecution() async throws {
         struct DenyExecutionPolicy: PolicyEvaluating {
             func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
