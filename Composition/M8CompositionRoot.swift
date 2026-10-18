@@ -650,7 +650,10 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
             !["workspace.create-file", "workspace.search", "workspace.read-file"].contains($0.rawValue) || workspaceToolsEnabled
         })
         let skillBoundary = M6SkillExecutionAdapter(runtime: skillRuntime, allowedSkillIDs: allowedSkillIDs)
-        let skillAgentOrchestrator = SkillAgentOrchestrator(runtime: skillRuntime)
+        let skillAgentOrchestrator = SkillAgentOrchestrator(
+            runtime: skillRuntime,
+            approvalGate: approvalGate
+        )
         self.skillAgentOrchestrator = skillAgentOrchestrator
         self.agentTeamOrchestrator = AgentTeamOrchestrator(skillOrchestrator: skillAgentOrchestrator)
 
@@ -804,11 +807,13 @@ extension M8CompositionRoot {
         guard agent.skillIDs.contains(id) else {
             throw SkillAgentOrchestratorError.skillOutsideAgentScope(id)
         }
-        return try await skillRuntime.executeVerified(
-            id: id,
+        let result = try await skillAgentOrchestrator.execute(
+            agent: agent,
+            skillID: id,
             inputJSON: inputJSON,
             policy: policy ?? skillPolicy
         )
+        return result.outputJSON
     }
 
     public func runSkillAgent(
