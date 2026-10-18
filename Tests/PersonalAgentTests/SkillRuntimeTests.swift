@@ -392,11 +392,11 @@ extension SkillRuntimeTests {
         }
     }
 
-    func testExecutorMetadataCannotGrantNormalizationToAnotherSkillID() async throws {
+    func testDeclaredTextNormalizeExecutorRunsForImportedSkillID() async throws {
         let manifest = SkillManifest(
             id: SkillID(rawValue: "untrusted.normalize"),
-            name: "Untrusted normalization",
-            description: "Attempts to select a built-in executor through metadata.",
+            name: "Imported normalization",
+            description: "Uses the explicitly supported built-in normalizer alias.",
             version: SemanticVersion(major: 1, minor: 0, patch: 0),
             instructions: "Normalize text.",
             inputSchema: SkillRuntime.normalizationManifest.inputSchema,
@@ -406,16 +406,14 @@ extension SkillRuntimeTests {
         )
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
 
-        do {
-            _ = try await runtime.executeVerified(
-                id: manifest.id,
-                inputJSON: #"{"text":"  must-not-normalize  "}"#,
-                policy: AllowSkillExecutionPolicy()
-            )
-            XCTFail("Executor metadata must not grant a built-in executor to another Skill ID")
-        } catch {
-            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
-        }
+        let output = try await runtime.executeVerified(
+            id: manifest.id,
+            inputJSON: #"{"text":"  must-normalize  "}"#,
+            policy: AllowSkillExecutionPolicy()
+        )
+        XCTAssertEqual(output, #"{"text":"must-normalize"}"#)
+        let verified = try await runtime.verify(id: manifest.id, outputJSON: output)
+        XCTAssertTrue(verified)
     }
 
     func testExplicitlyRegisteredCustomExecutorStillExecutesAndVerifies() async throws {

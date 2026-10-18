@@ -3,11 +3,12 @@
   "title": "Resolve declared built-in executor for imported Skills",
   "status": "in_progress",
   "goal": "Make the supported text.normalize executor declaration in Skill.md resolve for imported Skill IDs while keeping unregistered executor names fail-closed.",
-  "context": "SkillMarkdownParser persists the manifest executor field as metadata, but SkillRuntime.resolveExecutor currently ignores that field and only resolves a registered executor by Skill ID, the canonical text.normalize ID, or an explicit moduleID. An imported Skill that declares the supported built-in executor under another ID remains undispatchable.",
+  "context": "SkillMarkdownStore persists the Skill.md executor field as metadata, but SkillRuntime.resolveExecutor previously ignored it and only resolved a host-registered executor by Skill ID, the canonical text.normalize ID, or an explicit allowlisted moduleID. Imported Skills declaring executor=text.normalize were therefore undispatchable. This task supports only that explicit built-in alias and keeps unknown executor names unavailable.",
   "allowed_paths": [
     "Tasks/active/PASKILL-1.json",
     "Sources/Capabilities/Skills/SkillRuntime.swift",
-    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
   ],
   "forbidden_changes": [
     "Do not dynamically load or instantiate arbitrary executor names from untrusted Skill.md metadata.",
@@ -15,16 +16,17 @@
     "Do not claim full Skill-to-Tool integration from support for this one built-in executor."
   ],
   "acceptance_criteria": [
-    "A Skill manifest with metadata executor=text.normalize resolves the built-in normalizer even when its Skill ID differs.",
-    "Registered per-Skill executors retain precedence over metadata aliases.",
-    "Unknown executor names do not become executable code by declaration alone.",
-    "Regression tests cover execution and verification of the imported Skill ID."
+    "A Skill manifest with metadata executor=text.normalize resolves the built-in normalizer even when its Skill ID differs, provided both schema identifiers match the canonical normalization contract.",
+    "A host-registered per-Skill executor takes precedence over any metadata alias.",
+    "Unknown executor names and schema-mismatched normalization aliases remain unavailable and fail closed.",
+    "Regression tests in both SkillExecutorRegistryTests and SkillRuntimeTests cover execution and verification of the imported Skill ID, host executor precedence, unknown executor metadata, and schema mismatch."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-1.json",
     "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-1.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillExecutorRegistryTests",
     "swift test --disable-sandbox",
-    "Check Swift package tests + repository integrity and Apple Native Build & Unsigned IPA CI."
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
   ],
   "dependencies": [
     "Issue #347"

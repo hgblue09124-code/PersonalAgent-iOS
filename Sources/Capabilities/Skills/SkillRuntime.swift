@@ -544,11 +544,8 @@ public struct SkillRuntime: Sendable {
             return .available
         }
 
-        if id == Self.normalizationManifest.id {
-            return manifest.inputSchema.identifier == Self.normalizationManifest.inputSchema.identifier
-                && manifest.outputSchema.identifier == Self.normalizationManifest.outputSchema.identifier
-                ? .available
-                : .unavailable
+        if id == Self.normalizationManifest.id || manifest.metadata["executor"] == "text.normalize" {
+            return Self.hasNormalizationSchema(manifest) ? .available : .unavailable
         }
 
         guard let rawModuleID = manifest.metadata["moduleID"],
@@ -578,13 +575,24 @@ public struct SkillRuntime: Sendable {
         return verified
     }
 
+    private static func hasNormalizationSchema(_ manifest: SkillManifest) -> Bool {
+        manifest.inputSchema.identifier == Self.normalizationManifest.inputSchema.identifier
+            && manifest.outputSchema.identifier == Self.normalizationManifest.outputSchema.identifier
+    }
+
     private func resolveExecutor(for manifest: SkillManifest) async -> (any SkillExecutor)? {
         if let registered = await executors.executor(for: manifest.id.rawValue) {
             return registered
         }
-        // Built-ins are bound to exact Skill identity. Metadata alone cannot grant
-        // a built-in executor to another manifest.
+        // The canonical built-in ID remains supported directly.
         if manifest.id == Self.normalizationManifest.id {
+            return TextNormalizeSkillExecutor()
+        }
+        // Skill.md may declare this one host-supported alias. Never instantiate
+        // arbitrary executor names from manifest metadata, and require the exact
+        // normalization schema contract before honoring the alias.
+        if manifest.metadata["executor"] == "text.normalize",
+           Self.hasNormalizationSchema(manifest) {
             return TextNormalizeSkillExecutor()
         }
         guard let rawModuleID = manifest.metadata["moduleID"],

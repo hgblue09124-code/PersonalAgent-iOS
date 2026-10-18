@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 import PAKernel
 import PARuntime
@@ -102,8 +103,8 @@ struct SkillExecutorRegistryTests {
         #expect(try await runtime.verify(id: id, outputJSON: "{\"text\":\"hello\"}") == false)
     }
 
-    @Test("Executor metadata cannot grant a built-in executor to an imported Skill ID")
-    func executorMetadataCannotGrantBuiltinToImportedSkillID() async throws {
+    @Test("Declared text.normalize executor runs and verifies for an imported Skill ID")
+    func declaredTextNormalizeExecutorRunsForImportedSkillID() async throws {
         let id = SkillID(rawValue: "custom.normalize")
         let manifest = SkillManifest(
             id: id,
@@ -117,14 +118,91 @@ struct SkillExecutorRegistryTests {
             metadata: ["executor": "text.normalize"]
         )
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        #expect(await runtime.executorAvailability(for: id) == .available)
+        let output = try await runtime.executeVerified(
+            id: id,
+            inputJSON: #"{ "text": "  hello  " }"#,
+            policy: AllowPolicy()
+        )
+        let outputObject = try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: String]
+        #expect(outputObject?["text"] == "hello")
+        #expect(try await runtime.verify(id: id, outputJSON: output))
+    }
+
+    @Test("Registered per-Skill executor takes precedence over metadata aliases")
+    func registeredExecutorTakesPrecedenceOverMetadataAlias() async throws {
+        let id = SkillID(rawValue: "custom.normalize-override")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Host Registered Executor",
+            description: "A host-registered executor must take precedence.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Use the explicit host registration.",
+            inputSchema: SchemaDocument(identifier: "skill.text.normalize.in"),
+            outputSchema: SchemaDocument(identifier: "skill.text.normalize.out"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["executor": "text.normalize"]
+        )
+        let registry = SkillExecutorRegistry()
+        await registry.register(EchoExecutor(), for: id.rawValue)
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]), executors: registry)
+        let output = try await runtime.execute(
+            id: id,
+            inputJSON: #"{ "text": "hello" }"#,
+            policy: AllowPolicy()
+        )
+        let outputObject = try JSONSerialization.jsonObject(with: Data(output.utf8)) as? [String: String]
+        #expect(outputObject?["value"] == "custom")
+    }
+
+    @Test("Unknown executor metadata does not instantiate arbitrary code")
+    func unknownExecutorMetadataFailsClosed() async throws {
+        let id = SkillID(rawValue: "custom.unknown-executor")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Unknown Executor",
+            description: "Declares an executor the host does not support.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Must remain unavailable.",
+            inputSchema: SchemaDocument(identifier: "skill.text.normalize.in"),
+            outputSchema: SchemaDocument(identifier: "skill.text.normalize.out"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["executor": "shell.execute"]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        #expect(await runtime.executorAvailability(for: id) == .unavailable)
         await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
-            try await runtime.execute(
+            _ = try await runtime.execute(
                 id: id,
-                inputJSON: #"{"text":"  hello  "}"#,
+                inputJSON: #"{ "text": "  must not run  " }"#,
                 policy: AllowPolicy()
             )
         }
-        #expect(try await runtime.verify(id: id, outputJSON: #"{"text":"hello"}"#) == false)
+    }
+
+    @Test("Declared text.normalize alias requires the exact built-in schema contract")
+    func declaredTextNormalizeAliasRejectsSchemaMismatch() async throws {
+        let id = SkillID(rawValue: "custom.normalize-invalid-schema")
+        let manifest = SkillManifest(
+            id: id,
+            name: "Invalid Normalizer Alias",
+            description: "Attempts to alias a normalizer with a different output contract.",
+            version: SemanticVersion(major: 1, minor: 0, patch: 0),
+            instructions: "Must remain unavailable.",
+            inputSchema: SchemaDocument(identifier: "skill.text.normalize.in"),
+            outputSchema: SchemaDocument(identifier: "custom.output"),
+            requiredCapabilities: [.read, .execute],
+            metadata: ["executor": "text.normalize"]
+        )
+        let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
+        #expect(await runtime.executorAvailability(for: id) == .unavailable)
+        await #expect(throws: SkillRuntimeError.unknownSkill(id)) {
+            _ = try await runtime.execute(
+                id: id,
+                inputJSON: #"{ "text": "hello" }"#,
+                policy: AllowPolicy()
+            )
+        }
     }
 
     @Test("An unmapped module Skill is rejected before trusting its schema claims")
