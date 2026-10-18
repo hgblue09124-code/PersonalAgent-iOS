@@ -129,10 +129,10 @@ final class SkillInputSchemaValidationTests: XCTestCase {
 
         let output = try await runtime.executeVerified(
             id: manifest.id,
-            inputJSON: #"{\"name\":\"Ada\"}"#,
+            inputJSON: #"{ "name":"Ada" }"#,
             policy: AllowInputSchemaTestPolicy()
         )
-        XCTAssertEqual(output, #"{\"ok\":true}"#)
+        XCTAssertEqual(output, #"{ "ok":true }"#)
         let successfulExecutionCount = await counter.count()
         XCTAssertEqual(successfulExecutionCount, 1)
     }
