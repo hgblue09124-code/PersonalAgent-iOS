@@ -412,7 +412,8 @@ extension SkillRuntimeTests {
             policy: AllowSkillExecutionPolicy()
         )
         XCTAssertEqual(output, #"{"text":"must-normalize"}"#)
-        XCTAssertTrue(try await runtime.verify(id: manifest.id, outputJSON: output))
+        let verified = try await runtime.verify(id: manifest.id, outputJSON: output)
+        XCTAssertTrue(verified)
     }
 
     func testExplicitlyRegisteredCustomExecutorStillExecutesAndVerifies() async throws {
