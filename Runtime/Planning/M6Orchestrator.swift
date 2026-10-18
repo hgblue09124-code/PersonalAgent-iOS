@@ -250,6 +250,9 @@ public struct DefaultVerifier: Verifying {
         guard proposals.allSatisfy({ $0.planID == plan.id }) else {
             return VerificationResult(accepted: false, notes: "Rejected proposal referencing a different plan")
         }
+        guard proposals.allSatisfy({ !($0.toolID != nil && $0.skillID != nil) }) else {
+            return VerificationResult(accepted: false, notes: "Rejected proposal with conflicting Tool and Skill targets")
+        }
         guard Set(proposals.map(\.actionID)).count == proposals.count else {
             return VerificationResult(accepted: false, notes: "Rejected duplicate action identifiers")
         }
@@ -424,7 +427,15 @@ public actor M6Orchestrator {
 
             // 6. Verification
             progress?(.verification)
-            let verification = try await verifier.verify(plan: plan, proposals: proposals)
+            let verification: VerificationResult
+            if proposals.contains(where: { $0.toolID != nil && $0.skillID != nil }) {
+                verification = VerificationResult(
+                    accepted: false,
+                    notes: "Rejected proposal with conflicting Tool and Skill targets"
+                )
+            } else {
+                verification = try await verifier.verify(plan: plan, proposals: proposals)
+            }
             try Task.checkCancellation()
             try await emit(
                 traceID: traceID,
