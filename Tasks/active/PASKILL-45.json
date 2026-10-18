@@ -1,0 +1,36 @@
+{
+  "id": "PASKILL-45",
+  "title": "Scope public Skill selection to the active Agent",
+  "status": "in_progress",
+  "goal": "Prevent the public M8 selectSkill API from selecting an installed Skill that is outside the active default Agent's declared Skill scope.",
+  "context": "M8CompositionRoot.selectSkill currently calls SkillRuntime.select without allowedSkillIDs. An imported Skill can therefore be selected by exact ID even when it is not declared by personal.default, although execution APIs reject that same Skill later.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-45.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not widen the default Agent's declared Skill IDs or silently add imported Skills to its scope.",
+    "Do not change the general discoverSkills API, which may list installed Skills for management.",
+    "Do not alter intent matching semantics for Skills that are in the active Agent's scope.",
+    "Do not bypass workspaceToolsEnabled filtering or change execution authorization."
+  ],
+  "acceptance_criteria": [
+    "M8 selectSkill loads personal.default and applies scopeAgentForWorkspaceSetting before selection.",
+    "The selector receives only the active Agent's declared Skill IDs.",
+    "An installed Skill outside the Agent scope cannot be selected even when the query exactly matches its ID.",
+    "An in-scope Skill remains selectable and existing execution scope checks remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-45.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-45.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #510"
+  ],
+  "recovery": "Pass the active Agent's exact Skill ID set to SkillRuntime.select and assert an out-of-scope exact-ID query returns noSelection."
+}
