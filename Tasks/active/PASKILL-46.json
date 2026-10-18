@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-46",
+  "title": "Enforce output schema in standalone Skill verification",
+  "status": "in_progress",
+  "goal": "Make SkillRuntime.verify return false when output JSON violates a declared output schema, even if the executor verifier accepts it.",
+  "context": "executeVerified already validates constrained output against manifest.outputSchema before accepting executor verification. The public verify(id:outputJSON:) API currently calls only executor.verify, so a permissive registered executor can report true for schema-invalid output when callers use verification independently. Keep the existing unconstrained empty-schema compatibility behavior.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-46.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/SkillExecutorRegistryTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change ordinary execute semantics or policy/approval behavior.",
+    "Do not weaken SkillJSONSchemaValidator or accept unsupported schema keywords.",
+    "Do not change executor resolution, capability grants, or Agent scope."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime.verify returns false when output violates a non-empty manifest output schema, even if the executor verifier returns true.",
+    "Valid schema-conforming output still delegates to the executor verifier.",
+    "The legacy empty output schema {} remains unconstrained for compatibility.",
+    "Regression coverage proves standalone verification fails closed for missing required properties and disallowed additional properties.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-46.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-46.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillExecutorRegistryTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert the single logical task change if the regression or required CI fails; keep Issue #347 open for the remaining Skill-to-Tool acceptance work."
+}
