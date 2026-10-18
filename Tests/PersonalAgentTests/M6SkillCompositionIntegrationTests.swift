@@ -98,6 +98,9 @@ struct M6SkillCompositionIntegrationTests {
         #expect(try await root.discoverSkills().contains { $0.id == skillID })
         #expect(await root.skillExecutorAvailability(for: skillID) == .available)
 
+        await #expect(throws: SkillExecutionError.noSelection) {
+            _ = try await root.selectSkill(goalStatement: skillID.rawValue)
+        }
         await #expect(throws: SkillAgentOrchestratorError.skillOutsideAgentScope(skillID)) {
             _ = try await root.executeSkill(id: skillID, inputJSON: "{}", policy: AllowPolicy())
         }
