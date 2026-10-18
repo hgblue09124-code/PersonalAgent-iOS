@@ -132,7 +132,7 @@ final class SkillInputSchemaValidationTests: XCTestCase {
             inputJSON: #"{ "name":"Ada" }"#,
             policy: AllowInputSchemaTestPolicy()
         )
-        XCTAssertEqual(output, #"{ "ok":true }"#)
+        XCTAssertEqual(output, #"{"ok":true}"#)
         let successfulExecutionCount = await counter.count()
         XCTAssertEqual(successfulExecutionCount, 1)
     }
