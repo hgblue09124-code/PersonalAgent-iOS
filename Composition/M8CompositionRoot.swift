@@ -530,7 +530,7 @@ public struct M8CompositionRoot: CompositionRoot, Sendable {
         mutationEvidenceStore: (any MutationEvidenceStore)? = nil,
         workspaceToolsEnabled: Bool = false
     ) async throws {
-        let resolvedPolicy: any PolicyEvaluating = policy ?? DefaultPolicyEvaluator()
+        let resolvedPolicy: any PolicyEvaluating = policy ?? SettingsBackedPolicyEvaluator()
         self.skillPolicy = resolvedPolicy
         let rootDirectoryURL: URL
         if let storeDirectoryURL {
