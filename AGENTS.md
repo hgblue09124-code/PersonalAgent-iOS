@@ -1,5 +1,22 @@
 # AGENTS.md
 
+## P0 Product Objective — Alpha Agent Skill Completion
+
+**This objective takes precedence over all routine feature work, refactors, cleanup, and unrelated issues until its acceptance gate is satisfied.** At the start of every autonomous task/session, check GitHub Issue [#347](https://github.com/hgblue09124-code/PersonalAgent-iOS/issues/347) first. If it is open and not explicitly blocked by an external dependency, continue its next highest-value step before selecting any lower-priority work. Do not stop after writing a plan or finding a bug: implement, test, inspect CI, repair failures, and continue in bounded logical commits.
+
+The objective is a verified real product loop: **Chat → Orchestrator/Agent → Skill → Module/Tool → policy/approval → execution → verification → truthful Chat result**, including the reported `malformed skill` failure where reproducible.
+
+### Alpha completion gate (all required)
+- Real workspace create/read/search requests execute through the production Chat path and return only verified results; malformed/unavailable/unauthorized Skills fail clearly and never claim success.
+- Settings capability toggles are honored by the production runtime while preserving Agent scope, schemas, policy/approval, protected-path and secret checks, size limits, read-back verification, and cancellation.
+- Regression tests cover success and failure paths; Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final commit.
+- A fresh build is installed and exercised on the target physical iPhone; record the exact request, device/iOS/build, observed output, and evidence on Issue #347.
+- If physical-device access is unavailable, keep Issue #347 open and mark device acceptance explicitly blocked. CI green or test source presence alone is not full Alpha completion.
+
+Work autonomously on routine implementation and repair within task-contract scope. Do not ask for confirmation for normal code/test/CI fixes. Do not bypass security controls, invent success, or merge a failing PR. Use one logical task/commit at a time and update Issue #347 with evidence and blockers. Once the gate is complete, report the final commit, all required CI runs, and device evidence before taking unrelated work.
+
+---
+
 ## Scope & Operating Instructions for Jules
 
 ### Primary Scope

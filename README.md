@@ -1,5 +1,8 @@
 # PersonalAgent
 
+> **P0 product priority — Alpha Agent Skills:** All autonomous repository work must prioritize [Issue #347](https://github.com/hgblue09124-code/PersonalAgent-iOS/issues/347) until the real Chat → Agent → Skill → Tool → verification → Chat-result loop is proven on the target iPhone. See [AGENTS.md](AGENTS.md) for the mandatory acceptance gate. Do not start unrelated work first or declare completion from code presence/CI alone.
+
+
 **PersonalAgent** là ứng dụng trợ lý AI cá nhân dành cho iPhone, được phát triển theo hướng *local-first*, có khả năng mở rộng và ưu tiên quyền kiểm soát dữ liệu của người dùng. Mục tiêu dài hạn là kết hợp hội thoại, Agent, Skills, công cụ, bộ nhớ và workspace trong một môi trường thống nhất.
 
 > **Trạng thái dự án:** đang phát triển. README này mô tả sản phẩm, kiến trúc và cách phát triển; không phải bảng tiến độ. Sự hiện diện của giao diện hoặc thành phần trong mã nguồn không bảo đảm toàn bộ luồng đã hoạt động end-to-end. Hãy dựa vào kiểm thử, CI của commit cụ thể và thử nghiệm trên thiết bị để đánh giá mức độ sẵn sàng.

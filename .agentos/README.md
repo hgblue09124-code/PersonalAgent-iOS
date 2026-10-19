@@ -1,5 +1,11 @@
 # Agent-Ready Repository Contract
 
+## P0 priority override: finish Alpha Agent Skills first
+
+Before selecting any work, inspect [Issue #347 — Alpha Agent Skill completion gate](https://github.com/hgblue09124-code/PersonalAgent-iOS/issues/347). While it remains open, it is the highest-priority product objective: resume the next concrete blocker there before unrelated features, refactors, or cleanup. Continue autonomously through implementation, focused regression tests, CI repair, and physical-device acceptance. Do not mark verified from code presence or CI alone. The full gate is recorded on Issue #347 and in root `AGENTS.md`; if only the device step remains and no device is available, keep the issue open with an explicit blocker.
+
+---
+
 This directory defines the minimum execution contract for agents working in PersonalAgent-iOS. It complements, and does not replace, GitHub Issues, `AGENTS.md`, module contracts, tests, and CI.
 
 ## Source of truth
