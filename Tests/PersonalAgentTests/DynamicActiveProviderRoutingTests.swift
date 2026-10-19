@@ -26,8 +26,8 @@ struct DynamicActiveProviderRoutingTests {
             _ = try await provider.complete(LLMRequest(model: ModelID(rawValue: "fake-text"), prompt: "must not call remote"))
         }
     }
-    @Test func remoteStreamingDoesNotResolveLocalModelStorage() async throws {
-        let suiteName = "DynamicActiveProviderRoutingTests.\(UUID().uuidString)"
+    @Test func remoteInferenceFailsClosedWhenNetworkPolicyIsMissing() async throws {
+        let suiteName = "DynamicActiveProviderRoutingTests.missing-policy.\(UUID().uuidString)"
         let settings = try #require(UserDefaults(suiteName: suiteName))
         defer { settings.removePersistentDomain(forName: suiteName) }
         settings.set("remote", forKey: "provider.execution.mode")
@@ -43,6 +43,31 @@ struct DynamicActiveProviderRoutingTests {
             coordinator: coordinator,
             settings: settings
         )
+        await #expect(throws: ProviderRuntimeError.authorizationFailure) {
+            _ = try await provider.complete(
+                LLMRequest(model: ModelID(rawValue: "fake-text"), prompt: "must not bypass policy")
+            )
+        }
+    }
+
+    @Test func remoteStreamingDoesNotResolveLocalModelStorage() async throws {
+        let suiteName = "DynamicActiveProviderRoutingTests.\(UUID().uuidString)"
+        let settings = try #require(UserDefaults(suiteName: suiteName))
+        defer { settings.removePersistentDomain(forName: suiteName) }
+        settings.set("remote", forKey: "provider.execution.mode")
+        settings.set(true, forKey: "provider.remote.enabled")
+        settings.set(false, forKey: "privacy.localOnly")
+
+        let coordinator = LocalModelRuntimeCoordinator(
+            storage: FailingLocalModelStorage(),
+            deviceCapabilityProvider: DefaultDeviceCapabilityProvider()
+        )
+        let provider = DynamicActiveProvider(
+            fallbackProvider: DeterministicFakeProvider(),
+            coordinator: coordinator,
+            settings: settings,
+            policy: AllowNetworkPolicy()
+        )
         let request = LLMRequest(model: ModelID(rawValue: "fake-text"), prompt: "route remote")
 
         var sawFallbackDelta = false
@@ -53,6 +78,12 @@ struct DynamicActiveProviderRoutingTests {
         }
 
         #expect(sawFallbackDelta)
+    }
+}
+
+private struct AllowNetworkPolicy: PolicyEvaluating {
+    func evaluate(_ intent: ActionIntent) async -> PolicyDecision {
+        .allow()
     }
 }
 

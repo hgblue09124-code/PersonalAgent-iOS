@@ -1,0 +1,35 @@
+{
+  "id": "PAPROVIDER-2",
+  "title": "Fail closed when remote inference has no network policy",
+  "status": "in_progress",
+  "goal": "Ensure DynamicActiveProvider never routes remote inference when no PolicyEvaluating dependency is configured.",
+  "context": "DynamicActiveProvider accepts an optional policy. In remote mode, resolveActiveProvider currently evaluates the network capability only when the optional policy exists, so direct callers that omit it bypass the network grant boundary. Production M8 composition currently injects a resolved policy, but the provider itself should enforce the security invariant for every construction path. Keep local inference routing unchanged and require an explicit allow decision for remote inference.",
+  "allowed_paths": [
+    "Tasks/active/PAPROVIDER-2.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/DynamicActiveProviderRoutingTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken the live network policy check or allow approval-required decisions to proceed without approval.",
+    "Do not change local model routing, lazy loading, or local-only behavior.",
+    "Do not make remote mode silently fall back to an unconfigured provider when authorization is missing."
+  ],
+  "acceptance_criteria": [
+    "Remote inference throws ProviderRuntimeError.authorizationFailure when policy is absent.",
+    "Remote inference still fails closed when the configured policy denies network access or requires approval.",
+    "Remote routing succeeds through the existing provider path when an explicit policy allows network access.",
+    "Local inference and privacy.localOnly routing behavior remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAPROVIDER-2.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAPROVIDER-2.json --base origin/main",
+    "swift test --disable-sandbox --filter DynamicActiveProviderRoutingTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PR #360 network policy boundary"
+  ],
+  "recovery": "Revert this single logical change if the focused regression or required CI fails; preserve the invariant that remote inference requires an explicit network allow decision."
+}

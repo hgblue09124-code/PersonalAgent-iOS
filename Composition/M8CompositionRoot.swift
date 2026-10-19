@@ -233,13 +233,16 @@ public final class DynamicActiveProvider: LLMProvider, @unchecked Sendable {
         let remoteEnabled = settings.bool(forKey: "provider.remote.enabled")
             && !settings.bool(forKey: "privacy.localOnly")
         if executionMode == "remote" && remoteEnabled {
-            if let policy {
-                let decision = await policy.evaluate(
-                    ActionIntent(capabilities: .network, summary: "Remote provider inference")
-                )
-                guard decision.allowed && !decision.requiresApproval else {
-                    throw ProviderRuntimeError.authorizationFailure
-                }
+            // Remote inference requires an explicit live network-policy decision.
+            // A missing policy is not an implicit grant.
+            guard let policy else {
+                throw ProviderRuntimeError.authorizationFailure
+            }
+            let decision = await policy.evaluate(
+                ActionIntent(capabilities: .network, summary: "Remote provider inference")
+            )
+            guard decision.allowed && !decision.requiresApproval else {
+                throw ProviderRuntimeError.authorizationFailure
             }
             return .noActiveModel
         }
