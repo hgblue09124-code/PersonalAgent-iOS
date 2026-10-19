@@ -1,0 +1,37 @@
+{
+  "id": "PAALPHA-518",
+  "title": "Wire Settings capability toggles into Alpha runtime policy",
+  "status": "in_progress",
+  "goal": "Make the existing read/write/execute/network Settings toggles authoritative for default runtime authorization so Alpha workspace Skills can run when the user explicitly enables the required capabilities.",
+  "context": "The composition root currently defaults to DefaultPolicyEvaluator, which denies all non-read-only actions regardless of the capability toggles displayed in Settings. Replace the default with a settings-backed evaluator while preserving explicitly injected policies and existing workspace safety checks.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-518.json",
+    "Runtime/Verification/PolicyContracts.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/SkillPolicyEnforcementTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not bypass workspace path validation, protected-file checks, secret detection, size limits, read-back verification, or cancellation.",
+    "Do not silently grant destructive actions; require explicit approval.",
+    "Do not enable network capability unless its Settings toggle is enabled.",
+    "Do not weaken explicitly injected policies or fail-closed behavior when policy is missing."
+  ],
+  "acceptance_criteria": [
+    "Default composition policy honors the existing permissions.capability.* Settings values.",
+    "Read, write, execute, and network are individually checked; network remains disabled by default.",
+    "Destructive actions request approval rather than being automatically allowed.",
+    "Unit tests cover enabled workspace write, disabled write/network, and destructive approval.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-518.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-518.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillPolicyEnforcementTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "Revert this scoped policy wiring change if capability settings regress; preserve explicit policies and all workspace safety checks."
+}
