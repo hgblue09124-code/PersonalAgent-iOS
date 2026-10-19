@@ -1,0 +1,40 @@
+{
+  "id": "PAALPHA-519",
+  "title": "Make Alpha Agent Skill completion the P0 autonomous work priority",
+  "status": "in_progress",
+  "goal": "Ensure every autonomous agent resumes the verified Alpha Chat-to-Skill objective before unrelated repository work until physical iPhone acceptance is recorded.",
+  "context": "The repository has an open Alpha acceptance issue for the real Chat → Orchestrator → Skill → Module/Tool → policy/approval → verification → Chat-result path. The user explicitly requested this goal be the highest priority for automated work.",
+  "allowed_paths": [
+    "AGENTS.md",
+    ".agentos/README.md",
+    "README.md",
+    "Tasks/active/PAALPHA-519.json"
+  ],
+  "forbidden_changes": [
+    "Do not claim Alpha is complete from documentation or code presence alone.",
+    "Do not weaken policy, Agent scope, schema validation, or workspace safety controls.",
+    "Do not modify application implementation in this documentation-priority task.",
+    "Do not start unrelated features or refactors as part of this task."
+  ],
+  "acceptance_criteria": [
+    "Root AGENTS.md instructs agents to resume Issue #347 before unrelated work.",
+    ".agentos/README.md states the same P0 priority rule for automated agents.",
+    "README.md links the P0 Alpha objective and mandatory acceptance gate.",
+    "Issue #347 remains open until CI and physical iPhone evidence satisfy all acceptance criteria."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-519.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-519.json --base origin/main",
+    "Agent Task Contract workflow passes on the final PR head.",
+    "M3 and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "GitHub Issue #347",
+    "Current Alpha implementation/fix PRs and their CI results"
+  ],
+  "recovery": "If validation fails, inspect the task guard output and adjust only this contract or its declared documentation paths. Keep Issue #347 open; do not bypass required CI or device acceptance.",
+  "evidence": [
+    "Issue #347 title/body updated with P0 priority and measurable Alpha completion gate.",
+    "Commit d9c736728235e55985b4f5fc50709d6016768360 adds the priority rules to AGENTS.md, .agentos/README.md, and README.md."
+  ]
+}
