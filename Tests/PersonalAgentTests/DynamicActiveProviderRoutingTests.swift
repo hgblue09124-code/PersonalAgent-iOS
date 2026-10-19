@@ -27,7 +27,7 @@ struct DynamicActiveProviderRoutingTests {
         }
     }
     @Test func remoteInferenceFailsClosedWhenNetworkPolicyIsMissing() async throws {
-        let suiteName = "DynamicActiveProviderRoutingTests.missing-policy.\\(UUID().uuidString)"
+        let suiteName = "DynamicActiveProviderRoutingTests.missing-policy.\(UUID().uuidString)"
         let settings = try #require(UserDefaults(suiteName: suiteName))
         defer { settings.removePersistentDomain(forName: suiteName) }
         settings.set("remote", forKey: "provider.execution.mode")
