@@ -18,7 +18,7 @@ public struct DefaultPolicyEvaluator: PolicyEvaluating {
 /// Applies the user's explicit Agent capability toggles to runtime actions.
 /// Read/write/execute/network are opt-in according to Settings; destructive
 /// operations are never silently granted and always require the approval gate.
-public struct SettingsBackedPolicyEvaluator: PolicyEvaluating {
+public final class SettingsBackedPolicyEvaluator: PolicyEvaluating, @unchecked Sendable {
     private let defaults: UserDefaults
 
     public init(defaults: UserDefaults = .standard) {
