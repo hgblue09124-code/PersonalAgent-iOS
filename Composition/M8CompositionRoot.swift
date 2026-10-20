@@ -845,6 +845,45 @@ extension M8CompositionRoot {
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
+        // A bare "Tạo file" is an incomplete request, not a malformed Skill.
+        // Let the normal chat path ask for a filename/content instead of routing
+        // it into the strict workspace.create-file adapter and surfacing
+        // malformedSkill before any tool execution.
+        // Normalize accents, punctuation, and repeated whitespace before comparing
+        // command-only prompts. This is deliberately an exact phrase allowlist:
+        // requests that include a path/content continue through normal Skill routing.
+        let normalizedGoal = goalStatement
+            .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+        let incompleteCreateCommands: Set<String> = [
+            "tao file", "tao tep", "tao mot file", "tao mot tep",
+            "hay tao file", "hay tao tep", "hay tao mot file", "hay tao mot tep",
+            "create file", "create a file", "please create file", "please create a file",
+            "write file", "write a file", "please write file", "please write a file",
+            "make file", "make a file", "new file"
+        ]
+        let createCommandPrefixes = incompleteCreateCommands.filter { !$0.isEmpty }
+        let isCreateFileRequest = createCommandPrefixes.contains {
+            normalizedGoal == $0 || normalizedGoal.hasPrefix($0 + " ")
+        }
+        // A filename alone is not a complete write request. Route it back to Chat
+        // for clarification instead of invoking the strict Skill parser, which
+        // currently reports malformedSkill when no explicit content boundary exists.
+        // Keep complete requests on the existing policy-gated, verified write path.
+        let contentBoundaryDelimiters = [
+            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
+            " with content:", " content:", " với nội dung là ", " với nội dung ",
+            " nội dung là ", " nội dung ", " with content ", " content ",
+            "\nnội dung:", "\ncontent:"
+        ]
+        let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
+            goalStatement.range(of: $0, options: [.caseInsensitive]) != nil
+        }
+        guard !(isCreateFileRequest && !hasExplicitContentBoundary) else { return nil }
+
         let storedAgent = try await agentStore.load(id: agentID)
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
         guard !agent.skillIDs.isEmpty else { return nil }
