@@ -898,7 +898,25 @@ extension M8CompositionRoot {
         let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
             goalStatement.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil
         }
-        guard !hasExplicitContentBoundary else { return .continueRouting }
+        if hasExplicitContentBoundary {
+            let normalizedBoundaryMarkers = [
+                " voi noi dung la", " voi noi dung", " noi dung la", " noi dung",
+                " with content", " content"
+            ]
+            let boundaryRanges = normalizedBoundaryMarkers.compactMap { marker in
+                normalizedGoal.range(of: marker).map { (marker, $0) }
+            }
+            let boundaryRange = boundaryRanges.min { $0.1.lowerBound < $1.1.lowerBound }?.1
+            let filenamePrefix = boundaryRange.map { String(normalizedGoal[..<$0.lowerBound]) } ?? normalizedGoal
+            let filename = String(filenamePrefix.dropFirst(commandPrefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !filename.isEmpty else {
+                return .needsClarification(
+                    "Anh muốn lưu file với tên hoặc đường dẫn nào? Hãy cho biết tên file trước khi gửi nội dung."
+                )
+            }
+            return .continueRouting
+        }
 
         let commandWordCount = commandPrefix.split(separator: " ").count
         let requestWordCount = normalizedGoal.split(separator: " ").count
