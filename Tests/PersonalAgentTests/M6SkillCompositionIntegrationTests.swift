@@ -150,9 +150,28 @@ struct M6SkillCompositionIntegrationTests {
         })
         #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/hello.txt").path))
 
-        #expect(root.preflightChatRequest(
-            goalStatement: "Hãy tạo file hello.txt với nội dung: Xin chào"
-        ) == .continueRouting)
+        let completePrompts = [
+            "Hãy tạo file workspace/hello.txt với nội dung: Xin chào",
+            "Please create a file workspace/report.md with content: status ok",
+            "Tạo một tệp workspace/empty.txt với nội dung:"
+        ]
+        for prompt in completePrompts {
+            #expect(root.preflightChatRequest(goalStatement: prompt) == .continueRouting)
+        }
+
+        let unsafeOrAmbiguousPaths = [
+            "Tạo file hello.txt với nội dung: Xin chào",
+            "Tạo file /tmp/hello.txt với nội dung: Xin chào",
+            "Tạo file workspace/../hello.txt với nội dung: Xin chào",
+            "Tạo file unknown-root/hello.txt với nội dung: Xin chào"
+        ]
+        for prompt in unsafeOrAmbiguousPaths {
+            guard case .needsClarification = root.preflightChatRequest(goalStatement: prompt) else {
+                Issue.record("Expected path clarification for: \\(prompt)")
+                continue
+            }
+        }
+
         #expect(root.preflightChatRequest(
             goalStatement: "Explain how Python async works"
         ) == .continueRouting)
