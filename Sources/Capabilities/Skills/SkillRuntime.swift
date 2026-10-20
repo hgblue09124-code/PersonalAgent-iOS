@@ -855,7 +855,11 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
             normalized = String(normalized.dropFirst(prefix.count))
                 .trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        let prefixes = ["tạo file ", "tạo tệp ", "create file ", "write file "]
+        let prefixes = [
+            "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
+            "create a file ", "create file ", "write a file ", "write file ",
+            "make a file ", "make file "
+        ]
         guard let prefix = prefixes.first(where: { normalized.lowercased().hasPrefix($0) }) else {
             return nil
         }
