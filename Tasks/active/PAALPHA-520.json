@@ -1,0 +1,36 @@
+{
+  "id": "PAALPHA-520",
+  "title": "Repair stale built-in workspace Skill bindings safely",
+  "status": "in_progress",
+  "goal": "Prevent legacy on-device workspace Skills from remaining unavailable or producing malformed-skill errors solely because their canonical module binding metadata predates the current runtime.",
+  "context": "FileSkillStore.ensureDefaultSkill only writes canonical workspace Skill files when they do not exist. Existing workspace.create-file, workspace.search, or workspace.read-file files can therefore retain missing host-owned moduleID/chatInputAdapter metadata after an app upgrade. Repair only a parsed canonical Skill with the exact expected ID and input/output schema identifiers; never overwrite custom Skill content or accept mismatched bindings.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-520.json",
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Tests/PersonalAgentTests/SkillMarkdownPersistenceTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not overwrite arbitrary or malformed custom Skill files.",
+    "Do not repair or grant a built-in binding when the Skill ID or schema identifiers do not exactly match the canonical contract.",
+    "Do not weaken Agent scope, policy, approval, schema validation, workspace path/protected-file checks, secret detection, size limits, read-back verification, or cancellation.",
+    "Do not infer or instantiate arbitrary executor names or module IDs from untrusted Skill metadata."
+  ],
+  "acceptance_criteria": [
+    "Existing canonical workspace Skill files missing only host-owned binding metadata are migrated idempotently.",
+    "Existing custom, malformed, schema-mismatched, or conflicting-binding Skill files are not overwritten or silently granted a built-in executor.",
+    "Regression tests cover migration for each canonical workspace Skill, idempotency, and refusal to rewrite a conflicting or schema-mismatched Skill.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-520.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-520.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillMarkdownPersistenceTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #518"
+  ],
+  "recovery": "Revert the scoped migration if existing user-authored Skill content changes unexpectedly; preserve fail-closed behavior for mismatched bindings."
+}
