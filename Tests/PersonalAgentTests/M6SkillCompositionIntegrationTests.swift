@@ -113,6 +113,15 @@ struct M6SkillCompositionIntegrationTests {
         }
     }
 
+    @Test("M8 bare create-file prompt falls through to chat")
+    func m8BareCreateFilePromptFallsThroughToChat() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(provider: DeterministicFakeProvider(), storeDirectoryURL: directory, policy: AllowPolicy(), workspaceToolsEnabled: true)
+        let result = try await root.runChatSkillIfMatched(goalStatement: "Tạo file")
+        #expect(result == nil)
+    }
+
     @Test("registered Skill executes and verifies through canonical composition")
     func executesVerifiedSkill() async throws {
         let manifest = SkillRuntime.normalizationManifest
