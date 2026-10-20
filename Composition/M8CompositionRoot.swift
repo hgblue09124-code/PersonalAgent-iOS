@@ -474,6 +474,22 @@ private struct ChatMessageEnvelope: Decodable, Sendable {
     let content: String?
 }
 
+/// Deterministic preflight result for user chat requests. A clarification is a
+/// terminal response for this turn and must not be delegated to a model provider.
+public enum ChatRequestPreflight: Sendable, Equatable {
+    case continueRouting
+    case needsClarification(String)
+}
+
+/// Explicit outcome contract for actionable Agent requests. A provider response
+/// alone is not a verified tool success.
+public enum AgentExecutionOutcome: Sendable, Equatable {
+    case needsClarification(String)
+    case denied(String)
+    case executionFailed(String)
+    case verifiedSuccess(String)
+}
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
@@ -839,50 +855,59 @@ extension M8CompositionRoot {
         )
     }
 
-    public func runChatSkillIfMatched(
-        goalStatement: String,
-        inputContext: String? = nil,
-        agentID: String = "personal.default",
-        policy: (any PolicyEvaluating)? = nil
-    ) async throws -> SkillAgentResult? {
-        // A bare "Tạo file" is an incomplete request, not a malformed Skill.
-        // Let the normal chat path ask for a filename/content instead of routing
-        // it into the strict workspace.create-file adapter and surfacing
-        // malformedSkill before any tool execution.
-        // Normalize accents, punctuation, and repeated whitespace before comparing
-        // command-only prompts. This is deliberately an exact phrase allowlist:
-        // requests that include a path/content continue through normal Skill routing.
+    /// Classifies create-file requests before Skill/team/provider routing.
+    /// Missing content is clarified deterministically; no provider call is needed.
+    public func preflightChatRequest(goalStatement: String) -> ChatRequestPreflight {
         let normalizedGoal = goalStatement
             .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
             .lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
             .joined(separator: " ")
-        let incompleteCreateCommands: Set<String> = [
+
+        let commandPrefixes = [
             "tao file", "tao tep", "tao mot file", "tao mot tep",
             "hay tao file", "hay tao tep", "hay tao mot file", "hay tao mot tep",
+            "vui long tao file", "vui long tao tep", "giup toi tao file", "giup toi tao tep",
             "create file", "create a file", "please create file", "please create a file",
             "write file", "write a file", "please write file", "please write a file",
             "make file", "make a file", "new file"
-        ]
-        let createCommandPrefixes = incompleteCreateCommands.filter { !$0.isEmpty }
-        let isCreateFileRequest = createCommandPrefixes.contains {
+        ].sorted { $0.count > $1.count }
+
+        guard let commandPrefix = commandPrefixes.first(where: {
             normalizedGoal == $0 || normalizedGoal.hasPrefix($0 + " ")
+        }) else {
+            return .continueRouting
         }
-        // A filename alone is not a complete write request. Route it back to Chat
-        // for clarification instead of invoking the strict Skill parser, which
-        // currently reports malformedSkill when no explicit content boundary exists.
-        // Keep complete requests on the existing policy-gated, verified write path.
-        let contentBoundaryDelimiters = [
-            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
-            " with content:", " content:", " với nội dung là ", " với nội dung ",
-            " nội dung là ", " nội dung ", " with content ", " content ",
-            "\nnội dung:", "\ncontent:"
-        ]
-        let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
-            goalStatement.range(of: $0, options: [.caseInsensitive]) != nil
+
+        // Normalize accents/punctuation before testing the content boundary too.
+        let hasExplicitContentBoundary = [
+            " voi noi dung la", " voi noi dung", " noi dung la", " noi dung",
+            " with content", " content"
+        ].contains { normalizedGoal.contains($0) }
+        guard !hasExplicitContentBoundary else { return .continueRouting }
+
+        let commandWordCount = commandPrefix.split(separator: " ").count
+        let requestWordCount = normalizedGoal.split(separator: " ").count
+        if requestWordCount > commandWordCount {
+            return .needsClarification(
+                "Anh muốn nội dung gì cho file này? Hãy gửi nội dung cụ thể, hoặc xác nhận rõ nếu muốn tạo file rỗng."
+            )
         }
-        guard !(isCreateFileRequest && !hasExplicitContentBoundary) else { return nil }
+        return .needsClarification(
+            "Anh muốn tạo file nào và nội dung là gì? Nếu muốn file rỗng, hãy xác nhận rõ."
+        )
+    }
+
+    public func runChatSkillIfMatched(
+        goalStatement: String,
+        inputContext: String? = nil,
+        agentID: String = "personal.default",
+        policy: (any PolicyEvaluating)? = nil
+    ) async throws -> SkillAgentResult? {
+        if case .needsClarification = preflightChatRequest(goalStatement: goalStatement) {
+            return nil
+        }
 
         let storedAgent = try await agentStore.load(id: agentID)
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
