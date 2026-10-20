@@ -1,0 +1,36 @@
+{
+  "id": "PACHAT-531",
+  "title": "Align chat file preflight with the workspace write capability",
+  "status": "in_progress",
+  "goal": "Reject non-workspace roots during chat preflight so accepted paths match the only root the built-in workspace file writer can execute.",
+  "context": "The prior preflight accepted agents, skills, modules, tools, and workspace roots, but the production create-file Skill is bound to tool.workspace.write and its verification contract only accepts workspace-relative paths. Preflight should clarify invalid roots before provider or Skill routing.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-531.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not broaden the workspace write allowlist or add write capability to other roots.",
+    "Do not weaken policy, approval, protected-path, size-limit, or read-back verification.",
+    "Do not modify release workflows or Alpha/Stable release configuration.",
+    "Do not claim physical-device verification without testing on a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Preflight only accepts workspace-relative create-file paths.",
+    "Requests targeting agents/ and tools/ roots deterministically ask for a valid workspace path.",
+    "Existing valid workspace paths and incomplete-request clarifications remain unchanged.",
+    "Regression tests cover unsupported roots and path traversal.",
+    "All changes stay within allowed_paths and required CI checks pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-531.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-531.json --base feat/chat-intent-execution-contract-main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "Physical iPhone acceptance remains tracked separately under Issue #347."
+  ],
+  "dependencies": [
+    "PACHAT-530"
+  ],
+  "recovery": "If tests or contract validation fail, correct the implementation or scope; never broaden runtime write permissions to make preflight pass."
+}
