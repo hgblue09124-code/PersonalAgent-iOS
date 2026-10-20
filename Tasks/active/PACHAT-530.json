@@ -1,0 +1,36 @@
+{
+  "id": "PACHAT-530",
+  "title": "Make chat intent routing and execution outcomes deterministic",
+  "status": "in_progress",
+  "goal": "Route incomplete create-file requests to a deterministic clarification before any provider or Skill execution, and expose explicit outcomes for clarification, denial, execution failure, and verified Skill success.",
+  "context": "This follow-up broadens the narrow create-file regression into deterministic request preflight and an explicit execution outcome contract while keeping security and write verification unchanged.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-530.json",
+    "Composition/M8CompositionRoot.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace path allowlists, policy/approval gates, write size limits, or verification requirements.",
+    "Do not treat a provider-generated answer as proof that a tool action succeeded.",
+    "Do not modify release workflows or Alpha/Stable release configuration.",
+    "Do not claim physical-device verification without testing on a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Incomplete create-file requests produce a deterministic clarification without invoking the provider, team orchestration, Skill execution, or workspace write module.",
+    "A request with a filename but no explicit content boundary asks for content or explicit confirmation of an empty file.",
+    "Complete create-file requests continue through the existing policy-gated and verified Skill route.",
+    "Execution outcomes distinguish needs_clarification, denied, execution_failed, and verified_success.",
+    "Regression tests cover Vietnamese/English incomplete requests, complete requests, no-write guarantees, and outcome status mapping.",
+    "All changes stay within allowed_paths and required CI checks pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-530.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-530.json --base main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "On a physical iPhone, send 'hãy tạo file hello.txt' and verify a clarification is shown without a file write."
+  ],
+  "dependencies": [],
+  "recovery": "If contract validation or tests fail, fix the implementation or task scope; never bypass CI, weaken file-write verification, or mark device verification complete without evidence."
+}
