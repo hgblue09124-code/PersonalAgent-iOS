@@ -474,6 +474,31 @@ private struct ChatMessageEnvelope: Decodable, Sendable {
     let content: String?
 }
 
+/// Deterministic preflight result for user chat requests. A clarification is a
+/// terminal response for this turn and must not be delegated to a model provider.
+public enum ChatRequestPreflight: Sendable, Equatable {
+    case continueRouting
+    case needsClarification(String)
+}
+
+/// Explicit outcome contract for actionable Agent requests. A provider response
+/// alone is not a verified tool success.
+public enum AgentExecutionOutcome: Sendable, Equatable {
+    case needsClarification(String)
+    case denied(String)
+    case executionFailed(String)
+    case verifiedSuccess(String)
+
+    public var statusName: String {
+        switch self {
+        case .needsClarification(_): return "needs_clarification"
+        case .denied(_): return "denied"
+        case .executionFailed(_): return "execution_failed"
+        case .verifiedSuccess(_): return "verified_success"
+        }
+    }
+}
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
@@ -839,12 +864,59 @@ extension M8CompositionRoot {
         )
     }
 
+    /// Classifies create-file requests before Skill/team/provider routing.
+    /// Missing content is clarified deterministically; no provider call is needed.
+    public func preflightChatRequest(goalStatement: String) -> ChatRequestPreflight {
+        let normalizedGoal = goalStatement
+            .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+
+        let commandPrefixes = [
+            "tao file", "tao tep", "tao mot file", "tao mot tep",
+            "hay tao file", "hay tao tep", "hay tao mot file", "hay tao mot tep",
+            "vui long tao file", "vui long tao tep", "giup toi tao file", "giup toi tao tep",
+            "create file", "create a file", "please create file", "please create a file",
+            "write file", "write a file", "please write file", "please write a file",
+            "make file", "make a file", "new file"
+        ].sorted { $0.count > $1.count }
+
+        guard let commandPrefix = commandPrefixes.first(where: {
+            normalizedGoal == $0 || normalizedGoal.hasPrefix($0 + " ")
+        }) else {
+            return .continueRouting
+        }
+
+        let hasExplicitContentBoundary = [
+            " voi noi dung la", " voi noi dung", " noi dung la", " noi dung",
+            " with content", " content"
+        ].contains { normalizedGoal.contains($0) }
+        guard !hasExplicitContentBoundary else { return .continueRouting }
+
+        let commandWordCount = commandPrefix.split(separator: " ").count
+        let requestWordCount = normalizedGoal.split(separator: " ").count
+        if requestWordCount > commandWordCount {
+            return .needsClarification(
+                "Anh muốn nội dung gì cho file này? Hãy gửi nội dung cụ thể, hoặc xác nhận rõ nếu muốn tạo file rỗng."
+            )
+        }
+        return .needsClarification(
+            "Anh muốn tạo file nào và nội dung là gì? Nếu muốn file rỗng, hãy xác nhận rõ."
+        )
+    }
+
     public func runChatSkillIfMatched(
         goalStatement: String,
         inputContext: String? = nil,
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
+        if case .needsClarification(_) = preflightChatRequest(goalStatement: goalStatement) {
+            return nil
+        }
+
         let storedAgent = try await agentStore.load(id: agentID)
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
         guard !agent.skillIDs.isEmpty else { return nil }
@@ -875,6 +947,9 @@ extension M8CompositionRoot {
         inputContext: String? = nil,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> AgentTeamResult? {
+        if case .needsClarification(_) = preflightChatRequest(goalStatement: goalStatement) {
+            return nil
+        }
         let storedAgents = try await agentStore.discover()
         let agents = storedAgents
             .map { scopeAgentForWorkspaceSetting($0) }
