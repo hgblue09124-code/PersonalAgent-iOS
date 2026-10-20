@@ -947,7 +947,9 @@ extension M8CompositionRoot {
         )
         let components = path.split(separator: "/", omittingEmptySubsequences: false)
         let allowedRoots: Set<String> = ["agents", "skills", "modules", "tools", "workspace"]
-        guard components.count >= 2,
+        guard path.count <= 512,
+              components.count >= 2,
+              components.allSatisfy({ !$0.isEmpty }),
               let root = components.first.map(String.init),
               allowedRoots.contains(root),
               !path.hasPrefix("/"),
