@@ -488,6 +488,15 @@ public enum AgentExecutionOutcome: Sendable, Equatable {
     case denied(String)
     case executionFailed(String)
     case verifiedSuccess(String)
+
+    public var statusName: String {
+        switch self {
+        case .needsClarification: return "needs_clarification"
+        case .denied: return "denied"
+        case .executionFailed: return "execution_failed"
+        case .verifiedSuccess: return "verified_success"
+        }
+    }
 }
 
 public struct M8CompositionRoot: CompositionRoot, Sendable {
