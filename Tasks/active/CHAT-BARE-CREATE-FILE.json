@@ -1,8 +1,8 @@
 {
   "id": "CHAT-BARE-CREATE-FILE",
-  "title": "Handle bare create-file requests as incomplete chat input",
+  "title": "Route incomplete create-file requests to Chat for clarification",
   "status": "in_progress",
-  "goal": "Prevent bare create-file commands from entering strict Skill execution before filename and content are supplied.",
+  "goal": "Prevent create-file requests missing an explicit content boundary from entering strict Skill execution; ask for clarification without weakening write verification.",
   "context": "PR #521 addresses the reported malformedSkill failure when the user sends only 'Tạo file'. The task contract is required by Agent Task Contract CI and scopes this focused change.",
   "allowed_paths": [
     "Tasks/active/CHAT-BARE-CREATE-FILE.json",
@@ -15,7 +15,7 @@
     "Do not claim the physical-device bug is fixed without device verification."
   ],
   "acceptance_criteria": [
-    "Bare create-file prompts such as 'Tạo file' return no Skill match and are handled as incomplete chat input.",
+    "Create-file prompts without an explicit content boundary, including 'hãy tạo file hello.txt', return no Skill match and are handled as incomplete chat input.",
     "A composition regression test covers the bare create-file prompt.",
     "All changed files are within allowed_paths.",
     "Required CI checks pass before the PR is considered mergeable."
