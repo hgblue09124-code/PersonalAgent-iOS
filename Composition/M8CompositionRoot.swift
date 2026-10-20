@@ -849,11 +849,22 @@ extension M8CompositionRoot {
         // Let the normal chat path ask for a filename/content instead of routing
         // it into the strict workspace.create-file adapter and surfacing
         // malformedSkill before any tool execution.
+        // Normalize accents, punctuation, and repeated whitespace before comparing
+        // command-only prompts. This is deliberately an exact phrase allowlist:
+        // requests that include a path/content continue through normal Skill routing.
         let normalizedGoal = goalStatement
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
             .lowercased()
-            .trimmingCharacters(in: .punctuationCharacters.union(.whitespacesAndNewlines))
-        let incompleteCreateCommands: Set<String> = ["tạo file", "tạo tệp", "create file", "write file"]
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+        let incompleteCreateCommands: Set<String> = [
+            "tao file", "tao tep", "tao mot file", "tao mot tep",
+            "hay tao file", "hay tao tep", "hay tao mot file", "hay tao mot tep",
+            "create file", "create a file", "please create file", "please create a file",
+            "write file", "write a file", "please write file", "please write a file",
+            "make file", "make a file", "new file"
+        ]
         guard !incompleteCreateCommands.contains(normalizedGoal) else { return nil }
 
         let storedAgent = try await agentStore.load(id: agentID)
