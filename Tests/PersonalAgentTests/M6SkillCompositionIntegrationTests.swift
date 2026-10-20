@@ -113,13 +113,43 @@ struct M6SkillCompositionIntegrationTests {
         }
     }
 
-    @Test("M8 bare create-file prompt falls through to chat")
+    @Test("M8 bare create-file prompts are incomplete and do not invoke Skills")
     func m8BareCreateFilePromptFallsThroughToChat() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
-        let root = try await M8CompositionRoot(provider: DeterministicFakeProvider(), storeDirectoryURL: directory, policy: AllowPolicy(), workspaceToolsEnabled: true)
-        let result = try await root.runChatSkillIfMatched(goalStatement: "Tạo file")
-        #expect(result == nil)
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        let incompletePrompts = [
+            "Tạo file",
+            "  TẠO FILE!  ",
+            "Tạo tệp...",
+            "Tạo một file",
+            "Hãy tạo tệp.",
+            "Create file",
+            "Create a file!",
+            "Please create a file.",
+            "Write file",
+            "Make a file",
+            "New file"
+        ]
+        for prompt in incompletePrompts {
+            let result = try await root.runChatSkillIfMatched(goalStatement: prompt)
+            #expect(result == nil, "Expected incomplete prompt to fall through: \\(prompt)")
+        }
+
+        let workspaceURL = directory.appendingPathComponent("workspace", isDirectory: true)
+        #expect(!FileManager.default.fileExists(atPath: workspaceURL.path))
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.write"
+        })
     }
 
     @Test("registered Skill executes and verifies through canonical composition")
