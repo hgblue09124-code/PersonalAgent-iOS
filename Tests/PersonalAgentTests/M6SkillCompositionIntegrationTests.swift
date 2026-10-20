@@ -117,7 +117,9 @@ struct M6SkillCompositionIntegrationTests {
     func m8PreflightClassifiesIncompleteAndCompleteFileRequests() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
         let root = try await M8CompositionRoot(
+            eventLog: eventLog,
             provider: DeterministicFakeProvider(),
             storeDirectoryURL: directory,
             policy: AllowPolicy(),
@@ -137,7 +139,14 @@ struct M6SkillCompositionIntegrationTests {
                 continue
             }
             #expect(!message.isEmpty)
+            #expect(try await root.runChatSkillIfMatched(goalStatement: prompt) == nil)
         }
+
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.write"
+        })
+        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/hello.txt").path))
 
         #expect(root.preflightChatRequest(
             goalStatement: "Hãy tạo file hello.txt với nội dung: Xin chào"
