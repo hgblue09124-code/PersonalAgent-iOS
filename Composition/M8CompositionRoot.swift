@@ -889,10 +889,15 @@ extension M8CompositionRoot {
             return .continueRouting
         }
 
-        let hasExplicitContentBoundary = [
-            " voi noi dung la", " voi noi dung", " noi dung la", " noi dung",
-            " with content", " content"
-        ].contains { normalizedGoal.contains($0) }
+        let contentBoundaryDelimiters = [
+            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
+            " with content:", " content:", " với nội dung là ", " với nội dung ",
+            " nội dung là ", " nội dung ", " with content ", " content ",
+            "\\nnội dung:", "\\ncontent:"
+        ]
+        let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
+            goalStatement.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+        }
         guard !hasExplicitContentBoundary else { return .continueRouting }
 
         let commandWordCount = commandPrefix.split(separator: " ").count
