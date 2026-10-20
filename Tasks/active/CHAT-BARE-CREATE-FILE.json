@@ -1,0 +1,30 @@
+{
+  "id": "CHAT-BARE-CREATE-FILE",
+  "title": "Handle bare create-file requests as incomplete chat input",
+  "status": "in_progress",
+  "goal": "Prevent bare create-file commands from entering strict Skill execution before filename and content are supplied.",
+  "context": "PR #521 addresses the reported malformedSkill failure when the user sends only 'Tạo file'. The task contract is required by Agent Task Contract CI and scopes this focused change.",
+  "allowed_paths": [
+    "Tasks/active/CHAT-BARE-CREATE-FILE.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not modify unrelated chat routing or Skill execution behavior.",
+    "Do not change release tags, release assets, or Alpha/Stable release configuration.",
+    "Do not claim the physical-device bug is fixed without device verification."
+  ],
+  "acceptance_criteria": [
+    "Bare create-file prompts such as 'Tạo file' return no Skill match and are handled as incomplete chat input.",
+    "A composition regression test covers the bare create-file prompt.",
+    "All changed files are within allowed_paths.",
+    "Required CI checks pass before the PR is considered mergeable."
+  ],
+  "verification": [
+    "python Scripts/agent_task_guard.py validate Tasks/active/CHAT-BARE-CREATE-FILE.json",
+    "python Scripts/agent_task_guard.py check-diff Tasks/active/CHAT-BARE-CREATE-FILE.json --base origin/main",
+    "Run the relevant Swift test suite and inspect all required PR checks."
+  ],
+  "dependencies": [],
+  "recovery": "If scope validation or regression tests fail, preserve CI evidence and revise the task or implementation in a follow-up commit; do not bypass the contract gate."
+}

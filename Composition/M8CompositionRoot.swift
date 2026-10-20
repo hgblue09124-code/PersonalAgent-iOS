@@ -845,6 +845,17 @@ extension M8CompositionRoot {
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
+        // A bare "Tạo file" is an incomplete request, not a malformed Skill.
+        // Let the normal chat path ask for a filename/content instead of routing
+        // it into the strict workspace.create-file adapter and surfacing
+        // malformedSkill before any tool execution.
+        let normalizedGoal = goalStatement
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .trimmingCharacters(in: .punctuationCharacters.union(.whitespacesAndNewlines))
+        let incompleteCreateCommands: Set<String> = ["tạo file", "tạo tệp", "create file", "write file"]
+        guard !incompleteCreateCommands.contains(normalizedGoal) else { return nil }
+
         let storedAgent = try await agentStore.load(id: agentID)
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
         guard !agent.skillIDs.isEmpty else { return nil }
