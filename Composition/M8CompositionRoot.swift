@@ -491,10 +491,10 @@ public enum AgentExecutionOutcome: Sendable, Equatable {
 
     public var statusName: String {
         switch self {
-        case .needsClarification: return "needs_clarification"
-        case .denied: return "denied"
-        case .executionFailed: return "execution_failed"
-        case .verifiedSuccess: return "verified_success"
+        case .needsClarification(_): return "needs_clarification"
+        case .denied(_): return "denied"
+        case .executionFailed(_): return "execution_failed"
+        case .verifiedSuccess(_): return "verified_success"
         }
     }
 }
@@ -914,7 +914,7 @@ extension M8CompositionRoot {
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
-        if case .needsClarification = preflightChatRequest(goalStatement: goalStatement) {
+        if case .needsClarification(_) = preflightChatRequest(goalStatement: goalStatement) {
             return nil
         }
 
