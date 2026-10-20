@@ -96,6 +96,7 @@ final class KernelSession: ObservableObject {
     @Published var executionProgress: AgentExecutionProgress?
     @Published var executionResult: String?
     @Published var presentedResult: String?
+    @Published private(set) var executionOutcome: AgentExecutionOutcome?
     @Published private(set) var isSubmitting = false
     @Published private(set) var chatHistory: [ChatTurn]
     @Published private(set) var conversations: [ChatConversation]
@@ -317,6 +318,7 @@ final class KernelSession: ObservableObject {
         executionProgress = nil
         executionResult = nil
         presentedResult = nil
+        executionOutcome = nil
         chatStreamPresentation.streamingResponse = ""
         discardPendingStreamingDelta()
         chatStreamPresentation.responseMetrics = nil
@@ -324,6 +326,15 @@ final class KernelSession: ObservableObject {
         firstResponseDeltaAt = nil
         lastError = nil
         appendChatTurn(role: .user, content: normalizedStatement, conversationID: conversationID)
+        if case .needsClarification(let prompt) = composition.preflightChatRequest(goalStatement: normalizedStatement) {
+            executionOutcome = .needsClarification(prompt)
+            executionResult = prompt
+            presentedResult = prompt
+            appendChatTurn(role: .assistant, content: prompt, conversationID: conversationID)
+            isSubmitting = false
+            await refresh()
+            return
+        }
         let streamGeneration = streamingFlushGeneration
         let agentID = selectedAgentID
         let useTeamMode = teamModeEnabled
@@ -356,6 +367,9 @@ final class KernelSession: ObservableObject {
                 }
                 if useTeamMode {
                     if let teamResult = try await self.composition.runChatTeamIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput) {
+                        if let unverified = teamResult.members.first(where: { !$0.skillResult.verified }) {
+                            throw SkillExecutionError.verificationFailed(unverified.skillResult.skillID)
+                        }
                         let result = teamResult.members.map { member in
                             "\(member.agentName) · \(member.skillResult.skillID.rawValue)\n\(Self.cleanSkillResult(member.skillResult.outputJSON))"
                         }.joined(separator: "\n\n")
@@ -364,6 +378,7 @@ final class KernelSession: ObservableObject {
                         }
                         self.executionResult = result
                         self.presentedResult = result
+                        self.executionOutcome = .verifiedSuccess(result)
                         self.chatStreamPresentation.streamingResponse = ""
                         self.discardPendingStreamingDelta()
                         self.chatStreamPresentation.responseMetrics = nil
@@ -373,12 +388,16 @@ final class KernelSession: ObservableObject {
                         return
                     }
                 } else if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput, agentID: agentID) {
+                    guard skillResult.verified else {
+                        throw SkillExecutionError.verificationFailed(skillResult.skillID)
+                    }
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
                     }
                     self.executionResult = result
                     self.presentedResult = result
+                    self.executionOutcome = .verifiedSuccess(result)
                     self.chatStreamPresentation.streamingResponse = ""
                     self.discardPendingStreamingDelta()
                     self.chatStreamPresentation.responseMetrics = nil
@@ -463,11 +482,23 @@ final class KernelSession: ObservableObject {
                 self.executionProgress = nil
                 self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
+                let failureMessage: String
                 if let kernelError = error as? KernelError {
-                    self.lastError = kernelError.description
+                    failureMessage = kernelError.description
                 } else {
-                    self.lastError = String(describing: error)
+                    failureMessage = String(describing: error)
                 }
+                if let skillError = error as? SkillExecutionError {
+                    switch skillError {
+                    case let .policyDenied(reason), let .policyRequiresApproval(reason):
+                        self.executionOutcome = .denied(reason)
+                    default:
+                        self.executionOutcome = .executionFailed(failureMessage)
+                    }
+                } else {
+                    self.executionOutcome = .executionFailed(failureMessage)
+                }
+                self.lastError = failureMessage
             }
             await self.refresh()
         }

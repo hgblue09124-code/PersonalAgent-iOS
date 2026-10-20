@@ -113,6 +113,56 @@ struct M6SkillCompositionIntegrationTests {
         }
     }
 
+    @Test("M8 preflight deterministically clarifies incomplete file intents")
+    func m8PreflightClassifiesIncompleteAndCompleteFileRequests() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        let incompletePrompts = [
+            "Tạo file",
+            "hãy tạo file hello.txt",
+            "Hãy tạo tệp báo cáo.md",
+            "Please create a file report.md",
+            "write file draft.txt",
+            "Tạo file với nội dung: chưa có tên file",
+            "Create file with content: missing filename"
+        ]
+        for prompt in incompletePrompts {
+            guard case .needsClarification(let message) = root.preflightChatRequest(goalStatement: prompt) else {
+                Issue.record("Expected deterministic clarification for: \(prompt)")
+                continue
+            }
+            #expect(!message.isEmpty)
+            #expect(try await root.runChatSkillIfMatched(goalStatement: prompt) == nil)
+        }
+
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.write"
+        })
+        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/hello.txt").path))
+
+        #expect(root.preflightChatRequest(
+            goalStatement: "Hãy tạo file hello.txt với nội dung: Xin chào"
+        ) == .continueRouting)
+        #expect(root.preflightChatRequest(
+            goalStatement: "Explain how Python async works"
+        ) == .continueRouting)
+
+        #expect(AgentExecutionOutcome.needsClarification("content").statusName == "needs_clarification")
+        #expect(AgentExecutionOutcome.denied("policy").statusName == "denied")
+        #expect(AgentExecutionOutcome.executionFailed("io").statusName == "execution_failed")
+        #expect(AgentExecutionOutcome.verifiedSuccess("written").statusName == "verified_success")
+    }
+
     @Test("registered Skill executes and verifies through canonical composition")
     func executesVerifiedSkill() async throws {
         let manifest = SkillRuntime.normalizationManifest

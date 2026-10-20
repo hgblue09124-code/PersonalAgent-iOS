@@ -474,6 +474,31 @@ private struct ChatMessageEnvelope: Decodable, Sendable {
     let content: String?
 }
 
+/// Deterministic preflight result for user chat requests. A clarification is a
+/// terminal response for this turn and must not be delegated to a model provider.
+public enum ChatRequestPreflight: Sendable, Equatable {
+    case continueRouting
+    case needsClarification(String)
+}
+
+/// Explicit outcome contract for actionable Agent requests. A provider response
+/// alone is not a verified tool success.
+public enum AgentExecutionOutcome: Sendable, Equatable {
+    case needsClarification(String)
+    case denied(String)
+    case executionFailed(String)
+    case verifiedSuccess(String)
+
+    public var statusName: String {
+        switch self {
+        case .needsClarification(_): return "needs_clarification"
+        case .denied(_): return "denied"
+        case .executionFailed(_): return "execution_failed"
+        case .verifiedSuccess(_): return "verified_success"
+        }
+    }
+}
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
@@ -839,12 +864,82 @@ extension M8CompositionRoot {
         )
     }
 
+    /// Classifies create-file requests before Skill/team/provider routing.
+    /// Missing content is clarified deterministically; no provider call is needed.
+    public func preflightChatRequest(goalStatement: String) -> ChatRequestPreflight {
+        let normalizedGoal = goalStatement
+            .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+
+        let commandPrefixes = [
+            "tao file", "tao tep", "tao mot file", "tao mot tep",
+            "hay tao file", "hay tao tep", "hay tao mot file", "hay tao mot tep",
+            "vui long tao file", "vui long tao tep", "giup toi tao file", "giup toi tao tep",
+            "create file", "create a file", "please create file", "please create a file",
+            "write file", "write a file", "please write file", "please write a file",
+            "make file", "make a file", "new file"
+        ].sorted { $0.count > $1.count }
+
+        guard let commandPrefix = commandPrefixes.first(where: {
+            normalizedGoal == $0 || normalizedGoal.hasPrefix($0 + " ")
+        }) else {
+            return .continueRouting
+        }
+
+        let contentBoundaryDelimiters = [
+            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
+            " with content:", " content:", " với nội dung là ", " với nội dung ",
+            " nội dung là ", " nội dung ", " with content ", " content ",
+            "\nnội dung:", "\ncontent:"
+        ]
+        let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
+            goalStatement.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+        }
+        if hasExplicitContentBoundary {
+            let normalizedBoundaryMarkers = [
+                " voi noi dung la", " voi noi dung", " noi dung la", " noi dung",
+                " with content", " content"
+            ]
+            let boundaryRanges = normalizedBoundaryMarkers.compactMap { marker in
+                normalizedGoal.range(of: marker).map { (marker, $0) }
+            }
+            let boundaryRange = boundaryRanges.min { $0.1.lowerBound < $1.1.lowerBound }?.1
+            let filenamePrefix = boundaryRange.map { String(normalizedGoal[..<$0.lowerBound]) } ?? normalizedGoal
+            let filename = String(filenamePrefix.dropFirst(commandPrefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !filename.isEmpty else {
+                return .needsClarification(
+                    "Anh muốn lưu nội dung vào đường dẫn nào trong workspace? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`."
+                )
+            }
+            return .continueRouting
+        }
+
+        let commandWordCount = commandPrefix.split(separator: " ").count
+        let requestWordCount = normalizedGoal.split(separator: " ").count
+        if requestWordCount > commandWordCount {
+            return .needsClarification(
+                "Anh muốn nội dung gì cho file này? Hãy dùng đường dẫn trong workspace (ví dụ `workspace/hello.txt`) và gửi nội dung sau `với nội dung:`. Nếu muốn file rỗng, xác nhận bằng `Tạo file workspace/hello.txt với nội dung:`."
+            )
+        }
+        return .needsClarification(
+            "Anh muốn tạo file nào trong workspace và nội dung là gì? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`. Để tạo file rỗng, xác nhận bằng `Tạo file workspace/hello.txt với nội dung:`."
+        )
+    }
+
     public func runChatSkillIfMatched(
         goalStatement: String,
         inputContext: String? = nil,
         agentID: String = "personal.default",
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> SkillAgentResult? {
+        if case .needsClarification(_) = preflightChatRequest(goalStatement: goalStatement) {
+            return nil
+        }
+
         let storedAgent = try await agentStore.load(id: agentID)
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
         guard !agent.skillIDs.isEmpty else { return nil }
@@ -875,6 +970,9 @@ extension M8CompositionRoot {
         inputContext: String? = nil,
         policy: (any PolicyEvaluating)? = nil
     ) async throws -> AgentTeamResult? {
+        if case .needsClarification(_) = preflightChatRequest(goalStatement: goalStatement) {
+            return nil
+        }
         let storedAgents = try await agentStore.discover()
         let agents = storedAgents
             .map { scopeAgentForWorkspaceSetting($0) }
