@@ -873,9 +873,15 @@ extension M8CompositionRoot {
         // for clarification instead of invoking the strict Skill parser, which
         // currently reports malformedSkill when no explicit content boundary exists.
         // Keep complete requests on the existing policy-gated, verified write path.
-        let hasExplicitContentBoundary = [
-            "voi noi dung", "noi dung", "with content", "content"
-        ].contains { normalizedGoal.contains($0) }
+        let contentBoundaryDelimiters = [
+            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
+            " with content:", " content:", " với nội dung là ", " với nội dung ",
+            " nội dung là ", " nội dung ", " with content ", " content ",
+            "\nnội dung:", "\ncontent:"
+        ]
+        let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
+            goalStatement.range(of: $0, options: [.caseInsensitive]) != nil
+        }
         guard !(isCreateFileRequest && !hasExplicitContentBoundary) else { return nil }
 
         let storedAgent = try await agentStore.load(id: agentID)
