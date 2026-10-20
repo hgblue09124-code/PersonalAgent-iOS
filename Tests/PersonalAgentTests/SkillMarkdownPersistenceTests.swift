@@ -143,7 +143,7 @@ struct SkillMarkdownPersistenceTests {
     @Test("migrates legacy canonical workspace Skill bindings idempotently")
     func migratesLegacyWorkspaceSkillBindings() async throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("skills-migrate-\\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("skills-migrate-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 
@@ -155,22 +155,22 @@ struct SkillMarkdownPersistenceTests {
 
         for item in cases {
             let markdown = """
-            id: \\(item.id)
-            name: \\(item.name)
+            id: \(item.id)
+            name: \(item.name)
             version: 1.0.0
             description: Existing user-visible built-in Skill.
             ---
             ## Input
-            \\(item.input)
+            \(item.input)
 
             ## Output
-            \\(item.output)
+            \(item.output)
 
             ## Rule
             Preserve this installed rule during migration.
             """
             try markdown.write(
-                to: directory.appendingPathComponent("\\(item.id).Skill.md"),
+                to: directory.appendingPathComponent("\(item.id).Skill.md"),
                 atomically: true,
                 encoding: .utf8
             )
@@ -179,7 +179,7 @@ struct SkillMarkdownPersistenceTests {
         let store = FileSkillStore(directoryURL: directory)
         try await store.ensureDefaultSkill()
         let migratedContents = try cases.map { item in
-            try String(contentsOf: directory.appendingPathComponent("\\(item.id).Skill.md"), encoding: .utf8)
+            try String(contentsOf: directory.appendingPathComponent("\(item.id).Skill.md"), encoding: .utf8)
         }
 
         for item in cases {
@@ -191,7 +191,7 @@ struct SkillMarkdownPersistenceTests {
 
         try await store.ensureDefaultSkill()
         let secondPassContents = try cases.map { item in
-            try String(contentsOf: directory.appendingPathComponent("\\(item.id).Skill.md"), encoding: .utf8)
+            try String(contentsOf: directory.appendingPathComponent("\(item.id).Skill.md"), encoding: .utf8)
         }
         #expect(migratedContents == secondPassContents)
     }
@@ -199,7 +199,7 @@ struct SkillMarkdownPersistenceTests {
     @Test("does not rewrite conflicting or schema-mismatched workspace Skills")
     func refusesUnsafeWorkspaceSkillMigration() async throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("skills-no-migrate-\\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("skills-no-migrate-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 
