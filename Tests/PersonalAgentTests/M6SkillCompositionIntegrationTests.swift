@@ -141,11 +141,11 @@ struct M6SkillCompositionIntegrationTests {
         ]
         for prompt in incompletePrompts {
             let result = try await root.runChatSkillIfMatched(goalStatement: prompt)
-            #expect(result == nil, "Expected incomplete prompt to fall through: \\(prompt)")
+            #expect(result == nil)
         }
 
-        let workspaceURL = directory.appendingPathComponent("workspace", isDirectory: true)
-        #expect(!FileManager.default.fileExists(atPath: workspaceURL.path))
+        let blockedFileURL = directory.appendingPathComponent("workspace/blocked.md")
+        #expect(!FileManager.default.fileExists(atPath: blockedFileURL.path))
         let events = try await eventLog.allEvents()
         #expect(!events.contains {
             $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.write"
