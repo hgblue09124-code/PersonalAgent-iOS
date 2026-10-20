@@ -152,18 +152,81 @@ public actor FileSkillStore: SkillStore {
         if !FileManager.default.fileExists(atPath: normalizeURL.path) {
             try Self.defaultSkillMarkdown.write(to: normalizeURL, atomically: true, encoding: .utf8)
         }
-        let createFileURL = directoryURL.appendingPathComponent("workspace.create-file.Skill.md")
-        if !FileManager.default.fileExists(atPath: createFileURL.path) {
-            try Self.defaultCreateFileSkillMarkdown.write(to: createFileURL, atomically: true, encoding: .utf8)
+
+        try ensureWorkspaceSkill(
+            at: directoryURL.appendingPathComponent("workspace.create-file.Skill.md"),
+            defaultMarkdown: Self.defaultCreateFileSkillMarkdown,
+            skillID: "workspace.create-file",
+            inputSchemaID: "tool.workspace.write.input",
+            outputSchemaID: "tool.workspace.write.output",
+            moduleID: "tool.workspace.write",
+            adapter: "workspace.create-file"
+        )
+        try ensureWorkspaceSkill(
+            at: directoryURL.appendingPathComponent("workspace.search.Skill.md"),
+            defaultMarkdown: Self.defaultSearchSkillMarkdown,
+            skillID: "workspace.search",
+            inputSchemaID: "tool.workspace.read.input",
+            outputSchemaID: "tool.workspace.read.output",
+            moduleID: "tool.workspace.read",
+            adapter: "workspace.search"
+        )
+        try ensureWorkspaceSkill(
+            at: directoryURL.appendingPathComponent("workspace.read-file.Skill.md"),
+            defaultMarkdown: Self.defaultReadFileSkillMarkdown,
+            skillID: "workspace.read-file",
+            inputSchemaID: "tool.workspace.read.input",
+            outputSchemaID: "tool.workspace.read.output",
+            moduleID: "tool.workspace.read",
+            adapter: "workspace.read-file"
+        )
+    }
+
+    /// Repairs only missing host-owned bindings on a canonical built-in Skill.
+    /// A custom, malformed, schema-mismatched, or conflicting Skill is left untouched.
+    private func ensureWorkspaceSkill(
+        at url: URL,
+        defaultMarkdown: String,
+        skillID: String,
+        inputSchemaID: String,
+        outputSchemaID: String,
+        moduleID: String,
+        adapter: String
+    ) throws {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            try defaultMarkdown.write(to: url, atomically: true, encoding: .utf8)
+            return
         }
-        let searchURL = directoryURL.appendingPathComponent("workspace.search.Skill.md")
-        if !FileManager.default.fileExists(atPath: searchURL.path) {
-            try Self.defaultSearchSkillMarkdown.write(to: searchURL, atomically: true, encoding: .utf8)
+
+        let original = try String(contentsOf: url, encoding: .utf8)
+        guard let manifest = try? parser.parse(original),
+              manifest.id.rawValue == skillID,
+              manifest.inputSchema.identifier == inputSchemaID,
+              manifest.outputSchema.identifier == outputSchemaID else {
+            return
         }
-        let readFileURL = directoryURL.appendingPathComponent("workspace.read-file.Skill.md")
-        if !FileManager.default.fileExists(atPath: readFileURL.path) {
-            try Self.defaultReadFileSkillMarkdown.write(to: readFileURL, atomically: true, encoding: .utf8)
+
+        let existingModuleID = manifest.metadata["moduleID"]
+        let existingAdapter = manifest.metadata["chatInputAdapter"]
+        guard (existingModuleID == nil || existingModuleID == moduleID),
+              (existingAdapter == nil || existingAdapter == adapter) else {
+            return
         }
+
+        var missingFields: [String] = []
+        if existingModuleID == nil { missingFields.append("moduleID: \(moduleID)") }
+        if existingAdapter == nil { missingFields.append("chatInputAdapter: \(adapter)") }
+        guard !missingFields.isEmpty else { return }
+
+        let normalized = original.replacingOccurrences(of: "\r\n", with: "\n")
+        var lines = normalized.components(separatedBy: "\n")
+        guard let delimiterIndex = lines.firstIndex(where: {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines) == "---"
+        }) else {
+            return
+        }
+        lines.insert(contentsOf: missingFields, at: delimiterIndex)
+        try lines.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
     }
 
     public func discover(query: String) async throws -> [SkillManifest] {
