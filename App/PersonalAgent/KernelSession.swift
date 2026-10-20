@@ -367,6 +367,9 @@ final class KernelSession: ObservableObject {
                 }
                 if useTeamMode {
                     if let teamResult = try await self.composition.runChatTeamIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput) {
+                        if let unverified = teamResult.members.first(where: { !$0.skillResult.verified }) {
+                            throw SkillExecutionError.verificationFailed(unverified.skillResult.skillID)
+                        }
                         let result = teamResult.members.map { member in
                             "\(member.agentName) · \(member.skillResult.skillID.rawValue)\n\(Self.cleanSkillResult(member.skillResult.outputJSON))"
                         }.joined(separator: "\n\n")
@@ -385,6 +388,9 @@ final class KernelSession: ObservableObject {
                         return
                     }
                 } else if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput, agentID: agentID) {
+                    guard skillResult.verified else {
+                        throw SkillExecutionError.verificationFailed(skillResult.skillID)
+                    }
                     let result = Self.cleanSkillResult(skillResult.outputJSON)
                     guard !result.isEmpty else {
                         throw KernelError.invalidStateUpdate("Skill completed without a result")
