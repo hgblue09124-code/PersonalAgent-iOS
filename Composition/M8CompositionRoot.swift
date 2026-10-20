@@ -875,12 +875,12 @@ extension M8CompositionRoot {
             .joined(separator: " ")
 
         let commandPrefixes = [
-            "tao file", "tao tep", "tao mot file", "tao mot tep",
-            "hay tao file", "hay tao tep", "hay tao mot file", "hay tao mot tep",
+            "tao mot file", "tao mot tep", "hay tao mot file", "hay tao mot tep",
             "vui long tao file", "vui long tao tep", "giup toi tao file", "giup toi tao tep",
-            "create file", "create a file", "please create file", "please create a file",
-            "write file", "write a file", "please write file", "please write a file",
-            "make file", "make a file", "new file"
+            "tao file", "tao tep", "hay tao file", "hay tao tep",
+            "please create a file", "create a file", "please create file", "create file",
+            "please write a file", "write a file", "please write file", "write file",
+            "make a file", "make file"
         ].sorted { $0.count > $1.count }
 
         guard let commandPrefix = commandPrefixes.first(where: {
@@ -889,45 +889,79 @@ extension M8CompositionRoot {
             return .continueRouting
         }
 
-        let contentBoundaryDelimiters = [
+        // Keep the raw command for path validation. The Skill parser and this
+        // preflight must agree on accepted command prefixes and content boundaries.
+        var rawCommand = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
+        let politePrefixes = [
+            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ",
+            "anh ", "em ", "please ", "kindly "
+        ]
+        while let prefix = politePrefixes.first(where: {
+            rawCommand.lowercased().hasPrefix($0)
+        }) {
+            rawCommand = String(rawCommand.dropFirst(prefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        let rawCommandPrefixes = [
+            "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
+            "create a file ", "create file ", "write a file ", "write file ",
+            "make a file ", "make file "
+        ]
+        guard let rawPrefix = rawCommandPrefixes.first(where: {
+            rawCommand.lowercased().hasPrefix($0)
+        }) else {
+            // If preflight recognizes a phrasing that the Skill parser cannot
+            // execute, do not silently send it to the provider as if it succeeded.
+            return .needsClarification(
+                "Anh hãy dùng cú pháp tạo file được hỗ trợ, ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`."
+            )
+        }
+
+        let remainder = String(rawCommand.dropFirst(rawPrefix.count))
+        let delimiters = [
             " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
             " with content:", " content:", " với nội dung là ", " với nội dung ",
             " nội dung là ", " nội dung ", " with content ", " content ",
             "\nnội dung:", "\ncontent:"
         ]
-        let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
-            goalStatement.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil
-        }
-        if hasExplicitContentBoundary {
-            let normalizedBoundaryMarkers = [
-                " voi noi dung la", " voi noi dung", " noi dung la", " noi dung",
-                " with content", " content"
-            ]
-            let boundaryRanges = normalizedBoundaryMarkers.compactMap { marker in
-                normalizedGoal.range(of: marker).map { (marker, $0) }
-            }
-            let boundaryRange = boundaryRanges.min { $0.1.lowerBound < $1.1.lowerBound }?.1
-            let filenamePrefix = boundaryRange.map { String(normalizedGoal[..<$0.lowerBound]) } ?? normalizedGoal
-            let filename = String(filenamePrefix.dropFirst(commandPrefix.count))
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !filename.isEmpty else {
+        let boundary = delimiters.compactMap { delimiter -> Range<String.Index>? in
+            remainder.range(of: delimiter, options: [.caseInsensitive, .diacriticInsensitive])
+        }.min { $0.lowerBound < $1.lowerBound }
+
+        guard let boundary else {
+            let hasFilename = !remainder.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            if hasFilename {
                 return .needsClarification(
-                    "Anh muốn lưu nội dung vào đường dẫn nào trong workspace? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`."
+                    "Anh muốn nội dung gì cho file này? Hãy dùng đường dẫn tương đối trong workspace (ví dụ `workspace/hello.txt`) và gửi nội dung sau `với nội dung:`. Để tạo file rỗng, xác nhận rõ bằng cú pháp có dấu hai chấm ở cuối."
                 )
             }
-            return .continueRouting
-        }
-
-        let commandWordCount = commandPrefix.split(separator: " ").count
-        let requestWordCount = normalizedGoal.split(separator: " ").count
-        if requestWordCount > commandWordCount {
             return .needsClarification(
-                "Anh muốn nội dung gì cho file này? Hãy dùng đường dẫn trong workspace (ví dụ `workspace/hello.txt`) và gửi nội dung sau `với nội dung:`. Nếu muốn file rỗng, xác nhận bằng `Tạo file workspace/hello.txt với nội dung:`."
+                "Anh muốn tạo file nào trong workspace và nội dung là gì? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`."
             )
         }
-        return .needsClarification(
-            "Anh muốn tạo file nào trong workspace và nội dung là gì? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`. Để tạo file rỗng, xác nhận bằng `Tạo file workspace/hello.txt với nội dung:`."
+
+        let rawPath = String(remainder[..<boundary.lowerBound])
+        let path = rawPath.trimmingCharacters(
+            in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'"))
         )
+        let components = path.split(separator: "/", omittingEmptySubsequences: false)
+        let allowedRoots: Set<String> = ["agents", "skills", "modules", "tools", "workspace"]
+        guard components.count >= 2,
+              let root = components.first.map(String.init),
+              allowedRoots.contains(root),
+              !path.hasPrefix("/"),
+              !path.contains("\\"),
+              !components.contains(".."),
+              !components.contains(".") else {
+            return .needsClarification(
+                "Anh hãy dùng đường dẫn tương đối nằm trong một thư mục được phép, ví dụ `workspace/hello.txt`, rồi gửi nội dung sau `với nội dung:`. Em sẽ vẫn kiểm tra quyền và đường dẫn trước khi ghi."
+            )
+        }
+
+        // An empty suffix is allowed only because the user explicitly supplied
+        // the content delimiter; the existing Skill/runtime still verifies writes.
+        return .continueRouting
     }
 
     public func runChatSkillIfMatched(
