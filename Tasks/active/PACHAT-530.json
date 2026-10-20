@@ -8,7 +8,8 @@
     "Tasks/active/PACHAT-530.json",
     "Composition/M8CompositionRoot.swift",
     "App/PersonalAgent/KernelSession.swift",
-    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift"
   ],
   "forbidden_changes": [
     "Do not weaken workspace path allowlists, policy/approval gates, write size limits, or verification requirements.",
@@ -22,7 +23,9 @@
     "Complete create-file requests continue through the existing policy-gated and verified Skill route.",
     "Execution outcomes distinguish needs_clarification, denied, execution_failed, and verified_success.",
     "Regression tests cover Vietnamese/English incomplete requests, complete requests, no-write guarantees, and outcome status mapping.",
-    "All changes stay within allowed_paths and required CI checks pass."
+    "All changes stay within allowed_paths and required CI checks pass.",
+    "The preflight grammar and built-in create-file Skill parser accept the same documented English command variants.",
+    "A filename without an allowed relative root/path is clarified before provider or Skill routing; runtime path policy remains authoritative."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-530.json",
