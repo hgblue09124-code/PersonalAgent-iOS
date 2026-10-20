@@ -132,6 +132,8 @@ struct M6SkillCompositionIntegrationTests {
             "Tạo tệp...",
             "Tạo một file",
             "Hãy tạo tệp.",
+            "Hãy tạo file hello.txt",
+            "hãy tạo file hello.txt",
             "Create file",
             "Create a file!",
             "Please create a file.",
