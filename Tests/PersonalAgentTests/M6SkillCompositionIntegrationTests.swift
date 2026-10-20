@@ -131,7 +131,9 @@ struct M6SkillCompositionIntegrationTests {
             "hãy tạo file hello.txt",
             "Hãy tạo tệp báo cáo.md",
             "Please create a file report.md",
-            "write file draft.txt"
+            "write file draft.txt",
+            "Tạo file với nội dung: chưa có tên file",
+            "Create file with content: missing filename"
         ]
         for prompt in incompletePrompts {
             guard case .needsClarification(let message) = root.preflightChatRequest(goalStatement: prompt) else {
