@@ -865,7 +865,18 @@ extension M8CompositionRoot {
             "write file", "write a file", "please write file", "please write a file",
             "make file", "make a file", "new file"
         ]
-        guard !incompleteCreateCommands.contains(normalizedGoal) else { return nil }
+        let createCommandPrefixes = incompleteCreateCommands.filter { !$0.isEmpty }
+        let isCreateFileRequest = createCommandPrefixes.contains {
+            normalizedGoal == $0 || normalizedGoal.hasPrefix($0 + " ")
+        }
+        // A filename alone is not a complete write request. Route it back to Chat
+        // for clarification instead of invoking the strict Skill parser, which
+        // currently reports malformedSkill when no explicit content boundary exists.
+        // Keep complete requests on the existing policy-gated, verified write path.
+        let hasExplicitContentBoundary = [
+            "voi noi dung", "noi dung", "with content", "content"
+        ].contains { normalizedGoal.contains($0) }
+        guard !(isCreateFileRequest && !hasExplicitContentBoundary) else { return nil }
 
         let storedAgent = try await agentStore.load(id: agentID)
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
