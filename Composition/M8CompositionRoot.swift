@@ -912,7 +912,7 @@ extension M8CompositionRoot {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard !filename.isEmpty else {
                 return .needsClarification(
-                    "Anh muốn lưu file với tên hoặc đường dẫn nào? Hãy cho biết tên file trước khi gửi nội dung."
+                    "Anh muốn lưu nội dung vào đường dẫn nào trong workspace? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`."
                 )
             }
             return .continueRouting
@@ -922,11 +922,11 @@ extension M8CompositionRoot {
         let requestWordCount = normalizedGoal.split(separator: " ").count
         if requestWordCount > commandWordCount {
             return .needsClarification(
-                "Anh muốn nội dung gì cho file này? Hãy gửi nội dung cụ thể, hoặc xác nhận rõ nếu muốn tạo file rỗng."
+                "Anh muốn nội dung gì cho file này? Hãy dùng đường dẫn trong workspace (ví dụ `workspace/hello.txt`) và gửi nội dung sau `với nội dung:`. Nếu muốn file rỗng, xác nhận bằng `Tạo file workspace/hello.txt với nội dung:`."
             )
         }
         return .needsClarification(
-            "Anh muốn tạo file nào và nội dung là gì? Nếu muốn file rỗng, hãy xác nhận rõ."
+            "Anh muốn tạo file nào trong workspace và nội dung là gì? Ví dụ: `Tạo file workspace/hello.txt với nội dung: Xin chào`. Để tạo file rỗng, xác nhận bằng `Tạo file workspace/hello.txt với nội dung:`."
         )
     }
 
