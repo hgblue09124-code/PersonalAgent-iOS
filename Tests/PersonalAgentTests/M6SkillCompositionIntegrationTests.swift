@@ -154,6 +154,47 @@ struct M6SkillCompositionIntegrationTests {
         })
     }
 
+    @Test("M8 preflight deterministically clarifies incomplete file intents")
+    func m8PreflightClassifiesIncompleteAndCompleteFileRequests() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        let incompletePrompts = [
+            "Tạo file",
+            "hãy tạo file hello.txt",
+            "Hãy tạo tệp báo cáo.md",
+            "Please create a file report.md",
+            "write file draft.txt"
+        ]
+        for prompt in incompletePrompts {
+            guard case .needsClarification(let message) = root.preflightChatRequest(goalStatement: prompt) else {
+                Issue.record("Expected deterministic clarification for: \(prompt)")
+                continue
+            }
+            #expect(!message.isEmpty)
+        }
+
+        #expect(root.preflightChatRequest(
+            goalStatement: "Hãy tạo file hello.txt với nội dung: Xin chào"
+        ) == .continueRouting)
+        #expect(root.preflightChatRequest(
+            goalStatement: "Explain how Python async works"
+        ) == .continueRouting)
+
+        // The outcome type is the contract boundary; provider text is not a
+        // verified-success outcome unless the Skill execution path verified it.
+        #expect(AgentExecutionOutcome.needsClarification("content").statusName == "needs_clarification")
+        #expect(AgentExecutionOutcome.denied("policy").statusName == "denied")
+        #expect(AgentExecutionOutcome.executionFailed("io").statusName == "execution_failed")
+        #expect(AgentExecutionOutcome.verifiedSuccess("written").statusName == "verified_success")
+    }
+
     @Test("registered Skill executes and verifies through canonical composition")
     func executesVerifiedSkill() async throws {
         let manifest = SkillRuntime.normalizationManifest
