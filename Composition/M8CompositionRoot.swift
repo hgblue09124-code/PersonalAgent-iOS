@@ -893,7 +893,7 @@ extension M8CompositionRoot {
             " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
             " with content:", " content:", " với nội dung là ", " với nội dung ",
             " nội dung là ", " nội dung ", " with content ", " content ",
-            "\\nnội dung:", "\\ncontent:"
+            "\nnội dung:", "\ncontent:"
         ]
         let hasExplicitContentBoundary = contentBoundaryDelimiters.contains {
             goalStatement.range(of: $0, options: [.caseInsensitive, .diacriticInsensitive]) != nil
