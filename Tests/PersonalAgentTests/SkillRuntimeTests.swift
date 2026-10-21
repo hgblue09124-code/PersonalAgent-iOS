@@ -25,7 +25,7 @@ final class SkillRuntimeTests: XCTestCase {
         XCTAssertFalse(verified)
     }
 
-    func testUnsupportedManifestIsReportedUnavailableWithoutExecuting() async throws {
+    func testUnsupportedManifestIsReportedUnavailableAndExecutionFailsClosed() async throws {
         let manifest = SkillManifest(
             id: SkillID(rawValue: "custom.unsupported"),
             name: "Unsupported Skill",
@@ -39,6 +39,17 @@ final class SkillRuntimeTests: XCTestCase {
         let runtime = SkillRuntime(store: InMemorySkillStore(manifests: [manifest]))
         let availability = await runtime.executorAvailability(for: manifest.id)
         XCTAssertEqual(availability, .unavailable)
+
+        do {
+            _ = try await runtime.executeVerified(
+                id: manifest.id,
+                inputJSON: "{}",
+                policy: AllowSkillExecutionPolicy()
+            )
+            XCTFail("A manifest without a registered executor must never return success")
+        } catch {
+            XCTAssertEqual(error as? SkillExecutionError, .unknownSkill(manifest.id))
+        }
     }
 
     func testExplicitlyRegisteredExecutorIsReportedAvailable() async throws {
