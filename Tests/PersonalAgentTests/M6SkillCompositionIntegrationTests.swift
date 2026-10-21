@@ -856,6 +856,9 @@ struct M6SkillCompositionIntegrationTests {
         ) as? [String: Any]
         #expect(noMatchPayload?["matches"] as? [String] == [])
 
+        let searchInvocationsBeforeIncompleteRequests = try await eventLog.allEvents().filter {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.search"
+        }.count
         for emptySearch in [
             "Hãy tìm kiếm trong workspace",
             "Tìm kiếm workspace",
@@ -871,9 +874,10 @@ struct M6SkillCompositionIntegrationTests {
             #expect(try await root.runChatSkillIfMatched(goalStatement: emptySearch) == nil)
         }
         let incompleteSearchEvents = try await eventLog.allEvents()
-        #expect(!incompleteSearchEvents.contains {
+        let searchInvocationsAfterIncompleteRequests = incompleteSearchEvents.filter {
             $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.search"
-        })
+        }.count
+        #expect(searchInvocationsAfterIncompleteRequests == searchInvocationsBeforeIncompleteRequests)
 
         let readResult = try await root.runChatSkillIfMatched(
             goalStatement: "Đọc file workspace/notes.md"
