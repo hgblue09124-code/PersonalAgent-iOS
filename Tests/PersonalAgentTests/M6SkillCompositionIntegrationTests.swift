@@ -163,7 +163,9 @@ struct M6SkillCompositionIntegrationTests {
             "Tạo file hello.txt với nội dung: Xin chào",
             "Tạo file /tmp/hello.txt với nội dung: Xin chào",
             "Tạo file workspace/../hello.txt với nội dung: Xin chào",
-            "Tạo file unknown-root/hello.txt với nội dung: Xin chào"
+            "Tạo file unknown-root/hello.txt với nội dung: Xin chào",
+            "Tạo file tools/hello.txt với nội dung: Xin chào",
+            "Tạo file agents/hello.txt với nội dung: Xin chào"
         ]
         for prompt in unsafeOrAmbiguousPaths {
             guard case .needsClarification = root.preflightChatRequest(goalStatement: prompt) else {
