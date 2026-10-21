@@ -162,7 +162,13 @@ struct M6SkillCompositionIntegrationTests {
             "Please create a file workspace/six.txt with content: six",
             "Kindly make file workspace/seven.txt with content: seven",
             "Vui lòng tạo file workspace/eight.txt với nội dung: eight",
-            "Giúp mình tạo tệp workspace/nine.txt với nội dung: nine"
+            "Giúp mình tạo tệp workspace/nine.txt với nội dung: nine",
+            "Could you create a file workspace/ten.txt with content: ten",
+            "Can you write a file workspace/eleven.txt with content: eleven",
+            "Would you make a file workspace/twelve.txt with content: twelve",
+            "Help me create a file workspace/thirteen.txt with content: thirteen",
+            "I need you to create a file workspace/fourteen.txt with content: fourteen",
+            "Giúp anh tạo file workspace/fifteen.txt với nội dung: fifteen"
         ]
         for prompt in completePrompts {
             #expect(root.preflightChatRequest(goalStatement: prompt) == .continueRouting)
