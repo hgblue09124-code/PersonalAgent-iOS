@@ -144,8 +144,15 @@ public struct SkillRuntime: Sendable {
         // Keep file-creation commands intact for the allowlisted workspace adapter.
         // Chat commonly adds a short polite lead-in; strip only known lead-ins so
         // the downstream parser still receives its explicit, fail-closed grammar.
-        let fileCommandPrefixes = ["tạo file ", "tạo tệp ", "create file ", "write file "]
-        let politePrefixes = ["hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em "]
+        let fileCommandPrefixes = [
+            "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
+            "create a file ", "create file ", "write a file ", "write file ",
+            "make a file ", "make file "
+        ]
+        let politePrefixes = [
+            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em ",
+            "please ", "kindly "
+        ]
         var command = statement
         while true {
             let normalized = command.lowercased()
@@ -361,6 +368,7 @@ public struct SkillRuntime: Sendable {
             "tìm": "search", "kiếm": "search", "tra": "search", "cứu": "search",
             "đọc": "read", "xem": "read", "mở": "read",
             "tạo": "create", "viết": "create", "soạn": "create",
+            "write": "create", "make": "create",
             "tệp": "file"
         ]
         return Set(

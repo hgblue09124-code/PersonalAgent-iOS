@@ -60,10 +60,48 @@ final class SkillRuntimeTests: XCTestCase {
     }
 
     func testChatInputTextPreservesCreateFileCommandGrammar() {
-        let vietnamese = "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"
-        XCTAssertEqual(SkillRuntime.chatInputText(from: vietnamese), vietnamese)
-        let english = "Create file workspace/english.md with content: English file"
-        XCTAssertEqual(SkillRuntime.chatInputText(from: english), english)
+        let commands: [(input: String, expected: String)] = [
+            ("Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật",
+             "Tạo file workspace/notes.md với nội dung: Nội dung đã ghi thật"),
+            ("Tạo một file workspace/one.md với nội dung: one",
+             "Tạo một file workspace/one.md với nội dung: one"),
+            ("Tạo một tệp workspace/two.md với nội dung: two",
+             "Tạo một tệp workspace/two.md với nội dung: two"),
+            ("Create file workspace/english.md with content: English file",
+             "Create file workspace/english.md with content: English file"),
+            ("Create a file workspace/three.md with content: three",
+             "Create a file workspace/three.md with content: three"),
+            ("Write a file workspace/four.md with content: four",
+             "Write a file workspace/four.md with content: four"),
+            ("Make a file workspace/five.md with content: five",
+             "Make a file workspace/five.md with content: five"),
+            ("Please create a file workspace/six.md with content: six",
+             "create a file workspace/six.md with content: six"),
+            ("Kindly make file workspace/seven.md with content: seven",
+             "make file workspace/seven.md with content: seven"),
+            ("Vui lòng tạo file workspace/eight.md với nội dung: eight",
+             "tạo file workspace/eight.md với nội dung: eight"),
+            ("Hãy tạo một file workspace/nine.md với nội dung: nine",
+             "tạo một file workspace/nine.md với nội dung: nine")
+        ]
+        for command in commands {
+            XCTAssertEqual(
+                SkillRuntime.chatInputText(from: command.input),
+                command.expected,
+                "Command grammar was altered: \(command.input)"
+            )
+        }
+
+        let contextual = """
+        Conversation context:
+        user: Tạo file workspace/old.md với nội dung: old content
+        Current user request:
+        Please create a file workspace/current.md with content: current content
+        """
+        XCTAssertEqual(
+            SkillRuntime.chatInputText(from: contextual),
+            "create a file workspace/current.md with content: current content"
+        )
     }
 
     func testVietnameseWorkspaceRequestsSelectTheMatchingBuiltInSkill() async throws {
