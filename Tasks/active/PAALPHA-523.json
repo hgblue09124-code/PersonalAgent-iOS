@@ -1,0 +1,35 @@
+{
+  "id": "PAALPHA-523",
+  "title": "Prove unsupported Skill execution fails closed",
+  "status": "in_progress",
+  "goal": "Add a regression proving a discovered Skill manifest without a registered executor cannot execute or claim success.",
+  "context": "Issue #347 requires unsupported capabilities to fail closed. Existing SkillRuntime coverage checks executorAvailability for unsupported manifests, but does not directly assert the execution boundary rejects that same manifest without invoking capability code.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-523.json",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production execution behavior or add an implicit executor.",
+    "Do not weaken policy, approval, schema validation, cancellation, or verification.",
+    "Do not treat manifest discovery or availability metadata as proof of execution.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "A manifest without an executor is reported unavailable.",
+    "Executing the unsupported Skill with an explicit allowing test policy throws the expected fail-closed unknownSkill error.",
+    "No executor output is returned as success.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-523.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-523.json --base main",
+    "swift test --disable-sandbox --filter SkillRuntimeTests",
+    "swift test --disable-sandbox",
+    "Confirm all three required PR workflows pass."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PAALPHA-522"
+  ],
+  "recovery": "If the assertion reveals a production execution path that accepts unsupported manifests, stop and investigate the boundary rather than adding a permissive fallback."
+}
