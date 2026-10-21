@@ -150,8 +150,9 @@ public struct SkillRuntime: Sendable {
             "make a file ", "make file "
         ]
         let politePrefixes = [
-            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em ",
-            "please ", "kindly "
+            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "giúp anh ", "làm ơn ", "anh ", "em ",
+            "please ", "kindly ", "could you ", "can you ", "would you ", "help me ",
+            "i need you to "
         ]
         var command = statement
         while true {
