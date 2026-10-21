@@ -876,8 +876,9 @@ extension M8CompositionRoot {
 
         var normalizedCommand = normalizedGoal
         let normalizedPolitePrefixes = [
-            "vui long ", "giup toi ", "giup minh ", "lam on ", "hay ",
-            "anh ", "em ", "please ", "kindly "
+            "vui long ", "giup toi ", "giup minh ", "giup anh ", "lam on ", "hay ",
+            "anh ", "em ", "please ", "kindly ", "could you ", "can you ",
+            "would you ", "help me ", "i need you to "
         ]
         while let prefix = normalizedPolitePrefixes.first(where: {
             normalizedCommand.hasPrefix($0)
