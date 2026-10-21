@@ -1,0 +1,37 @@
+{
+  "id": "PACHAT-534",
+  "title": "Align chat preflight with conversational command normalization",
+  "status": "in_progress",
+  "goal": "Ensure incomplete English and Vietnamese create-file requests with supported polite lead-ins are classified for clarification before provider or tool routing.",
+  "context": "SkillRuntime recognizes a broader set of conversational lead-ins than M8 deterministic preflight. When preflight misses an incomplete request, it can fall through to ordinary chat routing instead of asking for required parameters. This task aligns only the deterministic preflight prefix list and adds regression coverage.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-534.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace-only path restrictions, schema validation, policy or approval checks, protected-path checks, size limits, cancellation, or read-back verification.",
+    "Do not broaden executable grammar or execute arbitrary free-form chat.",
+    "Do not treat provider prose or a write response as proof of verified execution.",
+    "Do not modify release workflows or claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Preflight strips the same supported English and Vietnamese polite lead-ins already recognized by SkillRuntime.",
+    "Incomplete create-file requests with those lead-ins return needsClarification and do not invoke the write module.",
+    "Complete supported requests remain routable.",
+    "Unsafe paths remain denied or clarified and ordinary non-file chat remains unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA checks pass on the proposed commit."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-534.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-534.json --base main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "Physical iPhone acceptance remains tracked separately under Issue #347."
+  ],
+  "dependencies": [
+    "PACHAT-533",
+    "Issue #347"
+  ],
+  "recovery": "If a lead-in causes false positives, narrow the preflight list to exact documented prefixes and keep unsupported prompts on the clarification path."
+}
