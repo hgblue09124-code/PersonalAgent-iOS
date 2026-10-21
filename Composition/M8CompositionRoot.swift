@@ -867,25 +867,12 @@ extension M8CompositionRoot {
     /// Classifies create-file requests before Skill/team/provider routing.
     /// Missing content is clarified deterministically; no provider call is needed.
     public func preflightChatRequest(goalStatement: String) -> ChatRequestPreflight {
-        let normalizedGoal = goalStatement
+        let normalizedCommand = SkillRuntime.removingConversationalLeadIns(from: goalStatement)
             .folding(options: [.diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
             .lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
             .joined(separator: " ")
-
-        var normalizedCommand = normalizedGoal
-        let normalizedPolitePrefixes = [
-            "vui long ", "giup toi ", "giup minh ", "giup anh ", "lam on ", "hay ",
-            "anh ", "em ", "please ", "kindly ", "could you ", "can you ",
-            "would you ", "help me ", "i need you to "
-        ]
-        while let prefix = normalizedPolitePrefixes.first(where: {
-            normalizedCommand.hasPrefix($0)
-        }) {
-            normalizedCommand = String(normalizedCommand.dropFirst(prefix.count))
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-        }
 
         let commandPrefixes = [
             "tao mot file", "tao mot tep", "tao file", "tao tep",
@@ -901,18 +888,7 @@ extension M8CompositionRoot {
 
         // Keep the raw command for path validation. The Skill parser and this
         // preflight must agree on accepted command prefixes and content boundaries.
-        var rawCommand = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
-        let politePrefixes = [
-            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "giúp anh ", "làm ơn ",
-            "anh ", "em ", "please ", "kindly ", "could you ", "can you ",
-            "would you ", "help me ", "i need you to "
-        ]
-        while let prefix = politePrefixes.first(where: {
-            rawCommand.lowercased().hasPrefix($0)
-        }) {
-            rawCommand = String(rawCommand.dropFirst(prefix.count))
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-        }
+        let rawCommand = SkillRuntime.removingConversationalLeadIns(from: goalStatement)
 
         let rawCommandPrefixes = [
             "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
