@@ -643,7 +643,9 @@ struct M6SkillCompositionIntegrationTests {
 
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
         let root = try await M8CompositionRoot(
+            eventLog: eventLog,
             provider: DeterministicFakeProvider(),
             storeDirectoryURL: directory,
             policy: SettingsBackedPolicyEvaluator(defaults: defaults),
@@ -660,6 +662,15 @@ struct M6SkillCompositionIntegrationTests {
         }
         #expect(denied)
         #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/denied.txt").path))
+        let deniedEvents = try await eventLog.allEvents()
+        #expect(!deniedEvents.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.write"
+        })
+        #expect(!deniedEvents.contains {
+            $0.kind == .observationProduced
+                && $0.payload["skillID"] == "workspace.create-file"
+                && ($0.payload["succeeded"] == "true" || $0.payload["verified"] == "true")
+        })
 
         defaults.set(true, forKey: "permissions.capability.write")
         let result = try await root.runChatSkillIfMatched(
