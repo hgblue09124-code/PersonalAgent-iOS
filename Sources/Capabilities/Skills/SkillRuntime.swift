@@ -132,36 +132,44 @@ public struct SkillRuntime: Sendable {
     private let executors: SkillExecutorRegistry
     private let moduleRuntime: ModuleRuntime?
 
-    public static func chatInputText(from goalStatement: String) -> String {
-        // Contextual chat input may contain prior turns and memory. The explicit
-        // current-request boundary is authoritative; never parse an earlier turn as
-        // the active Skill command.
-        var payloadStatement = goalStatement
-        if let marker = goalStatement.range(of: "Current user request:\n", options: .backwards) {
-            payloadStatement = String(goalStatement[marker.upperBound...])
-        }
-        let statement = payloadStatement.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Keep file-creation commands intact for the allowlisted workspace adapter.
-        // Chat commonly adds a short polite lead-in; strip only known lead-ins so
-        // the downstream parser still receives its explicit, fail-closed grammar.
-        let fileCommandPrefixes = [
-            "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
-            "create a file ", "create file ", "write a file ", "write file ",
-            "make a file ", "make file "
-        ]
+    /// Removes only the explicitly supported conversational lead-ins. Keep this
+    /// shared by chat input extraction and deterministic preflight so both stages
+    /// classify the same request; this helper does not authorize or execute actions.
+    public static func removingConversationalLeadIns(from input: String) -> String {
         let politePrefixes = [
             "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "giúp anh ", "làm ơn ", "anh ", "em ",
             "please ", "kindly ", "could you ", "can you ", "would you ", "help me ",
             "i need you to "
         ]
-        var command = statement
-        while true {
-            let normalized = command.lowercased()
-            if fileCommandPrefixes.contains(where: { normalized.hasPrefix($0) }) {
-                return command
-            }
-            guard let lead = politePrefixes.first(where: { normalized.hasPrefix($0) }) else { break }
-            command = String(command.dropFirst(lead.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+        var command = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        while let lead = politePrefixes.first(where: {
+            command.lowercased().hasPrefix($0)
+        }) {
+            command = String(command.dropFirst(lead.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return command
+    }
+
+    public static func chatInputText(from goalStatement: String) -> String {
+        // Contextual chat input may contain prior turns and memory. The explicit
+        // current-request boundary is authoritative; never parse an earlier turn as
+        // the active Skill command.
+        var payloadStatement = goalStatement
+        if let marker = goalStatement.range(of: "Current user request:\\n", options: .backwards) {
+            payloadStatement = String(goalStatement[marker.upperBound...])
+        }
+        let statement = payloadStatement.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Keep file-creation commands intact for the allowlisted workspace adapter.
+        // Only a supported command receives normalization; ordinary chat remains unchanged.
+        let fileCommandPrefixes = [
+            "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
+            "create a file ", "create file ", "write a file ", "write file ",
+            "make a file ", "make file "
+        ]
+        let command = removingConversationalLeadIns(from: statement)
+        if fileCommandPrefixes.contains(where: { command.lowercased().hasPrefix($0) }) {
+            return command
         }
         // For ordinary prompts, preserve the payload exactly, including trailing whitespace.
         if let separator = payloadStatement.range(of: ": "),
