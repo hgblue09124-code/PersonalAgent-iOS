@@ -1,0 +1,39 @@
+{
+  "id": "PACHAT-535",
+  "title": "Use one shared conversational lead-in normalizer for chat and preflight",
+  "status": "in_progress",
+  "goal": "Eliminate duplicated English and Vietnamese polite-prefix lists so chat input extraction and deterministic preflight cannot drift.",
+  "context": "PR #528 aligned preflight behavior with SkillRuntime, but both stages still maintain separate lists and stripping loops. A future change could reintroduce mismatches. A shared deterministic helper should normalize only known lead-ins and must not change authorization, command grammar, or ordinary chat payloads.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-535.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace-only path restrictions, policy or approval checks, protected-path checks, size limits, cancellation, or read-back verification.",
+    "Do not convert arbitrary free-form chat into an executable command.",
+    "Do not treat provider prose as proof of tool execution.",
+    "Do not modify release workflows or claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "SkillRuntime exposes one deterministic helper for stripping only supported conversational lead-ins.",
+    "Chat input extraction and preflight both use the same helper instead of maintaining duplicate prefix lists.",
+    "Nested supported lead-ins normalize deterministically.",
+    "Ordinary chat and colon-delimited payload behavior remain unchanged.",
+    "Existing unsafe-path and incomplete-command tests remain intact.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA checks pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-535.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-535.json --base main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "Physical iPhone acceptance remains tracked separately under Issue #347."
+  ],
+  "dependencies": [
+    "PACHAT-534",
+    "Issue #347"
+  ],
+  "recovery": "If shared normalization changes ordinary chat payloads, restore the original payload fallback and restrict normalization to preflight classification and supported actionable command extraction."
+}
