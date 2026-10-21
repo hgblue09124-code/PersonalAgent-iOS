@@ -856,15 +856,28 @@ struct M6SkillCompositionIntegrationTests {
         ) as? [String: Any]
         #expect(noMatchPayload?["matches"] as? [String] == [])
 
-        for emptySearch in ["Hãy tìm kiếm trong workspace", "Search workspace"] {
-            var rejectedAsMalformed = false
-            do {
-                _ = try await root.runChatSkillIfMatched(goalStatement: emptySearch)
-            } catch let error as SkillExecutionError {
-                rejectedAsMalformed = error == .malformedSkill
+        let searchInvocationsBeforeIncompleteRequests = try await eventLog.allEvents().filter {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.search"
+        }.count
+        for emptySearch in [
+            "Hãy tìm kiếm trong workspace",
+            "Tìm kiếm workspace",
+            "Search workspace",
+            "Search workspace for",
+            "Find in workspace"
+        ] {
+            guard case .needsClarification(let message) = root.preflightChatRequest(goalStatement: emptySearch) else {
+                Issue.record("Expected clarification for incomplete search: \(emptySearch)")
+                continue
             }
-            #expect(rejectedAsMalformed)
+            #expect(!message.isEmpty)
+            #expect(try await root.runChatSkillIfMatched(goalStatement: emptySearch) == nil)
         }
+        let incompleteSearchEvents = try await eventLog.allEvents()
+        let searchInvocationsAfterIncompleteRequests = incompleteSearchEvents.filter {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.search"
+        }.count
+        #expect(searchInvocationsAfterIncompleteRequests == searchInvocationsBeforeIncompleteRequests)
 
         let readResult = try await root.runChatSkillIfMatched(
             goalStatement: "Đọc file workspace/notes.md"

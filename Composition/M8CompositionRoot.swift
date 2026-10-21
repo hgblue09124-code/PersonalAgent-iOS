@@ -874,6 +874,20 @@ extension M8CompositionRoot {
             .filter { !$0.isEmpty }
             .joined(separator: " ")
 
+        let incompleteWorkspaceSearchRequests: Set<String> = [
+            "tim kiem trong workspace",
+            "tim kiem workspace",
+            "search workspace",
+            "search workspace for",
+            "find workspace",
+            "find in workspace"
+        ]
+        if incompleteWorkspaceSearchRequests.contains(normalizedCommand) {
+            return .needsClarification(
+                "Anh muốn tìm nội dung nào trong workspace? Hãy thêm từ khóa, ví dụ: `Tìm kiếm trong workspace ghi-chu`."
+            )
+        }
+
         let commandPrefixes = [
             "tao mot file", "tao mot tep", "tao file", "tao tep",
             "create a file", "create file", "write a file", "write file",
