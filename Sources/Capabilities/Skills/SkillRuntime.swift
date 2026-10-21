@@ -156,7 +156,7 @@ public struct SkillRuntime: Sendable {
         // current-request boundary is authoritative; never parse an earlier turn as
         // the active Skill command.
         var payloadStatement = goalStatement
-        if let marker = goalStatement.range(of: "Current user request:\\n", options: .backwards) {
+        if let marker = goalStatement.range(of: "Current user request:\n", options: .backwards) {
             payloadStatement = String(goalStatement[marker.upperBound...])
         }
         let statement = payloadStatement.trimmingCharacters(in: .whitespacesAndNewlines)
