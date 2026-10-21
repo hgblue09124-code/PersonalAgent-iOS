@@ -1,0 +1,40 @@
+{
+  "id": "PACHAT-533",
+  "title": "Normalize conversational chat into supported machine-actionable commands",
+  "status": "in_progress",
+  "goal": "Normalize common conversational Vietnamese and English lead-ins into the existing strict workspace command grammar so the Agent can identify actionable intent without treating arbitrary chat as executable instructions.",
+  "context": "A successful workspace file-write report shows the production command path can execute a supported request. The current command normalizer recognizes only a narrow set of polite lead-ins, so natural user phrasing may fail to reach the same deterministic parser. Normalization must remain separate from capability authorization and execution verification.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-533.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace-only path restrictions, schema validation, policy or approval checks, protected-path checks, file size limits, cancellation, or read-back verification.",
+    "Do not convert arbitrary free-form chat into an executable command unless it matches the supported grammar.",
+    "Do not treat model-generated prose or a write response as proof of verified execution.",
+    "Do not modify release workflows or claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Common English conversational lead-ins and supported Vietnamese polite lead-ins normalize to the existing command grammar deterministically.",
+    "Preflight and Skill input extraction agree on the supported lead-ins.",
+    "Incomplete, ambiguous, and unsafe file requests continue to ask for clarification or fail closed without invoking a write module.",
+    "Regression tests cover normalization and preflight acceptance for the new variants.",
+    "Existing workspace path policy and read-back verification behavior remain unchanged.",
+    "All required CI checks pass on the proposed commit; physical-device acceptance remains separate under Issue #347."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-533.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-533.json --base main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "Record physical iPhone verification separately on Issue #347."
+  ],
+  "dependencies": [
+    "PACHAT-532",
+    "Issue #347"
+  ],
+  "recovery": "If a normalized phrase is ambiguous or unsupported by the strict file parser, remove that lead-in and return a clarification rather than widening the executable grammar."
+}

@@ -902,8 +902,9 @@ extension M8CompositionRoot {
         // preflight must agree on accepted command prefixes and content boundaries.
         var rawCommand = goalStatement.trimmingCharacters(in: .whitespacesAndNewlines)
         let politePrefixes = [
-            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ",
-            "anh ", "em ", "please ", "kindly "
+            "hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "giúp anh ", "làm ơn ",
+            "anh ", "em ", "please ", "kindly ", "could you ", "can you ",
+            "would you ", "help me ", "i need you to "
         ]
         while let prefix = politePrefixes.first(where: {
             rawCommand.lowercased().hasPrefix($0)
