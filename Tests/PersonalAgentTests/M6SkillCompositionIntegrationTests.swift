@@ -864,7 +864,7 @@ struct M6SkillCompositionIntegrationTests {
             "Find in workspace"
         ] {
             guard case .needsClarification(let message) = root.preflightChatRequest(goalStatement: emptySearch) else {
-                Issue.record("Expected clarification for incomplete search: \\(emptySearch)")
+                Issue.record("Expected clarification for incomplete search: \(emptySearch)")
                 continue
             }
             #expect(!message.isEmpty)
