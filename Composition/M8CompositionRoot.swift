@@ -946,7 +946,7 @@ extension M8CompositionRoot {
             in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'"))
         )
         let components = path.split(separator: "/", omittingEmptySubsequences: false)
-        let allowedRoots: Set<String> = ["agents", "skills", "modules", "tools", "workspace"]
+        let allowedRoots: Set<String> = ["workspace"]
         guard path.count <= 512,
               components.count >= 2,
               components.allSatisfy({ !$0.isEmpty }),
