@@ -173,6 +173,21 @@ final class SkillRuntimeTests: XCTestCase {
         }
     }
 
+    func testConversationalLeadInNormalizationIsSharedAndLeavesOrdinaryChatUntouched() {
+        XCTAssertEqual(
+            SkillRuntime.removingConversationalLeadIns(from: "  Could you please create a file x.txt  "),
+            "create a file x.txt"
+        )
+        XCTAssertEqual(
+            SkillRuntime.removingConversationalLeadIns(from: "Giúp anh hãy tạo file x.txt"),
+            "tạo file x.txt"
+        )
+        XCTAssertEqual(
+            SkillRuntime.chatInputText(from: "Please explain this topic"),
+            "Please explain this topic"
+        )
+    }
+
     func testChatInputTextStillExtractsOrdinaryColonDelimitedPayload() {
         XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text"), "actual text")
         XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text  "), "actual text  ")
