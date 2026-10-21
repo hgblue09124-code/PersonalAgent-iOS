@@ -1,0 +1,41 @@
+{
+  "id": "PACHAT-532",
+  "title": "Keep preflight, chat input normalization, and Skill parser grammar aligned",
+  "status": "in_progress",
+  "goal": "Ensure every documented create-file command variant accepted by chat preflight is passed intact to the Skill parser, including English polite lead-ins and alternate create/write phrasing.",
+  "context": "A source audit after PACHAT-531 found that preflight and parseCreateFileRequest accept more variants than SkillRuntime.chatInputText preserves. Additionally, the Skill selector did not normalize English write/make verbs to the canonical create intent, so accepted variants could lose content or fail selection.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-532.json",
+    "Composition/M8CompositionRoot.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    "Tests/PersonalAgentTests/SkillRuntimeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace path allowlists, policy/approval gates, protected-path checks, size limits, or read-back verification.",
+    "Do not treat provider prose as proof of tool execution.",
+    "Do not modify release workflows or Alpha/Stable release configuration.",
+    "Do not claim physical-device verification without testing on a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Preflight and chatInputText normalize the same documented Vietnamese/English polite prefixes before matching create-file grammar.",
+    "All supported create-file command variants preserve the full path and content boundary into Skill input.",
+    "English create/write/make variants select the canonical workspace.create-file Skill and execute verified writes with exact read-back content.",
+    "Current user request extraction continues to ignore earlier conversation turns.",
+    "Ordinary non-file chat remains unchanged.",
+    "Regression tests cover English and Vietnamese variants, content preservation, and complete preflight acceptance.",
+    "All changes stay within allowed_paths and required CI checks pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-532.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-532.json --base main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "Physical iPhone acceptance remains tracked separately under Issue #347."
+  ],
+  "dependencies": [
+    "PACHAT-530",
+    "PACHAT-531"
+  ],
+  "recovery": "If grammar changes cause ambiguity, narrow the accepted variants and clarify unsupported requests; do not route malformed inputs to a write capability."
+}
