@@ -874,17 +874,26 @@ extension M8CompositionRoot {
             .filter { !$0.isEmpty }
             .joined(separator: " ")
 
+        var normalizedCommand = normalizedGoal
+        let normalizedPolitePrefixes = [
+            "vui long ", "giup toi ", "giup minh ", "lam on ", "hay ",
+            "anh ", "em ", "please ", "kindly "
+        ]
+        while let prefix = normalizedPolitePrefixes.first(where: {
+            normalizedCommand.hasPrefix($0)
+        }) {
+            normalizedCommand = String(normalizedCommand.dropFirst(prefix.count))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
         let commandPrefixes = [
-            "tao mot file", "tao mot tep", "hay tao mot file", "hay tao mot tep",
-            "vui long tao file", "vui long tao tep", "giup toi tao file", "giup toi tao tep",
-            "tao file", "tao tep", "hay tao file", "hay tao tep",
-            "please create a file", "create a file", "please create file", "create file",
-            "please write a file", "write a file", "please write file", "write file",
+            "tao mot file", "tao mot tep", "tao file", "tao tep",
+            "create a file", "create file", "write a file", "write file",
             "make a file", "make file"
         ].sorted { $0.count > $1.count }
 
-        guard let commandPrefix = commandPrefixes.first(where: {
-            normalizedGoal == $0 || normalizedGoal.hasPrefix($0 + " ")
+        guard commandPrefixes.contains(where: {
+            normalizedCommand == $0 || normalizedCommand.hasPrefix($0 + " ")
         }) else {
             return .continueRouting
         }

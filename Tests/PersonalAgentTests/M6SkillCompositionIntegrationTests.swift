@@ -153,7 +153,16 @@ struct M6SkillCompositionIntegrationTests {
         let completePrompts = [
             "Hãy tạo file workspace/hello.txt với nội dung: Xin chào",
             "Please create a file workspace/report.md with content: status ok",
-            "Tạo một tệp workspace/empty.txt với nội dung:"
+            "Tạo một tệp workspace/empty.txt với nội dung:",
+            "Tạo một file workspace/one.txt với nội dung: one",
+            "Tạo một tệp workspace/two.txt với nội dung: two",
+            "Create a file workspace/three.txt with content: three",
+            "Write a file workspace/four.txt with content: four",
+            "Make a file workspace/five.txt with content: five",
+            "Please create a file workspace/six.txt with content: six",
+            "Kindly make file workspace/seven.txt with content: seven",
+            "Vui lòng tạo file workspace/eight.txt với nội dung: eight",
+            "Giúp mình tạo tệp workspace/nine.txt với nội dung: nine"
         ]
         for prompt in completePrompts {
             #expect(root.preflightChatRequest(goalStatement: prompt) == .continueRouting)
@@ -640,6 +649,40 @@ struct M6SkillCompositionIntegrationTests {
         let fileURL = directory.appendingPathComponent("workspace/team-polite.md")
         #expect(FileManager.default.fileExists(atPath: fileURL.path))
         #expect(try String(contentsOf: fileURL, encoding: .utf8) == content)
+    }
+
+    @Test("M8 workspace Skill executes supported English create-file grammar")
+    func m8WorkspaceSkillExecutesSupportedEnglishCreateFileGrammar() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        let cases: [(prompt: String, path: String, content: String)] = [
+            ("Create a file workspace/english-create.md with content: create variant",
+             "workspace/english-create.md", "create variant"),
+            ("Write a file workspace/english-write.md with content: write variant",
+             "workspace/english-write.md", "write variant"),
+            ("Make a file workspace/english-make.md with content: make variant",
+             "workspace/english-make.md", "make variant"),
+            ("Please create a file workspace/english-please.md with content: polite create",
+             "workspace/english-please.md", "polite create"),
+            ("Kindly make file workspace/english-kindly.md with content: polite make",
+             "workspace/english-kindly.md", "polite make")
+        ]
+
+        for item in cases {
+            let result = try await root.runChatSkillIfMatched(goalStatement: item.prompt)
+            #expect(result?.skillID.rawValue == "workspace.create-file")
+            #expect(result?.verified == true)
+            let fileURL = directory.appendingPathComponent(item.path)
+            #expect(FileManager.default.fileExists(atPath: fileURL.path))
+            #expect(try String(contentsOf: fileURL, encoding: .utf8) == item.content)
+        }
     }
 
     @Test("M8 workspace Skill accepts polite Vietnamese create-file commands")
