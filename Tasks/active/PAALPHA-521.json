@@ -1,0 +1,35 @@
+{
+  "id": "PAALPHA-521",
+  "title": "Exercise Settings capability toggles through M8 workspace Skill execution",
+  "status": "in_progress",
+  "goal": "Verify that the M8 Chat-to-Skill runtime denies workspace writes while the Settings write toggle is off and permits exact verified writes after the toggle is enabled.",
+  "context": "Issue #347 requires capability toggles to be enforced by the runtime path, not only by isolated policy unit tests. This regression uses an isolated UserDefaults suite and the actual M8 workspace.create-file Skill/Module path.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-521.json",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not modify production authorization behavior as part of this test-only task.",
+    "Do not weaken workspace path validation, protected-file checks, secret detection, size limits, read-back verification, cancellation, or approval gates.",
+    "Do not use an unconditional AllowPolicy for this scenario; exercise SettingsBackedPolicyEvaluator.",
+    "Do not claim physical-device acceptance from CI results."
+  ],
+  "acceptance_criteria": [
+    "With read and execute enabled but write disabled, a real M8 workspace create-file request is denied and no file is created.",
+    "After enabling write on the same SettingsBackedPolicyEvaluator, the next supported request writes the exact expected content and returns verified success.",
+    "The test uses isolated UserDefaults and cleans up its temporary workspace.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA checks pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-521.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-521.json --base main",
+    "swift test --disable-sandbox",
+    "Inspect Agent Task Contract, M3, and Apple Native Build & Unsigned IPA workflow results.",
+    "Physical iPhone acceptance remains tracked separately under Issue #347."
+  ],
+  "dependencies": [
+    "PAALPHA-518",
+    "Issue #347"
+  ],
+  "recovery": "If the policy denial is surfaced through a wrapper error, assert the concrete denial without loosening the policy. If execution cannot proceed after enabling write, diagnose the missing required capability at the Skill or Module boundary."
+}
