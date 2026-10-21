@@ -1,0 +1,36 @@
+{
+  "id": "PAALPHA-522",
+  "title": "Clarify incomplete workspace search requests before Skill execution",
+  "status": "in_progress",
+  "goal": "Replace malformed-Skill errors for recognized but incomplete workspace search requests with deterministic clarification before any Skill or Module execution.",
+  "context": "Issue #347 requires incomplete or ambiguous Chat requests to fail safely with a clear user-facing state. Current M8 integration coverage confirms empty search prompts such as 'Search workspace' and 'Hãy tìm kiếm trong workspace' reach Skill parsing and throw malformedSkill rather than being classified during preflight.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-522.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not broaden the supported workspace search grammar beyond recognizing incomplete requests for clarification.",
+    "Do not invoke a provider, Skill, or Module for an incomplete search request.",
+    "Do not weaken Agent scope, policy, approval, schema validation, workspace path/protected-file checks, secret scanning, size limits, read-back verification, or cancellation.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "Recognized empty Vietnamese and English workspace search prompts return needsClarification during deterministic preflight.",
+    "Calling the M8 chat Skill route with those incomplete prompts returns nil and does not emit a Module invocation.",
+    "Complete workspace search prompts continue to execute and verify matching results.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-522.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-522.json --base main",
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PAALPHA-521"
+  ],
+  "recovery": "If any complete search request is classified as incomplete, narrow the exact normalized prompt list and preserve the existing verified search path."
+}
