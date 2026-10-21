@@ -631,6 +631,50 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
+    @Test("M8 workspace Skill enforces Settings-backed write capability at runtime")
+    func m8WorkspaceSkillEnforcesSettingsBackedWriteCapability() async throws {
+        let suiteName = "PersonalAgentM8PolicyTests.\\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(true, forKey: "permissions.capability.read")
+        defaults.set(false, forKey: "permissions.capability.write")
+        defaults.set(true, forKey: "permissions.capability.execute")
+        defaults.set(false, forKey: "permissions.capability.network")
+
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: SettingsBackedPolicyEvaluator(defaults: defaults),
+            workspaceToolsEnabled: true
+        )
+
+        var denied = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Create a file workspace/denied.txt with content: must not write"
+            )
+        } catch SkillExecutionError.policyDenied(_) {
+            denied = true
+        }
+        #expect(denied)
+        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("workspace/denied.txt").path))
+
+        defaults.set(true, forKey: "permissions.capability.write")
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Create a file workspace/allowed.txt with content: settings allowed"
+        )
+        #expect(result?.skillID.rawValue == "workspace.create-file")
+        #expect(result?.verified == true)
+        #expect(
+            try String(
+                contentsOf: directory.appendingPathComponent("workspace/allowed.txt"),
+                encoding: .utf8
+            ) == "settings allowed"
+        )
+    }
+
     @Test("M8 Agent team normalizes polite Vietnamese create-file commands")
     func m8AgentTeamCreatesFileFromPoliteRequest() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
