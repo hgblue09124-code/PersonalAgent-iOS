@@ -148,6 +148,31 @@ final class SkillRuntimeTests: XCTestCase {
         XCTAssertEqual(create.rawValue, "workspace.create-file")
     }
 
+    func testChatInputTextNormalizesConversationalEnglishAndVietnameseLeadIns() {
+        let commands: [(input: String, expected: String)] = [
+            ("Could you create a file workspace/one.txt with content: one",
+             "create a file workspace/one.txt with content: one"),
+            ("Can you write a file workspace/two.txt with content: two",
+             "write a file workspace/two.txt with content: two"),
+            ("Would you make a file workspace/three.txt with content: three",
+             "make a file workspace/three.txt with content: three"),
+            ("Help me create a file workspace/four.txt with content: four",
+             "create a file workspace/four.txt with content: four"),
+            ("I need you to create a file workspace/five.txt with content: five",
+             "create a file workspace/five.txt with content: five"),
+            ("Giúp anh tạo file workspace/six.txt với nội dung: six",
+             "tạo file workspace/six.txt với nội dung: six")
+        ]
+
+        for command in commands {
+            XCTAssertEqual(
+                SkillRuntime.chatInputText(from: command.input),
+                command.expected,
+                "Conversational lead-in was not normalized: \\(command.input)"
+            )
+        }
+    }
+
     func testChatInputTextStillExtractsOrdinaryColonDelimitedPayload() {
         XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text"), "actual text")
         XCTAssertEqual(SkillRuntime.chatInputText(from: "Summarize this: actual text  "), "actual text  ")
