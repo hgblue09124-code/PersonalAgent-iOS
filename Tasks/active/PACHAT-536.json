@@ -1,0 +1,35 @@
+{
+  "id": "PACHAT-536",
+  "title": "Add one-tap quick-start prompts to the empty Chat screen",
+  "status": "in_progress",
+  "goal": "Make a new conversation immediately useful by showing four common task starters that populate the composer for review before sending.",
+  "context": "The empty Chat screen currently offers only a generic introduction and a link to the larger prompt library. Quick starts reduce time-to-first-use while keeping the user in control of the actual request.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-536.json",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not auto-submit a selected prompt.",
+    "Do not change Agent routing, execution, policy, or provider behavior.",
+    "Do not remove or replace the existing prompt library, cancellation, streaming, or conversation controls.",
+    "Do not claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "An empty conversation displays four quick-start actions: explain, plan, write, and investigate an error.",
+    "Selecting a quick start fills the existing composer and focuses it without submitting.",
+    "The quick starts are not shown over an existing conversation history.",
+    "The existing prompt library button remains available.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-536.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-536.json --base main",
+    "Review SwiftUI state flow and accessibility labels/hints.",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Verify quick-start selection on a physical iPhone before claiming device acceptance."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "If layout becomes cramped on smaller devices, keep the actions compact or use a horizontal scrolling row without changing the fill-only behavior. Revert the UI-only change if it breaks existing Chat composition."
+}
