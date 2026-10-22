@@ -77,9 +77,32 @@ struct SkillPolicyEnforcementTests {
         #expect(decision.allowed)
     }
 
-    @Test("denied policy fails closed")
+    private actor CountingSkillExecutor: SkillExecutor {
+        private var executeCalls = 0
+        private var verifyCalls = 0
+
+        func execute(manifest: SkillManifest, inputJSON: String) async throws -> String {
+            executeCalls += 1
+            return #"{"text":"hello"}"#
+        }
+
+        func verify(manifest: SkillManifest, outputJSON: String) async throws -> Bool {
+            verifyCalls += 1
+            return true
+        }
+
+        func callCounts() -> (execute: Int, verify: Int) {
+            (executeCalls, verifyCalls)
+        }
+    }
+
+    @Test("denied policy fails closed before executor code is invoked")
     func deniedPolicyFailsClosed() async {
-        let runtime = SkillRuntime()
+        let executor = CountingSkillExecutor()
+        let registry = SkillExecutorRegistry(executors: [
+            SkillRuntime.normalizationManifest.id.rawValue: executor
+        ])
+        let runtime = SkillRuntime(executors: registry)
         await #expect(throws: SkillRuntimeError.policyDenied("skill execution denied by test policy")) {
             try await runtime.execute(
                 id: SkillRuntime.normalizationManifest.id,
@@ -87,11 +110,18 @@ struct SkillPolicyEnforcementTests {
                 policy: DenyPolicy()
             )
         }
+        let counts = await executor.callCounts()
+        #expect(counts.execute == 0)
+        #expect(counts.verify == 0)
     }
 
-    @Test("approval requirement fails closed at skill boundary")
+    @Test("approval requirement fails closed before executor code is invoked")
     func approvalPolicyFailsClosed() async {
-        let runtime = SkillRuntime()
+        let executor = CountingSkillExecutor()
+        let registry = SkillExecutorRegistry(executors: [
+            SkillRuntime.normalizationManifest.id.rawValue: executor
+        ])
+        let runtime = SkillRuntime(executors: registry)
         await #expect(throws: SkillRuntimeError.policyRequiresApproval("skill execution requires approval")) {
             try await runtime.execute(
                 id: SkillRuntime.normalizationManifest.id,
@@ -99,5 +129,8 @@ struct SkillPolicyEnforcementTests {
                 policy: ApprovalPolicy()
             )
         }
+        let counts = await executor.callCounts()
+        #expect(counts.execute == 0)
+        #expect(counts.verify == 0)
     }
 }
