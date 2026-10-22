@@ -1,0 +1,37 @@
+{
+  "id": "PAALPHA-524",
+  "title": "Prove Settings-denied workspace writes never invoke the write module",
+  "status": "in_progress",
+  "goal": "Strengthen the canonical M8 regression so a Settings-backed write denial proves the workspace write module was never invoked and no successful Skill observation was emitted.",
+  "context": "Issue #347 requires production Settings capability toggles to be honored at the actual Module boundary. Existing integration coverage asserts denial and absence of a file, but does not explicitly assert the write capability was not invoked or reported as successful.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-524.json",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production execution behavior or weaken policy enforcement.",
+    "Do not change workspace path restrictions, approval handling, schema validation, cancellation, or verification.",
+    "Do not treat absence of a file alone as proof that no capability execution occurred.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "With the Settings-backed write capability disabled, the canonical chat Skill call is denied.",
+    "The denied request does not emit a moduleInvoked event for tool.workspace.write.",
+    "The denied request does not emit a successful/verified observation for workspace.create-file.",
+    "No denied target file is created.",
+    "After enabling write capability, the existing positive path still writes exact content and returns verified success.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-524.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-524.json --base main",
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "swift test --disable-sandbox",
+    "Confirm all three required PR workflows pass."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PAALPHA-521"
+  ],
+  "recovery": "If contract validation or any required CI gate fails, repair only within the declared allowed_paths; otherwise revert this single logical task and retain the failure evidence. Do not bypass policy checks or claim physical-device acceptance."
+}
