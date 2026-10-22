@@ -1,0 +1,37 @@
+{
+  "id": "PAALPHA-525",
+  "title": "Prove disabled workspace tools never invoke workspace modules",
+  "status": "in_progress",
+  "goal": "Strengthen M8 integration coverage so globally disabled workspace tools cannot invoke read, search, or write modules or emit successful workspace Skill observations.",
+  "context": "Issue #347 requires capability boundaries to fail closed. Existing coverage checks that chat Skill/team calls return nil and that no blocked file is created, but it does not assert that every relevant workspace module was not invoked under the global workspaceToolsEnabled=false setting.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-525.json",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production runtime behavior or grant capabilities.",
+    "Do not weaken Settings policy, Agent scope, approval, schema validation, cancellation, workspace path/protected-file checks, secret scanning, size limits, or verification.",
+    "Do not treat absence of a file alone as proof that no capability execution occurred.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "With workspaceToolsEnabled=false, chat create/search/read and team search/read remain unavailable.",
+    "No moduleInvoked event occurs for tool.workspace.write, tool.workspace.search, or tool.workspace.read.",
+    "No successful Skill observation is emitted for workspace.create-file, workspace.search, or workspace.read-file.",
+    "No denied target file is created.",
+    "Existing enabled-workspace positive-path tests remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-525.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-525.json --base main",
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #533"
+  ],
+  "recovery": "If contract validation or any required CI gate fails, repair only within the declared allowed_paths; otherwise revert this single logical task and retain failure evidence. Do not bypass policy checks or claim physical-device acceptance."
+}
