@@ -123,7 +123,15 @@ struct ChatScreen: View {
     }
 
     private var messages: some View {
-        ChatMessagesPanel(history: session.chatHistory, streamPresentation: session.chatStreamPresentation, onOpenPromptLibrary: { showPromptLibrary = true })
+        ChatMessagesPanel(
+            history: session.chatHistory,
+            streamPresentation: session.chatStreamPresentation,
+            onOpenPromptLibrary: { showPromptLibrary = true },
+            onSelectPrompt: { prompt in
+                message = prompt
+                focused = true
+            }
+        )
     }
 
     private var composer: some View {
@@ -228,9 +236,24 @@ private struct ChatComposerPanel: View {
 }
 
 private struct ChatMessagesPanel: View {
+    private struct QuickStart: Identifiable {
+        let title: String
+        let symbol: String
+        let prompt: String
+        var id: String { title }
+    }
+
+    private static let quickStarts: [QuickStart] = [
+        .init(title: "Giải thích", symbol: "lightbulb", prompt: "Giải thích [chủ đề] bằng ngôn ngữ dễ hiểu, ví dụ thực tế và những hiểu lầm thường gặp."),
+        .init(title: "Lập kế hoạch", symbol: "calendar", prompt: "Giúp tôi lập kế hoạch cho [mục tiêu]. Chia thành các bước, ưu tiên, thời gian dự kiến và tiêu chí hoàn thành."),
+        .init(title: "Viết nội dung", symbol: "pencil.line", prompt: "Giúp tôi viết [loại nội dung] về [chủ đề] cho [đối tượng]. Hỏi lại nếu thiếu thông tin quan trọng."),
+        .init(title: "Điều tra lỗi", symbol: "wrench.and.screwdriver", prompt: "Giúp tôi điều tra lỗi sau: [mô tả lỗi]. Đề xuất cách tái hiện, giả thuyết, bằng chứng cần thu thập và bản sửa nhỏ nhất.")
+    ]
+
     let history: [ChatTurn]
     @ObservedObject var streamPresentation: ChatStreamPresentation
     let onOpenPromptLibrary: () -> Void
+    let onSelectPrompt: (String) -> Void
 
     var body: some View {
         GlassPanel {
@@ -239,13 +262,29 @@ private struct ChatMessagesPanel: View {
                     PremiumIconTile(systemImage: "sparkles")
                     Text("Start a conversation").font(.headline)
                     Text("Ask the Agent to explain, plan, create or act.").font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                        ForEach(Self.quickStarts) { item in
+                            Button {
+                                onSelectPrompt(item.prompt)
+                            } label: {
+                                Label(item.title, systemImage: item.symbol)
+                                    .font(.subheadline.weight(.medium))
+                                    .frame(maxWidth: .infinity, minHeight: 38, alignment: .leading)
+                            }
+                            .buttonStyle(.bordered)
+                            .accessibilityHint("Adds this prompt to the composer without sending it.")
+                        }
+                    }
+                    .padding(.top, 2)
+
                     Button(action: onOpenPromptLibrary) {
                         Label("Khám phá thư viện tác vụ", systemImage: "books.vertical")
                             .font(.subheadline.weight(.semibold))
                     }
                     .buttonStyle(.borderedProminent)
                     .padding(.top, 2)
-                }.frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity).padding(.vertical, 36)
+                }.frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity).padding(.vertical, 24)
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
