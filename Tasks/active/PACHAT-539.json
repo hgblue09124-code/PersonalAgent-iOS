@@ -1,0 +1,35 @@
+{
+  "id": "PACHAT-539",
+  "title": "Add in-conversation message search to Chat",
+  "status": "in_progress",
+  "goal": "Let users find a message in the currently selected conversation by searching its text, without changing stored history.",
+  "context": "Long conversations become difficult to navigate. Inline search makes prior answers and user prompts discoverable.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-539.json",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not modify conversation persistence, ordering, or message contents.",
+    "Do not search conversations other than the currently selected one.",
+    "Do not change send, streaming, cancellation, or prompt execution behavior.",
+    "Do not claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Chat menu exposes Search this conversation and disables it when history is empty.",
+    "Search filters current conversation messages by case-insensitive substring.",
+    "UI displays matching count, clear-search, and no-match state.",
+    "Closing search clears query and restores all messages.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-539.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-539.json --base main",
+    "Confirm required workflows pass on final PR head.",
+    "Verify search, clear, no-match, and close behavior on a physical iPhone."
+  ],
+  "dependencies": [
+    "PACHAT-536",
+    "PACHAT-537"
+  ],
+  "recovery": "Keep search compact if vertical space becomes constrained; preserve matching count and no-match feedback."
+}
