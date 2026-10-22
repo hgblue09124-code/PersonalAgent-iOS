@@ -1,0 +1,36 @@
+{
+  "id": "PAALPHA-526",
+  "title": "Prove ordinary chat does not invoke tools",
+  "status": "in_progress",
+  "goal": "Add canonical M8 integration coverage proving ordinary conversational requests that do not express a supported Skill or tool intent do not invoke modules or emit Skill observations.",
+  "context": "Issue #347 explicitly requires ordinary chat to remain separate from tool execution. Workspace-specific regressions cover many denied and incomplete requests, but a direct positive regression for ordinary non-tool chat should verify the canonical chat Skill and team selection entry points remain inert.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-526.json",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production routing or make ordinary chat execute a Skill.",
+    "Do not weaken policy, Agent scope, approval, schema validation, cancellation, workspace restrictions, or verification.",
+    "Do not treat a nil return alone as proof that no capability code ran; assert event evidence.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "Ordinary conversational requests return no matched Skill/team result from the canonical M8 chat entry points.",
+    "No moduleInvoked or moduleCompleted event is emitted for those requests.",
+    "No observationProduced Skill success/failure event is emitted for those requests.",
+    "Existing complete, incomplete, and workspace execution regressions remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-526.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-526.json --base main",
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #534"
+  ],
+  "recovery": "If a test reveals ordinary chat invokes a tool, stop and investigate the routing boundary before changing behavior. If a required CI gate fails, repair only within allowed_paths or revert this logical task; never bypass policy or claim device acceptance."
+}
