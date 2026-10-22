@@ -32,5 +32,6 @@
   "dependencies": [
     "Issue #347",
     "PAALPHA-521"
-  ]
+  ],
+  "recovery": "If contract validation or any required CI gate fails, repair only within the declared allowed_paths; otherwise revert this single logical task and retain the failure evidence. Do not bypass policy checks or claim physical-device acceptance."
 }
