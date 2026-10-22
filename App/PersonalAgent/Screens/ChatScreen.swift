@@ -10,6 +10,8 @@ struct ChatScreen: View {
     @State private var renameText = ""
     @State private var showRename = false
     @State private var showPromptLibrary = false
+    @State private var showConversationSearch = false
+    @State private var conversationSearchText = ""
     @FocusState private var focused: Bool
 
     private var currentTitle: String { session.conversations.first(where: { $0.id == session.currentConversationID })?.title ?? "Conversation" }
@@ -23,6 +25,7 @@ struct ChatScreen: View {
     var body: some View {
         ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false) {
             conversationHeader
+            if showConversationSearch { conversationSearchBar }
             agentPicker
             messages
             if let error = session.lastError, !error.isEmpty {
@@ -60,6 +63,10 @@ struct ChatScreen: View {
                 Spacer()
                 Menu {
                     Button { session.newConversation() } label: { Label("New conversation", systemImage: "plus") }
+                    Button { showConversationSearch = true } label: {
+                        Label("Search this conversation", systemImage: "magnifyingglass")
+                    }
+                    .disabled(session.chatHistory.isEmpty)
                     Menu("Response language") {
                         Button("Automatic" + (session.chatResponseLanguage == "auto" ? " ✓" : "")) { session.setChatResponseLanguage("auto") }
                         Button("Tiếng Việt" + (session.chatResponseLanguage == "vi" ? " ✓" : "")) { session.setChatResponseLanguage("vi") }
@@ -124,8 +131,12 @@ struct ChatScreen: View {
     }
 
     private var messages: some View {
-        ChatMessagesPanel(
-            history: session.chatHistory,
+        let query = conversationSearchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let visibleHistory = query.isEmpty ? session.chatHistory : session.chatHistory.filter { $0.content.localizedCaseInsensitiveContains(query) }
+        return ChatMessagesPanel(
+            history: visibleHistory,
+            hasConversationHistory: !session.chatHistory.isEmpty,
+            isSearchActive: !query.isEmpty,
             streamPresentation: session.chatStreamPresentation,
             onOpenPromptLibrary: { showPromptLibrary = true },
             onSelectPrompt: { prompt in
@@ -133,6 +144,33 @@ struct ChatScreen: View {
                 focused = true
             }
         )
+    }
+
+    private var conversationSearchBar: some View {
+        GlassPanel {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                TextField("Search messages…", text: $conversationSearchText)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                if !conversationSearchText.isEmpty {
+                    Button { conversationSearchText = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("Clear conversation search")
+                }
+                Button("Done") {
+                    showConversationSearch = false
+                    conversationSearchText = ""
+                }
+                .font(.subheadline.weight(.semibold))
+            }
+            if !conversationSearchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                let query = conversationSearchText.trimmingCharacters(in: .whitespacesAndNewlines)
+                let count = session.chatHistory.filter { $0.content.localizedCaseInsensitiveContains(query) }.count
+                Text("\(count) matching messages").font(.caption).foregroundStyle(.secondary)
+            }
+        }
     }
 
     private var composer: some View {
@@ -252,13 +290,19 @@ private struct ChatMessagesPanel: View {
     ]
 
     let history: [ChatTurn]
+    let hasConversationHistory: Bool
+    let isSearchActive: Bool
     @ObservedObject var streamPresentation: ChatStreamPresentation
     let onOpenPromptLibrary: () -> Void
     let onSelectPrompt: (String) -> Void
 
     var body: some View {
         GlassPanel {
-            if history.isEmpty {
+            if history.isEmpty && hasConversationHistory && isSearchActive {
+                ContentUnavailableView("No matching messages", systemImage: "magnifyingglass",
+                    description: Text("Try a different keyword or clear the search."))
+                    .frame(maxWidth: .infinity, minHeight: 120, maxHeight: .infinity)
+            } else if history.isEmpty {
                 VStack(spacing: 12) {
                     PremiumIconTile(systemImage: "sparkles")
                     Text("Start a conversation").font(.headline)
