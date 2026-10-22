@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ChatScreen: View {
     @ObservedObject var session: KernelSession
@@ -461,6 +462,8 @@ private struct StreamingChatBubble: View {
 
 private struct ChatBubble: View {
     let turn: ChatTurn
+    @State private var didCopy = false
+
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             if turn.role == .assistant {
@@ -481,11 +484,23 @@ private struct ChatBubble: View {
                 .textSelection(.enabled)
                 .frame(maxWidth: 310, alignment: .leading)
             if turn.role == .assistant {
-                ShareLink(item: turn.content) {
-                    Label("Share answer", systemImage: "square.and.arrow.up")
-                        .font(.caption)
+                HStack(spacing: 14) {
+                    Button {
+                        UIPasteboard.general.string = turn.content
+                        didCopy = true
+                    } label: {
+                        Label(didCopy ? "Copied" : "Copy answer", systemImage: didCopy ? "checkmark" : "doc.on.doc")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Copies this answer to the clipboard.")
+
+                    ShareLink(item: turn.content) {
+                        Label("Share answer", systemImage: "square.and.arrow.up")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 11)
