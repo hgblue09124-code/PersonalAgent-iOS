@@ -1,0 +1,33 @@
+{
+  "id": "PACHAT-538",
+  "title": "Add search and empty-state feedback to installed local models",
+  "status": "in_progress",
+  "goal": "Help users quickly find an imported GGUF model by name when multiple models are installed.",
+  "context": "The Models screen currently lists every installed model without a filter. A small local search makes model management easier and should not change model loading or selection behavior.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-538.json",
+    "App/PersonalAgent/Screens/ModelsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change model import, deletion, loading, unloading, or selection semantics.",
+    "Do not add network access or persist search terms.",
+    "Do not modify provider routing or runtime behavior.",
+    "Do not claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Installed models can be filtered by case-insensitive substring of model name.",
+    "A clear-search control appears only when the query is non-empty.",
+    "The UI shows filtered count versus total installed model count.",
+    "A useful empty state appears when the query matches no installed model.",
+    "Existing Use, active-model indicator, context-menu Delete, and Import GGUF remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-538.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-538.json --base main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Verify search, clear, and no-results state on a physical iPhone before claiming device acceptance."
+  ],
+  "dependencies": ["PACHAT-536"],
+  "recovery": "If the model list layout regresses on smaller screens, remove only the count label or compact the search field; preserve the existing model actions."
+}

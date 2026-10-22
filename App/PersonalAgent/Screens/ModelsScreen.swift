@@ -6,6 +6,7 @@ import PAComposition
 struct ModelsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImporting = false
+    @State private var modelSearch = ""
     @State private var errorMessage: String?
 
     var body: some View {
@@ -65,8 +66,33 @@ struct ModelsScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                        TextField("Search installed models…", text: $modelSearch)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        if !modelSearch.isEmpty {
+                            Button {
+                                modelSearch = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                            .accessibilityLabel("Clear model search")
+                        }
+                    }
+                    .padding(10)
+                    .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                    Text("\(filteredInstalledModels.count) of \(session.installedModels.count) models")
+                        .font(.caption).foregroundStyle(.secondary)
+                    if filteredInstalledModels.isEmpty {
+                        ContentUnavailableView(
+                            "No matching models",
+                            systemImage: "magnifyingglass",
+                            description: Text("Try a different model name.")
+                        )
+                    } else {
                     LazyVStack(alignment: .leading, spacing: 8) {
-                    ForEach(session.installedModels, id: \.id) { model in
+                    ForEach(filteredInstalledModels, id: \.id) { model in
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(model.name).font(.subheadline.weight(.semibold))
@@ -93,6 +119,7 @@ struct ModelsScreen: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
+                    }
                     }
                     }
                 }
@@ -196,6 +223,12 @@ struct ModelsScreen: View {
                 Text(LocalizedStringKey(detail)).font(.caption).foregroundStyle(.secondary)
             }
         }
+    }
+
+    private var filteredInstalledModels: [LocalModelDescriptor] {
+        let query = modelSearch.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return session.installedModels }
+        return session.installedModels.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
 
     private var isTransitioning: Bool {
