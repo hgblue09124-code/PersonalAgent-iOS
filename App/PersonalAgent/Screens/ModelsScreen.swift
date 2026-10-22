@@ -225,7 +225,7 @@ struct ModelsScreen: View {
         }
     }
 
-    private var filteredInstalledModels: [InstalledModelDescriptor] {
+    private var filteredInstalledModels: [LocalModelDescriptor] {
         let query = modelSearch.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return session.installedModels }
         return session.installedModels.filter { $0.name.localizedCaseInsensitiveContains(query) }
