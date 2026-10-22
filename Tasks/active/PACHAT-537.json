@@ -1,0 +1,30 @@
+{
+  "id": "PACHAT-537",
+  "title": "Add a copy-answer action to assistant chat messages",
+  "status": "in_progress",
+  "goal": "Let users copy a complete assistant response to the clipboard directly from the message bubble, alongside the existing share action.",
+  "context": "Assistant responses are selectable text and shareable, but there is no explicit copy affordance. A copy button makes it faster to reuse answers in notes, code editors, and other apps.",
+  "allowed_paths": ["Tasks/active/PACHAT-537.json", "App/PersonalAgent/Screens/ChatScreen.swift"],
+  "forbidden_changes": [
+    "Do not change message persistence, generation, or provider behavior.",
+    "Do not add clipboard access for user messages.",
+    "Do not remove the existing Share answer action or selectable text.",
+    "Do not claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Assistant message bubbles expose a Copy answer action.",
+    "Tapping Copy answer writes that message's exact content to the iOS pasteboard.",
+    "The button visibly changes to Copied after activation.",
+    "User message bubbles do not show the copy-answer action.",
+    "Existing Share answer and text selection remain available.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-537.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-537.json --base main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Verify pasteboard behavior on a physical iPhone before claiming device acceptance."
+  ],
+  "dependencies": ["PACHAT-536"],
+  "recovery": "If pasteboard behavior is unavailable in a test environment, keep the copy action isolated to the assistant bubble and retain text selection and Share answer as fallbacks."
+}
