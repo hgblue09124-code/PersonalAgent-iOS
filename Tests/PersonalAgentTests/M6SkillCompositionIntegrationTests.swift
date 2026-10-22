@@ -631,6 +631,57 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
+    @Test("M8 Settings-denied workspace reads never invoke the read module")
+    func m8WorkspaceSkillEnforcesSettingsBackedReadCapability() async throws {
+        let suiteName = "PersonalAgentM8ReadPolicyTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        defaults.set(false, forKey: "permissions.capability.read")
+        defaults.set(true, forKey: "permissions.capability.write")
+        defaults.set(true, forKey: "permissions.capability.execute")
+        defaults.set(false, forKey: "permissions.capability.network")
+
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let workspace = directory.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        try "private-read-sentinel".write(
+            to: workspace.appendingPathComponent("denied.txt"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: SettingsBackedPolicyEvaluator(defaults: defaults),
+            workspaceToolsEnabled: true
+        )
+
+        var denied = false
+        do {
+            _ = try await root.runChatSkillIfMatched(
+                goalStatement: "Read file workspace/denied.txt"
+            )
+        } catch SkillExecutionError.policyDenied(_) {
+            denied = true
+        }
+        #expect(denied)
+
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.read"
+        })
+        #expect(!events.contains {
+            $0.kind == .observationProduced
+                && $0.payload["skillID"] == "workspace.read-file"
+                && ($0.payload["succeeded"] == "true" || $0.payload["verified"] == "true")
+        })
+        #expect(try String(contentsOf: workspace.appendingPathComponent("denied.txt"), encoding: .utf8) == "private-read-sentinel")
+    }
+
     @Test("M8 workspace Skill enforces Settings-backed write capability at runtime")
     func m8WorkspaceSkillEnforcesSettingsBackedWriteCapability() async throws {
         let suiteName = "PersonalAgentM8PolicyTests.\(UUID().uuidString)"
