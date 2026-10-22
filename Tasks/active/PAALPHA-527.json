@@ -1,0 +1,36 @@
+{
+  "id": "PAALPHA-527",
+  "title": "Prove Settings-denied workspace reads never invoke the read module",
+  "status": "in_progress",
+  "goal": "Add a canonical M8 integration regression proving the Settings-backed read capability is enforced before the workspace read module runs.",
+  "context": "Issue #347 requires Settings capability toggles to be honored by the production runtime. Write denial and global workspace-tools denial already have no-invocation coverage; the equivalent read-capability boundary needs a direct regression.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-527.json",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production execution behavior or grant capabilities.",
+    "Do not weaken policy, Agent scope, approval, schema validation, cancellation, workspace path/protected-file checks, secret scanning, size limits, or verification.",
+    "Do not treat an unchanged file alone as proof that no read capability execution occurred.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "With the Settings-backed read capability disabled, the canonical M8 read request is denied.",
+    "The denied request emits no moduleInvoked event for tool.workspace.read.",
+    "The denied request emits no successful or verified observation for workspace.read-file.",
+    "The fixture remains intact and existing positive read-path regressions remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-527.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-527.json --base main",
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #535"
+  ],
+  "recovery": "If the regression exposes a production bypass, stop and investigate the Module policy boundary rather than weakening the assertion. If a required gate fails, repair only within allowed_paths or revert this logical task; never bypass policy or claim device acceptance."
+}
