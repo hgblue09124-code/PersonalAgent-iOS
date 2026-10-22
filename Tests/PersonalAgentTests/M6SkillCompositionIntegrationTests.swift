@@ -1037,10 +1037,18 @@ struct M6SkillCompositionIntegrationTests {
 
         let events = try await eventLog.allEvents()
         #expect(!events.contains {
-            $0.kind == .moduleInvoked && $0.payload["moduleID"] == "tool.workspace.read"
+            $0.kind == .moduleInvoked && [
+                "tool.workspace.write",
+                "tool.workspace.search",
+                "tool.workspace.read"
+            ].contains($0.payload["moduleID"] ?? "")
         })
         #expect(!events.contains {
-            $0.kind == .observationProduced && $0.payload["skillID"] == "workspace.search"
+            $0.kind == .observationProduced && [
+                "workspace.create-file",
+                "workspace.search",
+                "workspace.read-file"
+            ].contains($0.payload["skillID"] ?? "")
         })
     }
 
