@@ -1,0 +1,36 @@
+{
+  "id": "PAALPHA-529",
+  "title": "Prove policy denial and approval stop before executor invocation",
+  "status": "in_progress",
+  "goal": "Strengthen SkillRuntime policy tests with an instrumented executor so deny/approval outcomes prove capability code is never invoked.",
+  "context": "Current policy tests assert the thrown error but do not directly assert that the executor's execute and verify methods remain untouched. The runtime checks policy before resolving and invoking the executor; pin that security boundary with an observable regression.",
+  "allowed_paths": [
+    "Tasks/active/PAALPHA-529.json",
+    "Tests/PersonalAgentTests/SkillPolicyEnforcementTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production runtime or policy behavior.",
+    "Do not weaken fail-closed policy, approval requirements, schema validation, cancellation, workspace boundaries, secret scanning, or verification.",
+    "Do not replace the instrumented invocation assertions with error-only assertions.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "A denied policy still throws the exact policyDenied reason.",
+    "An approval-required policy still throws the exact policyRequiresApproval reason.",
+    "In both cases, instrumented executor execute and verify call counts remain zero.",
+    "Allowed execution behavior and existing tests remain unchanged.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAALPHA-529.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAALPHA-529.json --base main",
+    "swift test --disable-sandbox --filter SkillPolicyEnforcementTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #536"
+  ],
+  "recovery": "If the test shows executor invocation before policy approval, stop and fix the runtime boundary rather than weakening the test. If a required gate fails, repair only within allowed_paths or revert this logical task; never bypass policy or claim device acceptance."
+}
