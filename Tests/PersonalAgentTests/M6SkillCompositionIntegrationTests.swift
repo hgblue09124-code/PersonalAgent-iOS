@@ -1000,6 +1000,37 @@ struct M6SkillCompositionIntegrationTests {
         #expect(traversalReadRejected)
     }
 
+    @Test("M8 ordinary chat does not invoke tools or emit Skill observations")
+    func m8OrdinaryChatDoesNotInvokeTools() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let eventLog = InMemoryEventLog()
+        let root = try await M8CompositionRoot(
+            eventLog: eventLog,
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+
+        let skillResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Explain the difference between a list and a dictionary in Python."
+        )
+        let teamResult = try await root.runChatTeamIfMatched(
+            goalStatement: "Chào bạn, hôm nay thế nào?"
+        )
+        #expect(skillResult == nil)
+        #expect(teamResult == nil)
+
+        let events = try await eventLog.allEvents()
+        #expect(!events.contains {
+            $0.kind == .moduleInvoked || $0.kind == .moduleCompleted
+        })
+        #expect(!events.contains {
+            $0.kind == .observationProduced
+        })
+    }
+
     @Test("M8 chat does not expose workspace Skills when workspace tools are disabled")
     func m8WorkspaceSkillsRemainOutOfScopeWhenDisabled() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
