@@ -1,0 +1,35 @@
+{
+  "id": "PACHAT-540",
+  "title": "Search available Agent profiles",
+  "status": "in_progress",
+  "goal": "Help users find an installed Agent profile by name, description, identifier, or declared Skill.",
+  "context": "The Agents screen lists all available profiles. As the profile catalog grows, local search and a clear no-match state make selection faster without changing runtime behavior.",
+  "allowed_paths": [
+    "Tasks/active/PACHAT-540.json",
+    "App/PersonalAgent/Screens/AgentsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change Agent selection, team mode, runtime routing, permissions, or Skill execution semantics.",
+    "Do not persist the search query or add network access.",
+    "Do not modify Agent manifests or role blueprint definitions.",
+    "Do not claim physical-device acceptance without testing a real iPhone."
+  ],
+  "acceptance_criteria": [
+    "Available Agent profiles can be filtered by case-insensitive name, description, ID, or declared Skill ID.",
+    "A clear-search control appears only when the query is non-empty.",
+    "The UI shows filtered count versus total profiles.",
+    "No matching results and an empty Agent store have distinct explanatory states.",
+    "Selecting a filtered profile continues to use the existing selection behavior and remains disabled while a task is running.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-540.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PACHAT-540.json --base main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on final PR head.",
+    "Verify search, clear, no-match, and profile selection on a physical iPhone."
+  ],
+  "dependencies": [
+    "PACHAT-539"
+  ],
+  "recovery": "If the search field adds too much vertical height on small screens, compact the count row without removing filtering or empty-state feedback."
+}
