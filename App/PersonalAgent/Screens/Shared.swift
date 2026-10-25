@@ -21,11 +21,12 @@ enum AgentDesign {
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
-            Circle()
-                .fill(accent.opacity(0.055))
-                .frame(width: 280, height: 280)
-                .blur(radius: 70)
-                .offset(x: 150, y: -260)
+            RadialGradient(
+                colors: [accent.opacity(0.045), .clear],
+                center: .topTrailing,
+                startRadius: 4,
+                endRadius: 240
+            )
         }
         .ignoresSafeArea()
     }
@@ -138,7 +139,7 @@ struct GlassPanel<Content: View>: View {
                 RoundedRectangle(cornerRadius: AgentDesign.corner, style: .continuous)
                     .stroke(.primary.opacity(0.065), lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.045), radius: 20, y: 8)
+            .shadow(color: .black.opacity(0.035), radius: 10, y: 4)
     }
 }
 
