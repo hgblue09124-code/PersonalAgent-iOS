@@ -56,7 +56,7 @@ private struct PersonalAgentV2Shell: View {
     var body: some View {
         TabView {
             NavigationStack {
-                ChatScreen(session: session)
+                PersonalAgentMessagesScreen(session: session)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button { showWorkspace = true } label: {
@@ -84,6 +84,119 @@ private struct PersonalAgentV2Shell: View {
             .tabItem { Label("Settings", systemImage: "gearshape") }
         }
         .tint(AgentDesign.accent)
+    }
+}
+
+private struct PersonalAgentMessagesScreen: View {
+    @ObservedObject var session: KernelSession
+    @State private var searchText = ""
+    @State private var showNewConversation = false
+
+    private var visibleConversations: [ChatConversation] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return session.conversations
+            .sorted { $0.updatedAt > $1.updatedAt }
+            .filter { conversation in
+                query.isEmpty
+                    || conversation.title.localizedCaseInsensitiveContains(query)
+                    || conversation.turns.last?.content.localizedCaseInsensitiveContains(query) == true
+            }
+    }
+
+    var body: some View {
+        ScreenScaffold(title: "Messages", systemImage: "bubble.left.and.bubble.right") {
+            GlassPanel {
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                    TextField("Search conversations", text: $searchText)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    Button {
+                        session.newConversation()
+                        showNewConversation = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(AgentDesign.accent)
+                    }
+                    .accessibilityLabel("New conversation")
+                }
+            }
+
+            if visibleConversations.isEmpty {
+                GlassPanel {
+                    ContentUnavailableView(
+                        "No conversations",
+                        systemImage: "bubble.left.and.bubble.right",
+                        description: Text(searchText.isEmpty ? "Start a conversation with your Agent." : "Try another search.")
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 140)
+                    if searchText.isEmpty {
+                        Button {
+                            session.newConversation()
+                            showNewConversation = true
+                        } label: {
+                            Label("Start chatting", systemImage: "plus")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+            } else {
+                ForEach(visibleConversations) { conversation in
+                    NavigationLink {
+                        ChatScreen(session: session)
+                            .onAppear {
+                                session.selectConversation(id: conversation.id)
+                            }
+                    } label: {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(LinearGradient(
+                                        colors: [AgentDesign.accent, AgentDesign.accentDeep],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ))
+                                Image(systemName: "sparkles")
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(.white)
+                            }
+                            .frame(width: 52, height: 52)
+
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(conversation.title)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(1)
+                                Text(conversation.turns.last?.content ?? "Tap to start a conversation")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                                    .multilineTextAlignment(.leading)
+                            }
+
+                            Spacer(minLength: 4)
+                            Text(conversation.updatedAt, style: .relative)
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                                .lineLimit(1)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            Color(.secondarySystemGroupedBackground),
+                            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        )
+                        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .navigationDestination(isPresented: $showNewConversation) {
+            ChatScreen(session: session)
+        }
     }
 }
 

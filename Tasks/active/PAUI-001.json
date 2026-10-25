@@ -16,6 +16,7 @@
     "Do not add new project dependencies."
   ],
   "acceptance_criteria": [
+    "Messages opens an inbox of persisted conversations with search, recent activity, previews, and a new-conversation action.",
     "The existing UI remains the default when the UI V2 setting is false or unset.",
     "Settings provides a persistent UI V2 on/off toggle.",
     "UI V2 exposes Messages, Tasks, Profile, and Settings tabs using the existing shared session.",
