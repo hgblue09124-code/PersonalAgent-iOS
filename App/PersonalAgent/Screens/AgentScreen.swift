@@ -17,7 +17,8 @@ struct AgentScreen: View {
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color(red: 0.07, green: 0.11, blue: 0.34), Color(red: 0.025, green: 0.035, blue: 0.12)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea()
-            Circle().fill(AgentDesign.accent.opacity(0.22)).frame(width: 300).blur(radius: 90).offset(x: 130, y: -250)
+            RadialGradient(colors: [AgentDesign.accent.opacity(0.16), .clear], center: .topTrailing, startRadius: 8, endRadius: 260)
+                .allowsHitTesting(false)
             ScrollView {
                 VStack(spacing: 0) {
                     header
@@ -234,6 +235,7 @@ private struct AgentOrb: View {
     let isActive: Bool
     let isThinking: Bool
     @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var pulseScale: CGFloat {
         isThinking ? 1.04 : isActive ? 1.02 : 1.012
@@ -279,7 +281,6 @@ private struct AgentOrb: View {
                 Ellipse()
                     .fill(Color.white.opacity(isThinking ? 0.5 : 0.34))
                     .frame(width: diameter * 0.42, height: diameter * 0.2)
-                    .blur(radius: diameter * 0.035)
                     .offset(x: -diameter * 0.14, y: -diameter * 0.25)
 
                 Circle()
@@ -306,12 +307,23 @@ private struct AgentOrb: View {
         }
         .scaleEffect(pulse ? pulseScale : 1)
         .animation(
-            .easeInOut(duration: pulseDuration).repeatForever(autoreverses: true),
+            reduceMotion || (!isActive && !isThinking)
+                ? nil
+                : .easeInOut(duration: pulseDuration).repeatForever(autoreverses: true),
             value: pulse
         )
-        .animation(.easeInOut(duration: 0.3), value: isThinking)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: isThinking)
         .onAppear {
-            pulse = true
+            pulse = !reduceMotion && (isActive || isThinking)
+        }
+        .onChange(of: isActive) { _, active in
+            pulse = !reduceMotion && (active || isThinking)
+        }
+        .onChange(of: isThinking) { _, thinking in
+            pulse = !reduceMotion && (isActive || thinking)
+        }
+        .onChange(of: reduceMotion) { _, shouldReduceMotion in
+            pulse = !shouldReduceMotion && (isActive || isThinking)
         }
         .accessibilityLabel(isThinking ? "Agent thinking" : isActive ? "Agent active" : "Agent idle")
     }

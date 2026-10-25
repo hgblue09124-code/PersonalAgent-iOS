@@ -1,0 +1,33 @@
+{
+  "id": "PAPERF-001",
+  "title": "Reduce GPU-heavy idle UI effects",
+  "status": "in_progress",
+  "goal": "Improve perceived smoothness on the primary Agent and shared screen surfaces by removing continuously rendered blur effects and avoiding idle pulsing while respecting the user's Reduce Motion setting.",
+  "context": "A focused UI-only stabilization task. It must not alter Agent execution, provider/runtime behavior, permissions, or data contracts.",
+  "allowed_paths": [
+    "Tasks/active/PAPERF-001.json",
+    "App/PersonalAgent/Screens/AgentScreen.swift",
+    "App/PersonalAgent/Screens/Shared.swift"
+  ],
+  "forbidden_changes": [
+    "Do not add Agent features or modify Agent Runtime, provider, workspace, or policy behavior.",
+    "Do not change conversation persistence or task execution semantics.",
+    "Do not claim zero jank or physical-device acceptance from source inspection or CI alone."
+  ],
+  "acceptance_criteria": [
+    "The main Agent screen no longer relies on a large continuously blurred circle for its decorative background.",
+    "The Agent orb does not pulse continuously while idle.",
+    "Orb animation respects the system accessibility Reduce Motion setting and only pulses while active or thinking.",
+    "Shared screen background and panel styling avoid unnecessary large-radius blur/shadow effects.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Physical-device scrolling, idle, and streaming behavior is still checked before declaring the UI smooth."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAPERF-001.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAPERF-001.json --base main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [],
+  "recovery": "If the visual hierarchy regresses or any required check fails, revise or revert this small UI-only task; do not weaken the contract or claim device-level smoothness without testing."
+}
