@@ -1,0 +1,32 @@
+{
+  "id": "PAPERF-002",
+  "title": "Throttle chat streaming auto-scroll work",
+  "status": "in_progress",
+  "goal": "Reduce unnecessary scroll positioning during streamed responses while keeping the latest assistant output in view.",
+  "context": "The streaming response changes in batches. Calling ScrollViewReader.scrollTo for every batch can add avoidable scroll/layout work while SwiftUI is already rendering new text.",
+  "allowed_paths": [
+    "Tasks/active/PAPERF-002.json",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change streaming generation, provider behavior, message persistence, or cancellation semantics.",
+    "Do not remove the initial scroll-to-latest behavior or history-count scrolling.",
+    "Do not add a new dependency or timer service.",
+    "Do not claim physical-device smoothness from CI alone."
+  ],
+  "acceptance_criteria": [
+    "Streaming auto-scroll is rate-limited to at most one scrollTo call per 120 milliseconds.",
+    "The first streaming update remains eligible for auto-scroll.",
+    "History changes and initial presentation still scroll to the latest message.",
+    "Agent Task Contract, M3 / package tests, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Streaming remains readable and responsive on a physical iPhone."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAPERF-002.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAPERF-002.json --base main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [],
+  "recovery": "If auto-scroll becomes noticeably laggy or skips the final position, revert the throttle or adjust the interval without changing stream semantics."
+}
