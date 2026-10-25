@@ -13,9 +13,16 @@ struct RootView: View {
     @ObservedObject var session: KernelSession
     @State private var showWorkspace = false
     @AppStorage("app.language") private var appLanguage = "vi"
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
 
     var body: some View {
-        AgentScreen(session: session, showWorkspace: $showWorkspace)
+        Group {
+            if isUIV2Enabled {
+                PersonalAgentV2Shell(session: session, showWorkspace: $showWorkspace)
+            } else {
+                AgentScreen(session: session, showWorkspace: $showWorkspace)
+            }
+        }
         .environment(\.locale, Locale(identifier: appLanguage))
         .environment(\.kernelSession, session)
         .sheet(isPresented: $showWorkspace) {
@@ -36,6 +43,127 @@ struct RootView: View {
                 let securityScoped = url.startAccessingSecurityScopedResource()
                 defer { if securityScoped { url.stopAccessingSecurityScopedResource() } }
                 await session.importModel(from: url)
+            }
+        }
+    }
+}
+
+
+private struct PersonalAgentV2Shell: View {
+    @ObservedObject var session: KernelSession
+    @Binding var showWorkspace: Bool
+
+    var body: some View {
+        TabView {
+            NavigationStack {
+                ChatScreen(session: session)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button { showWorkspace = true } label: {
+                                Image(systemName: "circle.hexagongrid.fill")
+                            }
+                            .accessibilityLabel("Open Agent workspace")
+                        }
+                    }
+            }
+            .tabItem { Label("Messages", systemImage: "bubble.left.and.bubble.right.fill") }
+
+            NavigationStack {
+                TasksScreen(session: session)
+            }
+            .tabItem { Label("Tasks", systemImage: "checklist") }
+
+            NavigationStack {
+                PersonalAgentProfileScreen()
+            }
+            .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+
+            NavigationStack {
+                SettingsScreen(session: session)
+            }
+            .tabItem { Label("Settings", systemImage: "gearshape") }
+        }
+        .tint(AgentDesign.accent)
+    }
+}
+
+private struct PersonalAgentProfileScreen: View {
+    @AppStorage("profile.displayName") private var displayName = "Personal Agent"
+    @AppStorage("profile.bio") private var bio = "Your personal AI workspace."
+    @AppStorage("profile.avatar.data") private var avatarData: Data = Data()
+    @State private var selectedPhoto: PhotosPickerItem?
+
+    var body: some View {
+        ScreenScaffold(title: "Profile", systemImage: "person.crop.circle") {
+            GlassPanel {
+                VStack(spacing: 14) {
+                    Group {
+                        if let image = UIImage(data: avatarData) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
+                            ZStack {
+                                Circle().fill(AgentDesign.accent.opacity(0.12))
+                                Image(systemName: "person.crop.circle.fill")
+                                    .font(.system(size: 48))
+                                    .foregroundStyle(AgentDesign.accent)
+                            }
+                        }
+                    }
+                    .frame(width: 104, height: 104)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(.primary.opacity(0.08), lineWidth: 1))
+
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        Label("Change profile photo", systemImage: "camera")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityHint("Choose a photo from your library for your profile avatar.")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 4)
+
+                TextField("Display name", text: $displayName)
+                    .textInputAutocapitalization(.words)
+                    .textFieldStyle(.roundedBorder)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("About").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    TextEditor(text: $bio)
+                        .frame(minHeight: 84, maxHeight: 120)
+                        .scrollContentBackground(.hidden)
+                        .padding(6)
+                        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                }
+            }
+
+            GlassPanel {
+                Label("Personal profile", systemImage: "person.text.rectangle")
+                    .font(.headline)
+                Text("Your name, bio and avatar are stored locally on this device. They do not change Agent permissions or execution behavior.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .onChange(of: selectedPhoto) { _, item in
+            guard let item else { return }
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) else { return }
+                let target = CGSize(width: 512, height: 512)
+                let renderer = UIGraphicsImageRenderer(size: target)
+                let resized = renderer.image { _ in
+                    let scale = max(target.width / image.size.width, target.height / image.size.height)
+                    let width = image.size.width * scale
+                    let height = image.size.height * scale
+                    let rect = CGRect(x: (target.width - width) / 2, y: (target.height - height) / 2, width: width, height: height)
+                    image.draw(in: rect)
+                }
+                if let compressed = resized.jpegData(compressionQuality: 0.78) {
+                    avatarData = compressed
+                }
             }
         }
     }
