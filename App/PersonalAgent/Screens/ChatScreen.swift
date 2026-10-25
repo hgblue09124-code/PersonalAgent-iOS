@@ -293,6 +293,7 @@ private struct ChatMessagesPanel: View {
     let hasConversationHistory: Bool
     let isSearchActive: Bool
     @ObservedObject var streamPresentation: ChatStreamPresentation
+    @State private var lastStreamAutoScroll: TimeInterval = 0
     let onOpenPromptLibrary: () -> Void
     let onSelectPrompt: (String) -> Void
 
@@ -344,7 +345,10 @@ private struct ChatMessagesPanel: View {
                     .onChange(of: history.count) { _, _ in if let id = history.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
                     .onChange(of: streamPresentation.streamingResponse) { _, value in
                         guard !value.isEmpty else { return }
-                        // Streaming text is refreshed in batches; don't animate every batch.
+                        // Keep the response visible without forcing a scroll/layout pass for every token batch.
+                        let now = ProcessInfo.processInfo.systemUptime
+                        guard now - lastStreamAutoScroll >= 0.12 else { return }
+                        lastStreamAutoScroll = now
                         proxy.scrollTo("streaming-response", anchor: .bottom)
                     }
                     .onAppear { if let id = history.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
