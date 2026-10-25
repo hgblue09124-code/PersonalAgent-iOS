@@ -36,6 +36,7 @@ struct SettingsScreen: View {
     @State private var lastImportError: String?
     @State private var lastImportStatus: String?
     @AppStorage("app.language") private var appLanguage = "vi"
+    @AppStorage("ui.v2.enabled") private var uiV2Enabled = false
     @State private var updateState: UpdateState = .idle
     @State private var copiedUpdateLink = false
     @AppStorage("provider.execution.mode") private var executionMode = UserDefaults.standard.bool(forKey: "provider.remote.enabled") ? "remote" : "local"
@@ -57,6 +58,15 @@ struct SettingsScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Settings", systemImage: "gearshape") {
+            GlassPanel {
+                Label("Giao diện", systemImage: "paintbrush.pointed")
+                    .font(.headline)
+                Toggle("UI V2 · giao diện nhắn tin", isOn: $uiV2Enabled)
+                Text("Bật để dùng giao diện Messages, Tasks, Profile và Settings. Có thể tắt bất cứ lúc nào để quay lại giao diện hiện tại.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             if let error = lastImportError ?? session.lastError {
                 GlassPanel {
                     Label("Attention", systemImage: "exclamationmark.triangle.fill")
