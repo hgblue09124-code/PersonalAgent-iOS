@@ -1,0 +1,37 @@
+{
+  "id": "PAUI-001",
+  "title": "Add switchable messaging UI V2 and editable profile",
+  "status": "in_progress",
+  "goal": "Provide an opt-in messaging-style shell with Messages, Tasks, Profile, and Settings tabs while retaining the current UI as the default and keeping Agent behavior shared.",
+  "context": "The user wants a complete, polished messaging-app interface with editable avatar/profile and a safe way to turn UI V2 on or off. This is presentation-only and must not duplicate or change Agent Runtime.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-001.json",
+    "App/PersonalAgent/RootView.swift",
+    "App/PersonalAgent/Screens/SettingsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change Agent Runtime, policy, permissions, provider routing, workspace execution, or conversation persistence.",
+    "Do not make UI V2 the default; it must remain opt-in until device acceptance.",
+    "Do not claim physical-device validation based on CI.",
+    "Do not add new project dependencies."
+  ],
+  "acceptance_criteria": [
+    "Messages opens an inbox of persisted conversations with search, recent activity, previews, and a new-conversation action.",
+    "The existing UI remains the default when the UI V2 setting is false or unset.",
+    "Settings provides a persistent UI V2 on/off toggle.",
+    "UI V2 exposes Messages, Tasks, Profile, and Settings tabs using the existing shared session.",
+    "Profile supports editing a display name and bio and selecting a local avatar image.",
+    "Avatar data is resized to a bounded 512 by 512 image before persistence.",
+    "Turning UI V2 off returns to the existing UI without resetting conversations or Agent state.",
+    "Agent Task Contract, M3 / Swift package tests, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Physical iPhone checks confirm tab navigation, avatar selection, and switching V1/V2 before declaring the UI complete."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-001.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-001.json --base main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [],
+  "recovery": "If the UI toggle causes state loss, revert the presentation switch and preserve the existing UI as default. If avatar selection or compilation fails, repair within the allowed paths; do not weaken policy or claim device acceptance."
+}
