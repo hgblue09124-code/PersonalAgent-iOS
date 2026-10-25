@@ -204,6 +204,7 @@ private struct PersonalAgentProfileScreen: View {
     @AppStorage("profile.displayName") private var displayName = "Personal Agent"
     @AppStorage("profile.bio") private var bio = "Your personal AI workspace."
     @AppStorage("profile.avatar.data") private var avatarData: Data = Data()
+    @State private var avatarImage: UIImage?
     @State private var selectedPhoto: PhotosPickerItem?
 
     var body: some View {
@@ -211,7 +212,7 @@ private struct PersonalAgentProfileScreen: View {
             GlassPanel {
                 VStack(spacing: 14) {
                     Group {
-                        if let image = UIImage(data: avatarData) {
+                        if let image = avatarImage {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFill()
@@ -259,6 +260,14 @@ private struct PersonalAgentProfileScreen: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+        }
+        .onAppear {
+            if avatarImage == nil, !avatarData.isEmpty {
+                avatarImage = UIImage(data: avatarData)
+            }
+        }
+        .onChange(of: avatarData) { _, data in
+            avatarImage = data.isEmpty ? nil : UIImage(data: data)
         }
         .onChange(of: selectedPhoto) { _, item in
             guard let item else { return }
