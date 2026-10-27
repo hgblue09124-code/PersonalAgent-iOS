@@ -1,0 +1,32 @@
+{
+  "id": "PAUI-002",
+  "title": "Render cached profile avatar in chat messages",
+  "status": "in_progress",
+  "goal": "Use the locally saved profile avatar for user messages in chat and avoid repeated image decoding during chat updates.",
+  "context": "Profile avatar bytes are stored in AppStorage under profile.avatar.data and the profile screen already caches a decoded UIImage. Chat bubbles still render a generic person icon, so profile edits are not reflected in chat.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-002.json",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change Agent Runtime, policy, permissions, provider routing, workspace execution, conversation persistence, or streaming generation.",
+    "Do not decode avatar data inside each ChatBubble body or for each streamed update.",
+    "Do not add dependencies or background timers.",
+    "Do not claim physical-device smoothness from CI alone."
+  ],
+  "acceptance_criteria": [
+    "User message avatars read the same profile.avatar.data value used by Profile.",
+    "A changed or cleared profile avatar updates chat without relaunching the app.",
+    "Avatar image decoding is cached at the chat panel level and does not repeat for every message or streaming update.",
+    "A missing or invalid avatar falls back to the existing person icon.",
+    "Agent Task Contract, M3 / Swift package tests, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-002.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-002.json --base main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [],
+  "recovery": "If image decoding affects scrolling or streaming, revert avatar rendering while keeping the generic fallback and preserve all chat behavior."
+}
