@@ -4,6 +4,18 @@ import PASkills
 
 struct AgentsScreen: View {
     @ObservedObject var session: KernelSession
+    @State private var agentSearch = ""
+
+    private var filteredAgents: [AgentManifest] {
+        let query = agentSearch.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return session.agentManifests }
+        return session.agentManifests.filter { agent in
+            agent.name.localizedCaseInsensitiveContains(query) ||
+            agent.description.localizedCaseInsensitiveContains(query) ||
+            agent.id.localizedCaseInsensitiveContains(query) ||
+            agent.skillIDs.contains { $0.rawValue.localizedCaseInsensitiveContains(query) }
+        }
+    }
 
     private var selectedAgent: AgentManifest? {
         session.agentManifests.first(where: { $0.id == session.selectedAgentID })
@@ -141,16 +153,37 @@ struct AgentsScreen: View {
             Text("AVAILABLE AGENTS")
                 .font(.caption.weight(.bold))
                 .foregroundStyle(.secondary)
-            if session.agentManifests.isEmpty {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                TextField("Search agents, descriptions, or Skills…", text: $agentSearch)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                if !agentSearch.isEmpty {
+                    Button { agentSearch = "" } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                    }
+                    .accessibilityLabel("Clear Agent search")
+                }
+            }
+            .padding(10)
+            .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+            HStack {
+                Text("\\(filteredAgents.count) of \\(session.agentManifests.count) Agents")
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+            }
+            if filteredAgents.isEmpty {
                 GlassPanel {
                     ContentUnavailableView(
-                        "No Agent profiles",
+                        session.agentManifests.isEmpty ? "No Agent profiles" : "No matching Agents",
                         systemImage: "person.crop.circle.badge.exclamationmark",
-                        description: Text("The Agent store has no valid Agent.md profile.")
+                        description: Text(session.agentManifests.isEmpty
+                            ? "The Agent store has no valid Agent.md profile."
+                            : "Try another name, description, or Skill.")
                     )
                 }
             } else {
-                ForEach(session.agentManifests, id: \.id) { agent in
+                ForEach(filteredAgents, id: \.id) { agent in
                     profileCard(agent)
                 }
             }
