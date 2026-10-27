@@ -294,6 +294,8 @@ private struct ChatMessagesPanel: View {
     let isSearchActive: Bool
     @ObservedObject var streamPresentation: ChatStreamPresentation
     @State private var lastStreamAutoScroll: TimeInterval = 0
+    @AppStorage("profile.avatar.data") private var profileAvatarData: Data = Data()
+    @State private var profileAvatar: UIImage?
     let onOpenPromptLibrary: () -> Void
     let onSelectPrompt: (String) -> Void
 
@@ -335,7 +337,7 @@ private struct ChatMessagesPanel: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 14) {
-                            ForEach(history) { turn in ChatBubble(turn: turn).id(turn.id) }
+                            ForEach(history) { turn in ChatBubble(turn: turn, profileAvatar: profileAvatar).id(turn.id) }
                             if !streamPresentation.streamingResponse.isEmpty {
                                 StreamingChatBubble(content: streamPresentation.streamingResponse).id("streaming-response")
                             }
@@ -354,6 +356,14 @@ private struct ChatMessagesPanel: View {
                     .onAppear { if let id = history.last?.id { proxy.scrollTo(id, anchor: .bottom) } }
                 }
             }
+        }
+        .onAppear {
+            if profileAvatar == nil, !profileAvatarData.isEmpty {
+                profileAvatar = UIImage(data: profileAvatarData)
+            }
+        }
+        .onChange(of: profileAvatarData) { _, data in
+            profileAvatar = data.isEmpty ? nil : UIImage(data: data)
         }
     }
 }
@@ -510,6 +520,7 @@ private struct StreamingChatBubble: View {
 
 private struct ChatBubble: View {
     let turn: ChatTurn
+    let profileAvatar: UIImage?
     @State private var didCopy = false
 
     var body: some View {
@@ -521,7 +532,17 @@ private struct ChatBubble: View {
             } else {
                 Spacer(minLength: 18)
                 bubble
-                PremiumIconTile(systemImage: "person.fill", tint: .secondary)
+                if let profileAvatar {
+                    Image(uiImage: profileAvatar)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 34, height: 34)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(.primary.opacity(0.08), lineWidth: 1))
+                        .accessibilityLabel("Profile avatar")
+                } else {
+                    PremiumIconTile(systemImage: "person.fill", tint: .secondary)
+                }
             }
         }
     }
