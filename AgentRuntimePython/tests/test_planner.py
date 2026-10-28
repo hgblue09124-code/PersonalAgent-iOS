@@ -1,6 +1,7 @@
 import unittest
 
 from personal_agent_runtime import IntentKind, PlanKind, plan_request
+from personal_agent_runtime.contracts import PLAN_SCHEMA_VERSION
 
 
 class PlannerTests(unittest.TestCase):
@@ -43,6 +44,14 @@ class PlannerTests(unittest.TestCase):
         self.assertEqual(plan.intent.kind, IntentKind.CHAT)
         self.assertIsNone(plan.skill_id)
         self.assertFalse(plan.is_executable)
+
+    def test_serialized_plan_has_stable_versioned_envelope(self):
+        payload = plan_request("Tạo file").to_dict()
+        self.assertEqual(payload["schema_version"], PLAN_SCHEMA_VERSION)
+        self.assertEqual(payload["schema_version"], 1)
+        self.assertEqual(payload["intent"]["kind"], "create_file")
+        self.assertIsInstance(payload["missing_fields"], list)
+        self.assertFalse(payload["is_executable"])
 
 
 if __name__ == "__main__":

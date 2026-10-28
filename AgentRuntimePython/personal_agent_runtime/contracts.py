@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+PLAN_SCHEMA_VERSION = 1
+
 
 class IntentKind(str, Enum):
     CHAT = "chat"
@@ -43,7 +45,9 @@ class AgentPlan:
         return False
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize a versioned envelope suitable for a future Swift/Python bridge."""
         return {
+            "schema_version": PLAN_SCHEMA_VERSION,
             "kind": self.kind.value,
             "intent": {
                 "kind": self.intent.kind.value,

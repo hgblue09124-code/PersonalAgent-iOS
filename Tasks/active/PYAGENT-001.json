@@ -2,7 +2,7 @@
   "id": "PYAGENT-001",
   "title": "Introduce a deterministic Python Agent Runtime planning core",
   "status": "in_progress",
-  "goal": "Create a dependency-free Python planning layer that classifies requests and emits typed proposals without executing tools or granting capabilities.",
+  "goal": "Create a dependency-free Python planning layer with a versioned JSON contract that classifies requests and emits typed proposals without executing tools or granting capabilities.",
   "context": "Swift remains responsible for iOS UI, permission decisions, policy enforcement, and tool execution. Python is intended to become the Agent reasoning/orchestration layer; this task adds a deterministic planner contract as the first incremental step.",
   "allowed_paths": [
     "Tasks/active/PYAGENT-001.json",
@@ -28,7 +28,8 @@
     "A complete create-file request produces only a proposal when the capability is explicitly in the allowed skill set.",
     "Missing capability fails closed with a non-executable plan.",
     "Standard-library unit tests cover the main classification and fail-closed cases.",
-    "A dedicated GitHub Actions workflow runs the Python tests and validates the task contract."
+    "A dedicated GitHub Actions workflow runs the Python tests and validates the task contract.",
+    "Serialized plans include a stable schema_version field for a future Swift/Python bridge."
   ],
   "verification": [
     "python3 -m unittest discover -s AgentRuntimePython/tests -v",

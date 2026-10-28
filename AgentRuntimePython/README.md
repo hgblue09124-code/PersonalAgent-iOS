@@ -6,6 +6,7 @@ This package is the first incremental Python-side runtime component for Personal
 
 - Python classifies intent and emits typed plans/proposals.
 - Swift remains authoritative for iOS UI, user consent, Settings capabilities, policy evaluation, tool execution, and result verification.
+- Serialized plans use `schema_version: 1` so a future Swift bridge can reject incompatible envelopes explicitly.
 - A plan is never proof of execution. AgentPlan.is_executable is always false.
 - Unknown, incomplete, or out-of-scope requests must not become tool proposals.
 
