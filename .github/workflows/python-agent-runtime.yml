@@ -1,0 +1,36 @@
+name: Python Agent Runtime
+
+on:
+  pull_request:
+    paths:
+      - "AgentRuntimePython/**"
+      - "Tasks/active/PYAGENT-001.json"
+      - ".github/workflows/python-agent-runtime.yml"
+      - "Scripts/agent_task_guard.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-planner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run planner unit tests
+        env:
+          PYTHONPATH: AgentRuntimePython
+        run: python -m unittest discover -s AgentRuntimePython/tests -v
+      - name: Compile runtime package
+        run: python -m compileall -q AgentRuntimePython/personal_agent_runtime
+      - name: Validate task contract
+        run: python Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-001.json
+      - name: Check task scope
+        run: python Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-001.json --base origin/main
