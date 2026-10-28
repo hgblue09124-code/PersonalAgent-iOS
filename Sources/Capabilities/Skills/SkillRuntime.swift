@@ -899,7 +899,19 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         let rawPath = String(remainder[..<delimiter.0.lowerBound])
         let path = rawPath.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "`\\\"'")))
         // Empty files are valid. The explicit delimiter establishes the content boundary.
-        let content = String(remainder[delimiter.0.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        let rawContent = String(remainder[delimiter.0.upperBound...])
+        // The delimiter is explicit: remove at most one conventional separator
+        // space, but preserve meaningful indentation and blank lines in file content.
+        let content: String
+        if rawContent.hasPrefix(" ") {
+            content = String(rawContent.dropFirst())
+        } else if rawContent.hasPrefix("\r\n") {
+            content = String(rawContent.dropFirst(2))
+        } else if rawContent.hasPrefix("\n") {
+            content = String(rawContent.dropFirst())
+        } else {
+            content = rawContent
+        }
         guard !path.isEmpty else { return nil }
         return (path, content)
     }
