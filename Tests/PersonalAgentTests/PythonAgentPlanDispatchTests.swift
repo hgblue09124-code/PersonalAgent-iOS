@@ -126,13 +126,14 @@ struct PythonAgentPlanDispatchTests {
         skillID: String? = nil,
         arguments: [String: String] = [:]
     ) throws -> Data {
+        let skillValue: Any = skillID.map { $0 as Any } ?? NSNull()
         let object: [String: Any] = [
             "schema_version": 1,
             "kind": kind,
             "intent": ["kind": intent, "normalized_text": message],
             "message": message,
             "missing_fields": missing,
-            "skill_id": skillID as Any? ?? NSNull(),
+            "skill_id": skillValue,
             "arguments": arguments,
             "is_executable": false
         ]
