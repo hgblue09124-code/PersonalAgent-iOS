@@ -649,6 +649,17 @@ struct M6SkillCompositionIntegrationTests {
         #expect(result?.verified == true)
         let fileURL = directory.appendingPathComponent("workspace/indented.swift")
         #expect(try String(contentsOf: fileURL, encoding: .utf8) == content)
+
+        // A tab immediately after the explicit delimiter is meaningful payload,
+        // not a separator to strip. Preserve it byte-for-byte.
+        let tabContent = "\tfunc tabIndented() {\\n\\t    return true\\n}"
+        let tabResult = try await root.runChatSkillIfMatched(
+            goalStatement: "Create a file workspace/tab-indented.swift with content:\\(tabContent)"
+        )
+        #expect(tabResult?.skillID.rawValue == "workspace.create-file")
+        #expect(tabResult?.verified == true)
+        let tabFileURL = directory.appendingPathComponent("workspace/tab-indented.swift")
+        #expect(try String(contentsOf: tabFileURL, encoding: .utf8) == tabContent)
     }
 
     @Test("M8 Settings-denied Skill execution never invokes a workspace module")

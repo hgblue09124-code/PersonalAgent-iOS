@@ -905,8 +905,6 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
         let content: String
         if rawContent.hasPrefix(" ") {
             content = String(rawContent.dropFirst())
-        } else if rawContent.hasPrefix("\t") {
-            content = String(rawContent.dropFirst())
         } else if rawContent.hasPrefix("\r\n") {
             content = String(rawContent.dropFirst(2))
         } else if rawContent.hasPrefix("\n") {
