@@ -652,9 +652,9 @@ struct M6SkillCompositionIntegrationTests {
 
         // A tab immediately after the explicit delimiter is meaningful payload,
         // not a separator to strip. Preserve it byte-for-byte.
-        let tabContent = "\tfunc tabIndented() {\\n\\t    return true\\n}"
+        let tabContent = "\tfunc tabIndented() {\n\t    return true\n}"
         let tabResult = try await root.runChatSkillIfMatched(
-            goalStatement: "Create a file workspace/tab-indented.swift with content:\\(tabContent)"
+            goalStatement: "Create a file workspace/tab-indented.swift with content:\(tabContent)"
         )
         #expect(tabResult?.skillID.rawValue == "workspace.create-file")
         #expect(tabResult?.verified == true)
