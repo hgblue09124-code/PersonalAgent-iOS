@@ -631,6 +631,26 @@ struct M6SkillCompositionIntegrationTests {
         #expect(observation?.payload["verified"] == "true")
     }
 
+    @Test("M8 create-file preserves indentation and blank lines in content")
+    func m8WorkspaceCreateFilePreservesContentWhitespace() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy(),
+            workspaceToolsEnabled: true
+        )
+        let content = "  func greet() {\n\n    print(\"hello\")\n  }"
+        let result = try await root.runChatSkillIfMatched(
+            goalStatement: "Create a file workspace/indented.swift with content: \(content)"
+        )
+        #expect(result?.skillID.rawValue == "workspace.create-file")
+        #expect(result?.verified == true)
+        let fileURL = directory.appendingPathComponent("workspace/indented.swift")
+        #expect(try String(contentsOf: fileURL, encoding: .utf8) == content)
+    }
+
     @Test("M8 Settings-denied Skill execution never invokes a workspace module")
     func m8WorkspaceSkillEnforcesSettingsBackedExecuteCapability() async throws {
         let suiteName = "PersonalAgentM8ExecutePolicyTests.\(UUID().uuidString)"

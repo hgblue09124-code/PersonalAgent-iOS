@@ -1,0 +1,35 @@
+{
+  "id": "PASKILL-49",
+  "title": "Preserve exact meaningful whitespace in workspace file creation",
+  "status": "in_progress",
+  "goal": "Ensure the canonical workspace.create-file Skill preserves user-supplied indentation and blank lines instead of trimming file contents during request parsing.",
+  "context": "The Skill adapter currently trims the content suffix with whitespacesAndNewlines, silently changing source files and formatted text. The user explicitly supplied a content delimiter, so parser normalization must remove only the conventional delimiter separator and leave the actual payload intact.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-49.json",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not weaken workspace path validation, Settings policy, Agent scope, module authorization, or read-back verification.",
+    "Do not change the existing create-file request grammar beyond preserving content after its explicit delimiter.",
+    "Do not claim physical-device verification from CI."
+  ],
+  "acceptance_criteria": [
+    "Create-file parsing preserves indentation and blank lines in supplied content.",
+    "The canonical M8 Skill path writes the exact expected content and returns verified=true only after verification.",
+    "Existing Vietnamese and English create-file tests remain green.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PASKILL-49.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-49.json --base origin/main",
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PASKILL-6"
+  ],
+  "recovery": "If the regression test reveals normalization elsewhere in the canonical path, fix the narrowest content-transforming boundary and keep exact-content read-back assertions."
+}
