@@ -98,7 +98,7 @@ struct PythonAgentPlanDispatchTests {
             policy: AllowPolicy(),
             workspaceToolsEnabled: true
         )
-        let invalid = proposal(path: "workspace/../outside.txt", content: "no")
+        let invalid = try proposal(path: "workspace/../outside.txt", content: "no")
         do {
             _ = try await root.dispatchPythonAgentPlan(invalid)
             Issue.record("Expected invalid Python plan to be rejected")
