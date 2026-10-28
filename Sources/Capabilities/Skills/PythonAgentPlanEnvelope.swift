@@ -7,7 +7,7 @@ import Foundation
 /// runtime, approval, and read-back verification boundaries.
 public struct PythonAgentPlanEnvelope: Decodable, Sendable, Equatable {
     public struct Intent: Decodable, Sendable, Equatable {
-        public enum Kind: String, Decodable, Sendable {
+        public enum Kind: String, Decodable, Sendable, Equatable {
             case chat
             case createFile = "create_file"
             case unknown
