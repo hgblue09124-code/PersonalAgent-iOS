@@ -1,0 +1,37 @@
+{
+  "id": "PYAGENT-002",
+  "title": "Validate the versioned Python Agent plan at the Swift boundary",
+  "status": "in_progress",
+  "goal": "Add a strict Swift decoder and validator for schema_version 1 Python Agent plan envelopes so Python proposals can be consumed safely without gaining execution authority.",
+  "context": "PYAGENT-001 adds a deterministic Python planner that emits a versioned JSON envelope. This task establishes the Swift-side contract boundary before any app wiring. Swift remains authoritative for Agent scope, Settings policy, approval, tool execution, and verification.",
+  "allowed_paths": [
+    "Tasks/active/PYAGENT-002.json",
+    "Sources/Capabilities/Skills/PythonAgentPlanEnvelope.swift",
+    "Tests/PersonalAgentTests/PythonAgentPlanBridgeTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not invoke Python, tools, filesystem, shell, or network from this decoder.",
+    "Do not let Python proposals authorize capabilities or bypass existing Skill/Module policy and verification.",
+    "Do not wire this bridge into production Chat routing in this task.",
+    "Do not modify App/ or PersonalAgent.xcodeproj."
+  ],
+  "acceptance_criteria": [
+    "Decode the exact schema_version 1 envelope emitted by AgentRuntimePython.",
+    "Reject unsupported schema versions and any plan with is_executable=true.",
+    "Accept only the allowlisted workspace.create-file proposal shape and reject path traversal or malformed arguments.",
+    "Clarification/chat/unsupported plans cannot carry Skill IDs or tool arguments.",
+    "Regression tests cover valid proposal, clarification, unsupported schema, executable flag, path traversal, and hidden arguments.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-002.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-002.json --base origin/main",
+    "swift test --disable-sandbox --filter PythonAgentPlanBridgeTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PYAGENT-001"
+  ],
+  "recovery": "Keep the bridge as data validation only. If the Python envelope changes, bump the schema version explicitly and update cross-language fixtures; never silently accept an unknown contract."
+}
