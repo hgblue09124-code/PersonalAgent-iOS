@@ -83,7 +83,21 @@ Every progress update should distinguish:
 
 Do not claim the application is finished until its intended product scope is implemented. Equally, do not use unfinished final acceptance of one feature as a blanket reason to stop expanding the rest of the app.
 
-## 8. Default operating instruction
+## 8. Continuous multi-commit execution mode
+
+When the user asks to finish a plan, complete the app, or vibe code continuously, treat the plan as an execution queue, not as a deliverable to report and wait on.
+
+1. **Plan once, execute continuously.** Convert the plan into ordered, independently verifiable slices. Start implementation immediately; do not stop after presenting the plan or ask the user to approve each routine slice.
+2. **Use multiple meaningful commits.** Prefer a sequence of focused commits that each deliver a coherent behavior, regression test, integration step, or root-cause fix. Do not collapse a multi-step feature into a documentation-only commit, and do not create artificial/no-op commits to inflate the count.
+3. **Keep moving after green CI.** When a slice's relevant checks pass, record the commit and evidence internally and begin the next queued slice in the same work session. Green CI is a continuation signal, not a stopping point.
+4. **Recover in place.** When CI fails, inspect the exact failed job and logs, fix the root cause in a new focused commit, rerun affected checks, then resume the queue. Do not abandon the rest of the plan because one slice failed.
+5. **Maintain a live execution queue.** Reorder tasks only when evidence or a dependency requires it. Prioritize end-to-end user value and integration over isolated infrastructure, cosmetic refactors, or repeated planning.
+6. **Batch the report at the end of a meaningful work session.** Report the plan's completed and remaining slices, commit/PR links, exact CI status, what is integrated versus standalone, blockers, and the next queue. Send an interim update only when the user needs to make a decision, a material blocker changes the plan, or a long-running task requires an accurate status update.
+7. **Respect real limits without stopping unrelated work.** If a device, credential, review, or external action is unavailable, mark only the affected acceptance item as blocked and continue with other safe, independent slices. Never imply a blocked item passed.
+
+A work session should aim to deliver several meaningful commits when scope allows, rather than one commit followed by a report. The objective is to finish the planned product work end-to-end, not merely to produce a plan, a branch, or a green workflow.
+
+## 9. Default operating instruction
 
 **Build → test → CI green → record evidence → expand.**
 If CI fails, fix the failing cause. If CI passes, move forward to the next natural capability. Preserve security and honest reporting, but do not let repeated acceptance rituals replace product development.
