@@ -8,6 +8,11 @@ Before selecting any work, inspect [Issue #347 — Alpha Agent Skill completion 
 
 This directory defines the minimum execution contract for agents working in PersonalAgent-iOS. It complements, and does not replace, GitHub Issues, `AGENTS.md`, module contracts, tests, and CI.
 
+## Continuous agent growth loop
+- Default behavior: run the five-step loop continuously — Observe → Orient → Plan → Execute → Verify & Learn — one bounded task and one logical commit at a time; test, inspect CI, repair failures, then return to Observe.
+- Keep this entrypoint short. Load [the detailed loop and context-recovery rules](../Documentation/RECURSIVE_AGENT_GROWTH_LOOP.md) only when needed.
+- Never treat checkpoints as truth over current repo/task/CI evidence; never mark unverified work complete. Issue #347 remains P0 until its full acceptance gate, including physical-device evidence, is satisfied.
+
 ## Source of truth
 - **Product intent:** product/architecture documentation and approved issues.
 - **Executable work item:** a JSON task based on `task.schema.json`.
