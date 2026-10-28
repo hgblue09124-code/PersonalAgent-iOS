@@ -11,7 +11,9 @@
     "AgentRuntimePython/personal_agent_runtime/planner.py",
     "AgentRuntimePython/tests/test_planner.py",
     "AgentRuntimePython/README.md",
-    ".github/workflows/python-agent-runtime.yml"
+    ".github/workflows/python-agent-runtime.yml",
+    "README.md",
+    "VIBE_CODING_LAW.md"
   ],
   "forbidden_changes": [
     "Do not execute tools, access the filesystem, or invoke shell commands from the Python planner.",
