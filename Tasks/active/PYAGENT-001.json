@@ -1,0 +1,40 @@
+{
+  "id": "PYAGENT-001",
+  "title": "Introduce a deterministic Python Agent Runtime planning core",
+  "status": "in_progress",
+  "goal": "Create a dependency-free Python planning layer that classifies requests and emits typed proposals without executing tools or granting capabilities.",
+  "context": "Swift remains responsible for iOS UI, permission decisions, policy enforcement, and tool execution. Python is intended to become the Agent reasoning/orchestration layer; this task adds a deterministic planner contract as the first incremental step.",
+  "allowed_paths": [
+    "Tasks/active/PYAGENT-001.json",
+    "AgentRuntimePython/personal_agent_runtime/__init__.py",
+    "AgentRuntimePython/personal_agent_runtime/contracts.py",
+    "AgentRuntimePython/personal_agent_runtime/planner.py",
+    "AgentRuntimePython/tests/test_planner.py",
+    "AgentRuntimePython/README.md",
+    ".github/workflows/python-agent-runtime.yml"
+  ],
+  "forbidden_changes": [
+    "Do not execute tools, access the filesystem, or invoke shell commands from the Python planner.",
+    "Do not let Python grant permissions, bypass Swift policy, or claim an action succeeded.",
+    "Do not add third-party runtime dependencies.",
+    "Do not change existing Swift runtime behavior or the Xcode project in this task."
+  ],
+  "acceptance_criteria": [
+    "The Python package exposes typed request, intent, plan, and proposal contracts.",
+    "A deterministic planner recognizes generic chat and incomplete or complete create-file requests in Vietnamese and English.",
+    "Incomplete create-file requests return missing fields and never propose an action.",
+    "A complete create-file request produces only a proposal when the capability is explicitly in the allowed skill set.",
+    "Missing capability fails closed with a non-executable plan.",
+    "Standard-library unit tests cover the main classification and fail-closed cases.",
+    "A dedicated GitHub Actions workflow runs the Python tests and validates the task contract."
+  ],
+  "verification": [
+    "python3 -m unittest discover -s AgentRuntimePython/tests -v",
+    "python3 -m compileall -q AgentRuntimePython/personal_agent_runtime",
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-001.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-001.json --base origin/main",
+    "Review that planner code has no filesystem, subprocess, network, or tool-execution imports."
+  ],
+  "dependencies": [],
+  "recovery": "Keep the planner pure and deterministic. If natural-language parsing becomes ambiguous, return a clarification plan instead of guessing a path or content."
+}
