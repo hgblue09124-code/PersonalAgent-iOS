@@ -499,6 +499,14 @@ public enum AgentExecutionOutcome: Sendable, Equatable {
     }
 }
 
+public enum PythonAgentPlanDispatchResult: Sendable, Equatable {
+    case clarification(String)
+    /// Conversational/unsupported plans must return to normal chat, not tool execution.
+    case notActionable(String)
+    case verified(SkillAgentResult)
+    case executionFailed(String)
+}
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
@@ -965,6 +973,50 @@ extension M8CompositionRoot {
         // An empty suffix is allowed only because the user explicitly supplied
         // the content delimiter; the existing Skill/runtime still verifies writes.
         return .continueRouting
+    }
+
+    /// Consumes a validated Python plan as an untrusted proposal, then routes supported
+    /// actions through the existing Chat -> Agent scope -> policy -> Skill/Module -> verification
+    /// path. This method does not start a Python interpreter; callers supply the JSON envelope.
+    public func dispatchPythonAgentPlan(
+        _ data: Data,
+        agentID: String = "personal.default"
+    ) async throws -> PythonAgentPlanDispatchResult {
+        let plan = try PythonAgentPlanEnvelope.decode(data)
+
+        switch plan.kind {
+        case .clarify:
+            return .clarification(plan.message)
+        case .respond:
+            return .notActionable(plan.message)
+        case .unsupported:
+            return .notActionable(plan.message)
+        case .proposeSkill:
+            guard plan.skillID == "workspace.create-file",
+                  case .string(let path)? = plan.arguments["path"],
+                  case .string(let fileContent)? = plan.arguments["content"] else {
+                return .executionFailed("Unsupported or malformed Python Skill proposal.")
+            }
+
+            // No direct module call here. The canonical Chat path rechecks the
+            // current Agent's declared Skill scope, Settings policy, workspace
+            // enablement, path protections, executor availability and read-back.
+            let command = "Create file \(path) with content:\(fileContent)"
+            do {
+                guard let result = try await runChatSkillIfMatched(
+                    goalStatement: command,
+                    agentID: agentID
+                ) else {
+                    return .executionFailed("The current Agent scope or workspace settings do not permit this proposal.")
+                }
+                guard result.skillID.rawValue == plan.skillID, result.verified else {
+                    return .executionFailed("The proposed file action did not return a verified result.")
+                }
+                return .verified(result)
+            } catch {
+                return .executionFailed(String(describing: error))
+            }
+        }
     }
 
     public func runChatSkillIfMatched(
