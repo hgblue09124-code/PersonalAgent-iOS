@@ -1,0 +1,41 @@
+{
+  "id": "PYAGENT-003",
+  "title": "Dispatch validated Python proposals through the canonical Swift Skill boundary",
+  "status": "in_progress",
+  "goal": "Provide a Swift entry point that consumes a versioned Python plan envelope and routes only supported create-file proposals through the existing Agent scope, Settings policy, workspace controls, Skill/Module execution, and read-back verification.",
+  "context": "PYAGENT-001 provides deterministic Python planning and PYAGENT-002 validates the schema-v1 envelope in Swift. This task connects validated proposal data to the existing execution boundary without embedding or invoking a Python interpreter; a future host integration can supply the JSON bytes.",
+  "allowed_paths": [
+    "Tasks/active/PYAGENT-003.json",
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/PythonAgentPlanDispatchTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not invoke Python, shell, network, or direct filesystem APIs from the dispatch entry point.",
+    "Do not call ModuleRuntime or workspace tools directly from the Python proposal boundary.",
+    "Do not let a Python proposal authorize capabilities, bypass Agent scope, Settings policy, approval, workspace checks, or read-back verification.",
+    "Do not wire an unavailable Python interpreter into the app or claim the Python runtime is running on iOS.",
+    "Do not modify App/ or PersonalAgent.xcodeproj."
+  ],
+  "acceptance_criteria": [
+    "A valid schema-v1 workspace.create-file proposal is transformed into the canonical supported Chat command and executed only through runChatSkillIfMatched.",
+    "The returned result is reported verified only when the canonical Skill result identifies workspace.create-file and verified=true.",
+    "Clarification, conversational, and unsupported plans do not invoke Skill execution.",
+    "Workspace-disabled configuration fails closed without creating a file.",
+    "Malformed and path-traversal proposals are rejected before execution.",
+    "Regression tests cover exact content/read-back, disabled workspace, non-actionable plans, and invalid proposals.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-003.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-003.json --base origin/main",
+    "swift test --disable-sandbox --filter PythonAgentPlanDispatchTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "PYAGENT-001",
+    "PYAGENT-002",
+    "Issue #347"
+  ],
+  "recovery": "If any proposal fails validation or the canonical runtime declines it, preserve the failure outcome and keep the workspace unchanged. Do not add a direct executor fallback."
+}
