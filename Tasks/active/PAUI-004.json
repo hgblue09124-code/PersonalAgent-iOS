@@ -1,14 +1,15 @@
 {
   "id": "PAUI-004",
-  "title": "Add independent editable User and Agent chat avatars",
+  "title": "Make UI V2 chat-first and add independent editable User and Agent avatars",
   "status": "in_progress",
-  "goal": "Allow the user to select, persist, preview, replace, and reset a separate Agent avatar while retaining the existing user profile avatar as the single source for user messages.",
-  "context": "Follow-up to PAUI-003. User explicitly asked to edit both Agent and User photos because the UI changes felt too small. Keep the changes presentation-only and preserve the UI V2 opt-in flag.",
+  "goal": "Present UI V2 as a focused messaging app with the chat screen as the primary surface, hide secondary Tasks/Settings/workspace navigation, keep profile and appearance controls behind the top-right avatar, and allow independently editable User and Agent avatars.",
+  "context": "Follow-up to PAUI-003. User explicitly asked to edit both Agent and User photos because the UI changes felt too small. Keep the changes presentation-only and preserve the UI V2 opt-in flag. Latest product direction: show only the messaging-chat experience by default; secondary information must stay out of the main interface and be reachable only when explicitly opened.",
   "allowed_paths": [
     "Tasks/active/PAUI-004.json",
     "App/PersonalAgent/RootView.swift",
     "App/PersonalAgent/Screens/ChatScreen.swift",
-    "App/PersonalAgent/Screens/Shared.swift"
+    "App/PersonalAgent/Screens/Shared.swift",
+    "Tasks/active/PAUI-004.json"
   ],
   "forbidden_changes": [
     "Do not alter Agent Runtime, policies, permissions, provider routing, workspace execution, or conversation persistence.",
@@ -17,6 +18,9 @@
     "Do not remove UI V2 opt-in or change the V1 default."
   ],
   "acceptance_criteria": [
+    "UI V2 opens directly into ChatScreen with no bottom tab bar, Tasks/Settings tabs, or workspace button visible.",
+    "Profile/avatar and appearance controls remain reachable from a compact top-right avatar button; profile is not a primary navigation destination.",
+    "The chat remains the primary screen; secondary information is hidden unless explicitly opened.",
     "Profile allows choosing a User avatar and a separate Agent avatar.",
     "Agent avatar can be replaced and reset to the themed fallback.",
     "User messages display profile.avatar.data and Agent replies, including streaming replies, display profile.agentAvatar.data.",
