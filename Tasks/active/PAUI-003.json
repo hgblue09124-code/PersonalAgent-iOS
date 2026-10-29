@@ -3,7 +3,7 @@
   "title": "Refine UI V2 into a customizable Sakura Agent Messenger",
   "status": "in_progress",
   "goal": "Refine the existing opt-in UI V2 into a chat-first, lightweight game-messenger experience with Sakura theme, soft bubbles, plain background, profile-sourced avatar, user customization, and measurable performance checks.",
-  "context": "UI V2 shell was merged in PR #546 and profile-avatar rendering was merged in PR #547. Do not duplicate either implementation. The current V2 inbox and ChatScreen still expose heavier scaffold/panel treatment; refine existing screens in small verified slices.",
+  "context": "UI V2 shell was merged in PR #546 and profile-avatar rendering was merged in PR #547. Do not duplicate either implementation. The current V2 inbox and ChatScreen still expose heavier scaffold/panel treatment; refine existing screens in small verified slices. Implementation is intentionally split into five independently reviewable slices: (A) chat-first shell and lighter panels; (B) Sakura/soft/plain theme; (C) profile avatar synchronization; (D) persistent theme and bubble customization; (E) CI plus physical-device performance verification. Complete and verify each slice before expanding scope.",
   "allowed_paths": [
     "Tasks/active/PAUI-003.json",
     "App/PersonalAgent/RootView.swift",
@@ -20,64 +20,16 @@
     "Do not add dependencies, background timers, continuous animations, remote wallpaper loading, or decorative particle effects.",
     "Do not claim tests, CI, IPA build, or physical-device smoothness unless the exact result is observed."
   ],
-  "implementation_plan": [
-    {
-      "task": "PAUI-003A — Chat-first shell",
-      "scope": "Reduce visual weight in the V2 inbox and chat: remove redundant glass/panel nesting where practical, keep conversation content and composer dominant, retain access to workspace/tools through an explicit secondary action.",
-      "acceptance_criteria": [
-        "Opening UI V2 lands on Messages and the primary visual focus is the conversation list or active conversation, not a dashboard or stacked cards.",
-        "The active chat keeps a compact header, scrollable message list, and persistent composer.",
-        "Search, new conversation, agent selection, export, rename, and other existing chat actions remain reachable.",
-        "The existing V1 UI remains available through the persisted UI V2 toggle."
-      ]
-    },
-    {
-      "task": "PAUI-003B — Sakura / soft / plain theme",
-      "scope": "Add a small semantic chat-theme layer with Sakura as the default V2 appearance, soft rounded message bubbles, and a plain static background.",
-      "acceptance_criteria": [
-        "V2 defaults to a restrained Sakura palette with readable text and accessible contrast in light and dark appearance.",
-        "Message bubbles use soft rounded corners and distinguish user from Agent messages without gradients or heavy glass effects.",
-        "The default background is plain and static; no wallpaper image, particles, blur stacks, or always-running animation.",
-        "Theme selection is persisted and changing theme does not alter conversation or Agent state."
-      ]
-    },
-    {
-      "task": "PAUI-003C — Profile avatar and identity consistency",
-      "scope": "Use existing profile.avatar.data and cached avatar implementation across V2 inbox and chat; add invalidation only where missing.",
-      "acceptance_criteria": [
-        "Profile avatar appears consistently in the chat/inbox locations where a user avatar is shown.",
-        "Changing or clearing the profile photo updates visible avatars without relaunching.",
-        "Missing or invalid image data falls back safely to the existing system avatar.",
-        "Avatar decoding is bounded/cached and does not occur per message row or streaming update."
-      ]
-    },
-    {
-      "task": "PAUI-003D — User customization",
-      "scope": "Expose compact controls for theme and bubble style without bloating the main chat screen.",
-      "acceptance_criteria": [
-        "Users can select supported themes and bubble styles from Profile or Settings.",
-        "Settings persist across app relaunch and changes preview immediately.",
-        "The chat screen itself remains free of customization panels unless explicitly opened.",
-        "Unknown or missing preference values fall back to Sakura / soft / plain."
-      ]
-    },
-    {
-      "task": "PAUI-003E — Performance and release verification",
-      "scope": "Add or update targeted tests where the architecture supports them, run repository gates, then request physical-device checks.",
-      "acceptance_criteria": [
-        "Swift package tests pass on the final PR head.",
-        "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
-        "No new dependencies or unbounded work in SwiftUI body/render paths.",
-        "Physical iPhone verification checks scrolling, sending while streaming, theme switching, avatar changes, and V1/V2 toggling.",
-        "Do not declare smoothness or release readiness until device checks are recorded."
-      ]
-    }
-  ],
   "acceptance_criteria": [
     "The five implementation slices are completed independently and each slice passes its stated checks before the next is merged.",
     "UI V2 remains opt-in until physical-device acceptance.",
     "The shared KernelSession and all existing Agent execution/security behavior remain unchanged.",
-    "The final report links commits/PR and states exact CI and device verification status; no IPA is claimed unless an artifact exists."
+    "The final report links commits/PR and states exact CI and device verification status; no IPA is claimed unless an artifact exists.",
+    "Slice A: Messages/chat remains the primary UI; redundant stacked panels are removed in V2 while existing chat actions remain reachable.",
+    "Slice B: Sakura is the default V2 accent, soft bubbles are the default, and the background is plain/static.",
+    "Slice C: Inbox and chat read the same profile.avatar.data value, refresh after changes, and use a safe fallback for missing data.",
+    "Slice D: Theme and bubble style are customizable, persisted, and applied immediately; invalid values fall back to Sakura/soft/plain.",
+    "Slice E: Required CI checks pass and physical iPhone checks separately cover scrolling during streaming, avatar updates, theme changes, and V1/V2 switching."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-003.json",
