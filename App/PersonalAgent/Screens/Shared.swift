@@ -54,6 +54,7 @@ struct ScreenScaffold<Content: View>: View {
     let title: String
     let systemImage: String
     var scrollable: Bool = true
+    var showsHeader: Bool = true
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -80,12 +81,12 @@ struct ScreenScaffold<Content: View>: View {
         Group {
             if scrollable {
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    screenHeader
+                    if showsHeader { screenHeader }
                     content()
                 }
             } else {
                 VStack(alignment: .leading, spacing: 16) {
-                    screenHeader
+                    if showsHeader { screenHeader }
                     content()
                 }
             }
