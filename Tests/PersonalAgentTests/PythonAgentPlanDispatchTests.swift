@@ -24,7 +24,7 @@ struct PythonAgentPlanDispatchTests {
             policy: AllowPolicy(),
             workspaceToolsEnabled: true
         )
-        let content = "  func greet() {\n\n    print(\"hello\")\n  }"
+        let content = "  func greet() {\n\n    print(\"hello\")\n  }\n  \n"
         let result = try await root.dispatchPythonAgentPlan(
             proposal(path: "workspace/bridge.swift", content: content)
         )
