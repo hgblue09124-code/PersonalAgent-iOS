@@ -249,7 +249,7 @@ struct SkillMarkdownPersistenceTests {
     @Test("malformed Skill files do not disable healthy Skills")
     func malformedSiblingSkillDoesNotPoisonDiscoveryOrLoad() async throws {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("skills-isolated-malformed-\\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("skills-isolated-malformed-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
