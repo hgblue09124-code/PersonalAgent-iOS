@@ -266,11 +266,16 @@ public actor FileSkillStore: SkillStore {
         var manifests: [SkillManifest] = []
         var seen = Set<SkillID>()
         for url in urls.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
-            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
-                if !ignoringMalformedFiles || url.deletingPathExtension().lastPathComponent == requestedID?.rawValue {
-                    throw SkillMarkdownError.invalidSchema("invalid UTF-8: \(url.lastPathComponent)")
+            let text: String
+            do {
+                text = try String(contentsOf: url, encoding: .utf8)
+            } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding {
+                // Only malformed text encoding is safe to isolate. Do not turn unrelated
+                // filesystem failures (permissions, I/O, removed files) into "missing Skills".
+                if ignoringMalformedFiles && url.deletingPathExtension().lastPathComponent != requestedID?.rawValue {
+                    continue
                 }
-                continue
+                throw SkillMarkdownError.invalidSchema("invalid UTF-8: \(url.lastPathComponent)")
             }
             let manifest: SkillManifest
             do {
