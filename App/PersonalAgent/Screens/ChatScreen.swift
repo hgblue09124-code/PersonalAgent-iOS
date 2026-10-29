@@ -642,5 +642,16 @@ private struct ChatBubble: View {
             in: RoundedRectangle(cornerRadius: uiV2Enabled ? AgentMessengerTheme.bubbleRadius(chatBubbleStyle) : 18, style: .continuous)
         )
         .overlay(RoundedRectangle(cornerRadius: uiV2Enabled ? AgentMessengerTheme.bubbleRadius(chatBubbleStyle) : 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
+        .contextMenu {
+            Button {
+                UIPasteboard.general.string = turn.content
+                didCopy = true
+            } label: {
+                Label("Copy message", systemImage: "doc.on.doc")
+            }
+            ShareLink(item: turn.content) {
+                Label("Share message", systemImage: "square.and.arrow.up")
+            }
+        }
     }
 }
