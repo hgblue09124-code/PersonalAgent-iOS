@@ -232,6 +232,7 @@ struct ChatScreen: View {
 
 private struct ChatComposerPanel: View {
     @ObservedObject var session: KernelSession
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
     @ObservedObject var streamPresentation: ChatStreamPresentation
     @Binding var message: String
     var focused: FocusState<Bool>.Binding
