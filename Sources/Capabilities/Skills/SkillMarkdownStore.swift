@@ -276,7 +276,7 @@ public actor FileSkillStore: SkillStore {
             do {
                 manifest = try parser.parse(text)
             } catch {
-                if !ignoringMalformedFiles || declaredSkillID(in: text) == requestedID?.rawValue {
+                if !ignoringMalformedFiles || (requestedID != nil && declaredSkillID(in: text) == requestedID?.rawValue) {
                     throw error
                 }
                 continue
