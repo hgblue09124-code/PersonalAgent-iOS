@@ -565,11 +565,15 @@ private struct StreamingChatBubble: View {
     @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
     @AppStorage("ui.chat.bubble") private var chatBubbleStyle = "soft"
 
+    private var maxBubbleWidth: CGFloat {
+        max(150, min(310, UIScreen.main.bounds.width - 160))
+    }
+
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             AgentChatAvatar(image: agentAvatar, isAgent: true)
             Text(content)
-                .font(.body).textSelection(.enabled).frame(maxWidth: 310, alignment: .leading)
+                .font(.body).textSelection(.enabled).frame(maxWidth: maxBubbleWidth, alignment: .leading)
                 .padding(.horizontal, 14).padding(.vertical, 11)
                 .background(
                     uiV2Enabled ? AnyShapeStyle(Color(uiColor: .secondarySystemBackground)) : AnyShapeStyle(.thinMaterial),
@@ -589,6 +593,10 @@ private struct ChatBubble: View {
     @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
     @AppStorage("ui.chat.bubble") private var chatBubbleStyle = "soft"
     @State private var didCopy = false
+
+    private var maxBubbleWidth: CGFloat {
+        max(150, min(310, UIScreen.main.bounds.width - 160))
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
@@ -612,7 +620,7 @@ private struct ChatBubble: View {
             Text(turn.content)
                 .font(.body)
                 .textSelection(.enabled)
-                .frame(maxWidth: 310, alignment: .leading)
+                .frame(maxWidth: maxBubbleWidth, alignment: .leading)
             if turn.role == .assistant && !uiV2Enabled {
                 HStack(spacing: 14) {
                     Button {
