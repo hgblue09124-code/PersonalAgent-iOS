@@ -94,7 +94,7 @@ struct ScreenScaffold<Content: View>: View {
         .frame(maxWidth: .infinity, maxHeight: scrollable ? nil : .infinity, alignment: .topLeading)
         .padding(.horizontal, AgentDesign.horizontalPadding)
         .padding(.top, 8)
-        .padding(.bottom, 32)
+        .padding(.bottom, scrollable ? 32 : 8)
     }
 
     private var screenHeader: some View {
