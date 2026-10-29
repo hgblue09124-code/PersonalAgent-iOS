@@ -360,6 +360,7 @@ final class KernelSession: ObservableObject {
                 return
             }
             var goalID: GoalID?
+            var skillFallbackNotice: String?
             do {
                 let lifecycle = self.state.lifecycle
                 if lifecycle == .stopped {
@@ -387,24 +388,37 @@ final class KernelSession: ObservableObject {
                         await self.refresh()
                         return
                     }
-                } else if let skillResult = try await self.composition.runChatSkillIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput, agentID: agentID) {
-                    guard skillResult.verified else {
-                        throw SkillExecutionError.verificationFailed(skillResult.skillID)
+                } else {
+                    do {
+                        if let skillResult = try await self.composition.runChatSkillIfMatched(
+                            goalStatement: normalizedStatement,
+                            inputContext: contextualInput,
+                            agentID: agentID
+                        ) {
+                            guard skillResult.verified else {
+                                throw SkillExecutionError.verificationFailed(skillResult.skillID)
+                            }
+                            let result = Self.cleanSkillResult(skillResult.outputJSON)
+                            guard !result.isEmpty else {
+                                throw KernelError.invalidStateUpdate("Skill completed without a result")
+                            }
+                            self.executionResult = result
+                            self.presentedResult = result
+                            self.executionOutcome = .verifiedSuccess(result)
+                            self.chatStreamPresentation.streamingResponse = ""
+                            self.discardPendingStreamingDelta()
+                            self.chatStreamPresentation.responseMetrics = nil
+                            self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
+                            self.executionProgress = nil
+                            await self.refresh()
+                            return
+                        }
+                    } catch let error as ChatSkillLoadError {
+                        // Loading/manifest failures are recoverable: disclose them, then
+                        // continue through the normal model runtime. Never catch policy,
+                        // approval, cancellation, or post-execution verification failures.
+                        skillFallbackNotice = "\(error.description) Em sẽ tiếp tục xử lý bằng chat thông thường trong phạm vi có thể."
                     }
-                    let result = Self.cleanSkillResult(skillResult.outputJSON)
-                    guard !result.isEmpty else {
-                        throw KernelError.invalidStateUpdate("Skill completed without a result")
-                    }
-                    self.executionResult = result
-                    self.presentedResult = result
-                    self.executionOutcome = .verifiedSuccess(result)
-                    self.chatStreamPresentation.streamingResponse = ""
-                    self.discardPendingStreamingDelta()
-                    self.chatStreamPresentation.responseMetrics = nil
-                    self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
-                    self.executionProgress = nil
-                    await self.refresh()
-                    return
                 }
 
                 goalID = try await self.composition.session.submitInput(contextualInput)
@@ -431,10 +445,11 @@ final class KernelSession: ObservableObject {
                         }
                     }
                 )
-                let result = Self.cleanModelResult(evaluation.reason)
-                guard !result.isEmpty else {
+                let modelResult = Self.cleanModelResult(evaluation.reason)
+                guard !modelResult.isEmpty else {
                     throw KernelError.invalidStateUpdate("Agent completed without a result")
                 }
+                let result = skillFallbackNotice.map { "\($0)\n\n\(modelResult)" } ?? modelResult
                 self.executionResult = result
                 self.presentedResult = result
                 self.refreshResponseMetrics()
@@ -483,11 +498,15 @@ final class KernelSession: ObservableObject {
                 self.chatStreamPresentation.streamingResponse = ""
                 self.discardPendingStreamingDelta()
                 let failureMessage: String
+                let underlyingFailure: String
                 if let kernelError = error as? KernelError {
-                    failureMessage = kernelError.description
+                    underlyingFailure = kernelError.description
                 } else {
-                    failureMessage = String(describing: error)
+                    underlyingFailure = String(describing: error)
                 }
+                failureMessage = skillFallbackNotice.map {
+                    "\($0)\n\nChat fallback cũng chưa hoàn tất: \(underlyingFailure)"
+                } ?? underlyingFailure
                 if let skillError = error as? SkillExecutionError {
                     switch skillError {
                     case let .policyDenied(reason), let .policyRequiresApproval(reason):
