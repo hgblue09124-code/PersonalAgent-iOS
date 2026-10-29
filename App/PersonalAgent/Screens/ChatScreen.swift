@@ -12,6 +12,7 @@ struct ChatScreen: View {
     @State private var showPromptLibrary = false
     @State private var showConversationSearch = false
     @State private var conversationSearchText = ""
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
     @FocusState private var focused: Bool
 
     private var currentTitle: String { session.conversations.first(where: { $0.id == session.currentConversationID })?.title ?? "Conversation" }
@@ -26,7 +27,7 @@ struct ChatScreen: View {
         ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false) {
             conversationHeader
             if showConversationSearch { conversationSearchBar }
-            agentPicker
+            if !isUIV2Enabled { agentPicker }
             messages
             if let error = session.lastError, !error.isEmpty {
                 failureNotice(error)
@@ -58,7 +59,9 @@ struct ChatScreen: View {
                 PremiumIconTile(systemImage: "bubble.left.and.bubble.right")
                 VStack(alignment: .leading, spacing: 2) {
                     Text(currentTitle).font(.headline).lineLimit(1)
-                    Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
+                    if !isUIV2Enabled {
+                        Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 Menu {
