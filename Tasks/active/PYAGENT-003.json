@@ -7,6 +7,7 @@
   "allowed_paths": [
     "Tasks/active/PYAGENT-003.json",
     "Composition/M8CompositionRoot.swift",
+    "Sources/Capabilities/Skills/SkillRuntime.swift",
     "Tests/PersonalAgentTests/PythonAgentPlanDispatchTests.swift"
   ],
   "forbidden_changes": [
