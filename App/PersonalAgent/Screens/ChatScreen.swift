@@ -233,6 +233,7 @@ struct ChatScreen: View {
 private struct ChatComposerPanel: View {
     @ObservedObject var session: KernelSession
     @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
     @ObservedObject var streamPresentation: ChatStreamPresentation
     @Binding var message: String
     var focused: FocusState<Bool>.Binding
@@ -241,7 +242,13 @@ private struct ChatComposerPanel: View {
     var body: some View {
         AgentMessengerPanel {
             HStack(alignment: .bottom, spacing: 9) {
-                TextField("Message your Agent…", text: $message, axis: .vertical).focused(focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(onSend)
+                TextField("Message your Agent…", text: $message, axis: .vertical)
+                    .focused(focused)
+                    .textFieldStyle(.plain)
+                    .lineLimit(1...5)
+                    .submitLabel(.send)
+                    .onSubmit(onSend)
+                    .accessibilityLabel("Message your Agent")
                 if session.isSubmitting {
                     Button(action: session.cancelCurrentGeneration) {
                         Image(systemName: "stop.fill")
@@ -260,12 +267,28 @@ private struct ChatComposerPanel: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(width: 34, height: 34)
-                            .background(AgentDesign.accent, in: Circle())
+                            .background(
+                                isUIV2Enabled ? AgentMessengerTheme.accent(chatTheme) : AgentDesign.accent,
+                                in: Circle()
+                            )
                             .contentShape(Circle())
                     }
                     .buttonStyle(.plain)
                     .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityLabel("Send message")
+                }
+            }
+            .padding(isUIV2Enabled ? 10 : 0)
+            .background {
+                if isUIV2Enabled {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color(uiColor: .secondarySystemBackground))
+                }
+            }
+            .overlay {
+                if isUIV2Enabled {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(.primary.opacity(0.06), lineWidth: 1)
                 }
             }
             if session.isSubmitting {
@@ -366,6 +389,7 @@ private struct ChatMessagesPanel: View {
                         }.padding(.vertical, 4)
                     }
                     .frame(minHeight: 120, maxHeight: .infinity)
+                    .scrollDismissesKeyboard(.interactively)
                     .onChange(of: history.count) { _, _ in if let id = history.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
                     .onChange(of: streamPresentation.streamingResponse) { _, value in
                         guard !value.isEmpty else { return }
