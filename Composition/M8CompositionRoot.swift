@@ -1061,6 +1061,18 @@ extension M8CompositionRoot {
             return nil
         } catch AgentTeamOrchestratorError.noMatchingSkills {
             return nil
+        } catch let error as SkillMarkdownError {
+            throw ChatSkillLoadError.unavailable("manifest không hợp lệ: \(error)")
+        } catch SkillRuntimeError.unknownSkill(let id) {
+            throw ChatSkillLoadError.unavailable("không tìm thấy Skill \(id.rawValue)")
+        } catch SkillRuntimeError.unavailableSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Skill \(id.rawValue) chưa có executor khả dụng")
+        } catch SkillExecutionError.unknownSkill(let id) {
+            throw ChatSkillLoadError.unavailable("không tìm thấy Skill \(id.rawValue)")
+        } catch SkillExecutionError.unavailableSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Skill \(id.rawValue) chưa có executor khả dụng")
+        } catch SkillAgentOrchestratorError.agentDeclaresMissingSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Agent tham chiếu Skill không tồn tại: \(id.rawValue)")
         }
     }
 

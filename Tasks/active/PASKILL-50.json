@@ -3,13 +3,14 @@
   "title": "Keep chat resilient when Skills fail to load",
   "status": "in_progress",
   "goal": "Prevent malformed or unavailable Skills from freezing chat: isolate malformed manifests, report the affected Skill when recoverable, and continue through normal Agent chat fallback without bypassing policy or verification.",
-  "context": "FileSkillStore.loadAll currently throws on the first malformed markdown file. Because both discovery and load use this shared operation, one broken custom Skill can poison the whole store and make unrelated chat Skill requests fail with malformedSkill. Isolate malformed siblings while retaining duplicate-ID rejection and targeted parse errors. Follow-up requirement: if a requested Skill cannot be loaded or resolved, the chat should explicitly disclose the Skill failure and continue with the normal model/runtime path when safe, instead of stopping the entire conversation.",
+  "context": "FileSkillStore.loadAll currently throws on the first malformed markdown file. Because both discovery and load use this shared operation, one broken custom Skill can poison the whole store and make unrelated chat Skill requests fail with malformedSkill. Isolate malformed siblings while retaining duplicate-ID rejection and targeted parse errors. Follow-up requirement: if a requested Skill cannot be loaded or resolved, the chat should explicitly disclose the Skill failure and continue with the normal model/runtime path when safe, instead of stopping the entire conversation. Team-mode chat uses a separate orchestrator path, so recoverable missing/malformed Skill errors must be normalized to the same chat-load error used by single-agent chat; policy and verification errors must still propagate.",
   "allowed_paths": [
     "Tasks/active/PASKILL-50.json",
     "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
     "Tests/PersonalAgentTests/SkillMarkdownPersistenceTests.swift",
     "App/PersonalAgent/KernelSession.swift",
-    "Composition/M8CompositionRoot.swift"
+    "Composition/M8CompositionRoot.swift",
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
   ],
   "forbidden_changes": [
     "Do not make malformed Skills executable or infer missing manifest fields.",
@@ -24,7 +25,8 @@
     "Duplicate valid Skill IDs remain a store-level error.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
     "Recoverable Skill-load/manifest errors in chat are identified to the user and continue through normal chat fallback.",
-    "Policy denial, required approval, cancellation, and execution verification failures never trigger fallback that could bypass the security boundary."
+    "Policy denial, required approval, cancellation, and execution verification failures never trigger fallback that could bypass the security boundary.",
+    "Team-mode chat maps malformed or missing declared Skills to the same recoverable chat-load error as single-agent chat, while verification and policy errors remain non-fallback."
   ],
   "verification": [
     "python Scripts/agent_task_guard.py validate Tasks/active/PASKILL-50.json",
