@@ -13,6 +13,8 @@ struct ChatScreen: View {
     @State private var showConversationSearch = false
     @State private var conversationSearchText = ""
     @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
+    @AppStorage("profile.agentAvatar.data") private var agentAvatarData: Data = Data()
+    @State private var headerAgentAvatar: UIImage?
     @FocusState private var focused: Bool
 
     private var currentTitle: String { session.conversations.first(where: { $0.id == session.currentConversationID })?.title ?? "Conversation" }
@@ -37,6 +39,10 @@ struct ChatScreen: View {
         .task {
             await session.prepareActiveModel()
         }
+        .onAppear { headerAgentAvatar = agentAvatarData.isEmpty ? nil : UIImage(data: agentAvatarData) }
+        .onChange(of: agentAvatarData) { _, data in
+            headerAgentAvatar = data.isEmpty ? nil : UIImage(data: data)
+        }
         .alert("Rename conversation", isPresented: $showRename) {
             TextField("Conversation name", text: $renameText)
             Button("Cancel", role: .cancel) {}
@@ -55,11 +61,19 @@ struct ChatScreen: View {
 
     private var conversationHeader: some View {
         AgentMessengerPanel {
-            HStack(spacing: 12) {
-                PremiumIconTile(systemImage: "bubble.left.and.bubble.right")
+            HStack(spacing: 10) {
+                if isUIV2Enabled {
+                    AgentChatAvatar(image: headerAgentAvatar, isAgent: true)
+                        .frame(width: 40, height: 40)
+                } else {
+                    PremiumIconTile(systemImage: "bubble.left.and.bubble.right")
+                }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(currentTitle).font(.headline).lineLimit(1)
-                    if !isUIV2Enabled {
+                    Text(isUIV2Enabled ? (session.agentManifests.first(where: { $0.id == session.selectedAgentID })?.name ?? "Personal Agent") : currentTitle)
+                        .font(.headline).lineLimit(1)
+                    if isUIV2Enabled {
+                        Text(currentTitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    } else {
                         Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -259,12 +273,12 @@ private struct ChatComposerPanel: View {
                     Text(streamPresentation.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
                         .font(.caption).foregroundStyle(.secondary)
                     Spacer(minLength: 4)
-                    if let metrics = streamPresentation.responseMetrics {
+                    if !isUIV2Enabled, let metrics = streamPresentation.responseMetrics {
                         Text("~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
                             .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                     }
                 }
-            } else if let metrics = streamPresentation.responseMetrics {
+            } else if !isUIV2Enabled, let metrics = streamPresentation.responseMetrics {
                 HStack(spacing: 6) {
                     Image(systemName: "speedometer").foregroundStyle(.secondary)
                     Text("Last response · ~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
@@ -598,7 +612,7 @@ private struct ChatBubble: View {
                 .font(.body)
                 .textSelection(.enabled)
                 .frame(maxWidth: 310, alignment: .leading)
-            if turn.role == .assistant {
+            if turn.role == .assistant && !uiV2Enabled {
                 HStack(spacing: 14) {
                     Button {
                         UIPasteboard.general.string = turn.content
