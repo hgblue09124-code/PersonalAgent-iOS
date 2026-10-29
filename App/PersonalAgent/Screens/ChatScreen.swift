@@ -516,6 +516,7 @@ private struct AgentPromptLibrary: View {
 private struct AgentChatAvatar: View {
     let image: UIImage?
     var isAgent: Bool = false
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
 
     var body: some View {
         Group {
@@ -528,8 +529,8 @@ private struct AgentChatAvatar: View {
                     .resizable()
                     .scaledToFit()
                     .padding(8)
-                    .foregroundStyle(isAgent ? AgentMessengerTheme.accent("sakura") : .secondary)
-                    .background(isAgent ? AgentMessengerTheme.accent("sakura").opacity(0.12) : Color.secondary.opacity(0.10))
+                    .foregroundStyle(isAgent ? AgentMessengerTheme.accent(chatTheme) : Color.secondary)
+                    .background(isAgent ? AgentMessengerTheme.accent(chatTheme).opacity(0.12) : Color.secondary.opacity(0.10))
             }
         }
         .frame(width: 36, height: 36)
