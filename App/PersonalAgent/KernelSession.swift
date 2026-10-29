@@ -367,26 +367,39 @@ final class KernelSession: ObservableObject {
                     try await self.composition.session.start()
                 }
                 if useTeamMode {
-                    if let teamResult = try await self.composition.runChatTeamIfMatched(goalStatement: normalizedStatement, inputContext: contextualInput) {
-                        if let unverified = teamResult.members.first(where: { !$0.skillResult.verified }) {
-                            throw SkillExecutionError.verificationFailed(unverified.skillResult.skillID)
+                    do {
+                        if let teamResult = try await self.composition.runChatTeamIfMatched(
+                            goalStatement: normalizedStatement,
+                            inputContext: contextualInput
+                        ) {
+                            if let unverified = teamResult.members.first(where: { !$0.skillResult.verified }) {
+                                throw SkillExecutionError.verificationFailed(unverified.skillResult.skillID)
+                            }
+                            let result = teamResult.members.map { member in
+                                "\(member.agentName) · \(member.skillResult.skillID.rawValue)\n\(Self.cleanSkillResult(member.skillResult.outputJSON))"
+                            }.joined(separator: "\n\n")
+                            guard !result.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                                throw KernelError.invalidStateUpdate("Agent team completed without a result")
+                            }
+                            self.executionResult = result
+                            self.presentedResult = result
+                            self.executionOutcome = .verifiedSuccess(result)
+                            self.chatStreamPresentation.streamingResponse = ""
+                            self.discardPendingStreamingDelta()
+                            self.chatStreamPresentation.responseMetrics = nil
+                            self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
+                            self.executionProgress = nil
+                            await self.refresh()
+                            return
                         }
-                        let result = teamResult.members.map { member in
-                            "\(member.agentName) · \(member.skillResult.skillID.rawValue)\n\(Self.cleanSkillResult(member.skillResult.outputJSON))"
-                        }.joined(separator: "\n\n")
-                        guard !result.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                            throw KernelError.invalidStateUpdate("Agent team completed without a result")
-                        }
-                        self.executionResult = result
-                        self.presentedResult = result
-                        self.executionOutcome = .verifiedSuccess(result)
-                        self.chatStreamPresentation.streamingResponse = ""
-                        self.discardPendingStreamingDelta()
-                        self.chatStreamPresentation.responseMetrics = nil
-                        self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
-                        self.executionProgress = nil
-                        await self.refresh()
-                        return
+                    } catch let error as ChatSkillLoadError {
+                        skillFallbackNotice = "\(error.description) Em sẽ tiếp tục xử lý bằng chat thông thường trong phạm vi có thể."
+                    } catch let error as SkillMarkdownError {
+                        skillFallbackNotice = "Skill bị lỗi khi nạp manifest: \(error). Em sẽ tiếp tục bằng chat thông thường trong phạm vi có thể."
+                    } catch SkillExecutionError.unknownSkill(let id) {
+                        skillFallbackNotice = "Không tìm thấy Skill \(id.rawValue). Em sẽ tiếp tục bằng chat thông thường trong phạm vi có thể."
+                    } catch SkillExecutionError.unavailableSkill(let id) {
+                        skillFallbackNotice = "Skill \(id.rawValue) chưa có executor khả dụng. Em sẽ tiếp tục bằng chat thông thường trong phạm vi có thể."
                     }
                 } else {
                     do {
