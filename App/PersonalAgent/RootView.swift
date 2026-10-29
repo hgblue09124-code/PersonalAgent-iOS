@@ -52,38 +52,55 @@ struct RootView: View {
 private struct PersonalAgentV2Shell: View {
     @ObservedObject var session: KernelSession
     @Binding var showWorkspace: Bool
+    @State private var showProfile = false
+    @AppStorage("profile.avatar.data") private var profileAvatarData: Data = Data()
+    @State private var profileAvatar: UIImage?
 
     var body: some View {
-        TabView {
-            NavigationStack {
-                PersonalAgentMessagesScreen(session: session)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button { showWorkspace = true } label: {
-                                Image(systemName: "circle.hexagongrid.fill")
+        NavigationStack {
+            ChatScreen(session: session)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { showProfile = true } label: {
+                            Group {
+                                if let profileAvatar {
+                                    Image(uiImage: profileAvatar)
+                                        .resizable()
+                                        .scaledToFill()
+                                } else {
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(3)
+                                }
                             }
-                            .accessibilityLabel("Open Agent workspace")
+                            .frame(width: 32, height: 32)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(.primary.opacity(0.10), lineWidth: 1))
                         }
+                        .accessibilityLabel("Profile and chat appearance")
                     }
-            }
-            .tabItem { Label("Messages", systemImage: "bubble.left.and.bubble.right.fill") }
-
-            NavigationStack {
-                TasksScreen(session: session)
-            }
-            .tabItem { Label("Tasks", systemImage: "checklist") }
-
-            NavigationStack {
-                PersonalAgentProfileScreen()
-            }
-            .tabItem { Label("Profile", systemImage: "person.crop.circle") }
-
-            NavigationStack {
-                SettingsScreen(session: session)
-            }
-            .tabItem { Label("Settings", systemImage: "gearshape") }
+                }
+                .sheet(isPresented: $showProfile) {
+                    NavigationStack {
+                        PersonalAgentProfileScreen()
+                            .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button("Done") { showProfile = false }
+                                }
+                            }
+                    }
+                }
         }
         .tint(AgentDesign.accent)
+        .onAppear {
+            if profileAvatar == nil, !profileAvatarData.isEmpty {
+                profileAvatar = UIImage(data: profileAvatarData)
+            }
+        }
+        .onChange(of: profileAvatarData) { _, data in
+            profileAvatar = data.isEmpty ? nil : UIImage(data: data)
+        }
     }
 }
 
@@ -91,6 +108,9 @@ private struct PersonalAgentMessagesScreen: View {
     @ObservedObject var session: KernelSession
     @State private var searchText = ""
     @State private var showNewConversation = false
+    @AppStorage("profile.avatar.data") private var profileAvatarData: Data = Data()
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
+    @State private var profileAvatar: UIImage?
 
     private var visibleConversations: [ChatConversation] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -105,7 +125,7 @@ private struct PersonalAgentMessagesScreen: View {
 
     var body: some View {
         ScreenScaffold(title: "Messages", systemImage: "bubble.left.and.bubble.right") {
-            GlassPanel {
+            AgentMessengerPanel {
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                     TextField("Search conversations", text: $searchText)
@@ -124,7 +144,7 @@ private struct PersonalAgentMessagesScreen: View {
             }
 
             if visibleConversations.isEmpty {
-                GlassPanel {
+                AgentMessengerPanel {
                     ContentUnavailableView(
                         "No conversations",
                         systemImage: "bubble.left.and.bubble.right",
@@ -151,18 +171,22 @@ private struct PersonalAgentMessagesScreen: View {
                             }
                     } label: {
                         HStack(spacing: 12) {
-                            ZStack {
-                                Circle()
-                                    .fill(LinearGradient(
-                                        colors: [AgentDesign.accent, AgentDesign.accentDeep],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
-                                Image(systemName: "sparkles")
-                                    .font(.title3.weight(.semibold))
-                                    .foregroundStyle(.white)
+                            Group {
+                                if let profileAvatar {
+                                    Image(uiImage: profileAvatar)
+                                        .resizable()
+                                        .scaledToFill()
+                                } else {
+                                    Image(systemName: "person.crop.circle.fill")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .foregroundStyle(AgentMessengerTheme.accent(chatTheme).opacity(0.9))
+                                        .padding(4)
+                                }
                             }
                             .frame(width: 52, height: 52)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(.primary.opacity(0.08), lineWidth: 1))
 
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(conversation.title)
@@ -197,6 +221,14 @@ private struct PersonalAgentMessagesScreen: View {
         .navigationDestination(isPresented: $showNewConversation) {
             ChatScreen(session: session)
         }
+        .onAppear {
+            if profileAvatar == nil, !profileAvatarData.isEmpty {
+                profileAvatar = UIImage(data: profileAvatarData)
+            }
+        }
+        .onChange(of: profileAvatarData) { _, data in
+            profileAvatar = data.isEmpty ? nil : UIImage(data: data)
+        }
     }
 }
 
@@ -204,12 +236,17 @@ private struct PersonalAgentProfileScreen: View {
     @AppStorage("profile.displayName") private var displayName = "Personal Agent"
     @AppStorage("profile.bio") private var bio = "Your personal AI workspace."
     @AppStorage("profile.avatar.data") private var avatarData: Data = Data()
+    @AppStorage("profile.agentAvatar.data") private var agentAvatarData: Data = Data()
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
+    @AppStorage("ui.chat.bubble") private var chatBubbleStyle = "soft"
     @State private var avatarImage: UIImage?
+    @State private var agentAvatarImage: UIImage?
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var selectedAgentPhoto: PhotosPickerItem?
 
     var body: some View {
         ScreenScaffold(title: "Profile", systemImage: "person.crop.circle") {
-            GlassPanel {
+            AgentMessengerPanel {
                 VStack(spacing: 14) {
                     Group {
                         if let image = avatarImage {
@@ -253,7 +290,73 @@ private struct PersonalAgentProfileScreen: View {
                 }
             }
 
-            GlassPanel {
+            AgentMessengerPanel {
+                VStack(spacing: 12) {
+                    Label("Agent avatar", systemImage: "sparkles")
+                        .font(.headline)
+                    Group {
+                        if let agentAvatarImage {
+                            Image(uiImage: agentAvatarImage)
+                                .resizable()
+                                .scaledToFill()
+                        } else {
+                            ZStack {
+                                Circle().fill(AgentMessengerTheme.accent(chatTheme).opacity(0.14))
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 42, weight: .semibold))
+                                    .foregroundStyle(AgentMessengerTheme.accent(chatTheme))
+                            }
+                        }
+                    }
+                    .frame(width: 92, height: 92)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(.primary.opacity(0.08), lineWidth: 1))
+
+                    HStack(spacing: 10) {
+                        PhotosPicker(selection: $selectedAgentPhoto, matching: .images) {
+                            Label("Change Agent photo", systemImage: "photo")
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        if !agentAvatarData.isEmpty {
+                            Button(role: .destructive) {
+                                agentAvatarData = Data()
+                                agentAvatarImage = nil
+                            } label: {
+                                Label("Reset", systemImage: "arrow.counterclockwise")
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    Text("This image is independent from your profile photo and appears beside Agent replies.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(maxWidth: .infinity)
+            }
+
+            AgentMessengerPanel {
+                Label("Chat appearance", systemImage: "paintpalette")
+                    .font(.headline)
+                Picker("Theme", selection: $chatTheme) {
+                    Text("Sakura").tag("sakura")
+                    Text("Ocean").tag("ocean")
+                    Text("Emerald").tag("emerald")
+                }
+                .pickerStyle(.segmented)
+                Picker("Message bubbles", selection: $chatBubbleStyle) {
+                    Text("Soft").tag("soft")
+                    Text("Round").tag("round")
+                    Text("Compact").tag("compact")
+                }
+                .pickerStyle(.segmented)
+                Text("Changes apply immediately to chat. The background stays plain to keep the interface light.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            AgentMessengerPanel {
                 Label("Personal profile", systemImage: "person.text.rectangle")
                     .font(.headline)
                 Text("Your name, bio and avatar are stored locally on this device. They do not change Agent permissions or execution behavior.")
@@ -265,9 +368,15 @@ private struct PersonalAgentProfileScreen: View {
             if avatarImage == nil, !avatarData.isEmpty {
                 avatarImage = UIImage(data: avatarData)
             }
+            if agentAvatarImage == nil, !agentAvatarData.isEmpty {
+                agentAvatarImage = UIImage(data: agentAvatarData)
+            }
         }
         .onChange(of: avatarData) { _, data in
             avatarImage = data.isEmpty ? nil : UIImage(data: data)
+        }
+        .onChange(of: agentAvatarData) { _, data in
+            agentAvatarImage = data.isEmpty ? nil : UIImage(data: data)
         }
         .onChange(of: selectedPhoto) { _, item in
             guard let item else { return }
@@ -285,6 +394,25 @@ private struct PersonalAgentProfileScreen: View {
                 }
                 if let compressed = resized.jpegData(compressionQuality: 0.78) {
                     avatarData = compressed
+                }
+            }
+        }
+        .onChange(of: selectedAgentPhoto) { _, item in
+            guard let item else { return }
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) else { return }
+                let target = CGSize(width: 512, height: 512)
+                let renderer = UIGraphicsImageRenderer(size: target)
+                let resized = renderer.image { _ in
+                    let scale = max(target.width / image.size.width, target.height / image.size.height)
+                    let width = image.size.width * scale
+                    let height = image.size.height * scale
+                    let rect = CGRect(x: (target.width - width) / 2, y: (target.height - height) / 2, width: width, height: height)
+                    image.draw(in: rect)
+                }
+                if let compressed = resized.jpegData(compressionQuality: 0.78) {
+                    agentAvatarData = compressed
                 }
             }
         }

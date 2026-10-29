@@ -12,6 +12,9 @@ struct ChatScreen: View {
     @State private var showPromptLibrary = false
     @State private var showConversationSearch = false
     @State private var conversationSearchText = ""
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
+    @AppStorage("profile.agentAvatar.data") private var agentAvatarData: Data = Data()
+    @State private var headerAgentAvatar: UIImage?
     @FocusState private var focused: Bool
 
     private var currentTitle: String { session.conversations.first(where: { $0.id == session.currentConversationID })?.title ?? "Conversation" }
@@ -23,10 +26,10 @@ struct ChatScreen: View {
     }
 
     var body: some View {
-        ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false) {
+        ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false, showsHeader: !isUIV2Enabled) {
             conversationHeader
             if showConversationSearch { conversationSearchBar }
-            agentPicker
+            if !isUIV2Enabled { agentPicker }
             messages
             if let error = session.lastError, !error.isEmpty {
                 failureNotice(error)
@@ -35,6 +38,10 @@ struct ChatScreen: View {
         }
         .task {
             await session.prepareActiveModel()
+        }
+        .onAppear { headerAgentAvatar = agentAvatarData.isEmpty ? nil : UIImage(data: agentAvatarData) }
+        .onChange(of: agentAvatarData) { _, data in
+            headerAgentAvatar = data.isEmpty ? nil : UIImage(data: data)
         }
         .alert("Rename conversation", isPresented: $showRename) {
             TextField("Conversation name", text: $renameText)
@@ -53,12 +60,22 @@ struct ChatScreen: View {
     }
 
     private var conversationHeader: some View {
-        GlassPanel {
-            HStack(spacing: 12) {
-                PremiumIconTile(systemImage: "bubble.left.and.bubble.right")
+        AgentMessengerPanel {
+            HStack(spacing: 10) {
+                if isUIV2Enabled {
+                    AgentChatAvatar(image: headerAgentAvatar, isAgent: true)
+                        .frame(width: 40, height: 40)
+                } else {
+                    PremiumIconTile(systemImage: "bubble.left.and.bubble.right")
+                }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(currentTitle).font(.headline).lineLimit(1)
-                    Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
+                    Text(isUIV2Enabled ? (session.agentManifests.first(where: { $0.id == session.selectedAgentID })?.name ?? "Personal Agent") : currentTitle)
+                        .font(.headline).lineLimit(1)
+                    if isUIV2Enabled {
+                        Text(currentTitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    } else {
+                        Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 Menu {
@@ -111,7 +128,7 @@ struct ChatScreen: View {
 
     @ViewBuilder private var agentPicker: some View {
         if !session.agentManifests.isEmpty {
-            GlassPanel {
+            AgentMessengerPanel {
                 Menu {
                     ForEach(session.agentManifests, id: \.id) { agent in
                         Button { session.selectAgent(id: agent.id) } label: { HStack { Text(agent.name); if agent.id == session.selectedAgentID { Spacer(); Image(systemName: "checkmark") } } }
@@ -147,7 +164,7 @@ struct ChatScreen: View {
     }
 
     private var conversationSearchBar: some View {
-        GlassPanel {
+        AgentMessengerPanel {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                 TextField("Search messages…", text: $conversationSearchText)
@@ -185,7 +202,7 @@ struct ChatScreen: View {
 
     
     private func failureNotice(_ error: String) -> some View {
-        GlassPanel {
+        AgentMessengerPanel {
             Label("Agent could not complete the request", systemImage: "exclamationmark.triangle.fill")
                 .font(.headline)
                 .foregroundStyle(.red)
@@ -215,15 +232,23 @@ struct ChatScreen: View {
 
 private struct ChatComposerPanel: View {
     @ObservedObject var session: KernelSession
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
     @ObservedObject var streamPresentation: ChatStreamPresentation
     @Binding var message: String
     var focused: FocusState<Bool>.Binding
     let onSend: () -> Void
 
     var body: some View {
-        GlassPanel {
+        AgentMessengerPanel {
             HStack(alignment: .bottom, spacing: 9) {
-                TextField("Message your Agent…", text: $message, axis: .vertical).focused(focused).textFieldStyle(.plain).lineLimit(1...5).submitLabel(.send).onSubmit(onSend)
+                TextField("Message your Agent…", text: $message, axis: .vertical)
+                    .focused(focused)
+                    .textFieldStyle(.plain)
+                    .lineLimit(1...5)
+                    .submitLabel(.send)
+                    .onSubmit(onSend)
+                    .accessibilityLabel("Message your Agent")
                 if session.isSubmitting {
                     Button(action: session.cancelCurrentGeneration) {
                         Image(systemName: "stop.fill")
@@ -242,12 +267,28 @@ private struct ChatComposerPanel: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(width: 34, height: 34)
-                            .background(AgentDesign.accent, in: Circle())
+                            .background(
+                                isUIV2Enabled ? AgentMessengerTheme.accent(chatTheme) : AgentDesign.accent,
+                                in: Circle()
+                            )
                             .contentShape(Circle())
                     }
                     .buttonStyle(.plain)
                     .disabled(message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityLabel("Send message")
+                }
+            }
+            .padding(isUIV2Enabled ? 10 : 0)
+            .background {
+                if isUIV2Enabled {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color(uiColor: .secondarySystemBackground))
+                }
+            }
+            .overlay {
+                if isUIV2Enabled {
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(.primary.opacity(0.06), lineWidth: 1)
                 }
             }
             if session.isSubmitting {
@@ -256,12 +297,12 @@ private struct ChatComposerPanel: View {
                     Text(streamPresentation.streamingResponse.isEmpty ? "Agent is thinking…" : "Generating response…")
                         .font(.caption).foregroundStyle(.secondary)
                     Spacer(minLength: 4)
-                    if let metrics = streamPresentation.responseMetrics {
+                    if !isUIV2Enabled, let metrics = streamPresentation.responseMetrics {
                         Text("~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
                             .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                     }
                 }
-            } else if let metrics = streamPresentation.responseMetrics {
+            } else if !isUIV2Enabled, let metrics = streamPresentation.responseMetrics {
                 HStack(spacing: 6) {
                     Image(systemName: "speedometer").foregroundStyle(.secondary)
                     Text("Last response · ~\(metrics.estimatedOutputTokens) tokens · \(metrics.estimatedTokensPerSecond, specifier: "%.1f") tok/s")
@@ -295,12 +336,14 @@ private struct ChatMessagesPanel: View {
     @ObservedObject var streamPresentation: ChatStreamPresentation
     @State private var lastStreamAutoScroll: TimeInterval = 0
     @AppStorage("profile.avatar.data") private var profileAvatarData: Data = Data()
+    @AppStorage("profile.agentAvatar.data") private var agentAvatarData: Data = Data()
     @State private var profileAvatar: UIImage?
+    @State private var agentAvatar: UIImage?
     let onOpenPromptLibrary: () -> Void
     let onSelectPrompt: (String) -> Void
 
     var body: some View {
-        GlassPanel {
+        AgentMessengerPanel {
             if history.isEmpty && hasConversationHistory && isSearchActive {
                 ContentUnavailableView("No matching messages", systemImage: "magnifyingglass",
                     description: Text("Try a different keyword or clear the search."))
@@ -337,13 +380,16 @@ private struct ChatMessagesPanel: View {
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 14) {
-                            ForEach(history) { turn in ChatBubble(turn: turn, profileAvatar: profileAvatar).id(turn.id) }
+                            ForEach(history) { turn in
+                                ChatBubble(turn: turn, profileAvatar: profileAvatar, agentAvatar: agentAvatar).id(turn.id)
+                            }
                             if !streamPresentation.streamingResponse.isEmpty {
-                                StreamingChatBubble(content: streamPresentation.streamingResponse).id("streaming-response")
+                                StreamingChatBubble(content: streamPresentation.streamingResponse, agentAvatar: agentAvatar).id("streaming-response")
                             }
                         }.padding(.vertical, 4)
                     }
                     .frame(minHeight: 120, maxHeight: .infinity)
+                    .scrollDismissesKeyboard(.interactively)
                     .onChange(of: history.count) { _, _ in if let id = history.last?.id { withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(id, anchor: .bottom) } } }
                     .onChange(of: streamPresentation.streamingResponse) { _, value in
                         guard !value.isEmpty else { return }
@@ -361,9 +407,15 @@ private struct ChatMessagesPanel: View {
             if profileAvatar == nil, !profileAvatarData.isEmpty {
                 profileAvatar = UIImage(data: profileAvatarData)
             }
+            if agentAvatar == nil, !agentAvatarData.isEmpty {
+                agentAvatar = UIImage(data: agentAvatarData)
+            }
         }
         .onChange(of: profileAvatarData) { _, data in
             profileAvatar = data.isEmpty ? nil : UIImage(data: data)
+        }
+        .onChange(of: agentAvatarData) { _, data in
+            agentAvatar = data.isEmpty ? nil : UIImage(data: data)
         }
     }
 }
@@ -503,16 +555,55 @@ private struct AgentPromptLibrary: View {
     }
 }
 
+private struct AgentChatAvatar: View {
+    let image: UIImage?
+    var isAgent: Bool = false
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Image(systemName: isAgent ? "sparkles" : "person.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(8)
+                    .foregroundStyle(isAgent ? AgentMessengerTheme.accent(chatTheme) : Color.secondary)
+                    .background(isAgent ? AgentMessengerTheme.accent(chatTheme).opacity(0.12) : Color.secondary.opacity(0.10))
+            }
+        }
+        .frame(width: 36, height: 36)
+        .clipShape(Circle())
+        .overlay(Circle().stroke(.primary.opacity(0.08), lineWidth: 1))
+        .accessibilityLabel(isAgent ? "Agent avatar" : "User avatar")
+    }
+}
+
 private struct StreamingChatBubble: View {
     let content: String
+    let agentAvatar: UIImage?
+    @AppStorage("ui.v2.enabled") private var uiV2Enabled = false
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
+    @AppStorage("ui.chat.bubble") private var chatBubbleStyle = "soft"
+
+    private var maxBubbleWidth: CGFloat {
+        max(150, min(310, UIScreen.main.bounds.width - 160))
+    }
+
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
-            PremiumIconTile(systemImage: "sparkles")
+            AgentChatAvatar(image: agentAvatar, isAgent: true)
             Text(content)
-                .font(.body).textSelection(.enabled).frame(maxWidth: 310, alignment: .leading)
+                .font(.body).textSelection(.enabled).frame(maxWidth: maxBubbleWidth, alignment: .leading)
                 .padding(.horizontal, 14).padding(.vertical, 11)
-                .background(AnyShapeStyle(.thinMaterial), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
+                .background(
+                    uiV2Enabled ? AnyShapeStyle(Color(uiColor: .secondarySystemBackground)) : AnyShapeStyle(.thinMaterial),
+                    in: RoundedRectangle(cornerRadius: uiV2Enabled ? AgentMessengerTheme.bubbleRadius(chatBubbleStyle) : 18, style: .continuous)
+                )
+                .overlay(RoundedRectangle(cornerRadius: uiV2Enabled ? AgentMessengerTheme.bubbleRadius(chatBubbleStyle) : 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
             Spacer(minLength: 18)
         }
     }
@@ -521,27 +612,29 @@ private struct StreamingChatBubble: View {
 private struct ChatBubble: View {
     let turn: ChatTurn
     let profileAvatar: UIImage?
+    let agentAvatar: UIImage?
+    @AppStorage("ui.v2.enabled") private var uiV2Enabled = false
+    @AppStorage("ui.chat.theme") private var chatTheme = "sakura"
+    @AppStorage("ui.chat.bubble") private var chatBubbleStyle = "soft"
     @State private var didCopy = false
+
+    private var maxBubbleWidth: CGFloat {
+        max(150, min(310, UIScreen.main.bounds.width - 160))
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             if turn.role == .assistant {
-                PremiumIconTile(systemImage: "sparkles")
+                AgentChatAvatar(image: agentAvatar, isAgent: true)
                 bubble
                 Spacer(minLength: 18)
             } else {
                 Spacer(minLength: 18)
                 bubble
                 if let profileAvatar {
-                    Image(uiImage: profileAvatar)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 34, height: 34)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(.primary.opacity(0.08), lineWidth: 1))
-                        .accessibilityLabel("Profile avatar")
+                    AgentChatAvatar(image: profileAvatar)
                 } else {
-                    PremiumIconTile(systemImage: "person.fill", tint: .secondary)
+                    AgentChatAvatar(image: nil)
                 }
             }
         }
@@ -551,8 +644,8 @@ private struct ChatBubble: View {
             Text(turn.content)
                 .font(.body)
                 .textSelection(.enabled)
-                .frame(maxWidth: 310, alignment: .leading)
-            if turn.role == .assistant {
+                .frame(maxWidth: maxBubbleWidth, alignment: .leading)
+            if turn.role == .assistant && !uiV2Enabled {
                 HStack(spacing: 14) {
                     Button {
                         UIPasteboard.general.string = turn.content
@@ -573,7 +666,25 @@ private struct ChatBubble: View {
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 11)
-        .background(turn.role == .assistant ? AnyShapeStyle(.thinMaterial) : AnyShapeStyle(AgentDesign.accent.opacity(0.11)), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
+        .background(
+            uiV2Enabled
+                ? (turn.role == .assistant
+                    ? AnyShapeStyle(Color(uiColor: .secondarySystemBackground))
+                    : AnyShapeStyle(AgentMessengerTheme.accent(chatTheme).opacity(0.22)))
+                : (turn.role == .assistant ? AnyShapeStyle(.thinMaterial) : AnyShapeStyle(AgentDesign.accent.opacity(0.11))),
+            in: RoundedRectangle(cornerRadius: uiV2Enabled ? AgentMessengerTheme.bubbleRadius(chatBubbleStyle) : 18, style: .continuous)
+        )
+        .overlay(RoundedRectangle(cornerRadius: uiV2Enabled ? AgentMessengerTheme.bubbleRadius(chatBubbleStyle) : 18, style: .continuous).stroke(.primary.opacity(0.045), lineWidth: 1))
+        .contextMenu {
+            Button {
+                UIPasteboard.general.string = turn.content
+                didCopy = true
+            } label: {
+                Label("Copy message", systemImage: "doc.on.doc")
+            }
+            ShareLink(item: turn.content) {
+                Label("Share message", systemImage: "square.and.arrow.up")
+            }
+        }
     }
 }
