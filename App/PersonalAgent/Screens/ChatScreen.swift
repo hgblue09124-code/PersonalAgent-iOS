@@ -26,7 +26,7 @@ struct ChatScreen: View {
     }
 
     var body: some View {
-        ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false) {
+        ScreenScaffold(title: "Chat", systemImage: "bubble.left.and.bubble.right", scrollable: false, showsHeader: !isUIV2Enabled) {
             conversationHeader
             if showConversationSearch { conversationSearchBar }
             if !isUIV2Enabled { agentPicker }
