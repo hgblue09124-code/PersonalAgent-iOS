@@ -1,0 +1,36 @@
+{
+  "id": "PAUI-004",
+  "title": "Add independent editable User and Agent chat avatars",
+  "status": "in_progress",
+  "goal": "Allow the user to select, persist, preview, replace, and reset a separate Agent avatar while retaining the existing user profile avatar as the single source for user messages.",
+  "context": "Follow-up to PAUI-003. User explicitly asked to edit both Agent and User photos because the UI changes felt too small. Keep the changes presentation-only and preserve the UI V2 opt-in flag.",
+  "allowed_paths": [
+    "Tasks/active/PAUI-004.json",
+    "App/PersonalAgent/RootView.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not alter Agent Runtime, policies, permissions, provider routing, workspace execution, or conversation persistence.",
+    "Do not reuse profile.avatar.data for the Agent; profile.agentAvatar.data is a separate local setting.",
+    "Do not decode image bytes for every message render or streaming token update.",
+    "Do not remove UI V2 opt-in or change the V1 default."
+  ],
+  "acceptance_criteria": [
+    "Profile allows choosing a User avatar and a separate Agent avatar.",
+    "Agent avatar can be replaced and reset to the themed fallback.",
+    "User messages display profile.avatar.data and Agent replies, including streaming replies, display profile.agentAvatar.data.",
+    "Avatar changes refresh without restarting the app and persist locally.",
+    "Images are resized/compressed before persistence and missing images use accessible fallbacks.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA are checked on the exact PR head.",
+    "Physical-device visual behavior is reported separately from CI."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PAUI-004.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PAUI-004.json --base main",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA on the exact PR head."
+  ],
+  "dependencies": [
+    "PAUI-003"
+  ],
+  "recovery": "Revert the Agent avatar state and rendering independently if a regression appears; preserve the existing User profile avatar and UI V2 toggle."
+}
