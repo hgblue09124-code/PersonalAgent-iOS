@@ -52,38 +52,55 @@ struct RootView: View {
 private struct PersonalAgentV2Shell: View {
     @ObservedObject var session: KernelSession
     @Binding var showWorkspace: Bool
+    @State private var showProfile = false
+    @AppStorage("profile.avatar.data") private var profileAvatarData: Data = Data()
+    @State private var profileAvatar: UIImage?
 
     var body: some View {
-        TabView {
-            NavigationStack {
-                PersonalAgentMessagesScreen(session: session)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button { showWorkspace = true } label: {
-                                Image(systemName: "circle.hexagongrid.fill")
+        NavigationStack {
+            ChatScreen(session: session)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { showProfile = true } label: {
+                            Group {
+                                if let profileAvatar {
+                                    Image(uiImage: profileAvatar)
+                                        .resizable()
+                                        .scaledToFill()
+                                } else {
+                                    Image(systemName: "person.crop.circle")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(3)
+                                }
                             }
-                            .accessibilityLabel("Open Agent workspace")
+                            .frame(width: 32, height: 32)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(.primary.opacity(0.10), lineWidth: 1))
                         }
+                        .accessibilityLabel("Profile and chat appearance")
                     }
-            }
-            .tabItem { Label("Messages", systemImage: "bubble.left.and.bubble.right.fill") }
-
-            NavigationStack {
-                TasksScreen(session: session)
-            }
-            .tabItem { Label("Tasks", systemImage: "checklist") }
-
-            NavigationStack {
-                PersonalAgentProfileScreen()
-            }
-            .tabItem { Label("Profile", systemImage: "person.crop.circle") }
-
-            NavigationStack {
-                SettingsScreen(session: session)
-            }
-            .tabItem { Label("Settings", systemImage: "gearshape") }
+                }
+                .sheet(isPresented: $showProfile) {
+                    NavigationStack {
+                        PersonalAgentProfileScreen()
+                            .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button("Done") { showProfile = false }
+                                }
+                            }
+                    }
+                }
         }
         .tint(AgentDesign.accent)
+        .onAppear {
+            if profileAvatar == nil, !profileAvatarData.isEmpty {
+                profileAvatar = UIImage(data: profileAvatarData)
+            }
+        }
+        .onChange(of: profileAvatarData) { _, data in
+            profileAvatar = data.isEmpty ? nil : UIImage(data: data)
+        }
     }
 }
 
