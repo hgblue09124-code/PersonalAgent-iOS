@@ -10,31 +10,7 @@ enum AgentDesign {
     static let accentDeep = Color(red: 0.12, green: 0.18, blue: 0.52)
 
     static var background: some View {
-        Group {
-            if UserDefaults.standard.bool(forKey: "ui.v2.enabled") {
-                Color(.systemBackground)
-            } else {
-                ZStack {
-                    Color(.systemGroupedBackground)
-                    LinearGradient(
-                        colors: [
-                            accent.opacity(0.11),
-                            Color.clear,
-                            accentDeep.opacity(0.055)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    RadialGradient(
-                        colors: [accent.opacity(0.045), .clear],
-                        center: .topTrailing,
-                        startRadius: 4,
-                        endRadius: 240
-                    )
-                }
-            }
-        }
-        .ignoresSafeArea()
+        AgentDesignBackground()
     }
 
     static var sectionLabel: Font {
@@ -47,6 +23,38 @@ enum AgentDesign {
 
     static var body: Font {
         .system(size: 15, weight: .regular, design: .rounded)
+    }
+}
+
+private struct AgentDesignBackground: View {
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
+
+    var body: some View {
+        Group {
+            if isUIV2Enabled {
+                Color(.systemBackground)
+            } else {
+                ZStack {
+                    Color(.systemGroupedBackground)
+                    LinearGradient(
+                        colors: [
+                            AgentDesign.accent.opacity(0.11),
+                            Color.clear,
+                            AgentDesign.accentDeep.opacity(0.055)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    RadialGradient(
+                        colors: [AgentDesign.accent.opacity(0.045), .clear],
+                        center: .topTrailing,
+                        startRadius: 4,
+                        endRadius: 240
+                    )
+                }
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 
