@@ -993,6 +993,8 @@ extension M8CompositionRoot {
         let storedAgent: AgentManifest
         do {
             storedAgent = try await agentStore.load(id: agentID)
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             throw ChatSkillLoadError.unavailable("không nạp được cấu hình Agent \(agentID): \(error)")
         }
