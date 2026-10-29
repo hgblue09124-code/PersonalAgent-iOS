@@ -474,8 +474,6 @@ private struct ChatMessageEnvelope: Decodable, Sendable {
     let content: String?
 }
 
-/// Deterministic preflight result for user chat requests. A clarification is a
-/// terminal response for this turn and must not be delegated to a model provider.
 /// Recoverable failure while loading or resolving a chat Skill.
 /// The chat layer may disclose this failure and continue with normal model fallback.
 public enum ChatSkillLoadError: Error, Sendable, Equatable, CustomStringConvertible {
@@ -489,6 +487,8 @@ public enum ChatSkillLoadError: Error, Sendable, Equatable, CustomStringConverti
     }
 }
 
+/// Deterministic preflight result for user chat requests. A clarification is a
+/// terminal response for this turn and must not be delegated to a model provider.
 public enum ChatRequestPreflight: Sendable, Equatable {
     case continueRouting
     case needsClarification(String)
