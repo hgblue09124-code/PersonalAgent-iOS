@@ -1,0 +1,36 @@
+{
+  "id": "PASKILL-50",
+  "title": "Isolate malformed Skill manifests from healthy chat Skills",
+  "status": "in_progress",
+  "goal": "Ensure a malformed unrelated Skill.md does not break discovery or execution of healthy Skills, while the malformed requested Skill remains unavailable and fails closed.",
+  "context": "FileSkillStore.loadAll currently throws on the first malformed markdown file. Because both discovery and load use this shared operation, one broken custom Skill can poison the whole store and make unrelated chat Skill requests fail with malformedSkill. Isolate malformed siblings while retaining duplicate-ID rejection and targeted parse errors.",
+  "allowed_paths": [
+    "Tasks/active/PASKILL-50.json",
+    "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
+    "Tests/PersonalAgentTests/SkillMarkdownPersistenceTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not make malformed Skills executable or infer missing manifest fields.",
+    "Do not silently resolve duplicate valid Skill IDs.",
+    "Do not weaken Agent scope, policy/approval, schema validation, path protections, cancellation, or result verification.",
+    "Do not claim physical-device acceptance from CI."
+  ],
+  "acceptance_criteria": [
+    "Discovery excludes malformed Skill.md files but still returns healthy manifests.",
+    "Loading a healthy Skill succeeds when an unrelated malformed Skill file exists.",
+    "Loading a specifically requested malformed Skill returns a parse error and never executes it.",
+    "Duplicate valid Skill IDs remain a store-level error.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python Scripts/agent_task_guard.py validate Tasks/active/PASKILL-50.json",
+    "python Scripts/agent_task_guard.py check-diff Tasks/active/PASKILL-50.json --base origin/main",
+    "swift test --disable-sandbox --filter SkillMarkdownPersistenceTests",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "If malformed files can still poison healthy Skill loading, narrow the parser error isolation without relaxing validation. If duplicate IDs stop failing closed, revert the change and repair the conflict handling."
+}
