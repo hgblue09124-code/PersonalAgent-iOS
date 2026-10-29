@@ -100,26 +100,6 @@ jobs:
           path: PersonalAgent-unsigned.ipa
           retention-days: 14
 
-      - name: Publish PR Pre-release
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="dev-pr-${{ github.event.pull_request.number }}"
-          TITLE="PR #${{ github.event.pull_request.number }} · Dev IPA · ${GITHUB_SHA::12}"
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --target "$GITHUB_SHA" --prerelease --latest=false
-            gh release upload "$TAG" PersonalAgent-unsigned.ipa --repo "$GITHUB_REPOSITORY" --clobber
-          else
-            gh release create "$TAG" PersonalAgent-unsigned.ipa \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "$TITLE" \
-              --prerelease \
-              --target "$GITHUB_SHA" \
-              --latest=false \
-              --notes "Unsigned development IPA for PR #${{ github.event.pull_request.number }}. The asset is replaced on every successful build."
-          fi
-
       - name: Publish branch Pre-release
         if: github.event_name == 'push' && github.ref == 'refs/heads/ui/native-agent-surface'
         env:
@@ -160,6 +140,5 @@ jobs:
               --notes "Native unsigned IPA for ${TAG}. Download the .ipa asset below; do not use GitHub's Source code ZIP."
           fi
 
-      # PR workflows also keep the verified IPA as an Actions artifact.
-      # Same-repository PRs additionally receive a direct .ipa release asset.
-      # Fork PRs stay artifact-only because pull_request tokens must not publish releases.
+      # Pull requests receive the verified IPA as an Actions artifact only.
+      # GitHub Releases are reserved for explicitly configured branch/tag events.

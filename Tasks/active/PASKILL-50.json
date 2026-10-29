@@ -3,14 +3,15 @@
   "title": "Keep chat resilient when Skills fail to load",
   "status": "in_progress",
   "goal": "Prevent malformed or unavailable Skills from freezing chat: isolate malformed manifests, report the affected Skill when recoverable, and continue through normal Agent chat fallback without bypassing policy or verification.",
-  "context": "FileSkillStore.loadAll currently throws on the first malformed markdown file. Because both discovery and load use this shared operation, one broken custom Skill can poison the whole store and make unrelated chat Skill requests fail with malformedSkill. Isolate malformed siblings while retaining duplicate-ID rejection and targeted parse errors. Follow-up requirement: if a requested Skill cannot be loaded or resolved, the chat should explicitly disclose the Skill failure and continue with the normal model/runtime path when safe, instead of stopping the entire conversation. Team-mode chat uses a separate orchestrator path, so recoverable missing/malformed Skill errors must be normalized to the same chat-load error used by single-agent chat; policy and verification errors must still propagate.",
+  "context": "FileSkillStore.loadAll currently throws on the first malformed markdown file. Because both discovery and load use this shared operation, one broken custom Skill can poison the whole store and make unrelated chat Skill requests fail with malformedSkill. Isolate malformed siblings while retaining duplicate-ID rejection and targeted parse errors. Follow-up requirement: if a requested Skill cannot be loaded or resolved, the chat should explicitly disclose the Skill failure and continue with the normal model/runtime path when safe, instead of stopping the entire conversation. Team-mode chat uses a separate orchestrator path, so recoverable missing/malformed Skill errors must be normalized to the same chat-load error used by single-agent chat; policy and verification errors must still propagate. The native build workflow must not create or update GitHub Releases for pull_request events; PR builds should expose the unsigned IPA only as an Actions artifact. Explicit branch/tag release behavior remains separate.",
   "allowed_paths": [
     "Tasks/active/PASKILL-50.json",
     "Sources/Capabilities/Skills/SkillMarkdownStore.swift",
     "Tests/PersonalAgentTests/SkillMarkdownPersistenceTests.swift",
     "App/PersonalAgent/KernelSession.swift",
     "Composition/M8CompositionRoot.swift",
-    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift"
+    "Tests/PersonalAgentTests/M6SkillCompositionIntegrationTests.swift",
+    ".github/workflows/apple-build.yml"
   ],
   "forbidden_changes": [
     "Do not make malformed Skills executable or infer missing manifest fields.",
@@ -26,7 +27,8 @@
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
     "Recoverable Skill-load/manifest errors in chat are identified to the user and continue through normal chat fallback.",
     "Policy denial, required approval, cancellation, and execution verification failures never trigger fallback that could bypass the security boundary.",
-    "Team-mode chat maps malformed or missing declared Skills to the same recoverable chat-load error as single-agent chat, while verification and policy errors remain non-fallback."
+    "Team-mode chat maps malformed or missing declared Skills to the same recoverable chat-load error as single-agent chat, while verification and policy errors remain non-fallback.",
+    "Pull request builds upload the unsigned IPA as a workflow artifact and do not create or update GitHub Releases; branch/tag release conditions remain unchanged."
   ],
   "verification": [
     "python Scripts/agent_task_guard.py validate Tasks/active/PASKILL-50.json",
@@ -34,7 +36,8 @@
     "swift test --disable-sandbox --filter SkillMarkdownPersistenceTests",
     "swift test --disable-sandbox",
     "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
-    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests"
+    "swift test --disable-sandbox --filter M6SkillCompositionIntegrationTests",
+    "Inspect Apple Native Build & Unsigned IPA workflow to confirm pull_request cannot reach any gh release create/edit/upload step."
   ],
   "dependencies": [
     "Issue #347"
