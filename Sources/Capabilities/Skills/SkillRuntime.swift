@@ -141,12 +141,15 @@ public struct SkillRuntime: Sendable {
             "please ", "kindly ", "could you ", "can you ", "would you ", "help me ",
             "i need you to "
         ]
-        var command = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Strip whitespace only at the command boundary. Trailing whitespace may
+        // belong to a file payload and must survive the Chat -> Skill handoff.
+        var command = String(input.drop(while: { $0.isWhitespace }))
         while let lead = politePrefixes.first(where: {
             command.lowercased().hasPrefix($0)
         }) {
             command = String(command.dropFirst(lead.count))
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .drop(while: { $0.isWhitespace })
+                .description
         }
         return command
     }
@@ -159,7 +162,7 @@ public struct SkillRuntime: Sendable {
         if let marker = goalStatement.range(of: "Current user request:\n", options: .backwards) {
             payloadStatement = String(goalStatement[marker.upperBound...])
         }
-        let statement = payloadStatement.trimmingCharacters(in: .whitespacesAndNewlines)
+        let statement = String(payloadStatement.drop(while: { $0.isWhitespace }))
         // Keep file-creation commands intact for the allowlisted workspace adapter.
         // Only a supported command receives normalization; ordinary chat remains unchanged.
         let fileCommandPrefixes = [
@@ -864,13 +867,16 @@ private struct ModuleBackedSkillExecutor: SkillExecutor {
     }
 
     private static func parseCreateFileRequest(_ rawText: String) -> (path: String, content: String)? {
-        var normalized = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Keep the payload suffix byte-for-byte after the explicit content delimiter.
+        // Only leading whitespace belongs to command normalization.
+        var normalized = String(rawText.drop(while: { $0.isWhitespace }))
         // Match the read/search adapters: strip only known polite lead-ins at the
         // command boundary, leaving the path/content grammar and safety checks intact.
         let politePrefixes = ["hãy ", "vui lòng ", "giúp tôi ", "giúp mình ", "làm ơn ", "anh ", "em ", "please ", "kindly "]
         while let prefix = politePrefixes.first(where: { normalized.lowercased().hasPrefix($0) }) {
             normalized = String(normalized.dropFirst(prefix.count))
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .drop(while: { $0.isWhitespace })
+                .description
         }
         let prefixes = [
             "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
