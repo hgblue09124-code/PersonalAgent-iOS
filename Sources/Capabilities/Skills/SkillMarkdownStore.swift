@@ -230,7 +230,9 @@ public actor FileSkillStore: SkillStore {
     }
 
     public func discover(query: String) async throws -> [SkillManifest] {
-        let values = try loadAll()
+        // A malformed, unrelated file must not disable every healthy Skill in the
+        // store. Invalid manifests are excluded from discovery and cannot execute.
+        let values = try loadAll(ignoringMalformedFiles: true)
         let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !needle.isEmpty else { return values.sorted { $0.id.rawValue < $1.id.rawValue } }
         return values.filter {
@@ -241,13 +243,21 @@ public actor FileSkillStore: SkillStore {
     }
 
     public func load(id: SkillID) async throws -> SkillManifest {
-        guard let manifest = try loadAll().first(where: { $0.id == id }) else {
+        // Keep failures local to the requested Skill. If its own manifest is malformed,
+        // surface that parse failure; malformed sibling files do not poison this lookup.
+        guard let manifest = try loadAll(
+            ignoringMalformedFiles: true,
+            requestedID: id
+        ).first(where: { $0.id == id }) else {
             throw SkillExecutionError.unknownSkill(id)
         }
         return manifest
     }
 
-    private func loadAll() throws -> [SkillManifest] {
+    private func loadAll(
+        ignoringMalformedFiles: Bool = false,
+        requestedID: SkillID? = nil
+    ) throws -> [SkillManifest] {
         guard FileManager.default.fileExists(atPath: directoryURL.path) else { return [] }
         let urls = try FileManager.default.contentsOfDirectory(
             at: directoryURL,
@@ -256,16 +266,47 @@ public actor FileSkillStore: SkillStore {
         var manifests: [SkillManifest] = []
         var seen = Set<SkillID>()
         for url in urls.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
-            guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+            let text: String
+            do {
+                text = try String(contentsOf: url, encoding: .utf8)
+            } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding || error.code == .fileReadCorruptFile {
+                // Only malformed text encoding is safe to isolate. Do not turn unrelated
+                // filesystem failures (permissions, I/O, removed files) into "missing Skills".
+                if ignoringMalformedFiles && url.deletingPathExtension().lastPathComponent != requestedID?.rawValue {
+                    continue
+                }
                 throw SkillMarkdownError.invalidSchema("invalid UTF-8: \(url.lastPathComponent)")
             }
-            let manifest = try parser.parse(text)
+            let manifest: SkillManifest
+            do {
+                manifest = try parser.parse(text)
+            } catch {
+                if !ignoringMalformedFiles || (requestedID != nil && declaredSkillID(in: text) == requestedID?.rawValue) {
+                    throw error
+                }
+                continue
+            }
             guard seen.insert(manifest.id).inserted else {
+                // Duplicate valid IDs are ambiguous and remain a store-level error.
                 throw SkillMarkdownError.missingField("duplicate skill id: \(manifest.id.rawValue)")
             }
             manifests.append(manifest)
         }
         return manifests
+    }
+
+    private func declaredSkillID(in markdown: String) -> String? {
+        for line in markdown.replacingOccurrences(of: "\r\n", with: "\n").split(separator: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { continue }
+            guard let separator = trimmed.firstIndex(of: ":") else { return nil }
+            let key = trimmed[..<separator].trimmingCharacters(in: .whitespaces)
+            guard key == "id" else { continue }
+            let value = trimmed[trimmed.index(after: separator)...]
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return value.isEmpty ? nil : value
+        }
+        return nil
     }
 
     private static let defaultSkillMarkdown = """

@@ -245,4 +245,94 @@ struct SkillMarkdownPersistenceTests {
         #expect(try String(contentsOf: mismatchedURL, encoding: .utf8) == mismatchedSchema)
     }
 
+
+    @Test("malformed Skill files do not disable healthy Skills")
+    func malformedSiblingSkillDoesNotPoisonDiscoveryOrLoad() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("skills-isolated-malformed-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let healthy = """
+        id: text.normalize
+        name: Text Normalize
+        version: 1.0.0
+        description: Normalize user text.
+        ---
+        ## Input
+        skill.text.normalize.in
+
+        ## Output
+        skill.text.normalize.out
+
+        ## Rule
+        Trim surrounding whitespace.
+        """
+        let malformed = """
+        id: broken.skill
+        name: Broken Skill
+        version: 1.0.0
+        ---
+        ## Input
+        broken.input
+        """
+        try healthy.write(
+            to: directory.appendingPathComponent("text.normalize.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try malformed.write(
+            to: directory.appendingPathComponent("broken.skill.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let store = FileSkillStore(directoryURL: directory)
+        let discovered = try await store.discover(query: "")
+        #expect(discovered.map { $0.id.rawValue } == ["text.normalize"])
+        #expect(try await store.load(id: SkillID(rawValue: "text.normalize")).name == "Text Normalize")
+        await #expect(throws: SkillMarkdownError.self) {
+            _ = try await store.load(id: SkillID(rawValue: "broken.skill"))
+        }
+    }
+
+    @Test("invalid UTF-8 siblings are isolated without hiding healthy Skills")
+    func invalidUTF8SiblingDoesNotPoisonHealthySkillLoad() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("skills-invalid-utf8-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let healthy = """
+        id: text.normalize
+        name: Text Normalize
+        version: 1.0.0
+        ---
+        ## Input
+        input.v1
+
+        ## Output
+        output.v1
+
+        ## Rule
+        Trim text.
+        """
+        try healthy.write(
+            to: directory.appendingPathComponent("text.normalize.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+        try Data([0xFF, 0xFE, 0xFA]).write(
+            to: directory.appendingPathComponent("broken.skill.Skill.md"),
+            options: .atomic
+        )
+
+        let store = FileSkillStore(directoryURL: directory)
+        #expect(try await store.discover(query: "").map { $0.id.rawValue } == ["text.normalize"])
+        #expect(try await store.load(id: SkillID(rawValue: "text.normalize")).name == "Text Normalize")
+        await #expect(throws: SkillMarkdownError.self) {
+            _ = try await store.load(id: SkillID(rawValue: "broken.skill"))
+        }
+    }
+
 }
