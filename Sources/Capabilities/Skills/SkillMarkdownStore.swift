@@ -269,7 +269,7 @@ public actor FileSkillStore: SkillStore {
             let text: String
             do {
                 text = try String(contentsOf: url, encoding: .utf8)
-            } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding {
+            } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding || error.code == .fileReadCorruptFile {
                 // Only malformed text encoding is safe to isolate. Do not turn unrelated
                 // filesystem failures (permissions, I/O, removed files) into "missing Skills".
                 if ignoringMalformedFiles && url.deletingPathExtension().lastPathComponent != requestedID?.rawValue {
