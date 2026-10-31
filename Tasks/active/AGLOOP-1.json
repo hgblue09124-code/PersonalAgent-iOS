@@ -1,0 +1,32 @@
+{
+  "id": "AGLOOP-1",
+  "title": "Document recursive agent growth loop and concise entrypoint",
+  "status": "in_progress",
+  "goal": "Persist the complete five-step autonomous growth loop while keeping the default agent entrypoint short and linking to detailed operating guidance.",
+  "context": "PersonalAgent-iOS already defines task contracts and a P0 Alpha gate. Agents need a durable detailed specification for observe, orient, plan, execute, verify/learn and context recovery, without forcing every task to load the full document.",
+  "allowed_paths": [
+    ".agentos/README.md",
+    "Documentation/RECURSIVE_AGENT_GROWTH_LOOP.md",
+    "Tasks/active/AGLOOP-1.json"
+  ],
+  "forbidden_changes": [
+    "Do not change runtime behavior, security policy, or execution permissions.",
+    "Do not duplicate a backlog or replace Issue #347 as the P0 source of truth.",
+    "Do not claim CI, merge, or physical-device verification without evidence."
+  ],
+  "acceptance_criteria": [
+    "Detailed documentation describes the five-step loop and context recovery rules.",
+    "The agent entrypoint remains concise and links to the detailed document.",
+    "A task contract records scope, acceptance criteria, verification, dependencies, and recovery.",
+    "The documentation and task contract are reviewed in the pull request and relevant checks pass."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/AGLOOP-1.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/AGLOOP-1.json --base origin/main",
+    "Review the diff for scope, concise entrypoint, and accurate claims."
+  ],
+  "dependencies": [
+    "Issue #347 remains the P0 product priority; this documentation task does not supersede it."
+  ],
+  "recovery": "If validation or scope review fails, correct the contract or split the documentation change without broadening runtime scope; keep status in_progress until the required evidence exists."
+}
