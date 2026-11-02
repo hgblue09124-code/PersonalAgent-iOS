@@ -37,7 +37,7 @@ public actor GoogleLiteRTModelEngine: LocalModelEngine {
         do {
             let config = try EngineConfig(
                 modelPath: url.path,
-                backend: .gpu(),
+                backend: .gpu,
                 maxNumTokens: options.maxTokens
             )
             let runtime = Engine(engineConfig: config)
