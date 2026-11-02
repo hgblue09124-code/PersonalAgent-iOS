@@ -5,8 +5,9 @@ import PAProviders
 
 /// LocalModelEngine backed by Google's official LiteRT-LM Swift runtime.
 /// Model files must use Google's .litertlm format.
-public actor GoogleLiteRTModelEngine: LocalModelEngine {
+public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendable {
     public let identity: LocalModelIdentity
+    private let lock = NSLock()
     private var engine: Engine?
     private var state: LocalModelLifecycleState = .unloaded
 
@@ -22,30 +23,32 @@ public actor GoogleLiteRTModelEngine: LocalModelEngine {
     }
 
     public var lifecycleState: LocalModelLifecycleState {
-        get async { state }
+        get async { lock.withLock { state } }
     }
 
     public func load(options: LocalModelLoadingOptions) async throws {
-        if case .loaded = state { return }
+        if lock.withLock({ state == .loaded }) { return }
         guard let url = identity.localURL,
               FileManager.default.fileExists(atPath: url.path) else {
-            state = .failed(reason: "LiteRT-LM model file is missing")
+            lock.withLock { state = .failed(reason: "LiteRT-LM model file is missing") }
             throw GoogleLiteRTError.modelFileMissing
         }
 
-        state = .loading(progress: 0.1)
+        lock.withLock { state = .loading(progress: 0.1) }
         do {
             let config = try EngineConfig(
                 modelPath: url.path,
-                backend: .gpu,
+                backend: .cpu(),
                 maxNumTokens: options.maxTokens
             )
             let runtime = Engine(engineConfig: config)
             try await runtime.initialize()
-            engine = runtime
-            state = .loaded
+            lock.withLock {
+                engine = runtime
+                state = .loaded
+            }
         } catch {
-            state = .failed(reason: error.localizedDescription)
+            lock.withLock { state = .failed(reason: error.localizedDescription) }
             throw error
         }
     }
@@ -61,7 +64,7 @@ public actor GoogleLiteRTModelEngine: LocalModelEngine {
     public func generateStream(
         request: LocalModelGenerationRequest
     ) -> AsyncThrowingStream<LocalModelStreamChunk, Error> {
-        let runtime = engine
+        let runtime = lock.withLock { engine }
         return AsyncThrowingStream { continuation in
             let task = Task {
                 do {
@@ -93,8 +96,10 @@ public actor GoogleLiteRTModelEngine: LocalModelEngine {
     public func cancel() async {}
 
     public func unload() async throws {
-        engine = nil
-        state = .unloaded
+        lock.withLock {
+            engine = nil
+            state = .unloaded
+        }
     }
 }
 
