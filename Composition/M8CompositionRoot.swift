@@ -80,6 +80,8 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         let newEngine: any LocalModelEngine
         if let factory = engineFactory {
             newEngine = factory(identity, deviceCapabilityProvider)
+        } else if fileURL.pathExtension.lowercased() == "litertlm" {
+            newEngine = GoogleLiteRTModelEngine(identity: identity)
         } else {
             newEngine = LlamaCPPModelEngine(
                 identity: identity,
