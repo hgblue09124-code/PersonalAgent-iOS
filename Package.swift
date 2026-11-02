@@ -156,7 +156,7 @@ let package = Package(
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
             path: "Providers/Local",
-            exclude: ["LlamaCPP/cllama"]
+            exclude: ["LlamaCPP/cllama", "GoogleLiteRT"]
         ),
         .target(
             name: "PATools",
