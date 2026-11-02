@@ -63,8 +63,9 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     }
 
     public func importModel(from sourceURL: URL, name: String? = nil) async throws -> LocalModelDescriptor {
-        guard sourceURL.pathExtension.lowercased() == "gguf" else {
-            throw LocalModelStorageError.invalidGGUFHeader("Only .gguf model files can be imported.")
+        let modelExtension = sourceURL.pathExtension.lowercased()
+        guard modelExtension == "gguf" || modelExtension == "litertlm" else {
+            throw LocalModelStorageError.invalidGGUFHeader("Only .gguf and .litertlm model files can be imported.")
         }
 
         let isAccessing = startSecurityScopedAccess(for: sourceURL)
@@ -89,9 +90,11 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             throw LocalModelStorageError.invalidGGUFHeader("GGUF file is empty or smaller than the minimum header size.")
         }
 
-        let summary: GGUFMetadataSummary
+        let summary: GGUFMetadataSummary?
         do {
-            summary = try parser.parseHeaderAndMetadata(at: sourceURL)
+            summary = modelExtension == "gguf"
+                ? try parser.parseHeaderAndMetadata(at: sourceURL)
+                : nil
         } catch let error as GGUFParseError {
             switch error {
             case .invalidMagic(let magic):
@@ -109,7 +112,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             throw LocalModelStorageError.invalidGGUFHeader(error.localizedDescription)
         }
 
-        let modelIDRaw = "local-gguf-\(UUID().uuidString.lowercased())"
+        let modelIDRaw = "local-\(modelExtension)-\(UUID().uuidString.lowercased())"
         let modelID = ModelID(rawValue: modelIDRaw)
 
         let fileExtension = sourceURL.pathExtension.isEmpty ? "gguf" : sourceURL.pathExtension
@@ -142,13 +145,13 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             filename: destinationFilename,
             fileSizeBytes: fileSizeBytes,
             addedAt: Date(),
-            architecture: summary.architecture,
+            architecture: summary?.architecture ?? (modelExtension == "litertlm" ? "litert-lm" : nil),
             quantization: nil,
             parameterCount: nil,
-            contextWindow: summary.contextLength != nil ? Int(summary.contextLength!) : nil,
-            version: summary.version,
-            tensorCount: summary.tensorCount,
-            metadataCount: summary.metadataCount
+            contextWindow: summary?.contextLength.map(Int.init),
+            version: summary?.version,
+            tensorCount: summary?.tensorCount,
+            metadataCount: summary?.metadataCount
         )
 
         index.descriptors[modelID.rawValue] = descriptor
