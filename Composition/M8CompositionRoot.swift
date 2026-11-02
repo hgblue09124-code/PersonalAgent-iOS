@@ -2,6 +2,7 @@ import Foundation
 import PAKernel
 import PAProviders
 import PAProvidersLocal
+import PAProvidersGoogleLiteRT
 import PAProvidersRemote
 import PAProvidersGrok
 import PAProvidersOpenAI
