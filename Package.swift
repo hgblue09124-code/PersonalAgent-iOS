@@ -143,7 +143,7 @@ let package = Package(
         ),
         .target(
             name: "PAProvidersGoogleLiteRT",
-            dependencies: ["PAProviders", "PAKernel", .product(name: "LiteRTLM", package: "LiteRT-LM")],
+            dependencies: ["PAProviders", "PAKernel", .product(name: "LiteRTLM", package: "litert-lm")],
             path: "Providers/Local/GoogleLiteRT"
         ),
         .target(
