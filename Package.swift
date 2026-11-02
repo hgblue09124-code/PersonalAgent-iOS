@@ -42,6 +42,10 @@ let package = Package(
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
         .library(name: "PAProvidersOpenAICompatible", targets: ["PAProvidersOpenAICompatible"]),
         .library(name: "PAProvidersLocal", targets: ["PAProvidersLocal"]),
+        .library(name: "PAProvidersGoogleLiteRT", targets: ["PAProvidersGoogleLiteRT"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/google-ai-edge/LiteRT-LM.git", exact: "0.19.0"),
     ],
     targets: [
         .binaryTarget(
@@ -138,6 +142,11 @@ let package = Package(
             path: "Providers/Remote/OpenAICompatible"
         ),
         .target(
+            name: "PAProvidersGoogleLiteRT",
+            dependencies: ["PAProviders", "PAKernel", .product(name: "LiteRTLM", package: "LiteRT-LM")],
+            path: "Providers/Local/GoogleLiteRT"
+        ),
+        .target(
             name: "PAProvidersLocal",
             dependencies: [
                 "PAProvidersRemote",
@@ -195,6 +204,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
+                "PAProvidersGoogleLiteRT",
                 "PAStorageModels",
 
                 "PASecurity",
@@ -224,6 +234,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
+                "PAProvidersGoogleLiteRT",
                 "PAGGUF",
                 "PATools",
                 "PAModules",
