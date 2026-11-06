@@ -397,7 +397,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         do {
             let data = try JSONSerialization.data(withJSONObject: [
                 "operation": "append",
-                "path": "workspace/split-secret.md",
+                "path": "workspace/split-note.md",
                 "content": safeSuffix
             ])
             let arguments = try XCTUnwrap(String(data: data, encoding: .utf8))
@@ -407,7 +407,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
             XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
         }
 
-        let persisted = try await workspace.readFile(at: "workspace/split-secret.md")
+        let persisted = try await workspace.readFile(at: "workspace/split-note.md")
         XCTAssertEqual(persisted, safePrefix)
     }
 
@@ -423,7 +423,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
 
         do {
             _ = try await reader.run(
-                argumentsJSON: #"{"operation":"read","path":"workspace/secret-note.md"}"#
+                argumentsJSON: #"{"operation":"read","path":"workspace/note.md"}"#
             )
             XCTFail("Reading secret-like content must be rejected")
         } catch {
