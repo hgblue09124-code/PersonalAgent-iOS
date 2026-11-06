@@ -29,6 +29,7 @@
 		A10000000000000000000018 /* PATerminal in Frameworks */ = {isa = PBXBuildFile; productRef = A30000000000000000000007 /* PATerminal */; };
 		A10000000000000000000019 /* TerminalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000019 /* TerminalScreen.swift */; };
 		A10000000000000000000020 /* PythonRuntimeBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000021 /* PythonRuntimeBridge.m */; };
+		A10000000000000000000024 /* EmbeddedPythonAgentRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000025 /* EmbeddedPythonAgentRuntime.swift */; };
 		A10000000000000000000021 /* Python.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* Python.xcframework */; };
 		A10000000000000000000022 /* app in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000023 /* app */; };
 		A10000000000000000000023 /* Python.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000024 /* Python.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -60,6 +61,7 @@
 		A20000000000000000000022 /* PythonRuntimeBridge-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PythonRuntimeBridge-Bridging-Header.h; sourceTree = "<group>"; };
 		A20000000000000000000023 /* app */ = {isa = PBXFileReference; lastKnownFileType = folder; path = app; sourceTree = "<group>"; };
 		A20000000000000000000024 /* Python.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Python.xcframework; sourceTree = "<group>"; };
+		A20000000000000000000025 /* EmbeddedPythonAgentRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbeddedPythonAgentRuntime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 				A20000000000000000000020 /* PythonRuntimeBridge.h */,
 				A20000000000000000000021 /* PythonRuntimeBridge.m */,
 				A20000000000000000000022 /* PythonRuntimeBridge-Bridging-Header.h */,
+				A20000000000000000000025 /* EmbeddedPythonAgentRuntime.swift */,
 				A2000000000000000000000C /* KernelSession.swift */,
 				A50000000000000000000004 /* Screens */,
 				A2000000000000000000000B /* Assets.xcassets */,
@@ -274,6 +277,7 @@
 				A1000000000000000000000D /* ModelsScreen.swift in Sources */,
 				A10000000000000000000019 /* TerminalScreen.swift in Sources */,
 				A10000000000000000000020 /* PythonRuntimeBridge.m in Sources */,
+				A10000000000000000000024 /* EmbeddedPythonAgentRuntime.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
