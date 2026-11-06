@@ -192,8 +192,11 @@ static NSString *PAConsumePythonError(void) {
     PyObject *plan = (plannerFunction != NULL && arguments != NULL)
         ? PyObject_CallObject(plannerFunction, arguments)
         : NULL;
-    PyObject *planDictionary = plan != NULL
-        ? PyObject_CallMethod(plan, "to_dict", NULL)
+    PyObject *toDictionaryFunction = plan != NULL
+        ? PyObject_GetAttrString(plan, "to_dict")
+        : NULL;
+    PyObject *planDictionary = toDictionaryFunction != NULL
+        ? PyObject_CallNoArgs(toDictionaryFunction)
         : NULL;
     PyObject *jsonModule = planDictionary != NULL
         ? PyImport_ImportModule("json")
@@ -216,6 +219,7 @@ static NSString *PAConsumePythonError(void) {
     Py_XDECREF(jsonString);
     Py_XDECREF(jsonModule);
     Py_XDECREF(planDictionary);
+    Py_XDECREF(toDictionaryFunction);
     Py_XDECREF(plan);
     Py_XDECREF(arguments);
     Py_XDECREF(pythonAllowedSkills);
