@@ -3,7 +3,7 @@
   "title": "Prove workspace write and append size limits fail closed",
   "status": "in_progress",
   "goal": "Add regression coverage for the production 256 KiB workspace tool limit so oversized writes and appends cannot mutate workspace state.",
-  "context": "Issue #347 requires regression evidence for workspace size limits. WorkspaceStorageTools enforces a 256 KiB maximum, but current test sources do not prove the rejection boundary or preservation of an existing file after an oversized append.",
+  "context": "Issue #347 requires regression evidence for workspace size limits. WorkspaceStorageTools enforces a 256 KiB maximum, but current test sources do not prove the rejection boundary or preservation of an existing file after an oversized append. The branch is rebased onto the latest main, including the merged LiteRT-LM provider integration, before final validation.",
   "allowed_paths": [
     "Tasks/active/P0-WORKSPACE-SIZE-001.json",
     "Tests/PersonalAgentTests/WorkspaceStorageToolTests.swift"
