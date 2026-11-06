@@ -512,6 +512,15 @@ public enum AgentExecutionOutcome: Sendable, Equatable {
     }
 }
 
+public enum PythonAgentPlanDispatchResult: Sendable, Equatable {
+    case clarification(String)
+    /// Conversational/unsupported plans must return to normal chat, not tool execution.
+    case notActionable(String)
+    case verified(SkillAgentResult)
+    case executionFailed(String)
+}
+
+
 public struct M8CompositionRoot: CompositionRoot, Sendable {
     public let milestone: MilestoneGate
     public let logger: any AgentLogger
