@@ -31,8 +31,8 @@ if [[ -z "${FRAMEWORK_SOURCE}" ]]; then
     exit 1
 fi
 
-if [[ ! -f "${FRAMEWORK_SOURCE}/build/build_utils.sh" ]]; then
-    echo "CPython ${VERSION} XCFramework is missing build/build_utils.sh" >&2
+if [[ ! -f "${FRAMEWORK_SOURCE}/build/utils.sh" ]]; then
+    echo "CPython ${VERSION} XCFramework is missing the upstream build/utils.sh helper" >&2
     exit 1
 fi
 
