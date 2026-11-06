@@ -1,5 +1,5 @@
 import PAKernel
-import PAProviders
+@_exported import PAProviders
 import PAProvidersRemote
 
 public enum LocalProviderBoundary {

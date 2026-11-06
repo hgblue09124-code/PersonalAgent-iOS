@@ -63,8 +63,9 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
     }
 
     public func importModel(from sourceURL: URL, name: String? = nil) async throws -> LocalModelDescriptor {
-        guard sourceURL.pathExtension.lowercased() == "gguf" else {
-            throw LocalModelStorageError.invalidGGUFHeader("Only .gguf model files can be imported.")
+        let modelExtension = sourceURL.pathExtension.lowercased()
+        guard modelExtension == "gguf" || modelExtension == "litertlm" else {
+            throw LocalModelStorageError.invalidGGUFHeader("Only .gguf and .litertlm model files can be imported.")
         }
 
         let isAccessing = startSecurityScopedAccess(for: sourceURL)
@@ -84,14 +85,17 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         } catch {
             throw LocalModelStorageError.fileNotFound(sourceURL)
         }
+        let minimumFileSize: Int64 = modelExtension == "gguf" ? 24 : 1
         guard let sourceSize = sourceAttributes[.size] as? NSNumber,
-              sourceSize.int64Value >= 24 else {
-            throw LocalModelStorageError.invalidGGUFHeader("GGUF file is empty or smaller than the minimum header size.")
+              sourceSize.int64Value >= minimumFileSize else {
+            throw LocalModelStorageError.invalidGGUFHeader("Local model file is empty or smaller than its minimum supported size.")
         }
 
-        let summary: GGUFMetadataSummary
+        let summary: GGUFMetadataSummary?
         do {
-            summary = try parser.parseHeaderAndMetadata(at: sourceURL)
+            summary = modelExtension == "gguf"
+                ? try parser.parseHeaderAndMetadata(at: sourceURL)
+                : nil
         } catch let error as GGUFParseError {
             switch error {
             case .invalidMagic(let magic):
@@ -109,7 +113,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             throw LocalModelStorageError.invalidGGUFHeader(error.localizedDescription)
         }
 
-        let modelIDRaw = "local-gguf-\(UUID().uuidString.lowercased())"
+        let modelIDRaw = "local-\(modelExtension)-\(UUID().uuidString.lowercased())"
         let modelID = ModelID(rawValue: modelIDRaw)
 
         let fileExtension = sourceURL.pathExtension.isEmpty ? "gguf" : sourceURL.pathExtension
@@ -123,7 +127,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             let copiedAttributes = try fileManager.attributesOfItem(atPath: destinationURL.path)
             guard let copiedSize = copiedAttributes[.size] as? NSNumber,
                   copiedSize.int64Value == fileSizeBytes else {
-                throw LocalModelStorageError.copyFailed("Imported GGUF file size does not match the source.")
+                throw LocalModelStorageError.copyFailed("Imported model file size does not match the source.")
             }
         } catch {
             if fileManager.fileExists(atPath: destinationURL.path) {
@@ -142,13 +146,13 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             filename: destinationFilename,
             fileSizeBytes: fileSizeBytes,
             addedAt: Date(),
-            architecture: summary.architecture,
+            architecture: summary?.architecture ?? (modelExtension == "litertlm" ? "litert-lm" : nil),
             quantization: nil,
             parameterCount: nil,
-            contextWindow: summary.contextLength != nil ? Int(summary.contextLength!) : nil,
-            version: summary.version,
-            tensorCount: summary.tensorCount,
-            metadataCount: summary.metadataCount
+            contextWindow: summary?.contextLength.map(Int.init),
+            version: summary?.version,
+            tensorCount: summary?.tensorCount,
+            metadataCount: summary?.metadataCount
         )
 
         index.descriptors[modelID.rawValue] = descriptor

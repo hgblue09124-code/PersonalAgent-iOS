@@ -160,6 +160,25 @@ struct LocalModelStorageTests {
         #expect(fetched == descriptor)
     }
 
+    @Test func testImportLiteRTLMModelSkipsGGUFParsingAndPreservesFormat() async throws {
+        let root = try createTestDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let source = root.appendingPathComponent("tiny-model.litertlm")
+        try Data([0x4c, 0x52, 0x54, 0x4c]).write(to: source)
+        let storageDir = root.appendingPathComponent("ModelMetadata").appendingPathComponent("Models")
+        let storage = try FileBackedLocalModelStorage(modelsDirectoryURL: storageDir)
+
+        let descriptor = try await storage.importModel(from: source, name: "LiteRT Test Model")
+
+        #expect(descriptor.name == "LiteRT Test Model")
+        #expect(descriptor.filename.hasSuffix(".litertlm"))
+        #expect(descriptor.architecture == "litert-lm")
+        #expect(descriptor.fileSizeBytes == 4)
+        let fetched = try await storage.getModel(id: descriptor.id)
+        #expect(fetched == descriptor)
+    }
+
     @Test func testImportInvalidGGUFMagicBytesFailsAndLeavesNoOrphanFile() async throws {
         let root = try createTestDirectory()
         defer { try? FileManager.default.removeItem(at: root) }
