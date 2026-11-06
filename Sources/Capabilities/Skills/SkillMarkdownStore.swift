@@ -272,7 +272,7 @@ public actor FileSkillStore: SkillStore {
             } catch let error as CocoaError where error.code == .fileReadInapplicableStringEncoding || error.code == .fileReadCorruptFile {
                 // Only malformed text encoding is safe to isolate. Do not turn unrelated
                 // filesystem failures (permissions, I/O, removed files) into "missing Skills".
-                if ignoringMalformedFiles && url.deletingPathExtension().lastPathComponent != requestedID?.rawValue {
+                if ignoringMalformedFiles && Self.skillID(from: url) != requestedID?.rawValue {
                     continue
                 }
                 throw SkillMarkdownError.invalidSchema("invalid UTF-8: \(url.lastPathComponent)")
@@ -293,6 +293,12 @@ public actor FileSkillStore: SkillStore {
             manifests.append(manifest)
         }
         return manifests
+    }
+
+    private static func skillID(from url: URL) -> String {
+        let filename = url.deletingPathExtension().lastPathComponent
+        let suffix = ".Skill"
+        return filename.hasSuffix(suffix) ? String(filename.dropLast(suffix.count)) : filename
     }
 
     private func declaredSkillID(in markdown: String) -> String? {
