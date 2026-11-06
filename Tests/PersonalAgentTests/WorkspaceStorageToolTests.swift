@@ -417,7 +417,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
         let notes = root.appendingPathComponent("workspace/note.md")
-        let secretText = "api_key = \"sk-" + String(repeating: "C", count: 24) + "\" needle"
+        let secretText = "Authorization: Bearer " + String(repeating: "C", count: 24) + " needle"
         try secretText.write(to: notes, atomically: true, encoding: .utf8)
         let reader = WorkspaceReadTool(workspace: workspace)
 
@@ -431,9 +431,12 @@ final class WorkspaceStorageToolTests: XCTestCase {
         }
 
         try await workspace.writeFile("safe needle", to: "workspace/regular.md")
-        let searchJSON = try await reader.run(
-            argumentsJSON: #"{\"operation\":\"search\",\"query\":\"needle\"}"#
-        )
+        let searchArgumentsData = try JSONSerialization.data(withJSONObject: [
+            "operation": "search",
+            "query": "needle"
+        ])
+        let searchArguments = try XCTUnwrap(String(data: searchArgumentsData, encoding: .utf8))
+        let searchJSON = try await reader.run(argumentsJSON: searchArguments)
         let data = try XCTUnwrap(searchJSON.data(using: .utf8))
         let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let matches = try XCTUnwrap(object["matches"] as? [String])
