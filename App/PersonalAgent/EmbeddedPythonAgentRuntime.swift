@@ -23,9 +23,9 @@ actor EmbeddedPythonAgentRuntime {
         // CPython installs process signal handlers during initialization; perform
         // its one-time bootstrap on the main thread, then execute plans on this actor.
         let initializationFailure = await MainActor.run { () -> String? in
-            var initializationError: NSError?
-            guard PAPythonRuntimeBridge.initializeRuntime(withError: &initializationError) else {
-                return initializationError?.localizedDescription ?? "CPython initialization failed."
+            var initializationError: NSString?
+            guard PAPythonRuntimeBridge.initializeRuntime(withErrorMessage: &initializationError) else {
+                return initializationError as String? ?? "CPython initialization failed."
             }
             return nil
         }
@@ -33,15 +33,15 @@ actor EmbeddedPythonAgentRuntime {
             throw EmbeddedPythonAgentRuntimeError.unavailable(initializationFailure)
         }
 
-        var bridgeError: NSError?
+        var bridgeError: NSString?
         let payload = PAPythonRuntimeBridge.planRequest(
             withText: text,
             allowedSkillIDs: allowedSkillIDs.sorted(),
-            error: &bridgeError
+            errorMessage: &bridgeError
         )
         guard let payload else {
             throw EmbeddedPythonAgentRuntimeError.unavailable(
-                bridgeError?.localizedDescription ?? "No planner response was produced."
+                bridgeError as String? ?? "No planner response was produced."
             )
         }
         guard let data = payload.data(using: .utf8) else {
