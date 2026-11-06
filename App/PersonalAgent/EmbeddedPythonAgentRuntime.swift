@@ -24,7 +24,7 @@ actor EmbeddedPythonAgentRuntime {
         // its one-time bootstrap on the main thread, then execute plans on this actor.
         let initializationFailure = await MainActor.run { () -> String? in
             var initializationError: NSString?
-            guard PAPythonRuntimeBridge.initializeRuntime(withErrorMessage: &initializationError) else {
+            guard PAPythonRuntimeBridge.initializeRuntime(errorMessage: &initializationError) else {
                 return initializationError as String? ?? "CPython initialization failed."
             }
             return nil
@@ -35,7 +35,7 @@ actor EmbeddedPythonAgentRuntime {
 
         var bridgeError: NSString?
         let payload = PAPythonRuntimeBridge.planRequest(
-            withText: text,
+            text: text,
             allowedSkillIDs: allowedSkillIDs.sorted(),
             errorMessage: &bridgeError
         )
