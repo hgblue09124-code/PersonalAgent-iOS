@@ -182,12 +182,8 @@ final class WorkspaceStorageToolTests: XCTestCase {
                 )
             )
             XCTFail("An append that exceeds 256 KiB must be rejected")
-        } catch let error as WorkspaceStorageToolError {
-            if case .fileTooLarge = error {
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected fileTooLarge, got: \(error)")
-            }
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool file exceeds the 256 KiB limit.")
         }
         let stableContent = try await workspace.readFile(at: "workspace/stable.md")
         XCTAssertEqual(stableContent, "stable")
