@@ -1,0 +1,39 @@
+{
+  "id": "GOOGLE-LITERT-001",
+  "title": "Integrate Google LiteRT-LM as an iOS local model engine",
+  "status": "in_progress",
+  "goal": "Add Google's official LiteRT-LM runtime to PersonalAgent so users can import and run supported .litertlm models through the existing local model and chat provider path.",
+  "context": "PersonalAgent already has a vendor-neutral LocalModelEngine contract and routes active local models through a provider adapter. Google LiteRT-LM provides an official Swift package for iOS and accepts .litertlm model files. This task adds the provider, package wiring, model import support, and automatic routing while preserving the existing GGUF/llama.cpp path.",
+  "allowed_paths": [
+    "Tasks/active/GOOGLE-LITERT-001.json",
+    "Package.swift",
+    "Providers/Local/GoogleLiteRT/GoogleLiteRTModelEngine.swift",
+    "Composition/M8CompositionRoot.swift",
+    "Storage/Models/FileBackedLocalModelStorage.swift",
+    "App/PersonalAgent/Screens/ModelsScreen.swift"
+  ],
+  "forbidden_changes": [
+    "Do not replace or regress the existing GGUF/llama.cpp model path.",
+    "Do not claim the Google runtime is verified on iPhone until a real .litertlm model is imported, loaded, and queried on a physical device.",
+    "Do not add automatic Release publishing to pull-request workflows."
+  ],
+  "acceptance_criteria": [
+    "The official LiteRT-LM Swift package is pinned to a stable version and exposed as a dedicated provider target.",
+    "A Google-backed LocalModelEngine loads .litertlm files and supports completion and streaming through the existing LocalModelEngine contract.",
+    "M8 composition automatically selects the Google engine for .litertlm files and keeps llama.cpp for GGUF files.",
+    "The existing model import UI and storage accept .litertlm files without trying to parse them as GGUF.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Physical-device validation is recorded separately and is not claimed without evidence."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/GOOGLE-LITERT-001.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/GOOGLE-LITERT-001.json --base origin/main",
+    "swift test --disable-sandbox",
+    "Confirm Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "On iPhone, import a compatible .litertlm model, load it, send a chat prompt, verify generated output, then unload it."
+  ],
+  "dependencies": [
+    "https://github.com/google-ai-edge/LiteRT-LM"
+  ],
+  "recovery": "Revert the Google provider and package wiring as one logical integration if the native build or existing GGUF flow regresses; retain the established LocalModelEngine contract."
+}

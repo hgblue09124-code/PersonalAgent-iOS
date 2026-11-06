@@ -42,6 +42,10 @@ let package = Package(
         .library(name: "PAProvidersOpenAI", targets: ["PAProvidersOpenAI"]),
         .library(name: "PAProvidersOpenAICompatible", targets: ["PAProvidersOpenAICompatible"]),
         .library(name: "PAProvidersLocal", targets: ["PAProvidersLocal"]),
+        .library(name: "PAProvidersGoogleLiteRT", targets: ["PAProvidersGoogleLiteRT"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/google-ai-edge/LiteRT-LM.git", exact: "0.19.0"),
     ],
     targets: [
         .binaryTarget(
@@ -138,6 +142,11 @@ let package = Package(
             path: "Providers/Remote/OpenAICompatible"
         ),
         .target(
+            name: "PAProvidersGoogleLiteRT",
+            dependencies: ["PAProviders", "PAKernel", .product(name: "LiteRTLM", package: "litert-lm", condition: .when(platforms: [.iOS, .macOS]))],
+            path: "Providers/Local/GoogleLiteRT"
+        ),
+        .target(
             name: "PAProvidersLocal",
             dependencies: [
                 "PAProvidersRemote",
@@ -147,7 +156,7 @@ let package = Package(
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
             path: "Providers/Local",
-            exclude: ["LlamaCPP/cllama"]
+            exclude: ["LlamaCPP/cllama", "GoogleLiteRT"]
         ),
         .target(
             name: "PATools",
@@ -195,6 +204,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
+                .target(name: "PAProvidersGoogleLiteRT", condition: .when(platforms: [.iOS, .macOS])),
                 "PAStorageModels",
 
                 "PASecurity",
@@ -224,6 +234,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
+                .target(name: "PAProvidersGoogleLiteRT", condition: .when(platforms: [.iOS, .macOS])),
                 "PAGGUF",
                 "PATools",
                 "PAModules",
