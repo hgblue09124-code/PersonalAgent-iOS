@@ -421,10 +421,13 @@ final class WorkspaceStorageToolTests: XCTestCase {
         try secretText.write(to: notes, atomically: true, encoding: .utf8)
         let reader = WorkspaceReadTool(workspace: workspace)
 
+        let readArgumentsData = try JSONSerialization.data(withJSONObject: [
+            "operation": "read",
+            "path": "workspace/note.md"
+        ])
+        let readArguments = try XCTUnwrap(String(data: readArgumentsData, encoding: .utf8))
         do {
-            _ = try await reader.run(
-            argumentsJSON: #"{ "operation": "read", "path": "workspace/note.md" }"#
-            )
+            _ = try await reader.run(argumentsJSON: readArguments)
             XCTFail("Reading secret-like content must be rejected")
         } catch {
             XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
