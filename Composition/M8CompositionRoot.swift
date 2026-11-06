@@ -2,7 +2,9 @@ import Foundation
 import PAKernel
 import PAProviders
 import PAProvidersLocal
+#if canImport(PAProvidersGoogleLiteRT)
 import PAProvidersGoogleLiteRT
+#endif
 import PAProvidersRemote
 import PAProvidersGrok
 import PAProvidersOpenAI
@@ -82,7 +84,11 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         if let factory = engineFactory {
             newEngine = factory(identity, deviceCapabilityProvider)
         } else if fileURL.pathExtension.lowercased() == "litertlm" {
+            #if canImport(PAProvidersGoogleLiteRT)
             newEngine = GoogleLiteRTModelEngine(identity: identity)
+            #else
+            throw ProviderRuntimeError.unavailable
+            #endif
         } else {
             newEngine = LlamaCPPModelEngine(
                 identity: identity,
