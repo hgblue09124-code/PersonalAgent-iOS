@@ -31,6 +31,21 @@ class PlannerTests(unittest.TestCase):
         self.assertFalse(plan.is_executable)
         self.assertFalse(plan.to_dict()["is_executable"])
 
+    def test_file_content_preserves_leading_trailing_whitespace_and_newlines(self):
+        content = " leading space\n\tindented line  \nfinal line\n"
+        prompt = f"Tạo file workspace/hello.txt nội dung: {content}"
+        plan = plan_request(prompt, allowed_skill_ids={"workspace.create-file"})
+        self.assertEqual(plan.kind, PlanKind.PROPOSE_SKILL)
+        self.assertEqual(plan.arguments["content"], content)
+
+    def test_whitespace_only_file_content_still_requires_clarification(self):
+        plan = plan_request(
+            "Tạo file workspace/hello.txt nội dung:   ",
+            allowed_skill_ids={"workspace.create-file"},
+        )
+        self.assertEqual(plan.kind, PlanKind.CLARIFY)
+        self.assertIn("content", plan.missing_fields)
+
     def test_complete_request_without_capability_fails_closed(self):
         plan = plan_request("Create file workspace/hello.txt content: hello", allowed_skill_ids=())
         self.assertEqual(plan.kind, PlanKind.UNSUPPORTED)

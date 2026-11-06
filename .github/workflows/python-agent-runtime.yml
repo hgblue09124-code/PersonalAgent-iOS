@@ -4,9 +4,13 @@ on:
   pull_request:
     paths:
       - "AgentRuntimePython/**"
+      - "app/**"
       - "Tasks/active/PYAGENT-001.json"
+      - "Tasks/active/PYAGENT-004.json"
       - ".github/workflows/python-agent-runtime.yml"
       - "Scripts/agent_task_guard.py"
+      - "Scripts/prepare_python_ios_runtime.sh"
+      - "PersonalAgent.xcodeproj/project.pbxproj"
   workflow_dispatch:
 
 permissions:
@@ -23,14 +27,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.15.2"
       - name: Run planner unit tests
         env:
-          PYTHONPATH: AgentRuntimePython
+          PYTHONPATH: app
         run: python -m unittest discover -s AgentRuntimePython/tests -v
       - name: Compile runtime package
-        run: python -m compileall -q AgentRuntimePython/personal_agent_runtime
+        run: python -m compileall -q app/personal_agent_runtime
       - name: Validate task contract
-        run: python Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-001.json
+        run: python Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-004.json
       - name: Check task scope
-        run: python Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-001.json --base origin/main
+        run: python Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-004.json --base origin/main
