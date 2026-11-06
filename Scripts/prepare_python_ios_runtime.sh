@@ -39,5 +39,5 @@ fi
 rm -rf "${DESTINATION}"
 ditto "${FRAMEWORK_SOURCE}" "${DESTINATION}"
 
-test -f "${DESTINATION}/build/build_utils.sh"
+test -f "${DESTINATION}/build/utils.sh"
 echo "Prepared official CPython ${VERSION} iOS XCFramework at ${DESTINATION}"
