@@ -19,7 +19,20 @@ enum EmbeddedPythonAgentRuntimeError: Error, LocalizedError, Sendable {
 actor EmbeddedPythonAgentRuntime {
     static let shared = EmbeddedPythonAgentRuntime()
 
-    func planRequest(text: String, allowedSkillIDs: Set<String>) throws -> Data {
+    func planRequest(text: String, allowedSkillIDs: Set<String>) async throws -> Data {
+        // CPython installs process signal handlers during initialization; perform
+        // its one-time bootstrap on the main thread, then execute plans on this actor.
+        let initializationFailure = await MainActor.run { () -> String? in
+            var initializationError: NSError?
+            guard PAPythonRuntimeBridge.initializeRuntime(withError: &initializationError) else {
+                return initializationError?.localizedDescription ?? "CPython initialization failed."
+            }
+            return nil
+        }
+        if let initializationFailure {
+            throw EmbeddedPythonAgentRuntimeError.unavailable(initializationFailure)
+        }
+
         var bridgeError: NSError?
         let payload = PAPythonRuntimeBridge.planRequest(
             withText: text,
