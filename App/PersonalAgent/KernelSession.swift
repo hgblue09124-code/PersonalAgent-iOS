@@ -402,6 +402,62 @@ final class KernelSession: ObservableObject {
                         skillFallbackNotice = "Skill \(id.rawValue) chưa có executor khả dụng. Em sẽ tiếp tục bằng chat thông thường trong phạm vi có thể."
                     }
                 } else {
+                    var pythonPlanData: Data?
+                    do {
+                        let allowedSkillIDs = try await self.composition.allowedChatSkillIDs(agentID: agentID)
+                        pythonPlanData = try await EmbeddedPythonAgentRuntime.shared.planRequest(
+                            text: normalizedStatement,
+                            allowedSkillIDs: allowedSkillIDs
+                        )
+                    } catch is CancellationError {
+                        throw CancellationError()
+                    } catch {
+                        skillFallbackNotice = "Python Agent Runtime chưa khả dụng; em sẽ thử tuyến Skill Swift hiện có trong phạm vi quyền: \(error.localizedDescription)"
+                    }
+
+                    if let pythonPlanData {
+                        let dispatch = try await self.composition.dispatchPythonAgentPlan(
+                            pythonPlanData,
+                            agentID: agentID
+                        )
+                        switch dispatch {
+                        case .clarification(let prompt):
+                            self.executionOutcome = .needsClarification(prompt)
+                            self.executionResult = prompt
+                            self.presentedResult = prompt
+                            self.chatStreamPresentation.streamingResponse = ""
+                            self.discardPendingStreamingDelta()
+                            self.appendChatTurn(role: .assistant, content: prompt, conversationID: conversationID)
+                            self.executionProgress = nil
+                            await self.refresh()
+                            return
+                        case .verified(let skillResult):
+                            guard skillResult.verified else {
+                                throw SkillExecutionError.verificationFailed(skillResult.skillID)
+                            }
+                            let result = Self.cleanSkillResult(skillResult.outputJSON)
+                            guard !result.isEmpty else {
+                                throw KernelError.invalidStateUpdate("Python-proposed Skill completed without a verified result")
+                            }
+                            self.executionResult = result
+                            self.presentedResult = result
+                            self.executionOutcome = .verifiedSuccess(result)
+                            self.chatStreamPresentation.streamingResponse = ""
+                            self.discardPendingStreamingDelta()
+                            self.chatStreamPresentation.responseMetrics = nil
+                            self.appendChatTurn(role: .assistant, content: result, conversationID: conversationID)
+                            self.executionProgress = nil
+                            await self.refresh()
+                            return
+                        case .executionFailed(let reason):
+                            throw EmbeddedPythonAgentRuntimeError.unavailable(
+                                "Swift rejected the Python proposal: \(reason)"
+                            )
+                        case .notActionable:
+                            break
+                        }
+                    }
+
                     do {
                         if let skillResult = try await self.composition.runChatSkillIfMatched(
                             goalStatement: normalizedStatement,
@@ -411,10 +467,11 @@ final class KernelSession: ObservableObject {
                             guard skillResult.verified else {
                                 throw SkillExecutionError.verificationFailed(skillResult.skillID)
                             }
-                            let result = Self.cleanSkillResult(skillResult.outputJSON)
-                            guard !result.isEmpty else {
+                            let skillOutput = Self.cleanSkillResult(skillResult.outputJSON)
+                            guard !skillOutput.isEmpty else {
                                 throw KernelError.invalidStateUpdate("Skill completed without a result")
                             }
+                            let result = skillFallbackNotice.map { "\($0)\n\n\(skillOutput)" } ?? skillOutput
                             self.executionResult = result
                             self.presentedResult = result
                             self.executionOutcome = .verifiedSuccess(result)
@@ -430,7 +487,8 @@ final class KernelSession: ObservableObject {
                         // Loading/manifest failures are recoverable: disclose them, then
                         // continue through the normal model runtime. Never catch policy,
                         // approval, cancellation, or post-execution verification failures.
-                        skillFallbackNotice = "\(error.description) Em sẽ tiếp tục xử lý bằng chat thông thường trong phạm vi có thể."
+                        let notice = "\(error.description) Em sẽ tiếp tục xử lý bằng chat thông thường trong phạm vi có thể."
+                        skillFallbackNotice = [skillFallbackNotice, notice].compactMap { $0 }.joined(separator: "\n\n")
                     }
                 }
 
