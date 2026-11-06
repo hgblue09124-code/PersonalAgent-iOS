@@ -198,7 +198,9 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let workspaceDirectory = root.appendingPathComponent("workspace", isDirectory: true)
         try FileManager.default.createDirectory(at: workspaceDirectory, withIntermediateDirectories: true)
         let oversizedURL = workspaceDirectory.appendingPathComponent("oversized.md")
-        try Data(repeating: 0x61, count: 256 * 1024 + 1).write(to: oversizedURL)
+        var oversizedContent = Data("needle".utf8)
+        oversizedContent.append(Data(repeating: 0x61, count: 256 * 1024))
+        try oversizedContent.write(to: oversizedURL)
 
         let reader = WorkspaceReadTool(workspace: workspace)
         do {
