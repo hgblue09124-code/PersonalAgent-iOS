@@ -43,7 +43,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
                 maxNumTokens: options.maxTokens
             )
             let runtime = Engine(engineConfig: config)
-            try runtime.initialize()
+            try await runtime.initialize()
             lock.withLock {
                 engine = runtime
                 state = .loaded
@@ -74,7 +74,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
                         Message($0, role: .system)
                     }
                     let config = ConversationConfig(systemMessage: systemMessage)
-                    let conversation = try runtime.createConversation(with: config)
+                    let conversation = try await runtime.createConversation(with: config)
                     let conversationID = ObjectIdentifier(conversation)
                     let registered = lock.withLock { () -> Bool in
                         guard state == .loaded else { return false }
