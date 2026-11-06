@@ -10,7 +10,8 @@
     "Providers/Local/GoogleLiteRT/GoogleLiteRTModelEngine.swift",
     "Composition/M8CompositionRoot.swift",
     "Storage/Models/FileBackedLocalModelStorage.swift",
-    "App/PersonalAgent/Screens/ModelsScreen.swift"
+    "App/PersonalAgent/Screens/ModelsScreen.swift",
+    "Providers/Local/LocalModelEngineFactory.swift"
   ],
   "forbidden_changes": [
     "Do not replace or regress the existing GGUF/llama.cpp model path.",
