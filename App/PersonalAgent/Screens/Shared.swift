@@ -10,31 +10,7 @@ enum AgentDesign {
     static let accentDeep = Color(red: 0.12, green: 0.18, blue: 0.52)
 
     static var background: some View {
-        Group {
-            if UserDefaults.standard.bool(forKey: "ui.v2.enabled") {
-                Color(.systemBackground)
-            } else {
-                ZStack {
-                    Color(.systemGroupedBackground)
-                    LinearGradient(
-                        colors: [
-                            accent.opacity(0.11),
-                            Color.clear,
-                            accentDeep.opacity(0.055)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    RadialGradient(
-                        colors: [accent.opacity(0.045), .clear],
-                        center: .topTrailing,
-                        startRadius: 4,
-                        endRadius: 240
-                    )
-                }
-            }
-        }
-        .ignoresSafeArea()
+        AgentDesignBackground()
     }
 
     static var sectionLabel: Font {
@@ -50,10 +26,43 @@ enum AgentDesign {
     }
 }
 
+private struct AgentDesignBackground: View {
+    @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
+
+    var body: some View {
+        Group {
+            if isUIV2Enabled {
+                Color(.systemBackground)
+            } else {
+                ZStack {
+                    Color(.systemGroupedBackground)
+                    LinearGradient(
+                        colors: [
+                            AgentDesign.accent.opacity(0.11),
+                            Color.clear,
+                            AgentDesign.accentDeep.opacity(0.055)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    RadialGradient(
+                        colors: [AgentDesign.accent.opacity(0.045), .clear],
+                        center: .topTrailing,
+                        startRadius: 4,
+                        endRadius: 240
+                    )
+                }
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
 struct ScreenScaffold<Content: View>: View {
     let title: String
     let systemImage: String
     var scrollable: Bool = true
+    var showsHeader: Bool = true
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -80,12 +89,12 @@ struct ScreenScaffold<Content: View>: View {
         Group {
             if scrollable {
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    screenHeader
+                    if showsHeader { screenHeader }
                     content()
                 }
             } else {
                 VStack(alignment: .leading, spacing: 16) {
-                    screenHeader
+                    if showsHeader { screenHeader }
                     content()
                 }
             }
@@ -93,7 +102,7 @@ struct ScreenScaffold<Content: View>: View {
         .frame(maxWidth: .infinity, maxHeight: scrollable ? nil : .infinity, alignment: .topLeading)
         .padding(.horizontal, AgentDesign.horizontalPadding)
         .padding(.top, 8)
-        .padding(.bottom, 32)
+        .padding(.bottom, scrollable ? 32 : 8)
     }
 
     private var screenHeader: some View {
