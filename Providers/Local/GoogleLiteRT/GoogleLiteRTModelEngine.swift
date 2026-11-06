@@ -68,6 +68,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
         let runtime = lock.withLock { engine }
         return AsyncThrowingStream { continuation in
             let task = Task {
+                var activeConversation: Conversation?
                 do {
                     guard let runtime else { throw GoogleLiteRTError.modelNotLoaded }
                     let systemMessage = request.systemPrompt.map {
@@ -75,6 +76,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
                     }
                     let config = ConversationConfig(systemMessage: systemMessage)
                     let conversation = try await runtime.createConversation(with: config)
+                    activeConversation = conversation
                     let conversationID = ObjectIdentifier(conversation)
                     let registered = lock.withLock { () -> Bool in
                         guard state == .loaded else { return false }
@@ -102,6 +104,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
                     }
                     continuation.finish()
                 } catch {
+                    try? activeConversation?.cancel()
                     continuation.finish(throwing: error)
                 }
             }
