@@ -19,11 +19,11 @@ if [[ ! -f "${ARCHIVE}" ]]; then
         --output "${ARCHIVE}" "${DOWNLOAD_URL}"
 fi
 
-echo "${EXPECTED_SHA256}  ${ARCHIVE}" | shasum --algorithm 256 --check -
+echo "${EXPECTED_SHA256}  ${ARCHIVE}" | shasum -a 256 -c -
 
 rm -rf "${EXTRACTED}"
 mkdir -p "${EXTRACTED}"
-tar --extract --gzip --file "${ARCHIVE}" --directory "${EXTRACTED}"
+tar -xzf "${ARCHIVE}" -C "${EXTRACTED}"
 
 FRAMEWORK_SOURCE="$(find "${EXTRACTED}" -type d -name "Python.xcframework" -print -quit)"
 if [[ -z "${FRAMEWORK_SOURCE}" ]]; then
