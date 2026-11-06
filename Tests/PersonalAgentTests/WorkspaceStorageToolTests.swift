@@ -141,6 +141,85 @@ final class WorkspaceStorageToolTests: XCTestCase {
         XCTAssertFalse(exists)
     }
 
+    func testWorkspaceWriteAndAppendRejectContentOver256KiBWithoutMutation() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let writer = WorkspaceWriteTool(workspace: workspace)
+        let oversized = String(repeating: "x", count: 256 * 1024 + 1)
+
+        func arguments(operation: String, path: String, content: String) throws -> String {
+            let payload = ["operation": operation, "path": path, "content": content]
+            let data = try JSONSerialization.data(withJSONObject: payload)
+            return try XCTUnwrap(String(data: data, encoding: .utf8))
+        }
+
+        do {
+            _ = try await writer.run(
+                argumentsJSON: arguments(
+                    operation: "write",
+                    path: "workspace/oversized.md",
+                    content: oversized
+                )
+            )
+            XCTFail("A write larger than 256 KiB must be rejected")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool file exceeds the 256 KiB limit.")
+        }
+        let oversizedFileExists = try await workspace.exists(at: "workspace/oversized.md")
+        XCTAssertFalse(oversizedFileExists)
+
+        _ = try await writer.run(
+            argumentsJSON: #"{"operation":"write","path":"workspace/stable.md","content":"stable"}"#
+        )
+        do {
+            _ = try await writer.run(
+                argumentsJSON: arguments(
+                    operation: "append",
+                    path: "workspace/stable.md",
+                    content: oversized
+                )
+            )
+            XCTFail("An append that exceeds 256 KiB must be rejected")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool file exceeds the 256 KiB limit.")
+        }
+        let stableContent = try await workspace.readFile(at: "workspace/stable.md")
+        XCTAssertEqual(stableContent, "stable")
+    }
+
+    func testWorkspaceReadRejectsOversizedFilesAndSearchSkipsThem() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+
+        let workspaceDirectory = root.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspaceDirectory, withIntermediateDirectories: true)
+        let oversizedURL = workspaceDirectory.appendingPathComponent("oversized.md")
+        var oversizedContent = Data("needle".utf8)
+        oversizedContent.append(Data(repeating: 0x61, count: 256 * 1024))
+        try oversizedContent.write(to: oversizedURL)
+
+        let reader = WorkspaceReadTool(workspace: workspace)
+        do {
+            _ = try await reader.run(
+                argumentsJSON: #"{"operation":"read","path":"workspace/oversized.md"}"#
+            )
+            XCTFail("Reading a file larger than 256 KiB must be rejected")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool file exceeds the 256 KiB limit.")
+        }
+
+        let searchJSON = try await reader.run(
+            argumentsJSON: #"{"operation":"search","query":"needle"}"#
+        )
+        let data = try XCTUnwrap(searchJSON.data(using: .utf8))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(object["matches"] as? [String], [])
+    }
+
     func testChatSkillCreatesAndReadBackVerifiesWorkspaceFile() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }

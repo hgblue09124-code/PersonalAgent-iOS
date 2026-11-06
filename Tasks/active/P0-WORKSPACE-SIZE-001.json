@@ -1,0 +1,34 @@
+{
+  "id": "P0-WORKSPACE-SIZE-001",
+  "title": "Prove workspace write and append size limits fail closed",
+  "status": "in_progress",
+  "goal": "Add regression coverage for the production 256 KiB workspace tool limit so oversized writes and appends cannot mutate workspace state.",
+  "context": "Issue #347 requires regression evidence for workspace size limits. WorkspaceStorageTools enforces a 256 KiB maximum, but current test sources do not prove the rejection boundary or preservation of an existing file after an oversized append. The branch is rebased onto the latest main, including the merged LiteRT-LM provider integration, before final validation.",
+  "allowed_paths": [
+    "Tasks/active/P0-WORKSPACE-SIZE-001.json",
+    "Tests/PersonalAgentTests/WorkspaceStorageToolTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change the production size limit or workspace runtime behavior.",
+    "Do not bypass policy, path validation, secret scanning, or read-back verification.",
+    "Do not weaken existing tests or add production dependencies.",
+    "Do not claim physical-device acceptance without a real iPhone test."
+  ],
+  "acceptance_criteria": [
+    "A write payload larger than 256 KiB returns the explicit 256 KiB file-too-large failure and creates no file.",
+    "An append that would grow an existing file beyond 256 KiB returns fileTooLarge and preserves the original contents exactly.",
+    "The regression tests use the real WorkspaceWriteTool and LocalAgentWorkspace path.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "Oversized reads fail with the explicit 256 KiB limit error, and workspace search skips oversized files."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/P0-WORKSPACE-SIZE-001.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/P0-WORKSPACE-SIZE-001.json --base origin/main",
+    "swift test --disable-sandbox --filter WorkspaceStorageToolTests",
+    "Confirm all required PR workflows pass on the final PR head."
+  ],
+  "dependencies": [
+    "Issue #347"
+  ],
+  "recovery": "If a test fails, inspect the actual WorkspaceStorageToolError and filesystem state; do not change the production limit merely to make the test pass."
+}
