@@ -166,6 +166,7 @@ func moduleName(for file: URL, repositoryRoot: URL) -> String {
     }
     if relative.hasPrefix("Providers/Remote/OpenAI/") { return "PAProvidersOpenAI" }
     if relative.hasPrefix("Providers/Remote/Shared/") { return "PAProvidersRemote" }
+    if relative.hasPrefix("Providers/Local/GoogleLiteRT/") { return "PAProvidersGoogleLiteRT" }
     if relative.hasPrefix("Providers/Local/") { return "PAProvidersLocal" }
 
     if relative.hasPrefix("Storage/Memory/") { return "PAStorageMemory" }

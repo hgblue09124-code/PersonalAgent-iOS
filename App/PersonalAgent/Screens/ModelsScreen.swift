@@ -3,6 +3,12 @@ import UniformTypeIdentifiers
 import PAProviders
 import PAComposition
 
+private extension UTType {
+    static var litertlm: UTType {
+        UTType(filenameExtension: "litertlm", conformingTo: .data) ?? .data
+    }
+}
+
 struct ModelsScreen: View {
     @ObservedObject var session: KernelSession
     @State private var isImporting = false
@@ -58,11 +64,11 @@ struct ModelsScreen: View {
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .accessibilityLabel("Import GGUF")
+                    .accessibilityLabel("Import local model")
                 }
 
                 if session.installedModels.isEmpty {
-                    Text("No GGUF models installed.")
+                    Text("No local models installed.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
@@ -162,7 +168,7 @@ struct ModelsScreen: View {
             GlassPanel {
                 Label("Vòng đời model local", systemImage: "arrow.trianglehead.2.clockwise")
                     .font(.headline)
-                modelStep("01", "Import", "Chọn GGUF từ Files; không đưa model lớn hoặc bí mật vào Git.")
+                modelStep("01", "Import", "Chọn GGUF hoặc LiteRT-LM từ Files; không đưa model lớn vào Git.")
                 modelStep("02", "Validate", "Kiểm tra định dạng và metadata trước khi tin tệp.")
                 modelStep("03", "Load", "Nạp engine và quan sát trạng thái; model có thể chưa phù hợp giới hạn thiết bị.")
                 modelStep("04", "Generate", "Thử prompt ngắn, streaming và cancellation trước tác vụ dài.")
@@ -184,7 +190,7 @@ struct ModelsScreen: View {
         }
         .fileImporter(
             isPresented: $isImporting,
-            allowedContentTypes: [.gguf],
+            allowedContentTypes: [.gguf, .litertlm],
             allowsMultipleSelection: false
         ) { result in
             switch result {
