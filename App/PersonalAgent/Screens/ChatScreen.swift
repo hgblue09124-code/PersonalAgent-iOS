@@ -10,6 +10,7 @@ struct ChatScreen: View {
     @State private var renameText = ""
     @State private var showRename = false
     @State private var showPromptLibrary = false
+    @State private var showAgentProfiles = false
     @State private var showConversationSearch = false
     @State private var conversationSearchText = ""
     @AppStorage("ui.v2.enabled") private var isUIV2Enabled = false
@@ -57,23 +58,63 @@ struct ChatScreen: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $showAgentProfiles) {
+            NavigationStack {
+                AgentsScreen(session: session)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { showAgentProfiles = false }
+                        }
+                    }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     private var conversationHeader: some View {
         AgentMessengerPanel {
             HStack(spacing: 10) {
                 if isUIV2Enabled {
-                    AgentChatAvatar(image: headerAgentAvatar, isAgent: true)
-                        .frame(width: 40, height: 40)
+                    Menu {
+                        ForEach(session.agentManifests, id: \.id) { agent in
+                            Button {
+                                session.selectAgent(id: agent.id)
+                            } label: {
+                                HStack {
+                                    Text(agent.name)
+                                    if agent.id == session.selectedAgentID {
+                                        Spacer()
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                            .disabled(session.isSubmitting)
+                        }
+                        Divider()
+                        Button {
+                            showAgentProfiles = true
+                        } label: {
+                            Label("Manage and search Agents", systemImage: "person.2")
+                        }
+                        .disabled(session.isSubmitting)
+                    } label: {
+                        HStack(spacing: 10) {
+                            AgentChatAvatar(image: headerAgentAvatar, isAgent: true)
+                                .frame(width: 40, height: 40)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(session.agentManifests.first(where: { $0.id == session.selectedAgentID })?.name ?? "Personal Agent")
+                                    .font(.headline).lineLimit(1)
+                                Text(currentTitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .disabled(session.isSubmitting)
                 } else {
                     PremiumIconTile(systemImage: "bubble.left.and.bubble.right")
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(isUIV2Enabled ? (session.agentManifests.first(where: { $0.id == session.selectedAgentID })?.name ?? "Personal Agent") : currentTitle)
-                        .font(.headline).lineLimit(1)
-                    if isUIV2Enabled {
-                        Text(currentTitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
-                    } else {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(currentTitle).font(.headline).lineLimit(1)
                         Text("\(session.chatHistory.count) turns").font(.caption).foregroundStyle(.secondary)
                     }
                 }
