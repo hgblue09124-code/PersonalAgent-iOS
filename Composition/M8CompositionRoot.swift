@@ -474,6 +474,19 @@ private struct ChatMessageEnvelope: Decodable, Sendable {
     let content: String?
 }
 
+/// Recoverable failure while loading or resolving a chat Skill.
+/// The chat layer may disclose this failure and continue with normal model fallback.
+public enum ChatSkillLoadError: Error, Sendable, Equatable, CustomStringConvertible {
+    case unavailable(String)
+
+    public var description: String {
+        switch self {
+        case .unavailable(let detail):
+            return "Skill bị lỗi khi nạp hoặc phân giải: \(detail)"
+        }
+    }
+}
+
 /// Deterministic preflight result for user chat requests. A clarification is a
 /// terminal response for this turn and must not be delegated to a model provider.
 public enum ChatRequestPreflight: Sendable, Equatable {
@@ -977,7 +990,14 @@ extension M8CompositionRoot {
             return nil
         }
 
-        let storedAgent = try await agentStore.load(id: agentID)
+        let storedAgent: AgentManifest
+        do {
+            storedAgent = try await agentStore.load(id: agentID)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw ChatSkillLoadError.unavailable("không nạp được cấu hình Agent \(agentID): \(error)")
+        }
         let agent = scopeAgentForWorkspaceSetting(storedAgent)
         guard !agent.skillIDs.isEmpty else { return nil }
         let inputData = try JSONSerialization.data(
@@ -996,6 +1016,14 @@ extension M8CompositionRoot {
             )
         } catch SkillRuntimeError.noSelection {
             return nil
+        } catch let error as SkillMarkdownError {
+            throw ChatSkillLoadError.unavailable("manifest không hợp lệ: \(error)")
+        } catch SkillRuntimeError.unknownSkill(let id) {
+            throw ChatSkillLoadError.unavailable("không tìm thấy Skill \(id.rawValue)")
+        } catch SkillRuntimeError.unavailableSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Skill \(id.rawValue) chưa có executor khả dụng")
+        } catch SkillAgentOrchestratorError.agentDeclaresMissingSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Agent tham chiếu Skill không tồn tại: \(id.rawValue)")
         }
     }
 
@@ -1033,6 +1061,18 @@ extension M8CompositionRoot {
             return nil
         } catch AgentTeamOrchestratorError.noMatchingSkills {
             return nil
+        } catch let error as SkillMarkdownError {
+            throw ChatSkillLoadError.unavailable("manifest không hợp lệ: \(error)")
+        } catch SkillRuntimeError.unknownSkill(let id) {
+            throw ChatSkillLoadError.unavailable("không tìm thấy Skill \(id.rawValue)")
+        } catch SkillRuntimeError.unavailableSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Skill \(id.rawValue) chưa có executor khả dụng")
+        } catch SkillExecutionError.unknownSkill(let id) {
+            throw ChatSkillLoadError.unavailable("không tìm thấy Skill \(id.rawValue)")
+        } catch SkillExecutionError.unavailableSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Skill \(id.rawValue) chưa có executor khả dụng")
+        } catch SkillAgentOrchestratorError.agentDeclaresMissingSkill(let id) {
+            throw ChatSkillLoadError.unavailable("Agent tham chiếu Skill không tồn tại: \(id.rawValue)")
         }
     }
 

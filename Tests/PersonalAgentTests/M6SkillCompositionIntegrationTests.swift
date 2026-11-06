@@ -1463,4 +1463,62 @@ struct M6SkillCompositionIntegrationTests {
         #expect(agent.skillIDs.map(\.rawValue) == ["text.normalize"])
         #expect(agent.instructions == "Keep the custom scope unchanged.")
     }
+
+    @Test("team chat reports missing declared Skills as recoverable load failures")
+    func teamChatMapsMissingDeclaredSkillToLoadError() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("M8TeamMissingSkill_\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let skillsDirectory = directory.appendingPathComponent("Skills", isDirectory: true)
+        let agentsDirectory = directory.appendingPathComponent("Agents", isDirectory: true)
+        try FileManager.default.createDirectory(at: skillsDirectory, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: agentsDirectory, withIntermediateDirectories: true)
+
+        let malformedSkill = """
+        id: broken.skill
+        name: Broken Skill
+        version: 1.0.0
+        ---
+        ## Input
+        broken.input
+        """
+        try malformedSkill.write(
+            to: skillsDirectory.appendingPathComponent("broken.skill.Skill.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let agent = """
+        id: personal.specialist
+        name: Specialist Agent
+        version: 1.0.0
+        description: Declares a Skill with a malformed manifest.
+        ---
+        ## Skills
+        broken.skill
+
+        ## Rule
+        Use only the declared Skill.
+        """
+        try agent.write(
+            to: agentsDirectory.appendingPathComponent("personal.specialist.Agent.md"),
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let root = try await M8CompositionRoot(
+            provider: DeterministicFakeProvider(),
+            storeDirectoryURL: directory,
+            policy: AllowPolicy()
+        )
+        await #expect(throws: ChatSkillLoadError.self) {
+            _ = try await root.runChatTeamIfMatched(
+                goalStatement: "run broken skill",
+                inputContext: "run broken skill"
+            )
+        }
+    }
+
+
 }
