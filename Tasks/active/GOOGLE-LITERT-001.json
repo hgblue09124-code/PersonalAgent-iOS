@@ -16,7 +16,8 @@
     "Kernel/Ports/Providers/LocalModelContracts.swift",
     "Providers/Local/LocalModelContracts.swift",
     "Providers/Local/LocalBoundary.swift",
-    "Tests/PersonalAgentTests/ImportBoundaryTests.swift"
+    "Tests/PersonalAgentTests/ImportBoundaryTests.swift",
+    "Tests/PersonalAgentTests/LocalModelStorageTests.swift"
   ],
   "forbidden_changes": [
     "Do not replace or regress the existing GGUF/llama.cpp model path.",
@@ -29,7 +30,8 @@
     "M8 composition automatically selects the Google engine for .litertlm files and keeps llama.cpp for GGUF files.",
     "The existing model import UI and storage accept .litertlm files without trying to parse them as GGUF.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
-    "Physical-device validation is recorded separately and is not claimed without evidence."
+    "Physical-device validation is recorded separately and is not claimed without evidence.",
+    "A regression test proves .litertlm import skips GGUF parsing, preserves the file extension and records LiteRT metadata."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/GOOGLE-LITERT-001.json",
