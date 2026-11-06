@@ -36,10 +36,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
             _ = try await reader.run(argumentsJSON: #"{"operation":"read","path":"../private.txt"}"#)
             XCTFail("Path traversal must be rejected")
         } catch {
-            XCTAssertEqual(
-                error.localizedDescription,
-                "Workspace tool path is outside the allowed roots or targets a protected filename."
-            )
+            XCTAssertEqual(error as? AgentWorkspaceError, .invalidPath("../private.txt"))
         }
     }
 
@@ -378,7 +375,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         } catch {
             XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
         }
-        let protectedPathExists = try await workspace.exists(at: "workspace/secrets/note.md")
+        let protectedPathExists = FileManager.default.fileExists(atPath: root.appendingPathComponent("workspace/secrets/note.md").path)
         let secretWriteExists = try await workspace.exists(at: "workspace/notes.md")
         XCTAssertFalse(protectedPathExists)
         XCTAssertFalse(secretWriteExists)
@@ -395,7 +392,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let safePrefix = "api_key = \"sk-"
         let safeSuffix = String(repeating: "D", count: 24) + "\""
         _ = try await writer.run(
-            argumentsJSON: #"{"operation":"write","path":"workspace/split-secret.md","content":"api_key = \"sk-"}"#
+            argumentsJSON: #"{"operation":"write","path":"workspace/split-note.md","content":"api_key = \"sk-"}"#
         )
         do {
             let data = try JSONSerialization.data(withJSONObject: [
@@ -419,7 +416,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: root) }
         let workspace = LocalAgentWorkspace(rootURL: root)
         try await workspace.prepare()
-        let notes = root.appendingPathComponent("workspace/secret-note.md")
+        let notes = root.appendingPathComponent("workspace/note.md")
         let secretText = "api_key = \"sk-" + String(repeating: "C", count: 24) + "\" needle"
         try secretText.write(to: notes, atomically: true, encoding: .utf8)
         let reader = WorkspaceReadTool(workspace: workspace)
