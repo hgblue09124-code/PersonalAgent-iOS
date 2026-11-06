@@ -153,6 +153,7 @@ let package = Package(
                 "PAProviders",
                 "PAKernel",
                 "PAGGUF",
+                .target(name: "PAProvidersGoogleLiteRT", condition: .when(platforms: [.iOS, .macOS])),
                 .target(name: "cllama", condition: .when(platforms: [.iOS, .macOS, .tvOS, .watchOS, .visionOS]))
             ],
             path: "Providers/Local",
