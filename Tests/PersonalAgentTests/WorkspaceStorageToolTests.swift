@@ -423,7 +423,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
 
         do {
             _ = try await reader.run(
-            argumentsJSON: #"{ "operation": "search", "query": "needle" }"#
+            argumentsJSON: #"{ "operation": "read", "path": "workspace/note.md" }"#
             )
             XCTFail("Reading secret-like content must be rejected")
         } catch {
