@@ -171,7 +171,8 @@ final class WorkspaceStorageToolTests: XCTestCase {
                 XCTFail("Expected fileTooLarge, got: \(error)")
             }
         }
-        XCTAssertFalse(try await workspace.exists(at: "workspace/oversized.md"))
+        let oversizedFileExists = try await workspace.exists(at: "workspace/oversized.md")
+        XCTAssertFalse(oversizedFileExists)
 
         _ = try await writer.run(
             argumentsJSON: #"{"operation":"write","path":"workspace/stable.md","content":"stable"}"#
@@ -192,7 +193,8 @@ final class WorkspaceStorageToolTests: XCTestCase {
                 XCTFail("Expected fileTooLarge, got: \(error)")
             }
         }
-        XCTAssertEqual(try await workspace.readFile(at: "workspace/stable.md"), "stable")
+        let stableContent = try await workspace.readFile(at: "workspace/stable.md")
+        XCTAssertEqual(stableContent, "stable")
     }
 
     func testChatSkillCreatesAndReadBackVerifiesWorkspaceFile() async throws {
