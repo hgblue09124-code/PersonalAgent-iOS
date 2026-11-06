@@ -32,7 +32,7 @@ def _extract_proposal(text: str) -> tuple[str | None, str | None]:
     path_match = _PATH.search(text)
     content_match = _CONTENT.search(text)
     path = path_match.group(0) if path_match else None
-    content = content_match.group(1).strip() if content_match else None
+    content = content_match.group(1) if content_match else None
     return path, content
 
 
@@ -54,9 +54,10 @@ def plan_request(text: str, allowed_skill_ids: Iterable[str] = ()) -> AgentPlan:
 
     if _has_create_file_intent(normalized):
         intent = AgentIntent(IntentKind.CREATE_FILE, normalized)
-        path, content = _extract_proposal(normalized)
+        path, content = _extract_proposal(text)
         missing = tuple(
-            field for field, value in (("path", path), ("content", content)) if not value
+            field for field, value in (("path", path), ("content", content))
+            if value is None or not value.strip()
         )
         if missing:
             labels = {"path": "file path", "content": "file content"}
