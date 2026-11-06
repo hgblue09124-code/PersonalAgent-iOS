@@ -36,7 +36,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
             _ = try await reader.run(argumentsJSON: #"{"operation":"read","path":"../private.txt"}"#)
             XCTFail("Path traversal must be rejected")
         } catch {
-            // Fail-closed is the expected contract.
+            XCTAssertEqual(error as? AgentWorkspaceError, .invalidPath("../private.txt"))
         }
     }
 
@@ -58,7 +58,10 @@ final class WorkspaceStorageToolTests: XCTestCase {
             _ = try await reader.run(argumentsJSON: #"{"operation":"read","path":"workspace/secrets/note.md"}"#)
             XCTFail("Protected parent directories must be rejected")
         } catch {
-            // Fail-closed is the expected contract.
+            XCTAssertEqual(
+                error.localizedDescription,
+                "Workspace tool path is outside the allowed roots or targets a protected filename."
+            )
         }
     }
 
@@ -135,7 +138,7 @@ final class WorkspaceStorageToolTests: XCTestCase {
             _ = try await writer.run(argumentsJSON: arguments)
             XCTFail("Secret-like content must be rejected")
         } catch {
-            // Fail-closed is the expected contract.
+            XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
         }
         let exists = try await workspace.exists(at: "workspace/notes.md")
         XCTAssertFalse(exists)
@@ -298,6 +301,150 @@ final class WorkspaceStorageToolTests: XCTestCase {
         let customStore = FileAgentStore(directoryURL: customRoot)
         try await customStore.ensureDefaultAgent()
         XCTAssertEqual(try String(contentsOf: customRoot.appendingPathComponent("personal.default.Agent.md"), encoding: .utf8), custom)
+    }
+
+
+    func testWorkspaceToolsRejectMalformedJSONAndInvalidInputShapes() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let reader = WorkspaceReadTool(workspace: workspace)
+        let writer = WorkspaceWriteTool(workspace: workspace)
+
+        let readCases: [(String, String)] = [
+            ("not-json", "Workspace tool input rejected: arguments must be a JSON object"),
+            (#"{"operation":"read","path":42}"#, "Workspace tool input rejected: missing string field: path"),
+            (#"{"operation":"read","path":"workspace/ok.md","extra":true}"#, "Workspace tool input rejected: unexpected input fields"),
+            (#"{"operation":"read"}"#, "Workspace tool input rejected: missing string field: path")
+        ]
+        for (arguments, expectedError) in readCases {
+            do {
+                _ = try await reader.run(argumentsJSON: arguments)
+                XCTFail("Invalid read input must be rejected: \(arguments)")
+            } catch {
+                XCTAssertEqual(error.localizedDescription, expectedError)
+            }
+        }
+
+        let writeCases: [(String, String)] = [
+            (#"{"operation":"write","path":"workspace/ok.md"}"#, "Workspace tool input rejected: missing string field: content"),
+            (#"{"operation":"write","path":"workspace/ok.md","content":"safe","unexpected":1}"#, "Workspace tool input rejected: unexpected input fields"),
+            (#"{"operation":"write","path":"workspace/ok.md","content":false}"#, "Workspace tool input rejected: missing string field: content")
+        ]
+        for (arguments, expectedError) in writeCases {
+            do {
+                _ = try await writer.run(argumentsJSON: arguments)
+                XCTFail("Invalid write input must be rejected: \(arguments)")
+            } catch {
+                XCTAssertEqual(error.localizedDescription, expectedError)
+            }
+        }
+        let invalidWriteCreatedFile = try await workspace.exists(at: "workspace/ok.md")
+        XCTAssertFalse(invalidWriteCreatedFile)
+    }
+
+    func testWorkspaceWriteRejectsProtectedPathsAndSecretLikeContentWithoutMutation() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let writer = WorkspaceWriteTool(workspace: workspace)
+
+        do {
+            _ = try await writer.run(
+                argumentsJSON: #"{"operation":"write","path":"workspace/secrets/note.md","content":"safe"}"#
+            )
+            XCTFail("Protected workspace paths must be rejected")
+        } catch {
+            XCTAssertEqual(
+                error.localizedDescription,
+                "Workspace tool path is outside the allowed roots or targets a protected filename."
+            )
+        }
+        do {
+            let fakeSecret = "api_key = \"sk-" + String(repeating: "B", count: 24) + "\""
+            let data = try JSONSerialization.data(withJSONObject: [
+                "operation": "write",
+                "path": "workspace/notes.md",
+                "content": fakeSecret
+            ])
+            let arguments = try XCTUnwrap(String(data: data, encoding: .utf8))
+            _ = try await writer.run(argumentsJSON: arguments)
+            XCTFail("Secret-like content must be rejected")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
+        }
+        let protectedPathExists = FileManager.default.fileExists(atPath: root.appendingPathComponent("workspace/secrets/note.md").path)
+        let secretWriteExists = try await workspace.exists(at: "workspace/notes.md")
+        XCTAssertFalse(protectedPathExists)
+        XCTAssertFalse(secretWriteExists)
+    }
+
+
+    func testWorkspaceAppendRejectsSecretFormedAcrossExistingAndNewContent() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let writer = WorkspaceWriteTool(workspace: workspace)
+
+        let safePrefix = "api_key = \"sk-"
+        let safeSuffix = String(repeating: "D", count: 24) + "\""
+        _ = try await writer.run(
+            argumentsJSON: #"{"operation":"write","path":"workspace/split-note.md","content":"api_key = \"sk-"}"#
+        )
+        do {
+            let data = try JSONSerialization.data(withJSONObject: [
+                "operation": "append",
+                "path": "workspace/split-note.md",
+                "content": safeSuffix
+            ])
+            let arguments = try XCTUnwrap(String(data: data, encoding: .utf8))
+            _ = try await writer.run(argumentsJSON: arguments)
+            XCTFail("The combined file content must be scanned for secrets")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
+        }
+
+        let persisted = try await workspace.readFile(at: "workspace/split-note.md")
+        XCTAssertEqual(persisted, safePrefix)
+    }
+
+    func testWorkspaceReadAndSearchSkipSecretLikeFiles() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let notes = root.appendingPathComponent("workspace/note.md")
+        let secretText = "Authorization: Bearer " + String(repeating: "C", count: 24) + " needle"
+        try secretText.write(to: notes, atomically: true, encoding: .utf8)
+        let reader = WorkspaceReadTool(workspace: workspace)
+
+        let readArgumentsData = try JSONSerialization.data(withJSONObject: [
+            "operation": "read",
+            "path": "workspace/note.md"
+        ])
+        let readArguments = try XCTUnwrap(String(data: readArgumentsData, encoding: .utf8))
+        do {
+            _ = try await reader.run(argumentsJSON: readArguments)
+            XCTFail("Reading secret-like content must be rejected")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
+        }
+
+        try await workspace.writeFile("safe needle", to: "workspace/regular.md")
+        let searchArgumentsData = try JSONSerialization.data(withJSONObject: [
+            "operation": "search",
+            "query": "needle"
+        ])
+        let searchArguments = try XCTUnwrap(String(data: searchArgumentsData, encoding: .utf8))
+        let searchJSON = try await reader.run(argumentsJSON: searchArguments)
+        let data = try XCTUnwrap(searchJSON.data(using: .utf8))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let matches = try XCTUnwrap(object["matches"] as? [String])
+        XCTAssertEqual(matches, ["workspace/regular.md"])
+        XCTAssertFalse(matches.contains("workspace/note.md"))
     }
 
     func testWorkspaceRejectsRepositoryMetadataAndCredentialDirectories() async throws {
