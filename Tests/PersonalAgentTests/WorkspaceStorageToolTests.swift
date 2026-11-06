@@ -343,7 +343,8 @@ final class WorkspaceStorageToolTests: XCTestCase {
                 XCTAssertEqual(error.localizedDescription, expectedError)
             }
         }
-        XCTAssertFalse(try await workspace.exists(at: "workspace/ok.md"))
+        let invalidWriteCreatedFile = try await workspace.exists(at: "workspace/ok.md")
+        XCTAssertFalse(invalidWriteCreatedFile)
     }
 
     func testWorkspaceWriteRejectsProtectedPathsAndSecretLikeContentWithoutMutation() async throws {
@@ -377,8 +378,10 @@ final class WorkspaceStorageToolTests: XCTestCase {
         } catch {
             XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
         }
-        XCTAssertFalse(try await workspace.exists(at: "workspace/secrets/note.md"))
-        XCTAssertFalse(try await workspace.exists(at: "workspace/notes.md"))
+        let protectedPathExists = try await workspace.exists(at: "workspace/secrets/note.md")
+        let secretWriteExists = try await workspace.exists(at: "workspace/notes.md")
+        XCTAssertFalse(protectedPathExists)
+        XCTAssertFalse(secretWriteExists)
     }
 
     func testWorkspaceReadAndSearchSkipSecretLikeFiles() async throws {
