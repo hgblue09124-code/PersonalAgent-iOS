@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 import PhotosUI
 import Vision
 import UIKit
+import ImageIO
 import PAComposition
 import PAImportGateway
 
@@ -378,43 +379,23 @@ private struct PersonalAgentProfileScreen: View {
         .onChange(of: agentAvatarData) { _, data in
             agentAvatarImage = data.isEmpty ? nil : UIImage(data: data)
         }
-        .onChange(of: selectedPhoto) { _, item in
-            guard let item else { return }
-            Task {
-                guard let data = try? await item.loadTransferable(type: Data.self),
-                      let image = UIImage(data: data) else { return }
-                let target = CGSize(width: 512, height: 512)
-                let renderer = UIGraphicsImageRenderer(size: target)
-                let resized = renderer.image { _ in
-                    let scale = max(target.width / image.size.width, target.height / image.size.height)
-                    let width = image.size.width * scale
-                    let height = image.size.height * scale
-                    let rect = CGRect(x: (target.width - width) / 2, y: (target.height - height) / 2, width: width, height: height)
-                    image.draw(in: rect)
-                }
-                if let compressed = resized.jpegData(compressionQuality: 0.78) {
-                    avatarData = compressed
-                }
-            }
+        .task(id: selectedPhoto) {
+            guard let item = selectedPhoto,
+                  let data = try? await item.loadTransferable(type: Data.self) else { return }
+            let compressed = await Task.detached(priority: .userInitiated) {
+                AvatarThumbnailProcessor.jpegData(from: data)
+            }.value
+            guard !Task.isCancelled, let compressed else { return }
+            avatarData = compressed
         }
-        .onChange(of: selectedAgentPhoto) { _, item in
-            guard let item else { return }
-            Task {
-                guard let data = try? await item.loadTransferable(type: Data.self),
-                      let image = UIImage(data: data) else { return }
-                let target = CGSize(width: 512, height: 512)
-                let renderer = UIGraphicsImageRenderer(size: target)
-                let resized = renderer.image { _ in
-                    let scale = max(target.width / image.size.width, target.height / image.size.height)
-                    let width = image.size.width * scale
-                    let height = image.size.height * scale
-                    let rect = CGRect(x: (target.width - width) / 2, y: (target.height - height) / 2, width: width, height: height)
-                    image.draw(in: rect)
-                }
-                if let compressed = resized.jpegData(compressionQuality: 0.78) {
-                    agentAvatarData = compressed
-                }
-            }
+        .task(id: selectedAgentPhoto) {
+            guard let item = selectedAgentPhoto,
+                  let data = try? await item.loadTransferable(type: Data.self) else { return }
+            let compressed = await Task.detached(priority: .userInitiated) {
+                AvatarThumbnailProcessor.jpegData(from: data)
+            }.value
+            guard !Task.isCancelled, let compressed else { return }
+            agentAvatarData = compressed
         }
     }
 }
@@ -1263,3 +1244,40 @@ private struct ImportedFilePreviewSheet: View {
     }
 }
 
+
+
+private enum AvatarThumbnailProcessor {
+    static func jpegData(from sourceData: Data, maximumPixelSize: Int = 512) -> Data? {
+        guard let source = CGImageSourceCreateWithData(sourceData as CFData, nil) else {
+            return nil
+        }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(1, maximumPixelSize),
+            kCGImageSourceShouldCacheImmediately: true
+        ]
+        guard let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
+            return nil
+        }
+
+        let output = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(
+            output,
+            UTType.jpeg.identifier as CFString,
+            1,
+            nil
+        ) else {
+            return nil
+        }
+        CGImageDestinationAddImage(
+            destination,
+            thumbnail,
+            [kCGImageDestinationLossyCompressionQuality: 0.78] as CFDictionary
+        )
+        guard CGImageDestinationFinalize(destination) else {
+            return nil
+        }
+        return output as Data
+    }
+}
