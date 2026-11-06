@@ -4,11 +4,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PAPythonRuntimeBridge : NSObject
 
-+ (BOOL)initializeRuntimeWithError:(NSError * _Nullable * _Nullable)error;
++ (BOOL)initializeRuntimeWithErrorMessage:(NSString * _Nullable * _Nullable)errorMessage;
 
 + (nullable NSString *)planRequestWithText:(NSString *)text
                            allowedSkillIDs:(NSArray<NSString *> *)allowedSkillIDs
-                                     error:(NSError * _Nullable * _Nullable)error;
+                              errorMessage:(NSString * _Nullable * _Nullable)errorMessage;
 
 @end
 
