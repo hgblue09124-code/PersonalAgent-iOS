@@ -143,7 +143,7 @@ let package = Package(
         ),
         .target(
             name: "PAProvidersGoogleLiteRT",
-            dependencies: ["PAProviders", "PAKernel", .product(name: "LiteRTLM", package: "litert-lm")],
+            dependencies: ["PAProviders", "PAKernel", .product(name: "LiteRTLM", package: "litert-lm", condition: .when(platforms: [.iOS, .macOS]))],
             path: "Providers/Local/GoogleLiteRT"
         ),
         .target(
@@ -234,7 +234,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
-                "PAProvidersGoogleLiteRT",
+                .target(name: "PAProvidersGoogleLiteRT", condition: .when(platforms: [.iOS, .macOS])),
                 "PAGGUF",
                 "PATools",
                 "PAModules",
