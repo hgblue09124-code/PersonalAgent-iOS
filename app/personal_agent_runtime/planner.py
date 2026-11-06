@@ -12,7 +12,7 @@ _CREATE_FILE = re.compile(
     re.IGNORECASE,
 )
 _PATH = re.compile(r"(?:workspace/)[A-Za-z0-9._/-]+")
-_CONTENT = re.compile(r"(?:noi\s*dung|nội\s*dung|content)\s*:\s*(.+)$", re.IGNORECASE | re.DOTALL)
+_CONTENT = re.compile(r"(?:noi\s*dung|nội\s*dung|content)\s*:\s?(.*)$", re.IGNORECASE | re.DOTALL)
 _CREATE_SKILL = "workspace.create-file"
 
 
