@@ -1,0 +1,59 @@
+{
+  "id": "PYAGENT-004",
+  "title": "Embed official CPython 3.15.2 and execute the Python planner on iOS",
+  "status": "in_progress",
+  "goal": "Replace the current caller-supplied Python plan envelope with a real embedded CPython runtime in the iOS app, while keeping Swift as the authority for Agent scope, policy, Skills, and execution.",
+  "context": "The repository already has a deterministic pure-Python planner and a Swift dispatcher, but the dispatcher explicitly does not start Python. CPython 3.15.2 now publishes an official iOS XCFramework. Use that pinned official artifact and the documented iOS embedding/bootstrap process to run the existing planner on-device.",
+  "allowed_paths": [
+    "Tasks/active/PYAGENT-004.json",
+    ".gitignore",
+    ".github/workflows/apple-build.yml",
+    ".github/workflows/python-agent-runtime.yml",
+    "PersonalAgent.xcodeproj/project.pbxproj",
+    "App/PersonalAgent/PythonRuntimeBridge.h",
+    "App/PersonalAgent/PythonRuntimeBridge.m",
+    "App/PersonalAgent/PythonRuntimeBridge-Bridging-Header.h",
+    "App/PersonalAgent/EmbeddedPythonAgentRuntime.swift",
+    "App/PersonalAgent/KernelSession.swift",
+    "Composition/M8CompositionRoot.swift",
+    "AgentRuntimePython/personal_agent_runtime/__init__.py",
+    "AgentRuntimePython/personal_agent_runtime/contracts.py",
+    "AgentRuntimePython/personal_agent_runtime/planner.py",
+    "AgentRuntimePython/tests/test_planner.py",
+    "AgentRuntimePython/README.md",
+    "app/personal_agent_runtime/__init__.py",
+    "app/personal_agent_runtime/contracts.py",
+    "app/personal_agent_runtime/planner.py",
+    "Scripts/prepare_python_ios_runtime.sh"
+  ],
+  "forbidden_changes": [
+    "Do not replace Swift UI, permission, policy, Skill execution, or workspace verification with Python.",
+    "Do not let Python directly access files, network, credentials, or native tools; it returns proposal JSON only.",
+    "Do not run an external python executable or subprocess on iOS; use embedded libPython.",
+    "Do not commit the 82 MB binary XCFramework; download it reproducibly and verify the pinned SHA-256.",
+    "Do not claim physical-device runtime success from a compile-only CI result."
+  ],
+  "acceptance_criteria": [
+    "The official CPython 3.15.2 iOS XCFramework is downloaded from python.org and SHA-256 verified before the Apple build; no binary is committed.",
+    "Xcode links, embeds, signs, and runs the documented install_python packaging step for the framework and bundled Python application package.",
+    "The embedded runtime initializes with isolated PyConfig, UTF-8 mode, bundled PYTHONHOME/PYTHONPATH, and bytecode writing disabled.",
+    "Swift can invoke personal_agent_runtime.planner.plan_request and receive a versioned JSON envelope; calls are serialized through an actor.",
+    "KernelSession routes supported Python proposals through dispatchPythonAgentPlan and preserves Swift Agent scope, Settings policy, Skill executor, and verified read-back.",
+    "Generic chat and unavailable Python runtime retain the existing Swift/model fallback without crashing or silently claiming Python executed.",
+    "Agent Task Contract, Python Agent Runtime tests, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-004.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/PYAGENT-004.json --base origin/main",
+    "python -m unittest discover -s AgentRuntimePython/tests with PYTHONPATH=app",
+    "Confirm the Apple build logs show the official framework checksum verification and install_python phase.",
+    "Confirm all required PR workflows pass on the exact final PR head.",
+    "Physical-device smoke test: launch app, submit a complete create-file request, verify returned plan and file read-back."
+  ],
+  "dependencies": [
+    "Official CPython 3.15.2 iOS XCFramework from python.org",
+    "Issue #347 Swift-owned policy and verified Skill execution",
+    "PR #552 Python plan dispatch envelope"
+  ],
+  "recovery": "If the official framework download or iOS build fails, do not substitute an unpinned or unofficial binary. Keep the Swift fallback working, report the exact blocker, and preserve the pinned source URL/checksum."
+}
