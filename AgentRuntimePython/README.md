@@ -16,6 +16,14 @@ The deterministic planner handles generic chat and a narrow create-file intent i
 
 The source package lives in `app/personal_agent_runtime` and is bundled into the iOS app. `PAPythonRuntimeBridge` initializes embedded CPython 3.15.2 and invokes `plan_request`; `EmbeddedPythonAgentRuntime` serializes calls. The runtime is a planner only: Swift validates its versioned JSON proposal and owns all scope, policy, approval, execution, and read-back behavior.
 
+## Build and run on iOS
+
+The Apple build workflow downloads the official CPython 3.15.2 iOS XCFramework from python.org, verifies its pinned SHA-256, then Xcode embeds it and runs the upstream `install_python` packaging step. For a local Xcode build, run:
+
+    bash Scripts/prepare_python_ios_runtime.sh
+
+The XCFramework is intentionally ignored by Git and is not committed to this repository.
+
 ## Run tests
 
     PYTHONPATH=app python3 -m unittest discover -s AgentRuntimePython/tests -v
