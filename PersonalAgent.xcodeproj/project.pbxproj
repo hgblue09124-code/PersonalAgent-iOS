@@ -229,6 +229,7 @@
 			files = (
 			);
 			name = "Process Python libraries";
+			alwaysOutOfDate = 1;
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "set -e\nsource \"$PROJECT_DIR/Python.xcframework/build/build_utils.sh\"\ninstall_python \"$PROJECT_DIR/Python.xcframework\" \"$PROJECT_DIR/app\"\n";
@@ -335,6 +336,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
 				HEADER_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Python.framework/Headers";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "App/PersonalAgent/PythonRuntimeBridge-Bridging-Header.h";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/PersonalAgent/Info.plist;
@@ -371,6 +373,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
 				HEADER_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Python.framework/Headers";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "App/PersonalAgent/PythonRuntimeBridge-Bridging-Header.h";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = App/PersonalAgent/Info.plist;
