@@ -15,7 +15,7 @@
     "Do not claim physical-device acceptance without a real iPhone test."
   ],
   "acceptance_criteria": [
-    "A write payload larger than 256 KiB returns WorkspaceStorageToolError.fileTooLarge and creates no file.",
+    "A write payload larger than 256 KiB returns the explicit 256 KiB file-too-large failure and creates no file.",
     "An append that would grow an existing file beyond 256 KiB returns fileTooLarge and preserves the original contents exactly.",
     "The regression tests use the real WorkspaceWriteTool and LocalAgentWorkspace path.",
     "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
