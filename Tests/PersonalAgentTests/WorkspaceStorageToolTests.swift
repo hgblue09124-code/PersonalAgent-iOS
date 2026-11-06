@@ -164,12 +164,8 @@ final class WorkspaceStorageToolTests: XCTestCase {
                 )
             )
             XCTFail("A write larger than 256 KiB must be rejected")
-        } catch let error as WorkspaceStorageToolError {
-            if case .fileTooLarge = error {
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected fileTooLarge, got: \(error)")
-            }
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool file exceeds the 256 KiB limit.")
         }
         let oversizedFileExists = try await workspace.exists(at: "workspace/oversized.md")
         XCTAssertFalse(oversizedFileExists)
