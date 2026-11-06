@@ -6,7 +6,8 @@
   "context": "The Agents screen lists all available profiles. As the profile catalog grows, local search and a clear no-match state make selection faster without changing runtime behavior.",
   "allowed_paths": [
     "Tasks/active/PACHAT-540.json",
-    "App/PersonalAgent/Screens/AgentsScreen.swift"
+    "App/PersonalAgent/Screens/AgentsScreen.swift",
+    "App/PersonalAgent/Screens/ChatScreen.swift"
   ],
   "forbidden_changes": [
     "Do not change Agent selection, team mode, runtime routing, permissions, or Skill execution semantics.",
@@ -20,7 +21,9 @@
     "The UI shows filtered count versus total profiles.",
     "No matching results and an empty Agent store have distinct explanatory states.",
     "Selecting a filtered profile continues to use the existing selection behavior and remains disabled while a task is running.",
-    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head.",
+    "UI V2 exposes the selected Agent header as a compact switcher and provides access to the searchable Agent profile screen without restoring a dashboard or tab bar.",
+    "Agent switching and profile management are disabled while a task is running."
   ],
   "verification": [
     "python3 Scripts/agent_task_guard.py validate Tasks/active/PACHAT-540.json",
