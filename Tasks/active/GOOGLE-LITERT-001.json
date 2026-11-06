@@ -12,7 +12,10 @@
     "Storage/Models/FileBackedLocalModelStorage.swift",
     "App/PersonalAgent/Screens/ModelsScreen.swift",
     "Providers/Local/LocalModelEngineFactory.swift",
-    "Tests/PersonalAgentTests/ArchitectureManifest.swift"
+    "Tests/PersonalAgentTests/ArchitectureManifest.swift",
+    "Kernel/Ports/Providers/LocalModelContracts.swift",
+    "Providers/Local/LocalModelContracts.swift",
+    "Providers/Local/LocalBoundary.swift"
   ],
   "forbidden_changes": [
     "Do not replace or regress the existing GGUF/llama.cpp model path.",
