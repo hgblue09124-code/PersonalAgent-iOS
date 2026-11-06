@@ -189,6 +189,35 @@ final class WorkspaceStorageToolTests: XCTestCase {
         XCTAssertEqual(stableContent, "stable")
     }
 
+    func testWorkspaceReadRejectsOversizedFilesAndSearchSkipsThem() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+
+        let workspaceDirectory = root.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspaceDirectory, withIntermediateDirectories: true)
+        let oversizedURL = workspaceDirectory.appendingPathComponent("oversized.md")
+        try Data(repeating: 0x61, count: 256 * 1024 + 1).write(to: oversizedURL)
+
+        let reader = WorkspaceReadTool(workspace: workspace)
+        do {
+            _ = try await reader.run(
+                argumentsJSON: #"{"operation":"read","path":"workspace/oversized.md"}"#
+            )
+            XCTFail("Reading a file larger than 256 KiB must be rejected")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool file exceeds the 256 KiB limit.")
+        }
+
+        let searchJSON = try await reader.run(
+            argumentsJSON: #"{"operation":"search","query":"needle"}"#
+        )
+        let data = try XCTUnwrap(searchJSON.data(using: .utf8))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(object["matches"] as? [String], [])
+    }
+
     func testChatSkillCreatesAndReadBackVerifiesWorkspaceFile() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
