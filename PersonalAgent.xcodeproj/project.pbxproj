@@ -232,7 +232,7 @@
 			alwaysOutOfDate = 1;
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "set -e\nsource \"$PROJECT_DIR/Python.xcframework/build/build_utils.sh\"\ninstall_python \"$PROJECT_DIR/Python.xcframework\" \"$PROJECT_DIR/app\"\n";
+			shellScript = "set -e\nsource \"$PROJECT_DIR/Python.xcframework/build/utils.sh\"\ninstall_python Python.xcframework app\n";
 		};
 		A40000000000000000000005 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
