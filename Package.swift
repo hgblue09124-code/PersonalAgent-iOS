@@ -204,7 +204,7 @@ let package = Package(
                 "PAProvidersOpenAI",
                 "PAProvidersOpenAICompatible",
                 "PAProvidersLocal",
-                "PAProvidersGoogleLiteRT",
+                .target(name: "PAProvidersGoogleLiteRT", condition: .when(platforms: [.iOS, .macOS])),
                 "PAStorageModels",
 
                 "PASecurity",
