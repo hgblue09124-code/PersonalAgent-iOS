@@ -1,0 +1,35 @@
+{
+  "id": "P0WORKSPACE-002",
+  "title": "Prove workspace tools reject malformed and unsafe inputs",
+  "status": "in_progress",
+  "goal": "Strengthen regression evidence that workspace read and write tools fail closed for malformed JSON, invalid field types, unexpected keys, protected paths, and secret-like content.",
+  "context": "Issue #347 requires explicit fail-closed regression tests around the real workspace tool boundary. Existing tests cover several unsafe cases but often accept any thrown error, which can hide a wrong failure mode. This task tightens the contract without changing production behavior.",
+  "allowed_paths": [
+    "Tasks/active/P0-WORKSPACE-002.json",
+    "Tests/PersonalAgentTests/WorkspaceStorageToolTests.swift"
+  ],
+  "forbidden_changes": [
+    "Do not change production workspace, policy, path, secret-scanning, or size-limit behavior.",
+    "Do not weaken existing assertions or accept arbitrary errors for a specific rejection contract.",
+    "Do not add dependencies or modify runtime architecture.",
+    "Do not claim physical-device acceptance without a real iPhone test."
+  ],
+  "acceptance_criteria": [
+    "Malformed JSON is rejected with the explicit JSON-object input error.",
+    "Wrong field types, missing required fields, and unexpected fields are rejected with their corresponding explicit input errors.",
+    "Protected workspace paths and secret-like write/read content are rejected with the expected error category.",
+    "Rejected write operations leave no file and do not mutate existing content.",
+    "Agent Task Contract, M3, and Apple Native Build & Unsigned IPA pass on the final PR head."
+  ],
+  "verification": [
+    "python3 Scripts/agent_task_guard.py validate Tasks/active/P0-WORKSPACE-002.json",
+    "python3 Scripts/agent_task_guard.py check-diff Tasks/active/P0-WORKSPACE-002.json --base origin/main",
+    "swift test --disable-sandbox --filter WorkspaceStorageToolTests",
+    "Confirm all required PR workflows pass on the exact final PR head."
+  ],
+  "dependencies": [
+    "Issue #347",
+    "PR #558 workspace size-limit regression coverage"
+  ],
+  "recovery": "If an assertion exposes a different failure mode, inspect the actual tool boundary and error description. Keep this test-only unless a reproducible production defect is demonstrated."
+}
