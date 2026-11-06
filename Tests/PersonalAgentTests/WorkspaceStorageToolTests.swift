@@ -384,6 +384,36 @@ final class WorkspaceStorageToolTests: XCTestCase {
         XCTAssertFalse(secretWriteExists)
     }
 
+
+    func testWorkspaceAppendRejectsSecretFormedAcrossExistingAndNewContent() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let writer = WorkspaceWriteTool(workspace: workspace)
+
+        let safePrefix = "api_key = \"sk-"
+        let safeSuffix = String(repeating: "D", count: 24) + "\""
+        _ = try await writer.run(
+            argumentsJSON: #"{"operation":"write","path":"workspace/split-secret.md","content":"api_key = \"sk-"}"#
+        )
+        do {
+            let data = try JSONSerialization.data(withJSONObject: [
+                "operation": "append",
+                "path": "workspace/split-secret.md",
+                "content": safeSuffix
+            ])
+            let arguments = try XCTUnwrap(String(data: data, encoding: .utf8))
+            _ = try await writer.run(argumentsJSON: arguments)
+            XCTFail("The combined file content must be scanned for secrets")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
+        }
+
+        let persisted = try await workspace.readFile(at: "workspace/split-secret.md")
+        XCTAssertEqual(persisted, safePrefix)
+    }
+
     func testWorkspaceReadAndSearchSkipSecretLikeFiles() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
