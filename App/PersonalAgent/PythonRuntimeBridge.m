@@ -76,7 +76,7 @@ static NSString *PAConsumePythonError(void) {
 
 @implementation PAPythonRuntimeBridge
 
-+ (BOOL)initializeRuntimeWithError:(NSError **)error {
++ (BOOL)initializeRuntimeWithErrorMessage:(NSString **)errorMessage {
     static dispatch_once_t onceToken;
     static BOOL initialized = NO;
     static NSError *initializationError = nil;
@@ -149,18 +149,18 @@ static NSString *PAConsumePythonError(void) {
         initialized = YES;
     });
 
-    if (!initialized && error != NULL) {
-        *error = initializationError ?: PAError(6, @"Embedded CPython is unavailable.");
+    if (!initialized && errorMessage != NULL) {
+        *errorMessage = (initializationError ?: PAError(6, @"Embedded CPython is unavailable.")).localizedDescription;
     }
     return initialized;
 }
 
 + (NSString *)planRequestWithText:(NSString *)text
                   allowedSkillIDs:(NSArray<NSString *> *)allowedSkillIDs
-                            error:(NSError **)error {
-    NSError *initializationError = nil;
-    if (![self initializeRuntimeWithError:&initializationError]) {
-        if (error != NULL) *error = initializationError;
+                     errorMessage:(NSString **)errorMessage {
+    NSString *initializationErrorMessage = nil;
+    if (![self initializeRuntimeWithErrorMessage:&initializationErrorMessage]) {
+        if (errorMessage != NULL) *errorMessage = initializationErrorMessage;
         return nil;
     }
 
@@ -229,8 +229,8 @@ static NSString *PAConsumePythonError(void) {
 
     PyGILState_Release(gilState);
 
-    if (result == nil && error != NULL) {
-        *error = planningError ?: PAError(21, @"The embedded Python planner returned an invalid result.");
+    if (result == nil && errorMessage != NULL) {
+        *errorMessage = (planningError ?: PAError(21, @"The embedded Python planner returned an invalid result.")).localizedDescription;
     }
     return result;
 }
