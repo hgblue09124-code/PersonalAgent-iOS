@@ -53,7 +53,12 @@ public struct WorkspaceReadTool: Tool {
             guard metadata.byteCount <= WorkspaceToolSafety.maximumFileBytes else {
                 throw WorkspaceStorageToolError.fileTooLarge
             }
-            let content = try await workspace.readFile(at: path)
+            let content: String
+            do {
+                content = try await workspace.readFile(at: path)
+            } catch AgentWorkspaceError.protectedContent {
+                throw WorkspaceStorageToolError.secretLikeContent
+            }
             guard !WorkspaceToolSafety.containsPotentialSecret(content) else {
                 throw WorkspaceStorageToolError.secretLikeContent
             }
@@ -87,7 +92,12 @@ public struct WorkspaceReadTool: Tool {
                                 && !WorkspaceToolSafety.isProtectedFilename(entry.relativePath) {
                         let metadata = try await workspace.metadata(at: entry.relativePath)
                         guard metadata.byteCount <= WorkspaceToolSafety.maximumFileBytes else { continue }
-                        let text = try await workspace.readFile(at: entry.relativePath)
+                        let text: String
+                        do {
+                            text = try await workspace.readFile(at: entry.relativePath)
+                        } catch AgentWorkspaceError.protectedContent {
+                            continue
+                        }
                         guard !WorkspaceToolSafety.containsPotentialSecret(text) else { continue }
                         if text.localizedCaseInsensitiveContains(query) {
                             matches.append(entry.relativePath)
