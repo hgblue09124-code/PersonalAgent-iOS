@@ -85,9 +85,10 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
         } catch {
             throw LocalModelStorageError.fileNotFound(sourceURL)
         }
+        let minimumFileSize: Int64 = modelExtension == "gguf" ? 24 : 1
         guard let sourceSize = sourceAttributes[.size] as? NSNumber,
-              sourceSize.int64Value >= 24 else {
-            throw LocalModelStorageError.invalidGGUFHeader("GGUF file is empty or smaller than the minimum header size.")
+              sourceSize.int64Value >= minimumFileSize else {
+            throw LocalModelStorageError.invalidGGUFHeader("Local model file is empty or smaller than its minimum supported size.")
         }
 
         let summary: GGUFMetadataSummary?
@@ -126,7 +127,7 @@ public actor FileBackedLocalModelStorage: LocalModelStorage {
             let copiedAttributes = try fileManager.attributesOfItem(atPath: destinationURL.path)
             guard let copiedSize = copiedAttributes[.size] as? NSNumber,
                   copiedSize.int64Value == fileSizeBytes else {
-                throw LocalModelStorageError.copyFailed("Imported GGUF file size does not match the source.")
+                throw LocalModelStorageError.copyFailed("Imported model file size does not match the source.")
             }
         } catch {
             if fileManager.fileExists(atPath: destinationURL.path) {
