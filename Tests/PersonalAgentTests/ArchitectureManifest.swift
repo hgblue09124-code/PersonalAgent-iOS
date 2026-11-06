@@ -63,6 +63,7 @@ public enum ArchitectureManifest: Sendable {
         "PAProvidersRemote": ["PAKernel", "PAProviders", "PASecurity"],
         "cllama": [],
         "PAProvidersLocal": ["PAKernel", "PAProviders", "PAProvidersRemote", "PAGGUF", "cllama", "PAProvidersGoogleLiteRT"],
+        "PAProvidersGoogleLiteRT": ["PAKernel", "PAProviders"],
         "PATools": ["PARuntime", "PAObservability", "PAKernel"],
         "PAModules": ["PAObservability", "PAEvents", "PAKernel"],
         "PASkills": ["PAModules", "PATools", "PARuntime", "PAKernel"],
