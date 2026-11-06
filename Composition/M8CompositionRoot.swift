@@ -1001,7 +1001,7 @@ extension M8CompositionRoot {
             // No direct module call here. The canonical Chat path rechecks the
             // current Agent's declared Skill scope, Settings policy, workspace
             // enablement, path protections, executor availability and read-back.
-            let command = "Create file \(path) with content:\(fileContent)"
+            let command = "Create file \(path) with content:\n\(fileContent)"
             do {
                 guard let result = try await runChatSkillIfMatched(
                     goalStatement: command,
