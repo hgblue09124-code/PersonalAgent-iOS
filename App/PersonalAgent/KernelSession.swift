@@ -406,7 +406,7 @@ final class KernelSession: ObservableObject {
                     do {
                         let allowedSkillIDs = try await self.composition.allowedChatSkillIDs(agentID: agentID)
                         pythonPlanData = try await EmbeddedPythonAgentRuntime.shared.planRequest(
-                            text: normalizedStatement,
+                            text: statement,
                             allowedSkillIDs: allowedSkillIDs
                         )
                     } catch is CancellationError {
