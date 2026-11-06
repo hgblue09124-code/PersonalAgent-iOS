@@ -141,8 +141,8 @@ public struct SkillRuntime: Sendable {
             "please ", "kindly ", "could you ", "can you ", "would you ", "help me ",
             "i need you to "
         ]
-        // Strip whitespace only at the command boundary. Trailing whitespace may
-        // belong to a file payload and must survive the Chat -> Skill handoff.
+        // Preserve the exact payload only for an explicit create-file command.
+        // Ordinary conversational input keeps the historical surrounding trim.
         var command = String(input.drop(while: { $0.isWhitespace }))
         while let lead = politePrefixes.first(where: {
             command.lowercased().hasPrefix($0)
@@ -151,7 +151,21 @@ public struct SkillRuntime: Sendable {
                 .drop(while: { $0.isWhitespace })
                 .description
         }
-        return command
+        let filePrefixes = [
+            "tạo một file ", "tạo một tệp ", "tạo file ", "tạo tệp ",
+            "create a file ", "create file ", "write a file ", "write file ",
+            "make a file ", "make file "
+        ]
+        let contentDelimiters = [
+            " với nội dung là:", " với nội dung:", " nội dung là:", " nội dung:",
+            " with content:", " content:", "\nnội dung:", "\ncontent:"
+        ]
+        let isExplicitFilePayload =
+            filePrefixes.contains(where: { command.lowercased().hasPrefix($0) })
+            && contentDelimiters.contains(where: { command.range(of: $0, options: .caseInsensitive) != nil })
+        return isExplicitFilePayload
+            ? command
+            : command.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     public static func chatInputText(from goalStatement: String) -> String {
