@@ -34,6 +34,7 @@ public enum ArchitectureManifest: Sendable {
         "PAProvidersOpenAI",
         "PAProvidersOpenAICompatible",
         "PAProvidersLocal",
+        "PAProvidersGoogleLiteRT",
     ]
 
     public static let reservedProviderIDs: [(id: String, milestone: String)] = [
@@ -61,7 +62,7 @@ public enum ArchitectureManifest: Sendable {
         "PAProvidersOpenAICompatible": ["PAKernel", "PAProviders", "PAProvidersRemote"],
         "PAProvidersRemote": ["PAKernel", "PAProviders", "PASecurity"],
         "cllama": [],
-        "PAProvidersLocal": ["PAKernel", "PAProviders", "PAProvidersRemote", "PAGGUF", "cllama"],
+        "PAProvidersLocal": ["PAKernel", "PAProviders", "PAProvidersRemote", "PAGGUF", "cllama", "PAProvidersGoogleLiteRT"],
         "PATools": ["PARuntime", "PAObservability", "PAKernel"],
         "PAModules": ["PAObservability", "PAEvents", "PAKernel"],
         "PASkills": ["PAModules", "PATools", "PARuntime", "PAKernel"],

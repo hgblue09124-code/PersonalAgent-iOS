@@ -81,7 +81,7 @@ public actor LocalModelRuntimeCoordinator: Sendable {
         if let factory = engineFactory {
             newEngine = factory(identity, deviceCapabilityProvider)
         } else {
-            newEngine = LlamaCPPModelEngine(
+            newEngine = try LocalModelEngineFactory.make(
                 identity: identity,
                 deviceCapabilityProvider: deviceCapabilityProvider
             )
