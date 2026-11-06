@@ -9,6 +9,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
     public let identity: LocalModelIdentity
     private let lock = NSLock()
     private var engine: Engine?
+    private var activeConversations: [ObjectIdentifier: Conversation] = [:]
     private var state: LocalModelLifecycleState = .unloaded
 
     public init(identity: LocalModelIdentity) {
@@ -42,7 +43,7 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
                 maxNumTokens: options.maxTokens
             )
             let runtime = Engine(engineConfig: config)
-            try await runtime.initialize()
+            try runtime.initialize()
             lock.withLock {
                 engine = runtime
                 state = .loaded
@@ -73,7 +74,22 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
                         Message($0, role: .system)
                     }
                     let config = ConversationConfig(systemMessage: systemMessage)
-                    let conversation = try await runtime.createConversation(with: config)
+                    let conversation = try runtime.createConversation(with: config)
+                    let conversationID = ObjectIdentifier(conversation)
+                    let registered = lock.withLock { () -> Bool in
+                        guard state == .loaded else { return false }
+                        activeConversations[conversationID] = conversation
+                        return true
+                    }
+                    guard registered else {
+                        try? conversation.cancel()
+                        throw GoogleLiteRTError.modelNotLoaded
+                    }
+                    defer {
+                        lock.withLock {
+                            activeConversations.removeValue(forKey: conversationID)
+                        }
+                    }
                     for try await message in conversation.sendMessageStream(
                         Message(request.prompt),
                         maxOutputTokens: request.maxTokens
@@ -93,10 +109,23 @@ public final class GoogleLiteRTModelEngine: LocalModelEngine, @unchecked Sendabl
         }
     }
 
-    public func cancel() async {}
+    public func cancel() async {
+        let conversations = lock.withLock { Array(activeConversations.values) }
+        for conversation in conversations {
+            try? conversation.cancel()
+        }
+    }
 
     public func unload() async throws {
+        let conversations = lock.withLock { () -> [Conversation] in
+            state = .unloading
+            return Array(activeConversations.values)
+        }
+        for conversation in conversations {
+            try? conversation.cancel()
+        }
         lock.withLock {
+            activeConversations.removeAll()
             engine = nil
             state = .unloaded
         }
