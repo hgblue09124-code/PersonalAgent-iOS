@@ -3,7 +3,7 @@
   "title": "Prove workspace tools reject malformed and unsafe inputs",
   "status": "in_progress",
   "goal": "Strengthen regression evidence that workspace read and write tools fail closed for malformed JSON, invalid field types, unexpected keys, protected paths, and secret-like content.",
-  "context": "Issue #347 requires explicit fail-closed regression tests around the real workspace tool boundary. Existing tests cover several unsafe cases but often accept any thrown error, which can hide a wrong failure mode. This task tightens the contract without changing production behavior. A CI run then exposed a production edge case: LocalAgentWorkspace throws protectedContent before WorkspaceReadTool can translate the read error or let search skip that file. The same task now includes a narrow tool-boundary repair.",
+  "context": "Issue #347 requires explicit fail-closed regression tests around the real workspace tool boundary. Existing tests cover several unsafe cases but often accept any thrown error, which can hide a wrong failure mode. This task tightens the contract and applies a narrow production repair at the existing tool boundary. A CI run then exposed a production edge case: LocalAgentWorkspace throws protectedContent before WorkspaceReadTool can translate the read error or let search skip that file. The same task now includes a narrow tool-boundary repair.",
   "allowed_paths": [
     "Tasks/active/P0-WORKSPACE-002.json",
     "Tests/PersonalAgentTests/WorkspaceStorageToolTests.swift",
