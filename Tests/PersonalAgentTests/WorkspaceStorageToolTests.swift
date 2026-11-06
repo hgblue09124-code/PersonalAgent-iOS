@@ -430,12 +430,15 @@ final class WorkspaceStorageToolTests: XCTestCase {
             XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
         }
 
+        try await workspace.writeFile("safe needle", to: "workspace/regular.md")
         let searchJSON = try await reader.run(
-            argumentsJSON: #"{"operation":"search","query":"needle"}"#
+            argumentsJSON: #"{\"operation\":\"search\",\"query\":\"needle\"}"#
         )
         let data = try XCTUnwrap(searchJSON.data(using: .utf8))
         let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
-        XCTAssertEqual(object["matches"] as? [String], [])
+        let matches = try XCTUnwrap(object["matches"] as? [String])
+        XCTAssertEqual(matches, ["workspace/regular.md"])
+        XCTAssertFalse(matches.contains("workspace/note.md"))
     }
 
     func testWorkspaceRejectsRepositoryMetadataAndCredentialDirectories() async throws {
