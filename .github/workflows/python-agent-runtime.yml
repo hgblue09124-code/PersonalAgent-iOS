@@ -3,8 +3,10 @@ name: Python Agent Runtime
 on:
   pull_request:
     paths:
-      - "AgentRuntimePython/**"
+      - "AgentRuntimePython/**
+      - "app/**""
       - "Tasks/active/PYAGENT-001.json"
+      - "Tasks/active/PYAGENT-004.json"
       - ".github/workflows/python-agent-runtime.yml"
       - "Scripts/agent_task_guard.py"
   workflow_dispatch:
@@ -26,10 +28,10 @@ jobs:
           python-version: "3.12"
       - name: Run planner unit tests
         env:
-          PYTHONPATH: AgentRuntimePython
+          PYTHONPATH: app
         run: python -m unittest discover -s AgentRuntimePython/tests -v
       - name: Compile runtime package
-        run: python -m compileall -q AgentRuntimePython/personal_agent_runtime
+        run: python -m compileall -q app/personal_agent_runtime
       - name: Validate task contract
         run: python Scripts/agent_task_guard.py validate Tasks/active/PYAGENT-001.json
       - name: Check task scope
