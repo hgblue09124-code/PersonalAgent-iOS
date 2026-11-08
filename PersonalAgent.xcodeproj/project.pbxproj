@@ -232,7 +232,7 @@
 			alwaysOutOfDate = 1;
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "set -e\nsource \"$PROJECT_DIR/Python.xcframework/build/utils.sh\"\ninstall_python Python.xcframework app\n";
+			shellScript = "set -e\n# CPython upstream signs generated extension frameworks; use ad-hoc signing when this unsigned build has no identity.\nEXPANDED_CODE_SIGN_IDENTITY=\"${EXPANDED_CODE_SIGN_IDENTITY:--}\"\nsource \"$PROJECT_DIR/Python.xcframework/build/utils.sh\"\ninstall_python Python.xcframework app\n";
 		};
 		A40000000000000000000005 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
