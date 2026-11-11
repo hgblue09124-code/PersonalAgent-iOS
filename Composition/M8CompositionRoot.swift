@@ -992,6 +992,14 @@ extension M8CompositionRoot {
     /// Consumes a validated Python plan as an untrusted proposal, then routes supported
     /// actions through the existing Chat -> Agent scope -> policy -> Skill/Module -> verification
     /// path. This method does not start a Python interpreter; callers supply the JSON envelope.
+    /// Returns a scope hint for the Python planner. This is not an authorization grant;
+    /// dispatchPythonAgentPlan reloads the Agent and rechecks the canonical Swift path.
+    public func allowedChatSkillIDs(agentID: String = "personal.default") async throws -> Set<String> {
+        let storedAgent = try await agentStore.load(id: agentID)
+        let scopedAgent = scopeAgentForWorkspaceSetting(storedAgent)
+        return Set(scopedAgent.skillIDs.map(\.rawValue))
+    }
+
     public func dispatchPythonAgentPlan(
         _ data: Data,
         agentID: String = "personal.default"

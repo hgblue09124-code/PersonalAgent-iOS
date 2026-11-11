@@ -9,3 +9,6 @@ DerivedData/
 .netrc
 *.xcuserstate
 .idea/
+
+# Downloaded from the pinned official CPython iOS release during Apple builds.
+/Python.xcframework/
