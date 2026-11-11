@@ -344,6 +344,39 @@ final class WorkspaceStorageToolTests: XCTestCase {
         XCTAssertFalse(invalidWriteCreatedFile)
     }
 
+    func testRejectedSecretWriteDoesNotReplaceExistingFile() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let workspace = LocalAgentWorkspace(rootURL: root)
+        try await workspace.prepare()
+        let writer = WorkspaceWriteTool(workspace: workspace)
+        let path = "workspace/notes.md"
+        let original = "keep this verified content"
+
+        _ = try await writer.run(
+            argumentsJSON: #"{"operation":"write","path":"workspace/notes.md","content":"keep this verified content"}"#
+        )
+
+        let fakeSecret = "api_key = \"sk-" + String(repeating: "E", count: 24) + "\""
+        let payload = [
+            "operation": "write",
+            "path": path,
+            "content": fakeSecret
+        ]
+        let data = try JSONSerialization.data(withJSONObject: payload)
+        let arguments = try XCTUnwrap(String(data: data, encoding: .utf8))
+
+        do {
+            _ = try await writer.run(argumentsJSON: arguments)
+            XCTFail("A rejected secret-like overwrite must not mutate the existing file")
+        } catch {
+            XCTAssertEqual(error.localizedDescription, "Workspace tool rejected secret-like content.")
+        }
+
+        let persisted = try await workspace.readFile(at: path)
+        XCTAssertEqual(persisted, original)
+    }
+
     func testWorkspaceWriteRejectsProtectedPathsAndSecretLikeContentWithoutMutation() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
